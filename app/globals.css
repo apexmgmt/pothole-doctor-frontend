@@ -1,26 +1,100 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-bg: oklch(1 0 0);
+  --color-primary: oklch(0.6639 0.1456 144.59);
+  --color-primary-foreground: oklch(0.9749 0.0118 145.48);
+  --color-title: oklch(0.2392 0.0059 337.75);
+  --color-text-color: oklch(0.5068 0 0);
+  --color-border: oklch(0.8914 0 0);
+
+  --text-large-title: 74px;
+  --text-heading: 60px;
+  --text-body-text: 18px;
+
+  --font-global: "inter", sans-serif;
+  --font-primary: "ClashGrotesk", sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* @theme (prefers-color-scheme: dark) {
+  --color-bg: oklch(0.145 0 0);
+  --color-primary: oklch(0.488 0.243 264.376);
+  --color-primary-foreground: oklch(0.985 0 0);
+  --color-title: oklch(0.985 0 0);
+  --color-body-text: oklch(0.708 0 0);
+  --color-border: oklch(0.269 0 0);
+
+} */
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Video player animations */
+@keyframes wave {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.wave-animation {
+  animation: wave 3s infinite;
+}
+
+.wave-animation:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.wave-animation:nth-child(3) {
+  animation-delay: 1s;
+}
+
+/* Custom form styles */
+.form-select-arrow {
+  pointer-events: none;
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.3s ease;
+}
+
+.container {
+  width: clamp(320px, 95%, 1310px);
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+@media (max-width: 575px) {
+  .container {
+    width: 100%;
+  }
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #96d17c 12.5%, rgb(83, 170, 87) 82.69%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
 }
