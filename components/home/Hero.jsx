@@ -24,7 +24,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative flex items-center justify-center overflow-hidden py-40">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
@@ -39,34 +39,30 @@ export default function HeroSection() {
 
       {/* Content Container */}
       <div className="relative z-10 container mx-auto px-4 py-15">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="flex gap-12 items-center">
           {/* Left Content */}
-          <div className="text-white space-y-6">
-            <div className="space-y-2">
-              <p className="text-sm font-medium tracking-wider uppercase text-gray-200">
+          <div className="text-white space-y-6 flex-1">
+            <div className="space-y-3">
+              <p className="text-base font-semibold tracking-wider uppercase gradient-text">
                 SURFACE SPECIALISTS
               </p>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight">
-                THE SPECIALISTS
-                <br />
-                FOR PAVEMENT
-                <br />
-                PROBLEMS
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-primary font-bold leading-[1.1]  uppercase">
+                Your Prescription for Perfect Pavement
               </h1>
             </div>
 
-            <p className="text-lg md:text-xl text-gray-200 max-w-lg leading-relaxed">
-              From cracks to complete overhauls, we deliver seamless,
-              long-lasting paving solutions with unmatched precision and care.
+            <p className="text-base md:text-lg text-[#EEEEEE] max-w-lg leading-relaxed">
+              From minor cracks to major repairs, we restore smooth, durable
+              surfaces with precision and care.
             </p>
           </div>
 
           {/* Right Content - Quote Form */}
-          <div className="flex justify-center lg:justify-end">
-            <div className="bg-black/60 backdrop-blur-sm rounded-lg p-8 w-full max-w-md">
-              <h2 className="text-2xl font-semibold text-white mb-6">
+          <div className="flex-1 max-w-[460px]">
+            <div className="bg-black/20 backdrop-blur-lg rounded-lg p-[30px] w-full">
+              <h3 className="text-[28px] font-semibold font-primary text-white mb-[30px]">
                 Free Quote Today
-              </h2>
+              </h3>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -76,7 +72,7 @@ export default function HeroSection() {
                     placeholder="Your Street Address"
                     value={formData.streetAddress}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-md bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-5 py-4 rounded-lg bg-white/10 border border-[#DBDBDB]/20 text-white focus:outline-none focus:ring focus:ring-primary focus:border-transparent font-normal font-global leading-[1.4]"
                     required
                   />
                 </div>
@@ -88,27 +84,36 @@ export default function HeroSection() {
                     placeholder="ZIP Code"
                     value={formData.zipCode}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-md bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-5 py-4 rounded-lg bg-white/10 border border-[#DBDBDB]/20 text-white focus:outline-none focus:ring focus:ring-primary focus:border-transparent font-normal font-global leading-[1.4]"
                     required
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-green-600 hover:bg-primary text-white font-semibold py-3 px-6 rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
+                  className=" bg-primary hover:bg-primary/85 text-white font-semibold py-[18px] px-5 rounded-lg transition-colors duration-200 flex items-center gap-1.5 text-sm/[1] w-max"
                 >
                   GET STARTED
                   <svg
-                    className="w-4 h-4"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
                     fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
+                      d="M13.9658 6.53339L6.89475 13.6045"
+                      stroke="white"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M8.54497 6.06194C8.54497 6.06194 13.6611 5.28557 14.4375 6.06196C15.2139 6.83836 14.4375 11.9545 14.4375 11.9545"
+                      stroke="white"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
                     />
                   </svg>
                 </button>

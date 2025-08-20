@@ -4,14 +4,14 @@ import Image from "next/image";
 
 export default function WorkProcessSection() {
   return (
-    <section className="py-15 bg-white">
+    <section className="pt-20 pb-30 bg-white">
       <div className="container">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-5xl font-semibold text-title mb-6">
+        <div className="text-center mb-10 max-w-xl mx-auto">
+          <h2 className=" text-[36px] md:text-[42px] lg:text-[52px]  font-semibold text-center text-title mb-6 font-primary leading-[1.2]">
             OUR PROCESS
           </h2>
-          <p className="text-xl text-text-color max-w-3xl mx-auto">
+          <p className="text-lg text-text-color ">
             We follow a simple yet effective process to deliver quality paving
             solutions on time and within budget.
           </p>
@@ -20,76 +20,83 @@ export default function WorkProcessSection() {
         {/* Process Grid */}
         <div className="relative">
           {/* Grid Container */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+          <div className="grid grid-rows-2 grid-cols-1 lg:grid-cols-3 gap-6 items-center">
             {/* Left Column - Steps 01 & 02 */}
-            <div className="space-y-8">
-              {/* Step 01 */}
-              <div className="bg-primary-foreground rounded-2xl p-8 border border-green-100">
-                <div className="text-4xl font-semibold text-primary mb-4">
-                  01
-                </div>
-                <h3 className="text-2xl font-semibold text-title mb-3">
-                  CONSULTATION
-                </h3>
-                <p className="text-text-color text-lg">
-                  Understanding your project needs
-                </p>
-              </div>
+            {/* <div className="space-y-6"> */}
+            {/* Step 01 */}
 
-              {/* Step 02 */}
-              <div className="bg-primary-foreground rounded-2xl p-8 border border-green-100">
-                <div className="text-4xl font-semibold text-primary mb-4">
-                  02
-                </div>
-                <h3 className="text-2xl font-semibold text-title mb-3">
-                  SITE INSPECTION
-                </h3>
-                <p className="text-text-color text-lg">
-                  Detailed assessment & planning
-                </p>
+            <div className="bg-primary-foreground rounded-lg p-[30px] h-full">
+              <div className="text-[44px] font-primary font-semibold text-primary mb-6 leading-[1]">
+                01
               </div>
+              <h3 className="text-xl font-semibold text-title mb-4 leading-[1.2]">
+                CONSULTATION
+              </h3>
+              <p className="text-text-color text-base leading-relaxed">
+                We start by carefully inspecting your pavement to identify
+                cracks, potholes, and underlying issues. Our team assesses the
+                root cause so the repair is more than just a quick patch.
+              </p>
             </div>
 
             {/* Center Column - Image */}
-            <div className="flex justify-center">
-              <div className="relative">
-                <Image
-                  fill
-                  src="/images/work-process.webp"
-                  alt="Professional worker laying paving stones"
-                  className="w-full max-w-md !relative"
-                />
-              </div>
+            <div className="row-span-2">
+              <Image
+                fill
+                src="/images/work-process.webp"
+                alt="Professional worker laying paving stones"
+                className="w-full max-w-md !relative"
+              />
             </div>
+
+            {/* Step 02 */}
+            <div className="bg-primary-foreground rounded-lg p-[30px] h-full">
+              <div className="text-[44px] font-primary font-semibold text-primary mb-6 leading-[1]">
+                02
+              </div>
+              <h3 className="text-xl font-semibold text-title mb-4 leading-[1.2]">
+                SITE INSPECTION
+              </h3>
+              <p className="text-text-color text-base leading-relaxed">
+                Every surface is different. We create a tailored repair plan
+                that outlines the best methods and materials for a long-lasting
+                solution — whether it’s a minor patch or a full resurfacing.
+              </p>
+            </div>
+            {/* </div> */}
 
             {/* Right Column - Steps 03 & 04 */}
-            <div className="space-y-8">
-              {/* Step 03 */}
-              <div className="bg-primary-foreground rounded-2xl p-8 border border-green-100">
-                <div className="text-4xl font-semibold text-primary mb-4">
-                  03
-                </div>
-                <h3 className="text-2xl font-semibold text-title mb-3">
-                  CUSTOM QUOTE
-                </h3>
-                <p className="text-text-color text-lg">
-                  Transparent and fair pricing
-                </p>
+            {/* <div className="space-y-8"> */}
+            {/* Step 03 */}
+            <div className="bg-primary-foreground rounded-lg p-[30px] h-full">
+              <div className="text-[44px] font-primary font-semibold text-primary mb-6 leading-[1]">
+                03
               </div>
-
-              {/* Step 04 */}
-              <div className="bg-primary-foreground rounded-2xl p-8 border border-green-100">
-                <div className="text-4xl font-semibold text-primary mb-4">
-                  04
-                </div>
-                <h3 className="text-2xl font-semibold text-title mb-3">
-                  FINAL CHECK
-                </h3>
-                <p className="text-text-color text-lg">
-                  Quality assurance & client approval
-                </p>
-              </div>
+              <h3 className="text-xl font-semibold text-title mb-4 leading-[1.2]">
+                CUSTOM QUOTE
+              </h3>
+              <p className="text-text-color text-base leading-relaxed">
+                We prepare the area by cleaning debris, loose asphalt, and
+                damaged material to ensure proper adhesion and a flawless
+                finish.
+              </p>
             </div>
+
+            {/* Step 04 */}
+            <div className="bg-primary-foreground rounded-lg p-[30px] h-full">
+              <div className="text-[44px] font-primary font-semibold text-primary mb-6 leading-[1]">
+                04
+              </div>
+              <h3 className="text-xl font-semibold text-title mb-4 leading-[1.2] ">
+                FINAL CHECK
+              </h3>
+              <p className="text-text-color text-base leading-relaxed">
+                Using proven techniques and high-quality materials, our crew
+                restores your surface. From pothole filling to crack sealing, we
+                guarantee durability and safety.
+              </p>
+            </div>
+            {/* </div> */}
           </div>
         </div>
       </div>

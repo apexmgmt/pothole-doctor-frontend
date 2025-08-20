@@ -22,11 +22,11 @@ const ClashGrotesk = localFont({
       weight: "600",
       style: "medium",
     },
-    // {
-    //   path: "/fonts/ClashGrotesk-",
-    //   weight: "700",
-    //   style: "normal",
-    // },
+    {
+      path: "../public/fonts/ClashGrotesk-Bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
   ],
   display: "swap",
 });

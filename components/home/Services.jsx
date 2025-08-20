@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState } from "react";
 
 export default function ServicesSection() {
@@ -7,75 +8,66 @@ export default function ServicesSection() {
   const services = [
     {
       id: "parking-blocks",
-      title: "PARKING BLOCK INSTALLATION",
+      title: "Parking block installation",
       description:
-        "Fast, durable pothole repairs to keep your pavement safe and smooth.",
-      image: "/placeholder-vrz1z.png",
-      size: "large",
-      position: "left",
-      alwaysShowDetails: true,
+        "We install sturdy parking blocks to protect vehicles, buildings, and landscaping from accidental damage.",
+      image: "/images/service1.webp",
     },
     {
       id: "pothole-repairs",
       title: "POTHOLE REPAIRS",
       description:
-        "We fix damaged catch basins to ensure proper drainage and prevent water damage.",
-      image: "/placeholder-wapo0.png",
-      size: "small",
-      position: "top-right",
+        "We restore damaged pavement with durable pothole repairs that improve safety and extend surface life.",
+      image: "/images/service2.webp",
     },
     {
       id: "crack-sealing",
       title: "CRACK SEALING",
       description:
-        "Professional crack sealing to prevent water infiltration and extend pavement life.",
-      image: "/asphalt-crack-sealing.png",
-      size: "small",
-      position: "top-right-2",
+        "Our crack sealing service prevents water infiltration and stops small cracks from turning into major pavement issues.",
+      image: "/images/service3.webp",
     },
     {
       id: "catch-basin",
       title: "CATCH BASIN REPAIRS",
       description:
-        "Expert repair and maintenance of drainage systems to prevent flooding.",
-      image: "/concrete-drain-repair.png",
-      size: "small",
-      position: "bottom-left",
+        "Our team ensures proper drainage and stability with expert catch basin restoration and rebuilding.",
+      image: "/images/service4.webp",
     },
     {
       id: "sealcoating",
       title: "ASPHALT SEALCOATING",
       description:
-        "Protective sealcoating to extend the life of your asphalt surfaces.",
-      image: "/fresh-sealcoating-asphalt.png",
-      size: "small",
-      position: "bottom-right",
+        "A protective sealcoat shields asphalt from weather, traffic, and UV damage while enhancing curb appeal.",
+      image: "/images/service5.webp",
     },
   ];
 
   return (
-    <section className="py-16 px-4 bg-white">
+    <section className="pt-30 pb-20 bg-white">
       <div className="container">
-        <h2 className="text-5xl font-semibold text-center text-title mb-12">
+        <h2 className="text-[36px] md:text-[42px] lg:text-[52px] font-semibold text-center text-title mb-10 font-primary leading-[1.2]">
           OUR SERVICES
         </h2>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto lg:h-[600px]">
+        <div className="grid grid-rows-2 grid-cols-1 lg:grid-cols-4 gap-6 ">
           {/* Large Left Card - Always shows details */}
-          <div className="lg:col-span-2 lg:row-span-2 relative rounded-2xl overflow-hidden group">
-            <div
-              className="w-full h-full bg-cover bg-center relative"
-              style={{ backgroundImage: `url('${services[0].image}')` }}
-            >
-              <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                <h3 className="text-3xl font-semibold mb-4">
-                  {services[0].title}
-                </h3>
-                <p className="text-lg text-gray-200">
-                  {services[0].description}
-                </p>
-              </div>
+          <div className="lg:col-span-2 lg:row-span-2 relative rounded-lg overflow-hidden group">
+            <div className="">
+              <Image
+                fill
+                src={services[0].image}
+                alt=""
+                className="h-full w-full !relative object-cover"
+              />
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-[30px] text-white">
+              <h3 className="text-[28px] font-semibold mb-4 font-primary">
+                {services[0].title}
+              </h3>
+              <p className="text-base text-[#EEEEEE]">
+                {services[0].description}
+              </p>
             </div>
           </div>
 
@@ -83,33 +75,39 @@ export default function ServicesSection() {
           {services.slice(1).map((service, index) => (
             <div
               key={service.id}
-              className="relative rounded-2xl overflow-hidden group cursor-pointer h-[280px] lg:h-auto"
+              className="relative rounded-lg overflow-hidden group"
               onMouseEnter={() => setHoveredCard(service.id)}
               onMouseLeave={() => setHoveredCard(null)}
             >
-              <div
-                className="w-full h-full bg-cover bg-center relative"
-                style={{ backgroundImage: `url('${service.image}')` }}
-              >
-                <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+              <div className="">
+                <Image
+                  fill
+                  src={service.image}
+                  alt=""
+                  className="h-full w-full !relative object-cover"
+                />
+              </div>
 
-                {/* Always visible title */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                  <h3 className="text-xl font-semibold mb-2">
-                    {service.title}
-                  </h3>
+              {/* Always visible title */}
+              <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+                <h3
+                  className={`text-xl font-semibold font-primary  ${
+                    hoveredCard === service.id ? "mb-5" : " mb-0"
+                  }`}
+                >
+                  {service.title}
+                </h3>
 
-                  <div
-                    className={`transition-all duration-300 ease-in-out ${
-                      hoveredCard === service.id
-                        ? "opacity-100 max-h-20 translate-y-0"
-                        : "opacity-0 max-h-0 translate-y-2"
-                    }`}
-                  >
-                    <p className="text-sm text-gray-200">
-                      {service.description}
-                    </p>
-                  </div>
+                <div
+                  className={`transition-all duration-300 ease-in-out ${
+                    hoveredCard === service.id
+                      ? "opacity-100 max-h-30 translate-y-0"
+                      : "opacity-0 max-h-0 translate-y-full"
+                  }`}
+                >
+                  <p className="text-base text-[#EEEEEE]">
+                    {service.description}
+                  </p>
                 </div>
               </div>
             </div>
