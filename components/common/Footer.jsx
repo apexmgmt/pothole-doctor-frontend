@@ -16,16 +16,16 @@ export default function Footer() {
       <div className="relative z-10 pt-15 pb-[30px]">
         <div className="container">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8 mb-6">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-center leading-[1.3] font-primary lg:text-left max-w-2xl">
-              LET'S BUILD A STRONGER FOUNDATION{" "}
-              <span className="gradient-text">TOGETHER</span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-center leading-[1.3] font-primary lg:text-left uppercase ">
+              From Cracks to Cures <br /> — We’ve Got You{" "}
+              <span className="gradient-text"> Covered</span>
             </h2>
-            <Link href="/" className="block">
+            <Link href="/" className="block h-[75px] w-auto">
               <Image
-                height={103}
-                width={103}
-                src="/images/logo.webp"
+                fill
+                src="/images/footer-logo.webp"
                 alt="The Pothole Doctors Logo"
+                className="h-full w-full !relative"
               />
             </Link>
           </div>

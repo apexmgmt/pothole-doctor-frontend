@@ -46,7 +46,7 @@ export default function ServicesSection() {
   return (
     <section className="pt-30 pb-20 bg-white">
       <div className="container">
-        <h2 className="text-[36px] md:text-[42px] lg:text-[52px] font-semibold text-center text-title mb-10 font-primary leading-[1.2]">
+        <h2 className="text-heading font-semibold text-center text-title mb-10 font-primary leading-[1.2] uppercase">
           OUR SERVICES
         </h2>
 

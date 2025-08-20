@@ -6,27 +6,28 @@ export default function Hero() {
       <div className="container">
         <div className="flex items-center gap-12">
           <div className="flex-1 max-w-1/2">
-            <h5 className="text-base font-semibold text-primary tracking-wide uppercase mb-4">
+            <h5 className="text-base font-semibold text-primary tracking-wide uppercase mb-4 ">
               ABOUT US
             </h5>
-            <h1 className="text-heading font-semibold text-title font-primary leading-tight mb-6">
-              BUILDING STRONG FOUNDATIONS
+            <h1 className="text-heading font-semibold font-primary text-title mb-6 leading-[1.2] uppercase">
+              Repairing Roads. Restoring Confidence
             </h1>
             <div className="space-y-6 text-body-text text-text-color leading-relaxed">
               <p>
-                Welcome to{" "}
-                <span className="font-medium text-title">
-                  The Pothole Doctors
-                </span>
-                , where passion meets precision in every paving project. With
-                years of experience and a deep commitment to quality, we've
-                become a trusted name in the paving industry from residential
-                driveways to commercial lots.
+                Founded in Southern Ohio, Pothole Doctors began with a simple
+                mission: to provide communities with expert pothole repair and
+                crack sealing services that actually last. What started as a
+                local solution to a universal problem has grown into a proven
+                business model that's now expanding through franchise
+                opportunities across the region and beyond.
               </p>
               <p>
-                Whether you're envisioning a sleek, modern finish or a durable,
-                long-lasting foundation, we're here to deliver craftsmanship
-                that stands the test of time.
+                Our founders recognized that most road repairs were temporary
+                fixes that failed within months, costing property owners and
+                municipalities both time and money. By combining specialized
+                equipment, premium materials, and proven techniques, we
+                developed a systematic approach that extends pavement life and
+                delivers lasting value to our customers.
               </p>
             </div>
           </div>

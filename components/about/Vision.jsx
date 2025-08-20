@@ -30,8 +30,8 @@ export default function Vision() {
 
   return (
     <section className="py-20 bg-primary-foreground  text-center">
-      <div className="container max-w-[850px]">
-        <h2 className="text-heading font-semibold text-title font-primary leading-tight mb-6">
+      <div className="container !max-w-[850px]">
+        <h2 className="text-heading font-semibold text-title font-primary leading-tight mb-6 uppercase">
           VISION STATEMENT
         </h2>
         <p className="text-lg text-text-color max-w-[712px] mx-auto leading-relaxed">

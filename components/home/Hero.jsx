@@ -46,7 +46,7 @@ export default function HeroSection() {
               <p className="text-base font-semibold tracking-wider uppercase gradient-text">
                 SURFACE SPECIALISTS
               </p>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-primary font-bold leading-[1.1]  uppercase">
+              <h1 className="text-large-title font-primary font-bold leading-[1.1]  uppercase">
                 Your Prescription for Perfect Pavement
               </h1>
             </div>

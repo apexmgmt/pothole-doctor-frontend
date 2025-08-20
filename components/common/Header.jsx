@@ -14,16 +14,22 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-gray-800 z-50 relative">
+    <header className=" z-50 relative">
       {/* Top Utility Bar */}
-      <div className="bg-gray-800 py-2 border-b border-gray-600">
+      <div
+        className="py-2 z-20 "
+        style={{
+          background:
+            "linear-gradient(90deg, rgb(27, 43, 28) 0%, rgb(33, 30, 32) 18.41%, rgb(33, 30, 32) 82.15%, rgb(27, 43, 28) 100%)",
+        }}
+      >
         <div className="container">
           <div className="flex items-center justify-between">
-            <ul className="flex gap-2">
+            <ul className="flex gap-3">
               <li>
                 <Link
                   href="#"
-                  className="flex items-center justify-center w-6 h-6 bg-black rounded hover:bg-gray-700 transition-colors"
+                  className="flex items-center justify-center w-6 h-6 transition-colors"
                 >
                   <svg
                     width="22"
@@ -42,7 +48,7 @@ export default function Header() {
               <li>
                 <Link
                   href="#"
-                  className="flex items-center justify-center w-6 h-6 bg-black rounded hover:bg-gray-700 transition-colors"
+                  className="flex items-center justify-center w-6 h-6 transition-colors"
                 >
                   <svg
                     width="22"
@@ -63,7 +69,7 @@ export default function Header() {
               <li>
                 <Link
                   href="#"
-                  className="flex items-center justify-center w-6 h-6 bg-black rounded hover:bg-gray-700 transition-colors"
+                  className="flex items-center justify-center w-6 h-6 transition-colors"
                 >
                   <svg
                     width="22"
@@ -83,36 +89,38 @@ export default function Header() {
               </li>
             </ul>
             <div className="flex items-center gap-5">
-              <button className="flex items-center gap-2 bg-transparent text-white border border-gray-500 px-3 py-1.5 rounded text-sm hover:bg-gray-700 hover:border-gray-400 transition-all">
+              <button className="flex items-center gap-1.5 bg-transparent text-white border border-border/20 p-2 rounded text-sm hover:bg-primary-foreground/10 font-medium transition-all cursor-pointer">
                 <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6C3.5 9.5 8 14.5 8 14.5C8 14.5 12.5 9.5 12.5 6C12.5 3.5 10.5 1.5 8 1.5ZM8 7.5C7.5 7.5 7 7 7 6.5C7 6 7.5 5.5 8 5.5C8.5 5.5 9 6 9 6.5C9 7 8.5 7.5 8 7.5Z"
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M10.0001 1.9375C7.13056 1.9375 4.39281 3.63477 3.24688 6.31351C2.18041 8.80645 2.75774 10.928 3.95981 12.7446C4.94535 14.234 6.38279 15.5633 7.67959 16.7626L7.6802 16.7631C7.92728 16.9916 8.16926 17.2154 8.40202 17.4347L8.40326 17.4359C8.8345 17.8396 9.40742 18.0625 10.0001 18.0625C10.5929 18.0625 11.1659 17.8396 11.5971 17.4358C11.8173 17.2297 12.0455 17.0194 12.2783 16.8049C13.5892 15.597 15.0468 14.254 16.0427 12.7457C17.2434 10.9271 17.8186 8.80338 16.7535 6.31351C15.6075 3.63477 12.8698 1.9375 10.0001 1.9375ZM9.99902 6.25C8.34217 6.25 6.99902 7.59315 6.99902 9.25C6.99902 10.9068 8.34217 12.25 9.99902 12.25C11.6558 12.25 12.999 10.9068 12.999 9.25C12.999 7.59315 11.6558 6.25 9.99902 6.25Z"
                     fill="white"
                   />
                 </svg>
                 Find Location
               </button>
-              <button className="flex items-center gap-1.5 text-white text-sm hover:text-primary transition-colors bg-transparent border-none">
+              <button className="flex items-center gap-1.5 text-white text-sm hover:text-primary transition-colors bg-transparent border-none font-medium cursor-pointer">
                 <span>Get Local Services</span>
                 <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M3 4.5L6 7.5L9 4.5"
+                    d="M15 7.50004C15 7.50004 11.3176 12.5 10 12.5C8.68233 12.5 5 7.5 5 7.5"
                     stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
                   />
                 </svg>
               </button>
@@ -122,16 +130,17 @@ export default function Header() {
       </div>
 
       {/* Main Navigation Bar */}
-      <div className="bg-gray-800 py-4">
+      <div className="py-3 bg-[#272727] z-10">
         <div className="container">
           <div className="flex items-center justify-between">
-            <Link href="/" className="block">
+            <Link href="/" className="block h-[75px] w-auto relative z-10">
               <Image
-                height={75}
-                width={75}
-                src="/images/logo.webp"
+                fill
+                src="/images/header-logo.webp"
                 alt="The Pothole Doctors Logo"
+                className="h-full w-full !relative"
               />
+              <span className="absolute top-2 right-[-100px] w-[40vw] h-full -z-10 bg-gradient-to-l from-[#53aa57] from-[29.75%] to-[#dcfaa2] to-[100%] skew-x-[-25deg] scale-y-[1.5]"></span>
             </Link>
 
             <div className="flex items-center gap-8">
@@ -141,10 +150,12 @@ export default function Header() {
                     <Link
                       href="/"
                       onClick={() => handleLinkClick("/")}
-                      className={`text-sm font-medium tracking-wide transition-colors ${
+                      className={`text-sm font-medium transition-colors relative py-2
+                      before:absolute before:bottom-0 before:left-0 before:w-full before:h-[2px] before:bg-primary before:transition-all before:duration-300 after:absolute after:top-1/2 after:left-1/2 after:w-[200%] after:h-[100px] after:bg-white/5 after:skew-x-[-30deg] after:translate-[-50%]
+                      ${
                         activeLink === "/"
-                          ? "text-primary"
-                          : "text-white hover:text-primary"
+                          ? "text-primary before:opacity-100 before:scale-x-100"
+                          : "text-white hover:text-primary before:opacity-0 before:scale-x-0 hover:before:opacity-100 hover:before:scale-x-100"
                       }`}
                     >
                       HOME
@@ -154,10 +165,12 @@ export default function Header() {
                     <Link
                       href="/about"
                       onClick={() => handleLinkClick("/about")}
-                      className={`text-sm font-medium tracking-wide transition-colors ${
+                      className={`text-sm font-medium transition-colors relative py-2
+                      before:absolute before:bottom-0 before:left-0 before:w-full before:h-[2px] before:bg-primary before:transition-all before:duration-300
+                      ${
                         activeLink === "/about"
-                          ? "text-primary"
-                          : "text-white hover:text-primary"
+                          ? "text-primary before:opacity-100 before:scale-x-100"
+                          : "text-white hover:text-primary before:opacity-0 before:scale-x-0 hover:before:opacity-100 hover:before:scale-x-100"
                       }`}
                     >
                       ABOUT US
@@ -167,10 +180,12 @@ export default function Header() {
                     <Link
                       href="/contact"
                       onClick={() => handleLinkClick("/contact")}
-                      className={`text-sm font-medium tracking-wide transition-colors ${
+                      className={`text-sm font-medium transition-colors relative py-2
+                      before:absolute before:bottom-0 before:left-0 before:w-full before:h-[2px] before:bg-primary before:transition-all before:duration-300
+                      ${
                         activeLink === "/contact"
-                          ? "text-primary"
-                          : "text-white hover:text-primary"
+                          ? "text-primary before:opacity-100 before:scale-x-100"
+                          : "text-white hover:text-primary before:opacity-0 before:scale-x-0 hover:before:opacity-100 hover:before:scale-x-100"
                       }`}
                     >
                       CONTACT
@@ -180,10 +195,12 @@ export default function Header() {
                     <Link
                       href="/location"
                       onClick={() => handleLinkClick("/location")}
-                      className={`text-sm font-medium tracking-wide transition-colors ${
+                      className={`text-sm font-medium transition-colors relative py-2
+                      before:absolute before:bottom-0 before:left-0 before:w-full before:h-[2px] before:bg-primary before:transition-all before:duration-300
+                      ${
                         activeLink === "/location"
-                          ? "text-primary"
-                          : "text-white hover:text-primary"
+                          ? "text-primary before:opacity-100 before:scale-x-100"
+                          : "text-white hover:text-primary before:opacity-0 before:scale-x-0 hover:before:opacity-100 hover:before:scale-x-100"
                       }`}
                     >
                       LOCATION
@@ -193,7 +210,7 @@ export default function Header() {
               </nav>
               <Link
                 href="/login"
-                className="text-white text-sm font-medium tracking-wide hover:text-primary transition-colors"
+                className="text-title py-4 px-5 text-sm rounded-lg font-semibold tracking-wide hover:text-white transition-colors bg-white hover:bg-primary"
               >
                 LOG IN
               </Link>

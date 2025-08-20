@@ -36,12 +36,12 @@ const ContactSection = () => {
             <div className="text-base font-semibold text-primary tracking-wide uppercase">
               CONTACT US
             </div>
-            <h1 className="text-heading font-semibold font-primary text-title leading-tight mb-6">
-              GET IN TOUCH WITH THE PAVING EXPERTS
+            <h1 className="text-heading font-semibold font-primary text-title leading-tight mb-6 uppercase">
+              Get in Touch With Pothole Doctors{" "}
             </h1>
             <p className="text-text-color text-body-text leading-relaxed  max-w-[460px]">
-              We're here to help! Have a question, need a quote, or planning a
-              project? Let's talk.
+              We’re here to answer your questions and provide fast, reliable
+              pavement solutions.
             </p>
 
             <div className="space-y-6 mt-[90px]">
@@ -63,7 +63,7 @@ const ContactSection = () => {
                   </svg>
                 </div>
                 <span className="text-body-text font-medium">
-                  (91) 98765 432154
+                  (740) 330-5155
                 </span>
               </div>
 
@@ -92,7 +92,7 @@ const ContactSection = () => {
                   </svg>
                 </div>
                 <span className="text-body-text font-medium">
-                  support@mail.com
+                  service@potholedoctors.com
                 </span>
               </div>
 
@@ -118,7 +118,7 @@ const ContactSection = () => {
                   </svg>
                 </div>
                 <span className="text-body-text font-medium">
-                  San Francisco, CA 94105, United States
+                  708-D Fairground Rd, Lucasville, OH 45648
                 </span>
               </div>
             </div>

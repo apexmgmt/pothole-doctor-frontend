@@ -35,8 +35,8 @@ export default function TestimonialsSection() {
 
   return (
     <section className="py-15 bg-white">
-      <div className="container max-w-[1160px] mx-auto">
-        <h2 className="max-w-[670px] mx-auto text-[36px] md:text-[42px] lg:text-[52px]  font-semibold text-center text-title mb-15 font-primary leading-[1.2]">
+      <div className="container !max-w-[1160px] ">
+        <h2 className="max-w-[670px] mx-auto text-heading font-semibold text-center text-title mb-15 font-primary leading-[1.2] uppercase">
           WHAT OUR CUSTOMERS ARE SAYING
         </h2>
 

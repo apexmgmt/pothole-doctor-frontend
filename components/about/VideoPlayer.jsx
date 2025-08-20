@@ -36,7 +36,7 @@ export default function VideoPlayer() {
 
   return (
     <section className="py-20 bg-white">
-      <div className="container max-w-[1080px]">
+      <div className="container !max-w-[1080px]">
         <div
           className="relative aspect-[2.29/1] bg-black rounded-lg overflow-hidden cursor-pointer"
           onClick={!isPlaying ? handlePlayClick : undefined}

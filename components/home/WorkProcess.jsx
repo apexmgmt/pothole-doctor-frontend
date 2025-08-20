@@ -8,7 +8,7 @@ export default function WorkProcessSection() {
       <div className="container">
         {/* Header */}
         <div className="text-center mb-10 max-w-xl mx-auto">
-          <h2 className=" text-[36px] md:text-[42px] lg:text-[52px]  font-semibold text-center text-title mb-6 font-primary leading-[1.2]">
+          <h2 className="text-heading font-semibold text-center text-title mb-6 font-primary leading-[1.2] uppercase">
             OUR PROCESS
           </h2>
           <p className="text-lg text-text-color ">

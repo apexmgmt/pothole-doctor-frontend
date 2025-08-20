@@ -6,7 +6,7 @@ export default function Mission() {
       <div className="container">
         <div className="flex gap-12 items-center">
           <div className="flex-1 max-w-1/2 space-y-6">
-            <h2 className="text-heading font-semibold text-title font-primary leading-tight mb-6">
+            <h2 className="text-heading font-semibold text-title font-primary leading-tight mb-6 uppercase">
               Mission Statement
             </h2>
             <div className="space-y-6 text-body-text text-text-color leading-relaxed">
@@ -38,4 +38,3 @@ export default function Mission() {
     </section>
   );
 }
-
