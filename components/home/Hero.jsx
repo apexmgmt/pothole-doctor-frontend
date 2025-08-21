@@ -104,16 +104,16 @@ export default function HeroSection() {
                     <path
                       d="M13.9658 6.53339L6.89475 13.6045"
                       stroke="white"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                     <path
                       d="M8.54497 6.06194C8.54497 6.06194 13.6611 5.28557 14.4375 6.06196C15.2139 6.83836 14.4375 11.9545 14.4375 11.9545"
                       stroke="white"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                   </svg>
                 </button>

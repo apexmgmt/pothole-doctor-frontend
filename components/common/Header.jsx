@@ -8,16 +8,22 @@ import Image from "next/image";
 export default function Header() {
   const pathname = usePathname();
   const [activeLink, setActiveLink] = useState(pathname);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLinkClick = (path) => {
     setActiveLink(path);
+    setIsMobileMenuOpen(false); // Close mobile menu when link is clicked
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   return (
     <header className=" z-50 relative">
       {/* Top Utility Bar */}
       <div
-        className="py-2 z-20 "
+        className="py-2 z-20 hidden sm:block"
         style={{
           background:
             "linear-gradient(90deg, rgb(27, 43, 28) 0%, rgb(33, 30, 32) 18.41%, rgb(33, 30, 32) 82.15%, rgb(27, 43, 28) 100%)",
@@ -98,8 +104,8 @@ export default function Header() {
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
+                    fillRule="evenodd"
+                    clipRule="evenodd"
                     d="M10.0001 1.9375C7.13056 1.9375 4.39281 3.63477 3.24688 6.31351C2.18041 8.80645 2.75774 10.928 3.95981 12.7446C4.94535 14.234 6.38279 15.5633 7.67959 16.7626L7.6802 16.7631C7.92728 16.9916 8.16926 17.2154 8.40202 17.4347L8.40326 17.4359C8.8345 17.8396 9.40742 18.0625 10.0001 18.0625C10.5929 18.0625 11.1659 17.8396 11.5971 17.4358C11.8173 17.2297 12.0455 17.0194 12.2783 16.8049C13.5892 15.597 15.0468 14.254 16.0427 12.7457C17.2434 10.9271 17.8186 8.80338 16.7535 6.31351C15.6075 3.63477 12.8698 1.9375 10.0001 1.9375ZM9.99902 6.25C8.34217 6.25 6.99902 7.59315 6.99902 9.25C6.99902 10.9068 8.34217 12.25 9.99902 12.25C11.6558 12.25 12.999 10.9068 12.999 9.25C12.999 7.59315 11.6558 6.25 9.99902 6.25Z"
                     fill="white"
                   />
@@ -118,9 +124,9 @@ export default function Header() {
                   <path
                     d="M15 7.50004C15 7.50004 11.3176 12.5 10 12.5C8.68233 12.5 5 7.5 5 7.5"
                     stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
                 </svg>
               </button>
@@ -130,20 +136,24 @@ export default function Header() {
       </div>
 
       {/* Main Navigation Bar */}
-      <div className="py-3 bg-[#272727] z-10">
+      <div className="py-2 lg:py-3 bg-[#272727] z-10">
         <div className="container">
           <div className="flex items-center justify-between">
-            <Link href="/" className="block h-[75px] w-auto relative z-10">
+            <Link
+              href="/"
+              className="block h-12 lg:h-[75px] w-auto relative z-10"
+            >
               <Image
                 fill
                 src="/images/header-logo.webp"
                 alt="The Pothole Doctors Logo"
                 className="h-full w-full !relative"
               />
-              <span className="absolute top-2 right-[-100px] w-[40vw] h-full -z-10 bg-gradient-to-l from-[#53aa57] from-[29.75%] to-[#dcfaa2] to-[100%] skew-x-[-25deg] scale-y-[1.5]"></span>
+              <span className="absolute top-2 right-0 lg:right-[-100px] w-screen sm:w-[50vw] h-full -z-10 bg-gradient-to-l from-[#53aa57] from-[29.75%] to-[#dcfaa2] to-[100%] skew-x-[-40deg] scale-y-[1.7] lg:scale-y-[1.5]"></span>
             </Link>
 
-            <div className="flex items-center gap-8">
+            {/* Desktop Navigation - Hidden on Mobile */}
+            <div className="hidden md:flex items-center gap-8">
               <nav>
                 <ul className="flex items-center gap-8">
                   <li>
@@ -151,7 +161,7 @@ export default function Header() {
                       href="/"
                       onClick={() => handleLinkClick("/")}
                       className={`text-sm font-medium transition-colors relative py-2
-                      before:absolute before:bottom-0 before:left-0 before:w-full before:h-[2px] before:bg-primary before:transition-all before:duration-300 after:absolute after:top-1/2 after:left-1/2 after:w-[200%] after:h-[100px] after:bg-white/5 after:skew-x-[-30deg] after:translate-[-50%]
+                      before:absolute before:bottom-0 before:left-0 before:w-full before:h-[2px] before:bg-primary before:transition-all before:duration-300 after:absolute after:top-1/2 after:left-1/2 after:w-[225%] after:h-[70px] lg:after:h-[100px] after:bg-white/5 after:skew-x-[-27deg] lg:after:skew-x-[-30deg] after:translate-[-50%]
                       ${
                         activeLink === "/"
                           ? "text-primary before:opacity-100 before:scale-x-100"
@@ -210,11 +220,170 @@ export default function Header() {
               </nav>
               <Link
                 href="/login"
-                className="text-title py-4 px-5 text-sm rounded-lg font-semibold tracking-wide hover:text-white transition-colors bg-white hover:bg-primary"
+                className="text-title py-2.5 px-4 lg:py-4 lg:px-5 text-sm rounded-lg font-semibold tracking-wide hover:text-white transition-colors bg-white hover:bg-primary"
               >
                 LOG IN
               </Link>
             </div>
+
+            {/* Mobile Menu Button - Visible only on Mobile */}
+            <button
+              onClick={toggleMobileMenu}
+              className="md:hidden flex flex-col justify-center items-center w-8 h-8 text-white hover:text-primary transition-colors cursor-pointer"
+              aria-label="Toggle mobile menu"
+            >
+              <span
+                className={`block w-6 h-0.5 bg-current transition-all duration-300 ${
+                  isMobileMenuOpen ? "rotate-45 translate-y-1.5" : ""
+                }`}
+              ></span>
+              <span
+                className={`block w-6 h-0.5 bg-current transition-all duration-300 mt-1 ${
+                  isMobileMenuOpen ? "opacity-0" : ""
+                }`}
+              ></span>
+              <span
+                className={`block w-6 h-0.5 bg-current transition-all duration-300 mt-1 ${
+                  isMobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""
+                }`}
+              ></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={toggleMobileMenu}
+        ></div>
+      )}
+
+      {/* Mobile Side Drawer */}
+      <div
+        className={`fixed top-0 right-0 h-full w-80 bg-[#272727] z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
+          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Mobile Menu Header */}
+          {/* <div className="flex items-center justify-between p-6 border-b border-white/10">
+            <button
+              onClick={toggleMobileMenu}
+              className="text-white hover:text-primary transition-colors cursor-pointer ml-auto"
+              aria-label="Close mobile menu"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 6L6 18M6 6L18 18"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div> */}
+
+          {/* Mobile Navigation */}
+          <nav className="flex-1 p-6">
+            <button
+              onClick={toggleMobileMenu}
+              className="text-white hover:text-red-500 transition-colors cursor-pointer ml-auto block"
+              aria-label="Close mobile menu"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 6L6 18M6 6L18 18"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <ul className="">
+              <li>
+                <Link
+                  href="/"
+                  onClick={() => handleLinkClick("/")}
+                  className={`block text-base font-medium transition-colors py-4 border-b border-white/10
+                  ${
+                    activeLink === "/"
+                      ? "text-primary"
+                      : "text-white hover:text-primary"
+                  }`}
+                >
+                  HOME
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/about"
+                  onClick={() => handleLinkClick("/about")}
+                  className={`block text-base font-medium transition-colors py-4 border-b border-white/10
+                  ${
+                    activeLink === "/about"
+                      ? "text-primary"
+                      : "text-white hover:text-primary"
+                  }`}
+                >
+                  ABOUT US
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  onClick={() => handleLinkClick("/contact")}
+                  className={`block text-base font-medium transition-colors py-4 border-b border-white/10
+                  ${
+                    activeLink === "/contact"
+                      ? "text-primary"
+                      : "text-white hover:text-primary"
+                  }`}
+                >
+                  CONTACT
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/location"
+                  onClick={() => handleLinkClick("/location")}
+                  className={`block text-base font-medium transition-colors py-4 border-b border-white/10
+                  ${
+                    activeLink === "/location"
+                      ? "text-primary"
+                      : "text-white hover:text-primary"
+                  }`}
+                >
+                  LOCATION
+                </Link>
+              </li>
+            </ul>
+          </nav>
+
+          {/* Mobile Menu Footer with Login Button */}
+          <div className="p-6 border-t border-white/10">
+            <Link
+              href="/login"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block w-full text-center py-4 px-6 text-sm rounded-lg font-semibold tracking-wide text-white bg-primary hover:bg-primary/85 transition-colors"
+            >
+              LOG IN
+            </Link>
           </div>
         </div>
       </div>

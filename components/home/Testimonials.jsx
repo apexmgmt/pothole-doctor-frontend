@@ -133,16 +133,16 @@ export default function TestimonialsSection() {
               <path
                 d="M3.33301 10L16.6663 10"
                 stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <path
                 d="M7.49965 14.1663C7.49965 14.1663 3.33302 11.0977 3.33301 9.99967C3.333 8.90167 7.49967 5.83301 7.49967 5.83301"
                 stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </button>
@@ -158,16 +158,16 @@ export default function TestimonialsSection() {
               <path
                 d="M16.667 10L3.33368 10"
                 stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <path
                 d="M12.5004 14.1663C12.5004 14.1663 16.667 11.0977 16.667 9.99967C16.667 8.90167 12.5003 5.83301 12.5003 5.83301"
                 stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </button>

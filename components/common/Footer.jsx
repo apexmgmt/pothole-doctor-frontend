@@ -13,12 +13,12 @@ export default function Footer() {
         />
       </figure>
 
-      <div className="relative z-10 pt-15 pb-[30px]">
+      <div className="relative z-10 pt-10 md:pt-15 pb-4 md:pb-[30px]">
         <div className="container">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 mb-6">
+          <div className="flex flex-col-reverse lg:flex-row items-center justify-between gap-8 mb-6">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-center leading-[1.3] font-primary lg:text-left uppercase ">
-              From Cracks to Cures <br /> — We’ve Got You{" "}
-              <span className="gradient-text"> Covered</span>
+              From Cracks to Cures <br className="hidden sm:inline-block" /> —
+              We’ve Got You <span className="gradient-text"> Covered</span>
             </h2>
             <Link href="/" className="block h-[75px] w-auto">
               <Image
@@ -31,9 +31,9 @@ export default function Footer() {
           </div>
 
           {/* Footer Menu */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 border-t border-border/[.16] pt-[30px] mb-[30px]">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 border-t border-border/[.16] pt-5 md:pt-[30px] mb-5 md:mb-[30px]">
             <nav>
-              <ul className="flex flex-wrap items-center justify-center gap-4 ">
+              <ul className="flex flex-wrap items-center justify-center gap-2.5 md:gap-4 ">
                 <li>
                   <Link
                     href="/"
@@ -184,7 +184,7 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="text-center text-sm text-white border-t border-border/[.16] pt-[30px]">
+          <div className="text-center text-sm text-white border-t border-border/[.16] pt-5 md:pt-[30px]">
             © 2025{" "}
             <Link href="/" className="hover:text-primary transition-colors">
               The Pothole Doctors
