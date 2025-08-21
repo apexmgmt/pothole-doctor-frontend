@@ -193,28 +193,28 @@ export default function Services() {
   ];
 
   return (
-    <section className="py-15 bg-white text-center">
+    <section className="py-10 md:py-15 bg-white text-center">
       <div className="container">
-        <h2 className="text-heading font-primary font-semibold text-title mb-6 uppercase leading-[1.1]">
+        <h2 className="text-heading font-primary font-semibold text-title mb-4 md:mb-6 uppercase leading-[1.1]">
           OUR SERVICES
         </h2>
-        <p className="text-lg text-text-color max-w-[630px] mx-auto">
+        <p className="text-body-text text-text-color max-w-[630px] mx-auto">
           Trusted Pavement Services Backed by Experience and Precision
         </p>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6  mt-10">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-8 md:mt-10">
           {servicesData.map((service, index) => (
             <div
               key={index}
-              className="bg-primary-foreground p-6 rounded-lg text-left hover:shadow-lg transition-shadow"
+              className="bg-primary-foreground p-5 md:p-6 rounded-lg text-left hover:shadow-lg transition-shadow"
             >
-              <div className="mb-[30px] h-15 w-15 rounded-lg bg-white flex items-center justify-center">
+              <div className="mb-4 md:mb-5 lg:mb-[30px] h-15 w-15 rounded-lg bg-white flex items-center justify-center">
                 {service.icon}
               </div>
-              <h3 className="text-xl font-primary font-semibold text-title mb-4 uppercase leading-[1.2]">
+              <h3 className="text-xl font-primary font-semibold text-title mb-3 md:mb-4 uppercase leading-[1.2]">
                 {service.title}
               </h3>
-              <p className="text-text-color text-base leading-relaxed">
+              <p className="text-text-color text-sm md:text-base leading-relaxed">
                 {service.description}
               </p>
             </div>

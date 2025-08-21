@@ -35,7 +35,7 @@ export default function VideoPlayer() {
   };
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-10 md:py-20 bg-white">
       <div className="container !max-w-[1080px]">
         <div
           className="relative aspect-[2.29/1] bg-black rounded-lg overflow-hidden cursor-pointer"
@@ -60,10 +60,11 @@ export default function VideoPlayer() {
             onLoadStart={() => console.log("Video loading started")}
             onCanPlay={() => console.log("Video can play")}
           >
-            <source
+            {/* <source
               src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
               type="video/mp4"
-            />
+            /> */}
+            <source src="/video/fill_asphalt.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 
@@ -77,13 +78,14 @@ export default function VideoPlayer() {
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-white text-2xl hover:bg-white transition-colors">
+                  <div className="w-10 md:w-16 h-10 md:h-16 bg-white rounded-full flex items-center justify-center text-white hover:bg-white transition-colors">
                     <svg
                       width="17"
                       height="18"
                       viewBox="0 0 17 18"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
+                      className="md:w-5 md:h-5 w-[12px] h-[12px]"
                     >
                       <path
                         d="M16.0293 7.42529C17.349 8.21824 17.3154 10.1424 15.9688 10.8889L3.84972 17.6066C2.50315 18.353 0.853533 17.3618 0.880402 15.8224L1.12223 1.96814C1.1491 0.428774 2.83231 -0.504244 4.152 0.288709L16.0293 7.42529Z"

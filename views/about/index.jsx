@@ -1,4 +1,4 @@
-import Hero from "@/components/about/Hero";
+import About from "@/components/about/About";
 import Mission from "@/components/about/Mission";
 import OurWork from "@/components/about/OurWork";
 import Services from "@/components/about/Services";
@@ -9,7 +9,7 @@ import React from "react";
 const AboutIndex = () => {
   return (
     <>
-      <Hero />
+      <About />
       <Services />
       <VideoPlayer />
       <Mission />

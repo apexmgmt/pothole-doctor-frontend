@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -9,6 +9,20 @@ export default function Header() {
   const pathname = usePathname();
   const [activeLink, setActiveLink] = useState(pathname);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Hide scrollbar when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    // Cleanup function to restore scroll when component unmounts
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
 
   const handleLinkClick = (path) => {
     setActiveLink(path);
@@ -23,7 +37,7 @@ export default function Header() {
     <header className=" z-50 relative">
       {/* Top Utility Bar */}
       <div
-        className="py-2 z-20 hidden sm:block"
+        className="py-2 z-20 hidden md:block"
         style={{
           background:
             "linear-gradient(90deg, rgb(27, 43, 28) 0%, rgb(33, 30, 32) 18.41%, rgb(33, 30, 32) 82.15%, rgb(27, 43, 28) 100%)",
@@ -149,7 +163,33 @@ export default function Header() {
                 alt="The Pothole Doctors Logo"
                 className="h-full w-full !relative"
               />
-              <span className="absolute top-2 right-0 lg:right-[-100px] w-screen sm:w-[50vw] h-full -z-10 bg-gradient-to-l from-[#53aa57] from-[29.75%] to-[#dcfaa2] to-[100%] skew-x-[-40deg] scale-y-[1.7] lg:scale-y-[1.5]"></span>
+              {/* Gradient background with border effect */}
+              <span className="absolute top-2 right-0 lg:right-[-100px] w-screen sm:w-[50vw] h-full -z-10 bg-gradient-to-l from-[#53aa57] from-[29.75%] to-[#dcfaa2] to-[100%] skew-x-[-40deg] scale-y-[1.7] lg:scale-y-[1.5]">
+                <span
+                  className="absolute top-0 right-0 w-screen sm:w-[50vw] h-full -z-10 pointer-events-none scale-y-90"
+                  style={{
+                    WebkitMaskImage:
+                      "linear-gradient(white, transparent) content-box, linear-gradient(white, transparent)",
+                    WebkitMaskComposite: "xor",
+                    maskImage:
+                      "linear-gradient(white, transparent) content-box, linear-gradient(white, transparent)",
+                    maskComposite: "exclude",
+                    padding: "7px",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <span
+                    className="block w-full h-full bg-gradient-to-l from-[#ffffff] from-[29.75%] to-[#e0160f] to-[100%] scale-y-[1.2]"
+                    style={{
+                      WebkitMask:
+                        "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                      WebkitMaskComposite: "xor",
+                      mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                      maskComposite: "exclude",
+                    }}
+                  />
+                </span>
+              </span>
             </Link>
 
             {/* Desktop Navigation - Hidden on Mobile */}
@@ -229,7 +269,7 @@ export default function Header() {
             {/* Mobile Menu Button - Visible only on Mobile */}
             <button
               onClick={toggleMobileMenu}
-              className="md:hidden flex flex-col justify-center items-center w-8 h-8 text-white hover:text-primary transition-colors cursor-pointer"
+              className="md:hidden flex flex-col justify-center items-center w-8 h-8 text-white hover:text-primary transition-colors cursor-pointer z-[100]"
               aria-label="Toggle mobile menu"
             >
               <span
@@ -294,7 +334,7 @@ export default function Header() {
 
           {/* Mobile Navigation */}
           <nav className="flex-1 p-6">
-            <button
+            {/* <button
               onClick={toggleMobileMenu}
               className="text-white hover:text-red-500 transition-colors cursor-pointer ml-auto block"
               aria-label="Close mobile menu"
@@ -314,8 +354,8 @@ export default function Header() {
                   strokeLinejoin="round"
                 />
               </svg>
-            </button>
-            <ul className="">
+            </button> */}
+            <ul className="pt-4">
               <li>
                 <Link
                   href="/"
@@ -380,7 +420,7 @@ export default function Header() {
             <Link
               href="/login"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="block w-full text-center py-4 px-6 text-sm rounded-lg font-semibold tracking-wide text-white bg-primary hover:bg-primary/85 transition-colors"
+              className="block w-full text-center py-3 sm:py-4 px-6 text-sm rounded-lg font-semibold tracking-wide text-white bg-primary hover:bg-primary/85 transition-colors"
             >
               LOG IN
             </Link>

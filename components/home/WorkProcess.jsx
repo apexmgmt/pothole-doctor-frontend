@@ -4,14 +4,14 @@ import Image from "next/image";
 
 export default function WorkProcessSection() {
   return (
-    <section className="pt-20 pb-30 bg-white">
+    <section className="pt-10 md:pt-20 pb-15 md:pb-30 bg-white">
       <div className="container">
         {/* Header */}
         <div className="text-center mb-10 max-w-xl mx-auto">
           <h2 className="text-heading font-semibold text-center text-title mb-6 font-primary leading-[1.2] uppercase">
             OUR PROCESS
           </h2>
-          <p className="text-lg text-text-color ">
+          <p className="text-body-text text-text-color ">
             We follow a simple yet effective process to deliver quality paving
             solutions on time and within budget.
           </p>
@@ -20,16 +20,16 @@ export default function WorkProcessSection() {
         {/* Process Grid */}
         <div className="relative">
           {/* Grid Container */}
-          <div className="grid grid-rows-2 grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+          <div className="grid lg:grid-rows-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6 items-center">
             {/* Left Column - Steps 01 & 02 */}
             {/* <div className="space-y-6"> */}
             {/* Step 01 */}
 
-            <div className="bg-primary-foreground rounded-lg p-[30px] h-full">
-              <div className="text-[44px] font-primary font-semibold text-primary mb-6 leading-[1]">
+            <div className="bg-primary-foreground rounded-lg p-5 xl:p-[30px] h-full">
+              <div className="text-[34px] md:text-[38px] xl:text-[44px] font-primary font-semibold text-primary mb-4 xl:mb-6 leading-[1]">
                 01
               </div>
-              <h3 className="text-xl font-semibold text-title mb-4 leading-[1.2]">
+              <h3 className="text-lg xl:text-xl font-semibold text-title mb-1.5 xl:mb-4 leading-[1.2] font-primary">
                 CONSULTATION
               </h3>
               <p className="text-text-color text-base leading-relaxed">
@@ -40,7 +40,7 @@ export default function WorkProcessSection() {
             </div>
 
             {/* Center Column - Image */}
-            <div className="row-span-2">
+            <div className="row-span-2 hidden lg:block">
               <Image
                 fill
                 src="/images/work-process.webp"
@@ -50,11 +50,11 @@ export default function WorkProcessSection() {
             </div>
 
             {/* Step 02 */}
-            <div className="bg-primary-foreground rounded-lg p-[30px] h-full">
-              <div className="text-[44px] font-primary font-semibold text-primary mb-6 leading-[1]">
+            <div className="bg-primary-foreground rounded-lg p-5 xl:p-[30px] h-full">
+              <div className="text-[34px] md:text-[38px] xl:text-[44px] font-primary font-semibold text-primary mb-4 xl:mb-6 leading-[1]">
                 02
               </div>
-              <h3 className="text-xl font-semibold text-title mb-4 leading-[1.2]">
+              <h3 className="text-lg xl:text-xl font-semibold text-title mb-1.5 xl:mb-4 leading-[1.2] font-primary">
                 SITE INSPECTION
               </h3>
               <p className="text-text-color text-base leading-relaxed">
@@ -68,11 +68,11 @@ export default function WorkProcessSection() {
             {/* Right Column - Steps 03 & 04 */}
             {/* <div className="space-y-8"> */}
             {/* Step 03 */}
-            <div className="bg-primary-foreground rounded-lg p-[30px] h-full">
-              <div className="text-[44px] font-primary font-semibold text-primary mb-6 leading-[1]">
+            <div className="bg-primary-foreground rounded-lg p-5 xl:p-[30px] h-full">
+              <div className="text-[34px] md:text-[38px] xl:text-[44px] font-primary font-semibold text-primary mb-4 xl:mb-6 leading-[1]">
                 03
               </div>
-              <h3 className="text-xl font-semibold text-title mb-4 leading-[1.2]">
+              <h3 className="text-lg xl:text-xl font-semibold text-title mb-1.5 xl:mb-4 leading-[1.2] font-primary">
                 CUSTOM QUOTE
               </h3>
               <p className="text-text-color text-base leading-relaxed">
@@ -83,11 +83,11 @@ export default function WorkProcessSection() {
             </div>
 
             {/* Step 04 */}
-            <div className="bg-primary-foreground rounded-lg p-[30px] h-full">
-              <div className="text-[44px] font-primary font-semibold text-primary mb-6 leading-[1]">
+            <div className="bg-primary-foreground rounded-lg p-5 xl:p-[30px] h-full">
+              <div className="text-[34px] md:text-[38px] xl:text-[44px] font-primary font-semibold text-primary mb-4 xl:mb-6 leading-[1]">
                 04
               </div>
-              <h3 className="text-xl font-semibold text-title mb-4 leading-[1.2] ">
+              <h3 className="text-lg xl:text-xl font-semibold text-title mb-1.5 xl:mb-4 leading-[1.2] font-primary">
                 FINAL CHECK
               </h3>
               <p className="text-text-color text-base leading-relaxed">

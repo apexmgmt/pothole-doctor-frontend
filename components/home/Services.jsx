@@ -44,15 +44,15 @@ export default function ServicesSection() {
   ];
 
   return (
-    <section className="pt-30 pb-20 bg-white">
+    <section className="pt-15 lg:pt-30 pb-20 bg-white">
       <div className="container">
-        <h2 className="text-heading font-semibold text-center text-title mb-10 font-primary leading-[1.2] uppercase">
+        <h2 className="text-heading font-semibold text-center text-title mb-6 md:mb- 10 font-primary leading-[1.2] uppercase">
           OUR SERVICES
         </h2>
 
-        <div className="grid grid-rows-2 grid-cols-1 lg:grid-cols-4 gap-6 ">
+        <div className="grid lg:grid-rows-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6 ">
           {/* Large Left Card - Always shows details */}
-          <div className="lg:col-span-2 lg:row-span-2 relative rounded-lg overflow-hidden group">
+          <div className="sm:col-span-2 row-span-2 relative rounded-lg overflow-hidden group">
             <div className="">
               <Image
                 fill
@@ -61,11 +61,11 @@ export default function ServicesSection() {
                 className="h-full w-full !relative object-cover"
               />
             </div>
-            <div className="absolute bottom-0 left-0 right-0 p-[30px] text-white">
-              <h3 className="text-[28px] font-semibold mb-4 font-primary">
+            <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 md:p-[30px] text-white">
+              <h3 className="text-lg sm:text-[28px] font-semibold mb-4 font-primary">
                 {services[0].title}
               </h3>
-              <p className="text-base text-[#EEEEEE]">
+              <p className="text-sm sm:text-base text-[#EEEEEE]">
                 {services[0].description}
               </p>
             </div>
@@ -89,10 +89,10 @@ export default function ServicesSection() {
               </div>
 
               {/* Always visible title */}
-              <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+              <div className="absolute bottom-0 left-0 right-0 p-4 xl:p-5 text-white">
                 <h3
-                  className={`text-xl font-semibold font-primary  ${
-                    hoveredCard === service.id ? "mb-5" : " mb-0"
+                  className={`text-lg xl:text-xl font-semibold font-primary leading-[1.1] mb-5 md:mb-2 xl:mb-5 ${
+                    hoveredCard === service.id ? " " : " !md:mb-0"
                   }`}
                 >
                   {service.title}
@@ -101,11 +101,11 @@ export default function ServicesSection() {
                 <div
                   className={`transition-all duration-300 ease-in-out ${
                     hoveredCard === service.id
-                      ? "opacity-100 max-h-30 translate-y-0"
-                      : "opacity-0 max-h-0 translate-y-full"
+                      ? "md:opacity-100 md:max-h-30 md:translate-y-0"
+                      : "md:opacity-0 md:max-h-0 md:translate-y-full"
                   }`}
                 >
-                  <p className="text-base text-[#EEEEEE]">
+                  <p className="text-sm xl:text-base text-[#EEEEEE]">
                     {service.description}
                   </p>
                 </div>

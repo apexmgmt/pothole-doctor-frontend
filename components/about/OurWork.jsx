@@ -2,10 +2,10 @@ import Image from "next/image";
 
 export default function OurWork() {
   return (
-    <section className="py-[120px] bg-white">
+    <section className="py-15 md:py-[120px] bg-white">
       <div className="container">
-        <div className="flex gap-12 items-center">
-          <div className="relative order-2 lg:order-1 flex-1 max-w-1/2">
+        <div className="flex flex-col-reverse lg:flex-row gap-12 items-center">
+          <div className="relative order-2 lg:order-1 flex-1 w-full lg:max-w-1/2">
             <Image
               fill
               src="/images/our-work-thumb.webp"
@@ -13,7 +13,7 @@ export default function OurWork() {
               className="w-full h-full object-cover !relative"
             />
           </div>
-          <div className="space-y-6 order-1 lg:order-2 flex-1 max-w-1/2">
+          <div className="space-y-6 order-1 lg:order-2 flex-1 w-full lg:max-w-1/2">
             <h2 className="text-heading font-semibold text-title font-primary leading-tight mb-6 uppercase">
               Our Southern <br /> Ohio Roots
             </h2>

@@ -29,12 +29,12 @@ export default function Vision() {
   ];
 
   return (
-    <section className="py-20 bg-primary-foreground  text-center">
+    <section className="py-15 md:py-20 bg-primary-foreground  text-center">
       <div className="container !max-w-[850px]">
-        <h2 className="text-heading font-semibold text-title font-primary leading-tight mb-6 uppercase">
+        <h2 className="text-heading font-semibold text-title font-primary leading-tight mb-4 md:mb-6 uppercase">
           VISION STATEMENT
         </h2>
-        <p className="text-lg text-text-color max-w-[712px] mx-auto leading-relaxed">
+        <p className="text-body-text text-text-color max-w-[712px] mx-auto leading-relaxed">
           To be the trusted road repair specialists in every community we serve,
           known for transforming damaged pavement into safe, durable surfaces.
           We envision a future where preventive maintenance and expert repairs
@@ -42,7 +42,7 @@ export default function Vision() {
           creating safer transportation.
         </p>
 
-        <div className="grid md:grid-cols-2 gap-6 mt-10 text-start">
+        <div className="grid sm:grid-cols-2 gap-4 md:gap-6 mt-8 md:mt-10 text-start">
           {visionValuesData.map((item, index) => {
             const isLastItem = index === visionValuesData.length - 1;
             const isOddTotal = visionValuesData.length % 2 !== 0;
@@ -51,14 +51,14 @@ export default function Vision() {
             return (
               <div
                 key={index}
-                className={`bg-white p-6 rounded-lg hover:shadow-md transition-shadow ${
-                  shouldSpanTwo ? "md:col-span-2" : ""
+                className={`bg-white p-5 md:p-6 rounded-lg hover:shadow-md transition-shadow ${
+                  shouldSpanTwo ? "sm:col-span-2" : ""
                 }`}
               >
-                <h3 className="text-[28px] font-primary font-semibold text-title mb-[18px]">
+                <h3 className="text-xl md:text-[28px] font-primary font-semibold text-title mb-[18px]">
                   {item.title}
                 </h3>
-                <p className="text-text-color text-base leading-relaxed">
+                <p className="text-text-color text-sm md:text-base leading-relaxed">
                   {item.description}
                 </p>
               </div>

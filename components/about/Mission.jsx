@@ -2,14 +2,14 @@ import Image from "next/image";
 
 export default function Mission() {
   return (
-    <section className="pt-20 pb-[120px] bg-white">
+    <section className="pt-10 md:pt-20 pb-15 md:pb-[120px] bg-white">
       <div className="container">
-        <div className="flex gap-12 items-center">
-          <div className="flex-1 max-w-1/2 space-y-6">
-            <h2 className="text-heading font-semibold text-title font-primary leading-tight mb-6 uppercase">
+        <div className="flex flex-col-reverse lg:flex-row gap-12 items-center">
+          <div className="flex-1 w-full lg:max-w-1/2 space-y-6">
+            <h2 className="text-heading font-semibold text-title font-primary leading-tight mb-4 md:mb-6 uppercase">
               Mission Statement
             </h2>
-            <div className="space-y-6 text-body-text text-text-color leading-relaxed">
+            <div className="space-y-4 md:space-y-6 text-body-text text-text-color leading-relaxed">
               <p>
                 At Pothole Doctors, we are dedicated to healing America's roads
                 through expert pothole repair and crack sealing services. We
@@ -25,7 +25,7 @@ export default function Mission() {
               </p>
             </div>
           </div>
-          <div className="relative flex-1 max-w-1/2 ">
+          <div className="relative w-full flex-1 lg:max-w-1/2 ">
             <Image
               fill
               src="/images/Our-mission-thumb.webp"
@@ -38,4 +38,3 @@ export default function Mission() {
     </section>
   );
 }
-

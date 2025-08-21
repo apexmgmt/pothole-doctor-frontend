@@ -8,8 +8,12 @@
   --color-text-color: oklch(0.5068 0 0);
   --color-border: oklch(0.8914 0 0);
 
+  /* Fonts */
+  --font-global: "inter", sans-serif;
+  --font-primary: "ClashGrotesk", sans-serif;
+
   /* Base (mobile first) */
-  --text-large-title: 40px;
+  --text-large-title: 38px;
   --text-heading: 36px;
   --text-body-text: 16px;
 }

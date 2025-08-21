@@ -24,7 +24,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative flex items-center justify-center overflow-hidden py-40">
+    <section className="relative flex items-center justify-center overflow-hidden py-20 md:py-40">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
@@ -39,9 +39,9 @@ export default function HeroSection() {
 
       {/* Content Container */}
       <div className="relative z-10 container mx-auto px-4 py-15">
-        <div className="flex gap-12 items-center">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center">
           {/* Left Content */}
-          <div className="text-white space-y-6 flex-1">
+          <div className="text-white space-y-4 md:space-y-6 flex-1 ">
             <div className="space-y-3">
               <p className="text-base font-semibold tracking-wider uppercase gradient-text">
                 SURFACE SPECIALISTS
@@ -51,16 +51,16 @@ export default function HeroSection() {
               </h1>
             </div>
 
-            <p className="text-base md:text-lg text-[#EEEEEE] max-w-lg leading-relaxed">
+            <p className="text-body-text text-[#EEEEEE] max-w-lg leading-relaxed">
               From minor cracks to major repairs, we restore smooth, durable
               surfaces with precision and care.
             </p>
           </div>
 
           {/* Right Content - Quote Form */}
-          <div className="flex-1 max-w-[460px]">
-            <div className="bg-black/20 backdrop-blur-lg rounded-lg p-[30px] w-full">
-              <h3 className="text-[28px] font-semibold font-primary text-white mb-[30px]">
+          <div className="flex-1 w-full md:max-w-[460px]">
+            <div className="bg-black/20 backdrop-blur-lg rounded-lg p-5 lg:p-[30px] w-full">
+              <h3 className="text-xl lg:text-[28px] font-semibold font-primary text-white mb-4 lg:mb-[30px]">
                 Free Quote Today
               </h3>
 
@@ -72,7 +72,7 @@ export default function HeroSection() {
                     placeholder="Your Street Address"
                     value={formData.streetAddress}
                     onChange={handleInputChange}
-                    className="w-full px-5 py-4 rounded-lg bg-white/10 border border-[#DBDBDB]/20 text-white focus:outline-none focus:ring focus:ring-primary focus:border-transparent font-normal font-global leading-[1.4]"
+                    className="w-full px-4 lg:px-5 py-2.5 lg:py-4 rounded-lg bg-white/10 border border-[#DBDBDB]/20 text-white focus:outline-none focus:ring focus:ring-primary focus:border-transparent font-normal font-global leading-[1.4]"
                     required
                   />
                 </div>
@@ -84,14 +84,14 @@ export default function HeroSection() {
                     placeholder="ZIP Code"
                     value={formData.zipCode}
                     onChange={handleInputChange}
-                    className="w-full px-5 py-4 rounded-lg bg-white/10 border border-[#DBDBDB]/20 text-white focus:outline-none focus:ring focus:ring-primary focus:border-transparent font-normal font-global leading-[1.4]"
+                    className="w-full px-4 lg:px-5 py-2.5 lg:py-4 rounded-lg bg-white/10 border border-[#DBDBDB]/20 text-white focus:outline-none focus:ring focus:ring-primary focus:border-transparent font-normal font-global leading-[1.4]"
                     required
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className=" bg-primary hover:bg-primary/85 text-white font-semibold py-[18px] px-5 rounded-lg transition-colors duration-200 flex items-center gap-1.5 text-sm/[1] w-max"
+                  className=" bg-primary hover:bg-primary/85 text-white font-semibold py-3 lg:py-[18px] px-5 rounded-lg transition-colors duration-200 flex items-center gap-1.5 text-sm/[1] w-max cursor-pointer"
                 >
                   GET STARTED
                   <svg
