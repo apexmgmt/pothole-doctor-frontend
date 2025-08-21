@@ -1,6 +1,6 @@
 import React from "react";
-
 import { useState } from "react";
+import { submitContactForm } from "../../services/contact.service";
 
 const ContactSection = () => {
   const [formData, setFormData] = useState({
@@ -21,11 +21,40 @@ const ContactSection = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Handle form submission here
-    alert("Thank you for your message! We will get back to you soon.");
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      const result = await submitContactForm(formData);
+
+      if (result.success) {
+        setSubmitStatus({ type: "success", message: result.message });
+        // Reset form on successful submission
+        setFormData({
+          firstName: "",
+          lastName: "",
+          phone: "",
+          email: "",
+          company: "",
+          message: "",
+          privacy: false,
+        });
+      } else {
+        setSubmitStatus({ type: "error", message: result.message });
+      }
+    } catch (error) {
+      setSubmitStatus({
+        type: "error",
+        message: "An unexpected error occurred. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -306,33 +335,79 @@ const ContactSection = () => {
                 </div>
               </div>
 
+              {/* Status Messages */}
+              {submitStatus && (
+                <div
+                  className={`p-4 rounded-lg ${
+                    submitStatus.type === "success"
+                      ? "bg-green-50 border border-green-200 text-green-800"
+                      : "bg-red-50 border border-red-200 text-red-800"
+                  }`}
+                >
+                  {submitStatus.message}
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="bg-primary text-white py-3 md:py-4 px-4 md:px-6 rounded-lg font-semibold tracking-wide uppercase hover:bg-primary/85 transition-colors flex items-center justify-center gap-1.5 w-max cursor-pointer"
+                disabled={isSubmitting}
+                className={`py-3 md:py-4 px-4 md:px-6 rounded-lg font-semibold tracking-wide uppercase transition-colors flex items-center justify-center gap-1.5 w-max cursor-pointer ${
+                  isSubmitting
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-primary text-white hover:bg-primary/85"
+                }`}
               >
-                <span>SEND MESSAGE</span>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M13.9658 6.53345L6.89475 13.6045"
-                    stroke="white"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M8.54497 6.062C8.54497 6.062 13.6611 5.28563 14.4375 6.06202C15.2139 6.83842 14.4375 11.9546 14.4375 11.9546"
-                    stroke="white"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                {isSubmitting ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span>SENDING...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>SEND MESSAGE</span>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M13.9658 6.53345L6.89475 13.6045"
+                        stroke="white"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M8.54497 6.062C8.54497 6.062 13.6611 5.28563 14.4375 6.06202C15.2139 6.83842 14.4375 11.9546 14.4375 11.9546"
+                        stroke="white"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </>
+                )}
               </button>
             </form>
           </div>
