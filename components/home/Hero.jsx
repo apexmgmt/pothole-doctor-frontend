@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function HeroSection() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     streetAddress: "",
     zipCode: "",
@@ -19,12 +21,13 @@ export default function HeroSection() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("[v0] Form submitted:", formData);
-    // Handle form submission logic here
+    console.log("Form submitted:", formData);
+    // Navigate to contact page after form submission
+    router.push("/contact");
   };
 
   return (
-    <section className="relative flex items-center justify-center overflow-hidden py-20 md:py-40">
+    <section className="relative flex items-center justify-center overflow-hidden py-20 md:py-42">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
@@ -59,7 +62,7 @@ export default function HeroSection() {
 
           {/* Right Content - Quote Form */}
           <div className="flex-1 w-full md:max-w-[460px]">
-            <div className="bg-black/20 backdrop-blur-lg rounded-lg p-5 lg:p-[30px] w-full">
+            <div className="bg-black/40 backdrop-blur-lg rounded-lg p-5 lg:p-[30px] w-full">
               <h3 className="text-xl lg:text-[28px] font-semibold font-primary text-white mb-4 lg:mb-[30px]">
                 Free Quote Today
               </h3>

@@ -13,14 +13,14 @@ import localFont from "next/font/local";
 const ClashGrotesk = localFont({
   src: [
     {
-      path: "../public/fonts/ClashGrotesk-medium.woff2",
+      path: "../public/fonts/ClashGrotesk-Medium.woff2",
       weight: "500",
       style: "normal",
     },
     {
       path: "../public/fonts/ClashGrotesk-Semibold.woff2",
       weight: "600",
-      style: "medium",
+      style: "normal",
     },
     {
       path: "../public/fonts/ClashGrotesk-Bold.woff2",

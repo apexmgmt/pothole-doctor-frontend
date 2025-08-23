@@ -3,13 +3,40 @@ import { useState } from "react";
 import { submitContactForm } from "../../services/contact.service";
 
 const ContactSection = () => {
+  // Add CSS to fix dropdown width issues
+  React.useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `
+      .contact-select {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .contact-select option {
+        max-width: 100% !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      if (document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
+    };
+  }, []);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     phone: "",
     email: "",
     company: "",
-    message: "",
+    projectType: "",
+    projectDescription: "",
+    timeline: "",
+    hearAboutUs: "",
     privacy: false,
   });
 
@@ -41,7 +68,10 @@ const ContactSection = () => {
           phone: "",
           email: "",
           company: "",
-          message: "",
+          projectType: "",
+          projectDescription: "",
+          timeline: "",
+          hearAboutUs: "",
           privacy: false,
         });
       } else {
@@ -60,11 +90,8 @@ const ContactSection = () => {
   return (
     <section className="py-10 md:py-15 bg-white">
       <div className="container">
-        <div className="flex gap-10 items-center min-[991px]:flex-row flex-col">
-          <div className="space-y-2.5 md:space-y-4 flex-1 xl:max-w-[520px]  max-[991px]:w-full">
-            <div className="text-base font-semibold text-primary tracking-wide uppercase">
-              CONTACT US
-            </div>
+        <div className="flex gap-10 items-start min-[991px]:flex-row flex-col">
+          <div className="space-y-2.5 md:space-y-4 flex-1 xl:max-w-[520px]  max-[991px]:w-full  min-[991px]:sticky  min-[991px]:top-5">
             <h1 className="text-heading font-semibold font-primary text-title leading-tight mb-4 md:mb-6 uppercase">
               Get in Touch With Pothole Doctors{" "}
             </h1>
@@ -154,6 +181,9 @@ const ContactSection = () => {
           </div>
 
           <div className="flex-1 w-full">
+            <div className="text-[28px] font-semibold text-title font-primary uppercase mb-[30px]">
+              CONTACT US
+            </div>
             <form onSubmit={handleSubmit} className="space-y-4 xl:space-y-6">
               <div className="grid sm:grid-cols-2 gap-4 xl:gap-6">
                 <div className="space-y-2 xl:space-y-3">
@@ -246,9 +276,15 @@ const ContactSection = () => {
                     name="company"
                     value={formData.company}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 text-base text-body-text border border-border rounded-lg focus:ring focus:ring-primary focus:border-transparent transition-all outline-none appearance-none bg-white"
+                    className="w-full px-4 py-3 text-base text-body-text border border-border rounded-lg focus:ring focus:ring-primary focus:border-transparent transition-all outline-none appearance-none bg-white [&>option]:py-2 [&>option]:px-3 contact-select"
+                    style={{
+                      maxWidth: "100%",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      overflow: "hidden",
+                    }}
                   >
-                    <option value="">Select Company</option>
+                    <option value="">Select Company Name</option>
                     <option value="individual">Individual</option>
                     <option value="small-business">Small Business</option>
                     <option value="medium-business">Medium Business</option>
@@ -274,21 +310,136 @@ const ContactSection = () => {
 
               <div className="space-y-2">
                 <label
-                  htmlFor="message"
+                  htmlFor="projectType"
                   className="block text-sm font-medium text-title uppercase"
                 >
-                  MESSAGE
+                  PROJECT TYPE
+                </label>
+                <div className="relative">
+                  <select
+                    id="projectType"
+                    name="projectType"
+                    value={formData.projectType}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 text-base text-body-text border border-border rounded-lg focus:ring focus:ring-primary focus:border-transparent transition-all outline-none appearance-none bg-white [&>option]:py-2 [&>option]:px-3 contact-select"
+                    style={{ maxWidth: "100%" }}
+                  >
+                    <option value="" defaultValue hidden>
+                      Select Project Type
+                    </option>
+                    <option value="pothole-repairs">Pothole Repairs</option>
+                    <option value="catch-basin-repairs">
+                      Catch Basin Repairs
+                    </option>
+                    <option value="birdbath-repairs">Birdbath Repairs</option>
+                    <option value="speed-bump-installation">
+                      Speed Bump Installation
+                    </option>
+                    <option value="parking-block-installation">
+                      Parking Block Installation
+                    </option>
+                    <option value="parking-block-repainting">
+                      Parking Block Repainting
+                    </option>
+                    <option value="crack-sealing">Crack Sealing</option>
+                    <option value="asphalt-sealcoating">
+                      Asphalt Sealcoating
+                    </option>
+                  </select>
+                  <svg
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M3 4.5L6 7.5L9 4.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="projectDescription"
+                  className="block text-sm font-medium text-title uppercase"
+                >
+                  WHAT KIND OF PROJECT ARE YOU PLANNING TO WORK ON?
                 </label>
                 <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
+                  id="projectDescription"
+                  name="projectDescription"
+                  value={formData.projectDescription}
                   onChange={handleInputChange}
                   rows="4"
                   className="w-full px-4 py-3 text-base text-body-text border border-border rounded-lg focus:ring focus:ring-primary focus:border-transparent transition-all outline-none resize-vertical"
                   placeholder="Type here"
                   required
                 ></textarea>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="timeline"
+                  className="block text-sm font-medium text-title uppercase"
+                >
+                  WHEN WOULD YOU IDEALLY LIKE THIS PROJECT COMPLETED?
+                </label>
+                <input
+                  type="text"
+                  id="timeline"
+                  name="timeline"
+                  value={formData.timeline}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 text-base text-body-text border border-border rounded-lg focus:ring focus:ring-primary focus:border-transparent transition-all outline-none"
+                  placeholder="Type here"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="hearAboutUs"
+                  className="block text-sm font-medium text-title uppercase"
+                >
+                  HOW DID YOU HEAR ABOUT US?
+                </label>
+                <div className="relative">
+                  <select
+                    id="hearAboutUs"
+                    name="hearAboutUs"
+                    value={formData.hearAboutUs}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 text-base text-body-text border border-border rounded-lg focus:ring focus:ring-primary focus:border-transparent transition-all outline-none appearance-none bg-white [&>option]:py-2 [&>option]:px-3 contact-select"
+                    style={{ maxWidth: "100%" }}
+                  >
+                    <option value="">Select</option>
+                    <option value="google">Google Search</option>
+                    <option value="social-media">Social Media</option>
+                    <option value="referral">Referral</option>
+                    <option value="advertisement">Advertisement</option>
+                    <option value="website">Website</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <svg
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M3 4.5L6 7.5L9 4.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
               </div>
 
               <div className="flex items-start gap-3">
@@ -383,7 +534,7 @@ const ContactSection = () => {
                   </>
                 ) : (
                   <>
-                    <span>SEND MESSAGE</span>
+                    <span>SUBMIT</span>
                     <svg
                       width="20"
                       height="20"

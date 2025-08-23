@@ -52,7 +52,10 @@ function doPost(e) {
       phoneNumber, // Use cleaned phone number
       data.email || "",
       data.company || "",
-      data.message || "",
+      data.projectType || "",
+      data.projectDescription || "",
+      data.timeline || "",
+      data.hearAboutUs || "",
       data.privacy || false,
     ];
 

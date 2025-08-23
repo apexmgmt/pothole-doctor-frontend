@@ -10,6 +10,11 @@ export default function Header() {
   const [activeLink, setActiveLink] = useState(pathname);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Update activeLink when pathname changes
+  useEffect(() => {
+    setActiveLink(pathname);
+  }, [pathname]);
+
   // Hide scrollbar when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -36,7 +41,7 @@ export default function Header() {
   return (
     <header className=" z-50 relative">
       {/* Top Utility Bar */}
-      <div
+      {/* <div
         className="py-2 z-20 hidden md:block"
         style={{
           background:
@@ -147,7 +152,7 @@ export default function Header() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Main Navigation Bar */}
       <div className="py-2 lg:py-3 bg-[#272727] z-10">
@@ -241,29 +246,14 @@ export default function Header() {
                       CONTACT
                     </Link>
                   </li>
-                  <li>
-                    <Link
-                      href="/location"
-                      onClick={() => handleLinkClick("/location")}
-                      className={`text-sm font-medium transition-colors relative py-2
-                      before:absolute before:bottom-0 before:left-0 before:w-full before:h-[2px] before:bg-primary before:transition-all before:duration-300
-                      ${
-                        activeLink === "/location"
-                          ? "text-primary before:opacity-100 before:scale-x-100"
-                          : "text-white hover:text-primary before:opacity-0 before:scale-x-0 hover:before:opacity-100 hover:before:scale-x-100"
-                      }`}
-                    >
-                      LOCATION
-                    </Link>
-                  </li>
                 </ul>
               </nav>
-              <Link
+              {/* <Link
                 href="/login"
                 className="text-title py-2.5 px-4 lg:py-4 lg:px-5 text-sm rounded-lg font-semibold tracking-wide hover:text-white transition-colors bg-white hover:bg-primary"
               >
                 LOG IN
-              </Link>
+              </Link> */}
             </div>
 
             {/* Mobile Menu Button - Visible only on Mobile */}

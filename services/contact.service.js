@@ -1,6 +1,6 @@
 // Google Apps Script endpoint for form submission
 const GOOGLE_APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwPgoOgS3nseJob-ALgOXeUgbS_5mNlOH27p-YiBoc5s0V9qItxpHmbg_mjTwfW0rs/exec";
+  "https://script.google.com/macros/s/AKfycbzyZrL-VJRjkNLU2bYrc0IBpSMGgL-6spTvtuBthQP3a_78Ryq4dh_4XzmbQQRv_cia/exec";
 
 export const submitContactForm = async (formData) => {
   try {
@@ -20,8 +20,11 @@ export const submitContactForm = async (formData) => {
         phone: cleanPhone,
         email: formData.email,
         company: formData.company,
-        message: formData.message,
-        privacy: formData.privacy,
+        projectType: formData.projectType,
+        projectDescription: formData.projectDescription,
+        timeline: formData.timeline,
+        hearAboutUs: formData.hearAboutUs,
+        // privacy: formData.privacy,
       }),
     });
 
@@ -50,8 +53,11 @@ export const submitContactFormFormData = async (formData) => {
     form.append("phone", cleanPhone);
     form.append("email", formData.email);
     form.append("company", formData.company);
-    form.append("message", formData.message);
-    form.append("privacy", formData.privacy);
+    form.append("projectType", formData.projectType);
+    form.append("projectDescription", formData.projectDescription);
+    form.append("timeline", formData.timeline);
+    form.append("hearAboutUs", formData.hearAboutUs);
+    // form.append("privacy", formData.privacy);
 
     const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
       method: "POST",
