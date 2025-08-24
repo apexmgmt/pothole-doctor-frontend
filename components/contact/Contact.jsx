@@ -444,7 +444,7 @@ const ContactSection = () => {
 
               <div className="flex items-start gap-3">
                 <div className="flex items-center space-x-3">
-                  <div className="relative">
+                  <label className="relative cursor-pointer">
                     <input
                       type="checkbox"
                       id="privacy"
@@ -475,7 +475,7 @@ const ContactSection = () => {
                         </svg>
                       )}
                     </div>
-                  </div>
+                  </label>
                   <label
                     htmlFor="privacy"
                     className="text-sm text-title leading-relaxed cursor-pointer select-none"

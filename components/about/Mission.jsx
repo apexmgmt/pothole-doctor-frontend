@@ -28,7 +28,7 @@ export default function Mission() {
           <div className="relative w-full flex-1 lg:max-w-1/2 ">
             <Image
               fill
-              src="/images/Our-mission-thumb.webp"
+              src="/images/our-mission-thumbnail.webp"
               alt="Worker laying pavement stones"
               className="w-full h-full object-cover !relative"
             />

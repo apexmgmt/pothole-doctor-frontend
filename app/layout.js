@@ -35,6 +35,11 @@ export const metadata = {
   title: "The Pothole Doctors - Professional Road Repair Services",
   description:
     "Expert pothole repair, crack sealing, and asphalt maintenance services. Building strong foundations with quality craftsmanship.",
+  icons: {
+    icon: "/images/favicon.webp",
+    shortcut: "/images/favicon.webp",
+    apple: "/images/favicon.webp",
+  },
 };
 
 export default function RootLayout({ children }) {

@@ -9,7 +9,7 @@ This guide will help you set up your contact form to submit data directly to a G
 3. Name it something like "Contact Form Submissions"
 4. In the first row, add these headers:
    ```
-   A1: Timestamp | B1: First Name | C1: Last Name | D1: Phone | E1: Email | F1: Company | G1: Message | H1: Privacy
+   A1: Timestamp | B1: First Name | C1: Last Name | D1: Phone | E1: Email | F1: Company | G1: Project Type | H1: Project Description | I1: Timeline | J1: How Did You Hear About Us | K1: Privacy
    ```
 
 ## Step 2: Create Google Apps Script

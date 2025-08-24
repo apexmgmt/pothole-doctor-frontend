@@ -6,9 +6,7 @@ const MapSection = () => {
       <div className="container">
         <div className="rounded-2xl overflow-hidden ">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095343008!2d-73.8460879!3d40.7182173!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25f4b8b1b1b1b%3A0x1b1b1b1b1b1b1b1b!2sForest%20Hills%2C%20Queens%2C%20NY%2C%20USA!5e0!3m2!1sen!2sus!4v1234567890!5m2!1sen!2sus"
-            // width="100%"
-            // height="300"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d8782.784250390601!2d-83.0002177820114!3d38.89692686989827!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8846f12ce993ade5%3A0x6ab2286df4dd88ac!2s708%20Fairground%20Rd%20Unit%20D%2C%20Lucasville%2C%20OH%2045648%2C%20USA!5e0!3m2!1sen!2sbd!4v1756041339641!5m2!1sen!2sbd"
             style={{ border: 0 }}
             allowFullScreen=""
             loading="lazy"
