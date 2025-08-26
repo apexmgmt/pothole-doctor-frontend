@@ -7,17 +7,17 @@ export default function ServicesSection() {
 
   const services = [
     {
-      id: "parking-blocks",
-      title: "Parking block installation",
-      description:
-        "We install sturdy parking blocks to protect vehicles, buildings, and landscaping from accidental damage.",
-      image: "/images/service1.webp",
-    },
-    {
       id: "pothole-repairs",
       title: "POTHOLE REPAIRS",
       description:
         "We restore damaged pavement with durable pothole repairs that improve safety and extend surface life.",
+      image: "/images/service1.webp",
+    },
+    {
+      id: "parking-blocks",
+      title: "Parking block installation",
+      description:
+        "We install sturdy parking blocks to protect vehicles, buildings, and landscaping from accidental damage.",
       image: "/images/service2.webp",
     },
     {
