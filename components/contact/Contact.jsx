@@ -148,7 +148,7 @@ const ContactSection = () => {
                   </svg>
                 </div>
                 <span className="text-body-text font-medium">
-                  service@potholedoctors.com
+                  todd@potholedoctors.com 
                 </span>
               </div>
 
