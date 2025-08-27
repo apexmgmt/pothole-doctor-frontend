@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@sendgrid/mail": "^8.1.5",
     "next": "15.4.7",
     "nodemailer": "^7.0.5",
     "react": "19.1.0",

@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
 export async function POST(req) {
   try {
@@ -33,15 +33,8 @@ export async function POST(req) {
       }, { status: 400 });
     }
 
-    let transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: process.env.MAIL_PORT,
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.MAIL_USERNAME,
-        pass: process.env.MAIL_PASSWORD,
-      },
-    });
+    // Set SendGrid API key
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
     // Format project type for display
     const formatProjectType = (type) => {
@@ -290,20 +283,7 @@ export async function POST(req) {
                 </div>
             </div>
 
-            <div class="contact-info">
-                <h3>Pothole Doctors Contact Information</h3>
-                <div class="contact-details">
-                    <div class="contact-item">
-                        📞 (740) 330-5155
-                    </div>
-                    <div class="contact-item">
-                        ✉️ todd@potholedoctors.com 
-                    </div>
-                    <div class="contact-item">
-                        📍 708-D Fairground Rd, Lucasville, OH 45648
-                    </div>
-                </div>
-            </div>
+            
 
             <div class="footer">
                 <p>This email was generated automatically from the Pothole Doctors contact form.</p>
@@ -313,9 +293,16 @@ export async function POST(req) {
     </body>
     </html>`;
 
-    let mailOptions = {
-      from: `"Pothole Doctors Website" <${process.env.MAIL_FROM_ADDRESS}>`,
-      to: process.env.MAIL_TO_ADDRESS,
+    const msg = {
+      to: process.env.SENDGRID_TO_EMAIL,
+      from: {
+        email: process.env.SENDGRID_FROM_EMAIL,
+        name: 'Pothole Doctors Website'
+      },
+      replyTo: {
+        email: email,
+        name: `${firstName} ${lastName}`
+      },
       subject: `New Contact Form Submission - ${firstName} ${lastName} | ${formatProjectType(projectType)}`,
       text: `
 NEW CONTACT FORM SUBMISSION - POTHOLE DOCTORS
@@ -348,7 +335,7 @@ Please respond within 24 hours for best customer service.
       html: emailHTML,
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    await sgMail.send(msg);
     
     return Response.json({ 
       success: true,
@@ -356,7 +343,7 @@ Please respond within 24 hours for best customer service.
     }, { status: 200 });
 
   } catch (error) {
-    console.error('Email sending error:', error);
+    console.error('SendGrid error:', error);
     return Response.json({ 
       success: false,
       message: 'Failed to send your message. Please try again or call us directly at (740) 330-5155.' 
