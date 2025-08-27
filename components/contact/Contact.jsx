@@ -270,42 +270,16 @@ const ContactSection = () => {
                 >
                   COMPANY NAME
                 </label>
-                <div className="relative">
-                  <select
-                    id="company"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 text-base text-body-text border border-border rounded-lg focus:ring focus:ring-primary focus:border-transparent transition-all outline-none appearance-none bg-white [&>option]:py-2 [&>option]:px-3 contact-select"
-                    style={{
-                      maxWidth: "100%",
-                      width: "100%",
-                      boxSizing: "border-box",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <option value="">Select Company Name</option>
-                    <option value="individual">Individual</option>
-                    <option value="small-business">Small Business</option>
-                    <option value="medium-business">Medium Business</option>
-                    <option value="large-business">Large Business</option>
-                    <option value="government">Government</option>
-                  </select>
-                  <svg
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-                    viewBox="0 0 12 12"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M3 4.5L6 7.5L9 4.5"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
+                <input
+                  type="text"
+                  id="company"
+                  name="company"
+                  value={formData.company}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 text-base text-body-text border border-border rounded-lg focus:ring focus:ring-primary focus:border-transparent transition-all outline-none"
+                  placeholder="Company Name"
+                  required
+                />
               </div>
 
               <div className="space-y-2">
