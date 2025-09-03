@@ -1,3 +1,4 @@
+import Header from "@/components/erp/common/Header";
 import Sidebar from "@/components/erp/common/Sidebar";
 import React from "react";
 
@@ -7,7 +8,10 @@ const layout = ({ children }) => {
       <aside className="w-[260px]">
         <Sidebar />
       </aside>
-      <main className="flex-1">{children}</main>
+      <section className="flex-1">
+        <Header />
+        <main>{children}</main>
+      </section>
     </section>
   );
 };

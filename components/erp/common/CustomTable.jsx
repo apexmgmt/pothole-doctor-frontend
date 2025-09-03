@@ -2,18 +2,18 @@
 
 import React, { useState, useMemo } from "react";
 // import Button from "@/components/common/CustomButton";
-import {
-  MagnifyingGlassIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-  ChevronDoubleLeftIcon,
-  ChevronDoubleRightIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  EllipsisHorizontalIcon,
-  PlusIcon,
-  ChevronUpDownIcon,
-} from "@heroicons/react/24/outline";
+// import {
+//   MagnifyingGlassIcon,
+//   ChevronUpIcon,
+//   ChevronDownIcon,
+//   ChevronDoubleLeftIcon,
+//   ChevronDoubleRightIcon,
+//   ChevronLeftIcon,
+//   ChevronRightIcon,
+//   EllipsisHorizontalIcon,
+//   PlusIcon,
+//   ChevronUpDownIcon,
+// } from "@heroicons/react/24/outline";
 import CustomButton from "./CustomButton";
 
 /**
@@ -235,14 +235,14 @@ const CustomTable = ({
   const renderSortIcon = (column) => {
     if (!showSorting) return null;
 
-    if (sortConfig.column === column) {
-      return sortConfig.direction === "asc" ? (
-        <ChevronUpIcon className="w-4 h-4 ml-1" />
-      ) : (
-        <ChevronDownIcon className="w-4 h-4 ml-1" />
-      );
-    }
-    return <ChevronUpIcon className="w-4 h-4 ml-1 text-gray opacity-30" />;
+    // if (sortConfig.column === column) {
+    //   return sortConfig.direction === "asc" ? (
+    //     <ChevronUpIcon className="w-4 h-4 ml-1" />
+    //   ) : (
+    //     <ChevronDownIcon className="w-4 h-4 ml-1" />
+    //   );
+    // }
+    // return <ChevronUpIcon className="w-4 h-4 ml-1 text-gray opacity-30" />;
   };
 
   const renderCellContent = (row, column) => {
@@ -258,7 +258,7 @@ const CustomTable = ({
     }
     return (
       <button className="p-1 text-gray hover:text-light transition-colors">
-        <EllipsisHorizontalIcon className="w-4 h-4" />
+        {/* <EllipsisHorizontalIcon className="w-4 h-4" /> */}
       </button>
     );
   };
@@ -289,7 +289,7 @@ const CustomTable = ({
               {showSearch && (
                 <div className="flex-1 max-w-md">
                   <div className="relative">
-                    <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray" />
+                    {/* <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray" /> */}
                     <input
                       type="text"
                       placeholder={searchPlaceholder}
@@ -307,16 +307,16 @@ const CustomTable = ({
           {actionButtons.length > 0 && (
             <div className="flex gap-2">
               {actionButtons.map((button, index) => (
-                <Button
+                <CustomButton
                   key={index}
                   variant={button.variant || "primary"}
                   size="md"
                   onClick={() => handleActionButton(button.action)}
-                  icon={<PlusIcon className="w-4 h-4" />}
+                  // icon={<PlusIcon className="w-4 h-4" />}
                   iconPosition="left"
                 >
                   {button.label}
-                </Button>
+                </CustomButton>
               ))}
             </div>
           )}
@@ -530,7 +530,7 @@ const CustomTable = ({
                       </option>
                     ))}
                   </select>
-                  <ChevronUpDownIcon className="w-4 h-4 absolute right-2 top-1/2 transform -translate-y-1/2 text-gray pointer-events-none" />
+                  {/* <ChevronUpDownIcon className="w-4 h-4 absolute right-2 top-1/2 transform -translate-y-1/2 text-gray pointer-events-none" /> */}
                 </div>
               </div>
 
@@ -546,28 +546,28 @@ const CustomTable = ({
                     disabled={currentPage === 1}
                     className="p-1 rounded text-gray hover:text-light disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <ChevronDoubleLeftIcon className="w-4 h-4" />
+                    {/* <ChevronDoubleLeftIcon className="w-4 h-4" /> */}
                   </button>
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                     className="p-1 rounded text-gray hover:text-light disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <ChevronLeftIcon className="w-4 h-4" />
+                    {/* <ChevronLeftIcon className="w-4 h-4" /> */}
                   </button>
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                     className="p-1 rounded text-gray hover:text-light disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <ChevronRightIcon className="w-4 h-4" />
+                    {/* <ChevronRightIcon className="w-4 h-4" /> */}
                   </button>
                   <button
                     onClick={() => handlePageChange(totalPages)}
                     disabled={currentPage === totalPages}
                     className="p-1 rounded text-gray hover:text-light disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <ChevronDoubleRightIcon className="w-4 h-4" />
+                    {/* <ChevronDoubleRightIcon className="w-4 h-4" /> */}
                   </button>
                 </div>
               </div>
