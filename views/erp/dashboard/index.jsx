@@ -124,18 +124,18 @@ const DashboardIndex = () => {
   const renderStatusCell = (row, column, value) => {
     if (column.key === "status") {
       const statusColors = {
-        Active: "bg-green-500 text-white",
-        Pending: "bg-yellow-500 text-white",
-        Inactive: "bg-red-500 text-white",
-        "In Progress": "bg-blue-500 text-white",
-        Completed: "bg-green-600 text-white",
-        Scheduled: "bg-purple-500 text-white",
+        Active: "text-green-500",
+        Pending: "text-gray",
+        Inactive: "text-red-500",
+        "In Progress": "text-orange-500",
+        Completed: "text-green-600",
+        Scheduled: "text-blue-500",
       };
 
       return (
         <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            statusColors[value] || "bg-gray-500 text-white"
+          className={`px-2 py-1.5 rounded-md text-xs font-medium bg-border/40 ${
+            statusColors[value] || "text-gray-500"
           }`}
         >
           {value}

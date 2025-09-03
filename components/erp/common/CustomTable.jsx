@@ -264,7 +264,8 @@ const CustomTable = ({
   };
 
   return (
-    <div className={`bg-bg-2 rounded-lg border border-border ${className}`}>
+    //bg-bg-2 rounded-lg border border-border
+    <div className={` ${className}`}>
       {/* Header Section */}
       <div className={`p-4 border-b border-border ${headerClassName}`}>
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -330,7 +331,9 @@ const CustomTable = ({
         }`}
       >
         <table className={`w-full ${tableClassName}`}>
-          <thead className={`bg-bg ${stickyHeader ? "sticky top-0 z-10" : ""}`}>
+          <thead
+            className={`bg-border  ${stickyHeader ? "sticky top-0 z-10" : ""}`}
+          >
             <tr>
               {/* Row numbers */}
               {showRowNumbers && (
@@ -379,7 +382,7 @@ const CustomTable = ({
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-4 py-3 text-left text-gray text-sm font-medium border-b border-border ${
+                  className={`px-4 py-3 text-left text-light text-sm font-medium border-b border-border ${
                     showSorting && column.sortable !== false
                       ? "cursor-pointer hover:text-light"
                       : ""
