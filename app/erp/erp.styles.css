@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #09090b;
+  --color-bg-2: #171717;
+  --color-light: #ffffff;
+  --color-light-2: #f4f4f5;
+  --color-gray: #a7a7ae;
+  --color-dark: #09090b;
+  --color-border: #4d4d4d;
+  --font-gest: var(--font-geist);
+  --font-inter: var(--font-inter);
+}
+
+/* @theme (prefers-color-scheme: dark) {
+  --background: #09090b;
+  --foreground: #171717;
+} */
+
+body {
+  background: var(--color-bg);
+  color: var(--color-light);
+  font-family: var(--font-inter);
+}

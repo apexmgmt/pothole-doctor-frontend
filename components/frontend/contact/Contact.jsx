@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import { submitContactForm } from "../../services/contact.service";
+import { submitContactForm } from "../../../services/contact.service";
 
 const ContactSection = () => {
   // Add CSS to fix dropdown width issues
@@ -148,7 +148,7 @@ const ContactSection = () => {
                   </svg>
                 </div>
                 <span className="text-body-text font-medium">
-                  todd@potholedoctors.com 
+                  todd@potholedoctors.com
                 </span>
               </div>
 

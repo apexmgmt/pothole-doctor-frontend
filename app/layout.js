@@ -1,7 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/common/Header";
-import Footer from "@/components/common/Footer";
+import Header from "@/components/frontend/common/Header";
+import Footer from "@/components/frontend/common/Footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -46,9 +46,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} antialiased`}>
       <body className="font-global">
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        <section>{children}</section>
       </body>
     </html>
   );

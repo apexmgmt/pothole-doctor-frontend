@@ -1,7 +1,7 @@
 "use client";
 
-import ContactSection from "@/components/contact/Contact";
-import MapSection from "@/components/contact/Map";
+import ContactSection from "@/components/frontend/contact/Contact";
+import MapSection from "@/components/frontend/contact/Map";
 
 export default function ContactPage() {
   return (
