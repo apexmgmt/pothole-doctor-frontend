@@ -120,7 +120,7 @@ export const BellIcon = (
     />
     <path
       fillRule="evenodd"
-      clip-rule="evenodd"
+      clipRule="evenodd"
       d="M14.1665 8.36033V8.33366V8.33366C14.1665 6.03283 12.3007 4.16699 9.99984 4.16699V4.16699C7.699 4.16699 5.83317 6.03283 5.83317 8.33366V8.33366V8.36033V10.4203C5.83317 10.6903 5.68067 10.9362 5.43984 11.057L5.02067 11.2662C4.49734 11.5287 4.1665 12.0637 4.1665 12.6487V12.6487C4.1665 13.502 4.85817 14.1937 5.7115 14.1937H14.2882C15.1415 14.1937 15.8332 13.502 15.8332 12.6487V12.6487C15.8332 12.0637 15.5023 11.5287 14.979 11.267L14.5598 11.0578C14.319 10.9362 14.1665 10.6903 14.1665 10.4203V8.36033Z"
       stroke="#F4F4F5"
       strokeWidth="1.5"
@@ -347,16 +347,16 @@ export const DetailsIcon = (
     <path
       d="M5.3335 4.66297H8.0121M8.0121 4.66297H13.3335C14.0699 4.66297 14.6668 5.25993 14.6668 5.99631V8M8.0121 4.66297L6.20022 2.26479C6.07422 2.09802 5.87731 2 5.6683 2H2.00016C1.63198 2 1.3335 2.29848 1.3335 2.66667V12.6667C1.3335 13.4031 1.93045 14 2.66683 14H8.0121"
       stroke="#A7A7AE"
-      stroke-width="1.2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M14.6667 10H10M14.6667 12H10M11.6667 14H10"
       stroke="#A7A7AE"
-      stroke-width="1.2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -372,42 +372,42 @@ export const FilterIcon = (
     <path
       d="M4.6665 13.6667V12"
       stroke="white"
-      stroke-width="1.2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M11.3335 13.6663V10.333"
       stroke="white"
-      stroke-width="1.2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M11.3335 3.99967V2.33301"
       stroke="white"
-      stroke-width="1.2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M4.6665 5.66634V2.33301"
       stroke="white"
-      stroke-width="1.2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M12.6668 4H10.0002C9.63196 4 9.3335 4.29848 9.3335 4.66667V7.33333C9.3335 7.70153 9.63196 8 10.0002 8H12.6668C13.035 8 13.3335 7.70153 13.3335 7.33333V4.66667C13.3335 4.29848 13.035 4 12.6668 4Z"
       stroke="white"
-      stroke-width="1.2"
-      stroke-linejoin="round"
+      strokeWidth="1.2"
+      strokeLinejoin="round"
     />
     <path
       d="M5.99984 8H3.33317C2.96498 8 2.6665 8.29847 2.6665 8.66667V11.3333C2.6665 11.7015 2.96498 12 3.33317 12H5.99984C6.36802 12 6.6665 11.7015 6.6665 11.3333V8.66667C6.6665 8.29847 6.36802 8 5.99984 8Z"
       stroke="white"
-      stroke-width="1.2"
-      stroke-linejoin="round"
+      strokeWidth="1.2"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -423,16 +423,16 @@ export const PlusIcon = (
     <path
       d="M7.99984 3.33301V12.6663"
       stroke="#09090B"
-      stroke-width="1.5"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M3.3335 8.00033H12.6668"
       stroke="#09090B"
-      stroke-width="1.5"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -448,16 +448,16 @@ export const PDFIcon = (
     <path
       d="M12.5 8.625V7.16056C12.5 6.64959 12.5 6.39413 12.4049 6.16441C12.3097 5.9347 12.1291 5.75406 11.7677 5.39277L8.80744 2.43243C8.49562 2.12063 8.33975 1.96472 8.14656 1.87234C8.10637 1.85313 8.06525 1.83608 8.02325 1.82126C7.82131 1.75 7.60087 1.75 7.15987 1.75C5.13176 1.75 4.11769 1.75 3.43083 2.30379C3.29207 2.41568 3.16567 2.54207 3.05379 2.68083C2.5 3.36769 2.5 4.38176 2.5 6.4099V8.625M8.125 2.0625V2.375C8.125 4.14277 8.125 5.02665 8.67419 5.57583C9.22337 6.125 10.1072 6.125 11.875 6.125H12.1875"
       stroke="#F4F4F5"
-      stroke-width="1.2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M12.3438 10.5H10.7813C10.4361 10.5 10.1563 10.7798 10.1563 11.125V12.375M10.1563 12.375V14.25M10.1563 12.375H12.0313M2.65625 14.25V12.6875M2.65625 12.6875V10.5H3.75C4.35406 10.5 4.84375 10.9897 4.84375 11.5938C4.84375 12.1978 4.35406 12.6875 3.75 12.6875H2.65625ZM6.40625 10.5H7.34375C8.03413 10.5 8.59375 11.0596 8.59375 11.75V13C8.59375 13.6904 8.03413 14.25 7.34375 14.25H6.40625V10.5Z"
       stroke="#F4F4F5"
-      stroke-width="1.2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -470,7 +470,7 @@ export const ExcelIcon = (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g clip-path="url(#clip0_307_11346)">
+    <g clipPath="url(#clip0_307_11346)">
       <path
         d="M9.54375 9.025L8.3125 10.5L9.54375 11.975C9.7625 12.2375 9.73125 12.6313 9.4625 12.8563C9.34375 12.9563 9.20625 13 9.0625 13C8.88125 13 8.70625 12.925 8.58125 12.775L7.5 11.475L6.41875 12.775C6.29375 12.925 6.11875 13 5.9375 13C5.79375 13 5.65625 12.95 5.5375 12.8563C5.275 12.6375 5.2375 12.2438 5.45625 11.975L6.6875 10.5L5.45625 9.025C5.2375 8.7625 5.26875 8.36875 5.5375 8.14375C5.80625 7.925 6.19375 7.95625 6.41875 8.225L7.5 9.525L8.58125 8.225C8.8 7.9625 9.19375 7.925 9.4625 8.14375C9.725 8.3625 9.7625 8.75625 9.54375 9.025ZM13.75 7.05625V12.375C13.75 14.1 12.35 15.5 10.625 15.5H4.375C2.65 15.5 1.25 14.1 1.25 12.375V3.625C1.25 1.9 2.65 0.5 4.375 0.5H7.19375C8.3625 0.5 9.4625 0.95625 10.2875 1.78125L12.4625 3.9625C13.2875 4.7875 13.7438 5.8875 13.7438 7.05625H13.75ZM9.40625 2.6625C9.20625 2.4625 8.9875 2.29375 8.75 2.15625V4.875C8.75 5.21875 9.03125 5.5 9.375 5.5H12.0875C11.95 5.2625 11.7813 5.04375 11.5813 4.84375L9.40625 2.6625ZM12.5 7.05C12.5 6.95 12.5 6.84375 12.4875 6.74375H9.375C8.34375 6.74375 7.5 5.9 7.5 4.86875V1.7625C7.4 1.75 7.3 1.75 7.19375 1.75H4.375C3.34375 1.75 2.5 2.59375 2.5 3.625V12.375C2.5 13.4062 3.34375 14.25 4.375 14.25H10.625C11.6563 14.25 12.5 13.4062 12.5 12.375V7.05625V7.05Z"
         fill="#F4F4F5"

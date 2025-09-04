@@ -262,9 +262,9 @@ const CustomTable = ({
             <path
               d="M8.25 3.75L6 1.5L3.75 3.75"
               stroke="#fff"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               className={`${
                 sortConfig.direction === "asc" ? "opacity-40" : "opacity-100"
               }`}
@@ -272,9 +272,9 @@ const CustomTable = ({
             <path
               d="M8.25 8.25L6 10.5L3.75 8.25"
               stroke="#fff"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               className={`${
                 sortConfig.direction === "asc" ? "opacity-100" : "opacity-40"
               }`}
@@ -295,16 +295,16 @@ const CustomTable = ({
           <path
             d="M8.25 3.75L6 1.5L3.75 3.75"
             stroke="#656565"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
           <path
             d="M8.25 8.25L6 10.5L3.75 8.25"
             stroke="#656565"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </svg>
       </div>
