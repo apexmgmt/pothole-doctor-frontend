@@ -1,13 +1,7 @@
 "use client";
 
-import ContactSection from "@/components/frontend/contact/Contact";
-import MapSection from "@/components/frontend/contact/Map";
+import ContactIndex from "@/views/frontend/contact";
 
 export default function ContactPage() {
-  return (
-    <div className="min-h-screen">
-      <ContactSection />
-      <MapSection />
-    </div>
-  );
+  return <ContactIndex />;
 }

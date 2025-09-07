@@ -619,7 +619,7 @@ const CustomTable = ({
 
       {/* Footer Section */}
       {showPagination && (
-        <div className="p-4 border-t border-border">
+        <div className="py-4">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             {/* Selection info */}
             <div className="text-gray text-sm">

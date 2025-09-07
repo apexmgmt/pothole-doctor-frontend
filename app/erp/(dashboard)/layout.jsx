@@ -4,13 +4,13 @@ import React from "react";
 
 const layout = ({ children }) => {
   return (
-    <section className="flex items-start min-h-screen relative overflow-hidden">
+    <section className="flex min-h-screen relative overflow-hidden h-screen">
       <aside className="w-[260px]">
         <Sidebar />
       </aside>
-      <section className="flex-1">
+      <section className="flex-1 flex flex-col">
         <Header />
-        <main>{children}</main>
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </section>
     </section>
   );
