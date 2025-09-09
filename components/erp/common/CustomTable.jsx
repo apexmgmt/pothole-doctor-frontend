@@ -15,6 +15,7 @@ import React, { useState, useMemo } from "react";
 //   ChevronUpDownIcon,
 // } from "@heroicons/react/24/outline";
 import CustomButton from "./CustomButton";
+import { ExcelIcon, PDFIcon, SearchIcon } from "@/public/icons/icons";
 
 /**
  * Comprehensive, professional table component with full control over all functionality
@@ -76,7 +77,20 @@ const CustomTable = ({
 
   // Export options
   showExport = true,
-  exportOptions = ["Excel", "PDF"],
+  exportOptions = [
+    {
+      label: "Excel",
+      value: "Excel",
+      icon: ExcelIcon,
+      conditional: () => true,
+    },
+    {
+      label: "PDF",
+      value: "PDF",
+      icon: PDFIcon,
+      conditional: () => true,
+    },
+  ],
   onExport,
 
   // Action buttons
@@ -235,14 +249,66 @@ const CustomTable = ({
   const renderSortIcon = (column) => {
     if (!showSorting) return null;
 
-    // if (sortConfig.column === column) {
-    //   return sortConfig.direction === "asc" ? (
-    //     <ChevronUpIcon className="w-4 h-4 ml-1" />
-    //   ) : (
-    //     <ChevronDownIcon className="w-4 h-4 ml-1" />
-    //   );
-    // }
-    // return <ChevronUpIcon className="w-4 h-4 ml-1 text-gray opacity-30" />;
+    if (sortConfig.column === column) {
+      return (
+        <div className="ml-2">
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8.25 3.75L6 1.5L3.75 3.75"
+              stroke="#fff"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`${
+                sortConfig.direction === "asc" ? "opacity-40" : "opacity-100"
+              }`}
+            />
+            <path
+              d="M8.25 8.25L6 10.5L3.75 8.25"
+              stroke="#fff"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`${
+                sortConfig.direction === "asc" ? "opacity-100" : "opacity-40"
+              }`}
+            />
+          </svg>
+        </div>
+      );
+    }
+    return (
+      <div className="ml-2">
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M8.25 3.75L6 1.5L3.75 3.75"
+            stroke="#656565"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M8.25 8.25L6 10.5L3.75 8.25"
+            stroke="#656565"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+    );
   };
 
   const renderCellContent = (row, column) => {
@@ -267,34 +333,61 @@ const CustomTable = ({
     //bg-bg-2 rounded-lg border border-border
     <div className={` ${className}`}>
       {/* Header Section */}
-      <div className={`p-4 border-b border-border ${headerClassName}`}>
+      <div className={`py-4 ${headerClassName}`}>
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           {/* Left side - Export buttons */}
           {showExport && (
             <div className="flex gap-2">
               <div className="flex gap-2">
-                {exportOptions.map((option) => (
-                  <CustomButton
-                    key={option}
-                    variant="outline"
-                    size="md"
-                    onClick={() => handleExport(option)}
-                    className="!px-3 !py-2"
-                  >
-                    {option}
-                  </CustomButton>
-                ))}
+                {exportOptions.map((option) => {
+                  // Handle both string and object formats for backward compatibility
+                  const exportOption =
+                    typeof option === "string"
+                      ? {
+                          label: option,
+                          value: option,
+                          conditional: () => true,
+                        }
+                      : option;
+
+                  // Skip rendering if conditional is not met
+                  if (exportOption.conditional && !exportOption.conditional()) {
+                    return null;
+                  }
+
+                  return (
+                    <CustomButton
+                      key={exportOption.value || exportOption.label}
+                      variant="outline"
+                      size="md"
+                      onClick={() =>
+                        handleExport(exportOption.value || exportOption.label)
+                      }
+                      className="!px-3 !py-2"
+                    >
+                      {exportOption.icon && <span>{exportOption.icon}</span>}
+                      {exportOption.label}
+                    </CustomButton>
+                  );
+                })}
               </div>
 
               {/* Center - Search */}
               {showSearch && (
                 <div className="flex-1 max-w-md">
                   <div className="relative">
-                    {/* <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray" /> */}
+                    {/* <MagnifyingGlassIcon  /> */}
+                    <label
+                      htmlFor="search-input"
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                    >
+                      {SearchIcon}
+                    </label>
                     <input
                       type="text"
                       placeholder={searchPlaceholder}
                       value={searchTerm}
+                      id="search-input"
                       onChange={(e) => handleSearch(e.target.value)}
                       className="w-full pl-10 pr-4 py-2 bg-bg-2 border border-border rounded-lg text-light placeholder:text-gray focus:outline-none focus:border-light text-sm"
                     />
@@ -332,78 +425,85 @@ const CustomTable = ({
       >
         <table className={`w-full ${tableClassName}`}>
           <thead
-            className={`bg-border  ${stickyHeader ? "sticky top-0 z-10" : ""}`}
+            className={`bg-border/40 ${
+              stickyHeader ? "sticky top-0 z-10" : ""
+            }`}
           >
             <tr>
               {/* Row numbers */}
-              {showRowNumbers && (
+              {/* {showRowNumbers && (
                 <th className="px-4 py-3 text-left text-gray text-sm font-medium border-b border-border">
                   #
                 </th>
-              )}
-
-              {/* Row selection */}
-              {showRowSelection && (
-                <th className="px-4 py-3 text-left border-b border-border">
-                  <label className="flex items-center cursor-pointer select-none group">
-                    <input
-                      type="checkbox"
-                      checked={
-                        localSelectedRows.length === paginatedData.length &&
-                        paginatedData.length > 0
-                      }
-                      onChange={(e) => handleSelectAll(e.target.checked)}
-                      className="peer sr-only"
-                    />
-                    <span
-                      className="relative inline-flex size-5 items-center justify-center rounded-sm border border-border peer-checked:bg-bg/60
-                      transition-colors duration-150
-                      peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-light
-                      peer-checked:border-light bg-light/10"
-                    >
-                      <svg
-                        className="absolute w-3 h-3 text-light opacity-0 group-has-[input:checked]:opacity-100 transition-opacity duration-150 pointer-events-none z-10"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    </span>
-                  </label>
-                </th>
-              )}
+              )} */}
 
               {/* Column headers */}
-              {columns.map((column) => (
-                <th
-                  key={column.key}
-                  className={`px-4 py-3 text-left text-light text-sm font-medium border-b border-border ${
-                    showSorting && column.sortable !== false
-                      ? "cursor-pointer hover:text-light"
-                      : ""
-                  }`}
-                  onClick={() =>
-                    column.sortable !== false && handleSort(column.key)
-                  }
-                >
-                  <div className="flex items-center">
-                    {column.label}
-                    {showSorting &&
-                      column.sortable !== false &&
-                      renderSortIcon(column.key)}
-                  </div>
-                </th>
-              ))}
+              {columns.map((column, index) => {
+                // Skip rendering if column is conditional and condition is not met
+                if (column.conditional && !column.conditional()) {
+                  return null;
+                }
 
-              {/* Actions column */}
-              <th className="px-4 py-3 text-left text-gray text-sm font-medium border-b border-border">
-                Action
-              </th>
+                return (
+                  <th
+                    key={column.key}
+                    className={`px-4 py-3 text-left text-light text-sm font-medium  ${
+                      showSorting && column.sortable !== false
+                        ? "cursor-pointer hover:text-light"
+                        : ""
+                    } ${index === 0 ? "rounded-l-lg" : ""} ${
+                      index === columns.length - 1 ? "rounded-r-lg" : ""
+                    }`}
+                    onClick={() =>
+                      column.sortable !== false && handleSort(column.key)
+                    }
+                  >
+                    <div className="flex items-center">
+                      {column.key === "checkbox" ? (
+                        <label className="flex items-center cursor-pointer select-none group">
+                          <input
+                            type="checkbox"
+                            checked={
+                              localSelectedRows.length ===
+                                paginatedData.length && paginatedData.length > 0
+                            }
+                            onChange={(e) => handleSelectAll(e.target.checked)}
+                            className="peer sr-only"
+                          />
+                          <span
+                            className="relative inline-flex size-5 items-center justify-center rounded-sm border border-border peer-checked:bg-bg/60
+                            transition-colors duration-150
+                            peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-light
+                            peer-checked:border-light bg-light/10"
+                          >
+                            <svg
+                              className="absolute w-3 h-3 text-light opacity-0 group-has-[input:checked]:opacity-100 transition-opacity duration-150 pointer-events-none z-10"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </span>
+                        </label>
+                      ) : column.key === "actions" ? (
+                        column.label || "Actions"
+                      ) : (
+                        <>
+                          {column.label}
+                          {showSorting &&
+                            column.sortable !== false &&
+                            renderSortIcon(column.key)}
+                        </>
+                      )}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
 
@@ -412,9 +512,9 @@ const CustomTable = ({
               <tr>
                 <td
                   colSpan={
-                    columns.length +
-                    (showRowSelection ? 2 : 1) +
-                    (showRowNumbers ? 1 : 0)
+                    columns.filter(
+                      (col) => !col.conditional || col.conditional()
+                    ).length + (showRowNumbers ? 1 : 0)
                   }
                   className="px-4 py-8 text-center text-gray"
                 >
@@ -425,9 +525,9 @@ const CustomTable = ({
               <tr>
                 <td
                   colSpan={
-                    columns.length +
-                    (showRowSelection ? 2 : 1) +
-                    (showRowNumbers ? 1 : 0)
+                    columns.filter(
+                      (col) => !col.conditional || col.conditional()
+                    ).length + (showRowNumbers ? 1 : 0)
                   }
                   className="px-4 py-8 text-center text-gray"
                 >
@@ -450,53 +550,66 @@ const CustomTable = ({
                     </td>
                   )}
 
-                  {/* Row selection */}
-                  {showRowSelection && (
-                    <td className="px-4 py-3">
-                      <label className="flex items-center cursor-pointer select-none group">
-                        <input
-                          type="checkbox"
-                          checked={localSelectedRows.includes(row[rowKey])}
-                          onChange={(e) =>
-                            handleSelectRow(row[rowKey], e.target.checked)
-                          }
-                          className="peer sr-only"
-                        />
-                        <span
-                          className="relative inline-flex size-5 items-center justify-center rounded-sm border border-border peer-checked:bg-bg/60
-                          transition-colors duration-150
-                          peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-light
-                          peer-checked:border-light bg-light/10"
-                        >
-                          <svg
-                            className="absolute w-3 h-3 text-light opacity-0 group-has-[input:checked]:opacity-100 transition-opacity duration-150 pointer-events-none z-10"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        </span>
-                      </label>
-                    </td>
-                  )}
-
                   {/* Data cells */}
-                  {columns.map((column) => (
-                    <td
-                      key={column.key}
-                      className="px-4 py-3 text-light text-sm"
-                    >
-                      {renderCellContent(row, column)}
-                    </td>
-                  ))}
+                  {columns.map((column) => {
+                    // Skip rendering if column is conditional and condition is not met
+                    if (column.conditional && !column.conditional()) {
+                      return null;
+                    }
 
-                  {/* Actions */}
-                  <td className="px-4 py-3">{renderActionsCell(row)}</td>
+                    if (column.key === "checkbox") {
+                      return (
+                        <td key={column.key} className="px-4 py-3">
+                          <label className="flex items-center cursor-pointer select-none group">
+                            <input
+                              type="checkbox"
+                              checked={localSelectedRows.includes(row[rowKey])}
+                              onChange={(e) =>
+                                handleSelectRow(row[rowKey], e.target.checked)
+                              }
+                              className="peer sr-only"
+                            />
+                            <span
+                              className="relative inline-flex size-5 items-center justify-center rounded-sm border border-border peer-checked:bg-bg/60
+                              transition-colors duration-150
+                              peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-light
+                              peer-checked:border-light bg-light/10"
+                            >
+                              <svg
+                                className="absolute w-3 h-3 text-light opacity-0 group-has-[input:checked]:opacity-100 transition-opacity duration-150 pointer-events-none z-10"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            </span>
+                          </label>
+                        </td>
+                      );
+                    }
+
+                    if (column.key === "actions") {
+                      return (
+                        <td key={column.key} className="px-4 py-3">
+                          {renderActionsCell(row)}
+                        </td>
+                      );
+                    }
+
+                    return (
+                      <td
+                        key={column.key}
+                        className="px-4 py-3 text-light text-sm"
+                      >
+                        {renderCellContent(row, column)}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))
             )}
@@ -506,7 +619,7 @@ const CustomTable = ({
 
       {/* Footer Section */}
       {showPagination && (
-        <div className="p-4 border-t border-border">
+        <div className="py-4">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             {/* Selection info */}
             <div className="text-gray text-sm">

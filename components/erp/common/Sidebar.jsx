@@ -300,8 +300,13 @@ const Sidebar = () => {
       <div className="border-t border-border p-4 space-y-4">
         {/* User Profile */}
         <div className="flex items-center gap-3 p-3 rounded-lg bg-bg/30">
-          <div className="w-10 h-10 bg-light rounded-full flex items-center justify-center">
-            <div className="w-6 h-6 bg-dark rounded-full"></div>
+          <div className="w-10 h-10 rounded-full">
+            <Image
+              src="/images/dashboard/user.webp"
+              alt="profile"
+              fill
+              className="object-cover !relative"
+            />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-light font-medium text-sm truncate">
