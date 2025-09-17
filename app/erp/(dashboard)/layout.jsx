@@ -8,7 +8,7 @@ const layout = ({ children }) => {
       <aside className="w-[260px]">
         <Sidebar />
       </aside>
-      <section className="flex-1 flex flex-col">
+      <section className="w-[calc(100%-260px)] flex flex-col">
         <Header />
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </section>

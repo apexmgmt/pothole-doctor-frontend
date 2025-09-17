@@ -3,18 +3,16 @@
 import React, { useState } from "react";
 import CommonLayout from "../CommonLayout";
 import CustomTable from "../../../common/CustomTable";
-import {
-  DetailsIcon,
-  FilterIcon,
-  LeadIcon,
-  PlusIcon,
-} from "@/public/icons/icons";
+import FilterDrawer from "../../../common/FilterDrawer";
+import { DetailsIcon, FilterIcon, LeadIcon } from "@/public/icons/icons";
+import { PlusIcon, UserPlusIcon } from "lucide-react";
 
 const Leads = () => {
   const [activeTab, setActiveTab] = useState("lead");
   const [selectedRows, setSelectedRows] = useState([]);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
-  // Sample lead data based on the image
+  // Sample lead data with unique IDs and diverse information
   const leadsData = [
     {
       id: "001545464",
@@ -27,53 +25,53 @@ const Leads = () => {
       stage: "Open",
     },
     {
-      id: "001545464",
-      name: "Pothole Doctors",
-      phone: "(740) 330-5155",
-      company: "The Pothole Doctors",
-      email: "todd@potholedoctors.com",
-      jobAddress: "708-D Fairground Rd, Lucasville, OH 45648",
-      leadSource: "Repair",
+      id: "001545465",
+      name: "John Smith",
+      phone: "(555) 123-4567",
+      company: "Smith Construction",
+      email: "john@smithconstruction.com",
+      jobAddress: "123 Main St, Columbus, OH 43215",
+      leadSource: "Referral",
       stage: "Prospect",
     },
     {
-      id: "001545464",
-      name: "Pothole Doctors",
-      phone: "(740) 330-5155",
-      company: "The Pothole Doctors",
-      email: "todd@potholedoctors.com",
-      jobAddress: "708-D Fairground Rd, Lucasville, OH 45648",
-      leadSource: "Repair",
+      id: "001545466",
+      name: "Sarah Johnson",
+      phone: "(614) 987-6543",
+      company: "Johnson Properties",
+      email: "sarah@johnsonproperties.com",
+      jobAddress: "456 Oak Ave, Cleveland, OH 44101",
+      leadSource: "Website",
       stage: "Working",
     },
     {
-      id: "001545464",
-      name: "Pothole Doctors",
-      phone: "(740) 330-5155",
-      company: "The Pothole Doctors",
-      email: "todd@potholedoctors.com",
-      jobAddress: "708-D Fairground Rd, Lucasville, OH 45648",
-      leadSource: "Repair",
+      id: "001545467",
+      name: "Mike Wilson",
+      phone: "(513) 456-7890",
+      company: "Wilson Enterprises",
+      email: "mike@wilsonenterprises.com",
+      jobAddress: "789 Pine St, Cincinnati, OH 45202",
+      leadSource: "Cold Call",
       stage: "Closed-Won",
     },
     {
-      id: "001545464",
-      name: "Pothole Doctors",
-      phone: "(740) 330-5155",
-      company: "The Pothole Doctors",
-      email: "todd@potholedoctors.com",
-      jobAddress: "708-D Fairground Rd, Lucasville, OH 45648",
-      leadSource: "Repair",
+      id: "001545468",
+      name: "Lisa Brown",
+      phone: "(330) 234-5678",
+      company: "Brown Development",
+      email: "lisa@browndevelopment.com",
+      jobAddress: "321 Elm St, Akron, OH 44308",
+      leadSource: "Social Media",
       stage: "Meeting Set",
     },
     {
-      id: "001545464",
-      name: "Pothole Doctors",
-      phone: "(740) 330-5155",
-      company: "The Pothole Doctors",
-      email: "todd@potholedoctors.com",
-      jobAddress: "708-D Fairground Rd, Lucasville, OH 45648",
-      leadSource: "Repair",
+      id: "001545469",
+      name: "David Miller",
+      phone: "(419) 345-6789",
+      company: "Miller & Associates",
+      email: "david@millerassociates.com",
+      jobAddress: "654 Maple Dr, Toledo, OH 43604",
+      leadSource: "Trade Show",
       stage: "Open",
     },
   ];
@@ -90,24 +88,18 @@ const Leads = () => {
     { key: "phone", label: "Phone", sortable: true },
     { key: "company", label: "Company", sortable: true },
     { key: "email", label: "Email", sortable: true },
-    { key: "jobAddress", label: "Job Address", sortable: true },
+    {
+      key: "jobAddress",
+      label: "Job Address",
+      sortable: true,
+      whitespace: "normal",
+    },
     { key: "leadSource", label: "Lead Source", sortable: true },
     { key: "stage", label: "Stage", sortable: true },
-    {
-      key: "actions",
-      label: "Actions",
-      conditional: () => true,
-    },
   ];
 
-  // Action buttons for the table
+  // Action buttons for the table (Filter is now built into CustomTable)
   const actionButtons = [
-    {
-      label: "Filter",
-      action: "filter",
-      variant: "secondary",
-      icon: FilterIcon,
-    },
     {
       label: "Add Lead",
       action: "add_lead",
@@ -116,92 +108,94 @@ const Leads = () => {
     },
   ];
 
-  // Custom cell renderer for stage column
-  const renderStageCell = (row, column, value) => {
-    if (column.key === "stage") {
-      const stageColors = {
-        Open: "bg-green-500/20 text-green-400",
-        Prospect: "bg-gray-500/20 text-gray-400",
-        Working: "bg-orange-500/20 text-orange-400",
-        "Closed-Won": "bg-red-500/20 text-red-400",
-        "Meeting Set": "bg-blue-500/20 text-blue-400",
-      };
+  // Custom cell renderer for stage column (now handled by default in CustomTable)
+  // const renderStageCell = (row, column, value) => {
+  //   // This is now handled automatically by CustomTable for columns with 'stage' in the key
+  //   return value;
+  // };
 
-      return (
-        <span
-          className={`px-2 py-1.5 rounded-md text-xs font-medium ${
-            stageColors[value] || "bg-gray-500/20 text-gray-400"
-          }`}
-        >
-          {value}
-        </span>
-      );
-    }
-    return value;
-  };
+  // Lead-specific filter configuration
+  const leadFilterFields = [
+    {
+      key: "leadId",
+      label: "Lead ID",
+      type: "text",
+      placeholder: "Enter lead ID",
+    },
+    { key: "name", label: "Name", type: "text", placeholder: "Enter name" },
+    {
+      key: "phone",
+      label: "Phone",
+      type: "text",
+      placeholder: "Enter phone number",
+    },
+    {
+      key: "company",
+      label: "Company",
+      type: "text",
+      placeholder: "Enter company name",
+    },
+    {
+      key: "email",
+      label: "Email",
+      type: "email",
+      placeholder: "Enter email address",
+    },
+    {
+      key: "jobAddress",
+      label: "Job Address",
+      type: "text",
+      placeholder: "Enter job address",
+    },
+    {
+      key: "leadSource",
+      label: "Lead Source",
+      type: "select",
+      placeholder: "Select lead source",
+      options: [
+        { value: "repair", label: "Repair" },
+        { value: "referral", label: "Referral" },
+        { value: "website", label: "Website" },
+        { value: "cold-call", label: "Cold Call" },
+        { value: "social-media", label: "Social Media" },
+        { value: "trade-show", label: "Trade Show" },
+      ],
+    },
+    {
+      key: "stage",
+      label: "Stage",
+      type: "select",
+      placeholder: "Select stage",
+      options: [
+        { value: "open", label: "Open" },
+        { value: "prospect", label: "Prospect" },
+        { value: "working", label: "Working" },
+        { value: "closed-won", label: "Closed-Won" },
+        { value: "meeting-set", label: "Meeting Set" },
+      ],
+    },
+    {
+      key: "dateRange",
+      label: "Date Range",
+      gridCols: 2,
+      fields: [
+        { key: "dateFrom", label: "Date From", type: "date" },
+        { key: "dateTo", label: "Date To", type: "date" },
+      ],
+    },
+  ];
 
-  // Custom actions renderer
-  const renderLeadActions = (row) => (
-    <div className="flex gap-2">
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          console.log("View lead:", row);
-        }}
-        className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 rounded-md transition-colors"
-        title="View"
-      >
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-          />
-        </svg>
-      </button>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          console.log("Edit lead:", row);
-        }}
-        className="p-2 text-green-400 hover:text-green-300 hover:bg-green-400/10 rounded-md transition-colors"
-        title="Edit"
-      >
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-          />
-        </svg>
-      </button>
-    </div>
-  );
+  const leadFilterButtons = [
+    { label: "Clear", action: "clear", variant: "outline" },
+    { label: "Apply Filters", action: "apply", variant: "primary" },
+  ];
 
   // Event handlers
   const handleActionButtonClick = (action) => {
     console.log("Action clicked:", action);
     switch (action) {
       case "filter":
-        console.log("Opening filter modal...");
+        setIsFilterDrawerOpen(true);
         break;
       case "add_lead":
         console.log("Opening add lead form...");
@@ -211,24 +205,35 @@ const Leads = () => {
     }
   };
 
-  const handleSearch = (data, searchTerm) => {
-    return data.filter((row) =>
-      Object.values(row).some((value) =>
-        String(value).toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
+  const handleFilterDrawerClose = () => {
+    setIsFilterDrawerOpen(false);
   };
 
-  const handleSort = (data, column, direction) => {
-    return [...data].sort((a, b) => {
-      const aVal = a[column];
-      const bVal = b[column];
-
-      if (aVal < bVal) return direction === "asc" ? -1 : 1;
-      if (aVal > bVal) return direction === "asc" ? 1 : -1;
-      return 0;
-    });
+  const handleApplyFilters = (filters) => {
+    console.log("Applied lead filters:", filters);
+    // Handle filter application logic here
   };
+
+  // Search functionality is now handled by default in CustomTable
+  // const handleSearch = (data, searchTerm) => {
+  //   return data.filter((row) =>
+  //     Object.values(row).some((value) =>
+  //       String(value).toLowerCase().includes(searchTerm.toLowerCase())
+  //     )
+  //   );
+  // };
+
+  // Sorting functionality is now handled by default in CustomTable
+  // const handleSort = (data, column, direction) => {
+  //   return [...data].sort((a, b) => {
+  //     const aVal = a[column];
+  //     const bVal = b[column];
+
+  //     if (aVal < bVal) return direction === "asc" ? -1 : 1;
+  //     if (aVal > bVal) return direction === "asc" ? 1 : -1;
+  //     return 0;
+  //   });
+  // };
 
   const handleRowClick = (row) => {
     console.log("Row clicked:", row);
@@ -267,21 +272,6 @@ const Leads = () => {
           columns={leadColumns}
           actionButtons={actionButtons}
           onActionButtonClick={handleActionButtonClick}
-          onSearch={handleSearch}
-          onSort={handleSort}
-          onRowClick={handleRowClick}
-          onRowSelectionChange={handleRowSelectionChange}
-          selectedRows={selectedRows}
-          renderCell={renderStageCell}
-          renderActions={renderLeadActions}
-          showRowNumbers={false}
-          stickyHeader={true}
-          maxHeight={400}
-          searchPlaceholder="Search leads..."
-          showExport={false}
-          showPagination={true}
-          pageSize={10}
-          emptyMessage="No leads found"
         />
       )}
 
@@ -291,6 +281,16 @@ const Leads = () => {
           {/* Add your details-specific content */}
         </div>
       )}
+
+      {/* Filter Drawer */}
+      <FilterDrawer
+        isOpen={isFilterDrawerOpen}
+        onClose={handleFilterDrawerClose}
+        onApplyFilters={handleApplyFilters}
+        title="Filter Leads"
+        fields={leadFilterFields}
+        buttons={leadFilterButtons}
+      />
     </CommonLayout>
   );
 };
