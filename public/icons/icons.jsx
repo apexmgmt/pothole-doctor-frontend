@@ -8,14 +8,14 @@ export const EyeOpenIcon = (
   >
     <path
       d="M10.3866 7.99995C10.3866 9.31995 9.31995 10.3866 7.99995 10.3866C6.67995 10.3866 5.61328 9.31995 5.61328 7.99995C5.61328 6.67995 6.67995 5.61328 7.99995 5.61328C9.31995 5.61328 10.3866 6.67995 10.3866 7.99995Z"
-      stroke="#A7A7AE"
+      stroke="currentColor"
       strokeWidth="1.2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M7.9999 13.5133C10.3532 13.5133 12.5466 12.1266 14.0732 9.72665C14.6732 8.78665 14.6732 7.20665 14.0732 6.26665C12.5466 3.86665 10.3532 2.47998 7.9999 2.47998C5.64656 2.47998 3.45323 3.86665 1.92656 6.26665C1.32656 7.20665 1.32656 8.78665 1.92656 9.72665C3.45323 12.1266 5.64656 13.5133 7.9999 13.5133Z"
-      stroke="#A7A7AE"
+      stroke="currentColor"
       strokeWidth="1.2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -33,42 +33,42 @@ export const EyeCloseIcon = (
   >
     <path
       d="M9.68661 6.31328L6.31328 9.68661C5.87995 9.25328 5.61328 8.65995 5.61328 7.99995C5.61328 6.67995 6.67995 5.61328 7.99995 5.61328C8.65995 5.61328 9.25328 5.87995 9.68661 6.31328Z"
-      stroke="#A7A7AE"
+      stroke="currentColor"
       strokeWidth="1.2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M11.8799 3.84682C10.7132 2.96682 9.37989 2.48682 7.99989 2.48682C5.64656 2.48682 3.45323 3.87348 1.92656 6.27348C1.32656 7.21348 1.32656 8.79348 1.92656 9.73348C2.45323 10.5602 3.06656 11.2735 3.73323 11.8468"
-      stroke="#A7A7AE"
+      stroke="currentColor"
       strokeWidth="1.2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M5.61328 13.02C6.37328 13.34 7.17995 13.5133 7.99995 13.5133C10.3533 13.5133 12.5466 12.1266 14.0733 9.72662C14.6733 8.78662 14.6733 7.20662 14.0733 6.26662C13.8533 5.91995 13.6133 5.59329 13.3666 5.28662"
-      stroke="#A7A7AE"
+      stroke="currentColor"
       strokeWidth="1.2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M10.34 8.4668C10.1666 9.4068 9.39996 10.1735 8.45996 10.3468"
-      stroke="#A7A7AE"
+      stroke="currentColor"
       strokeWidth="1.2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M6.31301 9.68652L1.33301 14.6665"
-      stroke="#A7A7AE"
+      stroke="currentColor"
       strokeWidth="1.2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M14.6665 1.3335L9.68652 6.3135"
-      stroke="#A7A7AE"
+      stroke="currentColor"
       strokeWidth="1.2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -346,14 +346,14 @@ export const DetailsIcon = (
   >
     <path
       d="M5.3335 4.66297H8.0121M8.0121 4.66297H13.3335C14.0699 4.66297 14.6668 5.25993 14.6668 5.99631V8M8.0121 4.66297L6.20022 2.26479C6.07422 2.09802 5.87731 2 5.6683 2H2.00016C1.63198 2 1.3335 2.29848 1.3335 2.66667V12.6667C1.3335 13.4031 1.93045 14 2.66683 14H8.0121"
-      stroke="#A7A7AE"
+      stroke="currentColor"
       strokeWidth="1.2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M14.6667 10H10M14.6667 12H10M11.6667 14H10"
-      stroke="#A7A7AE"
+      stroke="currentColor"
       strokeWidth="1.2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -567,5 +567,685 @@ export const FillterIcon = (
       strokeWidth="1.2"
       strokeLinejoin="round"
     />
+  </svg>
+);
+
+export const MessageIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      opacity="0.7"
+      d="M3.5 4.25L4.97101 5.1197C5.8286 5.62675 6.1714 5.62675 7.029 5.1197L8.5 4.25"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      opacity="0.7"
+      d="M1.00788 6.73781C1.04057 8.27056 1.05691 9.03696 1.62248 9.60466C2.18804 10.1724 2.97517 10.1922 4.54942 10.2317C5.51965 10.2561 6.48035 10.2561 7.4506 10.2317C9.02485 10.1922 9.81195 10.1724 10.3775 9.60466C10.9431 9.03696 10.9595 8.27056 10.9921 6.73781C11.0027 6.24496 11.0027 5.75501 10.9921 5.26221C10.9595 3.72943 10.9431 2.96305 10.3775 2.39533C9.81195 1.82762 9.02485 1.80784 7.4506 1.76829C6.48035 1.74391 5.51965 1.74391 4.54941 1.76828C2.97517 1.80783 2.18804 1.82761 1.62248 2.39533C1.05691 2.96304 1.04057 3.72942 1.00788 5.26216C0.997373 5.75501 0.997373 6.24496 1.00788 6.73781Z"
+      stroke="currentColor"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const DocumentIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M10.25 5.25V5C10.25 3.11438 10.2499 2.17158 9.6642 1.58579C9.0784 1 8.1356 1 6.24995 1H5.75C3.86442 1 2.92162 1 2.33583 1.58578C1.75005 2.17156 1.75004 3.11436 1.75002 4.99997L1.75 7.25C1.74999 8.8937 1.74998 9.7156 2.20394 10.2688C2.28706 10.3701 2.37993 10.4629 2.48121 10.5461C3.03439 11 3.85625 11 5.49995 11"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.75 3.5H8.25"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.75 6H6.75"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10.25 10V8.5C10.25 7.7853 9.57845 7 8.75 7C7.92155 7 7.25 7.7853 7.25 8.5V10.25C7.25 10.6642 7.5858 11 8 11C8.4142 11 8.75 10.6642 8.75 10.25V8.5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  </svg>
+);
+
+export const LocationIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M6.80885 10.6835C6.59205 10.8865 6.3022 11 6.00055 11C5.6989 11 5.4091 10.8865 5.19225 10.6835C3.20651 8.813 0.54538 6.72345 1.84314 3.68983C2.54482 2.04958 4.22917 1 6.00055 1C7.77195 1 9.4563 2.04958 10.158 3.68983C11.4541 6.71965 8.7995 8.81945 6.80885 10.6835Z"
+        stroke="currentColor"
+      />
+      <path
+        d="M7.75 5.5C7.75 6.4665 6.9665 7.25 6 7.25C5.0335 7.25 4.25 6.4665 4.25 5.5C4.25 4.5335 5.0335 3.75 6 3.75C6.9665 3.75 7.75 4.5335 7.75 5.5Z"
+        stroke="currentColor"
+      />
+    </g>
+  </svg>
+);
+
+export const MeasurementsIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7" clipPath="url(#clip0_307_11299)">
+      <path
+        d="M10.4988 6.5C10.5 6.26495 10.5 6.01535 10.5 5.75C10.5 3.51083 10.5 2.39124 9.8044 1.69562C9.10875 1 7.98915 1 5.75 1C3.51083 1 2.39124 1 1.69562 1.69562C1 2.39124 1 3.51083 1 5.75C1 7.98915 1 9.10875 1.69562 9.8044C2.39124 10.5 3.51083 10.5 5.75 10.5C6.01535 10.5 6.26495 10.5 6.5 10.4988"
+        stroke="currentColor"
+        strokeLinecap="round"
+      />
+      <path
+        d="M9.25 7.5L9.37895 7.8485C9.54805 8.3055 9.6326 8.534 9.7993 8.7007C9.966 8.8674 10.1945 8.95195 10.6515 9.12105L11 9.25L10.6515 9.37895C10.1945 9.54805 9.966 9.6326 9.7993 9.7993C9.6326 9.966 9.54805 10.1945 9.37895 10.6515L9.25 11L9.12105 10.6515C8.95195 10.1945 8.8674 9.966 8.7007 9.7993C8.534 9.6326 8.3055 9.54805 7.8485 9.37895L7.5 9.25L7.8485 9.12105C8.3055 8.95195 8.534 8.8674 8.7007 8.7007C8.8674 8.534 8.95195 8.3055 9.12105 7.8485L9.25 7.5Z"
+        stroke="currentColor"
+        strokeLinejoin="round"
+      />
+      <path d="M1 4.5H10.5" stroke="currentColor" strokeLinejoin="round" />
+      <path
+        d="M3.25 2.75H3.25898"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5.25 2.75H5.259"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_307_11299">
+        <rect width="12" height="12" fill="white" />
+      </clipPath>
+    </defs>
+  </svg>
+);
+
+export const DoubleQuoteIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7" clipPath="url(#clip0_307_11307)">
+      <path
+        d="M1.25 6C1.25 3.76083 1.25 2.64124 1.94562 1.94562C2.64124 1.25 3.76083 1.25 6 1.25C8.23915 1.25 9.35875 1.25 10.0544 1.94562C10.75 2.64124 10.75 3.76083 10.75 6C10.75 8.23915 10.75 9.35875 10.0544 10.0544C9.35875 10.75 8.23915 10.75 6 10.75C3.76083 10.75 2.64124 10.75 1.94562 10.0544C1.25 9.35875 1.25 8.23915 1.25 6Z"
+        stroke="currentColor"
+      />
+      <path
+        d="M5.3728 5C5.3728 4.52859 5.3728 4.29289 5.21735 4.14644C5.06195 4 4.81176 4 4.31141 4C3.81106 4 3.56088 4 3.40544 4.14644C3.25 4.29289 3.25 4.52859 3.25 5C3.25 5.4714 3.25 5.7071 3.40544 5.85355C3.56088 6 3.81106 6 4.31141 6C4.81176 6 5.06195 6 5.21735 5.85355C5.3728 5.7071 5.3728 5.4714 5.3728 5ZM5.3728 5V6.03435C5.3728 6.9511 4.70526 7.72855 3.7807 8M8.75 5C8.75 4.52859 8.75 4.29289 8.59455 4.14644C8.4391 4 8.18895 4 7.6886 4C7.18825 4 6.93805 4 6.78265 4.14644C6.6272 4.29289 6.6272 4.52859 6.6272 5C6.6272 5.4714 6.6272 5.7071 6.78265 5.85355C6.93805 6 7.18825 6 7.6886 6C8.18895 6 8.4391 6 8.59455 5.85355C8.75 5.7071 8.75 5.4714 8.75 5ZM8.75 5V6.03435C8.75 6.9511 8.08245 7.72855 7.1579 8"
+        stroke="currentColor"
+        strokeWidth="0.8"
+        strokeLinecap="round"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_307_11307">
+        <rect width="12" height="12" fill="currentColor" />
+      </clipPath>
+    </defs>
+  </svg>
+);
+
+export const SalesRepIcon = (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 18 18"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7" clipPath="url(#clip0_307_11255)">
+      <path
+        d="M8.25 7.125H9.375C9.9963 7.125 10.5 7.6287 10.5 8.25M8.25 7.125H7.125C6.50368 7.125 6 7.6287 6 8.25V8.625C6 9.2463 6.50368 9.75 7.125 9.75H9.375C9.9963 9.75 10.5 10.2537 10.5 10.875V11.25C10.5 11.8713 9.9963 12.375 9.375 12.375H8.25M8.25 7.125V6M8.25 12.375H7.125C6.50368 12.375 6 11.8713 6 11.25M8.25 12.375V13.5"
+        stroke="#A7A7AE"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 3.0412C8.75378 3.01397 8.5035 3 8.25 3C4.52208 3 1.5 6.02208 1.5 9.75C1.5 13.4779 4.52208 16.5 8.25 16.5C11.9779 16.5 15 13.4779 15 9.75C15 9.4965 14.9861 9.24622 14.9588 9"
+        stroke="#A7A7AE"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13.875 1.5V6.75M16.5 4.125H11.25"
+        stroke="#A7A7AE"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_307_11255">
+        <rect width="18" height="18" fill="white" />
+      </clipPath>
+    </defs>
+  </svg>
+);
+
+export const CalenderIcon = (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 18 18"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M12 1.5V4.5M6 1.5V4.5"
+        stroke="#A7A7AE"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9.75 3H8.25C5.42157 3 4.00736 3 3.12868 3.87868C2.25 4.75736 2.25 6.17157 2.25 9V10.5C2.25 13.3284 2.25 14.7427 3.12868 15.6213C4.00736 16.5 5.42157 16.5 8.25 16.5H9.75C12.5784 16.5 13.9927 16.5 14.8713 15.6213C15.75 14.7427 15.75 13.3284 15.75 10.5V9C15.75 6.17157 15.75 4.75736 14.8713 3.87868C13.9927 3 12.5784 3 9.75 3Z"
+        stroke="#A7A7AE"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M2.25 7.5H15.75"
+        stroke="#A7A7AE"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.99662 10.5H9.00337M8.99662 13.5H9.00337M11.9932 10.5H12M6 10.5H6.00673M6 13.5H6.00673"
+        stroke="#A7A7AE"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  </svg>
+);
+
+export const CallIcon = (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 18 18"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M6.86869 4.28417L6.5667 3.60469C6.36924 3.16041 6.27051 2.93826 6.12286 2.76826C5.93781 2.55521 5.6966 2.39846 5.42676 2.31589C5.21144 2.25 4.96834 2.25 4.48216 2.25C3.77093 2.25 3.41532 2.25 3.1168 2.38672C2.76515 2.54777 2.44758 2.89746 2.32105 3.26295C2.21363 3.57322 2.2444 3.89207 2.30593 4.52978C2.96093 11.3176 6.68236 15.0391 13.4702 15.694C14.1079 15.7556 14.4268 15.7864 14.737 15.679C15.1026 15.5525 15.4522 15.2348 15.6133 14.8832C15.75 14.5846 15.75 14.2291 15.75 13.5178C15.75 13.0316 15.75 12.7885 15.6841 12.5732C15.6015 12.3034 15.4448 12.0622 15.2317 11.8771C15.0618 11.7295 14.8396 11.6308 14.3953 11.4333L13.7158 11.1313C13.2347 10.9174 12.9941 10.8106 12.7497 10.7873C12.5157 10.765 12.2798 10.7979 12.0608 10.8832C11.832 10.9723 11.6298 11.1408 11.2252 11.4778C10.8226 11.8134 10.6213 11.9812 10.3753 12.071C10.1572 12.1507 9.86892 12.1802 9.63927 12.1463C9.38014 12.1082 9.18177 12.0022 8.78494 11.7901C7.55044 11.1304 6.86965 10.4496 6.2099 9.21503C5.99785 8.81828 5.89183 8.61983 5.85365 8.36078C5.8198 8.13105 5.84931 7.84275 5.92897 7.62472C6.01884 7.37871 6.18661 7.17739 6.52214 6.77475C6.85921 6.37026 7.02775 6.16802 7.11686 5.93918C7.20214 5.72021 7.23496 5.4843 7.21271 5.25036C7.18945 5.00589 7.08253 4.76532 6.86869 4.28417Z"
+        stroke="#A7A7AE"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+    </g>
+  </svg>
+);
+
+export const InvoiceIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M10.25 5.25V5C10.25 3.11438 10.2499 2.17158 9.6642 1.58579C9.0784 1 8.1356 1 6.24995 1H5.75C3.86442 1 2.92162 1 2.33583 1.58578C1.75005 2.17156 1.75004 3.11436 1.75002 4.99997L1.75 7.25C1.74999 8.8937 1.74998 9.7156 2.20394 10.2688C2.28706 10.3701 2.37993 10.4629 2.48121 10.5461C3.03439 11 3.85625 11 5.49995 11"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.75 3.5H8.25"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.75 6H6.75"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10.25 10V8.5C10.25 7.7853 9.57845 7 8.75 7C7.92155 7 7.25 7.7853 7.25 8.5V10.25C7.25 10.6642 7.5858 11 8 11C8.4142 11 8.75 10.6642 8.75 10.25V8.5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.75 8.5H9.5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  </svg>
+);
+
+export const JobsIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M9.5 4.5V3.5C9.5 2.11929 8.38071 1 7 1H5C3.61929 1 2.5 2.11929 2.5 3.5V4.5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M1 4.5H11C11.2761 4.5 11.5 4.72386 11.5 5V9.5C11.5 10.3284 10.8284 11 10 11H2C1.17157 11 0.5 10.3284 0.5 9.5V5C0.5 4.72386 0.723858 4.5 1 4.5Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 7H8"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 8.5H6"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  </svg>
+);
+
+export const RefundsIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M9.5 4.5L8.5 3.5L7.5 4.5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.5 3.5V7.5C8.5 8.32843 7.82843 9 7 9H5C4.17157 9 3.5 8.32843 3.5 7.5V5C3.5 4.17157 4.17157 3.5 5 3.5H8.5Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M2.5 7.5L3.5 8.5L4.5 7.5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.5 8.5V4.5C3.5 3.67157 4.17157 3 5 3H7C7.82843 3 8.5 3.67157 8.5 4.5V7C8.5 7.82843 7.82843 8.5 7 8.5H3.5Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  </svg>
+);
+
+export const EmailIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M1 3C1 2.44772 1.44772 2 2 2H10C10.5523 2 11 2.44772 11 3V9C11 9.55228 10.5523 10 10 10H2C1.44772 10 1 9.55228 1 9V3Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M1 3L6 6.5L11 3"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  </svg>
+);
+
+export const SmsIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M1 2C1 1.44772 1.44772 1 2 1H10C10.5523 1 11 1.44772 11 2V8C11 8.55228 10.5523 9 10 9H2C1.44772 9 1 8.55228 1 8V2Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3 4H9"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3 6H7"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  </svg>
+);
+
+export const ContactIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M6 6C7.65685 6 9 4.65685 9 3C9 1.34315 7.65685 0 6 0C4.34315 0 3 1.34315 3 3C3 4.65685 4.34315 6 6 6Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M0 12C0 9.79086 1.79086 8 4 8H8C10.2091 8 12 9.79086 12 12"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  </svg>
+);
+
+export const RulerIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M1 2H11C11.5523 2 12 2.44772 12 3V9C12 9.55228 11.5523 10 11 10H1C0.447715 10 0 9.55228 0 9V3C0 2.44772 0.447715 2 1 2Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M2 4H3"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5 4H6"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 4H9"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M2 6H3"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5 6H6"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 6H9"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M2 8H3"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5 8H6"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 8H9"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  </svg>
+);
+
+export const CalculatorIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M3 1H9C9.55228 1 10 1.44772 10 2V10C10 10.5523 9.55228 11 9 11H3C2.44772 11 2 10.5523 2 10V2C2 1.44772 2.44772 1 3 1Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3 3H9"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 5H5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 5H8"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 6.5H5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 6.5H8"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 8H5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 8H8"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 9.5H8"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  </svg>
+);
+
+export const CalendarIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M8 1V3M4 1V3"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9.5 2H2.5C1.67157 2 1 2.67157 1 3.5V9.5C1 10.3284 1.67157 11 2.5 11H9.5C10.3284 11 11 10.3284 11 9.5V3.5C11 2.67157 10.3284 2 9.5 2Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M1 5H11"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.5 7.5H3.505"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6 7.5H6.005"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.5 7.5H8.505"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.5 9H3.505"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6 9H6.005"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.5 9H8.505"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  </svg>
+);
+
+export const DollarIcon = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.7">
+      <path
+        d="M6 1V11"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.5 3.5H5.5C4.67157 3.5 4 4.17157 4 5C4 5.82843 4.67157 6.5 5.5 6.5H6.5C7.32843 6.5 8 7.17157 8 8C8 8.82843 7.32843 9.5 6.5 9.5H3.5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
   </svg>
 );

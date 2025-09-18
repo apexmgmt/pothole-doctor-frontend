@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-// import Button from "@/components/common/CustomButton";
 import CustomButton from "./CustomButton";
 import {
   ExcelIcon,
@@ -506,9 +505,9 @@ const CustomTable = ({
       {showToolbar && (
         <div className={`py-4 ${headerClassName}`}>
           <div className="flex items-center justify-between gap-4">
-            {/* Left side - Filter Button */}
+            {/* Left side - Filter Button or Export Options */}
             <div className="flex items-center gap-4">
-              {showFilter && (
+              {showFilter ? (
                 <button
                   onClick={() => handleActionButton("filter")}
                   className="flex items-center gap-2 px-3 py-1.5 bg-bg border border-border rounded-md text-light hover:bg-accent transition-colors"
@@ -516,33 +515,8 @@ const CustomTable = ({
                   {FillterIcon}
                   Filter
                 </button>
-              )}
-
-              {/* Search Field */}
-              {showSearch && (
-                <div className="relative max-w-md">
-                  <label
-                    htmlFor="search-input"
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                  >
-                    {SearchIcon}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={searchPlaceholder}
-                    value={searchTerm}
-                    id="search-input"
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-bg border border-border rounded-md text-light placeholder:text-gray focus:outline-none focus:border-light text-sm"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Right side - Action Buttons and Export Options */}
-            <div className="flex items-center gap-2">
-              {/* Export Options */}
-              {showExport && (
+              ) : showExport ? (
+                /* Export Options on left when filter is disabled */
                 <div className="flex gap-2">
                   {exportOptions.map((option) => {
                     // Handle both string and object formats for backward compatibility
@@ -564,16 +538,79 @@ const CustomTable = ({
                     }
 
                     return (
-                      <button
+                      <CustomButton
                         key={exportOption.value || exportOption.label}
                         onClick={() =>
                           handleExport(exportOption.value || exportOption.label)
                         }
-                        className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent"
+                        variant="outline"
+                        size="sm"
+                        icon={exportOption.icon}
                       >
-                        {exportOption.icon && <span>{exportOption.icon}</span>}
                         {exportOption.label}
-                      </button>
+                      </CustomButton>
+                    );
+                  })}
+                </div>
+              ) : null}
+
+              {/* Search Field */}
+              {showSearch && (
+                <div className="relative max-w-md">
+                  <label
+                    htmlFor="search-input"
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                  >
+                    {SearchIcon}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={searchPlaceholder}
+                    value={searchTerm}
+                    id="search-input"
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-transparent border border-border rounded-md text-light placeholder:text-gray focus:outline-none focus:border-light text-sm"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Right side - Action Buttons and Export Options (only when filter is enabled) */}
+            <div className="flex items-center gap-2">
+              {/* Export Options - only show on right when filter is enabled */}
+              {showExport && showFilter && (
+                <div className="flex gap-2">
+                  {exportOptions.map((option) => {
+                    // Handle both string and object formats for backward compatibility
+                    const exportOption =
+                      typeof option === "string"
+                        ? {
+                            label: option,
+                            value: option,
+                            conditional: () => true,
+                          }
+                        : option;
+
+                    // Skip rendering if conditional is not met
+                    if (
+                      exportOption.conditional &&
+                      !exportOption.conditional()
+                    ) {
+                      return null;
+                    }
+
+                    return (
+                      <CustomButton
+                        key={exportOption.value || exportOption.label}
+                        onClick={() =>
+                          handleExport(exportOption.value || exportOption.label)
+                        }
+                        variant="outline"
+                        size="sm"
+                        icon={exportOption.icon}
+                      >
+                        {exportOption.label}
+                      </CustomButton>
                     );
                   })}
                 </div>

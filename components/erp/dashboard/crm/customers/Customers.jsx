@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import CommonLayout from "../CommonLayout";
 import CustomTable from "../../../common/CustomTable";
 import FilterDrawer from "../../../common/FilterDrawer";
 import { DetailsIcon, FilterIcon, UserIcon } from "@/public/icons/icons";
 import { PlusIcon } from "lucide-react";
+import AdvancedCustomerDetails from "./AdvancedCustomerDetails";
 
 const Customers = () => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("customers");
   const [selectedRows, setSelectedRows] = useState([]);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
@@ -97,7 +100,7 @@ const Customers = () => {
       label: "Add Customer",
       action: "add_customer",
       variant: "primary",
-      icon: PlusIcon,
+      // icon: PlusIcon,
     },
   ];
 
@@ -238,7 +241,7 @@ const Customers = () => {
         setIsFilterDrawerOpen(true);
         break;
       case "add_customer":
-        console.log("Opening add customer form...");
+        router.push("/erp/crm/customers/add-customer");
         break;
       default:
         console.log("Unknown action:", action);
@@ -304,7 +307,7 @@ const Customers = () => {
   ];
 
   return (
-    <CommonLayout title="Customer" buttons={buttons} className="mb-6">
+    <CommonLayout title="Customer" buttons={buttons}>
       {activeTab === "customers" && (
         <CustomTable
           data={customersData}
@@ -315,10 +318,10 @@ const Customers = () => {
       )}
 
       {activeTab === "details" && (
-        <div className="text-light">
-          <p>Customer details view content goes here...</p>
-          {/* Add your details-specific content */}
-        </div>
+        <AdvancedCustomerDetails
+          customerData={customersData[0]} // Pass the first customer as sample data
+          onEdit={() => console.log("Edit customer")}
+        />
       )}
 
       {/* Filter Drawer */}

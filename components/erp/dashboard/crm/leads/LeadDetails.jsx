@@ -1,0 +1,12 @@
+"use client";
+
+import React from "react";
+import EntityDetails from "../../../common/EntityDetails";
+
+const LeadDetails = ({ leadData, onEdit }) => {
+  return (
+    <EntityDetails entityData={leadData} entityType="lead" onEdit={onEdit} />
+  );
+};
+
+export default LeadDetails;

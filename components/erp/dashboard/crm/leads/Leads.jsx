@@ -6,6 +6,7 @@ import CustomTable from "../../../common/CustomTable";
 import FilterDrawer from "../../../common/FilterDrawer";
 import { DetailsIcon, FilterIcon, LeadIcon } from "@/public/icons/icons";
 import { PlusIcon, UserPlusIcon } from "lucide-react";
+import LeadDetails from "./LeadDetails";
 
 const Leads = () => {
   const [activeTab, setActiveTab] = useState("lead");
@@ -265,7 +266,7 @@ const Leads = () => {
   ];
 
   return (
-    <CommonLayout title="Lead" buttons={buttons} className="mb-6">
+    <CommonLayout title="Lead" buttons={buttons}>
       {activeTab === "lead" && (
         <CustomTable
           data={leadsData}
@@ -276,10 +277,10 @@ const Leads = () => {
       )}
 
       {activeTab === "details" && (
-        <div className="text-light">
-          <p>Lead details view content goes here...</p>
-          {/* Add your details-specific content */}
-        </div>
+        <LeadDetails
+          leadData={leadsData[0]} // Pass the first lead as sample data
+          onEdit={() => console.log("Edit lead")}
+        />
       )}
 
       {/* Filter Drawer */}
