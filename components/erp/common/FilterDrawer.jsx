@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 
 const FilterDrawer = ({
   isOpen,
@@ -83,8 +84,18 @@ const FilterDrawer = ({
       case "text":
       case "email":
       case "number":
-      case "date":
         return <Input {...commonInputProps} type={field.type} />;
+
+      case "date":
+        return (
+          <DatePicker
+            value={filters[field.key] || null}
+            onChange={(date) => handleInputChange(field.key, date)}
+            placeholder={
+              field.placeholder || `Select ${field.label.toLowerCase()}`
+            }
+          />
+        );
 
       case "select":
         return (

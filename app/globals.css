@@ -99,9 +99,9 @@
 }
 
 /* Smooth transitions */
-* {
+/* {
   transition: all 0.3s ease;
-}
+} */
 
 .container {
   width: clamp(320px, 95%, 1310px);

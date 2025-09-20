@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Checkbox } from "@/components/ui/checkbox";
 import { PlusIcon, XIcon } from "lucide-react";
 
 const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
+  const modalRef = useRef(null);
   const [formData, setFormData] = useState({
     estimateTitle: "",
     estimateType: "",
@@ -21,12 +24,67 @@ const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
     serviceType: "",
     estimateLocation: "",
     useCountryOnly: false,
-    bidDate: "",
-    expirationDate: "",
+    bidDate: null,
+    expirationDate: null,
     customer: "",
     paymentTerms: "",
     assignedEstimator: "",
   });
+  const [showAddCustomer, setShowAddCustomer] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    company: "",
+  });
+
+  // Handle outside click to close modal
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if the click is inside the modal content area
+      if (modalRef.current && modalRef.current.contains(event.target)) {
+        return; // Don't close if clicking inside modal
+      }
+
+      // Check if the click is on any Radix UI elements (select dropdowns, date pickers, etc.)
+      const isRadixElement =
+        event.target.closest("[data-radix-select-content]") ||
+        event.target.closest("[data-radix-select-viewport]") ||
+        event.target.closest("[data-radix-select-item]") ||
+        event.target.closest("[data-radix-select-trigger]") ||
+        event.target.closest("[data-radix-select-scroll-up-button]") ||
+        event.target.closest("[data-radix-select-scroll-down-button]") ||
+        event.target.closest("[data-radix-popover-content]") ||
+        event.target.closest("[data-radix-calendar-root]") ||
+        event.target.closest("[data-radix-calendar-cell]") ||
+        event.target.closest("[data-radix-calendar-grid]") ||
+        event.target.closest("[data-radix-calendar-month]") ||
+        event.target.closest("[data-radix-calendar-caption]") ||
+        event.target.closest("[data-radix-calendar-nav]") ||
+        event.target.closest("[data-radix-calendar-day]") ||
+        event.target.closest(".rdp") ||
+        event.target.closest(".rdp-day") ||
+        event.target.closest(".rdp-button") ||
+        event.target.closest(".rdp-nav") ||
+        event.target.closest(".rdp-caption");
+
+      // Don't close modal if clicking on Radix UI elements
+      if (isRadixElement) {
+        return;
+      }
+
+      // If we reach here, the click is outside both modal and Radix UI elements
+      handleCancel();
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -58,20 +116,71 @@ const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
       serviceType: "",
       estimateLocation: "",
       useCountryOnly: false,
-      bidDate: "",
-      expirationDate: "",
+      bidDate: null,
+      expirationDate: null,
       customer: "",
       paymentTerms: "",
       assignedEstimator: "",
     });
+    setShowAddCustomer(false);
+    setNewCustomer({
+      name: "",
+      email: "",
+      phone: "",
+      company: "",
+    });
     onClose();
+  };
+
+  const handleNewCustomerChange = (e) => {
+    const { name, value } = e.target;
+    setNewCustomer((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveNewCustomer = () => {
+    if (newCustomer.name && newCustomer.email) {
+      // Create a new customer ID based on the name
+      const customerId = newCustomer.name.toLowerCase().replace(/\s+/g, "-");
+      const customerName = newCustomer.name;
+
+      // Add the new customer to the form data
+      setFormData((prev) => ({
+        ...prev,
+        customer: customerId,
+      }));
+
+      // Reset the new customer form
+      setNewCustomer({
+        name: "",
+        email: "",
+        phone: "",
+        company: "",
+      });
+      setShowAddCustomer(false);
+    }
+  };
+
+  const handleCancelNewCustomer = () => {
+    setNewCustomer({
+      name: "",
+      email: "",
+      phone: "",
+      company: "",
+    });
+    setShowAddCustomer(false);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-bg-2 rounded-lg border border-border p-6 w-full max-w-2xl mx-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div
+        ref={modalRef}
+        className="bg-bg-2 rounded-lg border border-border p-6 w-full max-w-[400px] mx-4"
+      >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-light">Add Estimate</h2>
           <button
@@ -189,19 +298,19 @@ const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
               placeholder="Enter estimate location"
               className="bg-bg-3 border-border text-light placeholder:text-gray"
             />
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="useCountryOnly"
-                name="useCountryOnly"
-                checked={formData.useCountryOnly}
-                onChange={handleInputChange}
-                className="rounded border-border bg-bg-3 text-primary focus:ring-primary"
-              />
-              <Label htmlFor="useCountryOnly" className="text-light-2 text-sm">
-                Use country only
-              </Label>
-            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="useCountryOnly"
+              checked={formData.useCountryOnly}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({ ...prev, useCountryOnly: checked }))
+              }
+              className="border-border bg-bg-3 text-primary focus:ring-primary"
+            />
+            <Label htmlFor="useCountryOnly" className="text-light-2 text-sm">
+              Use country only
+            </Label>
           </div>
 
           {/* Bid Date and Expiration Date */}
@@ -213,13 +322,12 @@ const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
               >
                 Select bid date
               </Label>
-              <Input
-                id="bidDate"
-                name="bidDate"
-                type="date"
+              <DatePicker
                 value={formData.bidDate}
-                onChange={handleInputChange}
-                className="bg-bg-3 border-border text-light"
+                onChange={(date) =>
+                  setFormData((prev) => ({ ...prev, bidDate: date }))
+                }
+                placeholder="Date"
               />
             </div>
 
@@ -230,13 +338,12 @@ const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
               >
                 Expiration date
               </Label>
-              <Input
-                id="expirationDate"
-                name="expirationDate"
-                type="date"
+              <DatePicker
                 value={formData.expirationDate}
-                onChange={handleInputChange}
-                className="bg-bg-3 border-border text-light"
+                onChange={(date) =>
+                  setFormData((prev) => ({ ...prev, expirationDate: date }))
+                }
+                placeholder="Date"
               />
             </div>
           </div>
@@ -345,7 +452,7 @@ const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
           </Button>
           <Button
             onClick={handleSave}
-            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+            className="flex-1 bg-white text-black hover:bg-gray-100"
           >
             Save
           </Button>

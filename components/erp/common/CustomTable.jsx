@@ -394,6 +394,9 @@ const CustomTable = ({
       active: "bg-gray-500/20 text-green-400",
       approved: "bg-gray-500/20 text-green-400",
       "job completed": "bg-gray-500/20 text-green-400",
+      "in progress": "bg-gray-500/20 text-green-400",
+      "job in progress": "bg-gray-500/20 text-green-400",
+      "quote in progress": "bg-gray-500/20 text-green-400",
 
       // Danger states
       danger: "bg-gray-500/20 text-red-400",
@@ -407,9 +410,6 @@ const CustomTable = ({
       warning: "bg-gray-500/20 text-orange-400",
       pending: "bg-gray-500/20 text-orange-400",
       processing: "bg-gray-500/20 text-orange-400",
-      "in progress": "bg-gray-500/20 text-orange-400",
-      "job in progress": "bg-gray-500/20 text-orange-400",
-      "quote in progress": "bg-gray-500/20 text-orange-400",
       working: "bg-gray-500/20 text-orange-400",
 
       // Info states

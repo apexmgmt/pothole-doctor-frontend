@@ -180,8 +180,18 @@ const Leads = () => {
       label: "Date Range",
       gridCols: 2,
       fields: [
-        { key: "dateFrom", label: "Date From", type: "date" },
-        { key: "dateTo", label: "Date To", type: "date" },
+        {
+          key: "dateFrom",
+          label: "Date From",
+          type: "date",
+          placeholder: "Date from",
+        },
+        {
+          key: "dateTo",
+          label: "Date To",
+          type: "date",
+          placeholder: "Date to",
+        },
       ],
     },
   ];
