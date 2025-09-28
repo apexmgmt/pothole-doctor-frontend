@@ -1,20 +1,21 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import CommonLayout from "../CommonLayout";
 import CustomTable from "../../../common/CustomTable";
-import {
-  DetailsIcon,
-  FilterIcon,
-  UserIcon,
-  PlusIcon,
-} from "@/public/icons/icons";
+import FilterDrawer from "../../../common/FilterDrawer";
+import { DetailsIcon, FilterIcon, UserIcon } from "@/public/icons/icons";
+import { PlusIcon } from "lucide-react";
+import AdvancedCustomerDetails from "./AdvancedCustomerDetails";
 
 const Customers = () => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("customers");
   const [selectedRows, setSelectedRows] = useState([]);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
-  // Sample customer data based on the image
+  // Sample customer data with unique IDs and diverse information
   const customersData = [
     {
       id: "001545464",
@@ -27,47 +28,47 @@ const Customers = () => {
     },
     {
       id: "001545465",
-      name: "Pothole Doctors",
-      phone: "(740) 330-5155",
-      company: "The Pothole Doctors",
-      jobAddress: "708-D Fairground Rd, Lucasville, OH 45648",
-      leadSource: "Repair",
+      name: "John Smith",
+      phone: "(555) 123-4567",
+      company: "Smith Construction",
+      jobAddress: "123 Main St, Columbus, OH 43215",
+      leadSource: "Referral",
       stage: "Quote Voided",
     },
     {
       id: "001545466",
-      name: "Pothole Doctors",
-      phone: "(740) 330-5155",
-      company: "The Pothole Doctors",
-      jobAddress: "708-D Fairground Rd, Lucasville, OH 45648",
-      leadSource: "Repair",
+      name: "Sarah Johnson",
+      phone: "(614) 987-6543",
+      company: "Johnson Properties",
+      jobAddress: "456 Oak Ave, Cleveland, OH 44101",
+      leadSource: "Website",
       stage: "Quote In Progress",
     },
     {
       id: "001545467",
-      name: "Pothole Doctors",
-      phone: "(740) 330-5155",
-      company: "The Pothole Doctors",
-      jobAddress: "708-D Fairground Rd, Lucasville, OH 45648",
-      leadSource: "Repair",
+      name: "Mike Wilson",
+      phone: "(513) 456-7890",
+      company: "Wilson Enterprises",
+      jobAddress: "789 Pine St, Cincinnati, OH 45202",
+      leadSource: "Cold Call",
       stage: "Job in progress",
     },
     {
       id: "001545468",
-      name: "Pothole Doctors",
-      phone: "(740) 330-5155",
-      company: "The Pothole Doctors",
-      jobAddress: "708-D Fairground Rd, Lucasville, OH 45648",
-      leadSource: "Repair",
+      name: "Lisa Brown",
+      phone: "(330) 234-5678",
+      company: "Brown Development",
+      jobAddress: "321 Elm St, Akron, OH 44308",
+      leadSource: "Social Media",
       stage: "Job Completed",
     },
     {
       id: "001545469",
-      name: "Pothole Doctors",
-      phone: "(740) 330-5155",
-      company: "The Pothole Doctors",
-      jobAddress: "708-D Fairground Rd, Lucasville, OH 45648",
-      leadSource: "Repair",
+      name: "David Miller",
+      phone: "(419) 345-6789",
+      company: "Miller & Associates",
+      jobAddress: "654 Maple Dr, Toledo, OH 43604",
+      leadSource: "Trade Show",
       stage: "Quote In Progress",
     },
   ];
@@ -93,44 +94,21 @@ const Customers = () => {
     },
   ];
 
-  // Action buttons for the table
+  // Action buttons for the table (Filter is now built into CustomTable)
   const actionButtons = [
-    {
-      label: "Filter",
-      action: "filter",
-      variant: "secondary",
-      icon: FilterIcon,
-    },
     {
       label: "Add Customer",
       action: "add_customer",
       variant: "primary",
-      icon: PlusIcon,
+      // icon: PlusIcon,
     },
   ];
 
-  // Custom cell renderer for stage column
-  const renderStageCell = (row, column, value) => {
-    if (column.key === "stage") {
-      const stageColors = {
-        "Job Completed": "bg-green-500/20 text-green-400",
-        "Quote Voided": "bg-blue-500/20 text-blue-400",
-        "Quote In Progress": "bg-orange-500/20 text-orange-400",
-        "Job in progress": "bg-orange-500/20 text-orange-400",
-      };
-
-      return (
-        <span
-          className={`px-2 py-1.5 rounded-md text-xs font-medium ${
-            stageColors[value] || "bg-gray-500/20 text-gray-400"
-          }`}
-        >
-          {value}
-        </span>
-      );
-    }
-    return value;
-  };
+  // Custom cell renderer for stage column (now handled by default in CustomTable)
+  // const renderStageCell = (row, column, value) => {
+  //   // This is now handled automatically by CustomTable for columns with 'stage' in the key
+  //   return value;
+  // };
 
   // Custom actions renderer
   const renderCustomerActions = (row) => (
@@ -182,39 +160,122 @@ const Customers = () => {
     </div>
   );
 
+  // Customer-specific filter configuration
+  const customerFilterFields = [
+    {
+      key: "customerId",
+      label: "Customer ID",
+      type: "text",
+      placeholder: "Enter customer ID",
+    },
+    { key: "name", label: "Name", type: "text", placeholder: "Enter name" },
+    {
+      key: "phone",
+      label: "Phone",
+      type: "text",
+      placeholder: "Enter phone number",
+    },
+    {
+      key: "company",
+      label: "Company",
+      type: "text",
+      placeholder: "Enter company name",
+    },
+    {
+      key: "jobAddress",
+      label: "Job Address",
+      type: "text",
+      placeholder: "Enter job address",
+    },
+    {
+      key: "leadSource",
+      label: "Lead Source",
+      type: "select",
+      placeholder: "Select lead source",
+      options: [
+        { value: "repair", label: "Repair" },
+        { value: "referral", label: "Referral" },
+        { value: "website", label: "Website" },
+        { value: "cold-call", label: "Cold Call" },
+        { value: "social-media", label: "Social Media" },
+        { value: "trade-show", label: "Trade Show" },
+      ],
+    },
+    {
+      key: "stage",
+      label: "Stage",
+      type: "select",
+      placeholder: "Select stage",
+      options: [
+        { value: "job-completed", label: "Job Completed" },
+        { value: "quote-voided", label: "Quote Voided" },
+        { value: "quote-in-progress", label: "Quote In Progress" },
+        { value: "job-in-progress", label: "Job In Progress" },
+      ],
+    },
+    { key: "lastContactDate", label: "Last Contact Date", type: "date" },
+    {
+      key: "totalJobs",
+      label: "Total Jobs",
+      type: "number",
+      placeholder: "Enter minimum jobs",
+    },
+    {
+      key: "totalRevenue",
+      label: "Total Revenue ($)",
+      type: "number",
+      placeholder: "Enter minimum revenue",
+    },
+  ];
+
+  const customerFilterButtons = [
+    { label: "Clear", action: "clear", variant: "outline" },
+    { label: "Apply Filters", action: "apply", variant: "primary" },
+  ];
+
   // Event handlers
   const handleActionButtonClick = (action) => {
     console.log("Action clicked:", action);
     switch (action) {
       case "filter":
-        console.log("Opening filter modal...");
+        setIsFilterDrawerOpen(true);
         break;
       case "add_customer":
-        console.log("Opening add customer form...");
+        router.push("/erp/crm/customers/add-customer");
         break;
       default:
         console.log("Unknown action:", action);
     }
   };
 
-  const handleSearch = (data, searchTerm) => {
-    return data.filter((row) =>
-      Object.values(row).some((value) =>
-        String(value).toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
+  const handleFilterDrawerClose = () => {
+    setIsFilterDrawerOpen(false);
   };
 
-  const handleSort = (data, column, direction) => {
-    return [...data].sort((a, b) => {
-      const aVal = a[column];
-      const bVal = b[column];
-
-      if (aVal < bVal) return direction === "asc" ? -1 : 1;
-      if (aVal > bVal) return direction === "asc" ? 1 : -1;
-      return 0;
-    });
+  const handleApplyFilters = (filters) => {
+    console.log("Applied customer filters:", filters);
+    // Handle filter application logic here
   };
+
+  // Search and sorting functionality is now handled by default in CustomTable
+  // const handleSearch = (data, searchTerm) => {
+  //   return data.filter((row) =>
+  //     Object.values(row).some((value) =>
+  //       String(value).toLowerCase().includes(searchTerm.toLowerCase())
+  //     )
+  //   );
+  // };
+
+  // const handleSort = (data, column, direction) => {
+  //   return [...data].sort((a, b) => {
+  //     const aVal = a[column];
+  //     const bVal = b[column];
+
+  //     if (aVal < bVal) return direction === "asc" ? -1 : 1;
+  //     if (aVal > bVal) return direction === "asc" ? 1 : -1;
+  //     return 0;
+  //   });
+  // };
 
   const handleRowClick = (row) => {
     console.log("Row clicked:", row);
@@ -246,41 +307,34 @@ const Customers = () => {
   ];
 
   return (
-    <CommonLayout title="Customer" buttons={buttons} className="mb-6">
+    <CommonLayout title="Customer" buttons={buttons}>
       {activeTab === "customers" && (
         <CustomTable
           data={customersData}
           columns={customerColumns}
           actionButtons={actionButtons}
           onActionButtonClick={handleActionButtonClick}
-          onSearch={handleSearch}
-          onSort={handleSort}
-          onRowClick={handleRowClick}
-          onRowSelectionChange={handleRowSelectionChange}
-          selectedRows={selectedRows}
-          renderCell={renderStageCell}
-          renderActions={renderCustomerActions}
-          showRowNumbers={false}
-          stickyHeader={true}
-          maxHeight={400}
-          searchPlaceholder="Search customers..."
-          showExport={false}
-          showPagination={true}
-          pageSize={10}
-          emptyMessage="No customers found"
         />
       )}
 
       {activeTab === "details" && (
-        <div className="text-light">
-          <p>Customer details view content goes here...</p>
-          {/* Add your details-specific content */}
-        </div>
+        <AdvancedCustomerDetails
+          customerData={customersData[0]} // Pass the first customer as sample data
+          onEdit={() => console.log("Edit customer")}
+        />
       )}
+
+      {/* Filter Drawer */}
+      <FilterDrawer
+        isOpen={isFilterDrawerOpen}
+        onClose={handleFilterDrawerClose}
+        onApplyFilters={handleApplyFilters}
+        title="Filter Customers"
+        fields={customerFilterFields}
+        buttons={customerFilterButtons}
+      />
     </CommonLayout>
   );
 };
 
 export default Customers;
-
-
