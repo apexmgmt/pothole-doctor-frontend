@@ -1,11 +1,12 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
+
 import { submitContactForm } from "../../../services/contact.service";
 
 const ContactSection = () => {
   // Add CSS to fix dropdown width issues
   React.useEffect(() => {
     const style = document.createElement("style");
+
     style.textContent = `
       .contact-select {
         width: 100% !important;
@@ -42,6 +43,7 @@ const ContactSection = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -61,6 +63,7 @@ const ContactSection = () => {
 
       if (result.success) {
         setSubmitStatus({ type: "success", message: result.message });
+
         // Reset form on successful submission
         setFormData({
           firstName: "",

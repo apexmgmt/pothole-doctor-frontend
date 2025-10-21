@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 
@@ -29,6 +30,7 @@ const SelectTrigger = React.forwardRef(
     </SelectPrimitive.Trigger>
   )
 );
+
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 const SelectScrollUpButton = React.forwardRef(
@@ -45,6 +47,7 @@ const SelectScrollUpButton = React.forwardRef(
     </SelectPrimitive.ScrollUpButton>
   )
 );
+
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName;
 
 const SelectScrollDownButton = React.forwardRef(
@@ -61,6 +64,7 @@ const SelectScrollDownButton = React.forwardRef(
     </SelectPrimitive.ScrollDownButton>
   )
 );
+
 SelectScrollDownButton.displayName =
   SelectPrimitive.ScrollDownButton.displayName;
 
@@ -91,6 +95,7 @@ const SelectContent = React.forwardRef(
     </SelectPrimitive.Portal>
   )
 );
+
 SelectContent.displayName = SelectPrimitive.Content.displayName;
 
 const SelectLabel = React.forwardRef(({ className, ...props }, ref) => (
@@ -100,6 +105,7 @@ const SelectLabel = React.forwardRef(({ className, ...props }, ref) => (
     {...props}
   />
 ));
+
 SelectLabel.displayName = SelectPrimitive.Label.displayName;
 
 const SelectItem = React.forwardRef(
@@ -121,6 +127,7 @@ const SelectItem = React.forwardRef(
     </SelectPrimitive.Item>
   )
 );
+
 SelectItem.displayName = SelectPrimitive.Item.displayName;
 
 const SelectSeparator = React.forwardRef(({ className, ...props }, ref) => (
@@ -130,6 +137,7 @@ const SelectSeparator = React.forwardRef(({ className, ...props }, ref) => (
     {...props}
   />
 ));
+
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
 
 export {

@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx}\"",
+    "stylelint": "stylelint \"**/*.{css,scss,js,jsx,ts,tsx}\"",
+    "stylelint:fix": "stylelint \"**/*.{css,scss,js,jsx,ts,tsx}\" --fix"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -34,11 +38,19 @@
     "zod": "^4.1.9"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
+    "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.12",
+    "@typescript-eslint/parser": "^8.46.1",
     "autoprefixer": "^10.4.20",
     "eslint": "^9",
     "eslint-config-next": "15.4.7",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "postcss-styled-syntax": "^0.7.1",
+    "prettier": "^3.6.2",
+    "stylelint": "^16.25.0",
+    "stylelint-use-logical-spec": "^5.0.1",
     "tailwindcss": "^4"
   }
 }

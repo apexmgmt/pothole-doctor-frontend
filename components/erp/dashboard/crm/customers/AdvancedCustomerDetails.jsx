@@ -1,6 +1,9 @@
 "use client";
 
 import React from "react";
+
+import { PlusIcon } from "lucide-react";
+
 import EntityDetails from "../../../common/EntityDetails";
 import {
   EmailIcon,
@@ -16,7 +19,6 @@ import {
   JobsIcon,
   RefundsIcon,
 } from "@/public/icons/icons";
-import { PlusIcon } from "lucide-react";
 
 const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
   // Custom tabs for customers with additional functionality
@@ -53,6 +55,7 @@ const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
           label: "Compose & Send Email",
           action: "compose_email",
           variant: "primary",
+
           // icon: <PlusIcon />,
         },
       ],
@@ -82,6 +85,7 @@ const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
           label: "Send SMS",
           action: "send_sms",
           variant: "primary",
+
           // icon: <PlusIcon />,
         },
       ],
@@ -125,6 +129,7 @@ const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
           label: "Upload Document",
           action: "upload_document",
           variant: "primary",
+
           // icon: <PlusIcon />,
         },
       ],
@@ -161,6 +166,7 @@ const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
           label: "Add Contact",
           action: "add_contact",
           variant: "primary",
+
           // icon: <PlusIcon />,
         },
       ],
@@ -201,6 +207,7 @@ const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
           label: "Add Address",
           action: "add_address",
           variant: "primary",
+
           // icon: <PlusIcon />,
         },
       ],
@@ -240,6 +247,7 @@ const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
           label: "Add Measurement",
           action: "add_measurement",
           variant: "primary",
+
           // icon: <PlusIcon />,
         },
       ],
@@ -279,10 +287,12 @@ const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
           label: "Create Estimate",
           action: "create_estimate",
           variant: "primary",
+
           // icon: <PlusIcon />,
         },
       ],
     },
+
     // Custom tab for customers - Projects
     {
       id: "projects",
@@ -319,10 +329,12 @@ const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
           label: "Create Project",
           action: "create_project",
           variant: "primary",
+
           // icon: <PlusIcon />,
         },
       ],
     },
+
     // Custom tab for customers - Payment History
     {
       id: "payments",
@@ -359,10 +371,12 @@ const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
           label: "Record Payment",
           action: "record_payment",
           variant: "primary",
+
           // icon: <PlusIcon />,
         },
       ],
     },
+
     // Custom tab for customers - Invoices
     {
       id: "invoices",
@@ -399,10 +413,12 @@ const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
           label: "Create Invoice",
           action: "create_invoice",
           variant: "primary",
+
           // icon: <PlusIcon />,
         },
       ],
     },
+
     // Custom tab for customers - Jobs
     {
       id: "jobs",
@@ -442,10 +458,12 @@ const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
           label: "Create Job",
           action: "create_job",
           variant: "primary",
+
           // icon: <PlusIcon />,
         },
       ],
     },
+
     // Custom tab for customers - Refunds
     {
       id: "refunds",
@@ -485,6 +503,7 @@ const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
           label: "Process Refund",
           action: "process_refund",
           variant: "primary",
+
           // icon: <PlusIcon />,
         },
       ],

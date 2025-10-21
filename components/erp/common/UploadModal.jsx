@@ -8,9 +8,11 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
   const handleChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const fileArray = Array.from(e.target.files);
+
       if (onUpload) {
         onUpload(fileArray);
       }
+
       onClose();
     }
   };

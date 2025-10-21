@@ -1,11 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
+
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function HeroSection() {
   const router = useRouter();
+
   const [formData, setFormData] = useState({
     streetAddress: "",
     zipCode: "",
@@ -13,6 +15,7 @@ export default function HeroSection() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -22,6 +25,7 @@ export default function HeroSection() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
+
     // Navigate to contact page after form submission
     router.push("/contact");
   };

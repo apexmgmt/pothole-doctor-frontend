@@ -39,7 +39,8 @@ export async function POST(req) {
     // Format project type for display
     const formatProjectType = (type) => {
       if (!type) return 'Not specified';
-      return type.split('-').map(word => 
+      
+return type.split('-').map(word => 
         word.charAt(0).toUpperCase() + word.slice(1)
       ).join(' ');
     };
@@ -47,7 +48,8 @@ export async function POST(req) {
     // Format company type for display
     const formatCompany = (company) => {
       if (!company) return 'Not specified';
-      return company.split('-').map(word => 
+      
+return company.split('-').map(word => 
         word.charAt(0).toUpperCase() + word.slice(1)
       ).join(' ');
     };
@@ -55,7 +57,8 @@ export async function POST(req) {
     // Format hear about us for display
     const formatHearAboutUs = (source) => {
       if (!source) return 'Not specified';
-      return source.split('-').map(word => 
+      
+return source.split('-').map(word => 
         word.charAt(0).toUpperCase() + word.slice(1)
       ).join(' ');
     };
@@ -344,7 +347,8 @@ Please respond within 24 hours for best customer service.
 
   } catch (error) {
     console.error('SendGrid error:', error);
-    return Response.json({ 
+    
+return Response.json({ 
       success: false,
       message: 'Failed to send your message. Please try again or call us directly at (740) 330-5155.' 
     }, { status: 500 });

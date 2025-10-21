@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+
+import { PlusIcon, XIcon } from "lucide-react";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -13,10 +16,10 @@ import {
 } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PlusIcon, XIcon } from "lucide-react";
 
 const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
   const modalRef = useRef(null);
+
   const [formData, setFormData] = useState({
     estimateTitle: "",
     estimateType: "",
@@ -30,7 +33,9 @@ const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
     paymentTerms: "",
     assignedEstimator: "",
   });
+
   const [showAddCustomer, setShowAddCustomer] = useState(false);
+
   const [newCustomer, setNewCustomer] = useState({
     name: "",
     email: "",
@@ -88,6 +93,7 @@ const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -134,6 +140,7 @@ const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
 
   const handleNewCustomerChange = (e) => {
     const { name, value } = e.target;
+
     setNewCustomer((prev) => ({
       ...prev,
       [name]: value,

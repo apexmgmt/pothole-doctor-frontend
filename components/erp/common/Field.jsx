@@ -1,5 +1,6 @@
-import { EyeCloseIcon, EyeOpenIcon } from "@/public/icons/icons";
 import React, { useMemo, useState } from "react";
+
+import { EyeCloseIcon, EyeOpenIcon } from "@/public/icons/icons";
 
 /**
  * Reusable Field component
@@ -17,6 +18,7 @@ const Field = ({
   required,
   disabled,
   onBlur,
+
   // select / radio / checkbox
   options = [], // [{ value: string, label: string }]
   // textarea
@@ -89,17 +91,22 @@ const Field = ({
   const renderCheckboxGroup = () => {
     // Supports single or multiple checkbox via value array
     const current = Array.isArray(value) ? value : value ? [value] : [];
+
     const handleToggle = (val) => {
       if (!onChange) return;
       let next;
+
       if (current.includes(val)) {
         next = current.filter((v) => v !== val);
       } else {
         next = [...current, val];
       }
+
       onChange({ target: { name, value: next } });
     };
-    return (
+
+    
+return (
       <div className="grid gap-2">
         {options.length > 0 ? (
           options.map((opt) => (
@@ -212,6 +219,7 @@ const Field = ({
     if (type === "radio") return renderRadioGroup();
     if (type === "password")
       return renderTextLike(showPassword ? "text" : "password");
+
     // text/email
     return renderTextLike(type);
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
+
 import { useRouter } from "next/navigation";
+
+import { PlusIcon } from "lucide-react";
+
 import CommonLayout from "../CommonLayout";
 import CustomTable from "../../../common/CustomTable";
 import FilterDrawer from "../../../common/FilterDrawer";
 import { DetailsIcon, FilterIcon, UserIcon } from "@/public/icons/icons";
-import { PlusIcon } from "lucide-react";
 import AdvancedCustomerDetails from "./AdvancedCustomerDetails";
 
 const Customers = () => {
@@ -100,6 +103,7 @@ const Customers = () => {
       label: "Add Customer",
       action: "add_customer",
       variant: "primary",
+
       // icon: PlusIcon,
     },
   ];
@@ -236,6 +240,7 @@ const Customers = () => {
   // Event handlers
   const handleActionButtonClick = (action) => {
     console.log("Action clicked:", action);
+
     switch (action) {
       case "filter":
         setIsFilterDrawerOpen(true);
@@ -254,6 +259,7 @@ const Customers = () => {
 
   const handleApplyFilters = (filters) => {
     console.log("Applied customer filters:", filters);
+
     // Handle filter application logic here
   };
 

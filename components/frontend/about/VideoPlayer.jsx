@@ -1,7 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useRef } from "react";
+
+import Image from "next/image";
 
 export default function VideoPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);

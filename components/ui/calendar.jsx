@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -171,6 +172,7 @@ function CalendarDayButton({ className, day, modifiers, ...props }) {
   const defaultClassNames = getDefaultClassNames();
 
   const ref = React.useRef(null);
+
   React.useEffect(() => {
     if (modifiers.focused) ref.current?.focus();
   }, [modifiers.focused]);

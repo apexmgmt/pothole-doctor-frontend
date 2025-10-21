@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+
+import { SearchIcon } from "lucide-react";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -11,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SearchIcon } from "lucide-react";
 
 const AddCustomer = () => {
   // Single form state with all fields
@@ -37,6 +39,7 @@ const AddCustomer = () => {
     spousePhone: "",
     interestLevel: "",
     preQualifiedFinanceAmount: "",
+
     // Address fields
     status: "",
     addressTitle: "",
@@ -53,6 +56,7 @@ const AddCustomer = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+
 import CustomButton from "./CustomButton";
 import {
   ExcelIcon,
@@ -198,6 +199,7 @@ const CustomTable = ({
   const processedData = useMemo(() => {
     // Apply search filter
     let searchFilteredData = data;
+
     if (searchTerm && onSearch) {
       searchFilteredData = onSearch(data, searchTerm);
     } else if (searchTerm) {
@@ -222,7 +224,8 @@ const CustomTable = ({
 
         if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
         if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
+        
+return 0;
       });
     }
 
@@ -234,6 +237,7 @@ const CustomTable = ({
     1,
     Math.ceil(processedData.length / currentPageSize)
   );
+
   const startIndex = (currentPage - 1) * currentPageSize;
   const endIndex = startIndex + currentPageSize;
   const paginatedData = processedData.slice(startIndex, endIndex);
@@ -256,6 +260,7 @@ const CustomTable = ({
 
   const handlePageChange = (page) => {
     const validPage = Math.max(1, Math.min(page, totalPages));
+
     setCurrentPage(validPage);
     onPageChange?.(validPage);
   };
@@ -268,6 +273,7 @@ const CustomTable = ({
 
   const handleSelectAll = (checked) => {
     const newSelection = checked ? paginatedData.map((row) => row[rowKey]) : [];
+
     setLocalSelectedRows(newSelection);
     onRowSelectionChange?.(newSelection);
   };
@@ -340,7 +346,9 @@ const CustomTable = ({
         </div>
       );
     }
-    return (
+
+    
+return (
       <div className="ml-2">
         <svg
           width="12"
@@ -422,10 +430,12 @@ const CustomTable = ({
       neutral: "bg-gray-500/20 text-gray-400",
       draft: "bg-gray-500/20 text-gray-400",
       prospect: "bg-gray-500/20 text-gray-400",
+
       // open: "bg-gray-500/20 text-gray-400",
     };
 
     const normalizedValue = value?.toLowerCase() || "";
+
     const colorClass =
       statusColors[normalizedValue] || "bg-gray-500/20 text-gray-400";
 
@@ -442,7 +452,9 @@ const CustomTable = ({
     if (renderActions) {
       return renderActions(row);
     }
-    return (
+
+    
+return (
       <div className="flex gap-2 items-center">
         <button
           onClick={(e) => {
@@ -499,6 +511,7 @@ const CustomTable = ({
   };
 
   return (
+
     //bg-bg-2 rounded-lg border border-border
     <div className={` ${className}`}>
       {/* Toolbar Section */}
@@ -516,6 +529,7 @@ const CustomTable = ({
                   Filter
                 </button>
               ) : showExport ? (
+
                 /* Export Options on left when filter is disabled */
                 <div className="flex gap-2">
                   {exportOptions.map((option) => {

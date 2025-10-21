@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
@@ -59,6 +60,7 @@ export function DatePicker({
           onSelect={handleSelect}
           initialFocus
           className="bg-bg-2 text-light border-none overflow-hidden w-[250px]"
+
           //   classNames={{
           //     root: "bg-bg-2 text-light",
           //     months: "bg-bg-2 text-light",
@@ -136,6 +138,7 @@ export function DateRangePicker({
           onSelect={handleSelect}
           initialFocus
           className="bg-bg-2 text-light border-0"
+
           //   classNames={{
           //     root: "bg-bg-2 text-light",
           //     months: "bg-bg-2 text-light",

@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
+
+import { PlusIcon, UserPlusIcon } from "lucide-react";
+
 import CommonLayout from "../CommonLayout";
 import CustomTable from "../../../common/CustomTable";
 import FilterDrawer from "../../../common/FilterDrawer";
 import { DetailsIcon, FilterIcon, LeadIcon } from "@/public/icons/icons";
-import { PlusIcon, UserPlusIcon } from "lucide-react";
 import LeadDetails from "./LeadDetails";
 
 const Leads = () => {
@@ -204,6 +206,7 @@ const Leads = () => {
   // Event handlers
   const handleActionButtonClick = (action) => {
     console.log("Action clicked:", action);
+
     switch (action) {
       case "filter":
         setIsFilterDrawerOpen(true);
@@ -222,6 +225,7 @@ const Leads = () => {
 
   const handleApplyFilters = (filters) => {
     console.log("Applied lead filters:", filters);
+
     // Handle filter application logic here
   };
 

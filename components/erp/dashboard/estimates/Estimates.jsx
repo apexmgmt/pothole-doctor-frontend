@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
+
+import { PlusIcon } from "lucide-react";
+
 import CommonLayout from "../crm/CommonLayout";
 import CustomTable from "../../common/CustomTable";
 import FilterDrawer from "../../common/FilterDrawer";
 import AddEstimateModal from "./AddEstimateModal";
-import { PlusIcon } from "lucide-react";
 
 const Estimates = () => {
   const [selectedRows, setSelectedRows] = useState([]);
@@ -178,6 +180,7 @@ const Estimates = () => {
   // Event handlers
   const handleActionButtonClick = (action) => {
     console.log("Action clicked:", action);
+
     switch (action) {
       case "filter":
         setIsFilterDrawerOpen(true);
@@ -196,6 +199,7 @@ const Estimates = () => {
 
   const handleApplyFilters = (filters) => {
     console.log("Applied estimate filters:", filters);
+
     // Handle filter application logic here
   };
 
@@ -214,6 +218,7 @@ const Estimates = () => {
 
   const handleSaveEstimate = (estimateData) => {
     console.log("New estimate saved:", estimateData);
+
     // Here you would typically add the new estimate to your data
     // For now, we'll just log it
   };

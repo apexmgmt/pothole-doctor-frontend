@@ -1,6 +1,7 @@
+import React from "react";
+
 import Header from "@/components/erp/common/Header";
 import Sidebar from "@/components/erp/common/Sidebar";
-import React from "react";
 
 const layout = ({ children }) => {
   return (

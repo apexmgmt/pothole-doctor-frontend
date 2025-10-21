@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+
 import {
   Sheet,
   SheetContent,
@@ -33,7 +34,8 @@ const FilterDrawer = ({
   // Initialize filters based on provided fields
   const initialFilters = fields.reduce((acc, field) => {
     acc[field.key] = field.defaultValue || "";
-    return acc;
+    
+return acc;
   }, {});
 
   const [filters, setFilters] = useState(initialFilters);
@@ -42,8 +44,10 @@ const FilterDrawer = ({
   useEffect(() => {
     const newInitialFilters = fields.reduce((acc, field) => {
       acc[field.key] = field.defaultValue || "";
-      return acc;
+      
+return acc;
     }, {});
+
     setFilters(newInitialFilters);
   }, [fields]);
 
@@ -171,6 +175,7 @@ const FilterDrawer = ({
               }
             >
               {field.gridCols ? (
+
                 // Handle grid layout for fields like date range
                 field.fields?.map((subField) => (
                   <div key={subField.key} className="space-y-2">
@@ -184,6 +189,7 @@ const FilterDrawer = ({
                   </div>
                 ))
               ) : (
+
                 // Single field
                 <>
                   <Label

@@ -5,6 +5,7 @@ const CustomTable = () => {
   const processedData = useMemo(() => {
     // Apply search filter
     let searchFilteredData = data;
+
     if (searchTerm && onSearch) {
       searchFilteredData = onSearch(data, searchTerm);
     } else if (searchTerm) {
@@ -29,7 +30,8 @@ const CustomTable = () => {
 
         if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
         if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
+        
+return 0;
       });
     }
 

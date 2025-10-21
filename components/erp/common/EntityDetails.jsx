@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+
+import { PhoneIcon, PlusIcon, UserIcon } from "lucide-react";
+
 import {
   CalenderIcon,
   CallIcon,
@@ -15,7 +18,6 @@ import {
 import CustomButton from "./CustomButton";
 import CustomTable from "./CustomTable";
 import DocumentsGallery from "./DocumentsGallery";
-import { PhoneIcon, PlusIcon, UserIcon } from "lucide-react";
 
 const EntityDetails = ({
   entityData,
@@ -247,6 +249,7 @@ const EntityDetails = ({
 
   const handleActionButtonClick = (action) => {
     console.log(`${entityType} action clicked:`, action);
+
     // Handle different actions based on the tab and entity type
   };
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+
 import EntityDetails from "../../../common/EntityDetails";
 
 const CustomerDetails = ({ customerData, onEdit }) => {

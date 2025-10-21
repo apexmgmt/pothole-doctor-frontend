@@ -1,5 +1,6 @@
-import EstimateDetailsIndex from "@/views/erp/dashboard/estimates/estimate-details";
 import React from "react";
+
+import EstimateDetailsIndex from "@/views/erp/dashboard/estimates/estimate-details";
 
 const EstimateDetailsPage = () => {
   return <EstimateDetailsIndex />;

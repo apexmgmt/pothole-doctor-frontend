@@ -1,5 +1,11 @@
 "use client";
 
+import React, { useState } from "react";
+
+import Image from "next/image";
+
+import Link from "next/link";
+
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -9,9 +15,7 @@ import {
   SettingsIcon,
   UserIcon,
 } from "@/public/icons/icons";
-import Image from "next/image";
-import Link from "next/link";
-import React, { useState } from "react";
+
 
 const Sidebar = () => {
   const [activeSection, setActiveSection] = useState("crm");
