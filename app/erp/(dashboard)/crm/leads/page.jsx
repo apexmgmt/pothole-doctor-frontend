@@ -1,9 +1,9 @@
 import React from "react";
 
-import LeadsIndex from "@/views/erp/dashboard/crm/leads";
+import Leads from "@/views/erp/dashboard/crm/leads/Leads";
 
-const page = () => {
-  return <LeadsIndex />;
+const LeadsPage = () => {
+  return <Leads />;
 };
 
-export default page;
+export default LeadsPage;

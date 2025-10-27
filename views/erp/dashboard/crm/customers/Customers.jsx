@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation";
 
 import { PlusIcon } from "lucide-react";
 
-import CommonLayout from "../CommonLayout";
-import CustomTable from "../../../common/CustomTable";
-import FilterDrawer from "../../../common/FilterDrawer";
+import CommonLayout from "@/components/erp/dashboard/crm/CommonLayout";
+import CustomTable from "@/components/erp/common/CustomTable";
+import FilterDrawer from "@/components/erp/common/FilterDrawer";
 import { DetailsIcon, FilterIcon, UserIcon } from "@/public/icons/icons";
-import AdvancedCustomerDetails from "./AdvancedCustomerDetails";
+import AdvancedCustomerDetails from "@/components/erp/dashboard/crm/customers/AdvancedCustomerDetails";
 
 const Customers = () => {
   const router = useRouter();

@@ -4,11 +4,11 @@ import React, { useState } from "react";
 
 import { PlusIcon, UserPlusIcon } from "lucide-react";
 
-import CommonLayout from "../CommonLayout";
-import CustomTable from "../../../common/CustomTable";
-import FilterDrawer from "../../../common/FilterDrawer";
+import CommonLayout from "@/components/erp/dashboard/crm/CommonLayout";
+import CustomTable from "@/components/erp/common/CustomTable";
+import FilterDrawer from "@/components/erp/common/FilterDrawer";
 import { DetailsIcon, FilterIcon, LeadIcon } from "@/public/icons/icons";
-import LeadDetails from "./LeadDetails";
+import LeadDetails from "@/components/erp/dashboard/crm/leads/LeadDetails";
 
 const Leads = () => {
   const [activeTab, setActiveTab] = useState("lead");

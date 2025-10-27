@@ -1,9 +1,9 @@
 import React from "react";
 
-import CustomersIndex from "@/views/erp/dashboard/crm/customers";
+import Customers from "@/views/erp/dashboard/crm/customers/Customers";
 
-const page = () => {
-  return <CustomersIndex />;
+const CustomersPage = () => {
+  return <Customers />;
 };
 
-export default page;
+export default CustomersPage;
