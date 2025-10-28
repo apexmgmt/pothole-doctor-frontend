@@ -18,7 +18,7 @@
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "plugins": [
       {
         "name": "next"
@@ -51,7 +51,9 @@
     "**/*.tsx",
     "**/*.mts",
     "**/*.js",
-    "**/*.jsx"
+    "**/*.jsx",
+    ".next\\dev/types/**/*.ts",
+    ".next\\dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
