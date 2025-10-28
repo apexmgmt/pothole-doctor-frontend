@@ -1,6 +1,5 @@
-import ContactSection from "@/components/frontend/contact/Contact";
-import MapSection from "@/components/frontend/contact/Map";
-import React from "react";
+import ContactSection from "@/views/frontend/contact/ContactSection";
+import MapSection from "@/views/frontend/contact/MapSection";
 
 const ContactIndex = () => {
   return (
