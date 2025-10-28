@@ -1,6 +1,6 @@
+import ContactService from "@/services/contact.service";
 import React, { useState } from "react";
 
-import { submitContactForm } from "../../../services/contact.service";
 
 const ContactSection = () => {
   // Add CSS to fix dropdown width issues
@@ -59,7 +59,7 @@ const ContactSection = () => {
     setSubmitStatus(null);
 
     try {
-      const result = await submitContactForm(formData);
+      const result = await ContactService.submitContactFormToGoogleSheet(formData);
 
       if (result.success) {
         setSubmitStatus({ type: "success", message: result.message });

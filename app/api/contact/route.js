@@ -1,69 +1,69 @@
 import sgMail from '@sendgrid/mail';
 
 export async function POST(req) {
-  try {
-    const body = await req.json();
+    try {
+        const body = await req.json();
 
-    const { 
-      firstName, 
-      lastName, 
-      email, 
-      phone, 
-      company, 
-      projectType, 
-      projectDescription, 
-      timeline, 
-      hearAboutUs,
-      privacy 
-    } = body;
+        const {
+            firstName,
+            lastName,
+            email,
+            phone,
+            company,
+            projectType,
+            projectDescription,
+            timeline,
+            hearAboutUs,
+            privacy
+        } = body;
 
-    // Validate required fields
-    if (!firstName || !lastName || !email || !phone || !projectDescription || !timeline) {
-      return Response.json({ 
-        success: false,
-        message: 'Please fill in all required fields' 
-      }, { status: 400 });
-    }
+        // Validate required fields
+        if (!firstName || !lastName || !email || !phone || !projectDescription || !timeline) {
+            return Response.json({
+                success: false,
+                message: 'Please fill in all required fields'
+            }, { status: 400 });
+        }
 
-    // Validate privacy agreement
-    if (!privacy) {
-      return Response.json({ 
-        success: false,
-        message: 'Please agree to the Privacy Policy' 
-      }, { status: 400 });
-    }
+        // Validate privacy agreement
+        if (!privacy) {
+            return Response.json({
+                success: false,
+                message: 'Please agree to the Privacy Policy'
+            }, { status: 400 });
+        }
 
-    // Set SendGrid API key
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        // Set SendGrid API key
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-    // Format project type for display
-    const formatProjectType = (type) => {
-      if (!type) return 'Not specified';
-      
-return type.split('-').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-    };
+        // Format project type for display
+        const formatProjectType = (type) => {
+            if (!type) return 'Not specified';
 
-    // Format company type for display
-    const formatCompany = (company) => {
-      if (!company) return 'Not specified';
-      
-return company.split('-').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-    };
+            return type.split('-').map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        };
 
-    // Format hear about us for display
-    const formatHearAboutUs = (source) => {
-      if (!source) return 'Not specified';
-      
-return source.split('-').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-    };
+        // Format company type for display
+        const formatCompany = (company) => {
+            if (!company) return 'Not specified';
 
-    const emailHTML = `
+            return company.split('-').map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        };
+
+        // Format hear about us for display
+        const formatHearAboutUs = (source) => {
+            if (!source) return 'Not specified';
+
+            return source.split('-').map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        };
+
+        const emailHTML = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -222,14 +222,14 @@ return source.split('-').map(word =>
             
             <div class="timestamp">
                 Received: ${new Date().toLocaleString('en-US', {
-                  timeZone: 'America/New_York',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit'
-                })} EST
+            timeZone: 'America/New_York',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        })} EST
             </div>
 
             <div class="content">
@@ -296,18 +296,18 @@ return source.split('-').map(word =>
     </body>
     </html>`;
 
-    const msg = {
-      to: process.env.SENDGRID_TO_EMAIL,
-      from: {
-        email: process.env.SENDGRID_FROM_EMAIL,
-        name: 'Pothole Doctors Website'
-      },
-      replyTo: {
-        email: email,
-        name: `${firstName} ${lastName}`
-      },
-      subject: `New Contact Form Submission - ${firstName} ${lastName} | ${formatProjectType(projectType)}`,
-      text: `
+        const msg = {
+            to: process.env.SENDGRID_TO_EMAIL,
+            from: {
+                email: process.env.SENDGRID_FROM_EMAIL,
+                name: 'Pothole Doctors Website'
+            },
+            replyTo: {
+                email: email,
+                name: `${firstName} ${lastName}`
+            },
+            subject: `New Contact Form Submission - ${firstName} ${lastName} | ${formatProjectType(projectType)}`,
+            text: `
 NEW CONTACT FORM SUBMISSION - POTHOLE DOCTORS
 
 Personal Information:
@@ -325,32 +325,32 @@ Additional Information:
 - How they heard about us: ${formatHearAboutUs(hearAboutUs)}
 
 Submitted: ${new Date().toLocaleString('en-US', {
-        timeZone: 'America/New_York',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })} EST
+                timeZone: 'America/New_York',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })} EST
 
 Please respond within 24 hours for best customer service.
       `,
-      html: emailHTML,
-    };
+            html: emailHTML,
+        };
 
-    await sgMail.send(msg);
-    
-    return Response.json({ 
-      success: true,
-      message: 'Thank you for your inquiry! We\'ll get back to you within 24 hours.' 
-    }, { status: 200 });
+        await sgMail.send(msg);
 
-  } catch (error) {
-    console.error('SendGrid error:', error);
-    
-return Response.json({ 
-      success: false,
-      message: 'Failed to send your message. Please try again or call us directly at (740) 330-5155.' 
-    }, { status: 500 });
-  }
+        return Response.json({
+            success: true,
+            message: 'Thank you for your inquiry! We\'ll get back to you within 24 hours.'
+        }, { status: 200 });
+
+    } catch (error) {
+        console.error('SendGrid error:', error);
+
+        return Response.json({
+            success: false,
+            message: 'Failed to send your message. Please try again or call us directly at (740) 330-5155.'
+        }, { status: 500 });
+    }
 }
