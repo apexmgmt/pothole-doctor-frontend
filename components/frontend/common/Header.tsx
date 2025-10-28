@@ -368,21 +368,11 @@ export default function Header() {
                   CONTACT
                 </Link>
               </li>
-              <li>
-                <Link
-                  href='/location'
-                  onClick={() => handleLinkClick('/location')}
-                  className={`block text-base font-medium transition-colors py-4 border-b border-white/10
-                  ${activeLink === '/location' ? 'text-primary' : 'text-white hover:text-primary'}`}
-                >
-                  LOCATION
-                </Link>
-              </li>
             </ul>
           </nav>
 
           {/* Mobile Menu Footer with Login Button */}
-          <div className='p-6 border-t border-white/10'>
+          {/* <div className='p-6 border-t border-white/10'>
             <Link
               href='/login'
               onClick={() => setIsMobileMenuOpen(false)}
@@ -390,7 +380,7 @@ export default function Header() {
             >
               LOG IN
             </Link>
-          </div>
+          </div> */}
         </div>
       </div>
     </header>
