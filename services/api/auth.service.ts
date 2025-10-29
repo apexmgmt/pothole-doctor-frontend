@@ -24,8 +24,10 @@ export default class AuthService {
 
         throw new Error(errorData.message || 'Failed to login')
       }
+      
+      return await response.json()
     } catch (error) {
-      console.error(error)
+      throw error
     }
   }
 }

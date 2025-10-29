@@ -4,7 +4,10 @@ import React, { useState } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import Field from '@/components/erp/common/Field'
 import CustomButton from '@/components/erp/common/CustomButton'
-import AuthService from '@/services/auth.service'
+import AuthService from '@/services/api/auth.service'
+import CookieService from '@/services/storage/cookie.service'
+import { encryptData } from '@/utils/encryption'
+import { useRouter } from 'next/navigation'
 
 type LoginForm = {
   email: string
@@ -12,6 +15,7 @@ type LoginForm = {
 }
 
 const Login: React.FC = () => {
+  const router = useRouter()
   const {
     register,
     handleSubmit,
@@ -28,10 +32,16 @@ const Login: React.FC = () => {
         .then(response => {
             setIsLoading(false)
             console.log(response)
-            // Handle successful login here (e.g., redirect, show message)
+            // save the token and refresh token
+            CookieService.store('access_token', response.access_token, { expires: response.expires_in })
+            CookieService.store('refresh_token', response.refresh_token)
+            CookieService.store('token_type', response.token_type)
+            CookieService.store('user', JSON.stringify(encryptData(response?.user)))
+            // redirect to dashboard
+            router.push('/erp/dashboard')
         }).catch(error => {
             setIsLoading(false)
-            console.error(error)
+            CookieService.clear()
         })
     } catch (error) {
         setIsLoading(false)
