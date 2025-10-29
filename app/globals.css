@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* @plugin "tailwindcss-animate";
 @import "tw-animate-css";
@@ -14,8 +14,8 @@
   --color-border: oklch(0.8914 0 0);
 
   /* Fonts */
-  --font-global: "inter", sans-serif;
-  --font-primary: "ClashGrotesk", sans-serif;
+  --font-global: 'inter', sans-serif;
+  --font-primary: 'ClashGrotesk', sans-serif;
 
   /* Base (mobile first) */
   --text-large-title: 38px;
@@ -53,7 +53,7 @@
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  inline-size: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -104,15 +104,17 @@
 } */
 
 .container {
-  width: clamp(320px, 95%, 1310px);
-  margin: 0 auto;
-  padding: 0 15px;
-  max-width: 1310px !important;
+  inline-size: clamp(320px, 95%, 1310px);
+  margin-block: 0;
+  margin-inline: auto;
+  padding-block: 0;
+  padding-inline: 15px;
+  max-inline-size: 1310px !important;
 }
 
 @media (max-width: 575px) {
   .container {
-    width: 100%;
+    inline-size: 100%;
   }
 }
 

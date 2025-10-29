@@ -1,9 +1,9 @@
 import React from "react";
 
-import AddCustomerIndex from "@/views/erp/dashboard/crm/customers/AddCustomerIndex";
+import AddCustomer from "@/views/erp/dashboard/crm/customers/AddCustomer";
 
 const AddCustomerPage = () => {
-  return <AddCustomerIndex />;
+  return <AddCustomer />;
 };
 
 export default AddCustomerPage;

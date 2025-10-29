@@ -1,15 +1,16 @@
 import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
+
+import type { Metadata } from 'next'
+
 import './globals.css'
-import Header from '@/components/frontend/common/Header'
-import Footer from '@/components/frontend/common/Footer'
+import { ReactNode } from '../types'
 
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-inter'
 })
-
-import localFont from 'next/font/local'
 
 const ClashGrotesk = localFont({
   src: [
@@ -32,7 +33,7 @@ const ClashGrotesk = localFont({
   display: 'swap'
 })
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'The Pothole Doctors - Professional Road Repair Services',
   description:
     'Expert pothole repair, crack sealing, and asphalt maintenance services. Building strong foundations with quality craftsmanship.',
@@ -43,7 +44,7 @@ export const metadata = {
   }
 }
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: ReactNode) {
   return (
     <html lang='en' className={`${inter.variable} antialiased`}>
       <body className='font-global'>

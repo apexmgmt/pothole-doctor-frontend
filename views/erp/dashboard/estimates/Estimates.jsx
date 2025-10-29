@@ -4,10 +4,10 @@ import React, { useState } from "react";
 
 import { PlusIcon } from "lucide-react";
 
-import CommonLayout from "../crm/CommonLayout";
-import CustomTable from "../../common/CustomTable";
-import FilterDrawer from "../../common/FilterDrawer";
-import AddEstimateModal from "./AddEstimateModal";
+import CommonLayout from "@/components/erp/dashboard/crm/CommonLayout";
+import CustomTable from "@/components/erp/common/CustomTable";
+import FilterDrawer from "@/components/erp/common/FilterDrawer";
+import AddEstimateModal from "@/views/erp/dashboard/estimates/AddEstimateModal";
 
 const Estimates = () => {
   const [selectedRows, setSelectedRows] = useState([]);

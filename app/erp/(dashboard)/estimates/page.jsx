@@ -1,9 +1,9 @@
 import React from "react";
 
-import EstimatesIndex from "@/views/erp/dashboard/estimates";
+import Estimates from "@/views/erp/dashboard/estimates/Estimates";
 
 const EstimatesPage = () => {
-  return <EstimatesIndex />;
+  return <Estimates />;
 };
 
 export default EstimatesPage;

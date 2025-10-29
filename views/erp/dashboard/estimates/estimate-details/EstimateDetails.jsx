@@ -4,7 +4,7 @@ import React, { useState } from "react";
 
 import { PlusIcon, EditIcon } from "lucide-react";
 
-import CustomButton from "../../common/CustomButton";
+import CustomButton from "@/components/erp/common/CustomButton";
 
 const EstimateDetails = () => {
   const [notes, setNotes] = useState([
