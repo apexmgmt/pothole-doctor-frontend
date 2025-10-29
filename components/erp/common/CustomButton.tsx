@@ -5,7 +5,7 @@ type Size = 'sm' | 'md' | 'lg'
 type IconPosition = 'left' | 'right'
 
 interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  children: ReactNode
+  children?: ReactNode // Make children optional
   type?: 'button' | 'submit' | 'reset'
   variant?: Variant
   size?: Size
