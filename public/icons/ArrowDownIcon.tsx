@@ -1,0 +1,27 @@
+import React from "react";
+
+/**
+ * ArrowDownIcon SVG component.
+ * @returns {JSX.Element} The downward arrow icon.
+ */
+const ArrowDownIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg
+    className="max-w-full max-h-full"
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M13 6L8 11L3 6"
+      stroke="white"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export default ArrowDownIcon;

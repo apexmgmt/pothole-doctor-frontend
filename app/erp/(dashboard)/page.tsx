@@ -1,9 +1,7 @@
-import React from "react";
-
 import DashboardIndex from "@/views/erp/dashboard";
 
-const page = () => {
+const DashboardPage = () => {
   return <DashboardIndex />;
 };
 
-export default page;
+export default DashboardPage;

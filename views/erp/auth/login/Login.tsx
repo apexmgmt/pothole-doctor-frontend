@@ -38,7 +38,7 @@ const Login: React.FC = () => {
             CookieService.store('token_type', response.token_type)
             CookieService.store('user', JSON.stringify(encryptData(response?.user)))
             // redirect to dashboard
-            router.push('/erp/dashboard')
+            router.push('/erp/')
         }).catch(error => {
             setIsLoading(false)
             CookieService.clear()
