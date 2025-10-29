@@ -9,7 +9,6 @@ const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' })
   // handle form changes
   const handle = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }))
-  // hjkbhj
   return (
     <>
       <h1 className='text-light-2 text-2xl font-semibold mb-1'>Welcome to Pothole Doctors!</h1>
