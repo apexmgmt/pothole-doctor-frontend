@@ -9,7 +9,7 @@ interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   type?: 'button' | 'submit' | 'reset'
   variant?: Variant
   size?: Size
-  icon?: ReactNode
+  icon?: ReactNode | React.FC | any
   iconPosition?: IconPosition
   fullWidth?: boolean
   className?: string

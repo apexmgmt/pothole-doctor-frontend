@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 
 import { PlusIcon, XIcon } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,8 +13,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/date-picker";
+} from "@/components/ui/Select";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
