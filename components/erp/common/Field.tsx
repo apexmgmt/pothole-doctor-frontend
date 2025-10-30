@@ -1,6 +1,6 @@
 import React, { useMemo, useState, ChangeEvent, FocusEvent } from 'react'
 import { FieldError, UseFormRegisterReturn } from 'react-hook-form'
-import { EyeCloseIcon, EyeOpenIcon } from '@/public/icons/icons'
+import { EyeCloseIcon, EyeOpenIcon } from '@/public/icons'
 
 type Option = {
   value: string
@@ -100,7 +100,7 @@ const Field: React.FC<FieldProps> = ({
               className='absolute right-2 top-1/2 -translate-y-1/2 text-gray hover:text-light-2 cursor-pointer'
               tabIndex={-1}
             >
-              {showPassword ? EyeCloseIcon : EyeOpenIcon}
+              {showPassword ? <EyeCloseIcon/> : <EyeOpenIcon/>}
             </button>
           )}
         </div>
@@ -128,7 +128,7 @@ const Field: React.FC<FieldProps> = ({
             className='absolute right-2 top-1/2 -translate-y-1/2 text-gray hover:text-light-2 cursor-pointer'
             tabIndex={-1}
           >
-            {showPassword ? EyeCloseIcon : EyeOpenIcon}
+            {showPassword ? <EyeCloseIcon/> : <EyeOpenIcon/>}
           </button>
         )}
       </div>

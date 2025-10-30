@@ -15,6 +15,15 @@ export default class CookieService {
   }
 
   /**
+   * Retrieves the value of a cookie by name.
+   * @param name The name of the cookie.
+   * @returns The cookie value or undefined if not found.
+   */
+  static get(name: string): string | undefined {
+    return Cookies.get(name)
+  }
+
+  /**
    * Updates an existing cookie by overwriting its value and options.
    * @param name The name of the cookie.
    * @param value The new value to store.

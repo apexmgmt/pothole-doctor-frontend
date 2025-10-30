@@ -25,12 +25,40 @@ export const PUBLIC_ROUTES: string[] = [
 ]
 
 /**
+ * Routes that do not require authentication
+ */
+export const UNAUTHENTICATED_ROUTES: string[] = [
+  '/erp/login',
+  '/erp/forgot-password',
+  '/erp/reset-password',
+  '/erp/otp-verification'
+]
+
+/**
  * Check if a route is public (doesn't require authentication)
  * @param pathname - The current route path
  * @returns True if route is public, false if protected
  */
 export const isPublicRoute = (pathname: string): boolean => {
   return PUBLIC_ROUTES.some(route => {
+    // Handle dynamic routes with parameters (e.g., /billboard/:id)
+    if (route.includes(':')) {
+      const routePattern = route.replace(/:[^/]+/g, '[^/]+')
+      const regex = new RegExp(`^${routePattern}$`)
+      return regex.test(pathname)
+    }
+    // Handle exact matches
+    return route === pathname
+  })
+}
+
+/**
+ * Check if a route is unauthenticated route (doesn't require authentication)
+ * @param pathname - The current route path
+ * @returns True if route is unauthenticated, false if protected
+ */
+export const isUnauthenticatedRoute = (pathname: string): boolean => {
+  return UNAUTHENTICATED_ROUTES.some(route => {
     // Handle dynamic routes with parameters (e.g., /billboard/:id)
     if (route.includes(':')) {
       const routePattern = route.replace(/:[^/]+/g, '[^/]+')

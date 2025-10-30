@@ -7,8 +7,8 @@ import { PlusIcon, UserPlusIcon } from "lucide-react";
 import CommonLayout from "@/components/erp/dashboard/crm/CommonLayout";
 import CustomTable from "@/components/erp/common/CustomTable";
 import FilterDrawer from "@/components/erp/common/FilterDrawer";
-import { DetailsIcon, FilterIcon, LeadIcon } from "@/public/icons/icons";
 import LeadDetails from "@/components/erp/dashboard/crm/leads/LeadDetails";
+import { DetailsIcon, LeadIcon } from "@/public/icons";
 
 const Leads = () => {
   const [activeTab, setActiveTab] = useState("lead");
