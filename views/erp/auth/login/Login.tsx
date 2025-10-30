@@ -33,11 +33,12 @@ const Login: React.FC = () => {
             setIsLoading(false)
             console.log(response)
             // save the token and refresh token
-            CookieService.store('access_token', response.access_token, { expires: response.expires_in })
-            CookieService.store('refresh_token', response.refresh_token)
-            CookieService.store('token_type', response.token_type)
-            CookieService.store('user', JSON.stringify(encryptData(response?.user)))
+            CookieService.store('access_token', response?.data.access_token, { expires: response?.data.expires_in })
+            CookieService.store('refresh_token', response?.data.refresh_token)
+            CookieService.store('token_type', response?.data.token_type)
+            CookieService.store('user', JSON.stringify(encryptData(response?.data?.user)))
             // redirect to dashboard
+            const me = AuthService.getUserDetails()
             router.push('/erp/')
         }).catch(error => {
             setIsLoading(false)
