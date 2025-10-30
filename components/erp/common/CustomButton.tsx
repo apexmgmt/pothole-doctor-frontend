@@ -47,7 +47,11 @@ const CustomButton: React.FC<CustomButtonProps> = ({
 
   const widthClass = fullWidth ? 'w-full' : ''
 
-  const iconElement = icon && <span className='flex-shrink-0'>{icon}</span>
+  const iconElement = icon && (
+    <span className='flex-shrink-0'>
+      {React.isValidElement(icon) ? icon : typeof icon === 'function' ? React.createElement(icon) : null}
+    </span>
+  )
 
   return (
     <button

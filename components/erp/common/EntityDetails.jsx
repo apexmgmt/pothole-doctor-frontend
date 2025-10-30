@@ -2,12 +2,12 @@
 
 import React, { useState } from "react";
 
-import { PhoneIcon, PlusIcon, UserIcon } from "lucide-react";
+import { PhoneIcon, PlusIcon } from "lucide-react";
 
 import CustomButton from "./CustomButton";
 import CustomTable from "./CustomTable";
 import DocumentsGallery from "./DocumentsGallery";
-import { CallIcon, DocumentIcon, DoubleQuoteIcon, LocationIcon, SalesRepIcon, MeasurementsIcon, MessageIcon, CalendarIcon } from "@/public/icons";
+import { CallIcon, DocumentIcon, DoubleQuoteIcon, LocationIcon, SalesRepIcon, MeasurementsIcon, MessageIcon, CalendarIcon, UserIcon } from "@/public/icons";
 
 const EntityDetails = ({
   entityData,
@@ -22,7 +22,7 @@ const EntityDetails = ({
     {
       id: "email",
       label: "Email",
-      icon: <UserIcon size={12} />,
+      icon: UserIcon,
       data: [
         {
           id: 1,
@@ -109,7 +109,7 @@ const EntityDetails = ({
     {
       id: "contacts",
       label: "Contacts",
-      icon: <UserIcon size={12} />,
+      icon: UserIcon,
       data: [
         {
           id: 1,
@@ -266,7 +266,7 @@ const EntityDetails = ({
         }`,
       },
       {
-        icon: <UserIcon size={18} />,
+        icon: UserIcon,
         label: "Contact Type:",
         value: entityType === "customer" ? "Customer" : "Lead",
       },
@@ -354,7 +354,7 @@ const EntityDetails = ({
             {getEntityInfo().map((info, index) => (
               <div key={index} className="flex items-center gap-3">
                 <div className="w-5 h-5 flex items-center justify-center text-gray">
-                  {info.icon}
+                  <info.icon/>
                 </div>
                 <div className="flex-1">
                   <span className="text-sm text-gray">{info.label}</span>
@@ -375,7 +375,7 @@ const EntityDetails = ({
             {getAdditionalInfo().map((info, index) => (
               <div key={index} className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-lg flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5 text-gray">
-                  {info.icon}
+                  <info.icon/>
                 </div>
                 <div className="flex-1">
                   <span className="text-sm text-gray">{info.label}</span>
@@ -400,7 +400,7 @@ const EntityDetails = ({
                   : "text-gray border-transparent hover:text-light hover:bg-bg/20"
               }`}
             >
-              <span>{tab.icon}</span>
+              <span><tab.icon/></span>
               <span className="text-xs font-medium">{tab.label}</span>
             </button>
           ))}
