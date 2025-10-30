@@ -28,14 +28,13 @@ const CommonLayout = ({ title, buttons = [], className = "", children }) => {
                 <button
                   key={index}
                   onClick={button.onClick}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 cursor-pointer ${
-                    button.isActive
-                      ? "bg-light/20 text-light shadow-sm"
-                      : "text-gray hover:text-light hover:bg-light/5"
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 cursor-pointer ${button.isActive
+                    ? "bg-light/20 text-light shadow-sm"
+                    : "text-gray hover:text-light hover:bg-light/5"
+                    }`}
                 >
                   {button.icon && (
-                    <span className="w-4 h-4">{button.icon}</span>
+                    <button.icon className="w-4 h-4" />
                   )}
                   <span className="text-sm font-medium">{button.label}</span>
                 </button>
