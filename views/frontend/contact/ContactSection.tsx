@@ -1,6 +1,6 @@
 'use client'
 
-import ContactService from '@/services/contact.service'
+import ContactService from '@/services/api/contact.service'
 import { ContactFormData, ContactFormSubmitStatus } from '@/types'
 import React, { useState, ChangeEvent, FormEvent } from 'react'
 
