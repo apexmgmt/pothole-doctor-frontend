@@ -4,20 +4,10 @@ import React, { useState } from "react";
 
 import { PhoneIcon, PlusIcon, UserIcon } from "lucide-react";
 
-import {
-  CalenderIcon,
-  CallIcon,
-  DocumentIcon,
-  DoubleQuoteIcon,
-  EditIcon,
-  LocationIcon,
-  MeasurementsIcon,
-  MessageIcon,
-  SalesRepIcon,
-} from "@/public/icons/icons";
 import CustomButton from "./CustomButton";
 import CustomTable from "./CustomTable";
 import DocumentsGallery from "./DocumentsGallery";
+import { CallIcon, DocumentIcon, DoubleQuoteIcon, LocationIcon, SalesRepIcon, MeasurementsIcon, MessageIcon, CalendarIcon } from "@/public/icons";
 
 const EntityDetails = ({
   entityData,
@@ -269,7 +259,7 @@ const EntityDetails = ({
   const getEntityInfo = () => {
     const baseInfo = [
       {
-        icon: CalenderIcon,
+        icon: CalendarIcon,
         label: "Date Added:",
         value: `${entityData?.createdDate || "12-07-2025"} by ${
           entityData?.createdBy || "David Warner"
@@ -320,7 +310,7 @@ const EntityDetails = ({
         value: entityData?.salesRep || entityData?.name || "Liam Harper",
       },
       {
-        icon: CalenderIcon,
+        icon: CalendarIcon,
         label: "Started On:",
         value: entityData?.createdDate || "12-07-2025",
       },

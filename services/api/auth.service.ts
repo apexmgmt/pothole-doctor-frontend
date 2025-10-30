@@ -1,7 +1,13 @@
-import { AUTH_LOGIN, OAUTH_TOKEN } from '@/constants/api'
+import { AUTH_LOGIN } from '@/constants/api'
 import { getApiUrl } from '@/utils/utility'
 
 export default class AuthService {
+  /**
+   * Auth Login
+   * @param email 
+   * @param password 
+   * @returns 
+   */
   static login = async (email: string, password: string) => {
     try {
       const payload: object = {
@@ -24,10 +30,23 @@ export default class AuthService {
 
         throw new Error(errorData.message || 'Failed to login')
       }
-      
+
       return await response.json()
     } catch (error) {
       throw error
     }
   }
+
+  static refreshToken = async () => {
+
+  }
+
+  static logout = async () => {
+
+  }
+
+  static getUserDetails = async () => {
+
+  }
+
 }

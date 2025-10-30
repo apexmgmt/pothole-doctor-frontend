@@ -3,12 +3,7 @@
 import React, { useState, useMemo } from "react";
 
 import CustomButton from "./CustomButton";
-import {
-  ExcelIcon,
-  FillterIcon,
-  PDFIcon,
-  SearchIcon,
-} from "@/public/icons/icons";
+import { FilterIcon, PDFIcon, ExcelIcon, SearchIcon } from "@/public/icons";
 
 /**
  * Professional table component with sensible defaults and full customization options
@@ -525,7 +520,7 @@ return (
                   onClick={() => handleActionButton("filter")}
                   className="flex items-center gap-2 px-3 py-1.5 bg-bg border border-border rounded-md text-light hover:bg-accent transition-colors"
                 >
-                  {FillterIcon}
+                  <FilterIcon/>
                   Filter
                 </button>
               ) : showExport ? (
@@ -575,7 +570,7 @@ return (
                     htmlFor="search-input"
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
                   >
-                    {SearchIcon}
+                    <SearchIcon />
                   </label>
                   <input
                     type="text"

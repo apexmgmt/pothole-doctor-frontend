@@ -1,24 +1,7 @@
 "use client";
 
-import React from "react";
-
-import { PlusIcon } from "lucide-react";
-
-import EntityDetails from "../../../common/EntityDetails";
-import {
-  EmailIcon,
-  SmsIcon,
-  DocumentIcon,
-  ContactIcon,
-  LocationIcon,
-  RulerIcon,
-  CalculatorIcon,
-  CalendarIcon,
-  DollarIcon,
-  InvoiceIcon,
-  JobsIcon,
-  RefundsIcon,
-} from "@/public/icons/icons";
+import EntityDetails from "@/components/erp/common/EntityDetails";
+import { LocationIcon, RefundsIcon, JobsIcon, InvoiceIcon, DollarIcon, CalendarIcon, CalculatorIcon, RulerIcon, ContactIcon, DocumentIcon, SmsIcon, EmailIcon } from "@/public/icons";
 
 const AdvancedCustomerDetails = ({ customerData, onEdit }) => {
   // Custom tabs for customers with additional functionality
