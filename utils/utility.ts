@@ -48,7 +48,7 @@ function buildUrl(apiBaseUrl: string, appBaseUrl: string, host: string): string 
       const subdomain = hostParts.slice(0, hostParts.length - baseParts.length).join('.')
       const api = new URL(apiBaseUrl)
       api.hostname = `${subdomain}.${api.hostname}`
-      return api.toString() + '/api'
+      return api.toString() + 'api'
     }
 
     return apiBaseUrl + '/api'

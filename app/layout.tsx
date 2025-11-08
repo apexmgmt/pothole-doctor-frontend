@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { ReactNode } from '../types'
 import StoreProvider from '@/lib/StoreProvider'
+import { Toaster } from '@/components/ui/sonner'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -50,6 +51,8 @@ export default function RootLayout({ children }: ReactNode) {
     <html lang='en' className={`${inter.variable} antialiased`}>
       <body className='font-global'>
         <StoreProvider>
+          <Toaster />
+
           <section>{children}</section>
         </StoreProvider>
       </body>

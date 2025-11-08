@@ -79,7 +79,23 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
 
   const handleLogout = async () => {
     setOpen(false)
-    await AuthService.logout()
+    AuthService.logout()
+      .then(response => {
+        CookieService.delete('access_token')
+        CookieService.delete('refresh_token')
+        CookieService.delete('token_type')
+        CookieService.delete('user')
+        dispatch(logoutUserSuccess())
+        router.push('/login')
+      })
+      .catch(error => {
+        CookieService.delete('access_token')
+        CookieService.delete('refresh_token')
+        CookieService.delete('token_type')
+        CookieService.delete('user')
+        dispatch(logoutUserSuccess())
+        router.push('/login')
+      })
   }
 
   return (

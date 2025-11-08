@@ -15,14 +15,18 @@ export interface AuthState {
   refresh: boolean
 }
 
+// Use sync cookie APIs in reducers/initial state (reducers can't be async)
+// Return null on server to avoid SSR crashes
 const getUserFromCookie = (): User | null => {
-  const userCookie = CookieService.get('user')
-  if (!userCookie) return null
-
   try {
+    // If running on server, skip
+    if (typeof window === 'undefined') return null
+
+    const userCookie = CookieService.getSync('user')
+    if (!userCookie) return null
+
     const decrypted = decryptData(userCookie)
 
-    // In development decryptData may return the raw object or a JSON string.
     if (process.env.NODE_ENV === 'development') {
       if (typeof decrypted === 'string') {
         try {
@@ -34,12 +38,10 @@ const getUserFromCookie = (): User | null => {
       return decrypted as User
     }
 
-    // In production decryptData should return the parsed object
     return decrypted as User
   } catch (error) {
-    // keep short/log for debugging
     // eslint-disable-next-line no-console
-    console.error('Error decrypting user cookie', error)
+    console.error('Error reading user cookie', error)
     return null
   }
 }
@@ -55,15 +57,19 @@ const authSlice = createSlice({
   reducers: {
     logoutUserSuccess: state => {
       state.user = null
-      // remove cookie on logout
-      CookieService.delete('user')
+      // remove cookie on logout (client only)
+      try {
+        CookieService.deleteSync('user')
+      } catch {
+        /* noop */
+      }
     },
     setUserData: (state, action: PayloadAction<User | null>) => {
       state.user = action.payload
       try {
         // store as JSON string; encryption/decryption handled elsewhere
-        CookieService.store('user', JSON.stringify(action.payload), {
-          expires: 7, // optional: cookie expires in 7 days
+        CookieService.storeSync('user', JSON.stringify(action.payload), {
+          expires: 7,
           path: '/'
         })
       } catch {

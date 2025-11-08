@@ -1,4 +1,3 @@
-import AuthService from '@/services/api/auth.service'
 import CookieService from '@/services/storage/cookie.service'
 
 interface ApiInterceptorOptions extends RequestInit {
@@ -6,13 +5,14 @@ interface ApiInterceptorOptions extends RequestInit {
   req?: any
   res?: any
   serverCookies?: Record<string, string>
+  _isRetry?: boolean // internal flag to prevent infinite loops
 }
 
 /**
  * API interceptor that ensures Authorization header has a valid access_token.
  * If access_token is missing and refresh_token exists, it will attempt to refresh the token
  * and store the returned tokens (access_token, refresh_token, token_type, expires_in).
- * On failure to obtain a token the interceptor calls AuthService.logout().
+ * On failure to obtain a token the interceptor clears cookies and redirects to login.
  */
 const storeTokens = (data: any) => {
   if (!data) return
@@ -22,35 +22,77 @@ const storeTokens = (data: any) => {
   CookieService.store('token_type', data.token_type)
 }
 
+const clearAuthAndRedirect = async () => {
+  await CookieService.delete('access_token')
+  await CookieService.delete('refresh_token')
+  await CookieService.delete('token_type')
+  await CookieService.delete('user')
+
+  // Client-side redirect only (interceptor runs client-side)
+  if (typeof window !== 'undefined') {
+    window.location.href = '/login'
+  }
+}
+
+let isRefreshing = false
+let refreshPromise: Promise<any> | null = null
+
 const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}): Promise<Response> => {
-  const { requiresAuth = true, req, serverCookies, ...fetchOptions } = options
+  const { requiresAuth = true, req, serverCookies, _isRetry = false, ...fetchOptions } = options
 
   // Read tokens
-  let accessToken = CookieService.get('access_token')
-  let refreshToken = CookieService.get('refresh_token')
+  let accessToken = await CookieService.get('access_token')
+  let refreshToken = await CookieService.get('refresh_token')
 
   // If auth required and access token missing but refresh token exists => try refresh first
-  if (requiresAuth && !accessToken && refreshToken) {
-    try {
-      const refreshed = await AuthService.refreshToken()
-      if (refreshed && refreshed.access_token) {
-        storeTokens(refreshed)
-        accessToken = refreshed.access_token
-        refreshToken = refreshed.refresh_token
-      } else {
-        // refresh didn't return token => logout
-        await AuthService.logout()
+  if (requiresAuth && !accessToken && refreshToken && !_isRetry) {
+    if (isRefreshing) {
+      // Wait for ongoing refresh
+      try {
+        await refreshPromise
+        accessToken = await CookieService.get('access_token')
+      } catch (err) {
+        clearAuthAndRedirect()
         throw new Error('Unable to refresh token')
       }
-    } catch (err) {
-      await AuthService.logout()
-      throw err
+    } else {
+      isRefreshing = true
+      // Import AuthService dynamically to avoid circular dependency
+      const { default: AuthService } = await import('@/services/api/auth.service')
+
+      refreshPromise = AuthService.refreshToken()
+        .then(refreshed => {
+          if (refreshed && refreshed.access_token) {
+            storeTokens(refreshed)
+            isRefreshing = false
+            refreshPromise = null
+            return refreshed
+          } else {
+            isRefreshing = false
+            refreshPromise = null
+            throw new Error('No access token in refresh response')
+          }
+        })
+        .catch(err => {
+          isRefreshing = false
+          refreshPromise = null
+          clearAuthAndRedirect()
+          throw err
+        })
+
+      try {
+        const refreshed = await refreshPromise
+        accessToken = refreshed.access_token
+        refreshToken = refreshed.refresh_token
+      } catch (err) {
+        throw new Error('Unable to refresh token')
+      }
     }
   }
 
-  // If auth required and still no access token => logout and fail
+  // If auth required and still no access token => clear and redirect
   if (requiresAuth && !accessToken) {
-    await AuthService.logout()
+    clearAuthAndRedirect()
     throw new Error('Authentication failed. Please log in again.')
   }
 
@@ -73,33 +115,69 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
   try {
     let response = await fetch(url, { ...fetchOptions, headers })
 
-    // If 401 and requiresAuth -> attempt a single refresh (if refresh token available), then retry once.
-    if (response.status === 401 && requiresAuth) {
-      refreshToken = CookieService.get('refresh_token')
+    // If 401 and requiresAuth and not already a retry -> attempt refresh once
+    if (response.status === 401 && requiresAuth && !_isRetry) {
+      refreshToken = await CookieService.get('refresh_token')
 
       if (refreshToken) {
-        try {
-          const refreshed = await AuthService.refreshToken()
-          if (refreshed && refreshed.access_token) {
-            storeTokens(refreshed)
-            // retry request with new access token
+        if (isRefreshing) {
+          // Wait for ongoing refresh
+          try {
+            await refreshPromise
+            const newAccessToken = await CookieService.get('access_token')
+            if (newAccessToken) {
+              const retryHeaders = { ...headers, Authorization: `Bearer ${newAccessToken}` }
+              response = await fetch(url, { ...fetchOptions, headers: retryHeaders })
+              if (response.status !== 401) return response
+            }
+          } catch {
+            // Fall through to clear and redirect
+          }
+        } else {
+          isRefreshing = true
+          // Import AuthService dynamically to avoid circular dependency
+          const { default: AuthService } = await import('@/services/api/auth.service')
+
+          refreshPromise = AuthService.refreshToken()
+            .then(refreshed => {
+              if (refreshed && refreshed.access_token) {
+                storeTokens(refreshed)
+                isRefreshing = false
+                refreshPromise = null
+                return refreshed
+              } else {
+                isRefreshing = false
+                refreshPromise = null
+                throw new Error('No access token in refresh response')
+              }
+            })
+            .catch(err => {
+              isRefreshing = false
+              refreshPromise = null
+              clearAuthAndRedirect()
+              throw err
+            })
+
+          try {
+            const refreshed = await refreshPromise
+            // Retry request with new token
             const retryHeaders = { ...headers, Authorization: `Bearer ${refreshed.access_token}` }
             response = await fetch(url, { ...fetchOptions, headers: retryHeaders })
             if (response.status !== 401) return response
+          } catch {
+            // Fall through to clear and redirect
           }
-        } catch {
-          // ignore and proceed to logout below
         }
       }
 
-      // If we reach here, refresh did not produce a usable token -> logout
-      await AuthService.logout()
+      // If we reach here, refresh did not produce a usable token
+      clearAuthAndRedirect()
       throw new Error('Authentication failed. Please log in again.')
     }
 
     return response
   } catch (error) {
-    // Re-throw the error to let callers handle it (logout already called where necessary)
+    // Re-throw the error to let callers handle it
     throw error
   }
 }
