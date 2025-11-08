@@ -84,7 +84,10 @@ export default class AuthService {
     } catch (error) {
       // ignore API errors for logout, proceed to clear and redirect
     } finally {
-      CookieService.clear()
+      CookieService.delete('access_token')
+      CookieService.delete('refresh_token')
+      CookieService.delete('token_type')
+      CookieService.delete('user')
 
       // Server-side redirect
       if (typeof window === 'undefined') {

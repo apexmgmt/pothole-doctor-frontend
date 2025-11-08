@@ -27,7 +27,7 @@ export default function TestimonialsSection() {
       text: '“Pothole Doctors came out the same week we called and fixed a dangerous pothole in our parking lot. The crew was professional, efficient, and left everything looking brand new. Our customers noticed the difference right away.”',
       name: 'David M.',
       rating: 5.0,
-      avatar: '/images/avater.webp',
+      avatar: '/images/avatar.webp',
       bio: 'Business Owner'
     },
     {
@@ -35,7 +35,7 @@ export default function TestimonialsSection() {
       text: '“We’ve had other companies patch our lot before, but the repairs never lasted. Pothole Doctors did it right the first time. Months later, the surface is still smooth and holding up perfectly. We’ll definitely be using them again.”',
       name: 'Sarah T.',
       rating: 5.0,
-      avatar: '/images/avater.webp',
+      avatar: '/images/avatar.webp',
       bio: 'Property Manager'
     },
     {
@@ -43,7 +43,7 @@ export default function TestimonialsSection() {
       text: '“Pothole Doctors repaired the cracks and potholes in our driveway, and the difference is amazing. It’s smooth, clean, and adds real curb appeal to our home. We couldn’t be happier with the results!”',
       name: 'Karen S.',
       rating: 5.0,
-      avatar: '/images/avater.webp',
+      avatar: '/images/avatar.webp',
       bio: 'Homeowner'
     }
   ]
@@ -103,7 +103,7 @@ export default function TestimonialsSection() {
                       <figure className='w-10 h-10 md:w-12 md:h-12 rounded-full '>
                         <Image
                           fill
-                          src={testimonial.avatar || '/images/avater.webp'}
+                          src={testimonial.avatar || '/images/avatar.webp'}
                           alt={testimonial.name}
                           className='h-full w-full object-cover !relative'
                         />

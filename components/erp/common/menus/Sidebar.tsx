@@ -27,7 +27,7 @@ interface ExpandedSections {
   [key: string]: boolean
 }
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
   const pathname = usePathname()
   const [expandedSections, setExpandedSections] = useState<ExpandedSections>({})
 
@@ -331,7 +331,7 @@ const Sidebar: React.FC = () => {
       </nav>
 
       {/* Bottom Section */}
-      <SidebarFooter />
+      <SidebarFooter user={user} />
     </div>
   )
 }
