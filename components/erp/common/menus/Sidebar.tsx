@@ -245,15 +245,19 @@ const Sidebar: React.FC = () => {
 
   // path helpers
   const normalize = (p: string) => p.replace(/\/+$/, '') || '/'
-  const firstSegment = (p: string) => p.split('/').filter(Boolean)[0] || ''
 
-  // exactMatch default is true; when false, compare first segments
+  // exactMatch default is true; when false, check if pathname starts with href
   const isItemActive = (item: NavigationSubItem): boolean => {
     const current = normalize(pathname || '')
     const target = normalize(item.href)
     const exact = item.exactMatch !== false
-    if (exact) return current === target
-    return firstSegment(current) === firstSegment(target)
+
+    if (exact) {
+      return current === target
+    } else {
+      // pathname must start with href and be longer (to avoid /erp matching /erp/companies)
+      return current.startsWith(target) && current !== target
+    }
   }
 
   const hasActiveDescendant = (item: NavigationSubItem): boolean =>
