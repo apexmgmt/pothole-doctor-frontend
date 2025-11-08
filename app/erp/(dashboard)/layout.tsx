@@ -1,5 +1,5 @@
 import Header from '@/components/erp/common/Header'
-import Sidebar from '@/components/erp/common/Sidebar'
+import Sidebar from '@/components/erp/common/menus/Sidebar'
 import { ReactNode } from '@/types'
 
 

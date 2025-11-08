@@ -3,9 +3,10 @@
 import React, { useState, ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 import { ArrowDownIcon, ArrowUpIcon, SettingsIcon, EstimateIcon, UserIcon, CRMIcon, HomeIcon } from '@/public/icons'
-
+import SidebarFooter from './SidebarFooter'
 
 interface NavigationSubItem {
   id: string
@@ -14,6 +15,7 @@ interface NavigationSubItem {
   icon?: ReactNode
   hasSubItems?: boolean
   subItems?: NavigationSubItem[]
+  exactMatch?: boolean // default true if undefined
 }
 
 interface NavigationItem extends NavigationSubItem {
@@ -26,7 +28,7 @@ interface ExpandedSections {
 }
 
 const Sidebar: React.FC = () => {
-  const [activeSection, setActiveSection] = useState<string>('crm')
+  const pathname = usePathname()
   const [expandedSections, setExpandedSections] = useState<ExpandedSections>({})
 
   const toggleSection = (section: string) => {
@@ -41,8 +43,9 @@ const Sidebar: React.FC = () => {
       id: 'dashboard',
       label: 'Dashboard',
       icon: <HomeIcon />,
-      href: '/dashboard',
-      hasSubItems: false
+      href: '/erp',
+      hasSubItems: false,
+      exactMatch: true
     },
     {
       id: 'crm',
@@ -232,11 +235,28 @@ const Sidebar: React.FC = () => {
     }
   ]
 
-  // Recursive component to render menu items with unlimited depth
-  const renderMenuItem = (item: NavigationSubItem, level = 0): ReactNode => {
-    const isActive = activeSection === item.id
+  // path helpers
+  const normalize = (p: string) => p.replace(/\/+$/, '') || '/'
+  const firstSegment = (p: string) => p.split('/').filter(Boolean)[0] || ''
+
+  // exactMatch default is true; when false, compare first segments
+  const isItemActive = (item: NavigationSubItem): boolean => {
+    const current = normalize(pathname || '')
+    const target = normalize(item.href)
+    const exact = item.exactMatch !== false
+    if (exact) return current === target
+    return firstSegment(current) === firstSegment(target)
+  }
+
+  const hasActiveDescendant = (item: NavigationSubItem): boolean =>
+    !!item.subItems?.some(child => isItemActive(child) || hasActiveDescendant(child))
+
+  // Recursive renderer; inherit parent icon if a child has none (template)
+  const renderMenuItem = (item: NavigationSubItem, level = 0, parentIcon?: ReactNode): ReactNode => {
+    const isActive = isItemActive(item) || hasActiveDescendant(item)
     const isExpanded = expandedSections[item.id]
-    const paddingLeft = level * 16 // 16px per level
+    const paddingLeft = level * 16
+    const resolvedIcon = item.icon ?? parentIcon // ensure submenu shows an icon
 
     if (item.hasSubItems && item.subItems) {
       return (
@@ -250,7 +270,7 @@ const Sidebar: React.FC = () => {
             type='button'
           >
             <div className='flex items-center gap-3'>
-              {item.icon}
+              {resolvedIcon}
               <span className='font-medium'>{item.label}</span>
             </div>
             {isExpanded ? <ArrowUpIcon /> : <ArrowDownIcon />}
@@ -259,7 +279,7 @@ const Sidebar: React.FC = () => {
           {isExpanded && (
             <ul className='space-y-1 mt-2'>
               {item.subItems.map(subItem => (
-                <li key={subItem.id}>{renderMenuItem(subItem, level + 1)}</li>
+                <li key={subItem.id}>{renderMenuItem(subItem, level + 1, resolvedIcon)}</li>
               ))}
             </ul>
           )}
@@ -267,7 +287,7 @@ const Sidebar: React.FC = () => {
       )
     } else {
       return (
-        <a
+        <Link
           key={item.id}
           href={item.href}
           className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
@@ -275,9 +295,9 @@ const Sidebar: React.FC = () => {
           }`}
           style={{ paddingLeft: `${paddingLeft + 12}px` }}
         >
-          {item.icon}
+          {resolvedIcon}
           <span className='font-medium'>{item.label}</span>
-        </a>
+        </Link>
       )
     }
   }
@@ -299,21 +319,7 @@ const Sidebar: React.FC = () => {
       </nav>
 
       {/* Bottom Section */}
-      <div className='border-t border-border p-4 space-y-4'>
-        {/* User Profile */}
-        <div className='flex items-center gap-3 p-3 rounded-lg bg-bg/30'>
-          <div className='w-10 h-10 rounded-full relative'>
-            <Image src='/images/dashboard/user.webp' alt='profile' fill className='object-cover !relative' />
-          </div>
-          <div className='flex-1 min-w-0'>
-            <p className='text-light font-medium text-sm truncate'>Liam Harper</p>
-            <p className='text-gray text-xs truncate'>patrikhgy@gmail.com</p>
-          </div>
-          <button className='p-1 text-gray hover:text-light transition-colors'>
-            {/* <EllipsisVerticalIcon className="w-4 h-4" /> */}
-          </button>
-        </div>
-      </div>
+      <SidebarFooter />
     </div>
   )
 }
