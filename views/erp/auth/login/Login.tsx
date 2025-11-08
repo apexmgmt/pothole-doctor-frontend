@@ -8,6 +8,8 @@ import AuthService from '@/services/api/auth.service'
 import CookieService from '@/services/storage/cookie.service'
 import { encryptData } from '@/utils/encryption'
 import { useRouter } from 'next/navigation'
+import { useAppDispatch } from '@/lib/hooks'
+import { setUserData } from '@/lib/features/auth/authSlice'
 
 type LoginForm = {
   email: string
@@ -16,6 +18,8 @@ type LoginForm = {
 
 const Login: React.FC = () => {
   const router = useRouter()
+  const dispatch = useAppDispatch()
+
   const {
     register,
     handleSubmit,
@@ -37,6 +41,7 @@ const Login: React.FC = () => {
           CookieService.store('refresh_token', response?.data.refresh_token)
           CookieService.store('token_type', response?.data.token_type)
           CookieService.store('user', JSON.stringify(encryptData(response?.data?.user)))
+          dispatch(setUserData(response?.data?.user))
           // redirect to dashboard
           router.push('/erp/')
         })
