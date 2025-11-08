@@ -80,7 +80,6 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
   const handleLogout = async () => {
     setOpen(false)
     await AuthService.logout()
-    router.push('/login')
   }
 
   return (
