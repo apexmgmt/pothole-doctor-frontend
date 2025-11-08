@@ -48,6 +48,14 @@ const Sidebar: React.FC = () => {
       exactMatch: true
     },
     {
+      id: 'companies',
+      label: 'Companies',
+      icon: <HomeIcon />,
+      href: '/erp/companies',
+      hasSubItems: false,
+      exactMatch: false
+    },
+    {
       id: 'crm',
       label: 'CRM',
       icon: <CRMIcon />,
