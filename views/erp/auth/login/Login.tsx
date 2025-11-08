@@ -27,26 +27,26 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const onSubmit: SubmitHandler<LoginForm> = async data => {
     try {
-        setIsLoading(true)
-        AuthService.login(data.email, data.password)
+      setIsLoading(true)
+      AuthService.login(data.email, data.password)
         .then(response => {
-            setIsLoading(false)
-            console.log(response)
-            // save the token and refresh token
-            CookieService.store('access_token', response?.data.access_token, { expires: response?.data.expires_in })
-            CookieService.store('refresh_token', response?.data.refresh_token)
-            CookieService.store('token_type', response?.data.token_type)
-            CookieService.store('user', JSON.stringify(encryptData(response?.data?.user)))
-            // redirect to dashboard
-            const me = AuthService.getUserDetails()
-            router.push('/erp/')
-        }).catch(error => {
-            setIsLoading(false)
-            CookieService.clear()
+          setIsLoading(false)
+          console.log(response)
+          // save the token and refresh token
+          CookieService.store('access_token', response?.data.access_token, { expires: response?.data.expires_in })
+          CookieService.store('refresh_token', response?.data.refresh_token)
+          CookieService.store('token_type', response?.data.token_type)
+          CookieService.store('user', JSON.stringify(encryptData(response?.data?.user)))
+          // redirect to dashboard
+          router.push('/erp/')
+        })
+        .catch(error => {
+          setIsLoading(false)
+          CookieService.clear()
         })
     } catch (error) {
-        setIsLoading(false)
-        // Handle error here (e.g., show error message)
+      setIsLoading(false)
+      // Handle error here (e.g., show error message)
     }
   }
 
