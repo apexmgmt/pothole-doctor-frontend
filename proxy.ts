@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isPublicRoute, isUnauthenticatedRoute } from './constants/routePermission'
-import CookieService from './services/storage/cookie.service'
+import CookieService from './services/app/cookie.service'
 import { AUTH_REFRESH_TOKEN } from '@/constants/api'
 import { getApiUrl } from '@/utils/utility'
 import AuthService from './services/api/auth.service'

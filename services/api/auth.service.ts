@@ -1,6 +1,6 @@
 import { AUTH_LOGIN, AUTH_LOGOUT, AUTH_ME, AUTH_REFRESH_TOKEN } from '@/constants/api'
 import { getApiUrl } from '@/utils/utility'
-import CookieService from '../storage/cookie.service'
+import CookieService from '../app/cookie.service'
 import apiInterceptor from './api.interceptor'
 import { redirect } from 'next/navigation'
 
@@ -82,7 +82,7 @@ export default class AuthService {
         method: 'POST'
       })
 
-      if(!response.ok){
+      if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.message || 'Failed to logout')
       }
