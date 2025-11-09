@@ -246,7 +246,7 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
   // path helpers
   const normalize = (p: string) => p.replace(/\/+$/, '') || '/'
 
-  // exactMatch default is true; when false, check if pathname starts with href
+  // exactMatch default is true; when false, also active for any descendant path
   const isItemActive = (item: NavigationSubItem): boolean => {
     const current = normalize(pathname || '')
     const target = normalize(item.href)
@@ -255,8 +255,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
     if (exact) {
       return current === target
     } else {
-      // pathname must start with href and be longer (to avoid /erp matching /erp/companies)
-      return current.startsWith(target) && current !== target
+      // Active for target itself or any path beneath it; use boundary to avoid /example matching /example-other
+      return current === target || current.startsWith(target + '/')
     }
   }
 
