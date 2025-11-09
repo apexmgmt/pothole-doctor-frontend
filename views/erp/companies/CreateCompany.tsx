@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Input } from '@/components/ui/Input'
@@ -12,6 +12,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import CompanyService from '@/services/api/company.service'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { SpinnerCustom } from '@/components/ui/spinner'
 
 type FormValues = {
   first_name: string
@@ -42,20 +43,25 @@ const CreateCompany: React.FC = () => {
   const form = useForm<FormValues>({ defaultValues, mode: 'onSubmit' })
   const { handleSubmit, control, getValues, reset, formState } = form
   const { isSubmitting } = formState
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const onSubmit = async (data: FormValues) => {
+    setIsLoading(true)
     try {
       CompanyService.store(data)
         .then(response => {
+          setIsLoading(false)
           toast.success('Company created successfully')
           router.push('/erp/companies')
           reset()
         })
         .catch(error => {
           toast.error('Failed to create company')
+          setIsLoading(false)
         })
     } catch (error) {
       toast.error('Something went wrong!')
+      setIsLoading(false)
     }
   }
 
@@ -66,8 +72,10 @@ const CreateCompany: React.FC = () => {
       <Form {...form}>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className='bg-bg-2 rounded-lg border border-border p-6 w-full max-w-3xl space-y-6'
+          className='bg-bg-2 rounded-lg border border-border p-6 w-full max-w-3xl space-y-6 relative'
         >
+          {isLoading && <SpinnerCustom />}
+
           <h2 className='text-xl font-semibold text-light'>Create Company</h2>
 
           <div className='grid grid-cols-2 gap-6'>
@@ -261,16 +269,16 @@ const CreateCompany: React.FC = () => {
             <Button
               type='submit'
               variant='outline'
-              disabled={isSubmitting}
+              disabled={isLoading}
               className='flex-1 bg-bg-3 text-light hover:bg-bg-4 disabled:opacity-50'
             >
-              {isSubmitting ? 'Saving...' : 'Create'}
+              {isLoading ? 'Saving...' : 'Create'}
             </Button>
             <Button
               type='button'
               variant='outline'
               onClick={onCancel}
-              disabled={isSubmitting}
+              disabled={isLoading}
               className='flex-1 border-border text-light hover:bg-bg-3 disabled:opacity-50'
             >
               Reset
