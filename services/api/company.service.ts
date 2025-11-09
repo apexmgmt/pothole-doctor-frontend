@@ -49,4 +49,48 @@ export default class CompanyService {
       throw error
     }
   }
+
+  /** Get Company Details */
+  static show = async (companyId: string) => {
+    try {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + COMPANIES + companyId, {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 60, tags: [`companies/${companyId}`] } // Cache for 60 seconds
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        return errorData.message || 'Failed to fetch company details'
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /** Update Company Details */
+  static update = async (companyId: string, payload: object) => {
+    try {
+        const apiUrl: string = await getApiUrl()
+        const response = await apiInterceptor(apiUrl + COMPANIES + companyId, {
+        requiresAuth: true,
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          return errorData.message || 'Failed to update company details'
+        }
+
+        // Revalidate companies cache tag
+        await revalidate('companies')
+        return await response.json()
+    } catch (error) {}
+  }
+
+  
 }

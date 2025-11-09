@@ -8,7 +8,7 @@ import { revalidateTag } from 'next/cache'
  */
 export async function revalidate(tag: string): Promise<void> {
   try {
-    await revalidateTag(tag)
+    await revalidateTag(tag, 'max')
   } catch (error) {
     console.error('Failed to revalidate:', error)
   }
