@@ -43,7 +43,7 @@ export default class AuthService {
   static refreshToken = async (refresh_token?: string) => {
     // If not provided, try to get from CookieService (client-side only)
     if (!refresh_token) {
-      refresh_token = CookieService.get('refresh_token')
+      refresh_token = await CookieService.get('refresh_token')
     }
     if (!refresh_token) throw new Error('No refresh token available')
 
@@ -58,7 +58,7 @@ export default class AuthService {
         },
         body: JSON.stringify(payload)
       })
-      
+
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.message || 'Failed to refresh token')
@@ -77,23 +77,19 @@ export default class AuthService {
   static logout = async () => {
     try {
       const apiUrl: string = await getApiUrl()
-      await apiInterceptor(apiUrl + AUTH_LOGOUT, {
+      const response = await apiInterceptor(apiUrl + AUTH_LOGOUT, {
         requiresAuth: true,
         method: 'POST'
       })
-    } catch (error) {
-      // ignore API errors for logout, proceed to clear and redirect
-    } finally {
-      CookieService.clear()
 
-      // Server-side redirect
-      if (typeof window === 'undefined') {
-        redirect('/login')
-        return
+      if(!response.ok){
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to logout')
       }
 
-      // Client-side redirect
-      window.location.href = '/login'
+      return await response.json()
+    } catch (error) {
+      throw error
     }
   }
 
