@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { PlusIcon, Search } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
-import CommonTable from '@/components/erp/common/CommonTable'
+import CommonTable from '@/components/erp/common/table'
 import FilterDrawer from '@/components/erp/common/FilterDrawer'
 import AdvancedCustomerDetails from '@/components/erp/dashboard/crm/customers/AdvancedCustomerDetails'
 import { DetailsIcon, FilterIcon, UserIcon } from '@/public/icons'

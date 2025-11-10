@@ -1,8 +1,9 @@
 'use client'
 
 import React, { useMemo, ReactNode, useState } from 'react'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select'
 import { SpinnerCustom } from '@/components/ui/spinner'
+import Pagination from './Pagination'
+import { ArrowDown, ArrowUp } from 'lucide-react'
 
 type Column = {
   id: string
@@ -47,8 +48,9 @@ const CommonTable: React.FC<CommonTableProps> = ({
   handleRowSelect,
   rowKey = 'id'
 }) => {
-  const pageSizes = [10, 25, 50, 100]
   const [selectedRowId, setSelectedRowId] = useState<string | number | null>(null)
+  const [sortBy, setSortBy] = useState<string | null>(null)
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null)
 
   // Derive all values directly from props
   const tableData = data?.data || []
@@ -99,6 +101,8 @@ const CommonTable: React.FC<CommonTableProps> = ({
   // Handle sorting
   const handleSorting = (columnId: string, canSort: boolean) => {
     if (!canSort || !setFilterOptions) return
+    let sortBy: string | null = null
+    let sortOrder: 'asc' | 'desc' | null = null
 
     setFilterOptions((prevOptions: any) => {
       const newOptions = { ...prevOptions }
@@ -116,73 +120,38 @@ const CommonTable: React.FC<CommonTableProps> = ({
         if (newDirection === null) {
           delete newOptions.sortBy
           delete newOptions.sortOrder
+          sortBy = null
+          sortOrder = null
         } else {
           newOptions.sortBy = columnId
           newOptions.sortOrder = newDirection
+          sortBy = columnId
+          sortOrder = newDirection
         }
       } else {
         newOptions.sortBy = columnId
         newOptions.sortOrder = 'asc'
+        sortBy = columnId
+        sortOrder = 'asc'
       }
 
       return newOptions
     })
+    setSortBy(sortBy)
+    setSortOrder(sortOrder)
   }
 
   // Render sort icon
-  const renderSortIcon = (columnId: string, sortBy?: string, sortingDirection?: 'asc' | 'desc' | null) => {
+  const renderSortIcon = (columnId: string) => {
     if (columnId !== sortBy) return null
 
-    return (
-      <svg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg' className='ml-2'>
-        <path
-          d='M8.25 3.75L6 1.5L3.75 3.75'
-          stroke='currentColor'
-          strokeWidth='1.5'
-          strokeLinecap='round'
-          strokeLinejoin='round'
-          className={sortingDirection === 'asc' ? 'opacity-100' : 'opacity-40'}
-        />
-        <path
-          d='M8.25 8.25L6 10.5L3.75 8.25'
-          stroke='currentColor'
-          strokeWidth='1.5'
-          strokeLinecap='round'
-          strokeLinejoin='round'
-          className={sortingDirection === 'desc' ? 'opacity-100' : 'opacity-40'}
-        />
-      </svg>
-    )
-  }
-
-  // Generate page numbers for pagination
-  const getPageNumbers = () => {
-    const pages = []
-    const maxVisible = 5
-
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) pages.push(i)
-        pages.push('...')
-        pages.push(totalPages)
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1)
-        pages.push('...')
-        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i)
-      } else {
-        pages.push(1)
-        pages.push('...')
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i)
-        pages.push('...')
-        pages.push(totalPages)
-      }
+    if (sortOrder === 'asc') {
+      return <ArrowDown className='w-4 h-4 ml-2' />
+    } else if (sortOrder === 'desc') {
+      return <ArrowUp className='w-4 h-4 ml-2' />
     }
 
-    return pages
+    return null
   }
 
   return (
@@ -207,7 +176,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
                       } ${index === 0 ? 'rounded-l-lg' : ''} ${index === columns.length - 1 ? 'rounded-r-lg' : ''}`}
                       onClick={() => handleSorting(column.id, canSort)}
                     >
-                      <div className='flex items-center'>
+                      <div className='flex items-center justify-between'>
                         <span>{column.header}</span>
                         {canSort && renderSortIcon(column.id)}
                       </div>
@@ -269,102 +238,17 @@ const CommonTable: React.FC<CommonTableProps> = ({
 
       {/* Pagination Section */}
       {pagination && tableData.length > 0 && (
-        <div className='flex items-center justify-between border-t border-border px-4 py-3'>
-          {/* Left side - Rows per page */}
-          <div className='flex items-center gap-4'>
-            <div className='flex items-center gap-2'>
-              <span className='text-sm text-gray'>Rows per page</span>
-              <Select value={String(perPage)} onValueChange={v => updatePageSize(Number(v))}>
-                <SelectTrigger className='w-20'>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {pageSizes.map(size => (
-                    <SelectItem key={size} value={String(size)}>
-                      {size}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <span className='text-sm text-gray whitespace-nowrap'>
-              Showing {from} to {to} of {total} entries
-            </span>
-          </div>
-
-          {/* Right side - Pagination controls */}
-          <div className='flex items-center gap-1'>
-            {/* First page */}
-            <button
-              onClick={() => updatePageNumber(1)}
-              disabled={currentPage === 1 || isLoading}
-              className='p-2 rounded text-gray hover:text-light hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors'
-              title='First page'
-            >
-              <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M11 19l-7-7 7-7m8 14l-7-7 7-7' />
-              </svg>
-            </button>
-
-            {/* Previous page */}
-            <button
-              onClick={() => updatePageNumber(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1 || isLoading}
-              className='p-2 rounded text-gray hover:text-light hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors'
-              title='Previous page'
-            >
-              <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
-              </svg>
-            </button>
-
-            {/* Page numbers */}
-            {getPageNumbers().map((page, index) => (
-              <React.Fragment key={index}>
-                {page === '...' ? (
-                  <span className='px-3 py-1 text-gray'>...</span>
-                ) : (
-                  <button
-                    onClick={() => updatePageNumber(page as number)}
-                    disabled={isLoading}
-                    className={`px-3 py-1 rounded text-sm transition-colors ${
-                      currentPage === page
-                        ? 'bg-light text-bg font-medium'
-                        : 'text-gray hover:text-light hover:bg-accent'
-                    } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {page}
-                  </button>
-                )}
-              </React.Fragment>
-            ))}
-
-            {/* Next page */}
-            <button
-              onClick={() => updatePageNumber(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages || totalPages === 0 || isLoading}
-              className='p-2 rounded text-gray hover:text-light hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors'
-              title='Next page'
-            >
-              <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
-              </svg>
-            </button>
-
-            {/* Last page */}
-            <button
-              onClick={() => updatePageNumber(totalPages)}
-              disabled={currentPage === totalPages || totalPages === 0 || isLoading}
-              className='p-2 rounded text-gray hover:text-light hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors'
-              title='Last page'
-            >
-              <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 5l7 7-7 7M5 5l7 7-7 7' />
-              </svg>
-            </button>
-          </div>
-        </div>
+        <Pagination
+          total={total}
+          from={from}
+          to={to}
+          currentPage={currentPage}
+          perPage={perPage}
+          totalPages={totalPages}
+          isLoading={isLoading}
+          onPageChange={updatePageNumber}
+          onPageSizeChange={updatePageSize}
+        />
       )}
     </div>
   )
