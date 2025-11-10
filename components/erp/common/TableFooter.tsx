@@ -9,7 +9,7 @@ import {
   SelectGroup,
   SelectLabel,
   SelectItem
-} from '@/components/ui/Select'
+} from '@/components/ui/select'
 
 interface TableFooterProps {
   currentPage: number

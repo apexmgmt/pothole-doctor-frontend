@@ -8,7 +8,7 @@ import { DateRange as ReactDayPickerDateRange } from 'react-day-picker'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/PopoverContent'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popoverContent'
 
 interface DatePickerProps {
   value: Date | null

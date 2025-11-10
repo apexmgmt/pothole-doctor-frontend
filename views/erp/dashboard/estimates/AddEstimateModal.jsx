@@ -13,7 +13,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select";
+} from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/datePicker";
 import { Checkbox } from "@/components/ui/checkbox";
 
