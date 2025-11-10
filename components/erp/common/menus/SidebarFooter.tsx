@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/lib/hooks'
-import CookieService from '@/services/storage/cookie.service'
+import CookieService from '@/services/app/cookie.service'
 import { decryptData } from '@/utils/encryption'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {

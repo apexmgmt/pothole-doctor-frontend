@@ -1,4 +1,4 @@
-import CookieService from '@/services/storage/cookie.service'
+import CookieService from '@/services/app/cookie.service'
 
 interface ApiInterceptorOptions extends RequestInit {
   requiresAuth?: boolean

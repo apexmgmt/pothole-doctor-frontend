@@ -3,6 +3,7 @@
 import React, { useState, useMemo, ReactNode } from 'react'
 import CustomButton from './CustomButton'
 import { FilterIcon, PDFIcon, ExcelIcon, SearchIcon } from '@/public/icons'
+import TableFooter from './TableFooter'
 
 type Column = {
   key: string
@@ -45,6 +46,14 @@ interface CustomTableProps {
   pageSizeOptions?: number[]
   onPageChange?: (page: number) => void
   onPageSizeChange?: (size: number) => void
+  // Server-side pagination props
+  current_page?: number
+  total?: number
+  per_page?: number
+  from?: number
+  to?: number
+  last_page?: number
+  // ...existing props...
   showRowSelection?: boolean
   onRowSelectionChange?: (selectedRows: any[]) => void
   selectedRows?: any[]
@@ -96,9 +105,17 @@ const CustomTable: React.FC<CustomTableProps> = ({
   onActionButtonClick,
   showPagination = true,
   pageSize = 10,
-  pageSizeOptions = [5, 10, 25, 50, 100],
+  pageSizeOptions = [10, 25, 50, 100],
   onPageChange,
   onPageSizeChange,
+  // Server-side pagination
+  current_page,
+  total,
+  per_page,
+  from,
+  to,
+  last_page,
+  // ...existing props...
   showRowSelection = true,
   onRowSelectionChange,
   selectedRows = [],
@@ -154,11 +171,20 @@ const CustomTable: React.FC<CustomTableProps> = ({
     return searchFilteredData
   }, [data, searchTerm, sortConfig, onSearch, onSort])
 
+  // Use server pagination if provided, otherwise client-side
+  const isServerPagination = current_page !== undefined
+  const displayCurrentPage = isServerPagination ? current_page : currentPage
+  const displayTotalPages = isServerPagination
+    ? last_page || 1
+    : Math.max(1, Math.ceil(processedData.length / currentPageSize))
+  const displayPageSize = isServerPagination ? per_page || pageSize : currentPageSize
+  const displayTotal = isServerPagination ? total || 0 : processedData.length
+
   // Pagination calculations
-  const totalPages = Math.max(1, Math.ceil(processedData.length / currentPageSize))
+  const totalPages = displayTotalPages
   const startIndex = (currentPage - 1) * currentPageSize
   const endIndex = startIndex + currentPageSize
-  const paginatedData = processedData.slice(startIndex, endIndex)
+  const paginatedData = isServerPagination ? data : processedData.slice(startIndex, endIndex)
 
   // Handlers
   const handleSearch = (value: string) => {
@@ -669,90 +695,16 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
       {/* Footer Section */}
       {showPagination && (
-        <div className='py-4'>
-          <div className='flex flex-col sm:flex-row gap-4 items-center justify-between'>
-            <div className='text-gray text-sm'>
-              {localSelectedRows.length} of {processedData.length} row(s) selected
-            </div>
-            <div className='flex items-center gap-4'>
-              <div className='flex items-center gap-2'>
-                <span className='text-gray text-sm'>Rows per page</span>
-                <div className='relative'>
-                  <select
-                    value={currentPageSize}
-                    onChange={e => handlePageSizeChange(Number(e.target.value))}
-                    className='appearance-none pr-8 px-2 py-1 bg-bg border border-border rounded text-light text-sm focus:outline-none focus:border-light'
-                  >
-                    {pageSizeOptions.map(size => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              {processedData.length > currentPageSize && (
-                <div className='flex items-center gap-2'>
-                  <span className='text-gray text-sm'>
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <div className='flex gap-1'>
-                    <button
-                      onClick={() => handlePageChange(1)}
-                      disabled={currentPage === 1}
-                      className='p-1 rounded text-gray hover:text-light disabled:opacity-50 disabled:cursor-not-allowed'
-                      title='First page'
-                    >
-                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M11 19l-7-7 7-7m8 14l-7-7 7-7'
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className='p-1 rounded text-gray hover:text-light disabled:opacity-50 disabled:cursor-not-allowed'
-                      title='Previous page'
-                    >
-                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages || totalPages === 0}
-                      className='p-1 rounded text-gray hover:text-light disabled:opacity-50 disabled:cursor-not-allowed'
-                      title='Next page'
-                    >
-                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => handlePageChange(totalPages)}
-                      disabled={currentPage === totalPages || totalPages === 0}
-                      className='p-1 rounded text-gray hover:text-light disabled:opacity-50 disabled:cursor-not-allowed'
-                      title='Last page'
-                    >
-                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M13 5l7 7-7 7M5 5l7 7-7 7'
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <TableFooter
+          currentPage={displayCurrentPage}
+          totalPages={displayTotalPages}
+          currentPageSize={displayPageSize}
+          pageSizeOptions={pageSizeOptions}
+          totalRows={displayTotal}
+          selectedRowsCount={localSelectedRows.length}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
       )}
     </div>
   )

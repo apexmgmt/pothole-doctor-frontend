@@ -1,6 +1,6 @@
 import { decryptData } from '@/utils/encryption'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import CookieService from '@/services/storage/cookie.service'
+import CookieService from '@/services/app/cookie.service'
 
 export interface User {
   id?: string
