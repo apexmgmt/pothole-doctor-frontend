@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 
 import { PlusIcon, XIcon } from "lucide-react";
 
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {

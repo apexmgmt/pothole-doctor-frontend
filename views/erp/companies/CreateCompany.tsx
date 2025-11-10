@@ -3,10 +3,8 @@
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { Input } from '@/components/ui/Input'
-import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select'
 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import CompanyService from '@/services/api/company.service'

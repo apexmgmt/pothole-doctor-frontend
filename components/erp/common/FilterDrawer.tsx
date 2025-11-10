@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select'
 import { DatePicker } from '@/components/ui/datePicker'
-import { Input } from '@/components/ui/Input'
+import { Input } from '@/components/ui/input'
 
 type Option = {
   value: string

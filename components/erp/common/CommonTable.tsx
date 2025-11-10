@@ -66,7 +66,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
   const handleRowClick = (row: any) => {
     const rowId = row[rowKey]
     setSelectedRowId(rowId)
-    
+
     if (handleRowSelect) {
       handleRowSelect(row)
     }
@@ -75,22 +75,24 @@ const CommonTable: React.FC<CommonTableProps> = ({
   // Handle page size change
   const updatePageSize = (value: number) => {
     if (setFilterOptions) {
-      setFilterOptions((prevOptions: any) => ({
-        ...prevOptions,
-        per_page: value,
-        page: 1
-      }))
+      setFilterOptions((prevOptions: any) => {
+        const newOptions = { ...prevOptions, per_page: value, page: 1 }
+        if (newOptions.per_page === 10) delete newOptions.per_page
+        if (newOptions.page === 1) delete newOptions.page
+        return newOptions
+      })
     }
   }
 
   // Handle page change
   const updatePageNumber = (value: number) => {
     if (setFilterOptions) {
-      setFilterOptions((prevOptions: any) => ({
-        ...prevOptions,
-        per_page: perPage,
-        page: value
-      }))
+      setFilterOptions((prevOptions: any) => {
+        const newOptions = { ...prevOptions, per_page: perPage, page: value }
+        if (newOptions.per_page === 10) delete newOptions.per_page
+        if (newOptions.page === 1) delete newOptions.page
+        return newOptions
+      })
     }
   }
 
@@ -225,9 +227,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
                       key={rowIndex}
                       onClick={() => handleRowClick(row)}
                       className={`border-b border-border transition-colors cursor-pointer ${
-                        isSelected
-                          ? 'bg-gray-800 hover:bg-gray-900'
-                          : 'hover:bg-gray-900'
+                        isSelected ? 'bg-gray-800 hover:bg-gray-900' : 'hover:bg-gray-900'
                       }`}
                     >
                       {columns.map(column => (

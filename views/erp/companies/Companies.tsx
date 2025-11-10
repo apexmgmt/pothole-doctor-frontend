@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { PlusIcon } from 'lucide-react'
+import { PlusIcon, Search } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/CommonTable'
@@ -13,6 +13,7 @@ import CompanyService from '@/services/api/company.service'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse } from '@/types'
 import CompanyDetails from '@/components/erp/dashboard/crm/companies/CompanyDetails'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 
 interface CompanyData {
   id: string
@@ -49,6 +50,7 @@ const Companies: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
   const [selectedCompany, setSelectedCompany] = useState<object | null>(null)
+  const [searchValue, setSearchValue] = useState<string>('')
 
   // Initialize filterOptions from URL params
   const getInitialFilters = () => {
@@ -66,6 +68,32 @@ const Companies: React.FC = () => {
   }
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters())
+
+  // Set initial search value from filterOptions
+  useEffect(() => {
+    setSearchValue(filterOptions.search || '')
+  }, [])
+
+  // Debounced search update
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilterOptions((prev: any) => {
+        // Remove search if empty, otherwise set it
+        const newOptions = { ...prev }
+        if (searchValue && searchValue.trim() !== '') {
+          newOptions.search = searchValue
+        } else {
+          delete newOptions.search
+        }
+        if (newOptions.page) {
+          delete newOptions.page
+        }
+        return newOptions
+      })
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [searchValue])
 
   // Update URL when filters change
   const updateURL = (filters: any) => {
@@ -198,7 +226,7 @@ const Companies: React.FC = () => {
     {
       id: 'email',
       header: 'Email',
-      cell: row => <span className='text-blue-400'>{row.email}</span>,
+      cell: row => <span className=''>{row.email}</span>,
       sortable: true
     },
     {
@@ -223,78 +251,9 @@ const Companies: React.FC = () => {
     }
   ]
 
-  // Company-specific filter configuration
-  const companyFilterFields: FilterField[] = [
-    {
-      key: 'companyId',
-      label: 'Company ID',
-      type: 'text',
-      placeholder: 'Enter company ID'
-    },
-    {
-      key: 'name',
-      label: 'Name',
-      type: 'text',
-      placeholder: 'Enter name'
-    },
-    {
-      key: 'phone',
-      label: 'Phone',
-      type: 'text',
-      placeholder: 'Enter phone number'
-    },
-    {
-      key: 'company',
-      label: 'Company',
-      type: 'text',
-      placeholder: 'Enter company name'
-    },
-    {
-      key: 'email',
-      label: 'Email',
-      type: 'text',
-      placeholder: 'Enter email'
-    },
-    {
-      key: 'jobAddress',
-      label: 'Address',
-      type: 'text',
-      placeholder: 'Enter address'
-    },
-    {
-      key: 'stage',
-      label: 'Status',
-      type: 'select',
-      placeholder: 'Select status',
-      options: [
-        { value: 'active', label: 'Active' },
-        { value: 'inactive', label: 'Inactive' }
-      ]
-    }
-  ]
-
-  const companyFilterButtons: FilterButton[] = [
-    { label: 'Clear', action: 'clear', variant: 'outline' },
-    { label: 'Apply Filters', action: 'apply', variant: 'primary' }
-  ]
-
-  // Event handlers
-  const handleFilterDrawerClose = () => {
-    setIsFilterDrawerOpen(false)
-  }
-
-  const handleApplyFilters = (filters: Record<string, any>) => {
-    console.log('Applied company filters:', filters)
-    setFilterOptions((prev: any) => ({
-      ...prev,
-      ...filters,
-      page: 1 // Reset to first page when applying filters
-    }))
-    setIsFilterDrawerOpen(false)
-  }
-
   const handleClearFilters = () => {
     setFilterOptions({})
+    setSearchValue('')
     setIsFilterDrawerOpen(false)
   }
 
@@ -321,10 +280,17 @@ const Companies: React.FC = () => {
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <Button variant='outline' size='sm' onClick={() => setIsFilterDrawerOpen(true)} className='gap-2'>
-          <FilterIcon className='w-4 h-4' />
-          Filter
-        </Button>
+        <InputGroup>
+          <InputGroupInput
+            placeholder='Search...'
+            value={searchValue}
+            onChange={e => setSearchValue(e.target.value)}
+            className='w-80'
+          />
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+        </InputGroup>
         {hasActiveFilters() && (
           <Button variant='ghost' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
             Clear Filters
@@ -384,19 +350,7 @@ const Companies: React.FC = () => {
         />
       )}
 
-      {activeTab === 'details' && (
-        <CompanyDetails companyData={selectedCompany}/>
-      )}
-
-      {/* Filter Drawer */}
-      <FilterDrawer
-        isOpen={isFilterDrawerOpen}
-        onClose={handleFilterDrawerClose}
-        onApplyFilters={handleApplyFilters}
-        title='Filter Companies'
-        fields={companyFilterFields}
-        buttons={companyFilterButtons}
-      />
+      {activeTab === 'details' && <CompanyDetails companyData={selectedCompany} />}
     </CommonLayout>
   )
 }
