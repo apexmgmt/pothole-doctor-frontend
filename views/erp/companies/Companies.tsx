@@ -12,6 +12,7 @@ import { DetailsIcon, FilterIcon, UserIcon } from '@/public/icons'
 import CompanyService from '@/services/api/company.service'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse } from '@/types'
+import CompanyDetails from '@/components/erp/dashboard/crm/companies/CompanyDetails'
 
 interface CompanyData {
   id: string
@@ -384,10 +385,7 @@ const Companies: React.FC = () => {
       )}
 
       {activeTab === 'details' && (
-        <AdvancedCustomerDetails
-          customerData={companiesData.find(c => c.id === selectedCompanyId) || null}
-          onEdit={() => console.log('Edit company')}
-        />
+        <CompanyDetails companyData={selectedCompany}/>
       )}
 
       {/* Filter Drawer */}
