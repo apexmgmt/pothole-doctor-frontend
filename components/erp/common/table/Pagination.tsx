@@ -60,11 +60,10 @@ const Pagination: React.FC<PaginationProps> = ({
   }
 
   return (
-    <div className='flex items-center justify-between border-t border-border px-4 py-3'>
+    <div className='flex items-center justify-between border-t border-border py-3'>
       {/* Left side - Rows per page */}
       <div className='flex items-center gap-4'>
         <div className='flex items-center gap-2'>
-          <span className='text-sm text-gray'>Rows per page</span>
           <Select value={String(perPage)} onValueChange={v => onPageSizeChange(Number(v))}>
             <SelectTrigger className='w-20'>
               <SelectValue />
