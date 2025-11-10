@@ -10,6 +10,8 @@ import FilterDrawer from '@/components/erp/common/FilterDrawer'
 import AdvancedCustomerDetails from '@/components/erp/dashboard/crm/customers/AdvancedCustomerDetails'
 import { DetailsIcon, FilterIcon, UserIcon } from '@/public/icons'
 import CompanyService from '@/services/api/company.service'
+import { Button } from '@/components/ui/button'
+import { Column, DataTableApiResponse } from '@/types'
 
 interface CompanyData {
   id: string
@@ -20,14 +22,6 @@ interface CompanyData {
   email: string
   stage: string
   [key: string]: any
-}
-
-interface Column {
-  id: string
-  header: string
-  cell: (row: any) => React.ReactNode
-  sortable?: boolean
-  enableSorting?: boolean
 }
 
 interface FilterField {
@@ -44,24 +38,16 @@ interface FilterButton {
   variant: string
 }
 
-interface ApiResponse {
-  data: any[]
-  per_page: number
-  total: number
-  from: number
-  to: number
-  current_page: number
-  last_page: number
-}
-
 const Companies: React.FC = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
 
   const [activeTab, setActiveTab] = useState<string>('companies')
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
-  const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
+  const [selectedCompany, setSelectedCompany] = useState<object | null>(null)
 
   // Initialize filterOptions from URL params
   const getInitialFilters = () => {
@@ -311,6 +297,19 @@ const Companies: React.FC = () => {
     setIsFilterDrawerOpen(false)
   }
 
+  const handleRowSelect = (company: any) => {
+    setSelectedCompanyId(company?.id || null)
+
+    CompanyService.show(company?.id)
+      .then(response => {
+        setSelectedCompany(response.data)
+      })
+      .catch(error => {
+        setSelectedCompany(null)
+        console.error('Error fetching company details:', error)
+      })
+  }
+
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
@@ -321,34 +320,30 @@ const Companies: React.FC = () => {
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <button
-          onClick={() => setIsFilterDrawerOpen(true)}
-          className='flex items-center gap-2 px-3 py-1.5 bg-bg border border-border rounded-md text-light hover:bg-accent transition-colors'
-        >
-          <FilterIcon />
+        <Button variant='outline' size='sm' onClick={() => setIsFilterDrawerOpen(true)} className='gap-2'>
+          <FilterIcon className='w-4 h-4' />
           Filter
-        </button>
+        </Button>
         {hasActiveFilters() && (
-          <button
-            onClick={handleClearFilters}
-            className='px-4 py-2 bg-gray/20 text-gray rounded-md hover:bg-gray/30 transition-colors text-sm'
-          >
+          <Button variant='ghost' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
             Clear Filters
-          </button>
+          </Button>
         )}
       </div>
-      <button
+      <Button
+        variant='default'
+        size='sm'
         onClick={() => router.push('/erp/companies/create')}
-        className='px-4 py-2 bg-light text-bg rounded-md hover:bg-light/90 transition-colors flex items-center gap-2'
+        className='bg-light text-bg hover:bg-light/90'
       >
         <PlusIcon className='w-4 h-4' />
         Add Company
-      </button>
+      </Button>
     </div>
   )
 
   // Button configuration for CommonLayout
-  const buttons = [
+  const tabs = [
     {
       label: 'Companies',
       icon: UserIcon,
@@ -359,12 +354,13 @@ const Companies: React.FC = () => {
       label: 'Details',
       icon: DetailsIcon,
       onClick: () => setActiveTab('details'),
-      isActive: activeTab === 'details'
+      isActive: activeTab === 'details',
+      disabled: !selectedCompanyId
     }
   ]
 
   return (
-    <CommonLayout title='Companies' buttons={buttons}>
+    <CommonLayout title='Companies' buttons={tabs}>
       {activeTab === 'companies' && (
         <CommonTable
           data={{
@@ -383,11 +379,15 @@ const Companies: React.FC = () => {
           pagination={true}
           isLoading={isLoading}
           emptyMessage='No companies found'
+          handleRowSelect={handleRowSelect}
         />
       )}
 
       {activeTab === 'details' && (
-        <AdvancedCustomerDetails customerData={companiesData[0] || null} onEdit={() => console.log('Edit company')} />
+        <AdvancedCustomerDetails
+          customerData={companiesData.find(c => c.id === selectedCompanyId) || null}
+          onEdit={() => console.log('Edit company')}
+        />
       )}
 
       {/* Filter Drawer */}

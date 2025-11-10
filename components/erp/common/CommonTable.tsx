@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, ReactNode } from 'react'
+import React, { useMemo, ReactNode, useState } from 'react'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select'
 import { SpinnerCustom } from '@/components/ui/spinner'
 
@@ -30,6 +30,8 @@ interface CommonTableProps {
   pagination?: boolean
   className?: string
   emptyMessage?: string
+  handleRowSelect?: (row: any) => void
+  rowKey?: string
 }
 
 const CommonTable: React.FC<CommonTableProps> = ({
@@ -41,9 +43,12 @@ const CommonTable: React.FC<CommonTableProps> = ({
   showFilters = true,
   pagination = true,
   className = '',
-  emptyMessage = 'No data available'
+  emptyMessage = 'No data available',
+  handleRowSelect,
+  rowKey = 'id'
 }) => {
   const pageSizes = [10, 25, 50, 100]
+  const [selectedRowId, setSelectedRowId] = useState<string | number | null>(null)
 
   // Derive all values directly from props
   const tableData = data?.data || []
@@ -56,6 +61,16 @@ const CommonTable: React.FC<CommonTableProps> = ({
 
   // Calculate total pages
   const totalPages = useMemo(() => lastPage, [lastPage])
+
+  // Handle row click
+  const handleRowClick = (row: any) => {
+    const rowId = row[rowKey]
+    setSelectedRowId(rowId)
+    
+    if (handleRowSelect) {
+      handleRowSelect(row)
+    }
+  }
 
   // Handle page size change
   const updatePageSize = (value: number) => {
@@ -112,7 +127,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
     })
   }
 
-  // Render sort icon - now read from filterOptions via parent
+  // Render sort icon
   const renderSortIcon = (columnId: string, sortBy?: string, sortingDirection?: 'asc' | 'desc' | null) => {
     if (columnId !== sortBy) return null
 
@@ -202,15 +217,27 @@ const CommonTable: React.FC<CommonTableProps> = ({
 
             <tbody>
               {tableData.length > 0 ? (
-                tableData.map((row, rowIndex) => (
-                  <tr key={rowIndex} className='border-b border-border hover:bg-bg/30 transition-colors'>
-                    {columns.map(column => (
-                      <td key={column.id} className='px-4 py-3 text-light text-sm whitespace-nowrap'>
-                        {column.cell(row)}
-                      </td>
-                    ))}
-                  </tr>
-                ))
+                tableData.map((row, rowIndex) => {
+                  const rowId = row[rowKey]
+                  const isSelected = selectedRowId === rowId
+                  return (
+                    <tr
+                      key={rowIndex}
+                      onClick={() => handleRowClick(row)}
+                      className={`border-b border-border transition-colors cursor-pointer ${
+                        isSelected
+                          ? 'bg-gray-800 hover:bg-gray-900'
+                          : 'hover:bg-gray-900'
+                      }`}
+                    >
+                      {columns.map(column => (
+                        <td key={column.id} className='px-4 py-3 text-light text-sm whitespace-nowrap'>
+                          {column.cell(row)}
+                        </td>
+                      ))}
+                    </tr>
+                  )
+                })
               ) : (
                 <tr>
                   <td colSpan={columns.length} className='text-center py-8'>
