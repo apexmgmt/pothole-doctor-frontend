@@ -30,6 +30,31 @@ export async function getApiUrl(): Promise<string> {
 }
 
 /**
+ * Generates an app URL with an optional subdomain.
+ *
+ * Uses NEXT_PUBLIC_APP_URL from environment variables.
+ * If a subdomain is provided, it is prepended to the app base URL's host (e.g., abc.localhost:3000).
+ *
+ * @param subdomain - The subdomain to prepend (optional)
+ * @returns string The app URL with the subdomain if provided
+ */
+export function appUrl(subdomain?: string): string {
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+
+  if (!subdomain || subdomain.trim() === '') {
+    return appBaseUrl
+  }
+
+  try {
+    const appUrl = new URL(appBaseUrl)
+    appUrl.hostname = `${subdomain}.${appUrl.hostname}`
+    return appUrl.toString()
+  } catch {
+    return appBaseUrl
+  }
+}
+
+/**
  * Helper to build the API URL with subdomain if present.
  */
 function buildUrl(apiBaseUrl: string, appBaseUrl: string, host: string): string {

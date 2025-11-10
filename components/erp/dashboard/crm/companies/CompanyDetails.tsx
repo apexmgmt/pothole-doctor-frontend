@@ -4,6 +4,7 @@ import React from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { appUrl } from '@/utils/utility'
 
 interface CompanyDetailsProps {
   companyData: any
@@ -88,7 +89,7 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ companyData, onEdit }) 
           <div className='space-y-3'>
             <div>
               <label className='text-xs text-gray uppercase'>Domain</label>
-              <p className='text-light'>{companyData.domain?.domain || 'N/A'}</p>
+              <p className='text-light'>{appUrl(companyData.domain?.domain) || 'N/A'}</p>
             </div>
             <div>
               <label className='text-xs text-gray uppercase'>Guard</label>
