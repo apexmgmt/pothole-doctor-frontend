@@ -99,9 +99,9 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ companyData, onEdit }) 
               <label className='text-xs text-gray uppercase'>Tenant ID</label>
               <p className='text-light text-xs break-all'>{companyData.tenant_id || 'N/A'}</p>
             </div>
-            <div>
+            <div className="flex items-center gap-2">
               <label className='text-xs text-gray uppercase'>Status</label>
-              <Badge variant={companyData.status ? 'default' : 'secondary'} className='mt-1'>
+              <Badge variant={companyData.status ? 'default' : 'secondary'}>
                 {companyData.status ? 'Active' : 'Inactive'}
               </Badge>
             </div>
