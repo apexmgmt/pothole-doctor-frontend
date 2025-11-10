@@ -14,6 +14,8 @@ import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse } from '@/types'
 import CompanyDetails from '@/components/erp/dashboard/crm/companies/CompanyDetails'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Switch } from '@/components/ui/switch'
+import CompanyStatusSwitch from '@/components/erp/companies/CompanyStatusSwitch'
 
 interface CompanyData {
   id: string
@@ -51,6 +53,7 @@ const Companies: React.FC = () => {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
   const [selectedCompany, setSelectedCompany] = useState<object | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
+  const [statusLoading, setStatusLoading] = useState<{ [key: string]: boolean }>({})
 
   // Initialize filterOptions from URL params
   const getInitialFilters = () => {
@@ -145,7 +148,7 @@ const Companies: React.FC = () => {
         company: company.domain?.domain || 'N/A',
         jobAddress: company.userable?.address || 'N/A',
         email: company.email,
-        stage: company.status ? 'Active' : 'Inactive'
+        status: company.status
       }))
     : []
 
@@ -167,24 +170,6 @@ const Companies: React.FC = () => {
             strokeLinejoin='round'
             strokeWidth={2}
             d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
-          />
-        </svg>
-      </button>
-      <button
-        onClick={e => {
-          e.stopPropagation()
-          console.log('Delete company:', row)
-          // Add delete confirmation logic here
-        }}
-        className='p-2 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-md transition-colors'
-        title='Delete'
-      >
-        <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-          <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
-            strokeWidth={2}
-            d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
           />
         </svg>
       </button>
@@ -230,16 +215,17 @@ const Companies: React.FC = () => {
       sortable: true
     },
     {
-      id: 'stage',
+      id: 'status',
       header: 'Status',
       cell: row => (
-        <span
-          className={`px-2 py-1 rounded text-xs font-medium ${
-            row.stage === 'Active' ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
-          }`}
-        >
-          {row.stage}
-        </span>
+        <div className='flex items-center gap-2'>
+          <CompanyStatusSwitch
+            checked={row.status}
+            loading={statusLoading[row.id]}
+            companyId={row.id}
+            // fetchData={fetchData} // pass only if you want to refetch after change
+          />
+        </div>
       ),
       sortable: true
     },
@@ -325,6 +311,19 @@ const Companies: React.FC = () => {
       disabled: !selectedCompanyId
     }
   ]
+
+  const handleStatusToggle = async (companyId: string) => {
+    setStatusLoading(prev => ({ ...prev, [companyId]: true }))
+    try {
+      await CompanyService.changeStatus(companyId)
+      // Refetch data after status change
+      fetchData()
+    } catch (error) {
+      // Optionally show error
+      console.error('Failed to change status', error)
+    }
+    setStatusLoading(prev => ({ ...prev, [companyId]: false }))
+  }
 
   return (
     <CommonLayout title='Companies' buttons={tabs}>

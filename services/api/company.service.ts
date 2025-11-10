@@ -1,6 +1,6 @@
 import { getApiUrl } from '@/utils/utility'
 import apiInterceptor from './api.interceptor'
-import { COMPANIES } from '@/constants/api'
+import { COMPANIES, COMPANY_STATUS_CHANGE } from '@/constants/api'
 import { revalidate } from '../app/cache.service'
 
 export default class CompanyService {
@@ -74,23 +74,44 @@ export default class CompanyService {
   /** Update Company Details */
   static update = async (companyId: string, payload: object) => {
     try {
-        const apiUrl: string = await getApiUrl()
-        const response = await apiInterceptor(apiUrl + COMPANIES + companyId, {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + COMPANIES + companyId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
       })
 
-        if (!response.ok) {
-          const errorData = await response.json()
-          return errorData.message || 'Failed to update company details'
-        }
+      if (!response.ok) {
+        const errorData = await response.json()
+        return errorData.message || 'Failed to update company details'
+      }
 
-        // Revalidate companies cache tag
-        await revalidate('companies')
-        return await response.json()
+      // Revalidate companies cache tag
+      await revalidate('companies')
+      return await response.json()
     } catch (error) {}
   }
 
-  
+  /** Company status change */
+  static changeStatus = async (companyId: string) => {
+    try {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + COMPANY_STATUS_CHANGE, {
+        requiresAuth: true,
+        method: 'POST',
+        body: JSON.stringify({ id: companyId })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        return errorData.message || 'Failed to change company status'
+      }
+
+      // Revalidate companies cache tag
+      await revalidate('companies')
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
 }
