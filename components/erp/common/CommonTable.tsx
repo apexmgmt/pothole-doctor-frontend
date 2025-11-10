@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useEffect, ReactNode } from 'react'
+import React, { useMemo, ReactNode } from 'react'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select'
 import { SpinnerCustom } from '@/components/ui/spinner'
 
@@ -45,110 +45,75 @@ const CommonTable: React.FC<CommonTableProps> = ({
 }) => {
   const pageSizes = [10, 25, 50, 100]
 
-  // State management
-  const [tableData, setTableData] = useState<any[]>([])
-  const [total, setTotal] = useState(0)
-  const [from, setFrom] = useState(1)
-  const [to, setTo] = useState(10)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [perPage, setPerPage] = useState(10)
-  const [lastPage, setLastPage] = useState(1)
-  const [sortBy, setSortBy] = useState<string | null>(null)
-  const [sortingDirection, setSortingDirection] = useState<'asc' | 'desc' | null>(null)
-
-  // Update state when data changes
-  useEffect(() => {
-    if (data) {
-      setTableData(data.data || [])
-      setPerPage(data.per_page || 10)
-      setTotal(data.total || 0)
-      setFrom(data.from || 1)
-      setTo(data.to || 10)
-      setCurrentPage(data.current_page || 1)
-      setLastPage(data.last_page || 1)
-    }
-  }, [data])
+  // Derive all values directly from props
+  const tableData = data?.data || []
+  const total = data?.total || 0
+  const from = data?.from || 1
+  const to = data?.to || 10
+  const currentPage = data?.current_page || 1
+  const perPage = data?.per_page || 10
+  const lastPage = data?.last_page || 1
 
   // Calculate total pages
   const totalPages = useMemo(() => lastPage, [lastPage])
 
   // Handle page size change
   const updatePageSize = (value: number) => {
-    setPerPage(value)
-    setCurrentPage(1)
-
     if (setFilterOptions) {
-      setTimeout(() => {
-        setFilterOptions((prevOptions: any) => ({
-          ...prevOptions,
-          per_page: value,
-          current_page: 1
-        }))
-      }, 0)
+      setFilterOptions((prevOptions: any) => ({
+        ...prevOptions,
+        per_page: value,
+        page: 1
+      }))
     }
   }
 
   // Handle page change
   const updatePageNumber = (value: number) => {
-    setCurrentPage(value)
-
     if (setFilterOptions) {
-      setTimeout(() => {
-        setFilterOptions((prevOptions: any) => ({
-          ...prevOptions,
-          per_page: perPage,
-          current_page: value
-        }))
-      }, 0)
+      setFilterOptions((prevOptions: any) => ({
+        ...prevOptions,
+        per_page: perPage,
+        page: value
+      }))
     }
   }
 
   // Handle sorting
   const handleSorting = (columnId: string, canSort: boolean) => {
-    if (!canSort) return
+    if (!canSort || !setFilterOptions) return
 
-    if (columnId === sortBy) {
-      setSortingDirection(prev => {
-        const newDirection = prev === null ? 'asc' : prev === 'asc' ? 'desc' : null
+    setFilterOptions((prevOptions: any) => {
+      const newOptions = { ...prevOptions }
+      const currentSortBy = prevOptions.sortBy
+      const currentSortOrder = prevOptions.sortOrder
 
-        if (setFilterOptions) {
-          setTimeout(() => {
-            setFilterOptions((prevOptions: any) => {
-              const newOptions = { ...prevOptions }
+      if (currentSortBy === columnId) {
+        const newDirection =
+          currentSortOrder === null || currentSortOrder === undefined
+            ? 'asc'
+            : currentSortOrder === 'asc'
+              ? 'desc'
+              : null
 
-              if (newDirection === null) {
-                delete newOptions.sortBy
-                delete newOptions.sortOrder
-              } else {
-                newOptions.sortBy = columnId
-                newOptions.sortOrder = newDirection
-              }
-
-              return newOptions
-            })
-          }, 0)
+        if (newDirection === null) {
+          delete newOptions.sortBy
+          delete newOptions.sortOrder
+        } else {
+          newOptions.sortBy = columnId
+          newOptions.sortOrder = newDirection
         }
-
-        return newDirection
-      })
-    } else {
-      setSortBy(columnId)
-      setSortingDirection('asc')
-
-      if (setFilterOptions) {
-        setTimeout(() => {
-          setFilterOptions((prevOptions: any) => ({
-            ...prevOptions,
-            sortBy: columnId,
-            sortOrder: 'asc'
-          }))
-        }, 0)
+      } else {
+        newOptions.sortBy = columnId
+        newOptions.sortOrder = 'asc'
       }
-    }
+
+      return newOptions
+    })
   }
 
-  // Render sort icon
-  const renderSortIcon = (columnId: string) => {
+  // Render sort icon - now read from filterOptions via parent
+  const renderSortIcon = (columnId: string, sortBy?: string, sortingDirection?: 'asc' | 'desc' | null) => {
     if (columnId !== sortBy) return null
 
     return (
@@ -306,7 +271,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
             {/* First page */}
             <button
               onClick={() => updatePageNumber(1)}
-              disabled={currentPage === 1}
+              disabled={currentPage === 1 || isLoading}
               className='p-2 rounded text-gray hover:text-light hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors'
               title='First page'
             >
@@ -318,7 +283,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
             {/* Previous page */}
             <button
               onClick={() => updatePageNumber(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
+              disabled={currentPage === 1 || isLoading}
               className='p-2 rounded text-gray hover:text-light hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors'
               title='Previous page'
             >
@@ -335,11 +300,12 @@ const CommonTable: React.FC<CommonTableProps> = ({
                 ) : (
                   <button
                     onClick={() => updatePageNumber(page as number)}
+                    disabled={isLoading}
                     className={`px-3 py-1 rounded text-sm transition-colors ${
                       currentPage === page
                         ? 'bg-light text-bg font-medium'
                         : 'text-gray hover:text-light hover:bg-accent'
-                    }`}
+                    } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {page}
                   </button>
@@ -350,7 +316,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
             {/* Next page */}
             <button
               onClick={() => updatePageNumber(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages || totalPages === 0}
+              disabled={currentPage === totalPages || totalPages === 0 || isLoading}
               className='p-2 rounded text-gray hover:text-light hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors'
               title='Next page'
             >
@@ -362,7 +328,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
             {/* Last page */}
             <button
               onClick={() => updatePageNumber(totalPages)}
-              disabled={currentPage === totalPages || totalPages === 0}
+              disabled={currentPage === totalPages || totalPages === 0 || isLoading}
               className='p-2 rounded text-gray hover:text-light hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors'
               title='Last page'
             >
