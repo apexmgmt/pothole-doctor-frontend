@@ -5,13 +5,30 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { appUrl } from '@/utils/utility'
+import CompanyStatusSwitch from './CompanyStatusSwitch'
+import CompanyService from '@/services/api/company.service'
 
 interface CompanyDetailsProps {
-  companyData: any
+  companyData: any,
+  setCompanyData:  (options: any) => void
+  fetchData?: () => void
   onEdit?: () => void
 }
 
-const CompanyDetails: React.FC<CompanyDetailsProps> = ({ companyData, onEdit }) => {
+const CompanyDetails: React.FC<CompanyDetailsProps> = ({ companyData, setCompanyData, fetchData, onEdit }) => {
+  const fetchCompanyDetails = async () => {
+    CompanyService.show(companyData?.id)
+      .then(response => {
+        setCompanyData(response.data)
+        if (fetchData) {
+          fetchData()
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching company details:', error)
+      })
+  }
+
   if (!companyData) {
     return (
       <div className='flex items-center justify-center h-64'>
@@ -99,11 +116,9 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ companyData, onEdit }) 
               <label className='text-xs text-gray uppercase'>Tenant ID</label>
               <p className='text-light text-xs break-all'>{companyData.tenant_id || 'N/A'}</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               <label className='text-xs text-gray uppercase'>Status</label>
-              <Badge variant={companyData.status ? 'default' : 'secondary'}>
-                {companyData.status ? 'Active' : 'Inactive'}
-              </Badge>
+              <CompanyStatusSwitch checked={!!companyData.status} companyId={companyData.id} fetchData={fetchCompanyDetails} />
             </div>
           </div>
         </div>

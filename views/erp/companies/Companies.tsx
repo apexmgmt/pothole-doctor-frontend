@@ -12,10 +12,10 @@ import { DetailsIcon, FilterIcon, UserIcon } from '@/public/icons'
 import CompanyService from '@/services/api/company.service'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse } from '@/types'
-import CompanyDetails from '@/components/erp/dashboard/crm/companies/CompanyDetails'
+import CompanyDetails from '@/views/erp/companies/CompanyDetails'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Switch } from '@/components/ui/switch'
-import CompanyStatusSwitch from '@/components/erp/companies/CompanyStatusSwitch'
+import CompanyStatusSwitch from '@/views/erp/companies/CompanyStatusSwitch'
 
 interface CompanyData {
   id: string
@@ -349,7 +349,7 @@ const Companies: React.FC = () => {
         />
       )}
 
-      {activeTab === 'details' && <CompanyDetails companyData={selectedCompany} />}
+      {activeTab === 'details' && <CompanyDetails companyData={selectedCompany} setCompanyData={setSelectedCompany} fetchData={fetchData} />}
     </CommonLayout>
   )
 }
