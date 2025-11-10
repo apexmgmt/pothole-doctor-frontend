@@ -16,6 +16,7 @@ import CompanyDetails from '@/views/erp/companies/CompanyDetails'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Switch } from '@/components/ui/switch'
 import CompanyStatusSwitch from '@/views/erp/companies/CompanyStatusSwitch'
+import EditButton from '@/components/erp/common/buttons/EditButton'
 
 interface CompanyData {
   id: string
@@ -155,24 +156,7 @@ const Companies: React.FC = () => {
   // Custom actions renderer
   const renderCompanyActions = (row: CompanyData) => (
     <div className='flex gap-2'>
-      <button
-        onClick={e => {
-          e.stopPropagation()
-          console.log('Edit company:', row)
-          // router.push(`/erp/companies/edit/${row.id}`)
-        }}
-        className='p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 rounded-md transition-colors'
-        title='Edit'
-      >
-        <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-          <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
-            strokeWidth={2}
-            d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
-          />
-        </svg>
-      </button>
+      <EditButton title='Edit Company Information' link={`/erp/companies/${row.id}/edit`} />
     </div>
   )
 
