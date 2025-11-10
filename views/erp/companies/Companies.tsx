@@ -5,28 +5,28 @@ import { useRouter } from 'next/navigation'
 import { PlusIcon } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
-import CustomTable from '@/components/erp/common/CustomTable'
+import CommonTable from '@/components/erp/common/CommonTable'
 import FilterDrawer from '@/components/erp/common/FilterDrawer'
 import AdvancedCustomerDetails from '@/components/erp/dashboard/crm/customers/AdvancedCustomerDetails'
 import { DetailsIcon, UserIcon } from '@/public/icons'
 
-interface CustomerData {
+interface CompanyData {
   id: string
   name: string
   phone: string
   company: string
   jobAddress: string
-  leadSource: string
+  email: string
   stage: string
   [key: string]: any
 }
 
 interface Column {
-  key: string
-  label: string
+  id: string
+  header: string
+  cell: (row: any) => React.ReactNode
   sortable?: boolean
-  conditional?: () => boolean
-  whitespace?: string
+  enableSorting?: boolean
 }
 
 interface ActionButton {
@@ -50,108 +50,97 @@ interface FilterButton {
   variant: string
 }
 
-const Companies: React.FC = () => {
+const Companies: React.FC<{ companiesResponse: any }> = ({ companiesResponse }) => {
+  console.log('Companies Response:', companiesResponse)
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<string>('customers')
-  const [selectedRows, setSelectedRows] = useState<string[]>([])
+  const [activeTab, setActiveTab] = useState<string>('companies')
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
+  const [filterOptions, setFilterOptions] = useState<any>({
+    current_page: 1,
+    per_page: 10
+  })
 
-  // Sample customer data with unique IDs and diverse information
-  const customersData: CustomerData[] = [
-    {
-      id: '001545464',
-      name: 'Pothole Doctors',
-      phone: '(740) 330-5155',
-      company: 'The Pothole Doctors',
-      jobAddress: '708-D Fairground Rd, Lucasville, OH 45648',
-      leadSource: 'Repair',
-      stage: 'Job Completed'
-    },
-    {
-      id: '001545465',
-      name: 'John Smith',
-      phone: '(555) 123-4567',
-      company: 'Smith Construction',
-      jobAddress: '123 Main St, Columbus, OH 43215',
-      leadSource: 'Referral',
-      stage: 'Quote Voided'
-    },
-    {
-      id: '001545466',
-      name: 'Sarah Johnson',
-      phone: '(614) 987-6543',
-      company: 'Johnson Properties',
-      jobAddress: '456 Oak Ave, Cleveland, OH 44101',
-      leadSource: 'Website',
-      stage: 'Quote In Progress'
-    },
-    {
-      id: '001545467',
-      name: 'Mike Wilson',
-      phone: '(513) 456-7890',
-      company: 'Wilson Enterprises',
-      jobAddress: '789 Pine St, Cincinnati, OH 45202',
-      leadSource: 'Cold Call',
-      stage: 'Job in progress'
-    },
-    {
-      id: '001545468',
-      name: 'Lisa Brown',
-      phone: '(330) 234-5678',
-      company: 'Brown Development',
-      jobAddress: '321 Elm St, Akron, OH 44308',
-      leadSource: 'Social Media',
-      stage: 'Job Completed'
-    },
-    {
-      id: '001545469',
-      name: 'David Miller',
-      phone: '(419) 345-6789',
-      company: 'Miller & Associates',
-      jobAddress: '654 Maple Dr, Toledo, OH 43604',
-      leadSource: 'Trade Show',
-      stage: 'Quote In Progress'
-    }
-  ]
+  // Transform API data to match table format
+  const companiesData = companiesResponse?.data
+    ? companiesResponse.data.map((company: any, index: number) => ({
+        id: company.id,
+        index: (companiesResponse?.from || 1) + index - 1, // Adjust index based on from value
+        name: `${company.first_name} ${company.last_name}`,
+        phone: company.userable?.phone || 'N/A',
+        company: company.domain?.domain || 'N/A',
+        jobAddress: company.userable?.address || 'N/A',
+        email: company.email,
+        stage: company.status ? 'Active' : 'Inactive'
+      }))
+    : []
 
-  // Column definitions for the customers table
-  const customerColumns: Column[] = [
+  // Column definitions for CommonTable
+  const companyColumns: Column[] = [
     {
-      key: 'checkbox',
-      label: '',
-      conditional: () => true
+      id: 'index',
+      header: '#',
+      cell: row => <span>{row.index}</span>,
+      sortable: false
     },
-    { key: 'id', label: 'ID#', sortable: true },
-    { key: 'name', label: 'Name', sortable: true },
-    { key: 'phone', label: 'Phone', sortable: true },
-    { key: 'company', label: 'Company', sortable: true },
-    { key: 'jobAddress', label: 'Job Address', sortable: true },
-    { key: 'leadSource', label: 'Lead Source', sortable: true },
-    { key: 'stage', label: 'Stage', sortable: true },
     {
-      key: 'actions',
-      label: 'Action',
-      conditional: () => true
-    }
-  ]
-
-  // Action buttons for the table (Filter is now built into CustomTable)
-  const actionButtons: ActionButton[] = [
+      id: 'name',
+      header: 'Name',
+      cell: row => <span>{row.name}</span>,
+      sortable: true
+    },
     {
-      label: 'Add Customer',
-      action: 'add_customer',
-      variant: 'primary'
-      // icon: PlusIcon,
+      id: 'phone',
+      header: 'Phone',
+      cell: row => <span>{row.phone}</span>,
+      sortable: true
+    },
+    {
+      id: 'company',
+      header: 'Company',
+      cell: row => <span>{row.company}</span>,
+      sortable: true
+    },
+    {
+      id: 'jobAddress',
+      header: 'Job Address',
+      cell: row => <span>{row.jobAddress}</span>,
+      sortable: true
+    },
+    {
+      id: 'email',
+      header: 'Email',
+      cell: row => <span>{row.email}</span>,
+      sortable: true
+    },
+    {
+      id: 'stage',
+      header: 'Status',
+      cell: row => (
+        <span
+          className={`px-2 py-1 rounded text-xs ${
+            row.stage === 'Active' ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
+          }`}
+        >
+          {row.stage}
+        </span>
+      ),
+      sortable: true
+    },
+    {
+      id: 'actions',
+      header: 'Action',
+      cell: row => renderCompanyActions(row),
+      sortable: false
     }
   ]
 
   // Custom actions renderer
-  const renderCustomerActions = (row: CustomerData) => (
+  const renderCompanyActions = (row: CompanyData) => (
     <div className='flex gap-2'>
       <button
         onClick={e => {
           e.stopPropagation()
-          console.log('Edit customer:', row)
+          console.log('Edit company:', row)
         }}
         className='p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 rounded-md transition-colors'
         title='Edit'
@@ -168,7 +157,7 @@ const Companies: React.FC = () => {
       <button
         onClick={e => {
           e.stopPropagation()
-          console.log('Delete customer:', row)
+          console.log('Delete company:', row)
         }}
         className='p-2 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-md transition-colors'
         title='Delete'
@@ -185,13 +174,13 @@ const Companies: React.FC = () => {
     </div>
   )
 
-  // Customer-specific filter configuration
-  const customerFilterFields: FilterField[] = [
+  // Company-specific filter configuration
+  const companyFilterFields: FilterField[] = [
     {
-      key: 'customerId',
-      label: 'Customer ID',
+      key: 'companyId',
+      label: 'Company ID',
       type: 'text',
-      placeholder: 'Enter customer ID'
+      placeholder: 'Enter company ID'
     },
     { key: 'name', label: 'Name', type: 'text', placeholder: 'Enter name' },
     {
@@ -207,102 +196,75 @@ const Companies: React.FC = () => {
       placeholder: 'Enter company name'
     },
     {
-      key: 'jobAddress',
-      label: 'Job Address',
+      key: 'email',
+      label: 'Email',
       type: 'text',
-      placeholder: 'Enter job address'
+      placeholder: 'Enter email'
     },
     {
-      key: 'leadSource',
-      label: 'Lead Source',
-      type: 'select',
-      placeholder: 'Select lead source',
-      options: [
-        { value: 'repair', label: 'Repair' },
-        { value: 'referral', label: 'Referral' },
-        { value: 'website', label: 'Website' },
-        { value: 'cold-call', label: 'Cold Call' },
-        { value: 'social-media', label: 'Social Media' },
-        { value: 'trade-show', label: 'Trade Show' }
-      ]
+      key: 'jobAddress',
+      label: 'Address',
+      type: 'text',
+      placeholder: 'Enter address'
     },
     {
       key: 'stage',
-      label: 'Stage',
+      label: 'Status',
       type: 'select',
-      placeholder: 'Select stage',
+      placeholder: 'Select status',
       options: [
-        { value: 'job-completed', label: 'Job Completed' },
-        { value: 'quote-voided', label: 'Quote Voided' },
-        { value: 'quote-in-progress', label: 'Quote In Progress' },
-        { value: 'job-in-progress', label: 'Job In Progress' }
+        { value: 'active', label: 'Active' },
+        { value: 'inactive', label: 'Inactive' }
       ]
-    },
-    { key: 'lastContactDate', label: 'Last Contact Date', type: 'date' },
-    {
-      key: 'totalJobs',
-      label: 'Total Jobs',
-      type: 'number',
-      placeholder: 'Enter minimum jobs'
-    },
-    {
-      key: 'totalRevenue',
-      label: 'Total Revenue ($)',
-      type: 'number',
-      placeholder: 'Enter minimum revenue'
     }
   ]
 
-  const customerFilterButtons: FilterButton[] = [
+  const companyFilterButtons: FilterButton[] = [
     { label: 'Clear', action: 'clear', variant: 'outline' },
     { label: 'Apply Filters', action: 'apply', variant: 'primary' }
   ]
 
   // Event handlers
-  const handleActionButtonClick = (action: string) => {
-    console.log('Action clicked:', action)
-
-    switch (action) {
-      case 'filter':
-        setIsFilterDrawerOpen(true)
-        break
-      case 'add_customer':
-        router.push('/erp/crm/customers/add-customer')
-        break
-      default:
-        console.log('Unknown action:', action)
-    }
-  }
-
   const handleFilterDrawerClose = () => {
     setIsFilterDrawerOpen(false)
   }
 
   const handleApplyFilters = (filters: Record<string, any>) => {
-    console.log('Applied customer filters:', filters)
-    // Handle filter application logic here
+    console.log('Applied company filters:', filters)
+    setFilterOptions((prev: any) => ({
+      ...prev,
+      ...filters,
+      current_page: 1 // Reset to first page when applying filters
+    }))
+    setIsFilterDrawerOpen(false)
   }
 
-  const handleRowClick = (row: CustomerData) => {
-    console.log('Row clicked:', row)
-  }
-
-  const handleRowSelectionChange = (selectedIds: string[]) => {
-    setSelectedRows(selectedIds)
-    console.log('Selected rows:', selectedIds)
-  }
-
-  const handleExport = (format: string, data: CustomerData[]) => {
-    console.log(`Exporting ${format}:`, data)
-  }
+  // Custom filters component
+  const customFilters = (
+    <div className='flex items-center gap-2'>
+      <button
+        onClick={() => setIsFilterDrawerOpen(true)}
+        className='px-4 py-2 bg-accent text-light rounded-md hover:bg-accent/80 transition-colors'
+      >
+        Filter Companies
+      </button>
+      <button
+        onClick={() => router.push('/erp/companies/create')}
+        className='px-4 py-2 bg-light text-bg rounded-md hover:bg-light/90 transition-colors flex items-center gap-2'
+      >
+        <PlusIcon className='w-4 h-4' />
+        Add Company
+      </button>
+    </div>
+  )
 
   // Button configuration for CommonLayout
   const buttons = [
     {
-      label: 'Customers',
+      label: 'Companies',
       icon: UserIcon,
-      onClick: () => setActiveTab('customers'),
-      isActive: activeTab === 'customers'
+      onClick: () => setActiveTab('companies'),
+      isActive: activeTab === 'companies'
     },
     {
       label: 'Details',
@@ -313,24 +275,32 @@ const Companies: React.FC = () => {
   ]
 
   return (
-    <CommonLayout title='Customer' buttons={buttons}>
-      {activeTab === 'customers' && (
-        <CustomTable
-          data={customersData}
-          columns={customerColumns}
-          actionButtons={actionButtons}
-          onActionButtonClick={handleActionButtonClick}
-          renderActions={renderCustomerActions}
-          onRowClick={handleRowClick}
-          onRowSelectionChange={handleRowSelectionChange}
-          onExport={handleExport}
+    <CommonLayout title='Companies' buttons={buttons}>
+      {activeTab === 'companies' && (
+        <CommonTable
+          data={{
+            data: companiesData,
+            per_page: companiesResponse?.per_page || 10,
+            total: companiesResponse?.total || 0,
+            from: companiesResponse?.from || 1,
+            to: companiesResponse?.to || 10,
+            current_page: companiesResponse?.current_page || 1,
+            last_page: companiesResponse?.last_page || 1
+          }}
+          columns={companyColumns}
+          customFilters={customFilters}
+          setFilterOptions={setFilterOptions}
+          showFilters={true}
+          pagination={true}
+          isLoading={false}
+          emptyMessage='No companies found'
         />
       )}
 
       {activeTab === 'details' && (
         <AdvancedCustomerDetails
-          customerData={customersData[0]} // Pass the first customer as sample data
-          onEdit={() => console.log('Edit customer')}
+          customerData={companiesData[0]} // Pass the first company as sample data
+          onEdit={() => console.log('Edit company')}
         />
       )}
 
@@ -339,9 +309,9 @@ const Companies: React.FC = () => {
         isOpen={isFilterDrawerOpen}
         onClose={handleFilterDrawerClose}
         onApplyFilters={handleApplyFilters}
-        title='Filter Customers'
-        fields={customerFilterFields}
-        buttons={customerFilterButtons}
+        title='Filter Companies'
+        fields={companyFilterFields}
+        buttons={companyFilterButtons}
       />
     </CommonLayout>
   )
