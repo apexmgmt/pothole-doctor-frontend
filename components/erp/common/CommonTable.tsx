@@ -184,7 +184,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
   }
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`${className}`}>
       {/* Filters Section */}
       {showFilters && customFilters && <div className='py-4 border-b border-border'>{customFilters}</div>}
 
@@ -215,7 +215,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
               </tr>
             </thead>
 
-            <tbody>
+            <tbody className='relative'>
               {tableData.length > 0 ? (
                 tableData.map((row, rowIndex) => {
                   const rowId = row[rowKey]
@@ -261,7 +261,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
 
         {/* Loading Overlay */}
         {isLoading && (
-          <div className='absolute inset-0 bg-bg/50 backdrop-blur-sm flex items-center justify-center'>
+          <div className='absolute inset-0 backdrop-blur-xs flex items-center justify-center'>
             <SpinnerCustom size='size-8' />
           </div>
         )}
