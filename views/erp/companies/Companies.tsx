@@ -17,6 +17,8 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Switch } from '@/components/ui/switch'
 import CompanyStatusSwitch from '@/views/erp/companies/CompanyStatusSwitch'
 import EditButton from '@/components/erp/common/buttons/EditButton'
+import { useAppDispatch } from '@/lib/hooks'
+import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
 interface CompanyData {
   id: string
@@ -45,6 +47,7 @@ interface FilterButton {
 
 const Companies: React.FC = () => {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [activeTab, setActiveTab] = useState<string>('companies')
@@ -137,6 +140,7 @@ const Companies: React.FC = () => {
   useEffect(() => {
     fetchData()
     updateURL(filterOptions)
+    dispatch(setPageTitle('Manage Companies'))
   }, [filterOptions])
 
   // Transform API data to match table format
