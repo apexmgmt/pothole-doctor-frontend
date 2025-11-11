@@ -153,13 +153,6 @@ const Companies: React.FC = () => {
       }))
     : []
 
-  // Custom actions renderer
-  const renderCompanyActions = (row: CompanyData) => (
-    <div className='flex gap-2'>
-      <EditButton title='Edit Company Information' link={`/erp/companies/${row.id}/edit`} />
-    </div>
-  )
-
   // Column definitions for CommonTable
   const companyColumns: Column[] = [
     {
@@ -216,7 +209,11 @@ const Companies: React.FC = () => {
     {
       id: 'actions',
       header: 'Action',
-      cell: row => renderCompanyActions(row),
+      cell: row => (
+        <div className='flex gap-2'>
+          <EditButton tooltip='Edit Company Information' link={`/erp/companies/${row.id}/edit`} variant='icon' />
+        </div>
+      ),
       sortable: false
     }
   ]
@@ -333,7 +330,9 @@ const Companies: React.FC = () => {
         />
       )}
 
-      {activeTab === 'details' && <CompanyDetails companyData={selectedCompany} setCompanyData={setSelectedCompany} fetchData={fetchData} />}
+      {activeTab === 'details' && (
+        <CompanyDetails companyData={selectedCompany} setCompanyData={setSelectedCompany} fetchData={fetchData} />
+      )}
     </CommonLayout>
   )
 }
