@@ -49,7 +49,7 @@ const CreateCompany: React.FC = () => {
   useEffect(() => {
     dispatch(setPageTitle('Manage Companies'))
   }, [])
-  
+
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true)
     try {
@@ -275,7 +275,7 @@ const CreateCompany: React.FC = () => {
               type='submit'
               variant='outline'
               disabled={isLoading}
-              className='flex-1 bg-bg-3 text-light hover:bg-bg-4 disabled:opacity-50'
+              className='flex-1 bg-bg-3 text-light disabled:opacity-50'
             >
               {isLoading ? 'Saving...' : 'Create'}
             </Button>
@@ -284,7 +284,7 @@ const CreateCompany: React.FC = () => {
               variant='outline'
               onClick={onCancel}
               disabled={isLoading}
-              className='flex-1 border-border text-light hover:bg-bg-3 disabled:opacity-50'
+              className='flex-1 border-border text-light disabled:opacity-50'
             >
               Reset
             </Button>

@@ -70,7 +70,7 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ companyData, setCompany
         <div className='space-y-1'>
           <h4 className='text-lg font-medium text-light'>{fullName}</h4>
           <p className='text-gray'>{companyData.email}</p>
-          <Badge variant={companyData.status ? 'default' : 'secondary'}>
+          <Badge variant={companyData.status ? 'default' : 'destructive'}>
             {companyData.status ? 'Active' : 'Inactive'}
           </Badge>
         </div>

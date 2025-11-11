@@ -113,13 +113,13 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
             </div>
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align='end' className='w-56 bg-bg/90'>
+        <DropdownMenuContent align='end' className='w-56 '>
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleProfile} className='cursor-pointer'>
             Profile
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleLogout} className='cursor-pointer text-red-600'>
+          <DropdownMenuItem onClick={handleLogout} className='cursor-pointer'>
             Logout
           </DropdownMenuItem>
         </DropdownMenuContent>
