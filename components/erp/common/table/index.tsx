@@ -161,6 +161,13 @@ const CommonTable: React.FC<CommonTableProps> = ({
     }
   }
 
+  // Helper function to get column width style
+  const getColumnWidth = (size?: number | string) => {
+    if (!size) return {}
+    if (typeof size === 'number') return { width: `${size}px` }
+    return { width: size }
+  }
+
   return (
     <div className={`${className}`}>
       {/* Filters Section */}
@@ -175,10 +182,12 @@ const CommonTable: React.FC<CommonTableProps> = ({
                 {columns.map((column, index) => {
                   const canSort = column.sortable !== false && column.enableSorting !== false
                   const headerFlexAlign = getFlexAlignmentClass(column?.headerAlign)
+                  const columnWidth = getColumnWidth(column?.size)
 
                   return (
                     <th
                       key={column.id}
+                      style={columnWidth}
                       className={`px-4 py-3 text-light text-sm font-medium whitespace-nowrap ${
                         canSort ? 'cursor-pointer select-none hover:text-light/80' : ''
                       } ${index === 0 ? 'rounded-l-lg' : ''} ${index === columns.length - 1 ? 'rounded-r-lg' : ''}`}
@@ -207,14 +216,19 @@ const CommonTable: React.FC<CommonTableProps> = ({
                         isSelected ? 'bg-gray-800 hover:bg-gray-900' : 'hover:bg-gray-900'
                       }`}
                     >
-                      {columns.map(column => (
-                        <td
-                          key={column.id}
-                          className={`px-4 py-3 text-light text-sm whitespace-nowrap`}
-                        >
-                          {column.cell(row)}
-                        </td>
-                      ))}
+                      {columns.map(column => {
+                        const columnWidth = getColumnWidth(column?.size)
+
+                        return (
+                          <td
+                            key={column.id}
+                            style={columnWidth}
+                            className={`px-4 py-3 text-light text-sm whitespace-nowrap`}
+                          >
+                            {column.cell(row)}
+                          </td>
+                        )
+                      })}
                     </tr>
                   )
                 })

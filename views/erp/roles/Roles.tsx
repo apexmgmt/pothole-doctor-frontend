@@ -133,7 +133,8 @@ const Roles: React.FC = () => {
       id: 'index',
       header: '#',
       cell: row => <span className='text-gray'>{row.index}</span>,
-      sortable: false
+      sortable: false,
+      size: 16
     },
     {
       id: 'name',
@@ -151,6 +152,7 @@ const Roles: React.FC = () => {
       ),
       sortable: false,
       headerAlign: 'center',
+      size: 30
     }
   ]
 

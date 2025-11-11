@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { ReactNode } from 'react'
 
 export type Column = {
   id: string
@@ -7,6 +7,7 @@ export type Column = {
   sortable?: boolean
   enableSorting?: boolean
   headerAlign?: 'left' | 'center' | 'right'
+  size?: number | string // width in pixels or percentage (e.g., 100, '20%', 'auto')
 }
 
 export interface DataTableApiResponse {
