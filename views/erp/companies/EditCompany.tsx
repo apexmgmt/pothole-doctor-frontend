@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,8 @@ import CompanyService from '@/services/api/company.service'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { SpinnerCustom } from '@/components/ui/spinner'
+import { useAppDispatch } from '@/lib/hooks'
+import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
 type FormValues = {
   first_name: string
@@ -30,6 +32,7 @@ const defaultValues: FormValues = {
 
 const EditCompany: React.FC<{ companyDetails: any }> = ({ companyDetails }) => {
   const router = useRouter()
+  const dispatch = useAppDispatch()
 
   // Map companyDetails to form values, pulling address and phone from userable
   const mappedDefaults: FormValues = {
@@ -44,6 +47,10 @@ const EditCompany: React.FC<{ companyDetails: any }> = ({ companyDetails }) => {
   const { handleSubmit, control, getValues, reset, formState } = form
   const { isSubmitting } = formState
   const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  useEffect(() => {
+    dispatch(setPageTitle('Manage Companies'))
+  }, [])
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true)
