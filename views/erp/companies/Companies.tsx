@@ -17,6 +17,8 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Switch } from '@/components/ui/switch'
 import CompanyStatusSwitch from '@/views/erp/companies/CompanyStatusSwitch'
 import EditButton from '@/components/erp/common/buttons/EditButton'
+import { useAppDispatch } from '@/lib/hooks'
+import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
 interface CompanyData {
   id: string
@@ -45,6 +47,7 @@ interface FilterButton {
 
 const Companies: React.FC = () => {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [activeTab, setActiveTab] = useState<string>('companies')
@@ -137,6 +140,7 @@ const Companies: React.FC = () => {
   useEffect(() => {
     fetchData()
     updateURL(filterOptions)
+    dispatch(setPageTitle('Manage Companies'))
   }, [filterOptions])
 
   // Transform API data to match table format
@@ -152,13 +156,6 @@ const Companies: React.FC = () => {
         status: company.status
       }))
     : []
-
-  // Custom actions renderer
-  const renderCompanyActions = (row: CompanyData) => (
-    <div className='flex gap-2'>
-      <EditButton title='Edit Company Information' link={`/erp/companies/${row.id}/edit`} />
-    </div>
-  )
 
   // Column definitions for CommonTable
   const companyColumns: Column[] = [
@@ -216,7 +213,11 @@ const Companies: React.FC = () => {
     {
       id: 'actions',
       header: 'Action',
-      cell: row => renderCompanyActions(row),
+      cell: row => (
+        <div className='flex gap-2'>
+          <EditButton tooltip='Edit Company Information' link={`/erp/companies/${row.id}/edit`} variant='icon' />
+        </div>
+      ),
       sortable: false
     }
   ]
@@ -333,7 +334,9 @@ const Companies: React.FC = () => {
         />
       )}
 
-      {activeTab === 'details' && <CompanyDetails companyData={selectedCompany} setCompanyData={setSelectedCompany} fetchData={fetchData} />}
+      {activeTab === 'details' && (
+        <CompanyDetails companyData={selectedCompany} setCompanyData={setSelectedCompany} fetchData={fetchData} />
+      )}
     </CommonLayout>
   )
 }

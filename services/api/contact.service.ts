@@ -1,4 +1,4 @@
-import type { ContactFormData } from '@/types/Contact'
+import type { ContactFormData } from '@/types/contact.types'
 
 const GOOGLE_APPS_SCRIPT_URL =
   'https://script.google.com/macros/s/AKfycbzyZrL-VJRjkNLU2bYrc0IBpSMGgL-6spTvtuBthQP3a_78Ryq4dh_4XzmbQQRv_cia/exec'

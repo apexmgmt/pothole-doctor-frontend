@@ -7,15 +7,15 @@ import { Button } from '@/components/ui/button'
 import { appUrl } from '@/utils/utility'
 import CompanyStatusSwitch from './CompanyStatusSwitch'
 import CompanyService from '@/services/api/company.service'
+import EditButton from '@/components/erp/common/buttons/EditButton'
 
 interface CompanyDetailsProps {
-  companyData: any,
-  setCompanyData:  (options: any) => void
+  companyData: any
+  setCompanyData: (options: any) => void
   fetchData?: () => void
-  onEdit?: () => void
 }
 
-const CompanyDetails: React.FC<CompanyDetailsProps> = ({ companyData, setCompanyData, fetchData, onEdit }) => {
+const CompanyDetails: React.FC<CompanyDetailsProps> = ({ companyData, setCompanyData, fetchData }) => {
   const fetchCompanyDetails = async () => {
     CompanyService.show(companyData?.id)
       .then(response => {
@@ -49,11 +49,16 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ companyData, setCompany
       {/* Header */}
       <div className='flex items-center justify-between'>
         <h3 className='text-xl font-semibold text-light mt-2'>Company Details</h3>
-        {onEdit && (
-          <Button onClick={onEdit} variant='default' size='sm' className='bg-accent text-light hover:bg-accent/80'>
-            Edit Company
-          </Button>
-        )}
+        <div className='mt-2'>
+          <EditButton
+            title='Edit'
+            tooltip='Edit Company Information'
+            link={`/erp/companies/${companyData.id}/edit`}
+            variant='text'
+            buttonSize='default'
+            buttonVariant='outline'
+          />
+        </div>
       </div>
 
       {/* Profile Section */}
@@ -118,7 +123,11 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ companyData, setCompany
             </div>
             <div className='flex items-center gap-2'>
               <label className='text-xs text-gray uppercase'>Status</label>
-              <CompanyStatusSwitch checked={!!companyData.status} companyId={companyData.id} fetchData={fetchCompanyDetails} />
+              <CompanyStatusSwitch
+                checked={!!companyData.status}
+                companyId={companyData.id}
+                fetchData={fetchCompanyDetails}
+              />
             </div>
           </div>
         </div>
