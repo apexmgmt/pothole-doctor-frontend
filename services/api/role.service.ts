@@ -4,7 +4,7 @@ import apiInterceptor from './api.interceptor'
 import { ROLES } from '@/constants/api'
 import { revalidate } from '../app/cache.service'
 
-export default class RolePermissionService {
+export default class RoleService {
   /**Roles DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {

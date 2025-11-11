@@ -1,9 +1,12 @@
-export interface Column {
+import { ReactNode } from "react"
+
+export type Column = {
   id: string
   header: string
-  cell: (row: any) => React.ReactNode
+  cell: (row: any) => ReactNode
   sortable?: boolean
   enableSorting?: boolean
+  headerAlign?: 'left' | 'center' | 'right'
 }
 
 export interface DataTableApiResponse {
