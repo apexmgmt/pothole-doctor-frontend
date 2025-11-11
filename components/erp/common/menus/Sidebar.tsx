@@ -276,7 +276,7 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           <button
             onClick={() => toggleSection(item.id)}
             className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors ${
-              isActive ? 'bg-border/40 text-light' : 'text-gray hover:text-light hover:bg-bg/50'
+              isActive ? 'bg-accent/40 text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
             }`}
             style={{ paddingLeft: `${paddingLeft + 12}px` }}
             type='button'
@@ -303,7 +303,7 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           key={item.id}
           href={item.href}
           className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-            isActive ? 'bg-bg text-light' : 'text-gray hover:text-light hover:bg-bg/50'
+            isActive ? 'bg-accent text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
           }`}
           style={{ paddingLeft: `${paddingLeft + 12}px` }}
         >

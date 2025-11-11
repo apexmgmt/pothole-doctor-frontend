@@ -6,12 +6,24 @@
 @custom-variant dark (&:is(.dark *)); */
 
 @theme {
-  --color-bg: oklch(1 0 0);
-  --color-primary: oklch(0.6639 0.1456 144.59);
-  --color-primary-foreground: oklch(0.9749 0.0118 145.48);
-  --color-title: oklch(0.2392 0.0059 337.75);
-  --color-text-color: oklch(0.5068 0 0);
-  --color-border: oklch(0.8914 0 0);
+  --color-bg: #ffffff;
+  --color-background: #ffffff;
+  --color-muted: #221e20;
+  --color-muted-foreground: #808080;
+  --color-popover: #221e20;
+  --color-popover-foreground: #ffffff;
+  --color-accent: #4D4D4D66;
+  --color-accent-foreground: #ffffff;
+  --color-foreground: #171717;
+  --color-primary: #3ecf6d; /* oklch(0.6639 0.1456 144.59) ≈ #3ecf6d */
+  --color-primary-foreground: #f6fff7; /* oklch(0.9749 0.0118 145.48) ≈ #f6fff7 */
+  --color-secondary: #203bad;
+  --color-secondary-foreground: #f6fff7;
+  --color-destructive: #EA4335;
+  --color-destructive-foreground: #fff5f7;
+  --color-title: #3b3637; /* oklch(0.2392 0.0059 337.75) ≈ #3b3637 */
+  --color-text-color: #808080; /* oklch(0.5068 0 0) ≈ #808080 */
+  --color-border: #3b3637; 
 
   /* Fonts */
   --font-global: 'inter', sans-serif;
