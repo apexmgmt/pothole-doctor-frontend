@@ -3,7 +3,7 @@
 import React from "react";
 
 import EntityDetails from "../../../common/EntityDetails";
-import { DatePicker } from "@/components/ui/DatePicker";
+import { DatePicker } from "@/components/ui/datePicker";
 
 const LeadDetails = ({ leadData, onEdit }) => {
   return (

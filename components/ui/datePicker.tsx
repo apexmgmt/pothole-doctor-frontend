@@ -3,11 +3,12 @@
 import * as React from 'react'
 import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
+import { DateRange as ReactDayPickerDateRange } from 'react-day-picker'
 
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/Button'
-import { Calendar } from '@/components/ui/Calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/PopoverContent'
+import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popoverContent'
 
 interface DatePickerProps {
   value: Date | null
@@ -70,14 +71,9 @@ export function DatePicker({
   )
 }
 
-interface DateRange {
-  from?: Date
-  to?: Date
-}
-
 interface DateRangePickerProps {
-  value: DateRange | null
-  onChange: (range: DateRange | null) => void
+  value: ReactDayPickerDateRange | null
+  onChange: (range: ReactDayPickerDateRange | null) => void
   placeholder?: string
   className?: string
   disabled?: boolean
@@ -94,10 +90,13 @@ export function DateRangePicker({
 }: DateRangePickerProps) {
   const [open, setOpen] = React.useState(false)
 
-  const handleSelect = (range: DateRange | undefined) => {
+  const handleSelect = (range: ReactDayPickerDateRange | undefined) => {
     if (range) {
       onChange(range)
-      setOpen(false)
+      // Only close if both from and to are selected
+      if (range.from && range.to) {
+        setOpen(false)
+      }
     }
   }
 

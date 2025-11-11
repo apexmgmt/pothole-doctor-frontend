@@ -4,10 +4,10 @@ import React, { useState, ChangeEvent } from 'react'
 
 import { SearchIcon } from 'lucide-react'
 
-import { Input } from '@/components/ui/Input'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/Button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select'
+import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 type FormData = {
   location: string
