@@ -17,7 +17,7 @@ interface CreateOrEditRoleProps {
   mode?: 'create' | 'edit'
   permissions: PermissionsByModule
   roleId?: string | undefined
-  roleDetails?: RoleDetails | undefined
+  roleDetails?: RoleDetails | undefined | {}
 }
 
 const formSchema = z.object({
@@ -32,8 +32,8 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: roleDetails?.name || '',
-      permissions: roleDetails?.permissions.map(p => p.name) || []
+      name: roleDetails && 'name' in roleDetails ? roleDetails.name : '',
+      permissions: roleDetails && 'permissions' in roleDetails ? roleDetails.permissions.map(p => p.name) : []
     }
   })
 
@@ -72,8 +72,8 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
 
   const onCancel = () => {
     form.reset({
-      name: roleDetails?.name || '',
-      permissions: roleDetails?.permissions.map(p => p.name) || []
+      name: roleDetails && 'name' in roleDetails ? roleDetails.name : '',
+      permissions: roleDetails && 'permissions' in roleDetails ? roleDetails.permissions.map(p => p.name) : []
     })
   }
 
