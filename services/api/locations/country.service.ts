@@ -1,8 +1,8 @@
 import { CountryPayload } from '@/types'
 import { getApiUrl } from '@/utils/utility'
-import apiInterceptor from './api.interceptor'
+import apiInterceptor from '../api.interceptor'
 import { COUNTRIES } from '@/constants/api'
-import { revalidate } from '../app/cache.service'
+import { revalidate } from '../../app/cache.service'
 
 export default class CountryService {
   /**Countries DataTable API */
@@ -43,6 +43,7 @@ export default class CountryService {
       }
 
       await revalidate('countries')
+      await revalidate('locations')
 
       return await response.json()
     } catch (error) {
@@ -85,6 +86,7 @@ export default class CountryService {
       }
       await revalidate('countries')
       await revalidate(`countries/${countryId}`)
+      await revalidate('locations')
       return await response.json()
     } catch (error) {
       throw error
@@ -104,6 +106,7 @@ export default class CountryService {
       }
       await revalidate('countries')
       await revalidate(`countries/${countryId}`)
+      await revalidate('locations')
       return await response.json()
     } catch (error) {
       throw error

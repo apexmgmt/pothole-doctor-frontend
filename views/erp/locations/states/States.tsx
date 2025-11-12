@@ -7,18 +7,18 @@ import { PlusIcon, Search } from 'lucide-react'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse } from '@/types'
+import { Column, DataTableApiResponse, State } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import CountryService from '@/services/api/locations/country.service'
-import CreateOrEditCountryModal from './CreateOrEditCountryModal'
 import { Country } from '@/types'
+import StateService from '@/services/api/locations/state.service'
+import CreateOrEditStateModal from './CreateOrEditStateModal'
 
-const Countries: React.FC = () => {
+const States: React.FC = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -26,8 +26,8 @@ const Countries: React.FC = () => {
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null)
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null)
+  const [selectedStateId, setSelectedStateId] = useState<string | null>(null)
+  const [selectedState, setSelectedState] = useState<State | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
@@ -95,66 +95,67 @@ const Countries: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      CountryService.index(filterOptions)
+      StateService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          console.error('Error fetching countries:', error)
+          console.error('Error fetching states:', error)
         })
     } catch (error) {
       setIsLoading(false)
-      console.error('Error fetching countries:', error)
+      console.error('Error fetching states:', error)
     }
   }
 
   useEffect(() => {
     fetchData()
     updateURL(filterOptions)
-    dispatch(setPageTitle('Manage Countries'))
+    dispatch(setPageTitle('Manage States'))
   }, [filterOptions])
 
   // Transform API data to match table format
-  const countriesData = apiResponse?.data
-    ? apiResponse.data.map((country: any, index: number) => ({
-        id: country.id,
+  const statesData = apiResponse?.data
+    ? apiResponse.data.map((state: any, index: number) => ({
+        id: state.id,
         index: (apiResponse?.from || 1) + index,
-        name: country.name,
-        code: country.code
+        name: state.name,
+        country: state?.country?.name
       }))
     : []
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
-    setSelectedCountryId(null)
-    setSelectedCountry(null)
+    setSelectedStateId(null)
+    setSelectedState(null)
     setIsModalOpen(true)
   }
 
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
-    setSelectedCountryId(id)
+    setSelectedStateId(id)
 
-    // Fetch country details
+    // Fetch state details
     try {
-      const response = await CountryService.show(id)
-      setSelectedCountry(response.data)
+      const response = await StateService.show(id)
+      setSelectedState(response.data)
       setIsModalOpen(true)
     } catch (error) {
-      toast.error('Failed to fetch country details')
+      toast.error('Failed to fetch state details')
     }
   }
 
   const handleModalClose = () => {
     setIsModalOpen(false)
-    setSelectedCountryId(null)
-    setSelectedCountry(null)
+    setSelectedStateId(null)
+    setSelectedState(null)
   }
 
   const handleSuccess = () => {
     fetchData()
+    handleModalClose()
   }
 
   // Column definitions for CommonTable
@@ -173,9 +174,9 @@ const Countries: React.FC = () => {
       sortable: true
     },
     {
-      id: 'code',
-      header: 'Code',
-      cell: row => <span className='font-medium'>{row.code}</span>,
+      id: 'country',
+      header: 'Country',
+      cell: row => <span className='font-medium'>{row.country}</span>,
       sortable: true
     },
     {
@@ -183,8 +184,8 @@ const Countries: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton tooltip='Edit Country Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
-          <DeleteButton tooltip='Delete Country' variant='icon' onClick={() => handleDeleteCountry(row.id)} />
+          <EditButton tooltip='Edit State Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
+          <DeleteButton tooltip='Delete State' variant='icon' onClick={() => handleDeleteState(row.id)} />
         </div>
       ),
       sortable: false,
@@ -199,18 +200,18 @@ const Countries: React.FC = () => {
     setIsFilterDrawerOpen(false)
   }
 
-  const handleDeleteCountry = async (id: string) => {
+  const handleDeleteState = async (id: string) => {
     try {
-      CountryService.destroy(id)
+      StateService.destroy(id)
         .then(response => {
-          toast.success('Country deleted successfully')
+          toast.success('State deleted successfully')
           fetchData()
         })
         .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete country')
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete state')
         })
     } catch (error) {
-      toast.error('Something went wrong while deleting the country!')
+      toast.error('Something went wrong while deleting the state!')
     }
   }
 
@@ -248,17 +249,17 @@ const Countries: React.FC = () => {
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Country
+        Add State
       </Button>
     </div>
   )
 
   return (
     <>
-      <CommonLayout title='Countries' noTabs={true}>
+      <CommonLayout title='States' noTabs={true}>
         <CommonTable
           data={{
-            data: countriesData,
+            data: statesData,
             per_page: apiResponse?.per_page || 10,
             total: apiResponse?.total || 0,
             from: apiResponse?.from || 1,
@@ -272,20 +273,20 @@ const Countries: React.FC = () => {
           showFilters={true}
           pagination={true}
           isLoading={isLoading}
-          emptyMessage='No country found'
+          emptyMessage='No state found'
         />
       </CommonLayout>
 
-      <CreateOrEditCountryModal
+      <CreateOrEditStateModal
         mode={modalMode}
         open={isModalOpen}
         onOpenChange={handleModalClose}
-        countryId={selectedCountryId || undefined}
-        countryDetails={selectedCountry || undefined}
+        stateId={selectedStateId || undefined}
+        stateDetails={selectedState || undefined}
         onSuccess={handleSuccess}
       />
     </>
   )
 }
 
-export default Countries
+export default States
