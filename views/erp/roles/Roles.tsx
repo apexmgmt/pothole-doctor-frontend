@@ -15,6 +15,9 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import RoleService from '@/services/api/role.service'
+import { toast } from 'sonner'
+import Link from 'next/link'
+import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 
 interface RoleData {
   id: string
@@ -146,8 +149,9 @@ const Roles: React.FC = () => {
       id: 'actions',
       header: 'Action',
       cell: row => (
-        <div className='flex justify-center gap-2'>
+        <div className='flex items-center justify-center gap-2'>
           <EditButton tooltip='Edit Role Information' link={`/erp/roles/${row.id}/edit`} variant='icon' />
+          <DeleteButton tooltip='Delete Role' variant='icon' onClick={() => handleDeleteRole(row.id)} />
         </div>
       ),
       sortable: false,
@@ -175,6 +179,22 @@ const Roles: React.FC = () => {
       })
   }
 
+  const handleDeleteRole = async (id: string) => {
+    setSelectedRoleId(null)
+    try {
+      RoleService.destroy(id)
+        .then(response => {
+          toast.success('Role deleted successfully')
+          fetchData()
+        })
+        .catch(error => {
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete role')
+        })
+    } catch (error) {
+      toast.error('Something went wrong while deleting the role!')
+    }
+  }
+
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
@@ -197,67 +217,41 @@ const Roles: React.FC = () => {
           </InputGroupAddon>
         </InputGroup>
         {hasActiveFilters() && (
-          <Button variant='ghost' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
-            Clear Filters
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+            Clear
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        onClick={() => router.push('/erp/roles/create')}
-        className='bg-light text-bg hover:bg-light/90'
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Role
-      </Button>
+      <Link href='/erp/roles/create'>
+        <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
+          <PlusIcon className='w-4 h-4' />
+          Add Role
+        </Button>
+      </Link>
     </div>
   )
 
-  // Button configuration for CommonLayout
-  const tabs = [
-    {
-      label: 'Roles',
-      icon: UserIcon,
-      onClick: () => setActiveTab('roles'),
-      isActive: activeTab === 'roles'
-    },
-    {
-      label: 'Details',
-      icon: DetailsIcon,
-      onClick: () => setActiveTab('details'),
-      isActive: activeTab === 'details',
-      disabled: !selectedRoleId
-    }
-  ]
-
   return (
-    <CommonLayout title='Roles' buttons={tabs}>
-      {activeTab === 'roles' && (
-        <CommonTable
-          data={{
-            data: rolesData,
-            per_page: apiResponse?.per_page || 10,
-            total: apiResponse?.total || 0,
-            from: apiResponse?.from || 1,
-            to: apiResponse?.to || 10,
-            current_page: apiResponse?.current_page || 1,
-            last_page: apiResponse?.last_page || 1
-          }}
-          columns={columns}
-          customFilters={customFilters}
-          setFilterOptions={setFilterOptions}
-          showFilters={true}
-          pagination={true}
-          isLoading={isLoading}
-          emptyMessage='No Roles found'
-          handleRowSelect={handleRowSelect}
-        />
-      )}
-
-      {/* {activeTab === 'details' && (
-        <RoleDetails roleData={selectedRole} setRoleData={setSelectedRole} fetchData={fetchData} />
-      )} */}
+    <CommonLayout title='Roles' noTabs={true}>
+      <CommonTable
+        data={{
+          data: rolesData,
+          per_page: apiResponse?.per_page || 10,
+          total: apiResponse?.total || 0,
+          from: apiResponse?.from || 1,
+          to: apiResponse?.to || 10,
+          current_page: apiResponse?.current_page || 1,
+          last_page: apiResponse?.last_page || 1
+        }}
+        columns={columns}
+        customFilters={customFilters}
+        setFilterOptions={setFilterOptions}
+        showFilters={true}
+        pagination={true}
+        isLoading={isLoading}
+        emptyMessage='No Roles found'
+        handleRowSelect={handleRowSelect}
+      />
     </CommonLayout>
   )
 }

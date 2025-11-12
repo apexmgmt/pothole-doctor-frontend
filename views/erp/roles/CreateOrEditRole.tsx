@@ -12,6 +12,8 @@ import RoleService from '@/services/api/role.service'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { useAppDispatch } from '@/lib/hooks'
+import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
 interface CreateOrEditRoleProps {
   mode?: 'create' | 'edit'
@@ -29,6 +31,13 @@ type FormValues = z.infer<typeof formSchema>
 
 const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetails }: CreateOrEditRoleProps) => {
   const router = useRouter()
+  const dispatch = useAppDispatch()
+
+  // Set page title
+  useEffect(() => {
+    dispatch(setPageTitle('Manage Roles'))
+  }, [dispatch])
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
