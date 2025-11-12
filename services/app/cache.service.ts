@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { revalidateTag, updateTag } from 'next/cache'
 
 /**
  * Revalidate a cache tag.
@@ -8,7 +8,7 @@ import { revalidateTag } from 'next/cache'
  */
 export async function revalidate(tag: string): Promise<void> {
   try {
-    await revalidateTag(tag, 'max')
+    await updateTag(tag)
   } catch (error) {
     console.error('Failed to revalidate:', error)
   }

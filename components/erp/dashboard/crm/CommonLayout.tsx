@@ -13,6 +13,7 @@ interface ButtonType {
 
 interface CommonLayoutProps {
   title: string
+  noTabs?: boolean
   buttons?: ButtonType[]
   className?: string
   children?: ReactNode
@@ -27,16 +28,16 @@ interface CommonLayoutProps {
  * @param {string} props.className - Additional CSS classes for the container
  * @param {React.ReactNode} props.children - Content to render below the header
  */
-const CommonLayout: React.FC<CommonLayoutProps> = ({ title, buttons = [], className = '', children }) => {
+const CommonLayout: React.FC<CommonLayoutProps> = ({ title, noTabs = false, buttons = [], className = '', children }) => {
   return (
     <div className={`bg-bg-2 rounded-lg border border-border p-5 ${className}`}>
       {/* Header Section */}
-      <div className='pb-4 border-b border-border'>
+      <div className={`border-b border-border ${noTabs ? '' : 'pb-4'}`}>
         {/* Title */}
         <h2 className='text-xl font-semibold text-light mb-4'>{title}</h2>
 
         {/* Switcher Buttons */}
-        {buttons.length > 0 && (
+        {!noTabs && buttons.length > 0 && (
           <div>
             <div className='inline-flex bg-border/40 border border-border rounded-lg p-1 gap-1'>
               {buttons.map((button, index) => (

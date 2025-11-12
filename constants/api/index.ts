@@ -6,3 +6,5 @@ export const API_URL: string = process.env.NEXT_PUBLIC_API_URL || 'http://localh
 
 export * from './auth_api'
 export * from './company_api'
+export * from './permission_api'
+export * from './role_api'

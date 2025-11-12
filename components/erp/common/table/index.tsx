@@ -4,14 +4,7 @@ import React, { useMemo, ReactNode, useState } from 'react'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import Pagination from './Pagination'
 import { ArrowDown, ArrowUp } from 'lucide-react'
-
-type Column = {
-  id: string
-  header: string
-  cell: (row: any) => ReactNode
-  sortable?: boolean
-  enableSorting?: boolean
-}
+import { Column } from '@/types'
 
 interface CommonTableProps {
   data?: {
@@ -154,10 +147,31 @@ const CommonTable: React.FC<CommonTableProps> = ({
     return null
   }
 
+  // Helper function to get flex alignment class
+  const getFlexAlignmentClass = (align?: 'left' | 'center' | 'right') => {
+    switch (align) {
+      case 'left':
+        return 'justify-start'
+      case 'center':
+        return 'justify-center'
+      case 'right':
+        return 'justify-end'
+      default:
+        return 'justify-start'
+    }
+  }
+
+  // Helper function to get column width style
+  const getColumnWidth = (size?: number | string) => {
+    if (!size) return {}
+    if (typeof size === 'number') return { width: `${size}px` }
+    return { width: size }
+  }
+
   return (
     <div className={`${className}`}>
       {/* Filters Section */}
-      {showFilters && customFilters && <div className='py-4 border-b border-border'>{customFilters}</div>}
+      {showFilters && customFilters && <div className='py-4 border-border'>{customFilters}</div>}
 
       {/* Table Section */}
       <div className='relative'>
@@ -167,16 +181,19 @@ const CommonTable: React.FC<CommonTableProps> = ({
               <tr>
                 {columns.map((column, index) => {
                   const canSort = column.sortable !== false && column.enableSorting !== false
+                  const headerFlexAlign = getFlexAlignmentClass(column?.headerAlign)
+                  const columnWidth = getColumnWidth(column?.size)
 
                   return (
                     <th
                       key={column.id}
-                      className={`px-4 py-3 text-left text-light text-sm font-medium whitespace-nowrap ${
+                      style={columnWidth}
+                      className={`px-4 py-3 text-light text-sm font-medium whitespace-nowrap ${
                         canSort ? 'cursor-pointer select-none hover:text-light/80' : ''
                       } ${index === 0 ? 'rounded-l-lg' : ''} ${index === columns.length - 1 ? 'rounded-r-lg' : ''}`}
                       onClick={() => handleSorting(column.id, canSort)}
                     >
-                      <div className='flex items-center justify-between'>
+                      <div className={`flex items-center gap-2 ${headerFlexAlign}`}>
                         <span>{column.header}</span>
                         {canSort && renderSortIcon(column.id)}
                       </div>
@@ -199,11 +216,31 @@ const CommonTable: React.FC<CommonTableProps> = ({
                         isSelected ? 'bg-gray-800 hover:bg-gray-900' : 'hover:bg-gray-900'
                       }`}
                     >
-                      {columns.map(column => (
-                        <td key={column.id} className='px-4 py-3 text-light text-sm whitespace-nowrap'>
-                          {column.cell(row)}
-                        </td>
-                      ))}
+                      {columns.map(column => {
+                        const columnWidth = getColumnWidth(column?.size)
+
+                        return (
+                          <td
+                            key={column.id}
+                            style={columnWidth}
+                            className={`px-4 py-3 text-light text-sm whitespace-nowrap`}
+                            onClick={e => {
+                              // Stop propagation if clicked element is a button, link, or inside one
+                              const target = e.target as HTMLElement
+                              if (
+                                target.closest('button') ||
+                                target.closest('a') ||
+                                target.tagName === 'BUTTON' ||
+                                target.tagName === 'A'
+                              ) {
+                                e.stopPropagation()
+                              }
+                            }}
+                          >
+                            {column.cell(row)}
+                          </td>
+                        )
+                      })}
                     </tr>
                   )
                 })

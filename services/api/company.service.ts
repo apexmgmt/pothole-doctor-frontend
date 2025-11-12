@@ -18,7 +18,7 @@ export default class CompanyService {
 
       if (!response.ok) {
         const errorData = await response.json()
-        return errorData.message || 'Failed to fetch companies'
+        throw new Error(errorData.message || 'Failed to fetch companies')
       }
 
       return await response.json()
@@ -39,7 +39,7 @@ export default class CompanyService {
 
       if (!response.ok) {
         const errorData = await response.json()
-        return errorData.message || 'Failed to create company'
+        throw new Error(errorData.message || 'Failed to create company')
       }
 
       // Revalidate companies cache tag
@@ -62,7 +62,7 @@ export default class CompanyService {
 
       if (!response.ok) {
         const errorData = await response.json()
-        return errorData.message || 'Failed to fetch company details'
+        throw new Error(errorData.message || 'Failed to fetch company details')
       }
 
       return await response.json()
@@ -83,7 +83,7 @@ export default class CompanyService {
 
       if (!response.ok) {
         const errorData = await response.json()
-        return errorData.message || 'Failed to update company details'
+        throw new Error(errorData.message || 'Failed to update company details')
       }
 
       // Revalidate companies cache tag
@@ -104,7 +104,7 @@ export default class CompanyService {
 
       if (!response.ok) {
         const errorData = await response.json()
-        return errorData.message || 'Failed to change company status'
+        throw new Error(errorData.message || 'Failed to change company status')
       }
 
       // Revalidate companies cache tag
