@@ -18,7 +18,7 @@ export default class RoleService {
 
       if (!response.ok) {
         const errorData = await response.json()
-        return errorData.message || 'Failed to fetch roles'
+        throw new Error(errorData.message || 'Failed to fetch roles')
       }
 
       return await response.json()
@@ -39,7 +39,7 @@ export default class RoleService {
 
       if (!response.ok) {
         const errorData = await response.json()
-        return errorData.message || 'Failed to create role'
+        throw new Error(errorData.message || 'Failed to create role')
       }
 
       await revalidate('roles')
@@ -61,7 +61,7 @@ export default class RoleService {
 
       if (!response.ok) {
         const errorData = await response.json()
-        return errorData.message || 'Failed to fetch role details'
+        throw new Error(errorData.message || 'Failed to fetch role details')
       }
 
       return await response.json()
@@ -81,7 +81,7 @@ export default class RoleService {
 
       if (!response.ok) {
         const errorData = await response.json()
-        return errorData.message || 'Failed to update role'
+        throw new Error(errorData.message || 'Failed to update role')
       }
       await revalidate('roles')
       await revalidate(`roles/${roleId}`)
@@ -100,7 +100,7 @@ export default class RoleService {
       })
       if (!response.ok) {
         const errorData = await response.json()
-        return errorData.message || 'Failed to delete role'
+        throw new Error(errorData.message || 'Failed to delete role')
       }
       await revalidate('roles')
       await revalidate(`roles/${roleId}`)

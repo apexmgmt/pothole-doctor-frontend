@@ -15,7 +15,7 @@ export default class PermissionService {
 
       if (!response.ok) {
         const errorData = await response.json()
-        return errorData.message || 'Failed to fetch permissions'
+        throw new Error(errorData.message || 'Failed to fetch permissions')
       }
 
       return await response.json()

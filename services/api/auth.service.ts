@@ -103,7 +103,7 @@ export default class AuthService {
 
       if (!response.ok) {
         const errorData = await response.json()
-        return errorData.message || 'Failed to get user details'
+        throw new Error(errorData.message || 'Failed to get user details')
       }
 
       const data = await response.json()
