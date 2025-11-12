@@ -224,6 +224,18 @@ const CommonTable: React.FC<CommonTableProps> = ({
                             key={column.id}
                             style={columnWidth}
                             className={`px-4 py-3 text-light text-sm whitespace-nowrap`}
+                            onClick={e => {
+                              // Stop propagation if clicked element is a button, link, or inside one
+                              const target = e.target as HTMLElement
+                              if (
+                                target.closest('button') ||
+                                target.closest('a') ||
+                                target.tagName === 'BUTTON' ||
+                                target.tagName === 'A'
+                              ) {
+                                e.stopPropagation()
+                              }
+                            }}
                           >
                             {column.cell(row)}
                           </td>
