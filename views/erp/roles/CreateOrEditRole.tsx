@@ -1,6 +1,6 @@
 'use client'
 
-import { PermissionsByModule } from '@/types'
+import { PermissionsByModule, RoleDetails } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -11,12 +11,13 @@ import { useForm } from 'react-hook-form'
 import RoleService from '@/services/api/role.service'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 interface CreateOrEditRoleProps {
   mode?: 'create' | 'edit'
   permissions: PermissionsByModule
   roleId?: string | undefined
-  roleDetails?: object | undefined
+  roleDetails?: RoleDetails | undefined
 }
 
 const formSchema = z.object({
@@ -31,8 +32,8 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      permissions: []
+      name: roleDetails?.name || '',
+      permissions: roleDetails?.permissions.map(p => p.name) || []
     }
   })
 
@@ -52,10 +53,29 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
       } catch (error) {
         toast.error('Something went wrong while creating the role!')
       }
+    } else if (mode === 'edit' && roleId) {
+      try {
+        RoleService.update(roleId, values)
+          .then(response => {
+            console.log('Role updated:', response)
+            toast.success('Role updated successfully')
+            router.push('/erp/roles')
+          })
+          .catch(error => {
+            toast.error(typeof error.message === 'string' ? error.message : 'Failed to update role')
+          })
+      } catch (error) {
+        toast.error('Something went wrong while updating the role!')
+      }
     }
   }
 
-  const onCancel = () => form.reset()
+  const onCancel = () => {
+    form.reset({
+      name: roleDetails?.name || '',
+      permissions: roleDetails?.permissions.map(p => p.name) || []
+    })
+  }
 
   const modules = Object.keys(permissions)
 

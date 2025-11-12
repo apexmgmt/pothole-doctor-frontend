@@ -6,7 +6,6 @@ const CreateRole = async () => {
   try {
     const response = await PermissionService.index()
     permissions = response.data || {}
-    console.log('Permissions:', permissions)
   } catch (error) {
     permissions = {}
   }

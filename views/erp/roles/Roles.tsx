@@ -162,16 +162,16 @@ const Roles: React.FC = () => {
     setIsFilterDrawerOpen(false)
   }
 
-  const handleRowSelect = (company: any) => {
-    setSelectedRoleId(company?.id || null)
+  const handleRowSelect = (role: any) => {
+    setSelectedRoleId(role?.id || null)
 
-    CompanyService.show(company?.id)
+    RoleService.show(role?.id)
       .then(response => {
         setSelectedRole(response.data)
       })
       .catch(error => {
         setSelectedRole(null)
-        console.error('Error fetching company details:', error)
+        console.error('Error fetching role details:', error)
       })
   }
 
