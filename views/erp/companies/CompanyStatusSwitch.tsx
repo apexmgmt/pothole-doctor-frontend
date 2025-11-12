@@ -1,6 +1,6 @@
 import React from 'react'
 import { Switch } from '@/components/ui/switch'
-import ConfirmDialog from '@/components/erp/common/ConfirmDialog'
+import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 import CompanyService from '@/services/api/company.service'
 
 interface CompanyStatusSwitchProps {
