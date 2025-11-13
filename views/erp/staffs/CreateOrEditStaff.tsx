@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import CompanyService from '@/services/api/company.service'
@@ -372,47 +373,54 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
           </div>
 
           {/* Permissions Section */}
-          <div className='space-y-6'>
-            <div className='space-y-1'>
-              <FormLabel className='text-base font-semibold text-light'>Permissions (Optional)</FormLabel>
-            </div>
-
-            {modules.map(module => (
-              <div key={module} className='space-y-3'>
-                <h3 className='text-base font-medium text-light capitalize border-b border-border pb-2'>{module}</h3>
-                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pl-2'>
-                  {permissions[module]
-                    .sort((a, b) => a.id - b.id)
-                    .map(permission => (
-                      <FormField
-                        key={permission.id}
-                        control={control}
-                        name='permissions'
-                        render={({ field }) => {
-                          return (
-                            <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value?.includes(permission.name)}
-                                  onCheckedChange={checked => {
-                                    return checked
-                                      ? field.onChange([...(field.value || []), permission.name])
-                                      : field.onChange(field.value?.filter(value => value !== permission.name))
-                                  }}
-                                />
-                              </FormControl>
-                              <FormLabel className='text-sm font-normal cursor-pointer text-light'>
-                                {permission.name}
-                              </FormLabel>
-                            </FormItem>
-                          )
-                        }}
-                      />
-                    ))}
+          <Accordion type='single' collapsible className='space-y-6'>
+            <AccordionItem value='permissions' className='border-none'>
+              <AccordionTrigger className='text-base font-semibold text-light hover:no-underline py-0 pb-4'>
+                Permissions (Optional)
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className='space-y-6'>
+                  {modules.map(module => (
+                    <div key={module} className='space-y-3'>
+                      <h3 className='text-base font-medium text-light capitalize border-b border-border pb-2'>
+                        {module}
+                      </h3>
+                      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pl-2'>
+                        {permissions[module]
+                          .sort((a, b) => a.id - b.id)
+                          .map(permission => (
+                            <FormField
+                              key={permission.id}
+                              control={control}
+                              name='permissions'
+                              render={({ field }) => {
+                                return (
+                                  <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={field.value?.includes(permission.name)}
+                                        onCheckedChange={checked => {
+                                          return checked
+                                            ? field.onChange([...(field.value || []), permission.name])
+                                            : field.onChange(field.value?.filter(value => value !== permission.name))
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormLabel className='text-sm font-normal cursor-pointer text-light'>
+                                      {permission.name}
+                                    </FormLabel>
+                                  </FormItem>
+                                )
+                              }}
+                            />
+                          ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            ))}
-          </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
           <div className='flex gap-3 pt-4 border-t border-border'>
             <Button
