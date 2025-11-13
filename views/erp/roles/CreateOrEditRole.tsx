@@ -1,6 +1,6 @@
 'use client'
 
-import { PermissionsByModule, RoleDetails } from '@/types'
+import { PermissionsByModule, Role } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -19,7 +19,7 @@ interface CreateOrEditRoleProps {
   mode?: 'create' | 'edit'
   permissions: PermissionsByModule
   roleId?: string | undefined
-  roleDetails?: RoleDetails | undefined | {}
+  roleDetails?: Role | undefined | {}
 }
 
 const formSchema = z.object({

@@ -6,59 +6,31 @@ import { PlusIcon, Search } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
-import FilterDrawer from '@/components/erp/common/FilterDrawer'
-import AdvancedCustomerDetails from '@/components/erp/dashboard/crm/customers/AdvancedCustomerDetails'
-import { DetailsIcon, FilterIcon, UserIcon } from '@/public/icons'
-import CompanyService from '@/services/api/company.service'
+import { DetailsIcon, UserIcon } from '@/public/icons'
+import StaffService from '@/services/api/staff.service'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse } from '@/types'
-import CompanyDetails from '@/views/erp/companies/CompanyDetails'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { Switch } from '@/components/ui/switch'
-import CompanyStatusSwitch from '@/views/erp/companies/CompanyStatusSwitch'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
+import StaffDetails from './StaffDetails'
+import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
+import { toast } from 'sonner'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
 
-interface CompanyData {
-  id: string
-  name: string
-  phone: string
-  company: string
-  jobAddress: string
-  email: string
-  stage: string
-  [key: string]: any
-}
-
-interface FilterField {
-  key: string
-  label: string
-  type: string
-  placeholder?: string
-  options?: { value: string; label: string }[]
-}
-
-interface FilterButton {
-  label: string
-  action: string
-  variant: string
-}
-
-const Companies: React.FC = () => {
+const Staffs: React.FC = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [activeTab, setActiveTab] = useState<string>('companies')
-  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
+  const [activeTab, setActiveTab] = useState<string>('staffs')
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
-  const [selectedCompany, setSelectedCompany] = useState<object | null>(null)
+  const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null)
+  const [selectedStaff, setSelectedStaff] = useState<object | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
-  const [statusLoading, setStatusLoading] = useState<{ [key: string]: boolean }>({})
 
   // Initialize filterOptions from URL params
   const getInitialFilters = () => {
@@ -123,47 +95,57 @@ const Companies: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      CompanyService.index(filterOptions)
+      StaffService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          console.error('Error fetching companies:', error)
+          console.error('Error fetching staffs:', error)
         })
     } catch (error) {
       setIsLoading(false)
-      console.error('Error fetching companies:', error)
+      console.error('Error fetching staffs:', error)
     }
   }
 
   useEffect(() => {
     fetchData()
     updateURL(filterOptions)
-    dispatch(setPageTitle('Manage Companies'))
+    dispatch(setPageTitle('Manage Staffs'))
   }, [filterOptions])
 
   // Transform API data to match table format
-  const companiesData = apiResponse?.data
-    ? apiResponse.data.map((company: any, index: number) => ({
-        id: company.id,
+  const staffsData = apiResponse?.data
+    ? apiResponse.data.map((staff: any, index: number) => ({
+        id: staff.id,
         index: (apiResponse?.from || 1) + index,
-        name: `${company.first_name || ''} ${company.last_name || ''}`.trim(),
-        phone: company.userable?.phone || 'N/A',
-        company: company.domain?.domain || 'N/A',
-        jobAddress: company.userable?.address || 'N/A',
-        email: company.email,
-        status: company.status
+        name: `${staff.first_name || ''} ${staff.last_name || ''}`.trim(),
+        profilePicture: staff.userable?.profile_picture || null,
+        phone: staff.userable?.phone || 'N/A',
+        jobAddress: staff.userable?.address || 'N/A',
+        email: staff.email
       }))
     : []
 
   // Column definitions for CommonTable
-  const companyColumns: Column[] = [
+  const staffColumns: Column[] = [
     {
       id: 'index',
       header: '#',
       cell: row => <span className='text-gray'>{row.index}</span>,
+      sortable: false
+    },
+    {
+      id: 'profilePicture',
+      header: 'Profile Picture',
+      cell: row => (
+        <Avatar className='h-10 w-10'>
+          <AvatarImage src={row.profilePicture} alt={row.name} />
+          <AvatarFallback className='bg-border text-light text-xs font-medium'>{row.name.charAt(0)}</AvatarFallback>
+        </Avatar>
+      ),
       sortable: false
     },
     {
@@ -173,15 +155,15 @@ const Companies: React.FC = () => {
       sortable: true
     },
     {
-      id: 'phone',
-      header: 'Phone',
-      cell: row => <span>{row.phone}</span>,
+      id: 'email',
+      header: 'Email',
+      cell: row => <span className=''>{row.email}</span>,
       sortable: true
     },
     {
-      id: 'company',
-      header: 'Company',
-      cell: row => <span>{row.company}</span>,
+      id: 'phone',
+      header: 'Phone',
+      cell: row => <span>{row.phone}</span>,
       sortable: true
     },
     {
@@ -191,54 +173,48 @@ const Companies: React.FC = () => {
       sortable: true
     },
     {
-      id: 'email',
-      header: 'Email',
-      cell: row => <span className=''>{row.email}</span>,
-      sortable: true
-    },
-    {
-      id: 'status',
-      header: 'Status',
-      cell: row => (
-        <div className='flex items-center gap-2'>
-          <CompanyStatusSwitch
-            checked={row.status}
-            loading={statusLoading[row.id]}
-            companyId={row.id}
-            // fetchData={fetchData} // pass only if you want to refetch after change
-          />
-        </div>
-      ),
-      sortable: true
-    },
-    {
       id: 'actions',
       header: 'Action',
       cell: row => (
-        <div className='flex gap-2'>
-          <EditButton tooltip='Edit Company Information' link={`/erp/companies/${row.id}/edit`} variant='icon' />
+        <div className='flex items-center justify-center gap-2'>
+          <EditButton tooltip='Edit Staff Information' link={`/erp/staffs/${row.id}/edit`} variant='icon' />
+          <DeleteButton tooltip='Delete Staff' variant='icon' onClick={() => handleDeleteStaff(row.id)} />
         </div>
       ),
       sortable: false
     }
   ]
 
+  const handleDeleteStaff = async (id: string) => {
+    try {
+      StaffService.destroy(id)
+        .then(response => {
+          toast.success('Staff deleted successfully')
+          fetchData()
+        })
+        .catch(error => {
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete staff')
+        })
+    } catch (error) {
+      toast.error('Something went wrong while deleting the staff!')
+    }
+  }
+
   const handleClearFilters = () => {
     setFilterOptions({})
     setSearchValue('')
-    setIsFilterDrawerOpen(false)
   }
 
-  const handleRowSelect = (company: any) => {
-    setSelectedCompanyId(company?.id || null)
+  const handleRowSelect = (staff: any) => {
+    setSelectedStaffId(staff?.id || null)
 
-    CompanyService.show(company?.id)
+    StaffService.show(staff?.id)
       .then(response => {
-        setSelectedCompany(response.data)
+        setSelectedStaff(response.data)
       })
       .catch(error => {
-        setSelectedCompany(null)
-        console.error('Error fetching company details:', error)
+        setSelectedStaff(null)
+        console.error('Error fetching staff details:', error)
       })
   }
 
@@ -269,10 +245,10 @@ const Companies: React.FC = () => {
           </Button>
         )}
       </div>
-      <Link href='/erp/companies/create'>
+      <Link href='/erp/staffs/create'>
         <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
           <PlusIcon className='w-4 h-4' />
-          Add Company
+          Add Staff
         </Button>
       </Link>
     </div>
@@ -281,39 +257,26 @@ const Companies: React.FC = () => {
   // Button configuration for CommonLayout
   const tabs = [
     {
-      label: 'Companies',
+      label: 'Staffs',
       icon: UserIcon,
-      onClick: () => setActiveTab('companies'),
-      isActive: activeTab === 'companies'
+      onClick: () => setActiveTab('staffs'),
+      isActive: activeTab === 'staffs'
     },
     {
       label: 'Details',
       icon: DetailsIcon,
       onClick: () => setActiveTab('details'),
       isActive: activeTab === 'details',
-      disabled: !selectedCompanyId
+      disabled: !selectedStaffId
     }
   ]
 
-  const handleStatusToggle = async (companyId: string) => {
-    setStatusLoading(prev => ({ ...prev, [companyId]: true }))
-    try {
-      await CompanyService.changeStatus(companyId)
-      // Refetch data after status change
-      fetchData()
-    } catch (error) {
-      // Optionally show error
-      console.error('Failed to change status', error)
-    }
-    setStatusLoading(prev => ({ ...prev, [companyId]: false }))
-  }
-
   return (
-    <CommonLayout title='Companies' buttons={tabs}>
-      {activeTab === 'companies' && (
+    <CommonLayout title='Staffs' buttons={tabs}>
+      {activeTab === 'staffs' && (
         <CommonTable
           data={{
-            data: companiesData,
+            data: staffsData,
             per_page: apiResponse?.per_page || 10,
             total: apiResponse?.total || 0,
             from: apiResponse?.from || 1,
@@ -321,22 +284,22 @@ const Companies: React.FC = () => {
             current_page: apiResponse?.current_page || 1,
             last_page: apiResponse?.last_page || 1
           }}
-          columns={companyColumns}
+          columns={staffColumns}
           customFilters={customFilters}
           setFilterOptions={setFilterOptions}
           showFilters={true}
           pagination={true}
           isLoading={isLoading}
-          emptyMessage='No companies found'
+          emptyMessage='No staff found'
           handleRowSelect={handleRowSelect}
         />
       )}
 
       {activeTab === 'details' && (
-        <CompanyDetails companyData={selectedCompany} setCompanyData={setSelectedCompany} fetchData={fetchData} />
+        <StaffDetails staffData={selectedStaff} setStaffData={setSelectedStaff} fetchData={fetchData} />
       )}
     </CommonLayout>
   )
 }
 
-export default Companies
+export default Staffs
