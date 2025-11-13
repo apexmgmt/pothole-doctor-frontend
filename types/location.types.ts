@@ -28,7 +28,6 @@ export interface City {
     id: number
     name: string
     state: State
-    country: Country
     created_at: string
     updated_at: string
 }
