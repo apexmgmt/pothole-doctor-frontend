@@ -1,1 +1,1 @@
-export const ROLES = '/v1/roles/';
+export const ROLES: string = '/v1/roles/';

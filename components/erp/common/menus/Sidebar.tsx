@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 
 import { ArrowDownIcon, ArrowUpIcon, SettingsIcon, EstimateIcon, UserIcon, CRMIcon, HomeIcon } from '@/public/icons'
 import SidebarFooter from './SidebarFooter'
-import { Building2, LocateIcon, Map, UserLock } from 'lucide-react'
+import { Building2, LocateIcon, Map, UserLock, Users } from 'lucide-react'
 
 interface NavigationSubItem {
   id: string
@@ -53,6 +53,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       label: 'Companies',
       icon: <Building2 className='h-4 w-4' />,
       href: '/erp/companies',
+      hasSubItems: false,
+      exactMatch: false
+    },
+    {
+      id: 'staffs',
+      label: 'Staffs',
+      icon: <Users className='h-4 w-4' />,
+      href: '/erp/staffs',
       hasSubItems: false,
       exactMatch: false
     },
