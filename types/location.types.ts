@@ -1,5 +1,5 @@
 export interface Country {
-    id: number
+    id: string
     name: string
     code: string
     created_at: string
@@ -12,7 +12,7 @@ export interface CountryPayload {
 }
 
 export interface State {
-    id: number
+    id: string
     name: string
     country: Country
     created_at: string
@@ -25,7 +25,7 @@ export interface StatePayload {
 }
 
 export interface City {
-    id: number
+    id: string
     name: string
     state: State
     created_at: string
@@ -39,14 +39,14 @@ export interface CityPayload {
 }
 
 export interface CityWithoutRelations {
-    id: number
+    id: string
     name: string
     created_at: string
     updated_at: string
 }
 
 export interface StateWithCities {
-    id: number
+    id: string
     name: string
     created_at: string
     updated_at: string
@@ -54,7 +54,7 @@ export interface StateWithCities {
 }
 
 export interface CountryWithStates {
-    id: number
+    id: string
     name: string
     code: string
     created_at: string
