@@ -29,6 +29,7 @@ const Login: React.FC = () => {
   })
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
   const onSubmit: SubmitHandler<LoginForm> = async data => {
     try {
       setIsLoading(true)
@@ -47,6 +48,7 @@ const Login: React.FC = () => {
         })
         .catch(error => {
           setIsLoading(false)
+          setError(error?.message || 'Login failed. Please try again.')
           CookieService.clear()
         })
     } catch (error) {
@@ -89,6 +91,7 @@ const Login: React.FC = () => {
             {isLoading ? 'Logging in...' : 'Login'}
           </CustomButton>
         </div>
+        {error && <p className='text-red-500 text-sm mt-4'>{error}</p>}
       </form>
     </>
   )
