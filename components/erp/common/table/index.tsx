@@ -99,8 +99,8 @@ const CommonTable: React.FC<CommonTableProps> = ({
 
     setFilterOptions((prevOptions: any) => {
       const newOptions = { ...prevOptions }
-      const currentSortBy = prevOptions.sortBy
-      const currentSortOrder = prevOptions.sortOrder
+      const currentSortBy = prevOptions.sort_by
+      const currentSortOrder = prevOptions.sort_order
 
       if (currentSortBy === columnId) {
         const newDirection =
@@ -111,19 +111,19 @@ const CommonTable: React.FC<CommonTableProps> = ({
               : null
 
         if (newDirection === null) {
-          delete newOptions.sortBy
-          delete newOptions.sortOrder
+          delete newOptions.sort_by
+          delete newOptions.sort_order
           sortBy = null
           sortOrder = null
         } else {
-          newOptions.sortBy = columnId
-          newOptions.sortOrder = newDirection
+          newOptions.sort_by = columnId
+          newOptions.sort_order = newDirection
           sortBy = columnId
           sortOrder = newDirection
         }
       } else {
-        newOptions.sortBy = columnId
-        newOptions.sortOrder = 'asc'
+        newOptions.sort_by = columnId
+        newOptions.sort_order = 'asc'
         sortBy = columnId
         sortOrder = 'asc'
       }
