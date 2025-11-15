@@ -13,8 +13,8 @@ const CreateStaffPage = async () => {
 
   let roles = []
   try {
-    const response = await RoleService.index({per_page: 1000})
-    roles = response?.data?.data || []
+    const response = await RoleService.getAllRoles()
+    roles = response?.data || []
   } catch (error) {
     roles = []
   }

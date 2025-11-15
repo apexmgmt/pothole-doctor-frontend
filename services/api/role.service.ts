@@ -1,7 +1,7 @@
 import { RolePermissionPayload } from '@/types'
 import { getApiUrl } from '@/utils/utility'
 import apiInterceptor from './api.interceptor'
-import { ROLES } from '@/constants/api'
+import { GET_ROLES, ROLES } from '@/constants/api'
 import { revalidate } from '../app/cache.service'
 
 export default class RoleService {
@@ -14,6 +14,26 @@ export default class RoleService {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['roles'] } // Cache for 60 seconds
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to fetch roles')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static getAllRoles = async () => {
+    try {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + GET_ROLES, {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 60, tags: ['roles-selection-list'] } // Cache for 60 seconds
       })
 
       if (!response.ok) {
@@ -43,6 +63,7 @@ export default class RoleService {
       }
 
       await revalidate('roles')
+      await revalidate('roles-selection-list')
 
       return await response.json()
     } catch (error) {
@@ -85,6 +106,8 @@ export default class RoleService {
       }
       await revalidate('roles')
       await revalidate(`roles/${roleId}`)
+      await revalidate('roles-selection-list')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -104,6 +127,8 @@ export default class RoleService {
       }
       await revalidate('roles')
       await revalidate(`roles/${roleId}`)
+      await revalidate('roles-selection-list')
+      
       return await response.json()
     } catch (error) {
       throw error
