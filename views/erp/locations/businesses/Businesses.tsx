@@ -176,7 +176,7 @@ const BusinessLocations: React.FC = () => {
         <div className='flex items-center justify-center gap-2'>
           <EditButton
             tooltip='Edit Business Location Information'
-            link={`/locations/businesses/${row.id}/edit`}
+            link={`/erp/locations/businesses/${row.id}/edit`}
             variant='icon'
           />
           <DeleteButton

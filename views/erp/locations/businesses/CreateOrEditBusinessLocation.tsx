@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -14,10 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
-import LocationService from '@/services/api/locations/location.service'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { Location, BusinessLocationPayload } from '@/types'
+import { Location, BusinessLocation } from '@/types'
 import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
@@ -41,37 +40,58 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>
 
 const CreateOrEditBusinessLocation = ({
+  mode = 'create',
+  businessLocationId = null,
+  businessLocationDetails = null,
   countriesWithStateAndCities
 }: {
+  mode?: 'create' | 'edit'
+  businessLocationId?: string | null
+  businessLocationDetails?: BusinessLocation | null
   countriesWithStateAndCities: Location['countries']
 }) => {
   const router = useRouter()
-  const params = useParams()
   const dispatch = useAppDispatch()
   const [isLoading, setIsLoading] = useState(false)
-  const [isEditMode, setIsEditMode] = useState(false)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
-  const [countriesData, setCountriesData] = useState<Location['countries']>(countriesWithStateAndCities || [])
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      phone: '',
-      email: '',
-      fax: '',
-      is_branding: false,
-      logo: null,
-      website: '',
-      invoice_prefix: '',
-      sales_tax: '',
-      review_link: '',
-      country_id: '',
-      state_id: '',
-      city_id: '',
-      street_address: '',
-      zip_code: ''
-    }
+    defaultValues: businessLocationDetails
+      ? {
+          name: businessLocationDetails.name || '',
+          phone: businessLocationDetails.phone || '',
+          email: businessLocationDetails.email || '',
+          fax: businessLocationDetails.fax || '',
+          is_branding: businessLocationDetails.is_branding === 1,
+          logo: null,
+          website: businessLocationDetails.website || '',
+          invoice_prefix: businessLocationDetails.invoice_prefix || '',
+          sales_tax: businessLocationDetails.sales_tax?.toString() || '',
+          review_link: businessLocationDetails.review_link || '',
+          country_id: businessLocationDetails.city?.country_id?.toString() || '',
+          state_id: businessLocationDetails.state_id?.toString() || '',
+          city_id: businessLocationDetails.city_id?.toString() || '',
+          street_address: businessLocationDetails.street_address || '',
+          zip_code: businessLocationDetails.zip_code || ''
+        }
+      : {
+          name: '',
+          phone: '',
+          email: '',
+          fax: '',
+          is_branding: false,
+          logo: null,
+          website: '',
+          invoice_prefix: '',
+          sales_tax: '',
+          review_link: '',
+          country_id: '',
+          state_id: '',
+          city_id: '',
+          street_address: '',
+          zip_code: ''
+        }
   })
 
   // Watch country_id and state_id to filter states and cities
@@ -81,9 +101,9 @@ const CreateOrEditBusinessLocation = ({
   // Get states based on selected country
   const availableStates = useMemo(() => {
     if (!selectedCountryId) return []
-    const selectedCountry = countriesData.find(country => country.id.toString() === selectedCountryId)
+    const selectedCountry = countriesWithStateAndCities.find(country => country.id.toString() === selectedCountryId)
     return selectedCountry?.states || []
-  }, [selectedCountryId, countriesData])
+  }, [selectedCountryId, countriesWithStateAndCities])
 
   // Get cities based on selected state
   const availableCities = useMemo(() => {
@@ -92,9 +112,19 @@ const CreateOrEditBusinessLocation = ({
     return selectedState?.cities || []
   }, [selectedStateId, availableStates])
 
-  // Reset state_id when country changes
+  // Set page title on mount
   useEffect(() => {
-    if (selectedCountryId && !isEditMode) {
+    dispatch(setPageTitle(mode === 'edit' ? 'Edit Business Location' : 'Add New Business Location'))
+
+    // Set logo preview if exists
+    if (businessLocationDetails?.logo) {
+      setLogoPreview(businessLocationDetails.logo)
+    }
+  }, [mode, businessLocationDetails, dispatch])
+
+  // Reset dependent dropdowns when parent changes
+  useEffect(() => {
+    if (selectedCountryId && mode === 'create') {
       const currentStateId = form.getValues('state_id')
       const isStateInCountry = availableStates.some(state => state.id.toString() === currentStateId)
 
@@ -103,11 +133,10 @@ const CreateOrEditBusinessLocation = ({
         form.setValue('city_id', '')
       }
     }
-  }, [selectedCountryId, availableStates, form, isEditMode])
+  }, [selectedCountryId, availableStates, form, mode])
 
-  // Reset city_id when state changes
   useEffect(() => {
-    if (selectedStateId && !isEditMode) {
+    if (selectedStateId && mode === 'create') {
       const currentCityId = form.getValues('city_id')
       const isCityInState = availableCities.some(city => city.id.toString() === currentCityId)
 
@@ -115,73 +144,7 @@ const CreateOrEditBusinessLocation = ({
         form.setValue('city_id', '')
       }
     }
-  }, [selectedStateId, availableCities, form, isEditMode])
-
-  // Fetch countries with states and cities
-  const fetchCountriesWithStateAndCities = async () => {
-    try {
-      setIsLoading(true)
-      const response = await LocationService.index()
-      setCountriesData(response.data || [])
-      setIsLoading(false)
-    } catch (error) {
-      toast.error('Failed to fetch locations')
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    const locationId = params?.id as string
-
-    // Fetch countries data if not provided
-    if (!countriesWithStateAndCities || countriesWithStateAndCities.length === 0) {
-      fetchCountriesWithStateAndCities()
-    }
-
-    if (locationId) {
-      setIsEditMode(true)
-      dispatch(setPageTitle('Edit Business Location'))
-      fetchBusinessLocation(locationId)
-    } else {
-      dispatch(setPageTitle('Add New Business Location'))
-      setIsEditMode(false)
-    }
-  }, [params])
-
-  const fetchBusinessLocation = async (id: string) => {
-    try {
-      const response = await BusinessLocationService.show(id)
-      const data = response.data
-
-      form.reset({
-        name: data.name || '',
-        phone: data.phone || '',
-        email: data.email || '',
-        fax: data.fax || '',
-        is_branding: data.is_branding === 1 || data.is_branding === true,
-        website: data.website || '',
-        invoice_prefix: data.invoice_prefix || '',
-        sales_tax: data.sales_tax?.toString() || '',
-        review_link: data.review_link || '',
-        country_id: data.city?.state?.country?.id?.toString() || '',
-        state_id: data.city?.state?.id?.toString() || data.state_id || '',
-        city_id: data.city?.id?.toString() || data.city_id || '',
-        street_address: data.street_address || '',
-        zip_code: data.zip_code || ''
-      })
-
-      // Set logo preview if exists
-      if (data.logo) {
-        setLogoPreview(data.logo)
-      }
-
-      // After setting form values, allow dropdowns to work normally
-      setTimeout(() => setIsEditMode(false), 100)
-    } catch (error) {
-      toast.error('Failed to fetch business location details')
-      console.error(error)
-    }
-  }
+  }, [selectedStateId, availableCities, form, mode])
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -231,15 +194,15 @@ const CreateOrEditBusinessLocation = ({
         payload.logo = data.logo
       }
 
-      if (params?.id) {
-        await BusinessLocationService.update(params.id as string, payload)
+      if (mode === 'edit' && businessLocationId) {
+        await BusinessLocationService.update(businessLocationId, payload)
         toast.success('Business location updated successfully')
       } else {
         await BusinessLocationService.store(payload)
         toast.success('Business location created successfully')
       }
 
-      router.push('/locations/businesses')
+      router.push('/erp/locations/businesses')
     } catch (error: any) {
       toast.error(error?.message || 'Something went wrong')
       console.error(error)
@@ -256,7 +219,7 @@ const CreateOrEditBusinessLocation = ({
       <Card className='bg-card border-border'>
         <CardHeader>
           <CardTitle className='text-2xl font-semibold'>
-            {params?.id ? 'Edit Business Location' : 'Add New Location'}
+            {mode === 'edit' ? 'Edit Business Location' : 'Add New Location'}
           </CardTitle>
         </CardHeader>
         <CardContent className='max-w-[1024px]'>
@@ -447,21 +410,19 @@ const CreateOrEditBusinessLocation = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Country</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className='w-full'>
                             <SelectValue placeholder='Select a country' />
                           </SelectTrigger>
                         </FormControl>
-                        {countriesData.length > 0 && (
-                          <SelectContent>
-                            {countriesData.map(country => (
-                              <SelectItem key={country.id} value={country.id.toString()}>
-                                {country.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        )}
+                        <SelectContent>
+                          {countriesWithStateAndCities.map(country => (
+                            <SelectItem key={country.id} value={country.id.toString()}>
+                              {country.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
@@ -477,7 +438,6 @@ const CreateOrEditBusinessLocation = ({
                       <FormLabel>State</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
                         value={field.value}
                         disabled={!selectedCountryId || availableStates.length === 0}
                       >
@@ -514,7 +474,6 @@ const CreateOrEditBusinessLocation = ({
                       <FormLabel>City</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
                         value={field.value}
                         disabled={!selectedStateId || availableCities.length === 0}
                       >
@@ -573,7 +532,7 @@ const CreateOrEditBusinessLocation = ({
                               placeholder='12345'
                               className='flex-1'
                               maxLength={5}
-                              value={zipMain || ''} // Add || '' to ensure it's never undefined
+                              value={zipMain || ''}
                               onChange={e => {
                                 const newValue = e.target.value
                                 const newZip = zipExt ? `${newValue}-${zipExt}` : newValue
@@ -585,7 +544,7 @@ const CreateOrEditBusinessLocation = ({
                               placeholder='0000'
                               className='w-24'
                               maxLength={4}
-                              value={zipExt || ''} // Add || '' to ensure it's never undefined
+                              value={zipExt || ''}
                               onChange={e => {
                                 const newValue = e.target.value
                                 const newZip = zipMain ? `${zipMain}-${newValue}` : `-${newValue}`
