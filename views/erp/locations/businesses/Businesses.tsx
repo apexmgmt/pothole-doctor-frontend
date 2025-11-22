@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { PlusIcon, Search } from 'lucide-react'
+import { PlusIcon, Search, UsersIcon, WarehouseIcon } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -16,7 +16,8 @@ import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
 import Link from 'next/link'
-import { DetailsIcon, LocationIcon, UserIcon } from '@/public/icons'
+import { DetailsIcon, InvoiceIcon, LocationIcon, UserIcon } from '@/public/icons'
+import BusinessLocationDetails from './BusinessLocationDetails'
 
 const BusinessLocations: React.FC = () => {
   const router = useRouter()
@@ -215,15 +216,6 @@ const BusinessLocations: React.FC = () => {
 
   const handleRowSelect = (businessLocation: any) => {
     setSelectedBusinessLocationId(businessLocation?.id || null)
-
-    BusinessLocationService.show(businessLocation?.id)
-      .then(response => {
-        setSelectedBusinessLocation(response.data)
-      })
-      .catch(error => {
-        setSelectedBusinessLocation(null)
-        console.error('Error fetching business location details:', error)
-      })
   }
 
   // Check if filters are active (excluding pagination)
@@ -253,7 +245,7 @@ const BusinessLocations: React.FC = () => {
           </Button>
         )}
       </div>
-      <Link href='/locations/businesses/create'>
+      <Link href='/erp/locations/businesses/create'>
         <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
           <PlusIcon className='w-4 h-4' />
           Add Business Location
@@ -270,11 +262,46 @@ const BusinessLocations: React.FC = () => {
       onClick: () => setActiveTab('businesses'),
       isActive: activeTab === 'businesses'
     },
+    // {
+    //   label: 'Details',
+    //   icon: DetailsIcon,
+    //   onClick: () => setActiveTab('details'),
+    //   isActive: activeTab === 'details',
+    //   disabled: !selectedBusinessLocationId
+    // },
     {
-      label: 'Details',
+      label: 'Employees',
       icon: DetailsIcon,
-      onClick: () => setActiveTab('details'),
-      isActive: activeTab === 'details',
+      onClick: () => setActiveTab('employees'),
+      isActive: activeTab === 'employees',
+      disabled: !selectedBusinessLocationId
+    },
+    {
+      label: 'Customers',
+      icon: DetailsIcon,
+      onClick: () => setActiveTab('customers'),
+      isActive: activeTab === 'customers',
+      disabled: !selectedBusinessLocationId
+    },
+    {
+      label: 'Quotes',
+      icon: DetailsIcon,
+      onClick: () => setActiveTab('quotes'),
+      isActive: activeTab === 'quotes',
+      disabled: !selectedBusinessLocationId
+    },
+    {
+      label: 'Invoice',
+      icon: DetailsIcon,
+      onClick: () => setActiveTab('invoice'),
+      isActive: activeTab === 'invoice',
+      disabled: !selectedBusinessLocationId
+    },
+    {
+      label: 'Warehouses',
+      icon: DetailsIcon,
+      onClick: () => setActiveTab('warehouses'),
+      isActive: activeTab === 'warehouses',
       disabled: !selectedBusinessLocationId
     }
   ]
@@ -304,16 +331,8 @@ const BusinessLocations: React.FC = () => {
           />
         )}
 
-        {activeTab === 'details' && (
-          <div>
-            {/* Add your BusinessLocationDetails component here */}
-            {/* Example: <BusinessLocationDetails 
-              businessLocationData={selectedBusinessLocation} 
-              setBusinessLocationData={setSelectedBusinessLocation}
-              fetchData={fetchData}
-            /> */}
-            <p>Business Location Details - To be implemented</p>
-          </div>
+        {activeTab === 'details' && selectedBusinessLocationId && (
+          <BusinessLocationDetails businessLocationId={selectedBusinessLocationId} fetchData={fetchData} />
         )}
       </CommonLayout>
     </>

@@ -294,14 +294,13 @@ const CreateOrEditBusinessLocation = ({
                   control={form.control}
                   name='is_branding'
                   render={({ field }) => (
-                    <FormItem className='flex flex-row items-center justify-between'>
-                      <div className='space-y-0.5'>
-                        <FormLabel className='text-base'>Location Specific Branding</FormLabel>
-                        <FormDescription>Enable custom branding for this location</FormDescription>
-                      </div>
+                    <FormItem className='flex flex-row items-center'>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
+                      <div className='space-y-0.5'>
+                        <FormLabel>Location Specific Branding</FormLabel>
+                      </div>
                     </FormItem>
                   )}
                 />
