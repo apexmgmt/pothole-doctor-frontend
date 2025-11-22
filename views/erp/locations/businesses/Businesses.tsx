@@ -7,29 +7,29 @@ import { PlusIcon, Search } from 'lucide-react'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { City, Column, DataTableApiResponse, State } from '@/types'
+import { Column, DataTableApiResponse } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import CreateOrEditCityModal from './CreateOrEditCityModal'
-import CityService from '@/services/api/locations/city.service'
+import BusinessLocationService from '@/services/api/locations/business_location.service'
+import Link from 'next/link'
+import { DetailsIcon, LocationIcon, UserIcon } from '@/public/icons'
 
-const Cities: React.FC = () => {
+const BusinessLocations: React.FC = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
+  const [activeTab, setActiveTab] = useState<string>('businesses')
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [selectedCityId, setSelectedCityId] = useState<string | null>(null)
-  const [selectedCity, setSelectedCity] = useState<City | null>(null)
+  const [selectedBusinessLocationId, setSelectedBusinessLocationId] = useState<string | null>(null)
+  const [selectedBusinessLocation, setSelectedBusinessLocation] = useState<any | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
   // Initialize filterOptions from URL params
   const getInitialFilters = () => {
@@ -94,69 +94,41 @@ const Cities: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      CityService.index(filterOptions)
+      BusinessLocationService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          console.error('Error fetching cities:', error)
+          console.error('Error fetching business locations:', error)
         })
     } catch (error) {
       setIsLoading(false)
-      console.error('Error fetching cities:', error)
+      console.error('Error fetching business locations:', error)
     }
   }
 
   useEffect(() => {
     fetchData()
     updateURL(filterOptions)
-    dispatch(setPageTitle('Manage Cities'))
+    dispatch(setPageTitle('Manage Business Locations'))
   }, [filterOptions])
 
   // Transform API data to match table format
-  const cityData = apiResponse?.data
-    ? apiResponse.data.map((city: any, index: number) => ({
-        id: city.id,
+  const businessLocationData = apiResponse?.data
+    ? apiResponse.data.map((businessLocation: any, index: number) => ({
+        id: businessLocation.id,
         index: (apiResponse?.from || 1) + index,
-        name: city.name,
-        state: city?.state?.name,
-        country: city?.state?.country?.name
+        name: businessLocation?.name,
+        email: businessLocation?.email,
+        phone: businessLocation?.phone,
+        invoice_prefix: businessLocation?.invoice_prefix,
+        street_address: businessLocation?.street_address,
+        city: businessLocation?.city?.name || 'N/A',
+        state: businessLocation?.state?.name || 'N/A'
       }))
     : []
-
-  const handleOpenCreateModal = () => {
-    setModalMode('create')
-    setSelectedCityId(null)
-    setSelectedCity(null)
-    setIsModalOpen(true)
-  }
-
-  const handleOpenEditModal = async (id: string) => {
-    setModalMode('edit')
-    setSelectedCityId(id)
-
-    // Fetch city details
-    try {
-      const response = await CityService.show(id)
-      setSelectedCity(response.data)
-      setIsModalOpen(true)
-    } catch (error) {
-      toast.error('Failed to fetch city details')
-    }
-  }
-
-  const handleModalClose = () => {
-    setIsModalOpen(false)
-    setSelectedCityId(null)
-    setSelectedCity(null)
-  }
-
-  const handleSuccess = () => {
-    fetchData()
-    handleModalClose()
-  }
 
   // Column definitions for CommonTable
   const columns: Column[] = [
@@ -169,20 +141,32 @@ const Cities: React.FC = () => {
     },
     {
       id: 'name',
-      header: 'Name',
+      header: 'Location Title',
       cell: row => <span className='font-medium'>{row.name}</span>,
       sortable: true
     },
     {
-      id: 'state',
-      header: 'State',
-      cell: row => <span className='font-medium'>{row.state}</span>,
+      id: 'phone',
+      header: 'Phone Number',
+      cell: row => <span className='font-medium'>{row.phone}</span>,
       sortable: true
     },
     {
-      id: 'country',
-      header: 'Country',
-      cell: row => <span className='font-medium'>{row.country}</span>,
+      id: 'invoice_prefix',
+      header: 'Invoice Prefix',
+      cell: row => <span className='font-medium'>{row.invoice_prefix}</span>,
+      sortable: true
+    },
+    {
+      id: 'email',
+      header: 'Email',
+      cell: row => <span className='font-medium'>{row.email}</span>,
+      sortable: true
+    },
+    {
+      id: 'street_address',
+      header: 'Address',
+      cell: row => <span className='font-medium'>{row.street_address}</span>,
       sortable: true
     },
     {
@@ -190,8 +174,16 @@ const Cities: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton tooltip='Edit City Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
-          <DeleteButton tooltip='Delete City' variant='icon' onClick={() => handleDeleteCity(row.id)} />
+          <EditButton
+            tooltip='Edit Business Location Information'
+            link={`/locations/businesses/${row.id}/edit`}
+            variant='icon'
+          />
+          <DeleteButton
+            tooltip='Delete Business L'
+            variant='icon'
+            onClick={() => handleDeleteBusinessLocation(row.id)}
+          />
         </div>
       ),
       sortable: false,
@@ -206,19 +198,32 @@ const Cities: React.FC = () => {
     setIsFilterDrawerOpen(false)
   }
 
-  const handleDeleteCity = async (id: string) => {
+  const handleDeleteBusinessLocation = async (id: string) => {
     try {
-      CityService.destroy(id)
+      BusinessLocationService.destroy(id)
         .then(response => {
-          toast.success('City deleted successfully')
+          toast.success('Business location deleted successfully')
           fetchData()
         })
         .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete city')
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete business location')
         })
     } catch (error) {
-      toast.error('Something went wrong while deleting the city!')
+      toast.error('Something went wrong while deleting the business location!')
     }
+  }
+
+  const handleRowSelect = (businessLocation: any) => {
+    setSelectedBusinessLocationId(businessLocation?.id || null)
+
+    BusinessLocationService.show(businessLocation?.id)
+      .then(response => {
+        setSelectedBusinessLocation(response.data)
+      })
+      .catch(error => {
+        setSelectedBusinessLocation(null)
+        console.error('Error fetching business location details:', error)
+      })
   }
 
   // Check if filters are active (excluding pagination)
@@ -248,51 +253,71 @@ const Cities: React.FC = () => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add City
-      </Button>
+      <Link href='/locations/businesses/create'>
+        <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
+          <PlusIcon className='w-4 h-4' />
+          Add Business Location
+        </Button>
+      </Link>
     </div>
   )
 
+  // Button configuration for CommonLayout
+  const tabs = [
+    {
+      label: 'Locations',
+      icon: LocationIcon,
+      onClick: () => setActiveTab('businesses'),
+      isActive: activeTab === 'businesses'
+    },
+    {
+      label: 'Details',
+      icon: DetailsIcon,
+      onClick: () => setActiveTab('details'),
+      isActive: activeTab === 'details',
+      disabled: !selectedBusinessLocationId
+    }
+  ]
+
   return (
     <>
-      <CommonLayout title='Cities' noTabs={true}>
-        <CommonTable
-          data={{
-            data: cityData,
-            per_page: apiResponse?.per_page || 10,
-            total: apiResponse?.total || 0,
-            from: apiResponse?.from || 1,
-            to: apiResponse?.to || 10,
-            current_page: apiResponse?.current_page || 1,
-            last_page: apiResponse?.last_page || 1
-          }}
-          columns={columns}
-          customFilters={customFilters}
-          setFilterOptions={setFilterOptions}
-          showFilters={true}
-          pagination={true}
-          isLoading={isLoading}
-          emptyMessage='No city found'
-        />
-      </CommonLayout>
+      <CommonLayout title='Business Locations' buttons={tabs}>
+        {activeTab === 'businesses' && (
+          <CommonTable
+            data={{
+              data: businessLocationData,
+              per_page: apiResponse?.per_page || 10,
+              total: apiResponse?.total || 0,
+              from: apiResponse?.from || 1,
+              to: apiResponse?.to || 10,
+              current_page: apiResponse?.current_page || 1,
+              last_page: apiResponse?.last_page || 1
+            }}
+            columns={columns}
+            customFilters={customFilters}
+            setFilterOptions={setFilterOptions}
+            showFilters={true}
+            pagination={true}
+            isLoading={isLoading}
+            emptyMessage='No business location found'
+            handleRowSelect={handleRowSelect}
+          />
+        )}
 
-      <CreateOrEditCityModal
-        mode={modalMode}
-        open={isModalOpen}
-        onOpenChange={handleModalClose}
-        cityId={selectedCityId || undefined}
-        cityDetails={selectedCity || undefined}
-        onSuccess={handleSuccess}
-      />
+        {activeTab === 'details' && (
+          <div>
+            {/* Add your BusinessLocationDetails component here */}
+            {/* Example: <BusinessLocationDetails 
+              businessLocationData={selectedBusinessLocation} 
+              setBusinessLocationData={setSelectedBusinessLocation}
+              fetchData={fetchData}
+            /> */}
+            <p>Business Location Details - To be implemented</p>
+          </div>
+        )}
+      </CommonLayout>
     </>
   )
 }
 
-export default Cities
+export default BusinessLocations

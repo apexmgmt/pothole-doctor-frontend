@@ -99,6 +99,13 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/locations/cities',
           icon: <LocateIcon className='h-4 w-4'/>,
           hasSubItems: false
+        },
+        {
+          id: 'businesses',
+          label: 'Business Locations',
+          href: '/erp/locations/businesses',
+          icon: <LocateIcon className='h-4 w-4'/>,
+          hasSubItems: false
         }
       ]
     },
