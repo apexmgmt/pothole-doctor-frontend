@@ -1,6 +1,6 @@
 'use client'
 
-import { PaymentTermPayload, PartnerType, PartnerTypePayload } from '@/types'
+import { PaymentTermPayload, PartnerType, PartnerTypePayload, Unit, UnitPayload } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -12,92 +12,96 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import PaymentTermsService from '@/services/api/settings/payment_terms.service'
-import PartnerTypesService from '@/services/api/settings/partner_types.service'
+import UnitService from '@/services/api/settings/units.service'
 
-interface CreateOrEditPartnerTypeModalProps {
+interface CreateOrEditUnitModalProps {
   mode?: 'create' | 'edit'
   open: boolean
   onOpenChange: (open: boolean) => void
-  partnerTypeId?: string
-  partnerTypeDetails?: PartnerType
+  unitId?: string
+  unitDetails?: Unit
   onSuccess?: () => void
 }
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: 'Partner type name must be at least 2 characters' })
+  name: z.string().min(2, { message: 'Unit name must be at least 2 characters' }),
+  group: z.enum(['uom', 'measure'])
 })
 
 type FormValues = z.infer<typeof formSchema>
 
-const CreateOrEditPartnerTypeModal = ({
+const CreateOrEditUnitModal = ({
   mode = 'create',
   open,
   onOpenChange,
-  partnerTypeId,
-  partnerTypeDetails,
+  unitId,
+  unitDetails,
   onSuccess
-}: CreateOrEditPartnerTypeModalProps) => {
+}: CreateOrEditUnitModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: partnerTypeDetails?.name || ''
+      name: unitDetails?.name || '',
+      group: (unitDetails?.group as 'uom' | 'measure') || 'uom'
     }
   })
 
-  // Reset form when partnerTypeDetails changes or modal opens
+  // Reset form when unitDetails changes or modal opens
   useEffect(() => {
     if (open) {
       form.reset({
-        name: partnerTypeDetails?.name || ''
+        name: unitDetails?.name || '',
+        group: (unitDetails?.group as 'uom' | 'measure') || 'uom'
       })
     }
-  }, [partnerTypeDetails, open, form])
+  }, [unitDetails, open, form])
 
   const onSubmit = async (values: FormValues) => {
-    const payload: PartnerTypePayload = {
-      name: values.name
+    const payload: UnitPayload = {
+      name: values.name,
+      group: values.group
     }
 
     if (mode === 'create') {
       try {
-        await PartnerTypesService.store(payload)
+        await UnitService.store(payload)
           .then(response => {
-            console.log('Contractor type created:', response)
-            toast.success('Contractor type created successfully')
+            console.log('Unit created:', response)
+            toast.success('Unit created successfully')
             form.reset()
             onOpenChange(false)
             onSuccess?.()
           })
           .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to create contractor type')
+            toast.error(typeof error.message === 'string' ? error.message : 'Failed to create unit')
           })
       } catch (error) {
-        toast.error('Something went wrong while creating the contractor type!')
+        toast.error('Something went wrong while creating the unit!')
       }
-    } else if (mode === 'edit' && partnerTypeId) {
+    } else if (mode === 'edit' && unitId) {
       try {
-        await PartnerTypesService.update(partnerTypeId, payload)
+        await UnitService.update(unitId, payload)
           .then(response => {
-            console.log('Contractor type updated:', response)
-            toast.success('Contractor type updated successfully')
+            console.log('Unit updated:', response)
+            toast.success('Unit updated successfully')
             onOpenChange(false)
             onSuccess?.()
           })
           .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to update contractor type')
+            toast.error(typeof error.message === 'string' ? error.message : 'Failed to update unit')
           })
       } catch (error) {
-        toast.error('Something went wrong while updating the contractor type!')
+        toast.error('Something went wrong while updating the unit!')
       }
     }
   }
 
   const onCancel = () => {
     form.reset({
-      name: partnerTypeDetails?.name || '',
+      name: unitDetails?.name || '',
+      group: (unitDetails?.group as 'uom' | 'measure') || 'uom'
     })
     onOpenChange(false)
   }
@@ -105,11 +109,11 @@ const CreateOrEditPartnerTypeModal = ({
   return (
     <CommonDialog
       isLoading={isLoading}
-      loadingMessage='Loading contractor type...'
+      loadingMessage='Loading unit...'
       open={open}
       onOpenChange={onOpenChange}
-      title={mode === 'create' ? 'Create New Contractor Type' : 'Edit Contractor Type'}
-      description={mode === 'create' ? 'Add a new contractor type to the system' : 'Update contractor type information'}
+      title={mode === 'create' ? 'Create New Unit' : 'Edit Unit'}
+      description={mode === 'create' ? 'Add a new unit to the system' : 'Update unit information'}
       maxWidth='sm'
       disableClose={form.formState.isSubmitting}
       actions={
@@ -136,7 +140,7 @@ const CreateOrEditPartnerTypeModal = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          {/* Contractor Type Name Field */}
+          {/* Unit Name Field */}
           <FormField
             control={form.control}
             name='name'
@@ -146,7 +150,32 @@ const CreateOrEditPartnerTypeModal = ({
                   Name <span className='text-red-500'>*</span>
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter contractor type name' {...field} />
+                  <Input placeholder='Enter unit name' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Group Field */}
+          <FormField
+            control={form.control}
+            name='group'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Group <span className='text-red-500'>*</span>
+                </FormLabel>
+                <FormControl>
+                  <RadioGroup onValueChange={field.onChange} value={field.value} className='flex gap-4'>
+                    <FormItem className='flex items-center gap-2'>
+                      <RadioGroupItem value='uom' id='group-uom' />
+                      <Label htmlFor='group-uom'>UOM</Label>
+                    </FormItem>
+                    <FormItem className='flex items-center gap-2'>
+                      <RadioGroupItem value='measure' id='group-measure' />
+                      <Label htmlFor='group-measure'>Measure</Label>
+                    </FormItem>
+                  </RadioGroup>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -158,4 +187,4 @@ const CreateOrEditPartnerTypeModal = ({
   )
 }
 
-export default CreateOrEditPartnerTypeModal
+export default CreateOrEditUnitModal
