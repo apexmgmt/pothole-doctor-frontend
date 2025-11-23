@@ -262,40 +262,12 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       hasSubItems: true,
       subItems: [
         {
-          id: 'sub-settings-01',
-          label: 'Sub Settings 01',
-          href: '/settings/sub-settings-01',
-          hasSubItems: true,
-          subItems: [
-            {
-              id: 'settings-sub-1',
-              label: 'General Settings',
-              href: '/settings/sub-settings-01/general'
-            },
-            {
-              id: 'settings-sub-2',
-              label: 'Security Settings',
-              href: '/settings/sub-settings-01/security'
-            }
-          ]
-        },
-        {
-          id: 'sub-settings-02',
-          label: 'Sub Settings 02',
-          href: '/settings/sub-settings-02',
-          hasSubItems: true,
-          subItems: [
-            {
-              id: 'settings-sub-3',
-              label: 'Notification Settings',
-              href: '/settings/sub-settings-02/notifications'
-            },
-            {
-              id: 'settings-sub-4',
-              label: 'Advanced Settings',
-              href: '/settings/sub-settings-02/advanced'
-            }
-          ]
+          id: 'payment-terms',
+          label: 'Payment Terms',
+          href: '/erp/settings/payment-terms',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
         }
       ]
     }
