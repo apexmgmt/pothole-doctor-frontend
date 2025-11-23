@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import PaymentTermsService from '@/services/api/payment_terms.service'
+import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 
 interface CreateOrEditPaymentTermModalProps {
   mode?: 'create' | 'edit'

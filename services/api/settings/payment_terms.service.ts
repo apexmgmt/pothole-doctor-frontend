@@ -1,8 +1,8 @@
 import { getApiUrl } from '@/utils/utility'
-import apiInterceptor from './api.interceptor'
+import apiInterceptor from '../api.interceptor'
 import { PAYMENT_TERMS, PAYMENT_TERMS_TYPES } from '@/constants/api'
 import { PaymentTermPayload } from '@/types'
-import { revalidate } from '../app/cache.service'
+import { revalidate } from '../../app/cache.service'
 
 export default class PaymentTermsService {
   /**Payment Terms DataTable API */
@@ -140,19 +140,19 @@ export default class PaymentTermsService {
   /** Get Payment Term Types API */
   static getPaymentTermTypes = async () => {
     try {
-        const apiUrl: string = await getApiUrl()
-        const response = await apiInterceptor(apiUrl + PAYMENT_TERMS_TYPES, {
-            requiresAuth: true,
-            method: 'GET',
-            next: { revalidate: 3600, tags: ['payment-term-types'] } // Cache for 1 hour
-        })
-        if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.message || 'Failed to fetch payment term types')
-        }
-        return await response.json()
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + PAYMENT_TERMS_TYPES, {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 3600, tags: ['payment-term-types'] } // Cache for 1 hour
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to fetch payment term types')
+      }
+      return await response.json()
     } catch (error) {
-        throw error
+      throw error
     }
   }
 }
