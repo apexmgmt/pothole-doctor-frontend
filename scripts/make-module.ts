@@ -11,17 +11,17 @@ if (!moduleName) {
   process.exit(1)
 }
 
-const { lower, pascal } = normalizeModuleName(moduleName)
+const { lower, pascal, snake, kebab, constant } = normalizeModuleName(moduleName)
 
 // Paths
 const paths = {
-  page: `app/${lower}/page.tsx`,
-  view: `view/${lower}/${pascal}.tsx`,
-  constFile: `constants/api/${lower}_api.ts`,
+  page: `app/${kebab}/page.tsx`,
+  view: `views/${kebab}/${pascal}.tsx`,
+  constFile: `constants/api/${snake}_api.ts`,
   constIndex: `constants/api/index.ts`,
-  typeFile: `types/${lower}.types.ts`,
+  typeFile: `types/${snake}.types.ts`,
   typeIndex: `types/index.ts`,
-  service: `services/api/${lower}.service.ts`
+  service: `services/api/${snake}.service.ts`
 }
 
 // Templates
@@ -37,7 +37,7 @@ const viewTemplate = `
     }
     `.trim()
 
-const constTemplate = `export const ${lower}: string = '';`.trim()
+const constTemplate = `export const ${constant}: string = '';`.trim()
 
 const typeTemplate = `
     export interface ${pascal} {
@@ -57,28 +57,28 @@ const serviceTemplate = `
 
 // Create files
 fs.outputFileSync(paths.page, pageTemplate)
-console.log(`✅ "${moduleName}" Page created successfully!`)
+console.log(`✅ "${pascal}" Page created successfully!`)
 
 fs.outputFileSync(paths.view, viewTemplate)
-console.log(`✅ "${moduleName}" View created successfully!`)
+console.log(`✅ "${pascal}" View created successfully!`)
 
 fs.outputFileSync(paths.constFile, constTemplate)
-console.log(`✅ "${moduleName}" API Constants created successfully!`)
+console.log(`✅ "${constant}" API Constants created successfully!`)
 
 fs.outputFileSync(paths.typeFile, typeTemplate)
-console.log(`✅ "${moduleName}" Types created successfully!`)
+console.log(`✅ "${pascal}" Types created successfully!`)
 
 fs.outputFileSync(paths.service, serviceTemplate)
-console.log(`✅ "${moduleName}" API Service created successfully!`)
+console.log(`✅ "${pascal}" API Service created successfully!`)
 
 // Append exports
-fs.appendFileSync(paths.constIndex, `\nexport * from './${lower}_api';`)
-console.log(`✅ "${moduleName}" API Constants export added successfully!`)
+fs.appendFileSync(paths.constIndex, `\nexport * from './${snake}_api';`)
+console.log(`✅ "${constant}" API Constants export added successfully!`)
 
-fs.appendFileSync(paths.typeIndex, `\nexport * from './${lower}.types';`)
-console.log(`✅ "${moduleName}" Types export added successfully!`)
+fs.appendFileSync(paths.typeIndex, `\nexport * from './${snake}.types';`)
+console.log(`✅ "${pascal}" Types export added successfully!`)
 console.log(`----------------------------------------------------------------------------`)
-console.log(`✅ Module "${moduleName}" created successfully!`)
+console.log(`✅ Module "${pascal}" created successfully!`)
 
 /**
  * Normalize a module name into lower and Pascal case formats
@@ -86,15 +86,19 @@ console.log(`✅ Module "${moduleName}" created successfully!`)
  * @returns { lower: string, pascal: string }
  */
 function normalizeModuleName(name: string) {
-  // Replace - and _ with spaces, then split camelCase, then join and format
+  // Replace - and _ with spaces, then split camelCase and PascalCase, then join and format
   const words = name
     .replace(/[-_]/g, ' ')
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2') // split camelCase
+    .replace(/([A-Z]+)([A-Z][a-z0-9]+)/g, '$1 $2') // split ALLCAPS followed by CapitalWord
     .split(/\s+/)
     .filter(Boolean)
-    .map(w => w.toLowerCase());
+    .map(w => w.toLowerCase())
 
-  const lower = words.join('');
-  const pascal = words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
-  return { lower, pascal };
+  const lower = words.join('')
+  const pascal = words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+  const snake = words.join('_')
+  const kebab = words.join('-')
+  const constant = words.join('_').toUpperCase()
+  return { lower, pascal, snake, kebab, constant }
 }

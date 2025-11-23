@@ -11,3 +11,5 @@ export * from './role_api'
 export * from './locations_api'
 export * from './staff_api'
 export * from './business_locations_api'
+
+export * from './payment_terms_api';

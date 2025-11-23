@@ -6,3 +6,5 @@ export * from './location.types'
 export * from './staff.types'
 export * from './user.types'
 export * from './business_location.types'
+
+export * from './payment_terms.types';
