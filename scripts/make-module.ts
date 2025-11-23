@@ -16,7 +16,7 @@ const { lower, pascal, snake, kebab, constant } = normalizeModuleName(moduleName
 // Paths
 const paths = {
   page: `app/${kebab}/page.tsx`,
-  view: `view/${snake}/${pascal}.tsx`,
+  view: `views/${kebab}/${pascal}.tsx`,
   constFile: `constants/api/${snake}_api.ts`,
   constIndex: `constants/api/index.ts`,
   typeFile: `types/${snake}.types.ts`,
