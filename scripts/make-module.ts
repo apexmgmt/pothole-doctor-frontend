@@ -11,37 +11,37 @@ if (!moduleName) {
   process.exit(1)
 }
 
-const { lower, pascal, snake, kebab, constant } = normalizeModuleName(moduleName)
+const { lower, pascal, snake, kebab, constant, lowerPlural, pascalPlural, snakePlural, kebabPlural, constantPlural } =
+  normalizeModuleName(moduleName)
 
 // Paths
 const paths = {
-  page: `app/${kebab}/page.tsx`,
-  view: `views/${kebab}/${pascal}.tsx`,
-  constFile: `constants/api/${snake}_api.ts`,
+  page: `app/${kebabPlural}/page.tsx`,
+  view: `views/${kebabPlural}/${pascalPlural}.tsx`,
+  constFile: `constants/api/${snakePlural}_api.ts`,
   constIndex: `constants/api/index.ts`,
-  typeFile: `types/${snake}.types.ts`,
+  typeFile: `types/${snakePlural}.types.ts`,
   typeIndex: `types/index.ts`,
-  service: `services/api/${snake}.service.ts`
+  service: `services/api/${snakePlural}.service.ts`
 }
 
 // Templates
 const pageTemplate = `
-    export default function ${pascal}Page() {
-    return <div>${pascal} Page</div>;
+    export default function ${pascalPlural}Page() {
+    return <div>${pascalPlural} Page</div>;
     }
     `.trim()
 
 const viewTemplate = `
-    export default function ${pascal}() {
-    return <div>${pascal} View</div>;
+    export default function ${pascalPlural}() {
+    return <div>${pascalPlural} View</div>;
     }
     `.trim()
 
-const constTemplate = `export const ${constant}: string = '';`.trim()
-
+const constTemplate = `export const ${constantPlural}: string = '';`.trim()
 const typeTemplate = `
     export interface ${pascal} {
-    id: number;
+    id: string;
     }
     `.trim()
 
@@ -72,10 +72,10 @@ fs.outputFileSync(paths.service, serviceTemplate)
 console.log(`✅ "${pascal}" API Service created successfully!`)
 
 // Append exports
-fs.appendFileSync(paths.constIndex, `\nexport * from './${snake}_api';`)
+fs.appendFileSync(paths.constIndex, `\nexport * from './${snakePlural}_api';`)
 console.log(`✅ "${constant}" API Constants export added successfully!`)
 
-fs.appendFileSync(paths.typeIndex, `\nexport * from './${snake}.types';`)
+fs.appendFileSync(paths.typeIndex, `\nexport * from './${snakePlural}.types';`)
 console.log(`✅ "${pascal}" Types export added successfully!`)
 console.log(`----------------------------------------------------------------------------`)
 console.log(`✅ Module "${pascal}" created successfully!`)
@@ -100,5 +100,31 @@ function normalizeModuleName(name: string) {
   const snake = words.join('_')
   const kebab = words.join('-')
   const constant = words.join('_').toUpperCase()
-  return { lower, pascal, snake, kebab, constant }
+  // Create plural versions
+  const pluralize = (str: string) => {
+    if (str.endsWith('y')) return str.slice(0, -1) + 'ies'
+    if (str.endsWith('s') || str.endsWith('x') || str.endsWith('ch') || str.endsWith('sh')) return str + 'es'
+    return str + 's'
+  }
+  const lastWord = words[words.length - 1]
+  const pluralWords = [...words.slice(0, -1), pluralize(lastWord)]
+
+  const lowerPlural = pluralWords.join('')
+  const pascalPlural = pluralWords.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+  const snakePlural = pluralWords.join('_')
+  const kebabPlural = pluralWords.join('-')
+  const constantPlural = pluralWords.join('_').toUpperCase()
+
+  return {
+    lower,
+    pascal,
+    snake,
+    kebab,
+    constant,
+    lowerPlural,
+    pascalPlural,
+    snakePlural,
+    kebabPlural,
+    constantPlural
+  }
 }
