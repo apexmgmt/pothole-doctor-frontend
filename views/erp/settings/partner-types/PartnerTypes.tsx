@@ -7,28 +7,27 @@ import { PlusIcon, Search } from 'lucide-react'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, PaymentTerm, PaymentTermType } from '@/types'
+import { Column, DataTableApiResponse, PartnerType, PaymentTerm, PaymentTermType } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import CityService from '@/services/api/locations/city.service'
-import CreateOrEditCityModal from '../../locations/cities/CreateOrEditCityModal'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
-import CreateOrEditPaymentTermModal from './CreateOrEditPaymentTermModal'
+import PartnerTypesService from '@/services/api/settings/partner_types.service'
+import CreateOrEditPartnerTypeModal from './CreateOrEditPartnerTypeModal'
 
-const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ paymentTermTypes }) => {
+const PartnerTypes: React.FC = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [selectedPaymentTermId, setSelectedPaymentTermId] = useState<string | null>(null)
-  const [selectedPaymentTerm, setSelectedPaymentTerm] = useState<PaymentTerm | null>(null)
+  const [selectedPartnerTypeId, setSelectedPartnerTypeId] = useState<string | null>(null)
+  const [selectedPartnerType, setSelectedPartnerType] = useState<PartnerType | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
@@ -65,68 +64,63 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      PaymentTermsService.index(filterOptions)
+      PartnerTypesService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          console.error('Error fetching payment terms:', error)
+          console.error('Error fetching contractor types:', error)
         })
     } catch (error) {
       setIsLoading(false)
-      console.error('Error fetching payment terms:', error)
+      console.error('Error fetching contractor types:', error)
     }
   }
 
   useEffect(() => {
     fetchData()
     updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Payment Terms'))
+    dispatch(setPageTitle('Manage Contractor Types'))
   }, [filterOptions])
 
   // Transform API data to match table format
-  const paymentTermsData = apiResponse?.data
-    ? apiResponse.data.map((paymentTerm: any, index: number) => {
-        const typeObj = paymentTermTypes.find(t => t.type === paymentTerm.type)
+  const partnerTypesData = apiResponse?.data
+    ? apiResponse.data.map((partnerType: PartnerType, index: number) => {
         return {
-          id: paymentTerm.id,
+          id: partnerType.id,
           index: (apiResponse?.from || 1) + index,
-          name: paymentTerm.name,
-          type: typeObj ? typeObj.name : paymentTerm.type,
-          status: paymentTerm.status,
-          due_days: paymentTerm.type === 'day' ? paymentTerm.due_time : 0,
-          day_of_month_due: paymentTerm.type === 'month' ? paymentTerm.due_time : 0
+          name: partnerType.name
         }
       })
     : []
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
-    setSelectedPaymentTermId(null)
-    setSelectedPaymentTerm(null)
+    setSelectedPartnerTypeId(null)
+    setSelectedPartnerType(null)
     setIsModalOpen(true)
   }
 
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
-    setSelectedPaymentTermId(id)
+    setSelectedPartnerTypeId(id)
 
-    // Fetch payment term details
+    // Fetch partner type details
     try {
-      const response = await PaymentTermsService.show(id)
-      setSelectedPaymentTerm(response.data)
+      const response = await PartnerTypesService.show(id)
+      setSelectedPartnerType(response.data)
       setIsModalOpen(true)
     } catch (error) {
-      toast.error('Failed to fetch payment term details')
+      toast.error('Failed to fetch contractor type details')
     }
   }
 
   const handleModalClose = () => {
     setIsModalOpen(false)
-    setSelectedPaymentTermId(null)
-    setSelectedPaymentTerm(null)
+    setSelectedPartnerTypeId(null)
+    setSelectedPartnerType(null)
   }
 
   const handleSuccess = () => {
@@ -150,34 +144,20 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
       sortable: true
     },
     {
-      id: 'type',
-      header: 'Payment Term Type',
-      cell: row => <span className='font-medium'>{row.type}</span>,
-      sortable: true
-    },
-    {
-      id: 'due_days',
-      header: 'Due Days',
-      cell: row => <span className='font-medium'>{row.due_days}</span>,
-      sortable: false
-    },
-    {
-      id: 'day_of_month_due',
-      header: 'Day of Month Due',
-      cell: row => <span className='font-medium'>{row.day_of_month_due}</span>,
-      sortable: false
-    },
-    {
       id: 'actions',
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
           <EditButton
-            tooltip='Edit Payment Term Information'
+            tooltip='Edit Contractor Type Information'
             onClick={() => handleOpenEditModal(row.id)}
             variant='icon'
           />
-          <DeleteButton tooltip='Delete Payment Term' variant='icon' onClick={() => handleDeletePaymentTerm(row.id)} />
+          <DeleteButton
+            tooltip='Delete Contractor Type'
+            variant='icon'
+            onClick={() => handleDeletePartnerType(row.id)}
+          />
         </div>
       ),
       sortable: false,
@@ -191,18 +171,18 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
     setSearchValue('')
   }
 
-  const handleDeletePaymentTerm = async (id: string) => {
+  const handleDeletePartnerType = async (id: string) => {
     try {
-      PaymentTermsService.destroy(id)
+      PartnerTypesService.destroy(id)
         .then(response => {
-          toast.success('Payment term deleted successfully')
+          toast.success('Contractor type deleted successfully')
           fetchData()
         })
         .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete payment term')
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete contractor type')
         })
     } catch (error) {
-      toast.error('Something went wrong while deleting the payment term!')
+      toast.error('Something went wrong while deleting the contractor type!')
     }
   }
 
@@ -240,17 +220,17 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Payment Term
+        Add Contractor Type
       </Button>
     </div>
   )
 
   return (
     <>
-      <CommonLayout title='Payment Terms' noTabs={true}>
+      <CommonLayout title='Contractor Types' noTabs={true}>
         <CommonTable
           data={{
-            data: paymentTermsData,
+            data: partnerTypesData,
             per_page: apiResponse?.per_page || 10,
             total: apiResponse?.total || 0,
             from: apiResponse?.from || 1,
@@ -264,21 +244,20 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
           showFilters={true}
           pagination={true}
           isLoading={isLoading}
-          emptyMessage='No payment term found'
+          emptyMessage='No contractor type found'
         />
       </CommonLayout>
 
-      <CreateOrEditPaymentTermModal
+      <CreateOrEditPartnerTypeModal
         mode={modalMode}
         open={isModalOpen}
-        paymentTermTypes={paymentTermTypes}
         onOpenChange={handleModalClose}
-        paymentTermId={selectedPaymentTermId || undefined}
-        paymentTermDetails={selectedPaymentTerm || undefined}
+        partnerTypeId={selectedPartnerTypeId || undefined}
+        partnerTypeDetails={selectedPartnerType || undefined}
         onSuccess={handleSuccess}
       />
     </>
   )
 }
 
-export default PaymentTerms
+export default PartnerTypes

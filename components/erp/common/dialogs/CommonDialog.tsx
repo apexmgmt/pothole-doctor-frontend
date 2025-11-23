@@ -91,7 +91,7 @@ const CommonDialog = ({
         <div
           ref={contentRef}
           className={cn(
-            'relative max-h-[60vh] overflow-y-auto',
+            'relative max-h-[60vh] overflow-y-auto p-1',
             isLoading && 'pointer-events-none opacity-50',
             contentClassName
           )}
