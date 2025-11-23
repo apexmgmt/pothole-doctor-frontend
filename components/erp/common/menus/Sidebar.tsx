@@ -67,7 +67,7 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
     {
       id: 'roles',
       label: 'Roles',
-      icon: <UserLock className='h-4 w-4'/>,
+      icon: <UserLock className='h-4 w-4' />,
       href: '/erp/roles',
       hasSubItems: false,
       exactMatch: false
@@ -75,7 +75,7 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
     {
       id: 'locations',
       label: 'Locations',
-      icon: <Map className='h-4 w-4'/>,
+      icon: <Map className='h-4 w-4' />,
       href: '/erp/locations',
       hasSubItems: true,
       subItems: [
@@ -83,29 +83,33 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           id: 'countries',
           label: 'Countries',
           href: '/erp/locations/countries',
-          icon: <LocateIcon className='h-4 w-4'/>,
-          hasSubItems: false
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
         },
         {
           id: 'states',
           label: 'States',
           href: '/erp/locations/states',
-          icon: <LocateIcon className='h-4 w-4'/>,
-          hasSubItems: false
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
         },
         {
           id: 'cities',
           label: 'Cities',
           href: '/erp/locations/cities',
-          icon: <LocateIcon className='h-4 w-4'/>,
-          hasSubItems: false
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
         },
         {
           id: 'businesses',
           label: 'Business Locations',
           href: '/erp/locations/businesses',
-          icon: <LocateIcon className='h-4 w-4'/>,
-          hasSubItems: false
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
         }
       ]
     },
