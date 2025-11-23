@@ -3,6 +3,7 @@
 import fs from 'fs-extra'
 import path from 'path'
 
+// Get the module name from command line arguments
 const moduleName = process.argv[2]
 
 if (!moduleName) {
@@ -10,8 +11,7 @@ if (!moduleName) {
   process.exit(1)
 }
 
-const lower = moduleName.toLowerCase()
-const pascal = moduleName.charAt(0).toUpperCase() + moduleName.slice(1)
+const { lower, pascal } = normalizeModuleName(moduleName)
 
 // Paths
 const paths = {
@@ -57,13 +57,44 @@ const serviceTemplate = `
 
 // Create files
 fs.outputFileSync(paths.page, pageTemplate)
+console.log(`✅ "${moduleName}" Page created successfully!`)
+
 fs.outputFileSync(paths.view, viewTemplate)
+console.log(`✅ "${moduleName}" View created successfully!`)
+
 fs.outputFileSync(paths.constFile, constTemplate)
+console.log(`✅ "${moduleName}" API Constants created successfully!`)
+
 fs.outputFileSync(paths.typeFile, typeTemplate)
+console.log(`✅ "${moduleName}" Types created successfully!`)
+
 fs.outputFileSync(paths.service, serviceTemplate)
+console.log(`✅ "${moduleName}" API Service created successfully!`)
 
 // Append exports
 fs.appendFileSync(paths.constIndex, `\nexport * from './${lower}_api';`)
-fs.appendFileSync(paths.typeIndex, `\nexport * from './${lower}.types';`)
+console.log(`✅ "${moduleName}" API Constants export added successfully!`)
 
+fs.appendFileSync(paths.typeIndex, `\nexport * from './${lower}.types';`)
+console.log(`✅ "${moduleName}" Types export added successfully!`)
+console.log(`----------------------------------------------------------------------------`)
 console.log(`✅ Module "${moduleName}" created successfully!`)
+
+/**
+ * Normalize a module name into lower and Pascal case formats
+ * @param name - module name
+ * @returns { lower: string, pascal: string }
+ */
+function normalizeModuleName(name: string) {
+  // Replace - and _ with spaces, then split camelCase, then join and format
+  const words = name
+    .replace(/[-_]/g, ' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(w => w.toLowerCase());
+
+  const lower = words.join('');
+  const pascal = words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
+  return { lower, pascal };
+}
