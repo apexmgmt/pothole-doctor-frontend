@@ -18,11 +18,7 @@ export const TYPE_BASED_ROUTES: Record<string, string[]> = {
 /**
  * Public routes (accessible without authentication)
  */
-export const PUBLIC_ROUTES: string[] = [
-  '/',
-  '/about',
-  '/contact',
-]
+export const PUBLIC_ROUTES: string[] = ['/', '/about', '/contact', '/erp/profile']
 
 /**
  * Routes that do not require authentication
