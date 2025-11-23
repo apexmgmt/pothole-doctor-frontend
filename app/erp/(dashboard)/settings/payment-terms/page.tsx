@@ -1,6 +1,6 @@
-import PaymentTermsService from "@/services/api/payment_terms.service";
-import { PaymentTermType } from "@/types";
-import PaymentTerms from "@/views/erp/payment-terms/PaymentTerms";
+import PaymentTermsService from '@/services/api/payment_terms.service'
+import { PaymentTermType } from '@/types'
+import PaymentTerms from '@/views/erp/settings/payment-terms/PaymentTerms'
 
 export default async function PaymentTermsPage() {
   let paymentTermTypes: PaymentTermType[] = []

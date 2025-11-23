@@ -15,12 +15,12 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import CityService from '@/services/api/locations/city.service'
-import CreateOrEditCityModal from '../locations/cities/CreateOrEditCityModal'
+import CreateOrEditCityModal from '../../locations/cities/CreateOrEditCityModal'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import PaymentTermsService from '@/services/api/payment_terms.service'
 import CreateOrEditPaymentTermModal from './CreateOrEditPaymentTermModal'
 
-const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[]|[] }> = ({ paymentTermTypes }) => {
+const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ paymentTermTypes }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -60,8 +60,6 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[]|[] }> = ({ pa
 
     return () => clearTimeout(timer)
   }, [searchValue])
-
-
 
   // Fetch data from API
   const fetchData = async () => {
@@ -174,7 +172,11 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[]|[] }> = ({ pa
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton tooltip='Edit Payment Term Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
+          <EditButton
+            tooltip='Edit Payment Term Information'
+            onClick={() => handleOpenEditModal(row.id)}
+            variant='icon'
+          />
           <DeleteButton tooltip='Delete Payment Term' variant='icon' onClick={() => handleDeletePaymentTerm(row.id)} />
         </div>
       ),
