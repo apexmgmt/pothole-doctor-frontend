@@ -19,6 +19,7 @@ import CompanyStatusSwitch from '@/views/erp/companies/CompanyStatusSwitch'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
+import Link from 'next/link'
 
 interface CompanyData {
   id: string
@@ -268,15 +269,12 @@ const Companies: React.FC = () => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        onClick={() => router.push('/erp/companies/create')}
-        className='bg-light text-bg hover:bg-light/90'
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Company
-      </Button>
+      <Link href='/erp/companies/create'>
+        <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
+          <PlusIcon className='w-4 h-4' />
+          Add Company
+        </Button>
+      </Link>
     </div>
   )
 

@@ -279,7 +279,7 @@ const Cities: React.FC = () => {
           showFilters={true}
           pagination={true}
           isLoading={isLoading}
-          emptyMessage='No state found'
+          emptyMessage='No city found'
         />
       </CommonLayout>
 

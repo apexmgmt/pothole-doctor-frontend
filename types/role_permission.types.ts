@@ -20,7 +20,7 @@ export type PermissionsByModule = {
   [module: string]: Permission[]
 }
 
-export interface RoleDetails {
+export interface Role {
   id: number
   name: string
   guard_name: string

@@ -9,3 +9,11 @@ export * from './company_api'
 export * from './permission_api'
 export * from './role_api'
 export * from './locations_api'
+export * from './staff_api'
+export * from './business_locations_api'
+
+export * from './payment_terms_api';
+export * from './partner_types_api';
+export * from './units_api';
+
+export * from './service_types_api';

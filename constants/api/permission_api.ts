@@ -1,1 +1,1 @@
-export const PERMISSIONS = '/v1/permissions/';
+export const PERMISSIONS: string = '/v1/permissions/';
