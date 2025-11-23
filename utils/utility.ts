@@ -81,3 +81,35 @@ function buildUrl(apiBaseUrl: string, appBaseUrl: string, host: string): string 
     return apiBaseUrl + '/api'
   }
 }
+
+// Initialize filterOptions from URL params
+export const getInitialFilters = (searchParams: URLSearchParams) => {
+  const filters: any = {}
+  searchParams.forEach((value, key) => {
+    // Convert numeric values
+    if (key === 'page' || key === 'per_page') {
+      filters[key] = parseInt(value)
+    } else {
+      filters[key] = value
+    }
+  })
+
+  return filters
+}
+
+// Update URL when filters change
+export const updateURL = (router: any, filters: any) => {
+
+  const params = new URLSearchParams()
+
+  Object.keys(filters).forEach(key => {
+    if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+      params.set(key, String(filters[key]))
+    }
+  })
+
+  const queryString = params.toString()
+  const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+  router.push(newUrl, { scroll: false })
+}
