@@ -286,6 +286,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           exactMatch: false
         },
         {
+          id: 'note-types',
+          label: 'Note Types',
+          href: '/erp/settings/note-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
           id: 'uom-units',
           label: 'Uom Units',
           href: '/erp/settings/uom-units',
