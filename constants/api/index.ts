@@ -19,3 +19,4 @@ export * from './units_api';
 export * from './service_types_api';
 export * from './contact_types_api';
 export * from './note_types_api';
+export * from './commissions_api';

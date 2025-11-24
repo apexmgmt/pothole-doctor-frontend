@@ -286,6 +286,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           exactMatch: false
         },
         {
+          id: 'commissions',
+          label: 'Commissions',
+          href: '/erp/settings/commissions',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
           id: 'note-types',
           label: 'Note Types',
           href: '/erp/settings/note-types',
