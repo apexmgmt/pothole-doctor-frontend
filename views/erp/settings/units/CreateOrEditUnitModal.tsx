@@ -70,7 +70,6 @@ const CreateOrEditUnitModal = ({
       try {
         await UnitService.store(payload)
           .then(response => {
-            console.log('Unit created:', response)
             toast.success('Unit created successfully')
             form.reset()
             onOpenChange(false)
@@ -86,7 +85,6 @@ const CreateOrEditUnitModal = ({
       try {
         await UnitService.update(unitId, payload)
           .then(response => {
-            console.log('Unit updated:', response)
             toast.success('Unit updated successfully')
             onOpenChange(false)
             onSuccess?.()

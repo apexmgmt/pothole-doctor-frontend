@@ -116,7 +116,6 @@ const CreateOrEditCityModal = ({
       try {
         await CityService.store(payload)
           .then(response => {
-            console.log('City created:', response)
             toast.success('City created successfully')
             form.reset()
             onOpenChange(false)
@@ -132,7 +131,6 @@ const CreateOrEditCityModal = ({
       try {
         await CityService.update(cityId, payload)
           .then(response => {
-            console.log('City updated:', response)
             toast.success('City updated successfully')
             onOpenChange(false)
             onSuccess?.()

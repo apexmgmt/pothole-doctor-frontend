@@ -65,7 +65,6 @@ const CreateOrEditPartnerTypeModal = ({
       try {
         await PartnerTypesService.store(payload)
           .then(response => {
-            console.log('Contractor type created:', response)
             toast.success('Contractor type created successfully')
             form.reset()
             onOpenChange(false)
@@ -81,7 +80,6 @@ const CreateOrEditPartnerTypeModal = ({
       try {
         await PartnerTypesService.update(partnerTypeId, payload)
           .then(response => {
-            console.log('Contractor type updated:', response)
             toast.success('Contractor type updated successfully')
             onOpenChange(false)
             onSuccess?.()

@@ -85,7 +85,6 @@ const CreateOrEditPaymentTermModal = ({
       try {
         await PaymentTermsService.store(payload)
           .then(response => {
-            console.log('Payment term created:', response)
             toast.success('Payment term created successfully')
             form.reset()
             onOpenChange(false)
@@ -101,7 +100,6 @@ const CreateOrEditPaymentTermModal = ({
       try {
         await PaymentTermsService.update(paymentTermId, payload)
           .then(response => {
-            console.log('Payment term updated:', response)
             toast.success('Payment term updated successfully')
             onOpenChange(false)
             onSuccess?.()
