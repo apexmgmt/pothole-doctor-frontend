@@ -18,7 +18,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import CreateOrEditUnitModal from './CreateOrEditUnitModal'
 import UnitService from '@/services/api/settings/units.service'
 
-const Units: React.FC = () => {
+const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -63,7 +63,8 @@ const Units: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      UnitService.index(filterOptions)
+      const params = { ...filterOptions, ...(group ? { group } : {}) }
+      UnitService.index(params)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
@@ -154,16 +155,8 @@ const Units: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton
-            tooltip='Edit Unit Information'
-            onClick={() => handleOpenEditModal(row.id)}
-            variant='icon'
-          />
-          <DeleteButton
-            tooltip='Delete Unit'
-            variant='icon'
-            onClick={() => handleDeleteUnit(row.id)}
-          />
+          <EditButton tooltip='Edit Unit Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
+          <DeleteButton tooltip='Delete Unit' variant='icon' onClick={() => handleDeleteUnit(row.id)} />
         </div>
       ),
       sortable: false,
@@ -233,7 +226,7 @@ const Units: React.FC = () => {
 
   return (
     <>
-      <CommonLayout title='Units' noTabs={true}>
+      <CommonLayout title={group === 'uom' ? 'Uom Units' : 'Measure Units'} noTabs={true}>
         <CommonTable
           data={{
             data: unitsData,
@@ -255,6 +248,7 @@ const Units: React.FC = () => {
       </CommonLayout>
 
       <CreateOrEditUnitModal
+        group={group}
         mode={modalMode}
         open={isModalOpen}
         onOpenChange={handleModalClose}
