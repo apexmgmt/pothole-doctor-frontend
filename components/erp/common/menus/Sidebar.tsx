@@ -284,6 +284,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
           exactMatch: false
+        },
+        {
+          id: 'service-types',
+          label: 'Service Types',
+          href: '/erp/settings/service-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
         }
       ]
     }
