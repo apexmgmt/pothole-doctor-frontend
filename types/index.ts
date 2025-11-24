@@ -12,3 +12,4 @@ export * from './partner_types.types';
 export * from './units.types';
 
 export * from './service_types.types';
+export * from './contact_types.types';
