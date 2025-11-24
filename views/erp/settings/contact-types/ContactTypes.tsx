@@ -7,7 +7,7 @@ import { PlusIcon, Search } from 'lucide-react'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, Unit } from '@/types'
+import { Column, ContactType, DataTableApiResponse, PaymentTerm } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -15,18 +15,18 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
-import CreateOrEditUnitModal from './CreateOrEditUnitModal'
-import UnitService from '@/services/api/settings/units.service'
+import ContactTypeService from '@/services/api/settings/contact_types.service'
+import CreateOrEditContactTypeModal from './CreateOrEditContactTypeModal'
 
-const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
+const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_terms }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null)
-  const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null)
+  const [selectedContactTypeId, setSelectedContactTypeId] = useState<string | null>(null)
+  const [selectedContactType, setSelectedContactType] = useState<ContactType | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
@@ -63,65 +63,66 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      const params = { ...filterOptions, ...(group ? { group } : {}) }
-      UnitService.index(params)
+      ContactTypeService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          console.error('Error fetching units:', error)
+          console.error('Error fetching contact types:', error)
         })
     } catch (error) {
       setIsLoading(false)
-      console.error('Error fetching units:', error)
+      console.error('Error fetching contact types:', error)
     }
   }
 
   useEffect(() => {
     fetchData()
     updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Units'))
+    dispatch(setPageTitle('Manage Contact Types'))
   }, [filterOptions])
 
   // Transform API data to match table format
-  const unitsData = apiResponse?.data
-    ? apiResponse.data.map((unit: Unit, index: number) => {
+  const contactTypesData = apiResponse?.data
+    ? apiResponse.data.map((contactType: ContactType, index: number) => {
         return {
-          id: unit.id,
+          id: contactType.id,
           index: (apiResponse?.from || 1) + index,
-          name: unit.name,
-          group: unit.group
+          name: contactType.name,
+          payment_term: contactType?.payment_term?.name || 'N/A',
+          material_down_payment: `${contactType.material_down_payment}%`,
+          labor_down_payment: `${contactType.labor_down_payment}%`
         }
       })
     : []
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
-    setSelectedUnitId(null)
-    setSelectedUnit(null)
+    setSelectedContactTypeId(null)
+    setSelectedContactType(null)
     setIsModalOpen(true)
   }
 
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
-    setSelectedUnitId(id)
+    setSelectedContactTypeId(id)
 
-    // Fetch unit details
+    // Fetch contact type details
     try {
-      const response = await UnitService.show(id)
-      setSelectedUnit(response.data)
+      const response = await ContactTypeService.show(id)
+      setSelectedContactType(response.data)
       setIsModalOpen(true)
     } catch (error) {
-      toast.error('Failed to fetch unit details')
+      toast.error('Failed to fetch contact type details')
     }
   }
 
   const handleModalClose = () => {
     setIsModalOpen(false)
-    setSelectedUnitId(null)
-    setSelectedUnit(null)
+    setSelectedContactTypeId(null)
+    setSelectedContactType(null)
   }
 
   const handleSuccess = () => {
@@ -145,18 +146,38 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
       sortable: true
     },
     {
-      id: 'group',
-      header: 'Group',
-      cell: row => <span className='font-medium capitalize'>{row.group}</span>,
-      sortable: true
+        id: 'payment_term',
+        header: 'Payment Term',
+        cell: row => <span className='font-medium'>{row.payment_term}</span>,
+        sortable: true
+    },
+    {
+        id: 'material_down_payment',
+        header: 'Material Down Payment',
+        cell: row => <span className='font-medium'>{row.material_down_payment}</span>,
+        sortable: true
+    },
+    {
+        id: 'labor_down_payment',
+        header: 'Labor Down Payment',
+        cell: row => <span className='font-medium'>{row.labor_down_payment}</span>,
+        sortable: true
     },
     {
       id: 'actions',
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton tooltip='Edit Unit Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
-          <DeleteButton tooltip='Delete Unit' variant='icon' onClick={() => handleDeleteUnit(row.id)} />
+          <EditButton
+            tooltip='Edit Contact Type Information'
+            onClick={() => handleOpenEditModal(row.id)}
+            variant='icon'
+          />
+          <DeleteButton
+            tooltip='Delete Contact Type'
+            variant='icon'
+            onClick={() => handleDeleteContactType(row.id)}
+          />
         </div>
       ),
       sortable: false,
@@ -170,18 +191,18 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
     setSearchValue('')
   }
 
-  const handleDeleteUnit = async (id: string) => {
+  const handleDeleteContactType = async (id: string) => {
     try {
-      UnitService.destroy(id)
+      ContactTypeService.destroy(id)
         .then(response => {
-          toast.success('Unit deleted successfully')
+          toast.success('Contact type deleted successfully')
           fetchData()
         })
         .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete unit')
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete contact type')
         })
     } catch (error) {
-      toast.error('Something went wrong while deleting the unit!')
+      toast.error('Something went wrong while deleting the contact type!')
     }
   }
 
@@ -219,17 +240,17 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Unit
+        Add Contact Type
       </Button>
     </div>
   )
 
   return (
     <>
-      <CommonLayout title={group === 'uom' ? 'Uom Units' : 'Measure Units'} noTabs={true}>
+      <CommonLayout title='Contact Types' noTabs={true}>
         <CommonTable
           data={{
-            data: unitsData,
+            data: contactTypesData,
             per_page: apiResponse?.per_page || 10,
             total: apiResponse?.total || 0,
             from: apiResponse?.from || 1,
@@ -243,21 +264,21 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
           showFilters={true}
           pagination={true}
           isLoading={isLoading}
-          emptyMessage='No unit found'
+          emptyMessage='No contact type found'
         />
       </CommonLayout>
 
-      <CreateOrEditUnitModal
-        group={group}
+      <CreateOrEditContactTypeModal
         mode={modalMode}
         open={isModalOpen}
         onOpenChange={handleModalClose}
-        unitId={selectedUnitId || undefined}
-        unitDetails={selectedUnit || undefined}
+        paymentTerms={payment_terms}
+        contactTypeId={selectedContactTypeId || undefined}
+        contactTypeDetails={selectedContactType || undefined}
         onSuccess={handleSuccess}
       />
     </>
   )
 }
 
-export default Units
+export default ContactTypes

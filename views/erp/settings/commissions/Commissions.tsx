@@ -7,7 +7,7 @@ import { PlusIcon, Search } from 'lucide-react'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, Unit } from '@/types'
+import { Column, Commission, CommissionsParams, DataTableApiResponse } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -15,18 +15,17 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
-import CreateOrEditUnitModal from './CreateOrEditUnitModal'
-import UnitService from '@/services/api/settings/units.service'
+import CommissionService from '@/services/api/settings/commissions.service'
 
-const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
+const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionFilters, commissionBases }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null)
-  const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null)
+  const [selectedCommissionId, setSelectedCommissionId] = useState<string | null>(null)
+  const [selectedCommission, setSelectedCommission] = useState<Commission | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
@@ -63,65 +62,76 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      const params = { ...filterOptions, ...(group ? { group } : {}) }
-      UnitService.index(params)
+      CommissionService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          console.error('Error fetching units:', error)
+          console.error('Error fetching commissions:', error)
         })
     } catch (error) {
       setIsLoading(false)
-      console.error('Error fetching units:', error)
+      console.error('Error fetching commissions:', error)
     }
   }
 
   useEffect(() => {
     fetchData()
     updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Units'))
+    dispatch(setPageTitle('Manage Commissions'))
   }, [filterOptions])
 
   // Transform API data to match table format
-  const unitsData = apiResponse?.data
-    ? apiResponse.data.map((unit: Unit, index: number) => {
+  const commissionsData = apiResponse?.data
+    ? apiResponse.data.map((commission: any, index: number) => {
+        const typeObj = commissionTypes?.find(t => t.slug === commission?.commission_type)
+        const filterObj = commissionFilters?.find(f => f.slug === commission?.filter_type)
+        const baseObj = commissionBases?.find(b => b.slug === commission?.based_on)
+
         return {
-          id: unit.id,
+          id: commission.id,
           index: (apiResponse?.from || 1) + index,
-          name: unit.name,
-          group: unit.group
+          commission_type: typeObj ? typeObj.name : commission?.commission_type,
+          based_on: baseObj ? baseObj.name : commission?.based_on,
+          per: commission?.per,
+          filter_type_value: filterObj ? filterObj.type : commission?.filter_type,
+          filter_type: commission?.filter_type,
+          amount: commission?.amount || 0,
+          min_amount: commission?.min_amount || 0,
+          max_amount: commission?.max_amount || 0,
+          commission_percent: commission?.commission_percent,
+          filter_percent: commission?.filter_percent
         }
       })
     : []
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
-    setSelectedUnitId(null)
-    setSelectedUnit(null)
+    setSelectedCommissionId(null)
+    setSelectedCommission(null)
     setIsModalOpen(true)
   }
 
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
-    setSelectedUnitId(id)
+    setSelectedCommissionId(id)
 
-    // Fetch unit details
+    // Fetch payment term details
     try {
-      const response = await UnitService.show(id)
-      setSelectedUnit(response.data)
+      const response = await CommissionService.show(id)
+      setSelectedCommission(response.data)
       setIsModalOpen(true)
     } catch (error) {
-      toast.error('Failed to fetch unit details')
+      toast.error('Failed to fetch commission details')
     }
   }
 
   const handleModalClose = () => {
     setIsModalOpen(false)
-    setSelectedUnitId(null)
-    setSelectedUnit(null)
+    setSelectedCommissionId(null)
+    setSelectedCommission(null)
   }
 
   const handleSuccess = () => {
@@ -132,22 +142,56 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
   // Column definitions for CommonTable
   const columns: Column[] = [
     {
-      id: 'index',
-      header: '#',
-      cell: row => <span className='text-gray'>{row.index}</span>,
-      sortable: false,
-      size: 16
-    },
-    {
-      id: 'name',
-      header: 'Title',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      id: 'commission_type',
+      header: 'Commission Name',
+      cell: row => <span className='font-medium'>{row.commission_type}</span>,
       sortable: true
     },
     {
-      id: 'group',
-      header: 'Group',
-      cell: row => <span className='font-medium capitalize'>{row.group}</span>,
+      id: 'based_on',
+      header: 'Based On',
+      cell: row => <span className='font-medium'>{row.based_on}</span>,
+      sortable: true
+    },
+    {
+      id: 'per',
+      header: 'Commission Per',
+      cell: row => <span className='font-medium'>{row.per}</span>,
+      sortable: true
+    },
+    {
+      id: 'filter_type_value',
+      header: 'Selection',
+      cell: row => <span className='font-medium'>{row.filter_type_value}</span>,
+      sortable: false
+    },
+    {
+      id: 'values',
+      header: 'Values',
+      cell: row => {
+        switch (row.filter_type) {
+          case 'between':
+            return (
+              <span className='font-medium'>
+                {row.filter_percent ? '' : '$'}{row.min_amount}{row.filter_percent ? '%' : ''} - {row.filter_percent ? '' : '$'}{row.max_amount}{row.filter_percent ? '%' : ''}
+              </span>
+            )
+          case 'greater-than':
+            return <span className='font-medium'>{row.filter_percent ? '' : '$'}{row.min_amount}{row.filter_percent ? '%' : ''}</span>
+          case 'less-than':
+            return <span className='font-medium'>{row.filter_percent ? '' : '$'}{row.max_amount}{row.filter_percent ? '%' : ''}</span>
+          case 'same-as-store':
+            return <span className='font-medium'>0</span>
+          default:
+            return <span className='font-medium'>0</span>
+        }
+      },
+      sortable: false
+    },
+    {
+      id: 'amount',
+      header: 'Commission Value',
+      cell: row => <span className='font-medium'>{row.commission_percent ? '' : '$'}{row.amount}{row.commission_percent ? '%' : ''}</span>,
       sortable: true
     },
     {
@@ -155,8 +199,12 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton tooltip='Edit Unit Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
-          <DeleteButton tooltip='Delete Unit' variant='icon' onClick={() => handleDeleteUnit(row.id)} />
+          {/* <EditButton
+            tooltip='Edit Commission Information'
+            onClick={() => handleOpenEditModal(row.id)}
+            variant='icon'
+          /> */}
+          <DeleteButton tooltip='Delete Commission' variant='icon' onClick={() => handleDeleteCommission(row.id)} />
         </div>
       ),
       sortable: false,
@@ -170,18 +218,18 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
     setSearchValue('')
   }
 
-  const handleDeleteUnit = async (id: string) => {
+  const handleDeleteCommission = async (id: string) => {
     try {
-      UnitService.destroy(id)
+      CommissionService.destroy(id)
         .then(response => {
-          toast.success('Unit deleted successfully')
+          toast.success('Commission deleted successfully')
           fetchData()
         })
         .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete unit')
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete commission')
         })
     } catch (error) {
-      toast.error('Something went wrong while deleting the unit!')
+      toast.error('Something went wrong while deleting the commission!')
     }
   }
 
@@ -212,24 +260,24 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
           </Button>
         )}
       </div>
-      <Button
+      {/* <Button
         variant='default'
         size='sm'
         className='bg-light text-bg hover:bg-light/90'
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Unit
-      </Button>
+        Add Commission
+      </Button> */}
     </div>
   )
 
   return (
     <>
-      <CommonLayout title={group === 'uom' ? 'Uom Units' : 'Measure Units'} noTabs={true}>
+      <CommonLayout title='Commissions' noTabs={true}>
         <CommonTable
           data={{
-            data: unitsData,
+            data: commissionsData,
             per_page: apiResponse?.per_page || 10,
             total: apiResponse?.total || 0,
             from: apiResponse?.from || 1,
@@ -243,21 +291,23 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
           showFilters={true}
           pagination={true}
           isLoading={isLoading}
-          emptyMessage='No unit found'
+          emptyMessage='No commission found'
         />
       </CommonLayout>
 
-      <CreateOrEditUnitModal
-        group={group}
+      {/* <CreateOrEditCommissionModal
         mode={modalMode}
         open={isModalOpen}
+        commissionTypes={commissionTypes}
+        commissionFilters={commissionFilters}
+        commissionBases={commissionBases}
         onOpenChange={handleModalClose}
-        unitId={selectedUnitId || undefined}
-        unitDetails={selectedUnit || undefined}
+        commissionId={selectedCommissionId || undefined}
+        commissionDetails={selectedCommission || undefined}
         onSuccess={handleSuccess}
-      />
+      /> */}
     </>
   )
 }
 
-export default Units
+export default Commissions

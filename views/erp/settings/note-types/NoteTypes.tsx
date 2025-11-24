@@ -7,7 +7,7 @@ import { PlusIcon, Search } from 'lucide-react'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, Unit } from '@/types'
+import { Column, DataTableApiResponse, NoteType } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -15,18 +15,18 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
-import CreateOrEditUnitModal from './CreateOrEditUnitModal'
-import UnitService from '@/services/api/settings/units.service'
+import NoteTypeService from '@/services/api/settings/note_types.service'
+import CreateOrEditNoteTypeModal from './CreateOrEditNoteTypeModal'
 
-const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
+const NoteTypes: React.FC = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null)
-  const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null)
+  const [selectedNoteTypeId, setSelectedNoteTypeId] = useState<string | null>(null)
+  const [selectedNoteType, setSelectedNoteType] = useState<NoteType | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
@@ -63,65 +63,64 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      const params = { ...filterOptions, ...(group ? { group } : {}) }
-      UnitService.index(params)
+      NoteTypeService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          console.error('Error fetching units:', error)
+          console.error('Error fetching note types:', error)
         })
     } catch (error) {
       setIsLoading(false)
-      console.error('Error fetching units:', error)
+      console.error('Error fetching note types:', error)
     }
   }
 
   useEffect(() => {
     fetchData()
     updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Units'))
+    dispatch(setPageTitle('Manage Note Types'))
   }, [filterOptions])
 
   // Transform API data to match table format
-  const unitsData = apiResponse?.data
-    ? apiResponse.data.map((unit: Unit, index: number) => {
+  const noteTypesData = apiResponse?.data
+    ? apiResponse.data.map((noteType: NoteType, index: number) => {
         return {
-          id: unit.id,
+          id: noteType.id,
           index: (apiResponse?.from || 1) + index,
-          name: unit.name,
-          group: unit.group
+          name: noteType.name,
+          status: noteType.status ? 'Active' : 'Inactive'
         }
       })
     : []
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
-    setSelectedUnitId(null)
-    setSelectedUnit(null)
+    setSelectedNoteTypeId(null)
+    setSelectedNoteType(null)
     setIsModalOpen(true)
   }
 
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
-    setSelectedUnitId(id)
+    setSelectedNoteTypeId(id)
 
-    // Fetch unit details
+    // Fetch note type details
     try {
-      const response = await UnitService.show(id)
-      setSelectedUnit(response.data)
+      const response = await NoteTypeService.show(id)
+      setSelectedNoteType(response.data)
       setIsModalOpen(true)
     } catch (error) {
-      toast.error('Failed to fetch unit details')
+      toast.error('Failed to fetch note type details')
     }
   }
 
   const handleModalClose = () => {
     setIsModalOpen(false)
-    setSelectedUnitId(null)
-    setSelectedUnit(null)
+    setSelectedNoteTypeId(null)
+    setSelectedNoteType(null)
   }
 
   const handleSuccess = () => {
@@ -145,9 +144,13 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
       sortable: true
     },
     {
-      id: 'group',
-      header: 'Group',
-      cell: row => <span className='font-medium capitalize'>{row.group}</span>,
+      id: 'status',
+      header: 'Status',
+      cell: row => (
+        <span className={`font-medium ${row.status === 'Active' ? 'text-green-600' : 'text-red-600'}`}>
+          {row.status}
+        </span>
+      ),
       sortable: true
     },
     {
@@ -155,8 +158,16 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton tooltip='Edit Unit Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
-          <DeleteButton tooltip='Delete Unit' variant='icon' onClick={() => handleDeleteUnit(row.id)} />
+          <EditButton
+            tooltip='Edit Note Type Information'
+            onClick={() => handleOpenEditModal(row.id)}
+            variant='icon'
+          />
+          <DeleteButton
+            tooltip='Delete Note Type'
+            variant='icon'
+            onClick={() => handleDeleteNoteType(row.id)}
+          />
         </div>
       ),
       sortable: false,
@@ -170,18 +181,18 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
     setSearchValue('')
   }
 
-  const handleDeleteUnit = async (id: string) => {
+  const handleDeleteNoteType = async (id: string) => {
     try {
-      UnitService.destroy(id)
+      NoteTypeService.destroy(id)
         .then(response => {
-          toast.success('Unit deleted successfully')
+          toast.success('Note type deleted successfully')
           fetchData()
         })
         .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete unit')
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete note type')
         })
     } catch (error) {
-      toast.error('Something went wrong while deleting the unit!')
+      toast.error('Something went wrong while deleting the note type!')
     }
   }
 
@@ -219,17 +230,17 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Unit
+        Add Note Type
       </Button>
     </div>
   )
 
   return (
     <>
-      <CommonLayout title={group === 'uom' ? 'Uom Units' : 'Measure Units'} noTabs={true}>
+      <CommonLayout title='Note Types' noTabs={true}>
         <CommonTable
           data={{
-            data: unitsData,
+            data: noteTypesData,
             per_page: apiResponse?.per_page || 10,
             total: apiResponse?.total || 0,
             from: apiResponse?.from || 1,
@@ -243,21 +254,20 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
           showFilters={true}
           pagination={true}
           isLoading={isLoading}
-          emptyMessage='No unit found'
+          emptyMessage='No note type found'
         />
       </CommonLayout>
 
-      <CreateOrEditUnitModal
-        group={group}
+      <CreateOrEditNoteTypeModal
         mode={modalMode}
         open={isModalOpen}
         onOpenChange={handleModalClose}
-        unitId={selectedUnitId || undefined}
-        unitDetails={selectedUnit || undefined}
+        noteTypeId={selectedNoteTypeId || undefined}
+        noteTypeDetails={selectedNoteType || undefined}
         onSuccess={handleSuccess}
       />
     </>
   )
 }
 
-export default Units
+export default NoteTypes

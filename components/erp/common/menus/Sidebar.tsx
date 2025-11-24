@@ -278,9 +278,41 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           exactMatch: false
         },
         {
-          id: 'units',
-          label: 'Units',
-          href: '/erp/settings/units',
+          id: 'contact-types',
+          label: 'Contact Types',
+          href: '/erp/settings/contact-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'commissions',
+          label: 'Commissions',
+          href: '/erp/settings/commissions',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'note-types',
+          label: 'Note Types',
+          href: '/erp/settings/note-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'uom-units',
+          label: 'Uom Units',
+          href: '/erp/settings/uom-units',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'measure-units',
+          label: 'Measure Units',
+          href: '/erp/settings/measure-units',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
           exactMatch: false

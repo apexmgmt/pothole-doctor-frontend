@@ -1,6 +1,6 @@
 'use client'
 
-import { PaymentTermPayload, PartnerType, PartnerTypePayload } from '@/types'
+import { PaymentTermPayload, PartnerType, PartnerTypePayload, NoteType, NoteTypePayload } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -14,36 +14,39 @@ import { useEffect, useState } from 'react'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import PartnerTypesService from '@/services/api/settings/partner_types.service'
+import NoteTypeService from '@/services/api/settings/note_types.service'
 
-interface CreateOrEditPartnerTypeModalProps {
+interface CreateOrEditNoteTypeModalProps {
   mode?: 'create' | 'edit'
   open: boolean
   onOpenChange: (open: boolean) => void
-  partnerTypeId?: string
-  partnerTypeDetails?: PartnerType
+  noteTypeId?: string
+  noteTypeDetails?: NoteType
   onSuccess?: () => void
 }
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: 'Partner type name must be at least 2 characters' })
+  name: z.string().min(2, { message: 'Note type name must be at least 2 characters' }),
+  status: z.boolean()
 })
 
 type FormValues = z.infer<typeof formSchema>
 
-const CreateOrEditPartnerTypeModal = ({
+const CreateOrEditNoteTypeModal = ({
   mode = 'create',
   open,
   onOpenChange,
-  partnerTypeId,
-  partnerTypeDetails,
+  noteTypeId,
+  noteTypeDetails,
   onSuccess
-}: CreateOrEditPartnerTypeModalProps) => {
+}: CreateOrEditNoteTypeModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: partnerTypeDetails?.name || ''
+      name: noteTypeDetails?.name || '',
+      status: noteTypeDetails?.status ? true : false
     }
   })
 
@@ -51,51 +54,54 @@ const CreateOrEditPartnerTypeModal = ({
   useEffect(() => {
     if (open) {
       form.reset({
-        name: partnerTypeDetails?.name || ''
+        name: noteTypeDetails?.name || '',
+        status: noteTypeDetails?.status ? true : false
       })
     }
-  }, [partnerTypeDetails, open, form])
+  }, [noteTypeDetails, open, form])
 
   const onSubmit = async (values: FormValues) => {
-    const payload: PartnerTypePayload = {
-      name: values.name
+    const payload: NoteTypePayload = {
+      name: values.name,
+      status: mode === 'create' ? 1 : values.status ? 1 : 0
     }
 
     if (mode === 'create') {
       try {
-        await PartnerTypesService.store(payload)
+        await NoteTypeService.store(payload)
           .then(response => {
-            toast.success('Contractor type created successfully')
+            toast.success('Note type created successfully')
             form.reset()
             onOpenChange(false)
             onSuccess?.()
           })
           .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to create contractor type')
+            toast.error(typeof error.message === 'string' ? error.message : 'Failed to create note type')
           })
       } catch (error) {
-        toast.error('Something went wrong while creating the contractor type!')
+        toast.error('Something went wrong while creating the note type!')
       }
-    } else if (mode === 'edit' && partnerTypeId) {
+    } else if (mode === 'edit' && noteTypeId) {
       try {
-        await PartnerTypesService.update(partnerTypeId, payload)
+        await NoteTypeService.update(noteTypeId, payload)
           .then(response => {
-            toast.success('Contractor type updated successfully')
+            toast.success('Note type updated successfully')
             onOpenChange(false)
             onSuccess?.()
           })
           .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to update contractor type')
+            toast.error(typeof error.message === 'string' ? error.message : 'Failed to update note type')
           })
       } catch (error) {
-        toast.error('Something went wrong while updating the contractor type!')
+        toast.error('Something went wrong while updating the note type!')
       }
     }
   }
 
   const onCancel = () => {
     form.reset({
-      name: partnerTypeDetails?.name || '',
+      name: noteTypeDetails?.name || '',
+      status: noteTypeDetails?.status ? true : false
     })
     onOpenChange(false)
   }
@@ -103,11 +109,11 @@ const CreateOrEditPartnerTypeModal = ({
   return (
     <CommonDialog
       isLoading={isLoading}
-      loadingMessage='Loading contractor type...'
+      loadingMessage='Loading note type...'
       open={open}
       onOpenChange={onOpenChange}
-      title={mode === 'create' ? 'Create New Contractor Type' : 'Edit Contractor Type'}
-      description={mode === 'create' ? 'Add a new contractor type to the system' : 'Update contractor type information'}
+      title={mode === 'create' ? 'Create New Note Type' : 'Edit Note Type'}
+      description={mode === 'create' ? 'Add a new note type to the system' : 'Update note type information'}
       maxWidth='sm'
       disableClose={form.formState.isSubmitting}
       actions={
@@ -150,10 +156,43 @@ const CreateOrEditPartnerTypeModal = ({
               </FormItem>
             )}
           />
+          {/* Status Radio Group */}
+          {mode === 'edit' && (
+            <FormField
+              control={form.control}
+              name='status'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={val => field.onChange(val === 'true')}
+                      value={field.value ? 'true' : 'false'}
+                      className='space-y-2'
+                    >
+                      <div className='flex items-center space-x-2'>
+                        <RadioGroupItem value='true' id='active' />
+                        <Label htmlFor='active' className='cursor-pointer'>
+                          Active
+                        </Label>
+                      </div>
+                      <div className='flex items-center space-x-2'>
+                        <RadioGroupItem value='false' id='inactive' />
+                        <Label htmlFor='inactive' className='cursor-pointer'>
+                          Inactive
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </form>
       </Form>
     </CommonDialog>
   )
 }
 
-export default CreateOrEditPartnerTypeModal
+export default CreateOrEditNoteTypeModal
