@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import CompanyService from '@/services/api/company.service'
+import OrganizationService from '@/services/api/organizations.service'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { SpinnerCustom } from '@/components/ui/spinner'

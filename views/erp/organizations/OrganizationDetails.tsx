@@ -3,21 +3,20 @@
 import React from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { appUrl } from '@/utils/utility'
-import CompanyStatusSwitch from './CompanyStatusSwitch'
-import CompanyService from '@/services/api/company.service'
+import OrganizationStatusSwitch from './OrganizationStatusSwitch'
+import OrganizationService from '@/services/api/organizations.service'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 
-interface CompanyDetailsProps {
+interface OrganizationDetailsProps {
   companyData: any
   setCompanyData: (options: any) => void
   fetchData?: () => void
 }
 
-const CompanyDetails: React.FC<CompanyDetailsProps> = ({ companyData, setCompanyData, fetchData }) => {
-  const fetchCompanyDetails = async () => {
-    CompanyService.show(companyData?.id)
+const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({ companyData, setCompanyData, fetchData }) => {
+  const fetchOrganizationDetails = async () => {
+    OrganizationService.show(companyData?.id)
       .then(response => {
         setCompanyData(response.data)
         if (fetchData) {
@@ -123,10 +122,10 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ companyData, setCompany
             </div>
             <div className='flex items-center gap-2'>
               <label className='text-xs text-gray uppercase'>Status</label>
-              <CompanyStatusSwitch
+              <OrganizationStatusSwitch
                 checked={!!companyData.status}
                 companyId={companyData.id}
-                fetchData={fetchCompanyDetails}
+                fetchData={fetchOrganizationDetails}
               />
             </div>
           </div>
@@ -154,4 +153,4 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ companyData, setCompany
   )
 }
 
-export default CompanyDetails
+export default OrganizationDetails

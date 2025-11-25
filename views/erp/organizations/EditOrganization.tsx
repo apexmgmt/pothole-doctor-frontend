@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import CompanyService from '@/services/api/company.service'
+import OrganizationService from '@/services/api/organizations.service'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { SpinnerCustom } from '@/components/ui/spinner'
@@ -19,10 +19,6 @@ type FormValues = {
   last_name: string
   email: string
   phone: string
-  user_type: string
-  password: string
-  password_confirmation: string
-  subdomain: string
   address: string
 }
 
@@ -31,17 +27,23 @@ const defaultValues: FormValues = {
   last_name: '',
   email: '',
   phone: '',
-  user_type: 'organization',
-  password: '',
-  password_confirmation: '',
-  subdomain: '',
   address: ''
 }
 
-const CreateCompany: React.FC = () => {
+const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const form = useForm<FormValues>({ defaultValues, mode: 'onSubmit' })
+
+  // Map companyDetails to form values, pulling address and phone from userable
+  const mappedDefaults: FormValues = {
+    first_name: companyDetails.first_name || '',
+    last_name: companyDetails.last_name || '',
+    email: companyDetails.email || '',
+    phone: companyDetails.userable?.phone || '',
+    address: companyDetails.userable?.address || ''
+  }
+
+  const form = useForm<FormValues>({ defaultValues: mappedDefaults, mode: 'onSubmit' })
   const { handleSubmit, control, getValues, reset, formState } = form
   const { isSubmitting } = formState
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -53,15 +55,15 @@ const CreateCompany: React.FC = () => {
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true)
     try {
-      CompanyService.store(data)
+      OrganizationService.update(companyDetails.id, data)
         .then(response => {
           setIsLoading(false)
-          toast.success('Company created successfully')
+          toast.success('Company updated successfully')
           router.push('/erp/companies')
           reset()
         })
         .catch(error => {
-          toast.error('Failed to create company')
+          toast.error('Failed to update company')
           setIsLoading(false)
         })
     } catch (error) {
@@ -81,7 +83,7 @@ const CreateCompany: React.FC = () => {
         >
           {isLoading && <SpinnerCustom />}
 
-          <h2 className='text-xl font-semibold text-light'>Create Company</h2>
+          <h2 className='text-xl font-semibold text-light'>Edit Company</h2>
 
           <div className='grid grid-cols-2 gap-6'>
             <FormField
@@ -168,89 +170,6 @@ const CreateCompany: React.FC = () => {
 
             <FormField
               control={control}
-              name='subdomain'
-              rules={{
-                required: 'Required',
-                pattern: {
-                  // 1-63 chars, lowercase letters, numbers, hyphens; cannot start/end with hyphen
-                  value: /^(?=.{1,63}$)[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,
-                  message: 'Invalid subdomain. Use lowercase letters, numbers, and hyphens only.'
-                }
-              }}
-              render={({ field }) => (
-                <FormItem className='col-span-2'>
-                  <FormLabel>Subdomain</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder='e.g. acme'
-                      className='bg-bg-3 border-border text-light placeholder:text-gray'
-                      autoComplete='off'
-                      spellCheck={false}
-                      {...field}
-                      onChange={e => {
-                        const sanitized = e.target.value
-                          .toLowerCase()
-                          .replace(/\s+/g, '') // remove spaces
-                          .replace(/[^a-z0-9-]/g, '') // keep only allowed chars
-                          .replace(/-+/g, '-') // collapse multiple hyphens
-                          .replace(/^-+/, '') // no leading hyphen
-                          .replace(/-+$/, '') // no trailing hyphen
-                          .slice(0, 63) // max label length
-                        field.onChange(sanitized)
-                      }}
-                    />
-                  </FormControl>
-                  <p className='text-xs text-gray'>Lowercase letters, numbers, and hyphens only. Max 63 characters.</p>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name='password'
-              rules={{ required: 'Required' }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='password'
-                      placeholder='password'
-                      className='bg-bg-3 border-border text-light placeholder:text-gray'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name='password_confirmation'
-              rules={{
-                required: 'Required',
-                validate: (value: string) => value === getValues('password') || 'Does not match'
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='password'
-                      placeholder='confirm password'
-                      className='bg-bg-3 border-border text-light placeholder:text-gray'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
               name='address'
               rules={{ required: 'Required' }}
               render={({ field }) => (
@@ -275,16 +194,16 @@ const CreateCompany: React.FC = () => {
               type='submit'
               variant='outline'
               disabled={isLoading}
-              className='flex-1 bg-bg-3 text-light disabled:opacity-50'
+              className='flex-1 bg-bg-3 text-light hover:bg-bg-4 disabled:opacity-50'
             >
-              {isLoading ? 'Saving...' : 'Create'}
+              {isLoading ? 'Saving...' : 'Update'}
             </Button>
             <Button
               type='button'
               variant='outline'
               onClick={onCancel}
               disabled={isLoading}
-              className='flex-1 border-border text-light disabled:opacity-50'
+              className='flex-1 border-border text-light hover:bg-bg-3 disabled:opacity-50'
             >
               Reset
             </Button>
@@ -295,4 +214,4 @@ const CreateCompany: React.FC = () => {
   )
 }
 
-export default CreateCompany
+export default EditOrganization

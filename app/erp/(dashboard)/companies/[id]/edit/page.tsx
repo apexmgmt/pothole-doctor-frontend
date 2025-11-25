@@ -1,16 +1,16 @@
-import CompanyService from '@/services/api/company.service';
-import EditCompany from '@/views/erp/companies/EditCompany'
+import OrganizationService from '@/services/api/organizations.service'
+import EditOrganization from '@/views/erp/organizations/EditOrganization'
 
-const EditCompanyPage = async ({ params }: { params: { id: string } }) => {
-    const { id } = await params;
+const EditOrganizationPage = async ({ params }: { params: { id: string } }) => {
+  const { id } = await params
 
-    let companyDetails = null;
-    const response = await CompanyService.show(id);
-    if (response && response.data) {
-        companyDetails = response.data;
-    }
-    
-  return <EditCompany companyDetails={companyDetails} />
+  let companyDetails = null
+  const response = await OrganizationService.show(id)
+  if (response && response.data) {
+    companyDetails = response.data
+  }
+
+  return <EditOrganization companyDetails={companyDetails} />
 }
 
-export default EditCompanyPage
+export default EditOrganizationPage

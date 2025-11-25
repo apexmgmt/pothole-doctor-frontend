@@ -6,8 +6,6 @@ import { PlusIcon, Search } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
-import { DetailsIcon, FilterIcon, UserIcon } from '@/public/icons'
-import CompanyService from '@/services/api/company.service'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
