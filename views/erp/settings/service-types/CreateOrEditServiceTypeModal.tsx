@@ -26,10 +26,7 @@ interface CreateOrEditServiceTypeModalProps {
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Service type name must be at least 2 characters' }),
   is_editable: z.enum(['1', '0']),
-  wasted_percent: z
-    .number()
-    .min(0, { message: 'Must be at least 0' })
-    .max(100, { message: 'Must be at most 100' }),
+  wasted_percent: z.number().min(0, { message: 'Must be at least 0' }).max(100, { message: 'Must be at most 100' }),
   abbreviation: z.string().min(1, { message: 'Abbreviation is required' })
 })
 
@@ -50,7 +47,7 @@ const CreateOrEditServiceTypeModal = ({
     defaultValues: {
       name: serviceTypeDetails?.name || '',
       is_editable: serviceTypeDetails ? (String(serviceTypeDetails.is_editable) as '1' | '0') : '1',
-      wasted_percent: serviceTypeDetails?.wasted_percent ?? 0,
+      wasted_percent: serviceTypeDetails?.wasted_percent ? Number(serviceTypeDetails.wasted_percent) : 0,
       abbreviation: serviceTypeDetails?.abbreviation || ''
     }
   })
@@ -61,7 +58,7 @@ const CreateOrEditServiceTypeModal = ({
       form.reset({
         name: serviceTypeDetails?.name || '',
         is_editable: serviceTypeDetails ? (String(serviceTypeDetails.is_editable) as '1' | '0') : '1',
-        wasted_percent: serviceTypeDetails?.wasted_percent ?? 0,
+        wasted_percent: serviceTypeDetails?.wasted_percent ? Number(serviceTypeDetails.wasted_percent) : 0,
         abbreviation: serviceTypeDetails?.abbreviation || ''
       })
     }
@@ -78,7 +75,7 @@ const CreateOrEditServiceTypeModal = ({
 
     try {
       if (mode === 'create') {
-        await ServiceTypeService.store(payload)
+        ServiceTypeService.store(payload)
         toast.success('Service type created successfully')
       } else if (mode === 'edit' && serviceTypeId) {
         await ServiceTypeService.update(serviceTypeId, payload)
@@ -98,7 +95,7 @@ const CreateOrEditServiceTypeModal = ({
     form.reset({
       name: serviceTypeDetails?.name || '',
       is_editable: serviceTypeDetails ? (String(serviceTypeDetails.is_editable) as '1' | '0') : '1',
-      wasted_percent: serviceTypeDetails?.wasted_percent ?? 0,
+      wasted_percent: serviceTypeDetails?.wasted_percent ? Number(serviceTypeDetails.wasted_percent) : 0,
       abbreviation: serviceTypeDetails?.abbreviation || ''
     })
     onOpenChange(false)

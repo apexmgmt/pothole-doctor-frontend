@@ -70,11 +70,11 @@ const ServiceTypes: React.FC = () => {
         })
         .catch(error => {
           setIsLoading(false)
-          console.error('Error fetching service types:', error)
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch service types')
         })
     } catch (error) {
       setIsLoading(false)
-      console.error('Error fetching service types:', error)
+      toast.error('Something went wrong while fetching the service types!')
     }
   }
 
@@ -91,7 +91,7 @@ const ServiceTypes: React.FC = () => {
           id: serviceType.id,
           index: (apiResponse?.from || 1) + index,
           name: serviceType.name,
-          is_editable: serviceType?.is_editable ?? 1,
+          is_editable: serviceType?.is_editable ? true : false,
           wasted_percent: serviceType.wasted_percent || 0,
           abbreviation: serviceType.abbreviation || ''
         }
@@ -168,12 +168,20 @@ const ServiceTypes: React.FC = () => {
       header: 'Action',
       cell: row => (
         <>
-          {row.is_editable ? (
-            <div className='flex items-center justify-center gap-2'>
-              <EditButton tooltip='Edit Service Type Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
-              <DeleteButton tooltip='Delete Service Type' variant='icon' onClick={() => handleDeleteServiceType(row.id)} />
-            </div>
-          ) : null}
+          <div className='flex items-center justify-end gap-2'>
+            <EditButton
+              tooltip='Edit Service Type Information'
+              onClick={() => handleOpenEditModal(row.id)}
+              variant='icon'
+            />
+            {row.is_editable && (
+              <DeleteButton
+                tooltip='Delete Service Type'
+                variant='icon'
+                onClick={() => handleDeleteServiceType(row.id)}
+              />
+            )}
+          </div>
         </>
       ),
       sortable: false,
