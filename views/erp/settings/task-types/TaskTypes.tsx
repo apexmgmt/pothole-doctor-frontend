@@ -7,7 +7,7 @@ import { PlusIcon, Search } from 'lucide-react'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, Commission, CommissionsParams, DataTableApiResponse } from '@/types'
+import { Column, DataTableApiResponse, TaskType } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -15,18 +15,18 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
-import CommissionService from '@/services/api/settings/commissions.service'
-import CreateOrEditCommissionModal from './CreateOrEditCommissionModal'
+import TaskTypeService from '@/services/api/settings/task_types.service'
+import CreateOrEditTaskTypeModal from './CreateOrEditTaskTypeModal'
 
-const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionFilters, commissionBases }) => {
+const TaskTypes: React.FC = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [selectedCommissionId, setSelectedCommissionId] = useState<string | null>(null)
-  const [selectedCommission, setSelectedCommission] = useState<Commission | null>(null)
+  const [selectedTaskTypeId, setSelectedTaskTypeId] = useState<string | null>(null)
+  const [selectedTaskType, setSelectedTaskType] = useState<TaskType | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
@@ -63,76 +63,64 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      CommissionService.index(filterOptions)
+      TaskTypeService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          console.error('Error fetching commissions:', error)
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch task types')
         })
     } catch (error) {
       setIsLoading(false)
-      console.error('Error fetching commissions:', error)
+        toast.error('Something went wrong while fetching the task types!')
     }
   }
 
   useEffect(() => {
     fetchData()
     updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Commissions'))
+    dispatch(setPageTitle('Manage Task Types'))
   }, [filterOptions])
 
   // Transform API data to match table format
-  const commissionsData = apiResponse?.data
-    ? apiResponse.data.map((commission: any, index: number) => {
-        const typeObj = commissionTypes?.find(t => t.slug === commission?.commission_type)
-        const filterObj = commissionFilters?.find(f => f.slug === commission?.filter_type)
-        const baseObj = commissionBases?.find(b => b.slug === commission?.based_on)
-
+  const taskTypesData = apiResponse?.data
+    ? apiResponse.data.map((taskType: TaskType, index: number) => {
         return {
-          id: commission.id,
+          id: taskType.id,
           index: (apiResponse?.from || 1) + index,
-          commission_type: typeObj ? typeObj.name : commission?.commission_type,
-          based_on: baseObj ? baseObj.name : commission?.based_on,
-          per: commission?.per,
-          filter_type_value: filterObj ? filterObj.type : commission?.filter_type,
-          filter_type: commission?.filter_type,
-          amount: commission?.amount || 0,
-          min_amount: commission?.min_amount || 0,
-          max_amount: commission?.max_amount || 0,
-          commission_percent: commission?.commission_percent,
-          filter_percent: commission?.filter_percent
+          name: taskType.name,
+          is_editable: taskType.is_editable ? true : false
         }
       })
     : []
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
-    setSelectedCommissionId(null)
-    setSelectedCommission(null)
+    setSelectedTaskTypeId(null)
+    setSelectedTaskType(null)
     setIsModalOpen(true)
   }
 
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
-    setSelectedCommissionId(id)
+    setSelectedTaskTypeId(id)
 
-    // Fetch payment term details
+    // Fetch task type details
     try {
-      const response = await CommissionService.show(id)
-      setSelectedCommission(response.data)
+      const response = await TaskTypeService.show(id)
+      setSelectedTaskType(response.data)
       setIsModalOpen(true)
     } catch (error) {
-      toast.error('Failed to fetch commission details')
+      toast.error('Failed to fetch task type details')
     }
   }
 
   const handleModalClose = () => {
     setIsModalOpen(false)
-    setSelectedCommissionId(null)
-    setSelectedCommission(null)
+    setSelectedTaskTypeId(null)
+    setSelectedTaskType(null)
   }
 
   const handleSuccess = () => {
@@ -143,69 +131,35 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
   // Column definitions for CommonTable
   const columns: Column[] = [
     {
-      id: 'commission_type',
-      header: 'Commission Name',
-      cell: row => <span className='font-medium'>{row.commission_type}</span>,
+      id: 'index',
+      header: '#',
+      cell: row => <span className='text-gray'>{row.index}</span>,
+      sortable: false,
+      size: 16
+    },
+    {
+      id: 'name',
+      header: 'Title',
+      cell: row => <span className='font-medium'>{row.name}</span>,
       sortable: true
     },
     {
-      id: 'based_on',
-      header: 'Based On',
-      cell: row => <span className='font-medium'>{row.based_on}</span>,
-      sortable: true
-    },
-    {
-      id: 'per',
-      header: 'Commission Per',
-      cell: row => <span className='font-medium'>{row.per}</span>,
-      sortable: true
-    },
-    {
-      id: 'filter_type_value',
-      header: 'Selection',
-      cell: row => <span className='font-medium'>{row.filter_type_value}</span>,
+      id: 'is_editable',
+      header: 'Editable',
+      cell: row => (
+        <span className={`font-medium ${row.is_editable ? '' : 'text-red-600'}`}>
+          {row.is_editable ? 'Yes' : 'No'}
+        </span>
+      ),
       sortable: false
-    },
-    {
-      id: 'values',
-      header: 'Values',
-      cell: row => {
-        switch (row.filter_type) {
-          case 'between':
-            return (
-              <span className='font-medium'>
-                {row.filter_percent ? '' : '$'}{row.min_amount}{row.filter_percent ? '%' : ''} - {row.filter_percent ? '' : '$'}{row.max_amount}{row.filter_percent ? '%' : ''}
-              </span>
-            )
-          case 'greater-than':
-            return <span className='font-medium'>{row.filter_percent ? '' : '$'}{row.min_amount}{row.filter_percent ? '%' : ''}</span>
-          case 'less-than':
-            return <span className='font-medium'>{row.filter_percent ? '' : '$'}{row.max_amount}{row.filter_percent ? '%' : ''}</span>
-          case 'same-as-store':
-            return <span className='font-medium'>0</span>
-          default:
-            return <span className='font-medium'>0</span>
-        }
-      },
-      sortable: false
-    },
-    {
-      id: 'amount',
-      header: 'Commission Value',
-      cell: row => <span className='font-medium'>{row.commission_percent ? '' : '$'}{row.amount}{row.commission_percent ? '%' : ''}</span>,
-      sortable: true
     },
     {
       id: 'actions',
       header: 'Action',
       cell: row => (
-        <div className='flex items-center justify-center gap-2'>
-          <EditButton
-            tooltip='Edit Commission Information'
-            onClick={() => handleOpenEditModal(row.id)}
-            variant='icon'
-          />
-          <DeleteButton tooltip='Delete Commission' variant='icon' onClick={() => handleDeleteCommission(row.id)} />
+        <div className='flex items-center justify-end gap-2'>
+          <EditButton tooltip='Edit Task Type Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
+          {row.is_editable && <DeleteButton tooltip='Delete Task Type' variant='icon' onClick={() => handleDeleteTaskType(row.id)} />}
         </div>
       ),
       sortable: false,
@@ -219,18 +173,18 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
     setSearchValue('')
   }
 
-  const handleDeleteCommission = async (id: string) => {
+  const handleDeleteTaskType = async (id: string) => {
     try {
-      CommissionService.destroy(id)
+      TaskTypeService.destroy(id)
         .then(response => {
-          toast.success('Commission deleted successfully')
+          toast.success('Task type deleted successfully')
           fetchData()
         })
         .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete commission')
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete task type')
         })
     } catch (error) {
-      toast.error('Something went wrong while deleting the commission!')
+      toast.error('Something went wrong while deleting the task type!')
     }
   }
 
@@ -268,17 +222,17 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Commission
+        Add Task Type
       </Button>
     </div>
   )
 
   return (
     <>
-      <CommonLayout title='Commissions' noTabs={true}>
+      <CommonLayout title='Task Types' noTabs={true}>
         <CommonTable
           data={{
-            data: commissionsData,
+            data: taskTypesData,
             per_page: apiResponse?.per_page || 10,
             total: apiResponse?.total || 0,
             from: apiResponse?.from || 1,
@@ -292,23 +246,20 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
           showFilters={true}
           pagination={true}
           isLoading={isLoading}
-          emptyMessage='No commission found'
+          emptyMessage='No task type found'
         />
       </CommonLayout>
 
-      <CreateOrEditCommissionModal
+      <CreateOrEditTaskTypeModal
         mode={modalMode}
         open={isModalOpen}
         onOpenChange={handleModalClose}
-        commissionTypes={commissionTypes}
-        commissionFilters={commissionFilters}
-        commissionBases={commissionBases}
-        commissionId={selectedCommissionId || undefined}
-        commissionDetails={selectedCommission || undefined}
+        taskTypeId={selectedTaskTypeId || undefined}
+        taskTypeDetails={selectedTaskType || undefined}
         onSuccess={handleSuccess}
       />
     </>
   )
 }
 
-export default Commissions
+export default TaskTypes

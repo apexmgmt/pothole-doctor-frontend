@@ -21,7 +21,7 @@ interface CommonDialogProps {
   description?: string
   isLoading?: boolean
   loadingMessage?: string
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full'
   children: React.ReactNode
   actions?: React.ReactNode
   className?: string
@@ -35,6 +35,7 @@ const maxWidthClasses = {
   lg: 'sm:max-w-lg',
   xl: 'sm:max-w-xl',
   '2xl': 'sm:max-w-2xl',
+  '3xl': 'sm:max-w-3xl',
   full: 'sm:max-w-full'
 }
 
