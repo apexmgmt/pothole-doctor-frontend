@@ -74,7 +74,7 @@ const TaskTypes: React.FC = () => {
         })
     } catch (error) {
       setIsLoading(false)
-      toast.error('Something went wrong while fetching the task types!')
+        toast.error('Something went wrong while fetching the task types!')
     }
   }
 
@@ -147,25 +147,21 @@ const TaskTypes: React.FC = () => {
       id: 'is_editable',
       header: 'Editable',
       cell: row => (
-        <span className={`font-medium ${row.is_editable ? '' : 'text-red-600'}`}>{row.is_editable ? 'Yes' : 'No'}</span>
+        <span className={`font-medium ${row.is_editable ? '' : 'text-red-600'}`}>
+          {row.is_editable ? 'Yes' : 'No'}
+        </span>
       ),
       sortable: false
     },
     {
       id: 'actions',
       header: 'Action',
-      cell: row => {
-        return row.is_editable ? (
-          <div className='flex items-center justify-center gap-2'>
-            <EditButton
-              tooltip='Edit Task Type Information'
-              onClick={() => handleOpenEditModal(row.id)}
-              variant='icon'
-            />
-            <DeleteButton tooltip='Delete Task Type' variant='icon' onClick={() => handleDeleteTaskType(row.id)} />
-          </div>
-        ) : null
-      },
+      cell: row => (
+        <div className='flex items-center justify-end gap-2'>
+          <EditButton tooltip='Edit Task Type Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
+          {row.is_editable && <DeleteButton tooltip='Delete Task Type' variant='icon' onClick={() => handleDeleteTaskType(row.id)} />}
+        </div>
+      ),
       sortable: false,
       headerAlign: 'center',
       size: 30
