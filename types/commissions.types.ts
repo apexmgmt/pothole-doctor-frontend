@@ -54,3 +54,15 @@ export interface CommissionBase {
   created_at: string
   updated_at: string
 }
+
+export interface CreateOrEditCommissionModalProps {
+  mode?: 'create' | 'edit'
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSuccess?: () => void
+  commissionTypes: CommissionType[]
+  commissionFilters: CommissionFilter[]
+  commissionBases: CommissionBase[]
+  commissionId?: string
+  commissionDetails?: Commission
+}

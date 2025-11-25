@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import CommissionService from '@/services/api/settings/commissions.service'
+import CreateOrEditCommissionModal from './CreateOrEditCommissionModal'
 
 const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionFilters, commissionBases }) => {
   const router = useRouter()
@@ -199,11 +200,11 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          {/* <EditButton
+          <EditButton
             tooltip='Edit Commission Information'
             onClick={() => handleOpenEditModal(row.id)}
             variant='icon'
-          /> */}
+          />
           <DeleteButton tooltip='Delete Commission' variant='icon' onClick={() => handleDeleteCommission(row.id)} />
         </div>
       ),
@@ -260,7 +261,7 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
           </Button>
         )}
       </div>
-      {/* <Button
+      <Button
         variant='default'
         size='sm'
         className='bg-light text-bg hover:bg-light/90'
@@ -268,7 +269,7 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
       >
         <PlusIcon className='w-4 h-4' />
         Add Commission
-      </Button> */}
+      </Button>
     </div>
   )
 
@@ -295,17 +296,17 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
         />
       </CommonLayout>
 
-      {/* <CreateOrEditCommissionModal
+      <CreateOrEditCommissionModal
         mode={modalMode}
         open={isModalOpen}
+        onOpenChange={handleModalClose}
         commissionTypes={commissionTypes}
         commissionFilters={commissionFilters}
         commissionBases={commissionBases}
-        onOpenChange={handleModalClose}
         commissionId={selectedCommissionId || undefined}
         commissionDetails={selectedCommission || undefined}
         onSuccess={handleSuccess}
-      /> */}
+      />
     </>
   )
 }
