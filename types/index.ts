@@ -16,3 +16,4 @@ export * from './contact_types.types';
 export * from './note_types.types';
 export * from './commissions.types';
 export * from './task_types.types';
+export * from './partners.types';

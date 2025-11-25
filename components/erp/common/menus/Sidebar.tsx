@@ -57,6 +57,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       exactMatch: false
     },
     {
+      id: 'partners',
+      label: 'Contractors/Sub',
+      icon: <Building2 className='h-4 w-4' />,
+      href: '/erp/contractors',
+      hasSubItems: false,
+      exactMatch: false
+    },
+    {
       id: 'staffs',
       label: 'Staffs',
       icon: <Users className='h-4 w-4' />,
@@ -110,147 +118,6 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
           exactMatch: false
-        }
-      ]
-    },
-    {
-      id: 'crm',
-      label: 'CRM',
-      icon: <CRMIcon />,
-      href: '/crm',
-      hasSubItems: true,
-      subItems: [
-        {
-          id: 'leads',
-          label: 'Leads',
-          href: '/crm/leads',
-          icon: <CRMIcon />,
-          hasSubItems: true,
-          subItems: [
-            {
-              id: 'leads-sub-1',
-              label: 'Lead Management',
-              href: '/crm/leads/management',
-              icon: <CRMIcon />
-            },
-            {
-              id: 'leads-sub-2',
-              label: 'Lead Analytics',
-              href: '/crm/leads/analytics',
-              icon: <CRMIcon />
-            }
-          ]
-        },
-        {
-          id: 'customers',
-          label: 'Customers',
-          href: '/crm/customers',
-          hasSubItems: true,
-          icon: <CRMIcon />,
-          subItems: [
-            {
-              id: 'customers-sub-1',
-              label: 'Customer List',
-              href: '/crm/customers/list',
-              icon: <CRMIcon />
-            },
-            {
-              id: 'customers-sub-2',
-              label: 'Customer Details',
-              href: '/crm/customers/details',
-              icon: <CRMIcon />
-            }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'users',
-      label: 'Users',
-      icon: <UserIcon />,
-      href: '/users',
-      hasSubItems: true,
-      subItems: [
-        {
-          id: 'sub-users-01',
-          label: 'Sub Users 01',
-          href: '/users/sub-users-01',
-          hasSubItems: true,
-          subItems: [
-            {
-              id: 'users-sub-1',
-              label: 'User Permissions',
-              href: '/users/sub-users-01/permissions'
-            },
-            {
-              id: 'users-sub-2',
-              label: 'User Roles',
-              href: '/users/sub-users-01/roles'
-            }
-          ]
-        },
-        {
-          id: 'sub-users-02',
-          label: 'Sub Users 02',
-          href: '/users/sub-users-02',
-          hasSubItems: true,
-          subItems: [
-            {
-              id: 'users-sub-3',
-              label: 'User Groups',
-              href: '/users/sub-users-02/groups'
-            },
-            {
-              id: 'users-sub-4',
-              label: 'User Settings',
-              href: '/users/sub-users-02/settings'
-            }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'estimate',
-      label: 'Estimate',
-      icon: <EstimateIcon />,
-      href: '/estimate',
-      hasSubItems: true,
-      subItems: [
-        {
-          id: 'sub-estimates-01',
-          label: 'Sub Estimates 01',
-          href: '/estimate/sub-estimates-01',
-          hasSubItems: true,
-          subItems: [
-            {
-              id: 'estimate-sub-1',
-              label: 'Estimate Templates',
-              href: '/estimate/sub-estimates-01/templates'
-            },
-            {
-              id: 'estimate-sub-2',
-              label: 'Estimate History',
-              href: '/estimate/sub-estimates-01/history'
-            }
-          ]
-        },
-        {
-          id: 'sub-estimates-02',
-          label: 'Sub Estimates 02',
-          href: '/estimate/sub-estimates-02',
-          hasSubItems: true,
-          subItems: [
-            {
-              id: 'estimate-sub-3',
-              label: 'Estimate Reports',
-              href: '/estimate/sub-estimates-02/reports'
-            },
-            {
-              id: 'estimate-sub-4',
-              label: 'Estimate Settings',
-              href: '/estimate/sub-estimates-02/settings'
-            }
-          ]
         }
       ]
     },
