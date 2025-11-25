@@ -1,15 +1,15 @@
 import { getApiUrl } from '@/utils/utility'
 import apiInterceptor from './api.interceptor'
-import { COMPANIES, COMPANY_STATUS_CHANGE } from '@/constants/api'
+import { ORGANIZATIONS, ORGANIZATION_STATUS_CHANGE } from '@/constants/api'
 import { revalidate } from '../app/cache.service'
 
-export default class CompanyService {
+export default class OrganizationService {
   /** Company List API */
   static index = async (filterOptions: object = {}, options: object = {}) => {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
-      const response = await apiInterceptor(apiUrl + COMPANIES + (queryParams ? `?${queryParams}` : ''), {
+      const response = await apiInterceptor(apiUrl + ORGANIZATIONS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['companies', 'login'] }, // Cache for 60 seconds
@@ -31,7 +31,7 @@ export default class CompanyService {
   static store = async (payload: object) => {
     try {
       const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + COMPANIES, {
+      const response = await apiInterceptor(apiUrl + ORGANIZATIONS, {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -54,7 +54,7 @@ export default class CompanyService {
   static show = async (companyId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + COMPANIES + companyId, {
+      const response = await apiInterceptor(apiUrl + ORGANIZATIONS + companyId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`companies/${companyId}`] } // Cache for 60 seconds
@@ -75,7 +75,7 @@ export default class CompanyService {
   static update = async (companyId: string, payload: object) => {
     try {
       const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + COMPANIES + companyId, {
+      const response = await apiInterceptor(apiUrl + ORGANIZATIONS + companyId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -96,7 +96,7 @@ export default class CompanyService {
   static changeStatus = async (companyId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + COMPANY_STATUS_CHANGE, {
+      const response = await apiInterceptor(apiUrl + ORGANIZATION_STATUS_CHANGE, {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify({ id: companyId })
