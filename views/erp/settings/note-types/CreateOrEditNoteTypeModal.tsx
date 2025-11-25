@@ -1,6 +1,6 @@
 'use client'
 
-import { PaymentTermPayload, PartnerType, PartnerTypePayload, NoteType, NoteTypePayload } from '@/types'
+import { NoteType, NoteTypePayload } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -12,8 +12,6 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import PaymentTermsService from '@/services/api/settings/payment_terms.service'
-import PartnerTypesService from '@/services/api/settings/partner_types.service'
 import NoteTypeService from '@/services/api/settings/note_types.service'
 
 interface CreateOrEditNoteTypeModalProps {
@@ -150,7 +148,7 @@ const CreateOrEditNoteTypeModal = ({
                   Name <span className='text-red-500'>*</span>
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter contractor type name' {...field} />
+                  <Input placeholder='Enter note type name' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
