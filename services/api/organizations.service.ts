@@ -86,13 +86,14 @@ export default class OrganizationService {
         throw new Error(errorData.message || 'Failed to update company details')
       }
 
-      // Revalidate companies cache tag
+      // Revalidate organizations cache tag
       await revalidate('organizations')
+      await revalidate(`organizations/${organizationId}`)
       return await response.json()
     } catch (error) {}
   }
 
-  /** Company status change */
+  /** Organization status change */
   static changeStatus = async (organizationId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
@@ -109,6 +110,7 @@ export default class OrganizationService {
 
       // Revalidate organizations cache tag
       await revalidate('organizations')
+      await revalidate(`organizations/${organizationId}`)
       return await response.json()
     } catch (error) {
       throw error
