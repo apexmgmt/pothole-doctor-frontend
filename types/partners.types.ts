@@ -8,6 +8,7 @@ export interface PartnersProps {
   businessLocations: BusinessLocation[]
   partnerTypes: PartnerType[]
   countriesWithStatesAndCities: CountryWithStates[]
+  companies: Company[]
 }
 
 export interface CreateOrEditPartnerModalProps {
@@ -20,6 +21,7 @@ export interface CreateOrEditPartnerModalProps {
   businessLocations: BusinessLocation[]
   partnerTypes: PartnerType[]
   countriesWithStatesAndCities: CountryWithStates[]
+  companies: Company[]
 }
 
 export interface Partner {

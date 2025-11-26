@@ -18,7 +18,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import PartnerService from '@/services/api/partners.service'
 import CreateOrEditPartnerModal from './CreateOrEditPartnerModal'
 
-const Partners: React.FC<PartnersProps> = ({ businessLocations, partnerTypes, countriesWithStatesAndCities }) => {
+const Partners: React.FC<PartnersProps> = ({ businessLocations, partnerTypes, countriesWithStatesAndCities, companies }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -305,6 +305,7 @@ const Partners: React.FC<PartnersProps> = ({ businessLocations, partnerTypes, co
       </CommonLayout>
 
       <CreateOrEditPartnerModal
+        companies={companies}
         businessLocations={businessLocations}
         partnerTypes={partnerTypes}
         countriesWithStatesAndCities={countriesWithStatesAndCities}

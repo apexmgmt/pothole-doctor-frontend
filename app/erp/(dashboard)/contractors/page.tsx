@@ -1,14 +1,16 @@
+import CompanyService from '@/services/api/companies.service'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
 import LocationService from '@/services/api/locations/location.service'
 import PartnerTypesService from '@/services/api/settings/partner_types.service'
-import { BusinessLocation, CountryWithStates, PartnerType } from '@/types'
+import { BusinessLocation, Company, CountryWithStates, PartnerType } from '@/types'
 import Partners from '@/views/erp/partners/Partners'
 
 export default async function PartnersPage() {
   let businessLocations: BusinessLocation[] = []
   let partnerTypes: PartnerType[] = []
   let countriesWithStatesAndCities: CountryWithStates[] = []
-
+  let companies: Company[] = []
+  
   try {
     const response = await BusinessLocationService.getAllBusinessLocations()
     businessLocations = response.data || []
@@ -30,11 +32,19 @@ export default async function PartnersPage() {
     countriesWithStatesAndCities = []
   }
 
+  try {
+    const response = await CompanyService.getAllCompanies()
+    companies = response.data || []
+  } catch (error) {
+    companies = []
+  }
+
   return (
     <Partners
       businessLocations={businessLocations}
       partnerTypes={partnerTypes}
       countriesWithStatesAndCities={countriesWithStatesAndCities}
+      companies={companies}
     />
   )
 }

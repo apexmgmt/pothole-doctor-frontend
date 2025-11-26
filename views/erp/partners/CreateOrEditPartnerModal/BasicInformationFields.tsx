@@ -5,15 +5,16 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
-import { MultiSelect } from '@/components/ui/select'
-import { BusinessLocation } from '@/types'
+import { CreatableSelect, MultiSelect } from '@/components/ui/select'
+import { BusinessLocation, Company } from '@/types'
 
 interface BasicInformationFieldsProps {
   form: UseFormReturn<any>
   businessLocations: BusinessLocation[]
+  companies: Company[]
 }
 
-export function BasicInformationFields({ form, businessLocations }: BasicInformationFieldsProps) {
+export function BasicInformationFields({ form, businessLocations, companies }: BasicInformationFieldsProps) {
   return (
     <div className='col-span-2 grid grid-cols-2 gap-4'>
       {/* Role Radio Group */}
@@ -80,7 +81,16 @@ export function BasicInformationFields({ form, businessLocations }: BasicInforma
             <FormItem>
               <FormLabel>Company Name</FormLabel>
               <FormControl>
-                <Input placeholder='Enter company name' {...field} />
+                <CreatableSelect
+                  options={companies.map(company => ({
+                    value: company.name,
+                    label: company.name
+                  }))}
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  placeholder='Select or type company name'
+                  className='w-full'
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

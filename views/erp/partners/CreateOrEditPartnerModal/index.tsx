@@ -60,7 +60,8 @@ const CreateOrEditPartnerModal = ({
   onSuccess,
   businessLocations,
   partnerTypes,
-  countriesWithStatesAndCities
+  countriesWithStatesAndCities,
+  companies
 }: CreateOrEditPartnerModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -125,9 +126,9 @@ const CreateOrEditPartnerModal = ({
         is_email_confirmation: partnerDetails?.is_email_confirmation || 0,
         role: partnerDetails?.user?.role || 'Contractor',
         password: '',
-        city_id: partnerDetails?.city_id || '',
-        state_id: partnerDetails?.state_id || '',
-        country_id: partnerDetails?.city ? partnerDetails?.city?.country_id : '',
+        city_id: partnerDetails?.city_id?.toString() || '',
+        state_id: partnerDetails?.state_id?.toString() || '',
+        country_id: partnerDetails?.city ? partnerDetails?.city?.country_id?.toString() : '',
         location_id: partnerDetails?.locations ? partnerDetails?.locations.map(location => location.id.toString()) : [],
         partner_type_id: partnerDetails?.partner_type_id || ''
       })
@@ -315,7 +316,7 @@ const CreateOrEditPartnerModal = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mb-4'>
           <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
-            <BasicInformationFields form={form} businessLocations={businessLocations} />
+            <BasicInformationFields form={form} businessLocations={businessLocations} companies={companies} />
 
             {/* Entity Information section - now using the separated component */}
             <EntityInformationFields form={form} />
