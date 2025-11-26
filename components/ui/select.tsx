@@ -404,6 +404,106 @@ function CreatableMultiSelect({
   )
 }
 
+interface CreatableSelectProps {
+  options: { value: string; label: string }[]
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  className?: string
+  disabled?: boolean
+}
+
+function CreatableSelect({
+  options,
+  value,
+  onChange,
+  placeholder = 'Select or type to add...',
+  className,
+  disabled
+}: CreatableSelectProps) {
+  const [open, setOpen] = React.useState(false)
+  const [searchValue, setSearchValue] = React.useState('')
+
+  const filteredOptions = options.filter(option => option.label.toLowerCase().includes(searchValue.toLowerCase()))
+
+  const showCreateOption =
+    searchValue.trim() &&
+    !filteredOptions.some(opt => opt.label.toLowerCase() === searchValue.toLowerCase()) &&
+    value !== searchValue.trim()
+
+  const selectedOption = options.find(opt => opt.value === value)
+  const displayLabel = selectedOption?.label || value
+
+  const handleSelect = (val: string) => {
+    onChange(val)
+    setOpen(false)
+    setSearchValue('')
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && showCreateOption) {
+      e.preventDefault()
+      handleSelect(searchValue.trim())
+    }
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant='outline'
+          role='combobox'
+          aria-expanded={open}
+          className={cn('w-full border-border bg-muted justify-between h-auto min-h-9', className)}
+          disabled={disabled}
+        >
+          <span>{value ? displayLabel : <span className='text-muted-foreground'>{placeholder}</span>}</span>
+          <ChevronDownIcon className='h-4 w-4 shrink-0 opacity-50' />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className='w-full p-0' align='start'>
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder='Search or type to add...'
+            value={searchValue}
+            onValueChange={setSearchValue}
+            onKeyDown={handleKeyDown}
+          />
+          <CommandList>
+            {filteredOptions.length === 0 && !showCreateOption && <CommandEmpty>No results found.</CommandEmpty>}
+            <CommandGroup>
+              {filteredOptions.map(option => (
+                <CommandItem
+                  key={option.value}
+                  onSelect={() => handleSelect(option.value)}
+                  className={cn('cursor-pointer', value === option.value && 'bg-accent/80')}
+                >
+                  {/* <div
+                    className={cn(
+                      'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                      value === option.value ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
+                    )}
+                  >
+                    <Check className='h-4 w-4' />
+                  </div> */}
+                  {option.label}
+                </CommandItem>
+              ))}
+              {showCreateOption && (
+                <CommandItem onSelect={() => handleSelect(searchValue.trim())} className='cursor-pointer'>
+                  <div className='mr-2 flex h-4 w-4 items-center justify-center'>
+                    <Plus className='h-4 w-4' />
+                  </div>
+                  Create &quot;{searchValue}&quot;
+                </CommandItem>
+              )}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
 export {
   Select,
   SelectContent,
@@ -416,5 +516,6 @@ export {
   SelectTrigger,
   SelectValue,
   MultiSelect,
-  CreatableMultiSelect
+  CreatableMultiSelect,
+  CreatableSelect
 }
