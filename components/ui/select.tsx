@@ -2,9 +2,13 @@
 
 import * as React from 'react'
 import * as SelectPrimitive from '@radix-ui/react-select'
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
+import { ChevronDownIcon, ChevronUpIcon, Check, X } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
 
 function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot='select' {...props} />
@@ -143,6 +147,112 @@ function SelectScrollDownButton({
   )
 }
 
+// New MultiSelect Component
+interface MultiSelectProps {
+  options: { value: string; label: string }[]
+  selected: string[]
+  onChange: (values: string[]) => void
+  placeholder?: string
+  className?: string
+  disabled?: boolean
+}
+
+function MultiSelect({
+  options,
+  selected,
+  onChange,
+  placeholder = 'Select items...',
+  className,
+  disabled
+}: MultiSelectProps) {
+  const [open, setOpen] = React.useState(false)
+
+  const handleSelect = (value: string) => {
+    const newSelected = selected.includes(value) ? selected.filter(item => item !== value) : [...selected, value]
+    onChange(newSelected)
+  }
+
+  const handleRemove = (value: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    onChange(selected.filter(item => item !== value))
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant='outline'
+          role='combobox'
+          aria-expanded={open}
+          className={cn('w-full justify-between h-auto min-h-9 border-border bg-muted', className)}
+          disabled={disabled}
+        >
+          <div className='flex flex-wrap gap-1'>
+            {selected.length > 0 ? (
+              selected.map(value => {
+                const option = options.find(opt => opt.value === value)
+                return (
+                  <Badge key={value} variant='default' className='mr-1'>
+                    {option?.label}
+                    <button
+                      className='ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          handleRemove(value, e as any)
+                        }
+                      }}
+                      onMouseDown={e => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                      }}
+                      onClick={e => handleRemove(value, e)}
+                    >
+                      <X className='h-3 w-3 text-muted-foreground hover:text-foreground' />
+                    </button>
+                  </Badge>
+                )
+              })
+            ) : (
+              <span className='text-muted-foreground'>{placeholder}</span>
+            )}
+          </div>
+          <ChevronDownIcon className='h-4 w-4 shrink-0 opacity-50' />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className='w-full p-0' align='start'>
+        <Command>
+          <CommandInput placeholder='Search...' />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup>
+              {options.map(option => {
+                const isSelected = selected.includes(option.value)
+                return (
+                  <CommandItem
+                    key={option.value}
+                    onSelect={() => handleSelect(option.value)}
+                    className={cn('cursor-pointer', isSelected && 'bg-accent/80')}
+                  >
+                    <div
+                      className={cn(
+                        'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-border',
+                        isSelected ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
+                      )}
+                    >
+                      <Check className='h-4 w-4' />
+                    </div>
+                    {option.label}
+                  </CommandItem>
+                )
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 export {
   Select,
   SelectContent,
@@ -153,5 +263,6 @@ export {
   SelectScrollUpButton,
   SelectSeparator,
   SelectTrigger,
-  SelectValue
+  SelectValue,
+  MultiSelect
 }
