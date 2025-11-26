@@ -1,0 +1,190 @@
+'use client'
+
+import { UseFormReturn } from 'react-hook-form'
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
+import { MultiSelect } from '@/components/ui/select'
+import { BusinessLocation } from '@/types'
+
+interface BasicInformationFieldsProps {
+  form: UseFormReturn<any>
+  businessLocations: BusinessLocation[]
+}
+
+export function BasicInformationFields({ form, businessLocations }: BasicInformationFieldsProps) {
+  return (
+    <div className='col-span-2 grid grid-cols-2 gap-4'>
+      {/* Role Radio Group */}
+      <FormField
+        control={form.control}
+        name='role'
+        render={({ field }) => (
+          <FormItem className='flex flex-row gap-4'>
+            <FormLabel>Role</FormLabel>
+            <FormControl>
+              <RadioGroup
+                onValueChange={val => field.onChange(val)}
+                value={field.value}
+                className='flex flex-row gap-4 items-center'
+              >
+                <div className='flex gap-2 items-center'>
+                  <RadioGroupItem value='Contractor' id='role-contractor' />
+                  <Label htmlFor='role-contractor' className='cursor-pointer'>
+                    Contractor
+                  </Label>
+                </div>
+                <div className='flex gap-2 items-center'>
+                  <RadioGroupItem value='Referral' id='role-referral' />
+                  <Label htmlFor='role-referral' className='cursor-pointer'>
+                    Referral
+                  </Label>
+                </div>
+              </RadioGroup>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <div className='col-span-2 grid grid-cols-2 gap-4'>
+        {/* Location id Field */}
+        <FormField
+          control={form.control}
+          name='location_id'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Location<span className='text-red-500'>*</span>
+              </FormLabel>
+              <FormControl>
+                <MultiSelect
+                  options={businessLocations.map(loc => ({
+                    value: loc.id.toString(),
+                    label: loc.name
+                  }))}
+                  selected={field.value || []}
+                  onChange={field.onChange}
+                  placeholder='Select locations'
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Company Name Field */}
+        <FormField
+          control={form.control}
+          name='company_name'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Company Name</FormLabel>
+              <FormControl>
+                <Input placeholder='Enter company name' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className='col-span-2 grid grid-cols-2 gap-4'>
+        {/* First Name Field */}
+        <FormField
+          control={form.control}
+          name='first_name'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                First Name <span className='text-red-500'>*</span>
+              </FormLabel>
+              <FormControl>
+                <Input placeholder='Enter first name' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Last Name Field */}
+        <FormField
+          control={form.control}
+          name='last_name'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Last Name<span className='text-red-500'>*</span>
+              </FormLabel>
+              <FormControl>
+                <Input placeholder='Enter last name' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className='col-span-2 grid grid-cols-2 gap-4'>
+        {/* Email Field */}
+        <FormField
+          control={form.control}
+          name='email'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Email<span className='text-red-500'>*</span>
+              </FormLabel>
+              <FormControl>
+                <Input type='email' placeholder='Enter email' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Phone Field */}
+        <FormField
+          control={form.control}
+          name='phone'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Phone<span className='text-red-500'>*</span>
+              </FormLabel>
+              <FormControl>
+                <Input type='tel' placeholder='Enter phone' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      {/* Fax Field */}
+      <FormField
+        control={form.control}
+        name='fax'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Fax</FormLabel>
+            <FormControl>
+              <Input type='tel' placeholder='Enter fax' {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      {/* Password Field */}
+      <FormField
+        control={form.control}
+        name='password'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>
+              Password <span className='text-red-500'>*</span>
+            </FormLabel>
+            <FormControl>
+              <Input type='password' placeholder='Enter password' {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
+  )
+}

@@ -1,8 +1,26 @@
 import { BusinessLocation } from './business_location.types'
 import { Company } from './companies.type'
-import { City, State } from './location.types'
+import { City, CountryWithStates, State } from './location.types'
 import { PartnerType } from './partner_types.types'
 import { User } from './user.types'
+
+export interface PartnersProps {
+  businessLocations: BusinessLocation[]
+  partnerTypes: PartnerType[]
+  countriesWithStatesAndCities: CountryWithStates[]
+}
+
+export interface CreateOrEditPartnerModalProps {
+  mode?: 'create' | 'edit'
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  partnerId?: string
+  partnerDetails?: Partner
+  onSuccess?: () => void
+  businessLocations: BusinessLocation[]
+  partnerTypes: PartnerType[]
+  countriesWithStatesAndCities: CountryWithStates[]
+}
 
 export interface Partner {
   id: string
@@ -39,27 +57,28 @@ export interface Partner {
 
 export interface PartnerPayload {
   first_name: string
-  last_name: string
+  last_name?: string
   email: string
   phone: string
-  company_name: string
-  location_id: string[]
+  company_name: string | undefined
   status: number | 1 | 0
-  entity: string
+  entity: string | 'individual' | 'business'
   ssn: string
   ein: string
   fax: string
   notes: string
-  partner_type_id: string
-  skills: string[]
   schedule_color: string
-  insurance_expiration?: string | null
-  w9_expiration?: string | null
+  skills: string[]
+  insurance_expiration?: string | number | null
+  w9_expiration?: string | number | null
   hold_amount: number
   hold_amount_percent: number
+  street_address: string
   zip_code: string
   in_house_contractor: number | 1 | 0
   is_email_confirmation: number | 1 | 0
+  location_id: string[]
+  partner_type_id: string
   city_id: string
   state_id: string
   role: string

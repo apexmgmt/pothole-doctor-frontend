@@ -7,7 +7,7 @@ import { PlusIcon, Search } from 'lucide-react'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, Partner } from '@/types'
+import { Column, DataTableApiResponse, Partner, PartnersProps } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -16,8 +16,9 @@ import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import PartnerService from '@/services/api/partners.service'
+import CreateOrEditPartnerModal from './CreateOrEditPartnerModal'
 
-const Partners: React.FC = () => {
+const Partners: React.FC<PartnersProps> = ({ businessLocations, partnerTypes, countriesWithStatesAndCities }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -207,11 +208,11 @@ const Partners: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          {/* <EditButton
+          <EditButton
             tooltip='Edit Partner Information'
             onClick={() => handleOpenEditModal(row.id)}
             variant='icon'
-          /> */}
+          />
           <DeleteButton tooltip='Delete Partner' variant='icon' onClick={() => handleDeletePartner(row.id)} />
         </div>
       ),
@@ -268,7 +269,7 @@ const Partners: React.FC = () => {
           </Button>
         )}
       </div>
-      {/* <Button
+      <Button
         variant='default'
         size='sm'
         className='bg-light text-bg hover:bg-light/90'
@@ -276,7 +277,7 @@ const Partners: React.FC = () => {
       >
         <PlusIcon className='w-4 h-4' />
         Add Partner
-      </Button> */}
+      </Button>
     </div>
   )
 
@@ -303,15 +304,17 @@ const Partners: React.FC = () => {
         />
       </CommonLayout>
 
-      {/* <CreateOrEditContactTypeModal
+      <CreateOrEditPartnerModal
+        businessLocations={businessLocations}
+        partnerTypes={partnerTypes}
+        countriesWithStatesAndCities={countriesWithStatesAndCities}
         mode={modalMode}
         open={isModalOpen}
         onOpenChange={handleModalClose}
-        paymentTerms={payment_terms}
-        contactTypeId={selectedContactTypeId || undefined}
-        contactTypeDetails={selectedContactType || undefined}
+        partnerId={selectedPartnerId || undefined}
+        partnerDetails={selectedPartner || undefined}
         onSuccess={handleSuccess}
-      /> */}
+      />
     </>
   )
 }
