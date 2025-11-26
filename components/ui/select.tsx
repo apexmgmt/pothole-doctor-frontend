@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import * as SelectPrimitive from '@radix-ui/react-select'
-import { ChevronDownIcon, ChevronUpIcon, Check, X } from 'lucide-react'
+import { ChevronDownIcon, ChevronUpIcon, Check, X, Plus } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -194,8 +194,8 @@ function MultiSelect({
                 return (
                   <Badge key={value} variant='default' className='mr-1'>
                     {option?.label}
-                    <button
-                      className='ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+                    <span
+                      className='ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer inline-flex'
                       onKeyDown={e => {
                         if (e.key === 'Enter') {
                           handleRemove(value, e as any)
@@ -206,9 +206,11 @@ function MultiSelect({
                         e.stopPropagation()
                       }}
                       onClick={e => handleRemove(value, e)}
+                      role='button'
+                      tabIndex={0}
                     >
                       <X className='h-3 w-3 text-muted-foreground hover:text-foreground' />
-                    </button>
+                    </span>
                   </Badge>
                 )
               })
@@ -253,6 +255,155 @@ function MultiSelect({
   )
 }
 
+// Add this new component before the exports
+interface CreatableMultiSelectProps {
+  options: { value: string; label: string }[]
+  selected: string[]
+  onChange: (values: string[]) => void
+  placeholder?: string
+  className?: string
+  disabled?: boolean
+}
+
+function CreatableMultiSelect({
+  options,
+  selected,
+  onChange,
+  placeholder = 'Select or type to add...',
+  className,
+  disabled
+}: CreatableMultiSelectProps) {
+  const [open, setOpen] = React.useState(false)
+  const [searchValue, setSearchValue] = React.useState('')
+
+  const handleSelect = (value: string) => {
+    const newSelected = selected.includes(value) ? selected.filter(item => item !== value) : [...selected, value]
+    onChange(newSelected)
+  }
+
+  const handleRemove = (value: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    onChange(selected.filter(item => item !== value))
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && searchValue.trim()) {
+      e.preventDefault()
+      const trimmedValue = searchValue.trim()
+
+      // Check if it already exists in selected
+      if (!selected.includes(trimmedValue)) {
+        onChange([...selected, trimmedValue])
+      }
+      setSearchValue('')
+    }
+  }
+
+  const filteredOptions = options.filter(option => option.label.toLowerCase().includes(searchValue.toLowerCase()))
+
+  const showCreateOption =
+    searchValue.trim() &&
+    !filteredOptions.some(opt => opt.label.toLowerCase() === searchValue.toLowerCase()) &&
+    !selected.includes(searchValue.trim())
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant='outline'
+          role='combobox'
+          aria-expanded={open}
+          className={cn('w-full border-border bg-muted justify-between h-auto min-h-9', className)}
+          disabled={disabled}
+        >
+          <div className='flex flex-wrap gap-1'>
+            {selected.length > 0 ? (
+              selected.map(value => {
+                const option = options.find(opt => opt.value === value)
+                const label = option?.label || value
+                return (
+                  <Badge key={value} variant='default' className='mr-1'>
+                    {label}
+                    <span
+                      className='ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer inline-flex'
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          handleRemove(value, e as any)
+                        }
+                      }}
+                      onMouseDown={e => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                      }}
+                      onClick={e => handleRemove(value, e)}
+                      role='button'
+                      tabIndex={0}
+                    >
+                      <X className='h-3 w-3 text-muted-foreground hover:text-foreground' />
+                    </span>
+                  </Badge>
+                )
+              })
+            ) : (
+              <span className='text-muted-foreground'>{placeholder}</span>
+            )}
+          </div>
+          <ChevronDownIcon className='h-4 w-4 shrink-0 opacity-50' />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className='w-full p-0' align='start'>
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder='Search or type to add...'
+            value={searchValue}
+            onValueChange={setSearchValue}
+            onKeyDown={handleKeyDown}
+          />
+          <CommandList>
+            {filteredOptions.length === 0 && !showCreateOption && <CommandEmpty>No results found.</CommandEmpty>}
+            <CommandGroup>
+              {filteredOptions.map(option => {
+                const isSelected = selected.includes(option.value)
+                return (
+                  <CommandItem
+                    key={option.value}
+                    onSelect={() => handleSelect(option.value)}
+                    className={cn('cursor-pointer', isSelected && 'bg-accent/80')}
+                  >
+                    <div
+                      className={cn(
+                        'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                        isSelected ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
+                      )}
+                    >
+                      <Check className='h-4 w-4' />
+                    </div>
+                    {option.label}
+                  </CommandItem>
+                )
+              })}
+              {showCreateOption && (
+                <CommandItem
+                  onSelect={() => {
+                    handleSelect(searchValue.trim())
+                    setSearchValue('')
+                  }}
+                  className='cursor-pointer'
+                >
+                  <div className='mr-2 flex h-4 w-4 items-center justify-center'>
+                    <Plus className='h-4 w-4' />
+                  </div>
+                  Create &quot;{searchValue}&quot;
+                </CommandItem>
+              )}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 export {
   Select,
   SelectContent,
@@ -264,5 +415,6 @@ export {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-  MultiSelect
+  MultiSelect,
+  CreatableMultiSelect
 }
