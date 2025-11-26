@@ -36,14 +36,14 @@ export interface Partner {
   ein: string
   ssn: string
   notes: string
-  insurance_expiration: string | null
-  w9_expiration: string | null
+  insurance_expiration: string | number | null
+  w9_expiration: string | number | null
   hold_amount: number
   hold_amount_percent: number
-  street_address: string
+  street_address: string | number
   city_id: string
   state_id: string
-  zip_code: string
+  zip_code: string | number
   in_house_contractor: number | 1 | 0
   entity: string
   is_email_confirmation: number | 1 | 0

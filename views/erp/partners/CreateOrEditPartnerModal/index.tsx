@@ -17,6 +17,7 @@ import { HoldAmountFields } from './HoldAmountFields'
 import { ContractorDetailsFields } from './ContractorDetailsFields'
 import { EntityInformationFields } from './EntityInformationFields'
 import { BasicInformationFields } from './BasicInformationFields'
+import { formatDateTime } from '@/utils/date'
 
 const formSchema = z.object({
   first_name: z.string().min(2, { message: 'Partner name must be at least 2 characters' }),
@@ -32,8 +33,8 @@ const formSchema = z.object({
   notes: z.string().optional(),
   schedule_color: z.string().optional(),
   skills: z.array(z.string()).optional(),
-  insurance_expiration: z.union([z.string(), z.number(), z.null()]).optional().nullable(),
-  w9_expiration: z.union([z.string(), z.number(), z.null()]).optional().nullable(),
+  insurance_expiration: z.union([z.string(), z.number(), z.date(), z.null()]).optional().nullable(),
+  w9_expiration: z.union([z.string(), z.number(), z.date(), z.null()]).optional().nullable(),
   hold_amount: z.coerce.number().min(0),
   hold_amount_percent: z.coerce.number().min(0).max(100),
   street_address: z.union([z.string(), z.number()]),
@@ -81,8 +82,8 @@ const CreateOrEditPartnerModal = ({
       notes: partnerDetails?.notes || '',
       schedule_color: partnerDetails?.schedule_color || '',
       skills: partnerDetails?.skills ? partnerDetails?.skills.map(skill => skill.name) : [],
-      insurance_expiration: partnerDetails?.insurance_expiration || '',
-      w9_expiration: partnerDetails?.w9_expiration || '',
+      insurance_expiration: partnerDetails?.insurance_expiration ? new Date(partnerDetails?.insurance_expiration) : '',
+      w9_expiration: partnerDetails?.w9_expiration ? new Date(partnerDetails?.w9_expiration) : '',
       hold_amount: partnerDetails?.hold_amount || 0,
       hold_amount_percent: partnerDetails?.hold_amount_percent || 0,
       street_address: partnerDetails?.street_address || '',
@@ -116,8 +117,10 @@ const CreateOrEditPartnerModal = ({
         notes: partnerDetails?.notes || '',
         schedule_color: partnerDetails?.schedule_color || '',
         skills: partnerDetails?.skills ? partnerDetails?.skills.map(skill => skill.name) : [],
-        insurance_expiration: partnerDetails?.insurance_expiration || '',
-        w9_expiration: partnerDetails?.w9_expiration || '',
+        insurance_expiration: partnerDetails?.insurance_expiration
+          ? new Date(partnerDetails?.insurance_expiration)
+          : '',
+        w9_expiration: partnerDetails?.w9_expiration ? new Date(partnerDetails?.w9_expiration) : '',
         hold_amount: partnerDetails?.hold_amount || 0,
         hold_amount_percent: partnerDetails?.hold_amount_percent || 0,
         street_address: partnerDetails?.street_address || '',
@@ -150,8 +153,8 @@ const CreateOrEditPartnerModal = ({
       notes: values.notes || '',
       schedule_color: values.schedule_color || '',
       skills: values.skills || [],
-      insurance_expiration: values.insurance_expiration || null,
-      w9_expiration: values.w9_expiration || null,
+      insurance_expiration: formatDateTime(values.insurance_expiration ?? null),
+      w9_expiration: formatDateTime(values.w9_expiration ?? null),
       hold_amount: values.hold_amount,
       hold_amount_percent: values.hold_amount_percent,
       street_address: values.street_address || '',
@@ -222,8 +225,8 @@ const CreateOrEditPartnerModal = ({
       notes: partnerDetails?.notes || '',
       schedule_color: partnerDetails?.schedule_color || '',
       skills: partnerDetails?.skills ? partnerDetails?.skills.map(skill => skill.name) : [],
-      insurance_expiration: partnerDetails?.insurance_expiration || '',
-      w9_expiration: partnerDetails?.w9_expiration || '',
+      insurance_expiration: partnerDetails?.insurance_expiration ? new Date(partnerDetails?.insurance_expiration) : '',
+      w9_expiration: partnerDetails?.w9_expiration ? new Date(partnerDetails?.w9_expiration) : '',
       hold_amount: partnerDetails?.hold_amount || 0,
       hold_amount_percent: partnerDetails?.hold_amount_percent || 0,
       zip_code: partnerDetails?.zip_code || '',
@@ -327,7 +330,7 @@ const CreateOrEditPartnerModal = ({
               </div>
             )}
             {/* Contractor Details section */}
-            <ContractorDetailsFields form={form} businessLocations={businessLocations} partnerTypes={partnerTypes} />
+            <ContractorDetailsFields form={form} skills={[]} partnerTypes={partnerTypes} />
             <div className='col-span-3'>
               <Separator />
             </div>

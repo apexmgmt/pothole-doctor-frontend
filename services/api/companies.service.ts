@@ -10,7 +10,7 @@ export default class CompanyService {
       const response = await apiInterceptor(apiUrl + COMPANIES_ALL, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['companies-all'] } // Cache for 1 hour
+        // next: { revalidate: 3600, tags: ['companies-all'] } // Cache for 1 hour
       })
       if (!response.ok) {
         const errorData = await response.json()

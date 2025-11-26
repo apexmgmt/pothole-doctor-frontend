@@ -17,11 +17,11 @@ import { Checkbox } from '@/components/ui/checkbox'
 
 interface ContractorDetailsFieldsProps {
   form: UseFormReturn<any>
-  businessLocations: BusinessLocation[]
+  skills: any[]
   partnerTypes: PartnerType[]
 }
 
-export function ContractorDetailsFields({ form, businessLocations, partnerTypes }: ContractorDetailsFieldsProps) {
+export function ContractorDetailsFields({ form, skills, partnerTypes }: ContractorDetailsFieldsProps) {
   const role = form.watch('role')
 
   // Don't render if role is Referral
@@ -68,9 +68,9 @@ export function ContractorDetailsFields({ form, businessLocations, partnerTypes 
             <FormLabel>Skills</FormLabel>
             <FormControl>
               <CreatableMultiSelect
-                options={businessLocations.map(businessLocation => ({
-                  value: businessLocation.name,
-                  label: businessLocation.name
+                options={skills?.map(skill => ({
+                  value: skill.name,
+                  label: skill.name
                 }))}
                 selected={field.value || []}
                 onChange={field.onChange}
