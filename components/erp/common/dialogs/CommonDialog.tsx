@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import { SpinnerCustom } from '@/components/ui/spinner'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface CommonDialogProps {
   open: boolean
@@ -21,7 +22,7 @@ interface CommonDialogProps {
   description?: string
   isLoading?: boolean
   loadingMessage?: string
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'| '4xl' | 'full'
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'full'
   children: React.ReactNode
   actions?: React.ReactNode
   className?: string
@@ -90,21 +91,17 @@ const CommonDialog = ({
           </DialogHeader>
         )}
 
-        <div
+        <ScrollArea
+          className={cn('relative max-h-[60vh] p-1', isLoading && 'pointer-events-none opacity-50', contentClassName)}
           ref={contentRef}
-          className={cn(
-            'relative max-h-[60vh] overflow-y-auto p-1',
-            isLoading && 'pointer-events-none opacity-50',
-            contentClassName
-          )}
         >
           {isLoading && (
-            <div className='absolute inset-0 backdrop-blur-xs flex items-center justify-center'>
+            <div className='absolute inset-0 backdrop-blur-xs flex items-center justify-center z-10'>
               <SpinnerCustom size='size-8' />
             </div>
           )}
           {children}
-        </div>
+        </ScrollArea>
 
         {actions && <DialogFooter>{actions}</DialogFooter>}
       </DialogContent>
