@@ -62,7 +62,8 @@ const CreateOrEditPartnerModal = ({
   businessLocations,
   partnerTypes,
   countriesWithStatesAndCities,
-  companies
+  companies,
+  skills
 }: CreateOrEditPartnerModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -330,7 +331,7 @@ const CreateOrEditPartnerModal = ({
               </div>
             )}
             {/* Contractor Details section */}
-            <ContractorDetailsFields form={form} skills={[]} partnerTypes={partnerTypes} />
+            <ContractorDetailsFields form={form} skills={skills} partnerTypes={partnerTypes} />
             <div className='col-span-3'>
               <Separator />
             </div>

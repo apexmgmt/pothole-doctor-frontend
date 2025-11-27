@@ -18,7 +18,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import PartnerService from '@/services/api/partners.service'
 import CreateOrEditPartnerModal from './CreateOrEditPartnerModal'
 
-const Partners: React.FC<PartnersProps> = ({ businessLocations, partnerTypes, countriesWithStatesAndCities, companies }) => {
+const Partners: React.FC<PartnersProps> = ({ businessLocations, partnerTypes, countriesWithStatesAndCities, companies, skills }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -276,14 +276,14 @@ const Partners: React.FC<PartnersProps> = ({ businessLocations, partnerTypes, co
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Partner
+        Add Contractor/Sub
       </Button>
     </div>
   )
 
   return (
     <>
-      <CommonLayout title='Partners' noTabs={true}>
+      <CommonLayout title='Contractors/Subcontractors' noTabs={true}>
         <CommonTable
           data={{
             data: partnersData,
@@ -300,11 +300,12 @@ const Partners: React.FC<PartnersProps> = ({ businessLocations, partnerTypes, co
           showFilters={true}
           pagination={true}
           isLoading={isLoading}
-          emptyMessage='No partner found'
+          emptyMessage='No contractor/subcontractor found'
         />
       </CommonLayout>
 
       <CreateOrEditPartnerModal
+        skills={skills}
         companies={companies}
         businessLocations={businessLocations}
         partnerTypes={partnerTypes}

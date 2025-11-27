@@ -2,6 +2,7 @@ import { BusinessLocation } from './business_location.types'
 import { Company } from './companies.type'
 import { City, CountryWithStates, State } from './location.types'
 import { PartnerType } from './partner_types.types'
+import { Skill } from './skills.types'
 import { User } from './user.types'
 
 export interface PartnersProps {
@@ -9,6 +10,7 @@ export interface PartnersProps {
   partnerTypes: PartnerType[]
   countriesWithStatesAndCities: CountryWithStates[]
   companies: Company[]
+  skills: Skill[]
 }
 
 export interface CreateOrEditPartnerModalProps {
@@ -22,6 +24,7 @@ export interface CreateOrEditPartnerModalProps {
   partnerTypes: PartnerType[]
   countriesWithStatesAndCities: CountryWithStates[]
   companies: Company[]
+  skills: Skill[]
 }
 
 export interface Partner {
