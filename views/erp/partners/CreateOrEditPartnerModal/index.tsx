@@ -41,7 +41,7 @@ const formSchema = z.object({
   zip_code: z.union([z.string(), z.number()]),
   in_house_contractor: z.coerce.number().optional(),
   is_email_confirmation: z.coerce.number().optional(),
-  role: z.string(),
+  user_type: z.string(),
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
   city_id: z.string(),
   state_id: z.string(),
@@ -70,34 +70,38 @@ const CreateOrEditPartnerModal = ({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      first_name: partnerDetails?.user?.first_name || '',
-      last_name: partnerDetails?.user?.last_name || '',
-      email: partnerDetails?.user?.email || '',
-      phone: partnerDetails?.phone || '',
-      company_name: partnerDetails?.company?.name || '',
-      status: partnerDetails?.user ? (partnerDetails?.user?.status ? true : false) : true,
-      entity: partnerDetails?.entity || 'individual',
-      ssn: partnerDetails?.ssn || '',
-      ein: partnerDetails?.ein || '',
-      fax: partnerDetails?.fax || '',
-      notes: partnerDetails?.notes || '',
-      schedule_color: partnerDetails?.schedule_color || '',
-      skills: partnerDetails?.skills ? partnerDetails?.skills.map(skill => skill.name) : [],
-      insurance_expiration: partnerDetails?.insurance_expiration ? new Date(partnerDetails?.insurance_expiration) : '',
-      w9_expiration: partnerDetails?.w9_expiration ? new Date(partnerDetails?.w9_expiration) : '',
-      hold_amount: partnerDetails?.hold_amount || 0,
-      hold_amount_percent: partnerDetails?.hold_amount_percent || 0,
-      street_address: partnerDetails?.street_address || '',
-      zip_code: partnerDetails?.zip_code || '',
-      in_house_contractor: partnerDetails?.in_house_contractor || 0,
-      is_email_confirmation: partnerDetails?.is_email_confirmation || 0,
-      role: partnerDetails?.user?.role || 'Contractor',
+      first_name: partnerDetails?.first_name ?? '',
+      last_name: partnerDetails?.last_name ?? '',
+      email: partnerDetails?.email ?? '',
+      phone: partnerDetails?.userable?.phone ?? '',
+      company_name: partnerDetails?.userable?.company?.name ?? '',
+      status: partnerDetails ? !!partnerDetails.status : true,
+      entity: partnerDetails?.userable?.entity ?? 'individual',
+      ssn: partnerDetails?.userable?.ssn ?? '',
+      ein: partnerDetails?.userable?.ein ?? '',
+      fax: partnerDetails?.userable?.fax ?? '',
+      notes: partnerDetails?.userable?.notes ?? '',
+      schedule_color: partnerDetails?.userable?.schedule_color ?? '',
+      skills: partnerDetails?.userable?.skills ? partnerDetails.userable.skills.map(skill => skill.name) : [],
+      insurance_expiration: partnerDetails?.userable?.insurance_expiration
+        ? new Date(partnerDetails.userable.insurance_expiration)
+        : null,
+      w9_expiration: partnerDetails?.userable?.w9_expiration ? new Date(partnerDetails.userable.w9_expiration) : null,
+      hold_amount: partnerDetails?.userable.hold_amount ?? 0,
+      hold_amount_percent: partnerDetails?.userable?.hold_amount_percent ?? 0,
+      street_address: partnerDetails?.userable?.street_address ?? '',
+      zip_code: partnerDetails?.userable?.zip_code ?? '',
+      in_house_contractor: partnerDetails?.userable?.in_house_contractor ?? 0,
+      is_email_confirmation: partnerDetails?.userable?.is_email_confirmation ?? 0,
+      user_type: partnerDetails?.user_type ?? 'contractor',
       password: '',
-      city_id: partnerDetails?.city_id || '',
-      state_id: partnerDetails?.state_id || '',
-      country_id: partnerDetails?.city ? partnerDetails?.city?.country_id : '',
-      location_id: partnerDetails?.locations ? partnerDetails?.locations.map(location => location.id.toString()) : [],
-      partner_type_id: partnerDetails?.partner_type_id || ''
+      city_id: partnerDetails?.userable?.city_id?.toString() ?? '',
+      state_id: partnerDetails?.userable?.state_id?.toString() ?? '',
+      country_id: partnerDetails?.userable?.city ? partnerDetails.userable.city.country_id?.toString() : '',
+      location_id: partnerDetails?.userable?.locations
+        ? partnerDetails.userable.locations.map(location => location.id.toString())
+        : [],
+      partner_type_id: partnerDetails?.userable?.partner_type_id ?? ''
     }
   })
 
@@ -105,36 +109,38 @@ const CreateOrEditPartnerModal = ({
   useEffect(() => {
     if (open) {
       form.reset({
-        first_name: partnerDetails?.user?.first_name || '',
-        last_name: partnerDetails?.user?.last_name || '',
-        email: partnerDetails?.user?.email || '',
-        phone: partnerDetails?.phone || '',
-        company_name: partnerDetails?.company?.name || '',
-        status: partnerDetails?.user ? (partnerDetails?.user?.status ? true : false) : true,
-        entity: partnerDetails?.entity || 'individual',
-        ssn: partnerDetails?.ssn || '',
-        ein: partnerDetails?.ein || '',
-        fax: partnerDetails?.fax || '',
-        notes: partnerDetails?.notes || '',
-        schedule_color: partnerDetails?.schedule_color || '',
-        skills: partnerDetails?.skills ? partnerDetails?.skills.map(skill => skill.name) : [],
-        insurance_expiration: partnerDetails?.insurance_expiration
-          ? new Date(partnerDetails?.insurance_expiration)
+        first_name: partnerDetails?.first_name || '',
+        last_name: partnerDetails?.last_name || '',
+        email: partnerDetails?.email || '',
+        phone: partnerDetails?.userable?.phone || '',
+        company_name: partnerDetails?.userable?.company?.name || '',
+        status: partnerDetails ? (partnerDetails?.status ? true : false) : true,
+        entity: partnerDetails?.userable?.entity || 'individual',
+        ssn: partnerDetails?.userable?.ssn || '',
+        ein: partnerDetails?.userable?.ein || '',
+        fax: partnerDetails?.userable?.fax || '',
+        notes: partnerDetails?.userable?.notes || '',
+        schedule_color: partnerDetails?.userable?.schedule_color || '',
+        skills: partnerDetails?.userable?.skills ? partnerDetails.userable.skills.map(skill => skill.name) : [],
+        insurance_expiration: partnerDetails?.userable?.insurance_expiration
+          ? new Date(partnerDetails.userable.insurance_expiration)
           : '',
-        w9_expiration: partnerDetails?.w9_expiration ? new Date(partnerDetails?.w9_expiration) : '',
-        hold_amount: partnerDetails?.hold_amount || 0,
-        hold_amount_percent: partnerDetails?.hold_amount_percent || 0,
-        street_address: partnerDetails?.street_address || '',
-        zip_code: partnerDetails?.zip_code || '',
-        in_house_contractor: partnerDetails?.in_house_contractor || 0,
-        is_email_confirmation: partnerDetails?.is_email_confirmation || 0,
-        role: partnerDetails?.user?.role || 'Contractor',
+        w9_expiration: partnerDetails?.userable?.w9_expiration ? new Date(partnerDetails.userable.w9_expiration) : '',
+        hold_amount: partnerDetails?.userable?.hold_amount || 0,
+        hold_amount_percent: partnerDetails?.userable?.hold_amount_percent || 0,
+        street_address: partnerDetails?.userable?.street_address || '',
+        zip_code: partnerDetails?.userable?.zip_code || '',
+        in_house_contractor: partnerDetails?.userable?.in_house_contractor || 0,
+        is_email_confirmation: partnerDetails?.userable?.is_email_confirmation || 0,
+        user_type: partnerDetails?.user_type || 'contractor',
         password: '',
-        city_id: partnerDetails?.city_id?.toString() || '',
-        state_id: partnerDetails?.state_id?.toString() || '',
-        country_id: partnerDetails?.city ? partnerDetails?.city?.country_id?.toString() : '',
-        location_id: partnerDetails?.locations ? partnerDetails?.locations.map(location => location.id.toString()) : [],
-        partner_type_id: partnerDetails?.partner_type_id || ''
+        city_id: partnerDetails?.userable?.city_id?.toString() || '',
+        state_id: partnerDetails?.userable?.state_id?.toString() || '',
+        country_id: partnerDetails?.userable?.city ? partnerDetails.userable.city.country_id?.toString() : '',
+        location_id: partnerDetails?.userable?.locations
+          ? partnerDetails.userable.locations.map(location => location.id.toString())
+          : [],
+        partner_type_id: partnerDetails?.userable?.partner_type_id || ''
       })
     }
   }, [partnerDetails, open, form, mode])
@@ -162,7 +168,7 @@ const CreateOrEditPartnerModal = ({
       zip_code: values.zip_code || '',
       in_house_contractor: values.in_house_contractor || 0,
       is_email_confirmation: values.is_email_confirmation || 0,
-      role: values.role,
+      user_type: values.user_type,
       password: values.password,
       city_id: values.city_id,
       state_id: values.state_id,
@@ -213,33 +219,38 @@ const CreateOrEditPartnerModal = ({
 
   const onCancel = () => {
     form.reset({
-      first_name: partnerDetails?.user?.first_name || '',
-      last_name: partnerDetails?.user?.last_name || '',
-      email: partnerDetails?.user?.email || '',
-      phone: partnerDetails?.phone || '',
-      company_name: partnerDetails?.company?.name || '',
-      status: partnerDetails?.user ? (partnerDetails?.user?.status ? true : false) : true,
-      entity: partnerDetails?.entity || 'individual',
-      ssn: partnerDetails?.ssn || '',
-      ein: partnerDetails?.ein || '',
-      fax: partnerDetails?.fax || '',
-      notes: partnerDetails?.notes || '',
-      schedule_color: partnerDetails?.schedule_color || '',
-      skills: partnerDetails?.skills ? partnerDetails?.skills.map(skill => skill.name) : [],
-      insurance_expiration: partnerDetails?.insurance_expiration ? new Date(partnerDetails?.insurance_expiration) : '',
-      w9_expiration: partnerDetails?.w9_expiration ? new Date(partnerDetails?.w9_expiration) : '',
-      hold_amount: partnerDetails?.hold_amount || 0,
-      hold_amount_percent: partnerDetails?.hold_amount_percent || 0,
-      zip_code: partnerDetails?.zip_code || '',
-      in_house_contractor: partnerDetails?.in_house_contractor || 0,
-      is_email_confirmation: partnerDetails?.is_email_confirmation || 0,
-      role: partnerDetails?.user?.role || 'Contractor',
+      first_name: partnerDetails?.first_name || '',
+      last_name: partnerDetails?.last_name || '',
+      email: partnerDetails?.email || '',
+      phone: partnerDetails?.userable?.phone || '',
+      company_name: partnerDetails?.userable?.company?.name || '',
+      status: partnerDetails ? (partnerDetails?.status ? true : false) : true,
+      entity: partnerDetails?.userable?.entity || 'individual',
+      ssn: partnerDetails?.userable?.ssn || '',
+      ein: partnerDetails?.userable?.ein || '',
+      fax: partnerDetails?.userable?.fax || '',
+      notes: partnerDetails?.userable?.notes || '',
+      schedule_color: partnerDetails?.userable?.schedule_color || '',
+      skills: partnerDetails?.userable?.skills ? partnerDetails.userable.skills.map(skill => skill.name) : [],
+      insurance_expiration: partnerDetails?.userable?.insurance_expiration
+        ? new Date(partnerDetails.userable.insurance_expiration)
+        : '',
+      w9_expiration: partnerDetails?.userable?.w9_expiration ? new Date(partnerDetails.userable.w9_expiration) : '',
+      hold_amount: partnerDetails?.userable?.hold_amount || 0,
+      hold_amount_percent: partnerDetails?.userable?.hold_amount_percent || 0,
+      street_address: partnerDetails?.userable?.street_address || '',
+      zip_code: partnerDetails?.userable?.zip_code || '',
+      in_house_contractor: partnerDetails?.userable?.in_house_contractor || 0,
+      is_email_confirmation: partnerDetails?.userable?.is_email_confirmation || 0,
+      user_type: partnerDetails?.user_type || 'contractor',
       password: '',
-      city_id: partnerDetails?.city_id || '',
-      state_id: partnerDetails?.state_id || '',
-      country_id: partnerDetails?.city ? partnerDetails?.city?.country_id : '',
-      location_id: partnerDetails?.locations ? partnerDetails?.locations.map(location => location.id) : [],
-      partner_type_id: partnerDetails?.partner_type_id || ''
+      city_id: partnerDetails?.userable?.city_id?.toString() || '',
+      state_id: partnerDetails?.userable?.state_id?.toString() || '',
+      country_id: partnerDetails?.userable?.city ? partnerDetails.userable.city.country_id?.toString() : '',
+      location_id: partnerDetails?.userable?.locations
+        ? partnerDetails.userable.locations.map(location => location.id.toString())
+        : [],
+      partner_type_id: partnerDetails?.userable?.partner_type_id || ''
     })
     onOpenChange(false)
   }
@@ -283,7 +294,7 @@ const CreateOrEditPartnerModal = ({
     }
   }, [selectedStateId, availableCities, form])
 
-  const role = form.watch('role')
+  const user_type = form.watch('user_type')
 
   return (
     <CommonDialog
@@ -325,7 +336,7 @@ const CreateOrEditPartnerModal = ({
             {/* Entity Information section - now using the separated component */}
             <EntityInformationFields form={form} />
 
-            {role === 'Contractor' && (
+            {user_type === 'contractor' && (
               <div className='col-span-3'>
                 <Separator />
               </div>

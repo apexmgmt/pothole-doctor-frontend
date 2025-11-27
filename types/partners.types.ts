@@ -27,12 +27,61 @@ export interface CreateOrEditPartnerModalProps {
   skills: Skill[]
 }
 
+// export interface Partner {
+//   id: string
+//   company_id: string
+//   company?: Company
+//   partner_type_id: string
+//   partner_type?: PartnerType
+//   phone: string
+//   schedule_color: string
+//   fax: string
+//   ein: string
+//   ssn: string
+//   notes: string
+//   insurance_expiration: string | number | null
+//   w9_expiration: string | number | null
+//   hold_amount: number
+//   hold_amount_percent: number
+//   street_address: string | number
+//   city_id: string
+//   state_id: string
+//   zip_code: string | number
+//   in_house_contractor: number | 1 | 0
+//   entity: string
+//   is_email_confirmation: number | 1 | 0
+//   created_at: string
+//   updated_at: string
+//   deleted_at: string | null
+//   skills: PartnerSkill[]
+//   locations: BusinessLocation[]
+//   city: City
+//   state: State
+//   user: User
+// }
+
 export interface Partner {
   id: string
+  userable_id: string
+  userable_type: string
+  first_name: string
+  last_name: string
+  guard: string
+  status: boolean
+  email: string
+  email_verified_at: string | null
+  deleted_at: string | null
+  created_at: string
+  updated_at: string
+  tenant_id: string | null
+  user_type: string
+  userable: PartnerUserAble
+}
+
+export interface PartnerUserAble {
+  id: string
   company_id: string
-  company?: Company
   partner_type_id: string
-  partner_type?: PartnerType
   phone: string
   schedule_color: string
   fax: string
@@ -44,8 +93,13 @@ export interface Partner {
   hold_amount: number
   hold_amount_percent: number
   street_address: string | number
-  city_id: string
+  city_id: string,
+  city: City
   state_id: string
+  state: State
+  skills: PartnerSkill[]
+  locations: BusinessLocation[]
+  company: Company
   zip_code: string | number
   in_house_contractor: number | 1 | 0
   entity: string
@@ -53,11 +107,6 @@ export interface Partner {
   created_at: string
   updated_at: string
   deleted_at: string | null
-  skills: PartnerSkill[]
-  locations: BusinessLocation[]
-  city: City
-  state: State
-  user: User
 }
 
 export interface PartnerPayload {
@@ -78,15 +127,15 @@ export interface PartnerPayload {
   w9_expiration?: string | number | null
   hold_amount: number
   hold_amount_percent: number
-  street_address: string
-  zip_code: string
+  street_address: string | number
+  zip_code: string | number
   in_house_contractor: number | 1 | 0
   is_email_confirmation: number | 1 | 0
   location_id: string[]
   partner_type_id: string
   city_id: string
   state_id: string
-  role: string
+  user_type: string
   password: string
 }
 

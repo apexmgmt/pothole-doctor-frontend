@@ -17,10 +17,10 @@ interface BasicInformationFieldsProps {
 export function BasicInformationFields({ form, businessLocations, companies }: BasicInformationFieldsProps) {
   return (
     <div className='col-span-2 grid grid-cols-2 gap-4'>
-      {/* Role Radio Group */}
+      {/* User type Radio Group */}
       <FormField
         control={form.control}
-        name='role'
+        name='user_type'
         render={({ field }) => (
           <FormItem className='flex flex-row gap-4'>
             <FormLabel>Role</FormLabel>
@@ -31,14 +31,14 @@ export function BasicInformationFields({ form, businessLocations, companies }: B
                 className='flex flex-row gap-4 items-center'
               >
                 <div className='flex gap-2 items-center'>
-                  <RadioGroupItem value='Contractor' id='role-contractor' />
-                  <Label htmlFor='role-contractor' className='cursor-pointer'>
+                  <RadioGroupItem value='contractor' id='user_type-contractor' />
+                  <Label htmlFor='user_type-contractor' className='cursor-pointer'>
                     Contractor
                   </Label>
                 </div>
                 <div className='flex gap-2 items-center'>
-                  <RadioGroupItem value='Referral' id='role-referral' />
-                  <Label htmlFor='role-referral' className='cursor-pointer'>
+                  <RadioGroupItem value='referral' id='user_type-referral' />
+                  <Label htmlFor='user_type-referral' className='cursor-pointer'>
                     Referral
                   </Label>
                 </div>

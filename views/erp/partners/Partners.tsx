@@ -94,27 +94,37 @@ const Partners: React.FC<PartnersProps> = ({
   // Transform API data to match table format
   const partnersData = apiResponse?.data
     ? apiResponse.data.map((partner: Partner, index: number) => {
+        const userable = partner.userable
         return {
           id: partner.id,
           index: (apiResponse?.from || 1) + index,
-          name: partner?.user?.first_name + ' ' + partner?.user.last_name,
-          company: partner?.company?.name || '',
-          email: partner?.user?.email,
-          phone: partner.phone,
-          partner_type: partner?.partner_type?.name,
-          skills: partner?.skills.length > 0 ? partner.skills.map(skill => skill.name).join(', ') : 'N/A',
-          insurance_expiration: partner.insurance_expiration
-            ? new Date(partner.insurance_expiration).toLocaleDateString('en-US', {
+          name: partner.first_name + ' ' + (partner.last_name || ''),
+          company: userable?.company?.name || '',
+          email: partner.email,
+          phone: userable?.phone || '',
+          partner_type: userable?.partner_type_id || '',
+          skills:
+            userable?.skills && userable.skills.length > 0
+              ? userable.skills.map(skill => skill.name).join(', ')
+              : 'N/A',
+          insurance_expiration: userable?.insurance_expiration
+            ? new Date(userable.insurance_expiration).toLocaleString('en-US', {
                 month: '2-digit',
                 day: '2-digit',
-                year: 'numeric'
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
               })
             : '',
-          w9_expiration: partner.w9_expiration
-            ? new Date(partner.w9_expiration).toLocaleDateString('en-US', {
+          w9_expiration: userable?.w9_expiration
+            ? new Date(userable.w9_expiration).toLocaleString('en-US', {
                 month: '2-digit',
                 day: '2-digit',
-                year: 'numeric'
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
               })
             : ''
         }
