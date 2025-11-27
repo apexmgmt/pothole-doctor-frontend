@@ -18,6 +18,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import PartnerService from '@/services/api/partners/partners.service'
 import CreateOrEditPartnerModal from './CreateOrEditPartnerModal'
 import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
+import PartnerDocuments from './documents/PartnerDocuments'
 
 const Partners: React.FC<PartnersProps> = ({
   businessLocations,
@@ -338,6 +339,10 @@ const Partners: React.FC<PartnersProps> = ({
             isLoading={isLoading}
             emptyMessage='No contractor/subcontractor found'
           />
+        )}
+
+        {activeTab === 'documents' && selectedPartnerId && (
+          <PartnerDocuments userId={selectedPartnerId} />
         )}
       </CommonLayout>
 
