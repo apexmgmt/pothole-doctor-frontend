@@ -102,7 +102,7 @@ const Partners: React.FC<PartnersProps> = ({
           company: userable?.company?.name || '',
           email: partner.email,
           phone: userable?.phone || '',
-          partner_type: userable?.partner_type_id || '',
+          partner_type: userable?.partner_type?.name || '',
           skills:
             userable?.skills && userable.skills.length > 0
               ? userable.skills.map(skill => skill.name).join(', ')

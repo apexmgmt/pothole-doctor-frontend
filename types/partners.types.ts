@@ -82,6 +82,7 @@ export interface PartnerUserAble {
   id: string
   company_id: string
   partner_type_id: string
+  partner_type?: PartnerType
   phone: string
   schedule_color: string
   fax: string
