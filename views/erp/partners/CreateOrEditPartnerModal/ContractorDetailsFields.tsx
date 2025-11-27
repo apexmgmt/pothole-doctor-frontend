@@ -22,10 +22,10 @@ interface ContractorDetailsFieldsProps {
 }
 
 export function ContractorDetailsFields({ form, skills, partnerTypes }: ContractorDetailsFieldsProps) {
-  const role = form.watch('role')
+  const user_type = form.watch('user_type')
 
   // Don't render if role is Referral
-  if (role === 'Referral') {
+  if (user_type === 'referral') {
     return null
   }
 

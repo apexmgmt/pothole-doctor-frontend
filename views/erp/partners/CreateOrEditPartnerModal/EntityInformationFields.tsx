@@ -13,7 +13,7 @@ interface EntityInformationFieldsProps {
 }
 
 export function EntityInformationFields({ form }: EntityInformationFieldsProps) {
-  const role = form.watch('role')
+  const user_type = form.watch('user_type')
 
   return (
     <div className='flex flex-col gap-4'>
@@ -49,8 +49,8 @@ export function EntityInformationFields({ form }: EntityInformationFieldsProps) 
         )}
       />
 
-      {/* Entity Radio Group - Only show if role is Contractor */}
-      {role === 'Contractor' && (
+      {/* Entity Radio Group - Only show if user_type is contractor */}
+      {user_type === 'contractor' && (
         <FormField
           control={form.control}
           name='entity'

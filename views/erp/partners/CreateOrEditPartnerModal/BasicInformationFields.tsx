@@ -154,9 +154,7 @@ export function BasicInformationFields({ form, businessLocations, companies }: B
           name='phone'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Phone<span className='text-red-500'>*</span>
-              </FormLabel>
+              <FormLabel>Phone</FormLabel>
               <FormControl>
                 <Input type='tel' placeholder='Enter phone' {...field} />
               </FormControl>
@@ -185,9 +183,7 @@ export function BasicInformationFields({ form, businessLocations, companies }: B
         name='password'
         render={({ field }) => (
           <FormItem>
-            <FormLabel>
-              Password <span className='text-red-500'>*</span>
-            </FormLabel>
+            <FormLabel>Password</FormLabel>
             <FormControl>
               <Input type='password' placeholder='Enter password' {...field} />
             </FormControl>

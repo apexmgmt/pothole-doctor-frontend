@@ -24,7 +24,7 @@ const formSchema = z.object({
   last_name: z.string().optional(),
   company_name: z.string().optional(),
   email: z.email({ message: 'Invalid email address' }),
-  phone: z.string().min(7, { message: 'Phone number must be at least 7 characters' }),
+  phone: z.string().min(7, { message: 'Phone number must be at least 7 characters' }).optional(),
   status: z.boolean(),
   entity: z.string(),
   ssn: z.string().optional(),
@@ -42,7 +42,7 @@ const formSchema = z.object({
   in_house_contractor: z.coerce.number().optional(),
   is_email_confirmation: z.coerce.number().optional(),
   user_type: z.string(),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }).optional(),
   city_id: z.string(),
   state_id: z.string(),
   country_id: z.string(),
@@ -295,6 +295,18 @@ const CreateOrEditPartnerModal = ({
   }, [selectedStateId, availableCities, form])
 
   const user_type = form.watch('user_type')
+
+  // Clear contractor-specific fields when user_type changes to referral
+  useEffect(() => {
+    if (user_type === 'referral') {
+      form.setValue('partner_type_id', '')
+      form.setValue('skills', [])
+      form.setValue('schedule_color', '')
+      form.setValue('in_house_contractor', 0)
+      form.setValue('insurance_expiration', null)
+      form.setValue('w9_expiration', null)
+    }
+  }, [user_type, form])
 
   return (
     <CommonDialog
