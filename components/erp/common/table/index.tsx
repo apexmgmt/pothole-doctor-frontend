@@ -6,6 +6,20 @@ import Pagination from './Pagination'
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import { Column } from '@/types'
 
+/**
+ * Types for CommonTable component props
+ * - data: {data: any[], per_page: number, total: number, from: number, to: number, current_page: number, last_page: number}
+ * - columns: Column[]
+ * - customFilters: ReactNode
+ * - isLoading: boolean
+ * - setFilterOptions: (options: any) => void
+ * - showFilters: boolean
+ * - pagination: boolean
+ * - className: string
+ * - emptyMessage: string
+ * - handleRowSelect: (row: any) => void
+ * - rowKey: string
+ */
 interface CommonTableProps {
   data?: {
     data: any[]
@@ -28,6 +42,23 @@ interface CommonTableProps {
   rowKey?: string
 }
 
+/**
+ * CommonTable Component
+ *
+ * A reusable table component with sorting, pagination, and filtering capabilities.
+ * Props:
+ * - data: Table data and pagination info
+ * - columns: Column definitions
+ * - customFilters: Custom filter components
+ * - isLoading: Loading state
+ * - setFilterOptions: Function to update filter options
+ * - showFilters: Toggle filter visibility
+ * - pagination: Toggle pagination visibility
+ * - className: Additional CSS classes
+ * - emptyMessage: Message to display when no data is available
+ * - handleRowSelect: Callback for row selection
+ * - rowKey: Unique key for each row
+ */
 const CommonTable: React.FC<CommonTableProps> = ({
   data,
   columns = [],
