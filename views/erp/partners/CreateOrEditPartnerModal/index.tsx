@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useEffect, useMemo, useState } from 'react'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import PartnerService from '@/services/api/partners.service'
+import PartnerService from '@/services/api/partners/partners.service'
 
 import { Separator } from '@/components/ui/separator'
 import { LocationFields } from './LocationFields'

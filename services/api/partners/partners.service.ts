@@ -1,8 +1,8 @@
 import { getApiUrl } from '@/utils/utility'
-import apiInterceptor from './api.interceptor'
+import apiInterceptor from '../api.interceptor'
 import { PARTNERS } from '@/constants/api'
 import { PartnerPayload } from '@/types'
-import { revalidate } from '../app/cache.service'
+import { revalidate } from '../../app/cache.service'
 
 export default class PartnerService {
   /**Partner DataTable API */

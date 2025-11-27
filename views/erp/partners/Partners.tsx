@@ -15,10 +15,17 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
-import PartnerService from '@/services/api/partners.service'
+import PartnerService from '@/services/api/partners/partners.service'
 import CreateOrEditPartnerModal from './CreateOrEditPartnerModal'
+import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
 
-const Partners: React.FC<PartnersProps> = ({ businessLocations, partnerTypes, countriesWithStatesAndCities, companies, skills }) => {
+const Partners: React.FC<PartnersProps> = ({
+  businessLocations,
+  partnerTypes,
+  countriesWithStatesAndCities,
+  companies,
+  skills
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -30,7 +37,7 @@ const Partners: React.FC<PartnersProps> = ({ businessLocations, partnerTypes, co
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-
+  const [activeTab, setActiveTab] = useState<string>('partners')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
 
   // Set initial search value from filterOptions
@@ -208,11 +215,7 @@ const Partners: React.FC<PartnersProps> = ({ businessLocations, partnerTypes, co
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton
-            tooltip='Edit Partner Information'
-            onClick={() => handleOpenEditModal(row.id)}
-            variant='icon'
-          />
+          <EditButton tooltip='Edit Partner Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
           <DeleteButton tooltip='Delete Partner' variant='icon' onClick={() => handleDeletePartner(row.id)} />
         </div>
       ),
@@ -276,32 +279,56 @@ const Partners: React.FC<PartnersProps> = ({ businessLocations, partnerTypes, co
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Contractor/Sub
+        Add Contractor/Subcontractor
       </Button>
     </div>
   )
 
+  // Button configuration for CommonLayout
+  const tabs = [
+    {
+      label: 'Contractors/Subcontractors',
+      icon: UserIcon,
+      onClick: () => setActiveTab('partners'),
+      isActive: activeTab === 'partners'
+    },
+    {
+      label: 'Documents',
+      icon: DocumentIcon,
+      onClick: () => setActiveTab('documents'),
+      isActive: activeTab === 'documents',
+      disabled: !selectedPartnerId
+    }
+  ]
+
+  const handleRowSelect = (partner: any) => {
+    setSelectedPartnerId(partner?.id || null)
+  }
+
   return (
     <>
-      <CommonLayout title='Contractors/Subcontractors' noTabs={true}>
-        <CommonTable
-          data={{
-            data: partnersData,
-            per_page: apiResponse?.per_page || 10,
-            total: apiResponse?.total || 0,
-            from: apiResponse?.from || 1,
-            to: apiResponse?.to || 10,
-            current_page: apiResponse?.current_page || 1,
-            last_page: apiResponse?.last_page || 1
-          }}
-          columns={columns}
-          customFilters={customFilters}
-          setFilterOptions={setFilterOptions}
-          showFilters={true}
-          pagination={true}
-          isLoading={isLoading}
-          emptyMessage='No contractor/subcontractor found'
-        />
+      <CommonLayout title='Contractors/Subcontractors' buttons={tabs}>
+        {activeTab === 'partners' && (
+          <CommonTable
+            data={{
+              data: partnersData,
+              per_page: apiResponse?.per_page || 10,
+              total: apiResponse?.total || 0,
+              from: apiResponse?.from || 1,
+              to: apiResponse?.to || 10,
+              current_page: apiResponse?.current_page || 1,
+              last_page: apiResponse?.last_page || 1
+            }}
+            handleRowSelect={handleRowSelect}
+            columns={columns}
+            customFilters={customFilters}
+            setFilterOptions={setFilterOptions}
+            showFilters={true}
+            pagination={true}
+            isLoading={isLoading}
+            emptyMessage='No contractor/subcontractor found'
+          />
+        )}
       </CommonLayout>
 
       <CreateOrEditPartnerModal
