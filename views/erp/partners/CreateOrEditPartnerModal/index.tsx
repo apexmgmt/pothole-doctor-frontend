@@ -42,7 +42,7 @@ const formSchema = z.object({
   in_house_contractor: z.coerce.number().optional(),
   is_email_confirmation: z.coerce.number().optional(),
   user_type: z.string(),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }).optional(),
+  password: z.string().optional(),
   city_id: z.string(),
   state_id: z.string(),
   country_id: z.string(),
