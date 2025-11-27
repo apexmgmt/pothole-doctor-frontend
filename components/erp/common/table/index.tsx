@@ -5,6 +5,7 @@ import { SpinnerCustom } from '@/components/ui/spinner'
 import Pagination from './Pagination'
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import { Column } from '@/types'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 /**
  * Types for CommonTable component props
@@ -206,7 +207,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
 
       {/* Table Section */}
       <div className='relative'>
-        <div className='overflow-x-auto'>
+        <ScrollArea className='w-full'>
           <table className='w-full'>
             <thead className='bg-border/40'>
               <tr>
@@ -294,7 +295,8 @@ const CommonTable: React.FC<CommonTableProps> = ({
               )}
             </tbody>
           </table>
-        </div>
+          <ScrollBar orientation='horizontal' />
+        </ScrollArea>
 
         {/* Loading Overlay */}
         {isLoading && (
