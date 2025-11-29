@@ -1,7 +1,7 @@
-import Companies from '@/views/erp/companies/Companies'
+import Organizations from '@/views/erp/organizations/Organizations'
 
-const CompaniesPage = async () => {
-  return <Companies />
+const OrganizationsPage = async () => {
+  return <Organizations />
 }
 
-export default CompaniesPage
+export default OrganizationsPage
