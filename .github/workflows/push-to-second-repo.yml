@@ -1,0 +1,30 @@
+name: Push to Second Repo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Repo A থেকে কোড চেকআউট করা
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      # Git কনফিগার করা
+      - name: Setup Git
+        run: |
+          git config user.name "blackdevsco"
+          git config user.email "hello@blackdevs.co"
+
+      # Repo B তে পুশ করা
+      - name: Push to second repo
+        env:
+          SECOND_GIT_TOKEN: ${{ secrets.SECOND_GIT_TOKEN }}
+        run: |
+          git remote add mirror https://$SECOND_GIT_TOKEN@github.com/apexmgmt/perfect-billboards.git
+          git push mirror main:main --force
+
