@@ -68,7 +68,6 @@ const CreateOrEditCountryModal = ({
       try {
         await CountryService.store(payload)
           .then(response => {
-            console.log('Country created:', response)
             toast.success('Country created successfully')
             form.reset()
             onOpenChange(false)
@@ -84,7 +83,6 @@ const CreateOrEditCountryModal = ({
       try {
         await CountryService.update(countryId, payload)
           .then(response => {
-            console.log('Country updated:', response)
             toast.success('Country updated successfully')
             onOpenChange(false)
             onSuccess?.()

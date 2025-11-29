@@ -51,7 +51,6 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
       try {
         RoleService.store(values)
           .then(response => {
-            console.log('Role created:', response)
             toast.success('Role created successfully')
             form.reset()
             router.push('/erp/roles')
@@ -66,7 +65,6 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
       try {
         RoleService.update(roleId, values)
           .then(response => {
-            console.log('Role updated:', response)
             toast.success('Role updated successfully')
             router.push('/erp/roles')
           })

@@ -67,7 +67,7 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
     {
       id: 'roles',
       label: 'Roles',
-      icon: <UserLock className='h-4 w-4'/>,
+      icon: <UserLock className='h-4 w-4' />,
       href: '/erp/roles',
       hasSubItems: false,
       exactMatch: false
@@ -75,7 +75,7 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
     {
       id: 'locations',
       label: 'Locations',
-      icon: <Map className='h-4 w-4'/>,
+      icon: <Map className='h-4 w-4' />,
       href: '/erp/locations',
       hasSubItems: true,
       subItems: [
@@ -83,22 +83,33 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           id: 'countries',
           label: 'Countries',
           href: '/erp/locations/countries',
-          icon: <LocateIcon className='h-4 w-4'/>,
-          hasSubItems: false
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
         },
         {
           id: 'states',
           label: 'States',
           href: '/erp/locations/states',
-          icon: <LocateIcon className='h-4 w-4'/>,
-          hasSubItems: false
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
         },
         {
           id: 'cities',
           label: 'Cities',
           href: '/erp/locations/cities',
-          icon: <LocateIcon className='h-4 w-4'/>,
-          hasSubItems: false
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'businesses',
+          label: 'Business Locations',
+          href: '/erp/locations/businesses',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
         }
       ]
     },
@@ -251,40 +262,76 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       hasSubItems: true,
       subItems: [
         {
-          id: 'sub-settings-01',
-          label: 'Sub Settings 01',
-          href: '/settings/sub-settings-01',
-          hasSubItems: true,
-          subItems: [
-            {
-              id: 'settings-sub-1',
-              label: 'General Settings',
-              href: '/settings/sub-settings-01/general'
-            },
-            {
-              id: 'settings-sub-2',
-              label: 'Security Settings',
-              href: '/settings/sub-settings-01/security'
-            }
-          ]
+          id: 'payment-terms',
+          label: 'Payment Terms',
+          href: '/erp/settings/payment-terms',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
         },
         {
-          id: 'sub-settings-02',
-          label: 'Sub Settings 02',
-          href: '/settings/sub-settings-02',
-          hasSubItems: true,
-          subItems: [
-            {
-              id: 'settings-sub-3',
-              label: 'Notification Settings',
-              href: '/settings/sub-settings-02/notifications'
-            },
-            {
-              id: 'settings-sub-4',
-              label: 'Advanced Settings',
-              href: '/settings/sub-settings-02/advanced'
-            }
-          ]
+          id: 'partner-types',
+          label: 'Contractor Types',
+          href: '/erp/settings/contractor-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'contact-types',
+          label: 'Contact Types',
+          href: '/erp/settings/contact-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'commissions',
+          label: 'Commissions',
+          href: '/erp/settings/commissions',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'note-types',
+          label: 'Note Types',
+          href: '/erp/settings/note-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'task-types',
+          label: 'Task Types',
+          href: '/erp/settings/task-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'uom-units',
+          label: 'Uom Units',
+          href: '/erp/settings/uom-units',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'measure-units',
+          label: 'Measure Units',
+          href: '/erp/settings/measure-units',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'service-types',
+          label: 'Service Types',
+          href: '/erp/settings/service-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
         }
       ]
     }

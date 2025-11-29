@@ -4,7 +4,6 @@ import React, { useState, ReactNode } from 'react'
 import { PhoneIcon, PlusIcon } from 'lucide-react'
 import CustomButton from './CustomButton'
 import CustomTable from './CustomTable'
-import DocumentsGallery from './DocumentsGallery'
 import {
   CallIcon,
   DocumentIcon,
@@ -445,12 +444,15 @@ const EntityDetails: React.FC<EntityDetailsProps> = ({
         {/* Tab Content */}
         <div className=''>
           {activeTab === 'documents' ? (
-            <DocumentsGallery
-              entityData={entityData}
-              onUpload={() => handleActionButtonClick('upload_document')}
-              onDownload={(doc: any) => console.log('Download:', doc)}
-              onDelete={(doc: any) => console.log('Delete:', doc)}
-            />
+            // <DocumentsGallery
+            //   entityData={entityData}
+            //   onUpload={() => handleActionButtonClick('upload_document')}
+            //   onDownload={(doc: any) => console.log('Download:', doc)}
+            //   onDelete={(doc: any) => console.log('Delete:', doc)}
+            // />
+            <div className='p-6 border border-border rounded-lg text-center text-gray'>
+              Documents Gallery Component Placeholder
+            </div>
           ) : (
             <CustomTable
               data={activeTabData?.data || []}
