@@ -14,4 +14,5 @@
  * Data delete method: DELETE /{id}
  */
 export const PAYMENT_TERMS: string = '/v1/payment-terms/';
+export const PAYMENT_TERMS_ALL: string = '/v1/get-payment-terms/';
 export const PAYMENT_TERMS_TYPES: string = '/v1/payment-term-types/';

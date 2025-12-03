@@ -15,6 +15,7 @@ import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import UnitService from '@/services/api/settings/units.service'
 
 interface CreateOrEditUnitModalProps {
+  group?: string | 'uom' | 'measure'
   mode?: 'create' | 'edit'
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -25,12 +26,13 @@ interface CreateOrEditUnitModalProps {
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Unit name must be at least 2 characters' }),
-  group: z.enum(['uom', 'measure'])
+  group: z.string()
 })
 
 type FormValues = z.infer<typeof formSchema>
 
 const CreateOrEditUnitModal = ({
+  group,
   mode = 'create',
   open,
   onOpenChange,
@@ -44,7 +46,7 @@ const CreateOrEditUnitModal = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: unitDetails?.name || '',
-      group: (unitDetails?.group as 'uom' | 'measure') || 'uom'
+      group: group
     }
   })
 
@@ -53,7 +55,7 @@ const CreateOrEditUnitModal = ({
     if (open) {
       form.reset({
         name: unitDetails?.name || '',
-        group: (unitDetails?.group as 'uom' | 'measure') || 'uom'
+        group: group
       })
     }
   }, [unitDetails, open, form])
@@ -61,14 +63,13 @@ const CreateOrEditUnitModal = ({
   const onSubmit = async (values: FormValues) => {
     const payload: UnitPayload = {
       name: values.name,
-      group: values.group
+      group: group || ''
     }
 
     if (mode === 'create') {
       try {
         await UnitService.store(payload)
           .then(response => {
-            console.log('Unit created:', response)
             toast.success('Unit created successfully')
             form.reset()
             onOpenChange(false)
@@ -84,7 +85,6 @@ const CreateOrEditUnitModal = ({
       try {
         await UnitService.update(unitId, payload)
           .then(response => {
-            console.log('Unit updated:', response)
             toast.success('Unit updated successfully')
             onOpenChange(false)
             onSuccess?.()
@@ -101,7 +101,7 @@ const CreateOrEditUnitModal = ({
   const onCancel = () => {
     form.reset({
       name: unitDetails?.name || '',
-      group: (unitDetails?.group as 'uom' | 'measure') || 'uom'
+      group: group
     })
     onOpenChange(false)
   }
@@ -157,7 +157,7 @@ const CreateOrEditUnitModal = ({
             )}
           />
           {/* Group Field */}
-          <FormField
+          {/* <FormField
             control={form.control}
             name='group'
             render={({ field }) => (
@@ -180,7 +180,7 @@ const CreateOrEditUnitModal = ({
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
         </form>
       </Form>
     </CommonDialog>

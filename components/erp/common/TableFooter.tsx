@@ -33,7 +33,7 @@ const TableFooter: React.FC<TableFooterProps> = ({
   onPageSizeChange
 }) => {
   return (
-    <div className='flex items-center justify-between border-t px-4 pt-3'>
+    <div className='flex items-center justify-between border-border px-4 pt-3'>
       {/* Left side - Selected rows count */}
       <div className='text-sm text-gray'>
         {selectedRowsCount} of {totalRows} row(s) selected

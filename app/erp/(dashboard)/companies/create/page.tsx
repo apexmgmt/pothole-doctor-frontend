@@ -1,7 +1,7 @@
-import CreateCompany from '@/views/erp/companies/CreateCompany'
+import CreateOrganization from '@/views/erp/organizations/CreateOrganization'
 
-const CreateCompaniesPage = () => {
-  return <CreateCompany />
+const CreateOrganizationsPage = () => {
+  return <CreateOrganization />
 }
 
-export default CreateCompaniesPage
+export default CreateOrganizationsPage

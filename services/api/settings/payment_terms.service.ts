@@ -1,6 +1,6 @@
 import { getApiUrl } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { PAYMENT_TERMS, PAYMENT_TERMS_TYPES } from '@/constants/api'
+import { PAYMENT_TERMS, PAYMENT_TERMS_ALL, PAYMENT_TERMS_TYPES } from '@/constants/api'
 import { PaymentTermPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
 
@@ -87,7 +87,7 @@ export default class PaymentTermsService {
       }
       await revalidate('payment-terms')
       await revalidate(`payment-terms/${paymentTermId}`)
-      await revalidate('payment-terms')
+      await revalidate('payment-terms-all')
 
       return await response.json()
     } catch (error) {
@@ -107,7 +107,7 @@ export default class PaymentTermsService {
         const errorData = await response.json()
         throw new Error(errorData.message || 'Failed to delete payment terms')
       }
-      await revalidate('payment-terms')
+      await revalidate('payment-terms-all')
       await revalidate(`payment-terms/${paymentTermId}`)
       await revalidate('payment-terms')
       return await response.json()
@@ -130,7 +130,26 @@ export default class PaymentTermsService {
       }
       await revalidate('payment-terms')
       await revalidate(`payment-terms/${paymentTermId}`)
-      await revalidate('payment-terms')
+      await revalidate('payment-terms-all')
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /** Get All Payment Term API */
+  static getAllPaymentTerms = async () => {
+    try {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + PAYMENT_TERMS_ALL, {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 3600, tags: ['payment-terms-all'] } // Cache for 1 hour
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to fetch payment term list')
+      }
       return await response.json()
     } catch (error) {
       throw error
