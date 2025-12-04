@@ -1,44 +1,15 @@
 'use client'
 
-import React, { useState, ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { NavigationItem } from '@/types'
 
-import { ArrowDownIcon, ArrowUpIcon, SettingsIcon, EstimateIcon, UserIcon, CRMIcon, HomeIcon } from '@/public/icons'
-import SidebarFooter from './SidebarFooter'
+import { SettingsIcon, HomeIcon } from '@/public/icons'
 import { Building2, LocateIcon, Map, UserLock, Users } from 'lucide-react'
-
-interface NavigationSubItem {
-  id: string
-  label: string
-  href: string
-  icon?: ReactNode
-  hasSubItems?: boolean
-  subItems?: NavigationSubItem[]
-  exactMatch?: boolean // default true if undefined
-}
-
-interface NavigationItem extends NavigationSubItem {
-  hasSubItems: boolean
-  subItems?: NavigationSubItem[]
-}
-
-interface ExpandedSections {
-  [key: string]: boolean
-}
+import SidebarFooter from './SidebarFooter'
+import MenuItem from './menu-item'
 
 const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
-  const pathname = usePathname()
-  const [expandedSections, setExpandedSections] = useState<ExpandedSections>({})
-
-  const toggleSection = (section: string) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }))
-  }
-
   const navigationItems: NavigationItem[] = [
     {
       id: 'dashboard',
@@ -204,77 +175,6 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
     }
   ]
 
-  // path helpers
-  const normalize = (p: string) => p.replace(/\/+$/, '') || '/'
-
-  // exactMatch default is true; when false, also active for any descendant path
-  const isItemActive = (item: NavigationSubItem): boolean => {
-    const current = normalize(pathname || '')
-    const target = normalize(item.href)
-    const exact = item.exactMatch !== false
-
-    if (exact) {
-      return current === target
-    } else {
-      // Active for target itself or any path beneath it; use boundary to avoid /example matching /example-other
-      return current === target || current.startsWith(target + '/')
-    }
-  }
-
-  const hasActiveDescendant = (item: NavigationSubItem): boolean =>
-    !!item.subItems?.some(child => isItemActive(child) || hasActiveDescendant(child))
-
-  // Recursive renderer; inherit parent icon if a child has none (template)
-  const renderMenuItem = (item: NavigationSubItem, level = 0, parentIcon?: ReactNode): ReactNode => {
-    const isActive = isItemActive(item) || hasActiveDescendant(item)
-    const isExpanded = expandedSections[item.id]
-    const paddingLeft = level * 16
-    const resolvedIcon = item.icon ?? parentIcon // ensure submenu shows an icon
-
-    if (item.hasSubItems && item.subItems) {
-      return (
-        <div key={item.id}>
-          <button
-            onClick={() => toggleSection(item.id)}
-            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors ${
-              isActive ? 'bg-accent/40 text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
-            }`}
-            style={{ paddingLeft: `${paddingLeft + 12}px` }}
-            type='button'
-          >
-            <div className='flex items-center gap-3'>
-              {resolvedIcon}
-              <span className='font-medium'>{item.label}</span>
-            </div>
-            {isExpanded ? <ArrowUpIcon /> : <ArrowDownIcon />}
-          </button>
-
-          {isExpanded && (
-            <ul className='space-y-1 mt-2'>
-              {item.subItems.map(subItem => (
-                <li key={subItem.id}>{renderMenuItem(subItem, level + 1, resolvedIcon)}</li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )
-    } else {
-      return (
-        <Link
-          key={item.id}
-          href={item.href}
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-            isActive ? 'bg-accent text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
-          }`}
-          style={{ paddingLeft: `${paddingLeft + 12}px` }}
-        >
-          {resolvedIcon}
-          <span className='font-medium'>{item.label}</span>
-        </Link>
-      )
-    }
-  }
-
   return (
     <div className='w-full h-screen bg-bg-2 border-r border-border flex flex-col'>
       {/* Header/Logo */}
@@ -284,9 +184,11 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
 
       {/* Main Navigation */}
       <nav className='flex-1 p-4 overflow-y-auto'>
-        <ul className='space-y-2'>
+        <ul className='space-y-1'>
           {navigationItems.map(item => (
-            <li key={item.id}>{renderMenuItem(item)}</li>
+            <li key={item.id}>
+              <MenuItem item={item} isFirstItem={false} isLastItem={false} />
+            </li>
           ))}
         </ul>
       </nav>
