@@ -19,6 +19,7 @@ import CreateOrEditCityModal from '../../locations/cities/CreateOrEditCityModal'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import CreateOrEditPaymentTermModal from './CreateOrEditPaymentTermModal'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ paymentTermTypes }) => {
   const router = useRouter()
@@ -172,12 +173,20 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton
-            tooltip='Edit Payment Term Information'
-            onClick={() => handleOpenEditModal(row.id)}
-            variant='icon'
+          <ThreeDotButton
+            buttons={[
+              <EditButton
+                tooltip='Edit Payment Term Information'
+                onClick={() => handleOpenEditModal(row.id)}
+                variant='text'
+              />,
+              <DeleteButton
+                tooltip='Delete Payment Term'
+                variant='text'
+                onClick={() => handleDeletePaymentTerm(row.id)}
+              />
+            ]}
           />
-          <DeleteButton tooltip='Delete Payment Term' variant='icon' onClick={() => handleDeletePaymentTerm(row.id)} />
         </div>
       ),
       sortable: false,

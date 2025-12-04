@@ -19,6 +19,7 @@ import PartnerService from '@/services/api/partners/partners.service'
 import CreateOrEditPartnerModal from './CreateOrEditPartnerModal'
 import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
 import PartnerDocuments from './documents/PartnerDocuments'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const Partners: React.FC<PartnersProps> = ({
   businessLocations,
@@ -89,7 +90,7 @@ const Partners: React.FC<PartnersProps> = ({
   useEffect(() => {
     fetchData()
     updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Contractors/Subcontractors'))
+    dispatch(setPageTitle('Manage Contractors'))
   }, [filterOptions])
 
   // Transform API data to match table format
@@ -226,8 +227,17 @@ const Partners: React.FC<PartnersProps> = ({
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton tooltip='Edit Partner Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
-          <DeleteButton tooltip='Delete Partner' variant='icon' onClick={() => handleDeletePartner(row.id)} />
+          <ThreeDotButton
+            // title='Action'
+            buttons={[
+              <EditButton
+                tooltip='Edit Partner Information'
+                onClick={() => handleOpenEditModal(row.id)}
+                variant='text'
+              />,
+              <DeleteButton tooltip='Delete Partner' variant='text' onClick={() => handleDeletePartner(row.id)} />
+            ]}
+          />
         </div>
       ),
       sortable: false,
@@ -290,7 +300,7 @@ const Partners: React.FC<PartnersProps> = ({
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Contractor/Subcontractor
+        Add Contractor
       </Button>
     </div>
   )
@@ -298,7 +308,7 @@ const Partners: React.FC<PartnersProps> = ({
   // Button configuration for CommonLayout
   const tabs = [
     {
-      label: 'Contractors/Subcontractors',
+      label: 'Contractors',
       icon: UserIcon,
       onClick: () => setActiveTab('partners'),
       isActive: activeTab === 'partners'
@@ -318,7 +328,7 @@ const Partners: React.FC<PartnersProps> = ({
 
   return (
     <>
-      <CommonLayout title='Contractors/Subcontractors' buttons={tabs}>
+      <CommonLayout title='Contractors' buttons={tabs}>
         {activeTab === 'partners' && (
           <CommonTable
             data={{
@@ -337,13 +347,11 @@ const Partners: React.FC<PartnersProps> = ({
             showFilters={true}
             pagination={true}
             isLoading={isLoading}
-            emptyMessage='No contractor/subcontractor found'
+            emptyMessage='No contractor found'
           />
         )}
 
-        {activeTab === 'documents' && selectedPartnerId && (
-          <PartnerDocuments userId={selectedPartnerId} />
-        )}
+        {activeTab === 'documents' && selectedPartnerId && <PartnerDocuments userId={selectedPartnerId} />}
       </CommonLayout>
 
       <CreateOrEditPartnerModal

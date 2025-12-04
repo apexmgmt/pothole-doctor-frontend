@@ -138,7 +138,7 @@ const CreateOrganization: React.FC = () => {
                   <FormControl>
                     <Input
                       type='email'
-                      placeholder='company email'
+                      placeholder='Company email'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -156,7 +156,7 @@ const CreateOrganization: React.FC = () => {
                   <FormLabel>Phone</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder='phone'
+                      placeholder='Phone'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -216,7 +216,7 @@ const CreateOrganization: React.FC = () => {
                   <FormControl>
                     <Input
                       type='password'
-                      placeholder='password'
+                      placeholder='Password'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -239,7 +239,7 @@ const CreateOrganization: React.FC = () => {
                   <FormControl>
                     <Input
                       type='password'
-                      placeholder='confirm password'
+                      placeholder='Confirm password'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -271,12 +271,7 @@ const CreateOrganization: React.FC = () => {
           </div>
 
           <div className='flex gap-3 pt-4 border-t border-border'>
-            <Button
-              type='submit'
-              variant='outline'
-              disabled={isLoading}
-              className='flex-1 bg-bg-3 text-light disabled:opacity-50'
-            >
+            <Button type='submit' disabled={isLoading} className='flex-1 bg-bg-3 text-light disabled:opacity-50'>
               {isLoading ? 'Saving...' : 'Create'}
             </Button>
             <Button

@@ -17,6 +17,7 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import NoteTypeService from '@/services/api/settings/note_types.service'
 import CreateOrEditNoteTypeModal from './CreateOrEditNoteTypeModal'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const NoteTypes: React.FC = () => {
   const router = useRouter()
@@ -158,15 +159,15 @@ const NoteTypes: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton
-            tooltip='Edit Note Type Information'
-            onClick={() => handleOpenEditModal(row.id)}
-            variant='icon'
-          />
-          <DeleteButton
-            tooltip='Delete Note Type'
-            variant='icon'
-            onClick={() => handleDeleteNoteType(row.id)}
+          <ThreeDotButton
+            buttons={[
+              <EditButton
+                tooltip='Edit Note Type Information'
+                onClick={() => handleOpenEditModal(row.id)}
+                variant='text'
+              />,
+              <DeleteButton tooltip='Delete Note Type' variant='text' onClick={() => handleDeleteNoteType(row.id)} />
+            ]}
           />
         </div>
       ),

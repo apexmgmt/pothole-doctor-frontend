@@ -17,6 +17,7 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ContactTypeService from '@/services/api/settings/contact_types.service'
 import CreateOrEditContactTypeModal from './CreateOrEditContactTypeModal'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_terms }) => {
   const router = useRouter()
@@ -146,37 +147,41 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
       sortable: true
     },
     {
-        id: 'payment_term',
-        header: 'Payment Term',
-        cell: row => <span className='font-medium'>{row.payment_term}</span>,
-        sortable: true
+      id: 'payment_term',
+      header: 'Payment Term',
+      cell: row => <span className='font-medium'>{row.payment_term}</span>,
+      sortable: true
     },
     {
-        id: 'material_down_payment',
-        header: 'Material Down Payment',
-        cell: row => <span className='font-medium'>{row.material_down_payment}</span>,
-        sortable: true
+      id: 'material_down_payment',
+      header: 'Material Down Payment',
+      cell: row => <span className='font-medium'>{row.material_down_payment}</span>,
+      sortable: true
     },
     {
-        id: 'labor_down_payment',
-        header: 'Labor Down Payment',
-        cell: row => <span className='font-medium'>{row.labor_down_payment}</span>,
-        sortable: true
+      id: 'labor_down_payment',
+      header: 'Labor Down Payment',
+      cell: row => <span className='font-medium'>{row.labor_down_payment}</span>,
+      sortable: true
     },
     {
       id: 'actions',
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton
-            tooltip='Edit Contact Type Information'
-            onClick={() => handleOpenEditModal(row.id)}
-            variant='icon'
-          />
-          <DeleteButton
-            tooltip='Delete Contact Type'
-            variant='icon'
-            onClick={() => handleDeleteContactType(row.id)}
+          <ThreeDotButton
+            buttons={[
+              <EditButton
+                tooltip='Edit Contact Type Information'
+                onClick={() => handleOpenEditModal(row.id)}
+                variant='text'
+              />,
+              <DeleteButton
+                tooltip='Delete Contact Type'
+                variant='text'
+                onClick={() => handleDeleteContactType(row.id)}
+              />
+            ]}
           />
         </div>
       ),

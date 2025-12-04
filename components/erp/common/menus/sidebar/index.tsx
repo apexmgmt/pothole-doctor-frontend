@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { NavigationItem } from '@/types'
@@ -29,7 +30,7 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
     },
     {
       id: 'partners',
-      label: 'Contractors/Sub',
+      label: 'Contractors',
       icon: <Building2 className='h-4 w-4' />,
       href: '/erp/contractors',
       hasSubItems: false,
