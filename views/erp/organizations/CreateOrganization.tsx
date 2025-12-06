@@ -271,7 +271,7 @@ const CreateOrganization: React.FC = () => {
           </div>
 
           <div className='flex gap-3 pt-4 border-t border-border'>
-            <Button type='submit' disabled={isLoading} className='flex-1 bg-bg-3 text-light disabled:opacity-50'>
+            <Button type='submit' disabled={isLoading} className='flex-1 disabled:opacity-50'>
               {isLoading ? 'Saving...' : 'Create'}
             </Button>
             <Button

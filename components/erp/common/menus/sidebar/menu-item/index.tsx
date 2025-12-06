@@ -8,11 +8,10 @@ import TreeConnector from './TreeConnector'
 
 const MenuItem: React.FC<{
   item: NavigationSubItem
-  isFirstItem: boolean
-  isLastItem: boolean
+  isLastItem?: boolean
   level?: number
   parentIcon?: ReactNode
-}> = ({ item, isFirstItem, isLastItem, level = 0, parentIcon }) => {
+}> = ({ item, isLastItem = false, level = 0, parentIcon }) => {
   const pathname = usePathname()
   const [expandedSections, setExpandedSections] = useState<ExpandedSections>({})
 
@@ -57,7 +56,7 @@ const MenuItem: React.FC<{
         type='button'
       >
         <div className='flex items-center gap-3'>
-          <TreeConnector isFirstItem={isFirstItem} isLastItem={isLastItem} level={level} resolvedIcon={resolvedIcon} />
+          <TreeConnector level={level} resolvedIcon={resolvedIcon} />
           <span className='font-medium'>{item.label}</span>
         </div>
         {isExpanded ? <ArrowUpIcon /> : <ArrowDownIcon />}
@@ -69,7 +68,6 @@ const MenuItem: React.FC<{
             <li key={subItem.id}>
               <MenuItem
                 item={subItem}
-                isFirstItem={idx === 0}
                 isLastItem={idx + 1 === item.subItems?.length}
                 level={level + 1}
                 parentIcon={resolvedIcon}
@@ -90,9 +88,8 @@ const MenuItem: React.FC<{
       className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
         isActive ? 'bg-accent text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
       }`}
-      // style={{ marginLeft: `${marginLeft}px` }}
     >
-      <TreeConnector isFirstItem={isFirstItem} isLastItem={isLastItem} level={level} resolvedIcon={resolvedIcon} />
+      <TreeConnector isLastItem={isLastItem} level={level} resolvedIcon={resolvedIcon} />
       <span className='font-medium'>{item.label}</span>
     </Link>
   )

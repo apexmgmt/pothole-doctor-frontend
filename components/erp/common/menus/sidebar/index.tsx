@@ -188,7 +188,7 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
         <ul className='space-y-1'>
           {navigationItems.map(item => (
             <li key={item.id}>
-              <MenuItem item={item} isFirstItem={false} isLastItem={false} />
+              <MenuItem item={item} />
             </li>
           ))}
         </ul>

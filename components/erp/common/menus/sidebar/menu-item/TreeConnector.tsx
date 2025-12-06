@@ -1,11 +1,10 @@
 import React, { ReactNode } from 'react'
 
 const TreeConnector: React.FC<{
-  isFirstItem: boolean
-  isLastItem: boolean
+  isLastItem?: boolean
   level: number
   resolvedIcon: ReactNode
-}> = ({ isFirstItem, isLastItem, level, resolvedIcon }) => {
+}> = ({ isLastItem, level, resolvedIcon }) => {
   if (level > 0) {
     return (
       <span

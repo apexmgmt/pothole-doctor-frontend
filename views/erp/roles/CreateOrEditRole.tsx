@@ -162,12 +162,7 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
 
           {/* Submit Buttons */}
           <div className='flex gap-3 pt-4 border-t border-border'>
-            <Button
-              type='submit'
-              variant='outline'
-              disabled={form.formState.isSubmitting}
-              className='flex-1 bg-bg-3 text-light disabled:opacity-50'
-            >
+            <Button type='submit' disabled={form.formState.isSubmitting} className='flex-1 disabled:opacity-50'>
               {form.formState.isSubmitting ? 'Saving...' : mode === 'create' ? 'Create Role' : 'Update Role'}
             </Button>
             <Button

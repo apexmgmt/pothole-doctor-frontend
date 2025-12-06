@@ -190,12 +190,7 @@ const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails })
           </div>
 
           <div className='flex gap-3 pt-4 border-t border-border'>
-            <Button
-              type='submit'
-              variant='default'
-              disabled={isLoading}
-              className='flex-1 bg-bg-3 text-light hover:bg-bg-4 disabled:opacity-50'
-            >
+            <Button type='submit' variant='default' disabled={isLoading} className='flex-1 disabled:opacity-50'>
               {isLoading ? 'Saving...' : 'Update'}
             </Button>
             <Button
