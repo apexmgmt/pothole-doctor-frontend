@@ -24,3 +24,5 @@ export * from './task_types_api'
 export * from './partners_api'
 export * from './companies_api'
 export * from './skills_api'
+
+export * from './labor_costs_api';

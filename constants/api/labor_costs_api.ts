@@ -1,0 +1,1 @@
+export const LABOR_COSTS: string = '';

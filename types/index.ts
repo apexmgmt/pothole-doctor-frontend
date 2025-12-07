@@ -18,3 +18,5 @@ export * from './partners.types'
 export * from './companies.type'
 export * from './skills.types'
 export * from './documents.types'
+
+export * from './labor_costs.types';
