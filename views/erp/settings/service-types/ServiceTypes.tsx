@@ -17,6 +17,7 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import CreateOrEditServiceTypeModal from './CreateOrEditServiceTypeModal'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const ServiceTypes: React.FC = () => {
   const router = useRouter()
@@ -169,18 +170,22 @@ const ServiceTypes: React.FC = () => {
       cell: row => (
         <>
           <div className='flex items-center justify-end gap-2'>
-            <EditButton
-              tooltip='Edit Service Type Information'
-              onClick={() => handleOpenEditModal(row.id)}
-              variant='icon'
+            <ThreeDotButton
+              buttons={[
+                <EditButton
+                  tooltip='Edit Service Type Information'
+                  onClick={() => handleOpenEditModal(row.id)}
+                  variant='text'
+                />,
+                row.is_editable && (
+                  <DeleteButton
+                    tooltip='Delete Service Type'
+                    variant='text'
+                    onClick={() => handleDeleteServiceType(row.id)}
+                  />
+                )
+              ]}
             />
-            {row.is_editable && (
-              <DeleteButton
-                tooltip='Delete Service Type'
-                variant='icon'
-                onClick={() => handleDeleteServiceType(row.id)}
-              />
-            )}
           </div>
         </>
       ),

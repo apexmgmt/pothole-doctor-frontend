@@ -229,7 +229,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                   <FormControl>
                     <Input
                       type='email'
-                      placeholder='staff email'
+                      placeholder='Staff email'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -247,7 +247,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                   <FormLabel>Phone</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder='phone'
+                      placeholder='Phone'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -267,7 +267,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                   <FormControl>
                     <Input
                       type='password'
-                      placeholder='password'
+                      placeholder='Password'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -294,7 +294,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                   <FormControl>
                     <Input
                       type='password'
-                      placeholder='confirm password'
+                      placeholder='Confirm password'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -423,12 +423,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
           </Accordion>
 
           <div className='flex gap-3 pt-4 border-t border-border'>
-            <Button
-              type='submit'
-              variant='outline'
-              disabled={isLoading}
-              className='flex-1 bg-bg-3 text-light disabled:opacity-50'
-            >
+            <Button type='submit' disabled={isLoading} className='flex-1 disabled:opacity-50'>
               {isLoading ? 'Saving...' : mode === 'create' ? 'Create Staff' : 'Update Staff'}
             </Button>
             <Button

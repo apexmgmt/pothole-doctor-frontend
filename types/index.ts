@@ -20,3 +20,4 @@ export * from './skills.types'
 export * from './documents.types'
 
 export * from './labor_costs.types';
+export * from './menu.types'

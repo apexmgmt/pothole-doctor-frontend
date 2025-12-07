@@ -18,6 +18,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import PartnerTypesService from '@/services/api/settings/partner_types.service'
 import CreateOrEditPartnerTypeModal from './CreateOrEditPartnerTypeModal'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const PartnerTypes: React.FC = () => {
   const router = useRouter()
@@ -148,15 +149,19 @@ const PartnerTypes: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton
-            tooltip='Edit Contractor Type Information'
-            onClick={() => handleOpenEditModal(row.id)}
-            variant='icon'
-          />
-          <DeleteButton
-            tooltip='Delete Contractor Type'
-            variant='icon'
-            onClick={() => handleDeletePartnerType(row.id)}
+          <ThreeDotButton
+            buttons={[
+              <EditButton
+                tooltip='Edit Contractor Type Information'
+                onClick={() => handleOpenEditModal(row.id)}
+                variant='text'
+              />,
+              <DeleteButton
+                tooltip='Delete Contractor Type'
+                variant='text'
+                onClick={() => handleDeletePartnerType(row.id)}
+              />
+            ]}
           />
         </div>
       ),
