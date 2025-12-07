@@ -19,7 +19,7 @@ export default function EditButton({
   link = '',
   variant = 'icon',
   buttonSize = 'icon',
-  buttonVariant = 'outline',
+  buttonVariant = 'ghost',
   tooltip = ''
 }: EditButtonProps) {
   const buttonContent = variant === 'icon' ? <EditIcon className='h-6 w-6' /> : <span>{title}</span>
@@ -29,11 +29,24 @@ export default function EditButton({
       <Tooltip>
         <TooltipTrigger asChild>
           {link === '' ? (
-            <Button variant={buttonVariant} size={buttonSize} onClick={onClick} type='button' aria-label={title}>
+            <Button
+              variant={buttonVariant}
+              size={buttonSize}
+              onClick={onClick}
+              type='button'
+              aria-label={title}
+              className={`hover:text-yellow-200 ${variant !== 'icon' ? 'w-full' : ''}`}
+            >
               {buttonContent}
             </Button>
           ) : (
-            <Button variant={buttonVariant} size={buttonSize} aria-label={title} asChild>
+            <Button
+              variant={buttonVariant}
+              size={buttonSize}
+              aria-label={title}
+              asChild
+              className={`hover:text-yellow-200 ${variant !== 'icon' ? 'w-full' : ''}`}
+            >
               <Link href={link}>{buttonContent}</Link>
             </Button>
           )}

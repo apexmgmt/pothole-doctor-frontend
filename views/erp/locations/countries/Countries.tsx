@@ -17,6 +17,7 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import CountryService from '@/services/api/locations/country.service'
 import CreateOrEditCountryModal from './CreateOrEditCountryModal'
 import { Country } from '@/types'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const Countries: React.FC = () => {
   const router = useRouter()
@@ -183,8 +184,16 @@ const Countries: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton tooltip='Edit Country Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
-          <DeleteButton tooltip='Delete Country' variant='icon' onClick={() => handleDeleteCountry(row.id)} />
+          <ThreeDotButton
+            buttons={[
+              <EditButton
+                tooltip='Edit Country Information'
+                onClick={() => handleOpenEditModal(row.id)}
+                variant='text'
+              />,
+              <DeleteButton tooltip='Delete Country' variant='text' onClick={() => handleDeleteCountry(row.id)} />
+            ]}
+          />
         </div>
       ),
       sortable: false,

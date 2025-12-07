@@ -244,9 +244,9 @@ const CommonTable: React.FC<CommonTableProps> = ({
                     <tr
                       key={rowIndex}
                       onClick={() => handleRowClick(row)}
-                      className={`border-b border-border transition-colors cursor-pointer ${
+                      className={`transition-colors cursor-pointer ${
                         isSelected ? 'bg-gray-800 hover:bg-gray-900' : 'hover:bg-gray-900'
-                      }`}
+                      } ${rowIndex + 1 === tableData.length ? '' : 'border-b border-border'}`}
                     >
                       {columns.map(column => {
                         const columnWidth = getColumnWidth(column?.size)

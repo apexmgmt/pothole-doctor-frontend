@@ -17,6 +17,7 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import TaskTypeService from '@/services/api/settings/task_types.service'
 import CreateOrEditTaskTypeModal from './CreateOrEditTaskTypeModal'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const TaskTypes: React.FC = () => {
   const router = useRouter()
@@ -74,7 +75,7 @@ const TaskTypes: React.FC = () => {
         })
     } catch (error) {
       setIsLoading(false)
-        toast.error('Something went wrong while fetching the task types!')
+      toast.error('Something went wrong while fetching the task types!')
     }
   }
 
@@ -147,9 +148,7 @@ const TaskTypes: React.FC = () => {
       id: 'is_editable',
       header: 'Editable',
       cell: row => (
-        <span className={`font-medium ${row.is_editable ? '' : 'text-red-600'}`}>
-          {row.is_editable ? 'Yes' : 'No'}
-        </span>
+        <span className={`font-medium ${row.is_editable ? '' : 'text-red-600'}`}>{row.is_editable ? 'Yes' : 'No'}</span>
       ),
       sortable: false
     },
@@ -158,8 +157,18 @@ const TaskTypes: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-end gap-2'>
-          <EditButton tooltip='Edit Task Type Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
-          {row.is_editable && <DeleteButton tooltip='Delete Task Type' variant='icon' onClick={() => handleDeleteTaskType(row.id)} />}
+          <ThreeDotButton
+            buttons={[
+              <EditButton
+                tooltip='Edit Task Type Information'
+                onClick={() => handleOpenEditModal(row.id)}
+                variant='text'
+              />,
+              row.is_editable && (
+                <DeleteButton tooltip='Delete Task Type' variant='text' onClick={() => handleDeleteTaskType(row.id)} />
+              )
+            ]}
+          />
         </div>
       ),
       sortable: false,

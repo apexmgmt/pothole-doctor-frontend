@@ -18,6 +18,7 @@ import BusinessLocationService from '@/services/api/locations/business_location.
 import Link from 'next/link'
 import { DetailsIcon, InvoiceIcon, LocationIcon, UserIcon } from '@/public/icons'
 import BusinessLocationDetails from './BusinessLocationDetails'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const BusinessLocations: React.FC = () => {
   const router = useRouter()
@@ -175,15 +176,19 @@ const BusinessLocations: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton
-            tooltip='Edit Business Location Information'
-            link={`/erp/locations/businesses/${row.id}/edit`}
-            variant='icon'
-          />
-          <DeleteButton
-            tooltip='Delete Business L'
-            variant='icon'
-            onClick={() => handleDeleteBusinessLocation(row.id)}
+          <ThreeDotButton
+            buttons={[
+              <EditButton
+                tooltip='Edit Business Location Information'
+                link={`/erp/locations/businesses/${row.id}/edit`}
+                variant='text'
+              />,
+              <DeleteButton
+                tooltip='Delete Business L'
+                variant='text'
+                onClick={() => handleDeleteBusinessLocation(row.id)}
+              />
+            ]}
           />
         </div>
       ),

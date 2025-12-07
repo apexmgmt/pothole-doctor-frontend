@@ -1,5 +1,5 @@
 import Header from '@/components/erp/common/Header'
-import Sidebar from '@/components/erp/common/menus/Sidebar'
+import Sidebar from '@/components/erp/common/menus/sidebar'
 import { ReactNode } from '@/types'
 import { decryptData } from '@/utils/encryption'
 import { cookies } from 'next/headers'

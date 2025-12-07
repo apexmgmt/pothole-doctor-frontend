@@ -20,6 +20,7 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import Link from 'next/link'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 interface CompanyData {
   id: string
@@ -216,7 +217,11 @@ const Organizations: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex gap-2'>
-          <EditButton tooltip='Edit Company Information' link={`/erp/companies/${row.id}/edit`} variant='icon' />
+          <ThreeDotButton
+            buttons={[
+              <EditButton tooltip='Edit Company Information' link={`/erp/companies/${row.id}/edit`} variant='text' />
+            ]}
+          />
         </div>
       ),
       sortable: false
