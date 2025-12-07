@@ -1,6 +1,10 @@
-import { ServiceType } from "./service_types.types"
-import { Unit } from "./units.types"
+import { ServiceType } from './service_types.types'
+import { Unit } from './units.types'
 
+export interface LaborCostsProps {
+  serviceTypes: ServiceType[]
+  units: Unit[]
+}
 export interface LaborCost {
   id: string
   name: string
@@ -17,13 +21,11 @@ export interface LaborCost {
 }
 
 export interface LaborCostPayload {
-    name: string
-    description: string
-    cost: number
-    price: number
-    margin: number
-    service_type_id: string
-    unit_id: string 
+  name: string
+  description: string
+  cost: number
+  price: number
+  margin: number
+  service_type_id: string
+  unit_id: string
 }
-
-

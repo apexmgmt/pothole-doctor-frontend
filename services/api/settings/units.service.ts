@@ -1,6 +1,6 @@
 import { getApiUrl } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { UNITS } from '@/constants/api'
+import { UNITS, UNITS_ALL } from '@/constants/api'
 import { UnitPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
 
@@ -44,7 +44,8 @@ export default class UnitService {
 
       await revalidate('units')
       await revalidate('units-all')
-
+      await revalidate('units-all-uom')
+      await revalidate('units-all-measure')
       return await response.json()
     } catch (error) {
       throw error
@@ -89,6 +90,8 @@ export default class UnitService {
       await revalidate('units')
       await revalidate(`units/${unitId}`)
       await revalidate('units-all')
+      await revalidate('units-all-uom')
+      await revalidate('units-all-measure')
       return await response.json()
     } catch (error) {
       throw error
@@ -110,10 +113,30 @@ export default class UnitService {
       await revalidate('units')
       await revalidate(`units/${unitId}`)
       await revalidate('units-all')
+      await revalidate('units-all-uom')
+      await revalidate('units-all-measure')
       return await response.json()
     } catch (error) {
       throw error
     }
   }
 
+  /** Get all Units API */
+  static getAllUnits = async (group?: string | 'uom' | 'measure') => {
+    try {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + UNITS_ALL + (group ? `?group=${group}` : ''), {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 3600, tags: ['units-all' + (group ? `-${group}` : '')] } // Cache for 1 hour
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to fetch units')
+      }
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
 }
