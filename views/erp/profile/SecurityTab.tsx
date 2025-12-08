@@ -28,14 +28,6 @@ const SecurityTab: React.FC<SecurityTabProps> = () => {
       <div className='space-y-5'>
         <div className='flex items-center justify-between'>
           <h3 className='text-lg font-semibold text-light'>Change Password</h3>
-          <EditButton
-            title='Edit'
-            tooltip='Edit Password'
-            link='/erp/profile/edit'
-            variant='text'
-            buttonSize='default'
-            buttonVariant='outline'
-          />
         </div>
 
         {/* Password Fields in One Row */}

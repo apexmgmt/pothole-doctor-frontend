@@ -36,12 +36,13 @@ const Login: React.FC = () => {
       AuthService.login(data.email, data.password)
         .then(response => {
           setIsLoading(false)
-          console.log(response)
           // save the token and refresh token
           CookieService.store('access_token', response?.data.access_token, { expires: response?.data.expires_in })
           CookieService.store('refresh_token', response?.data.refresh_token)
           CookieService.store('token_type', response?.data.token_type)
           CookieService.store('user', JSON.stringify(encryptData(response?.data?.user)))
+          CookieService.store('roles', JSON.stringify(encryptData(response?.data?.roles || [])))
+          CookieService.store('permissions', JSON.stringify(encryptData(response?.data?.permissions || [])))          
           dispatch(setUserData(response?.data?.user))
           // redirect to dashboard
           router.push('/erp/')

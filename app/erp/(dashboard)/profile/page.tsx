@@ -1,7 +1,12 @@
+import CookieService from '@/services/app/cookie.service'
+import { decryptData } from '@/utils/encryption'
 import Profile from '@/views/erp/profile'
 
-const ProfilePage = () => {
-  return <Profile />
+const ProfilePage = async () => {
+  const encryptedUser = await CookieService.get('user')
+  const userData = encryptedUser ? decryptData(encryptedUser) : null
+
+  return <Profile userData={userData} />
 }
 
 export default ProfilePage
