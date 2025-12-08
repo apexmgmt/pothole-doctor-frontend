@@ -1,6 +1,6 @@
 'use client'
 
-import { Warehouse, WarehousePayload, BusinessLocation, CountryWithStates } from '@/types'
+import { WarehousePayload, WarehouseFormValues, CreateOrEditWarehouseModalProps } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -12,31 +12,6 @@ import { useEffect, useState, useMemo } from 'react'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import WarehouseService from '@/services/api/warehouses.service'
 import { Separator } from '@/components/ui/separator'
-
-interface CreateOrEditWarehouseModalProps {
-  mode?: 'create' | 'edit'
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  businessLocations: BusinessLocation[]
-  countriesWithStateAndCities: CountryWithStates[]
-  warehouseId?: string
-  warehouseDetails?: Warehouse
-  onSuccess?: () => void
-}
-
-interface FormValues {
-  location_id: string[]
-  title: string
-  email: string
-  phone: string
-  fax_number: string
-  tax_rate: number
-  street: string
-  state_id: string
-  city_id: string
-  zip_code: string
-  country_id: string
-}
 
 const CreateOrEditWarehouseModal = ({
   mode = 'create',
@@ -50,7 +25,7 @@ const CreateOrEditWarehouseModal = ({
 }: CreateOrEditWarehouseModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const form = useForm<FormValues>({
+  const form = useForm<WarehouseFormValues>({
     defaultValues: {
       location_id: warehouseDetails?.locations?.map(loc => loc.id.toString()) || [],
       title: warehouseDetails?.title || '',
@@ -124,33 +99,7 @@ const CreateOrEditWarehouseModal = ({
     }
   }, [selectedStateId, availableCities, form])
 
-  const onSubmit = async (values: FormValues) => {
-    // Basic validation
-    if (!values.title || values.title.length < 2) {
-      toast.error('Title must be at least 2 characters')
-      return
-    }
-    if (!values.email) {
-      toast.error('Email is required')
-      return
-    }
-    if (!values.location_id || values.location_id.length === 0) {
-      toast.error('At least one location is required')
-      return
-    }
-    if (!values.country_id) {
-      toast.error('Country is required')
-      return
-    }
-    if (!values.state_id) {
-      toast.error('State is required')
-      return
-    }
-    if (!values.city_id) {
-      toast.error('City is required')
-      return
-    }
-
+  const onSubmit = async (values: WarehouseFormValues) => {
     setIsLoading(true)
     const payload: WarehousePayload = {
       location_id: values.location_id,
@@ -240,6 +189,10 @@ const CreateOrEditWarehouseModal = ({
             <FormField
               control={form.control}
               name='location_id'
+              rules={{
+                required: 'At least one location is required',
+                validate: value => value.length > 0 || 'At least one location is required'
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -265,6 +218,10 @@ const CreateOrEditWarehouseModal = ({
             <FormField
               control={form.control}
               name='title'
+              rules={{
+                required: 'Warehouse title is required',
+                minLength: { value: 2, message: 'Title must be at least 2 characters' }
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -282,6 +239,13 @@ const CreateOrEditWarehouseModal = ({
             <FormField
               control={form.control}
               name='email'
+              rules={{
+                required: 'Email is required',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Invalid email address'
+                }
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -329,6 +293,10 @@ const CreateOrEditWarehouseModal = ({
             <FormField
               control={form.control}
               name='tax_rate'
+              rules={{
+                min: { value: 0, message: 'Tax rate must be at least 0' },
+                max: { value: 100, message: 'Tax rate cannot exceed 100' }
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tax Rate (%)</FormLabel>
@@ -357,6 +325,9 @@ const CreateOrEditWarehouseModal = ({
             <FormField
               control={form.control}
               name='country_id'
+              rules={{
+                required: 'Country is required'
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -385,6 +356,9 @@ const CreateOrEditWarehouseModal = ({
             <FormField
               control={form.control}
               name='state_id'
+              rules={{
+                required: 'State is required'
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -423,6 +397,9 @@ const CreateOrEditWarehouseModal = ({
             <FormField
               control={form.control}
               name='city_id'
+              rules={{
+                required: 'City is required'
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -461,9 +438,14 @@ const CreateOrEditWarehouseModal = ({
             <FormField
               control={form.control}
               name='zip_code'
+              rules={{
+                required: 'Zip code is required'
+              }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Zip Code</FormLabel>
+                  <FormLabel>
+                    Zip Code <span className='text-red-500'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder='Enter zip code' {...field} />
                   </FormControl>

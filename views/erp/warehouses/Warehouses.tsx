@@ -191,7 +191,7 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
       header: 'Address',
       cell: row => (
         <span className='font-medium'>
-          {row.street}, {row.city}, {row.state}, {row.zip_code}
+          {row.street ? `${row.street}, ` : ''}{row.city}, {row.state}, {row.zip_code}
         </span>
       ),
       sortable: false

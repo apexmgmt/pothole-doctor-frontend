@@ -33,6 +33,31 @@ export interface WarehousePayload {
 }
 
 export interface WarehousesProps {
-    businessLocations: BusinessLocation[]
-    countriesWithStateAndCities: CountryWithStates[]
+  businessLocations: BusinessLocation[]
+  countriesWithStateAndCities: CountryWithStates[]
+}
+
+export interface WarehouseFormValues {
+  location_id: string[]
+  title: string
+  email: string
+  phone: string
+  fax_number: string
+  tax_rate: number
+  street: string
+  state_id: string
+  city_id: string
+  zip_code: string
+  country_id: string
+}
+
+export interface CreateOrEditWarehouseModalProps {
+  mode?: 'create' | 'edit'
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  businessLocations: BusinessLocation[]
+  countriesWithStateAndCities: CountryWithStates[]
+  warehouseId?: string
+  warehouseDetails?: Warehouse
+  onSuccess?: () => void
 }
