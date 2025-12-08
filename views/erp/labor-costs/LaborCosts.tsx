@@ -17,6 +17,7 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import LaborCostService from '@/services/api/labor_costs.service'
 import CreateOrEditLaborCostModal from './CreateOrEditLaborCostModal'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
   const router = useRouter()
@@ -191,14 +192,16 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
       header: 'Action',
       cell: row => (
         <>
-          <div className='flex items-center justify-end gap-2'>
-            <EditButton
-              tooltip='Edit Labor Cost Information'
-              onClick={() => handleOpenEditModal(row.id)}
-              variant='icon'
-            />
-            <DeleteButton tooltip='Delete Labor Cost' variant='icon' onClick={() => handleDeleteLaborCost(row.id)} />
-          </div>
+          <ThreeDotButton
+            buttons={[
+              <EditButton
+                tooltip='Edit Labor Cost Information'
+                onClick={() => handleOpenEditModal(row.id)}
+                variant='text'
+              />,
+              <DeleteButton tooltip='Delete Labor Cost' variant='text' onClick={() => handleDeleteLaborCost(row.id)} />
+            ]}
+          />
         </>
       ),
       sortable: false,
