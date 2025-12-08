@@ -81,20 +81,6 @@ const CreateOrEditLaborCostModal = ({
   const filteredUnits = useMemo(() => units.filter(unit => unit.group === unitGroup), [units, unitGroup])
 
   const onSubmit = async (values: FormValues) => {
-    // Basic validation
-    if (!values.name || values.name.length < 2) {
-      toast.error('Name must be at least 2 characters')
-      return
-    }
-    if (!values.service_type_id) {
-      toast.error('Service type is required')
-      return
-    }
-    if (!values.unit_id) {
-      toast.error('Unit is required')
-      return
-    }
-
     setIsLoading(true)
     const payload: LaborCostPayload = {
       name: values.name,
@@ -175,6 +161,10 @@ const CreateOrEditLaborCostModal = ({
           <FormField
             control={form.control}
             name='name'
+            rules={{
+              required: 'Labor name is required',
+              minLength: { value: 2, message: 'Name must be at least 2 characters' }
+            }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -209,6 +199,10 @@ const CreateOrEditLaborCostModal = ({
             <FormField
               control={form.control}
               name='cost'
+              rules={{
+                required: 'Cost is required',
+                min: { value: 0, message: 'Cost must be at least 0' }
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -233,6 +227,10 @@ const CreateOrEditLaborCostModal = ({
             <FormField
               control={form.control}
               name='price'
+              rules={{
+                required: 'Price is required',
+                min: { value: 0, message: 'Price must be at least 0' }
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -257,6 +255,10 @@ const CreateOrEditLaborCostModal = ({
             <FormField
               control={form.control}
               name='margin'
+              rules={{
+                required: 'Margin is required',
+                min: { value: 0, message: 'Margin must be at least 0' }
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -284,6 +286,9 @@ const CreateOrEditLaborCostModal = ({
             <FormField
               control={form.control}
               name='service_type_id'
+              rules={{
+                required: 'Service type is required'
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -330,6 +335,9 @@ const CreateOrEditLaborCostModal = ({
             <FormField
               control={form.control}
               name='unit_id'
+              rules={{
+                required: 'Unit is required'
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
