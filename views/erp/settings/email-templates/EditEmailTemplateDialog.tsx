@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import EmailTemplateService from '@/services/api/settings/email_templates.service'
 import { toast } from 'sonner'
-import { createEditor, Descendant, Editor, Transforms, Element as SlateElement, BaseEditor } from 'slate'
+import { createEditor, Descendant, Editor, Transforms, Element as SlateElement, BaseEditor, Text } from 'slate'
 import { Slate, Editable, withReact, RenderLeafProps, RenderElementProps, ReactEditor } from 'slate-react'
 import { withHistory, HistoryEditor } from 'slate-history'
 import {
@@ -61,7 +61,7 @@ const serialize = (nodes: Descendant[]): string => {
 }
 
 const serializeNode = (node: any): string => {
-  if (node.text !== undefined) {
+  if (Text.isText(node)) {
     let text = node.text
     if (node.bold) text = `<strong>${text}</strong>`
     if (node.italic) text = `<em>${text}</em>`
@@ -95,15 +95,34 @@ const serializeNode = (node: any): string => {
 }
 
 const deserialize = (html: string): Descendant[] => {
+  // Handle plain text (no HTML tags at all)
+  if (!html.includes('<') && !html.includes('>')) {
+    const lines = html.split('\n').filter(line => line.trim() !== '')
+    if (lines.length === 0) {
+      return [{ type: 'paragraph', children: [{ text: '' }] }]
+    }
+    return lines.map(line => ({
+      type: 'paragraph',
+      children: [{ text: line }]
+    }))
+  }
+
   const doc = new DOMParser().parseFromString(html, 'text/html')
-  return Array.from(doc.body.childNodes)
+  const nodes = Array.from(doc.body.childNodes)
     .map(node => deserializeNode(node))
     .filter(Boolean) as Descendant[]
+
+  return nodes.length > 0 ? nodes : [{ type: 'paragraph', children: [{ text: '' }] }]
 }
 
 const deserializeNode = (node: Node): any => {
   if (node.nodeType === Node.TEXT_NODE) {
-    return { text: node.textContent || '' }
+    const text = node.textContent || ''
+    // Wrap orphan text nodes in paragraphs
+    if (text.trim() && node.parentNode?.nodeName === 'BODY') {
+      return { type: 'paragraph', children: [{ text }] }
+    }
+    return text.trim() ? { text } : null
   }
 
   if (node.nodeType !== Node.ELEMENT_NODE) {
@@ -111,12 +130,27 @@ const deserializeNode = (node: Node): any => {
   }
 
   const element = node as HTMLElement
-  const children = Array.from(element.childNodes)
+
+  // Handle inline formatting elements
+  if (element.nodeName === 'STRONG' || element.nodeName === 'B') {
+    const text = element.textContent || ''
+    return { text, bold: true }
+  }
+  if (element.nodeName === 'EM' || element.nodeName === 'I') {
+    const text = element.textContent || ''
+    return { text, italic: true }
+  }
+  if (element.nodeName === 'U') {
+    const text = element.textContent || ''
+    return { text, underline: true }
+  }
+
+  let children = Array.from(element.childNodes)
     .map(child => deserializeNode(child))
     .filter(Boolean)
 
   if (children.length === 0) {
-    children.push({ text: '' })
+    children = [{ text: '' }]
   }
 
   const align = element.style.textAlign || undefined
@@ -136,22 +170,34 @@ const deserializeNode = (node: Node): any => {
       return { type: 'numbered-list', children }
     case 'LI':
       return { type: 'list-item', children }
-    case 'STRONG':
-    case 'B':
-      return { text: element.textContent || '', bold: true }
-    case 'EM':
-    case 'I':
-      return { text: element.textContent || '', italic: true }
-    case 'U':
-      return { text: element.textContent || '', underline: true }
     case 'A':
       return { type: 'link', url: element.getAttribute('href'), children }
     case 'BR':
       return { text: '\n' }
+    case 'DIV':
+      // Convert div to paragraph
+      return { type: 'paragraph', align, children }
+    case 'BODY':
+      // Don't wrap body itself, just return its children
+      return children.length === 1 ? children[0] : children
     default:
-      return { type: 'paragraph', children }
+      // Wrap any unrecognized block elements in paragraph
+      if (children.length === 1 && Text.isText(children[0])) {
+        return { type: 'paragraph', children }
+      }
+      // If it contains only text, wrap in paragraph
+      const hasOnlyText = children.every((child: any) => Text.isText(child))
+      if (hasOnlyText) {
+        return { type: 'paragraph', children }
+      }
+      return children.length === 1 ? children[0] : { type: 'paragraph', children }
   }
 }
+
+const initialValue: Descendant[] = [{ type: 'paragraph', children: [{ text: '' }] }]
+
+const LIST_TYPES = ['numbered-list', 'bulleted-list']
+const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
 
 export default function EditEmailTemplateDialog({
   open,
@@ -161,52 +207,63 @@ export default function EditEmailTemplateDialog({
 }: EditEmailTemplateDialogProps) {
   const [title, setTitle] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const editor = useMemo(() => withHistory(withReact(createEditor())), [])
-  const [value, setValue] = useState<Descendant[]>([{ type: 'paragraph', children: [{ text: '' }] }])
+  const [value, setValue] = useState<Descendant[]>(initialValue)
+  const [key, setKey] = useState(0)
+  const editor = useMemo(() => withHistory(withReact(createEditor())), [key])
 
   useEffect(() => {
     if (template && open) {
       setTitle(template.title)
       try {
         const parsedValue = deserialize(template.description)
-        setValue(parsedValue.length > 0 ? parsedValue : [{ type: 'paragraph', children: [{ text: '' }] }])
+        setValue(parsedValue)
+        setKey(prev => prev + 1)
       } catch (error) {
         console.error('Error parsing template:', error)
         setValue([{ type: 'paragraph', children: [{ text: template.description }] }])
+        setKey(prev => prev + 1)
       }
     }
-  }, [template, open])
+  }, [template?.id, open])
 
   const renderElement = useCallback((props: RenderElementProps) => {
     const style = { textAlign: (props.element as any).align }
     switch (props.element.type) {
       case 'heading-one':
         return (
-          <h1 {...props.attributes} style={style}>
+          <h1 {...props.attributes} style={style} className='text-3xl font-bold'>
             {props.children}
           </h1>
         )
       case 'heading-two':
         return (
-          <h2 {...props.attributes} style={style}>
+          <h2 {...props.attributes} style={style} className='text-2xl font-bold'>
             {props.children}
           </h2>
         )
       case 'heading-three':
         return (
-          <h3 {...props.attributes} style={style}>
+          <h3 {...props.attributes} style={style} className='text-xl font-bold'>
             {props.children}
           </h3>
         )
       case 'bulleted-list':
-        return <ul {...props.attributes}>{props.children}</ul>
+        return (
+          <ul {...props.attributes} className='list-disc list-inside'>
+            {props.children}
+          </ul>
+        )
       case 'numbered-list':
-        return <ol {...props.attributes}>{props.children}</ol>
+        return (
+          <ol {...props.attributes} className='list-decimal list-inside'>
+            {props.children}
+          </ol>
+        )
       case 'list-item':
         return <li {...props.attributes}>{props.children}</li>
       case 'link':
         return (
-          <a {...props.attributes} href={(props.element as any).url}>
+          <a {...props.attributes} href={(props.element as any).url} className='text-blue-600 underline'>
             {props.children}
           </a>
         )
@@ -242,44 +299,49 @@ export default function EditEmailTemplateDialog({
   }
 
   const toggleBlock = (format: string) => {
-    const isActive = isBlockActive(editor, format)
-    const isList = format === 'bulleted-list' || format === 'numbered-list'
+    const isActive = isBlockActive(editor, format, TEXT_ALIGN_TYPES.includes(format) ? 'align' : 'type')
+    const isList = LIST_TYPES.includes(format)
 
     Transforms.unwrapNodes(editor, {
-      match: n => !Editor.isEditor(n) && SlateElement.isElement(n) && ['bulleted-list', 'numbered-list'].includes(n.type),
+      match: n =>
+        !Editor.isEditor(n) &&
+        SlateElement.isElement(n) &&
+        LIST_TYPES.includes(n.type as string) &&
+        !TEXT_ALIGN_TYPES.includes(format),
       split: true
     })
 
-    const newProperties: Partial<SlateElement> = {
-      type: isActive ? 'paragraph' : isList ? 'list-item' : format
-    } as Partial<SlateElement>
+    let newProperties: Partial<SlateElement>
+    if (TEXT_ALIGN_TYPES.includes(format)) {
+      newProperties = {
+        align: isActive ? undefined : format
+      } as Partial<SlateElement>
+    } else {
+      newProperties = {
+        type: isActive ? 'paragraph' : isList ? 'list-item' : format
+      } as Partial<SlateElement>
+    }
 
     Transforms.setNodes<SlateElement>(editor, newProperties)
 
     if (!isActive && isList) {
-      const block = { type: format, children: [] }
+      const block = { type: format, children: [] } as SlateElement
       Transforms.wrapNodes(editor, block)
     }
   }
 
-  const isBlockActive = (editor: Editor, format: string) => {
+  const isBlockActive = (editor: Editor, format: string, blockType = 'type') => {
     const { selection } = editor
     if (!selection) return false
 
     const [match] = Array.from(
       Editor.nodes(editor, {
         at: Editor.unhangRange(editor, selection),
-        match: n => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === format
+        match: n => !Editor.isEditor(n) && SlateElement.isElement(n) && (n as any)[blockType] === format
       })
     )
 
     return !!match
-  }
-
-  const toggleAlign = (align: string) => {
-    Transforms.setNodes(editor, { align } as Partial<SlateElement>, {
-      match: n => SlateElement.isElement(n) && Editor.isBlock(editor, n)
-    })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -462,20 +524,44 @@ export default function EditEmailTemplateDialog({
               <div className='w-px h-6 bg-border mx-1' />
 
               {/* Alignment */}
-              <Button type='button' variant='ghost' size='sm' onClick={() => toggleAlign('left')}>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={() => toggleBlock('left')}
+                className={isBlockActive(editor, 'left', 'align') ? 'bg-accent' : ''}
+              >
                 <AlignLeft className='h-4 w-4' />
               </Button>
-              <Button type='button' variant='ghost' size='sm' onClick={() => toggleAlign('center')}>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={() => toggleBlock('center')}
+                className={isBlockActive(editor, 'center', 'align') ? 'bg-accent' : ''}
+              >
                 <AlignCenter className='h-4 w-4' />
               </Button>
-              <Button type='button' variant='ghost' size='sm' onClick={() => toggleAlign('right')}>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={() => toggleBlock('right')}
+                className={isBlockActive(editor, 'right', 'align') ? 'bg-accent' : ''}
+              >
                 <AlignRight className='h-4 w-4' />
               </Button>
-              <Button type='button' variant='ghost' size='sm' onClick={() => toggleAlign('justify')}>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={() => toggleBlock('justify')}
+                className={isBlockActive(editor, 'justify', 'align') ? 'bg-accent' : ''}
+              >
                 <AlignJustify className='h-4 w-4' />
               </Button>
             </div>
-            <Slate editor={editor} initialValue={value} onChange={setValue}>
+            <Slate key={key} editor={editor} initialValue={value} onChange={setValue}>
               <Editable
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}

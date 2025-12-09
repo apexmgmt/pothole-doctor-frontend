@@ -3,16 +3,23 @@
 import { EmailTemplate } from '@/types'
 import EmailTemplateCard from './EmailTemplateCard'
 import EditEmailTemplateDialog from './EditEmailTemplateDialog'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Info } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function EmailTemplates({ templates: initialTemplates }: { templates: EmailTemplate[] }) {
   const [templates, setTemplates] = useState(initialTemplates)
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const router = useRouter()
+
+  // Sync state with props when initialTemplates changes
+  useEffect(() => {
+    setTemplates(initialTemplates)
+  }, [initialTemplates])
 
   const handleEdit = (template: EmailTemplate) => {
     setSelectedTemplate(template)
@@ -20,9 +27,9 @@ export default function EmailTemplates({ templates: initialTemplates }: { templa
   }
 
   const handleSuccess = () => {
-    // Refresh templates or update the specific template in state
     toast.success('Template updated successfully')
-    // You might want to refresh the templates here
+    // Refresh server-side data
+    router.refresh()
   }
 
   // Group templates by group type
