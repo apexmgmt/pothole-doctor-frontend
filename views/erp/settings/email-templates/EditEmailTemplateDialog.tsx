@@ -284,18 +284,20 @@ export default function EditEmailTemplateDialog({
     return <span {...props.attributes}>{children}</span>
   }, [])
 
-  const toggleMark = (format: string) => {
+  // To:
+  const isMarkActive = (editor: Editor, format: keyof Omit<CustomText, 'text'>) => {
+    const marks = Editor.marks(editor)
+    return marks ? marks[format] === true : false
+  }
+
+  // Also update the toggleMark function signature:
+  const toggleMark = (format: keyof Omit<CustomText, 'text'>) => {
     const isActive = isMarkActive(editor, format)
     if (isActive) {
       Editor.removeMark(editor, format)
     } else {
       Editor.addMark(editor, format, true)
     }
-  }
-
-  const isMarkActive = (editor: Editor, format: string) => {
-    const marks = Editor.marks(editor)
-    return marks ? marks[format] === true : false
   }
 
   const toggleBlock = (format: string) => {
