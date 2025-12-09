@@ -1,8 +1,6 @@
 'use client'
 
 import { CreateOrEditPartnerModalProps, PartnerPayload } from '@/types'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { useForm } from 'react-hook-form'
@@ -19,38 +17,36 @@ import { EntityInformationFields } from './EntityInformationFields'
 import { BasicInformationFields } from './BasicInformationFields'
 import { formatDateTime } from '@/utils/date'
 
-const formSchema = z.object({
-  first_name: z.string().min(2, { message: 'Partner name must be at least 2 characters' }),
-  last_name: z.string().optional(),
-  company_name: z.string().optional(),
-  email: z.email({ message: 'Invalid email address' }),
-  phone: z.string().min(7, { message: 'Phone number must be at least 7 characters' }).optional(),
-  status: z.boolean(),
-  entity: z.string(),
-  ssn: z.string().optional(),
-  ein: z.string().optional(),
-  fax: z.string().optional(),
-  notes: z.string().optional(),
-  schedule_color: z.string().optional(),
-  skills: z.array(z.string()).optional(),
-  insurance_expiration: z.union([z.string(), z.number(), z.date(), z.null()]).optional().nullable(),
-  w9_expiration: z.union([z.string(), z.number(), z.date(), z.null()]).optional().nullable(),
-  hold_amount: z.coerce.number().min(0),
-  hold_amount_percent: z.coerce.number().min(0).max(100),
-  street_address: z.union([z.string(), z.number()]),
-  zip_code: z.union([z.string(), z.number()]),
-  in_house_contractor: z.coerce.number().optional(),
-  is_email_confirmation: z.coerce.number().optional(),
-  user_type: z.string(),
-  password: z.string().optional(),
-  city_id: z.string(),
-  state_id: z.string(),
-  country_id: z.string(),
-  location_id: z.array(z.string()).optional(),
-  partner_type_id: z.string()
-})
-
-type FormValues = z.infer<typeof formSchema>
+interface FormValues {
+  first_name: string
+  last_name?: string
+  company_name?: string
+  email: string
+  phone?: string
+  status: boolean
+  entity: string
+  ssn?: string
+  ein?: string
+  fax?: string
+  notes?: string
+  schedule_color?: string
+  skills?: string[]
+  insurance_expiration?: string | number | Date | null
+  w9_expiration?: string | number | Date | null
+  hold_amount: number
+  hold_amount_percent: number
+  street_address: string | number
+  zip_code: string | number
+  in_house_contractor?: number
+  is_email_confirmation?: number
+  user_type: string
+  password?: string
+  city_id: string
+  state_id: string
+  country_id: string
+  location_id?: string[]
+  partner_type_id: string
+}
 
 const CreateOrEditPartnerModal = ({
   mode = 'create',
@@ -68,7 +64,6 @@ const CreateOrEditPartnerModal = ({
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
     defaultValues: {
       first_name: partnerDetails?.first_name ?? '',
       last_name: partnerDetails?.last_name ?? '',
@@ -87,7 +82,7 @@ const CreateOrEditPartnerModal = ({
         ? new Date(partnerDetails.userable.insurance_expiration)
         : null,
       w9_expiration: partnerDetails?.userable?.w9_expiration ? new Date(partnerDetails.userable.w9_expiration) : null,
-      hold_amount: partnerDetails?.userable.hold_amount ?? 0,
+      hold_amount: partnerDetails?.userable?.hold_amount ?? 0,
       hold_amount_percent: partnerDetails?.userable?.hold_amount_percent ?? 0,
       street_address: partnerDetails?.userable?.street_address ?? '',
       zip_code: partnerDetails?.userable?.zip_code ?? '',
@@ -124,8 +119,8 @@ const CreateOrEditPartnerModal = ({
         skills: partnerDetails?.userable?.skills ? partnerDetails.userable.skills.map(skill => skill.name) : [],
         insurance_expiration: partnerDetails?.userable?.insurance_expiration
           ? new Date(partnerDetails.userable.insurance_expiration)
-          : '',
-        w9_expiration: partnerDetails?.userable?.w9_expiration ? new Date(partnerDetails.userable.w9_expiration) : '',
+          : null,
+        w9_expiration: partnerDetails?.userable?.w9_expiration ? new Date(partnerDetails.userable.w9_expiration) : null,
         hold_amount: partnerDetails?.userable?.hold_amount || 0,
         hold_amount_percent: partnerDetails?.userable?.hold_amount_percent || 0,
         street_address: partnerDetails?.userable?.street_address || '',
@@ -143,14 +138,14 @@ const CreateOrEditPartnerModal = ({
         partner_type_id: partnerDetails?.userable?.partner_type_id || ''
       })
     }
-  }, [partnerDetails, open, form, mode])
+  }, [partnerDetails, open, form])
 
   const onSubmit = async (values: FormValues) => {
     const payload: PartnerPayload = {
       first_name: values.first_name,
       last_name: values.last_name,
       email: values.email,
-      phone: values.phone,
+      phone: values.phone || '',
       company_name: values.company_name,
       status: values.status ? 1 : 0,
       entity: values.entity,
@@ -169,89 +164,37 @@ const CreateOrEditPartnerModal = ({
       in_house_contractor: values.in_house_contractor || 0,
       is_email_confirmation: values.is_email_confirmation || 0,
       user_type: values.user_type,
-      password: values.password,
+      password: values.password || '',
       city_id: values.city_id,
       state_id: values.state_id,
-      // country_id: values.country_id,
       location_id: values.location_id || [],
       partner_type_id: values.partner_type_id
     }
 
     setIsLoading(true)
 
-    if (mode === 'create') {
-      try {
+    try {
+      if (mode === 'create') {
         await PartnerService.store(payload)
-          .then(response => {
-            toast.success('Contractor created successfully')
-            form.reset()
-            onOpenChange(false)
-            onSuccess?.()
-            setIsLoading(false)
-          })
-          .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to create contractor')
-            setIsLoading(false)
-          })
-      } catch (error) {
-        toast.error('Something went wrong while creating the contractor!')
-        setIsLoading(false)
-      }
-    } else if (mode === 'edit' && partnerId) {
-      try {
+        toast.success('Contractor created successfully')
+        form.reset()
+        onOpenChange(false)
+        onSuccess?.()
+      } else if (mode === 'edit' && partnerId) {
         await PartnerService.update(partnerId, payload)
-          .then(response => {
-            toast.success('Contractor updated successfully')
-            onOpenChange(false)
-            onSuccess?.()
-            setIsLoading(false)
-          })
-          .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to update contractor')
-            setIsLoading(false)
-          })
-      } catch (error) {
-        toast.error('Something went wrong while updating the contractor!')
-        setIsLoading(false)
+        toast.success('Contractor updated successfully')
+        onOpenChange(false)
+        onSuccess?.()
       }
+    } catch (error: any) {
+      toast.error(typeof error?.message === 'string' ? error.message : 'Failed to save contractor')
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const onCancel = () => {
-    form.reset({
-      first_name: partnerDetails?.first_name || '',
-      last_name: partnerDetails?.last_name || '',
-      email: partnerDetails?.email || '',
-      phone: partnerDetails?.userable?.phone || '',
-      company_name: partnerDetails?.userable?.company?.name || '',
-      status: partnerDetails ? (partnerDetails?.status ? true : false) : true,
-      entity: partnerDetails?.userable?.entity || 'individual',
-      ssn: partnerDetails?.userable?.ssn || '',
-      ein: partnerDetails?.userable?.ein || '',
-      fax: partnerDetails?.userable?.fax || '',
-      notes: partnerDetails?.userable?.notes || '',
-      schedule_color: partnerDetails?.userable?.schedule_color || '',
-      skills: partnerDetails?.userable?.skills ? partnerDetails.userable.skills.map(skill => skill.name) : [],
-      insurance_expiration: partnerDetails?.userable?.insurance_expiration
-        ? new Date(partnerDetails.userable.insurance_expiration)
-        : '',
-      w9_expiration: partnerDetails?.userable?.w9_expiration ? new Date(partnerDetails.userable.w9_expiration) : '',
-      hold_amount: partnerDetails?.userable?.hold_amount || 0,
-      hold_amount_percent: partnerDetails?.userable?.hold_amount_percent || 0,
-      street_address: partnerDetails?.userable?.street_address || '',
-      zip_code: partnerDetails?.userable?.zip_code || '',
-      in_house_contractor: partnerDetails?.userable?.in_house_contractor || 0,
-      is_email_confirmation: partnerDetails?.userable?.is_email_confirmation || 0,
-      user_type: partnerDetails?.user_type || 'contractor',
-      password: '',
-      city_id: partnerDetails?.userable?.city_id?.toString() || '',
-      state_id: partnerDetails?.userable?.state_id?.toString() || '',
-      country_id: partnerDetails?.userable?.city ? partnerDetails.userable.city.country_id?.toString() : '',
-      location_id: partnerDetails?.userable?.locations
-        ? partnerDetails.userable.locations.map(location => location.id.toString())
-        : [],
-      partner_type_id: partnerDetails?.userable?.partner_type_id || ''
-    })
+    form.reset()
     onOpenChange(false)
   }
 
@@ -345,7 +288,7 @@ const CreateOrEditPartnerModal = ({
           <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
             <BasicInformationFields form={form} businessLocations={businessLocations} companies={companies} />
 
-            {/* Entity Information section - now using the separated component */}
+            {/* Entity Information section */}
             <EntityInformationFields form={form} />
 
             {user_type === 'contractor' && (

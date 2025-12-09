@@ -58,6 +58,7 @@ export function LocationFields({ form, countriesWithStatesAndCities }: LocationF
       <FormField
         control={form.control}
         name='country_id'
+        rules={{ required: 'Country is required' }}
         render={({ field }) => (
           <FormItem>
             <FormLabel>
@@ -86,6 +87,7 @@ export function LocationFields({ form, countriesWithStatesAndCities }: LocationF
       <FormField
         control={form.control}
         name='state_id'
+        rules={{ required: 'State is required' }}
         render={({ field }) => (
           <FormItem>
             <FormLabel>
@@ -124,6 +126,7 @@ export function LocationFields({ form, countriesWithStatesAndCities }: LocationF
       <FormField
         control={form.control}
         name='city_id'
+        rules={{ required: 'City is required' }}
         render={({ field }) => (
           <FormItem>
             <FormLabel>
@@ -163,6 +166,7 @@ export function LocationFields({ form, countriesWithStatesAndCities }: LocationF
         <FormField
           control={form.control}
           name='street_address'
+          rules={{ required: 'Street address is required' }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -180,6 +184,7 @@ export function LocationFields({ form, countriesWithStatesAndCities }: LocationF
       <FormField
         control={form.control}
         name='zip_code'
+        rules={{ required: 'Zip code is required' }}
         render={({ field }) => (
           <FormItem>
             <FormLabel>
