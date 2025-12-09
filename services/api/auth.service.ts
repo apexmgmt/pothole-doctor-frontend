@@ -2,7 +2,6 @@ import { AUTH_LOGIN, AUTH_LOGOUT, AUTH_ME, AUTH_REFRESH_TOKEN } from '@/constant
 import { getApiUrl } from '@/utils/utility'
 import CookieService from '../app/cookie.service'
 import apiInterceptor from './api.interceptor'
-import { redirect } from 'next/navigation'
 
 export default class AuthService {
   /**
@@ -93,7 +92,7 @@ export default class AuthService {
     }
   }
 
-  static getUserDetails = async () => {
+  static getAuthDetails = async () => {
     try {
       const apiUrl: string = await getApiUrl()
       const response = await apiInterceptor(apiUrl + AUTH_ME, {

@@ -47,9 +47,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ userData }) => {
         {/* Profile Picture centered over banner */}
         <div className='absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 z-10'>
           <Avatar className='h-[86px] w-[86px] border border-light shadow-lg'>
-            {/* <AvatarImage src={profilePicture} alt={fullName} /> */}
-            {/* Testing scenario */}
-            <AvatarImage src='/images/dashboard/profile-pic.webp' alt={fullName} />
+            <AvatarImage src={profilePicture} alt={fullName} />
             <AvatarFallback className='bg-accent text-accent-foreground text-2xl font-semibold'>
               {initials || 'U'}
             </AvatarFallback>

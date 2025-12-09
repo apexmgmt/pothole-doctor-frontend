@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isPublicRoute, isUnauthenticatedRoute } from './constants/routePermission'
-import CookieService from './services/app/cookie.service'
-import { AUTH_REFRESH_TOKEN } from '@/constants/api'
-import { getApiUrl } from '@/utils/utility'
 import AuthService from './services/api/auth.service'
 
 export async function proxy(req: NextRequest) {
@@ -52,7 +49,7 @@ export async function proxy(req: NextRequest) {
       nextRes.cookies.set({
         name: 'access_token',
         value: newAccess,
-        httpOnly: true,
+        httpOnly: false,
         path: '/',
         maxAge: typeof expiresIn === 'number' ? expiresIn : undefined
       })
@@ -60,7 +57,7 @@ export async function proxy(req: NextRequest) {
         nextRes.cookies.set({
           name: 'refresh_token',
           value: newRefresh,
-          httpOnly: true,
+          httpOnly: false,
           path: '/'
         })
       }
@@ -68,7 +65,7 @@ export async function proxy(req: NextRequest) {
         nextRes.cookies.set({
           name: 'token_type',
           value: payload.token_type,
-          httpOnly: true,
+          httpOnly: false,
           path: '/'
         })
       }

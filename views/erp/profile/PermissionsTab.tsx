@@ -19,9 +19,9 @@ const PermissionsTab: React.FC<PermissionsTabProps> = ({ userData }) => {
           title='Edit'
           tooltip='Edit Permissions'
           link='/erp/profile/edit'
-          variant='text'
+          variant='icon'
           buttonSize='default'
-          buttonVariant='outline'
+          buttonVariant='ghost'
         />
       </div>
 
