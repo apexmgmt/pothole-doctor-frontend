@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { NavigationItem } from '@/types'
 
 import { SettingsIcon, HomeIcon } from '@/public/icons'
-import { Building2, LocateIcon, Map, UserLock, Users, Warehouse } from 'lucide-react'
+import { Boxes, Building2, LocateIcon, Map, UserLock, Users, Warehouse } from 'lucide-react'
 import SidebarFooter from './SidebarFooter'
 import MenuItem from './menu-item'
 
@@ -58,6 +58,24 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       icon: <Warehouse className='h-4 w-4' />,
       href: '/erp/warehouses',
       hasSubItems: false,
+      exactMatch: false
+    },
+    {
+      id: 'product',
+      label: 'Products',
+      icon: <Boxes className='h-4 w-4' />,
+      href: '/erp/products',
+      hasSubItems: true,
+      subItems: [
+        {
+          id: 'product-categories',
+          label: 'Categories',
+          href: '/erp/product/categories',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        }
+      ],
       exactMatch: false
     },
     {
