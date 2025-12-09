@@ -183,6 +183,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           exactMatch: false
         },
         {
+          id: 'task-reminders',
+          label: 'Task Reminders',
+          href: '/erp/settings/task-reminders',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
           id: 'uom-units',
           label: 'Uom Units',
           href: '/erp/settings/uom-units',
