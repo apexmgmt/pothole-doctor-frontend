@@ -126,11 +126,11 @@ export default class PartnerService {
       })
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to restore task type')
+        throw new Error(errorData.message || 'Failed to restore partner')
       }
-      await revalidate('task-types')
-      await revalidate(`task-types/${partnerId}`)
-      await revalidate('task-types-all')
+      await revalidate('partners')
+      await revalidate(`partners/${partnerId}`)
+      await revalidate('partners-all')
       return await response.json()
     } catch (error) {
       throw error
