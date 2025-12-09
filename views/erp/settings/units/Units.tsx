@@ -17,6 +17,7 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import CreateOrEditUnitModal from './CreateOrEditUnitModal'
 import UnitService from '@/services/api/settings/units.service'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
   const router = useRouter()
@@ -155,8 +156,12 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton tooltip='Edit Unit Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
-          <DeleteButton tooltip='Delete Unit' variant='icon' onClick={() => handleDeleteUnit(row.id)} />
+          <ThreeDotButton
+            buttons={[
+              <EditButton tooltip='Edit Unit Information' onClick={() => handleOpenEditModal(row.id)} variant='text' />,
+              <DeleteButton tooltip='Delete Unit' variant='text' onClick={() => handleDeleteUnit(row.id)} />
+            ]}
+          />
         </div>
       ),
       sortable: false,

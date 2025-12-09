@@ -6,8 +6,6 @@ import { PlusIcon, Search } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
-import { DetailsIcon, FilterIcon, UserIcon } from '@/public/icons'
-import CompanyService from '@/services/api/company.service'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
@@ -18,6 +16,7 @@ import RoleService from '@/services/api/role.service'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 interface RoleData {
   id: string
@@ -150,8 +149,12 @@ const Roles: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton tooltip='Edit Role Information' link={`/erp/roles/${row.id}/edit`} variant='icon' />
-          <DeleteButton tooltip='Delete Role' variant='icon' onClick={() => handleDeleteRole(row.id)} />
+          <ThreeDotButton
+            buttons={[
+              <EditButton tooltip='Edit Role Information' link={`/erp/roles/${row.id}/edit`} variant='text' />,
+              <DeleteButton tooltip='Delete Role' variant='text' onClick={() => handleDeleteRole(row.id)} />
+            ]}
+          />
         </div>
       ),
       sortable: false,

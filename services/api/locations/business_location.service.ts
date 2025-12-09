@@ -1,6 +1,6 @@
 import { getApiUrl } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { BUSINESS_LOCATIONS } from '@/constants/api'
+import { BUSINESS_LOCATIONS, BUSINESS_LOCATIONS_ALL } from '@/constants/api'
 import { revalidate } from '@/services/app/cache.service'
 import { BusinessLocationPayload } from '@/types'
 
@@ -43,7 +43,7 @@ export default class BusinessLocationService {
       }
 
       await revalidate('business-locations')
-
+      await revalidate('business-locations-all')
       return await response.json()
     } catch (error) {
       throw error
@@ -87,7 +87,7 @@ export default class BusinessLocationService {
       }
       await revalidate('business-locations')
       await revalidate(`business-locations/${businessLocationId}`)
-      await revalidate('locations')
+      await revalidate('business-locations-all')
 
       return await response.json()
     } catch (error) {
@@ -109,7 +109,7 @@ export default class BusinessLocationService {
       }
       await revalidate('business-locations')
       await revalidate(`business-locations/${businessLocationId}`)
-      await revalidate('locations')
+      await revalidate('business-locations-all')
 
       return await response.json()
     } catch (error) {
@@ -131,9 +131,30 @@ export default class BusinessLocationService {
       }
       await revalidate('business-locations')
       await revalidate(`business-locations/${businessLocationId}`)
-      await revalidate('locations')
+      await revalidate('business-locations-all')
 
       return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /** Get all business locations */
+  static getAllBusinessLocations = async () => {
+    try {
+      const apiUrl = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + BUSINESS_LOCATIONS_ALL, {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 300, tags: ['business-locations-all'] } // Cache for 5 minutes
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to fetch all business locations')
+      }
+      const result = await response.json()
+      return result.data
     } catch (error) {
       throw error
     }

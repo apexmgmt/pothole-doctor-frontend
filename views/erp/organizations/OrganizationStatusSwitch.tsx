@@ -1,16 +1,16 @@
 import React from 'react'
 import { Switch } from '@/components/ui/switch'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
-import CompanyService from '@/services/api/company.service'
+import OrganizationService from '@/services/api/organizations.service'
 
-interface CompanyStatusSwitchProps {
+interface OrganizationStatusSwitchProps {
   checked: boolean
   loading?: boolean
   companyId: string
   fetchData?: () => void // optional
 }
 
-const CompanyStatusSwitch: React.FC<CompanyStatusSwitchProps> = ({
+const OrganizationStatusSwitch: React.FC<OrganizationStatusSwitchProps> = ({
   checked,
   loading = false,
   companyId,
@@ -30,7 +30,7 @@ const CompanyStatusSwitch: React.FC<CompanyStatusSwitchProps> = ({
     const prevChecked = internalChecked
     setInternalChecked(!prevChecked)
     try {
-      await CompanyService.changeStatus(companyId)
+      await OrganizationService.changeStatus(companyId)
       if (fetchData) fetchData()
     } catch (error) {
       setInternalChecked(prevChecked)
@@ -71,4 +71,4 @@ const CompanyStatusSwitch: React.FC<CompanyStatusSwitchProps> = ({
   )
 }
 
-export default CompanyStatusSwitch
+export default OrganizationStatusSwitch

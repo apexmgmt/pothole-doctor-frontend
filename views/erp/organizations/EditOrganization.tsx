@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import CompanyService from '@/services/api/company.service'
+import OrganizationService from '@/services/api/organizations.service'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { SpinnerCustom } from '@/components/ui/spinner'
@@ -30,7 +30,7 @@ const defaultValues: FormValues = {
   address: ''
 }
 
-const EditCompany: React.FC<{ companyDetails: any }> = ({ companyDetails }) => {
+const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
 
@@ -55,7 +55,7 @@ const EditCompany: React.FC<{ companyDetails: any }> = ({ companyDetails }) => {
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true)
     try {
-      CompanyService.update(companyDetails.id, data)
+      OrganizationService.update(companyDetails.id, data)
         .then(response => {
           setIsLoading(false)
           toast.success('Company updated successfully')
@@ -140,7 +140,7 @@ const EditCompany: React.FC<{ companyDetails: any }> = ({ companyDetails }) => {
                   <FormControl>
                     <Input
                       type='email'
-                      placeholder='company email'
+                      placeholder='Company email'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -158,7 +158,7 @@ const EditCompany: React.FC<{ companyDetails: any }> = ({ companyDetails }) => {
                   <FormLabel>Phone</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder='phone'
+                      placeholder='Phone'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -190,13 +190,8 @@ const EditCompany: React.FC<{ companyDetails: any }> = ({ companyDetails }) => {
           </div>
 
           <div className='flex gap-3 pt-4 border-t border-border'>
-            <Button
-              type='submit'
-              variant='outline'
-              disabled={isLoading}
-              className='flex-1 bg-bg-3 text-light hover:bg-bg-4 disabled:opacity-50'
-            >
-              {isLoading ? 'Saving...' : 'Create'}
+            <Button type='submit' variant='default' disabled={isLoading} className='flex-1 disabled:opacity-50'>
+              {isLoading ? 'Saving...' : 'Update'}
             </Button>
             <Button
               type='button'
@@ -214,4 +209,4 @@ const EditCompany: React.FC<{ companyDetails: any }> = ({ companyDetails }) => {
   )
 }
 
-export default EditCompany
+export default EditOrganization

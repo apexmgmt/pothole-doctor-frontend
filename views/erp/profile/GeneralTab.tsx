@@ -3,15 +3,13 @@
 import React from 'react'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { User } from '@/types'
-import { formatDate, getUserDisplayData } from './utils'
+import { formatDate } from './utils'
 
 interface GeneralTabProps {
   userData: User | null
 }
 
 const GeneralTab: React.FC<GeneralTabProps> = ({ userData }) => {
-  const { firstName, lastName, email, phone, address } = getUserDisplayData(userData)
-
   return (
     <div className='space-y-5'>
       {/* Header with Edit Button */}
@@ -21,47 +19,39 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ userData }) => {
           title='Edit'
           tooltip='Edit Profile Information'
           link='/erp/profile/edit'
-          variant='text'
+          variant='icon'
           buttonSize='default'
-          buttonVariant='outline'
+          buttonVariant='ghost'
         />
       </div>
 
       {/* Personal Information Fields - Two Column Layout */}
-      <div className='grid grid-cols-2 gap-6'>
+      <div>
         {/* Left Column */}
         <div className='space-y-5'>
-          <div>
-            <label className='text-xs text-gray uppercase block mb-2'>First Name</label>
-            <p className='text-light'>{firstName || 'N/A'}</p>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div>
+              <label className='text-xs text-gray uppercase block mb-2'>First Name</label>
+              <p className='text-light'>{userData?.first_name || ''}</p>
+            </div>
+            <div>
+              <label className='text-xs text-gray uppercase block mb-2'>Last Name</label>
+              <p className='text-light'>{userData?.last_name || ''}</p>
+            </div>
           </div>
-          <div>
-            <label className='text-xs text-gray uppercase block mb-2'>Last Name</label>
-            <p className='text-light'>{lastName || 'N/A'}</p>
-          </div>
-          <div>
-            <label className='text-xs text-gray uppercase block mb-2'>Email</label>
-            <p className='text-light'>{email}</p>
-          </div>
-          <div>
-            <label className='text-xs text-gray uppercase block mb-2'>Phone</label>
-            <p className='text-light'>{phone}</p>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div>
+              <label className='text-xs text-gray uppercase block mb-2'>Email</label>
+              <p className='text-light'>{userData?.email || ' - '}</p>
+            </div>
+            <div>
+              <label className='text-xs text-gray uppercase block mb-2'>Phone</label>
+              <p className='text-light'>{userData?.userable?.phone || ' - '}</p>
+            </div>
           </div>
           <div>
             <label className='text-xs text-gray uppercase block mb-2'>Address</label>
-            <p className='text-light'>{address}</p>
-          </div>
-        </div>
-
-        {/* Right Column */}
-        <div className='space-y-5'>
-          <div>
-            <label className='text-xs text-gray uppercase block mb-2'>Created</label>
-            <p className='text-light text-sm'>{formatDate(userData?.created_at)}</p>
-          </div>
-          <div>
-            <label className='text-xs text-gray uppercase block mb-2'>Last Update</label>
-            <p className='text-light text-sm'>{formatDate(userData?.updated_at)}</p>
+            <p className='text-light'>{userData?.userable?.address || ' - '}</p>
           </div>
         </div>
       </div>

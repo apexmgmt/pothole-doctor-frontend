@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import CreateOrEditCityModal from './CreateOrEditCityModal'
 import CityService from '@/services/api/locations/city.service'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const Cities: React.FC = () => {
   const router = useRouter()
@@ -190,8 +191,12 @@ const Cities: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton tooltip='Edit City Information' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
-          <DeleteButton tooltip='Delete City' variant='icon' onClick={() => handleDeleteCity(row.id)} />
+          <ThreeDotButton
+            buttons={[
+              <EditButton tooltip='Edit City Information' onClick={() => handleOpenEditModal(row.id)} variant='text' />,
+              <DeleteButton tooltip='Delete City' variant='text' onClick={() => handleDeleteCity(row.id)} />
+            ]}
+          />
         </div>
       ),
       sortable: false,
