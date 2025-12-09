@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useEffect, useState, useMemo } from 'react'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import VendorService from '@/services/api/vendors.service'
+import VendorService from '@/services/api/vendors/vendors.service'
 import { Separator } from '@/components/ui/separator'
 
 interface VendorFormValues {
@@ -230,21 +230,10 @@ const CreateOrEditVendorModal = ({
       disableClose={isLoading}
       actions={
         <div className='flex gap-3'>
-          <Button
-            type='button'
-            variant='outline'
-            onClick={onCancel}
-            disabled={isLoading}
-            className='flex-1'
-          >
+          <Button type='button' variant='outline' onClick={onCancel} disabled={isLoading} className='flex-1'>
             Cancel
           </Button>
-          <Button
-            type='submit'
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={isLoading}
-            className='flex-1'
-          >
+          <Button type='submit' onClick={form.handleSubmit(onSubmit)} disabled={isLoading} className='flex-1'>
             {isLoading ? 'Saving...' : mode === 'create' ? 'Save' : 'Update'}
           </Button>
         </div>
@@ -414,7 +403,9 @@ const CreateOrEditVendorModal = ({
               rules={{ required: 'Payment term is required' }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Payment Term <span className='text-red-500'>*</span></FormLabel>
+                  <FormLabel>
+                    Payment Term <span className='text-red-500'>*</span>
+                  </FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger className='w-full'>

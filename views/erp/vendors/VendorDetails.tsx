@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import VendorService from '@/services/api/vendors.service'
+import VendorService from '@/services/api/vendors/vendors.service'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { Vendor } from '@/types'
 import { toast } from 'sonner'
@@ -184,7 +184,8 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit }) => {
             <div className='space-y-3'>
               <div>
                 <label className='text-xs text-gray uppercase'>B2B Status</label>
-                <br/><Badge variant='default'>Enabled</Badge>
+                <br />
+                <Badge variant='default'>Enabled</Badge>
               </div>
               <div>
                 <label className='text-xs text-gray uppercase'>Host URL</label>

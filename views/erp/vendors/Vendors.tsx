@@ -15,11 +15,12 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
-import VendorService from '@/services/api/vendors.service'
+import VendorService from '@/services/api/vendors/vendors.service'
 import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CreateOrEditVendorModal from './CreateOrEditVendorModal'
 import VendorDetails from './VendorDetails'
+import VendorDocuments from './documents/VendorDocuments'
 
 const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCities, paymentTerms }) => {
   const router = useRouter()
@@ -29,6 +30,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedVendorId, setSelectedVendorId] = useState<string | null>(null)
+  const [selectedUserAbleId, setSelectedUserAbleId] = useState<string | null>(null)
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
@@ -277,12 +279,13 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
       icon: DocumentIcon,
       onClick: () => setActiveTab('documents'),
       isActive: activeTab === 'documents',
-      disabled: !selectedVendorId
+      disabled: !selectedVendorId && !selectedUserAbleId
     }
   ]
 
   const handleRowSelect = (partner: any) => {
     setSelectedVendorId(partner?.id || null)
+    setSelectedUserAbleId(partner?.userable_id || null)
   }
 
   return (
@@ -313,7 +316,9 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
         {activeTab === 'details' && selectedVendorId && (
           <VendorDetails vendorId={selectedVendorId} onEdit={vendor => handleOpenEditModal(vendor.id)} />
         )}
-        {/* {activeTab === 'documents' && selectedVendorId && <VendorDocuments userId={selectedVendorId} />} */}
+        {activeTab === 'documents' && selectedVendorId && selectedUserAbleId && (
+          <VendorDocuments vendorId={selectedUserAbleId || ''} />
+        )}
       </CommonLayout>
 
       <CreateOrEditVendorModal
