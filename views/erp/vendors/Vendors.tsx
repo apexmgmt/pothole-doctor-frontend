@@ -16,9 +16,10 @@ import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import VendorService from '@/services/api/vendors.service'
-import { DocumentIcon, UserIcon } from '@/public/icons'
+import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CreateOrEditVendorModal from './CreateOrEditVendorModal'
+import VendorDetails from './VendorDetails'
 
 const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCities, paymentTerms }) => {
   const router = useRouter()
@@ -97,7 +98,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
           phone: userable?.phone || 'N/A',
           address: userable?.street_address + ', ' + userable?.city?.name + ', ' + userable?.state?.name || 'N/A',
           profit_margin: userable?.profit_margin || 0,
-          is_enable_b2b: userable?.is_enable_b2b ? 'Yes' : 'No',
+          is_enable_b2b: userable?.is_enable_b2b ? 'Yes' : 'No'
         }
       })
     : []
@@ -265,6 +266,13 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
       isActive: activeTab === 'vendors'
     },
     {
+      label: 'Details',
+      icon: DetailsIcon,
+      onClick: () => setActiveTab('details'),
+      isActive: activeTab === 'details',
+      disabled: !selectedVendorId
+    },
+    {
       label: 'Documents',
       icon: DocumentIcon,
       onClick: () => setActiveTab('documents'),
@@ -302,6 +310,9 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
           />
         )}
 
+        {activeTab === 'details' && selectedVendorId && (
+          <VendorDetails vendorId={selectedVendorId} onEdit={vendor => handleOpenEditModal(vendor.id)} />
+        )}
         {/* {activeTab === 'documents' && selectedVendorId && <VendorDocuments userId={selectedVendorId} />} */}
       </CommonLayout>
 
