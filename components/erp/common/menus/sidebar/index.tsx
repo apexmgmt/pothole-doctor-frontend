@@ -53,6 +53,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       exactMatch: false
     },
     {
+      id: 'labor-costs',
+      label: 'Labor Costs',
+      icon: <UserLock className='h-4 w-4' />,
+      href: '/erp/labor-costs',
+      hasSubItems: false,
+      exactMatch: false
+    },
+    {
       id: 'locations',
       label: 'Locations',
       icon: <Map className='h-4 w-4' />,

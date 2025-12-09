@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import CreateOrEditDocumentModal from './CreateOrEditDocumentModal'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const PartnerDocuments = ({ userId }: { userId: string }) => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
@@ -171,10 +172,12 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
       id: 'actions',
       header: 'Action',
       cell: row => (
-        <div className='flex items-center justify-center gap-2'>
-          <EditButton tooltip='Edit Document' onClick={() => handleOpenEditModal(row.id)} variant='icon' />
-          <DeleteButton tooltip='Delete Document' variant='icon' onClick={() => handleDeleteDocument(row.id)} />
-        </div>
+        <ThreeDotButton
+          buttons={[
+            <EditButton tooltip='Edit Document' onClick={() => handleOpenEditModal(row.id)} variant='text' />,
+            <DeleteButton tooltip='Delete Document' variant='text' onClick={() => handleDeleteDocument(row.id)} />
+          ]}
+        />
       ),
       sortable: false,
       headerAlign: 'center',

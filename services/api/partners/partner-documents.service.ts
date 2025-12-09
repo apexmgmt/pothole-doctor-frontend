@@ -1,8 +1,8 @@
-import { getApiUrl } from "@/utils/utility"
-import apiInterceptor from "../api.interceptor"
-import { PARTNER_DOCUMENTS, PARTNERS } from "@/constants/api"
-import { DocumentPayload, PartnerPayload } from "@/types"
-import { revalidate } from "@/services/app/cache.service"
+import { getApiUrl } from '@/utils/utility'
+import apiInterceptor from '../api.interceptor'
+import { PARTNER_DOCUMENTS, PARTNERS } from '@/constants/api'
+import { DocumentPayload, PartnerPayload } from '@/types'
+import { revalidate } from '@/services/app/cache.service'
 
 export default class PartnerDocumentService {
   /**Partner Documents DataTable API */
@@ -28,7 +28,7 @@ export default class PartnerDocumentService {
   }
 
   /**Create Partner API */
-  static store = async (payload: DocumentPayload) => {
+  static store = async (payload: any) => {
     try {
       const apiUrl: string = await getApiUrl()
       const response = await apiInterceptor(apiUrl + PARTNER_DOCUMENTS, {
@@ -72,13 +72,17 @@ export default class PartnerDocumentService {
   }
 
   /** Update Partner Document API */
-  static update = async (partnerDocumentId: string, payload: DocumentPayload) => {
+  static update = async (partnerDocumentId: string, payload: FormData) => {
     try {
       const apiUrl: string = await getApiUrl()
+
+      // Add the _method field to simulate PUT request
+      payload.append('_method', 'PUT')
+
       const response = await apiInterceptor(apiUrl + PARTNER_DOCUMENTS + partnerDocumentId, {
         requiresAuth: true,
-        method: 'PUT',
-        body: payload
+        method: 'POST',
+        body: payload // Pass FormData directly
       })
 
       if (!response.ok) {
