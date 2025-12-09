@@ -21,7 +21,7 @@ export default function DeleteButton({
   onClick,
   variant = 'icon',
   buttonSize = 'icon',
-  buttonVariant = 'destructive',
+  buttonVariant = 'ghost',
   tooltip = '',
   confirmTitle = 'Confirm Deletion',
   confirmMessage = 'Are you sure you want to delete this item? This action cannot be undone.',
@@ -46,6 +46,7 @@ export default function DeleteButton({
               type='button'
               aria-label={title}
               disabled={loading}
+              className={`hover:text-destructive ${variant !== 'icon' ? 'w-full' : ''}`}
             >
               {variant === 'icon' ? <Trash2Icon className='h-6 w-6' /> : <span>{title}</span>}
             </Button>

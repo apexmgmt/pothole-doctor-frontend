@@ -1,6 +1,6 @@
 import { getApiUrl } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { TASK_TYPES } from '@/constants/api'
+import { TASK_TYPES, TASK_TYPES_ALL } from '@/constants/api'
 import { TaskTypePayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -43,6 +43,7 @@ export default class TaskTypeService {
       }
 
       await revalidate('task-types')
+      await revalidate('task-types-all')
 
       return await response.json()
     } catch (error) {
@@ -131,6 +132,27 @@ export default class TaskTypeService {
       await revalidate('task-types')
       await revalidate(`task-types/${taskTypeId}`)
       await revalidate('task-types-all')
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**Get all task types */
+  static getAllTaskType = async () => {
+    try {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + TASK_TYPES_ALL, {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 60, tags: ['task-types-all'] } // Cache for 60 seconds
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to fetch all task types')
+      }
+
       return await response.json()
     } catch (error) {
       throw error

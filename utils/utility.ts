@@ -99,7 +99,6 @@ export const getInitialFilters = (searchParams: URLSearchParams) => {
 
 // Update URL when filters change
 export const updateURL = (router: any, filters: any) => {
-
   const params = new URLSearchParams()
 
   Object.keys(filters).forEach(key => {
@@ -112,4 +111,45 @@ export const updateURL = (router: any, filters: any) => {
   const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
   router.push(newUrl, { scroll: false })
+}
+
+/**Generate fill url from full path */
+export const generateFileUrl = (fullPath: string) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
+  return apiUrl + fullPath
+}
+
+/** Get file extension from full path */
+export const getFileExtension = (fullPath: string) => {
+  if (!fullPath) return 'unknown'
+  const ext = fullPath.split('.').pop()?.toLowerCase() || ''
+  return ext
+}
+/** Get file type from full path */
+export const getFileType = (fullPath: string) => {
+  const ext = getFileExtension(fullPath)
+
+  const imageExts = [
+    'jpg',
+    'jpeg',
+    'png',
+    'gif',
+    'bmp',
+    'webp',
+    'svg',
+    'tiff',
+    'heic',
+    'avif',
+    'jfif',
+    'ico',
+    'raw',
+    'heif'
+  ]
+  const videoExts = ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm', 'mkv']
+  const docExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv', 'rtf']
+
+  if (imageExts.includes(ext)) return 'image'
+  if (videoExts.includes(ext)) return 'video'
+  if (docExts.includes(ext)) return 'document'
+  return 'other'
 }

@@ -17,6 +17,7 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import CommissionService from '@/services/api/settings/commissions.service'
 import CreateOrEditCommissionModal from './CreateOrEditCommissionModal'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionFilters, commissionBases }) => {
   const router = useRouter()
@@ -174,13 +175,29 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
           case 'between':
             return (
               <span className='font-medium'>
-                {row.filter_percent ? '' : '$'}{row.min_amount}{row.filter_percent ? '%' : ''} - {row.filter_percent ? '' : '$'}{row.max_amount}{row.filter_percent ? '%' : ''}
+                {row.filter_percent ? '' : '$'}
+                {row.min_amount}
+                {row.filter_percent ? '%' : ''} - {row.filter_percent ? '' : '$'}
+                {row.max_amount}
+                {row.filter_percent ? '%' : ''}
               </span>
             )
           case 'greater-than':
-            return <span className='font-medium'>{row.filter_percent ? '' : '$'}{row.min_amount}{row.filter_percent ? '%' : ''}</span>
+            return (
+              <span className='font-medium'>
+                {row.filter_percent ? '' : '$'}
+                {row.min_amount}
+                {row.filter_percent ? '%' : ''}
+              </span>
+            )
           case 'less-than':
-            return <span className='font-medium'>{row.filter_percent ? '' : '$'}{row.max_amount}{row.filter_percent ? '%' : ''}</span>
+            return (
+              <span className='font-medium'>
+                {row.filter_percent ? '' : '$'}
+                {row.max_amount}
+                {row.filter_percent ? '%' : ''}
+              </span>
+            )
           case 'same-as-store':
             return <span className='font-medium'>0</span>
           default:
@@ -192,7 +209,13 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
     {
       id: 'amount',
       header: 'Commission Value',
-      cell: row => <span className='font-medium'>{row.commission_percent ? '' : '$'}{row.amount}{row.commission_percent ? '%' : ''}</span>,
+      cell: row => (
+        <span className='font-medium'>
+          {row.commission_percent ? '' : '$'}
+          {row.amount}
+          {row.commission_percent ? '%' : ''}
+        </span>
+      ),
       sortable: true
     },
     {
@@ -200,12 +223,16 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton
-            tooltip='Edit Commission Information'
-            onClick={() => handleOpenEditModal(row.id)}
-            variant='icon'
+          <ThreeDotButton
+            buttons={[
+              <EditButton
+                tooltip='Edit Commission Information'
+                onClick={() => handleOpenEditModal(row.id)}
+                variant='text'
+              />,
+              <DeleteButton tooltip='Delete Commission' variant='text' onClick={() => handleDeleteCommission(row.id)} />
+            ]}
           />
-          <DeleteButton tooltip='Delete Commission' variant='icon' onClick={() => handleDeleteCommission(row.id)} />
         </div>
       ),
       sortable: false,

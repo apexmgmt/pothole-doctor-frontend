@@ -19,6 +19,7 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const Staffs: React.FC = () => {
   const router = useRouter()
@@ -177,8 +178,12 @@ const Staffs: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton tooltip='Edit Staff Information' link={`/erp/staffs/${row.id}/edit`} variant='icon' />
-          <DeleteButton tooltip='Delete Staff' variant='icon' onClick={() => handleDeleteStaff(row.id)} />
+          <ThreeDotButton
+            buttons={[
+              <EditButton tooltip='Edit Staff Information' link={`/erp/staffs/${row.id}/edit`} variant='text' />,
+              <DeleteButton tooltip='Delete Staff' variant='text' onClick={() => handleDeleteStaff(row.id)} />
+            ]}
+          />
         </div>
       ),
       sortable: false

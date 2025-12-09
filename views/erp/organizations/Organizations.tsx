@@ -9,17 +9,18 @@ import CommonTable from '@/components/erp/common/table'
 import FilterDrawer from '@/components/erp/common/FilterDrawer'
 import AdvancedCustomerDetails from '@/components/erp/dashboard/crm/customers/AdvancedCustomerDetails'
 import { DetailsIcon, FilterIcon, UserIcon } from '@/public/icons'
-import CompanyService from '@/services/api/company.service'
+import OrganizationService from '@/services/api/organizations.service'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse } from '@/types'
-import CompanyDetails from '@/views/erp/companies/CompanyDetails'
+import OrganizationDetails from '@/views/erp/organizations/OrganizationDetails'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Switch } from '@/components/ui/switch'
-import CompanyStatusSwitch from '@/views/erp/companies/CompanyStatusSwitch'
+import OrganizationStatusSwitch from '@/views/erp/organizations/OrganizationStatusSwitch'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import Link from 'next/link'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 interface CompanyData {
   id: string
@@ -46,7 +47,7 @@ interface FilterButton {
   variant: string
 }
 
-const Companies: React.FC = () => {
+const Organizations: React.FC = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -123,7 +124,7 @@ const Companies: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      CompanyService.index(filterOptions)
+      OrganizationService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
@@ -201,7 +202,7 @@ const Companies: React.FC = () => {
       header: 'Status',
       cell: row => (
         <div className='flex items-center gap-2'>
-          <CompanyStatusSwitch
+          <OrganizationStatusSwitch
             checked={row.status}
             loading={statusLoading[row.id]}
             companyId={row.id}
@@ -216,7 +217,11 @@ const Companies: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex gap-2'>
-          <EditButton tooltip='Edit Company Information' link={`/erp/companies/${row.id}/edit`} variant='icon' />
+          <ThreeDotButton
+            buttons={[
+              <EditButton tooltip='Edit Company Information' link={`/erp/companies/${row.id}/edit`} variant='text' />
+            ]}
+          />
         </div>
       ),
       sortable: false
@@ -232,7 +237,7 @@ const Companies: React.FC = () => {
   const handleRowSelect = (company: any) => {
     setSelectedCompanyId(company?.id || null)
 
-    CompanyService.show(company?.id)
+    OrganizationService.show(company?.id)
       .then(response => {
         setSelectedCompany(response.data)
       })
@@ -298,7 +303,7 @@ const Companies: React.FC = () => {
   const handleStatusToggle = async (companyId: string) => {
     setStatusLoading(prev => ({ ...prev, [companyId]: true }))
     try {
-      await CompanyService.changeStatus(companyId)
+      await OrganizationService.changeStatus(companyId)
       // Refetch data after status change
       fetchData()
     } catch (error) {
@@ -333,10 +338,10 @@ const Companies: React.FC = () => {
       )}
 
       {activeTab === 'details' && (
-        <CompanyDetails companyData={selectedCompany} setCompanyData={setSelectedCompany} fetchData={fetchData} />
+        <OrganizationDetails companyData={selectedCompany} setCompanyData={setSelectedCompany} fetchData={fetchData} />
       )}
     </CommonLayout>
   )
 }
 
-export default Companies
+export default Organizations

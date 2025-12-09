@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import CompanyService from '@/services/api/company.service'
+import OrganizationService from '@/services/api/organizations.service'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { SpinnerCustom } from '@/components/ui/spinner'
@@ -38,7 +38,7 @@ const defaultValues: FormValues = {
   address: ''
 }
 
-const CreateCompany: React.FC = () => {
+const CreateOrganization: React.FC = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const form = useForm<FormValues>({ defaultValues, mode: 'onSubmit' })
@@ -53,7 +53,7 @@ const CreateCompany: React.FC = () => {
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true)
     try {
-      CompanyService.store(data)
+      OrganizationService.store(data)
         .then(response => {
           setIsLoading(false)
           toast.success('Company created successfully')
@@ -138,7 +138,7 @@ const CreateCompany: React.FC = () => {
                   <FormControl>
                     <Input
                       type='email'
-                      placeholder='company email'
+                      placeholder='Company email'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -156,7 +156,7 @@ const CreateCompany: React.FC = () => {
                   <FormLabel>Phone</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder='phone'
+                      placeholder='Phone'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -216,7 +216,7 @@ const CreateCompany: React.FC = () => {
                   <FormControl>
                     <Input
                       type='password'
-                      placeholder='password'
+                      placeholder='Password'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -239,7 +239,7 @@ const CreateCompany: React.FC = () => {
                   <FormControl>
                     <Input
                       type='password'
-                      placeholder='confirm password'
+                      placeholder='Confirm password'
                       className='bg-bg-3 border-border text-light placeholder:text-gray'
                       {...field}
                     />
@@ -271,12 +271,7 @@ const CreateCompany: React.FC = () => {
           </div>
 
           <div className='flex gap-3 pt-4 border-t border-border'>
-            <Button
-              type='submit'
-              variant='outline'
-              disabled={isLoading}
-              className='flex-1 bg-bg-3 text-light disabled:opacity-50'
-            >
+            <Button type='submit' disabled={isLoading} className='flex-1 disabled:opacity-50'>
               {isLoading ? 'Saving...' : 'Create'}
             </Button>
             <Button
@@ -295,4 +290,4 @@ const CreateCompany: React.FC = () => {
   )
 }
 
-export default CreateCompany
+export default CreateOrganization

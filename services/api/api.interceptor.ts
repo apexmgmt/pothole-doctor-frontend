@@ -30,7 +30,7 @@ const clearAuthAndRedirect = async () => {
 
   // Client-side redirect only (interceptor runs client-side)
   if (typeof window !== 'undefined') {
-    window.location.href = '/login'
+    window.location.href = '/erp/login'
   }
 }
 
