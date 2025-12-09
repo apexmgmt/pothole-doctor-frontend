@@ -1,5 +1,12 @@
-import { City, State } from "./location.types"
-import { PaymentTerm } from "./payment_terms.types"
+import { City, CountryWithStates, State } from './location.types'
+import { PaymentTerm } from './payment_terms.types'
+import { TaxType } from './tax_types.types'
+
+export interface VendorsProps {
+  taxTypes: TaxType[]
+  countriesWithStatesAndCities: CountryWithStates[]
+  paymentTerms: PaymentTerm[]
+}
 
 export interface Vendor {
   id: string
@@ -8,7 +15,7 @@ export interface Vendor {
   first_name: string
   last_name: string
   guard: string | 'vendor'
-  status: boolean 
+  status: boolean
   email: string
   email_verified_at: string | null
   deleted_at: string | null
@@ -20,29 +27,32 @@ export interface Vendor {
 }
 
 export interface VendorUserAble {
-    id: string
-    payment_term_id: string
-    state_id: string
-    city_id: string
-    zip_code: string
-    street_address: string
-    tax_type: string
-    fax_number: string
-    website: string
-    note: string
-    is_enable_b2b: number | 1 | 0
-    b2b_host_url: string
-    b2b_port_number: string
-    b2b_vendor_id: string
-    b2b_username: string
-    b2b_password: string
-    profit_margin: number
-    created_at: string
-    updated_at: string
-    deleted_at: string | null
-    payment_term?: PaymentTerm
-    city?: City
-    state?: State
+  id: string
+  payment_term_id: string
+  phone: string
+  number: string
+  state_id: string
+  city_id: string
+  zip_code: string
+  street_address: string
+  tax_type: string
+  fax_number: string
+  website: string
+  note: string
+  is_enable_b2b: number | 1 | 0
+  b2b_host_url: string | null
+  b2b_port_number: string | null
+  b2b_vendor_id: string | null
+  b2b_username: string | null
+  b2b_password: string | null
+  b2b_vendor_folder?: string
+  profit_margin: number | string
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+  payment_term?: PaymentTerm
+  city?: City
+  state?: State
 }
 
 export interface VendorPayload {
@@ -69,4 +79,16 @@ export interface VendorPayload {
   state_id: string
   zip_code: string
   street_address: string
+}
+
+export interface CreateOrEditVendorModalProps {
+  mode?: 'create' | 'edit'
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  paymentTerms: PaymentTerm[]
+  taxTypes: TaxType[]
+  countriesWithStatesAndCities: CountryWithStates[]
+  vendorId?: string
+  vendorDetails?: Vendor
+  onSuccess?: () => void
 }
