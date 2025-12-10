@@ -108,18 +108,28 @@ const CreateOrEditPickupAddressModal = ({
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true)
-    const payload: VendorPickupAddressPayload = {
-      vendor_id: vendorId,
-      title: values.title,
-      street_address: values.street_address,
-      state_id: values.state_id,
-      city_id: values.city_id,
-      zip_code: values.zip_code
-    }
+
+    const payload: VendorPickupAddressPayload | Omit<VendorPickupAddressPayload, 'vendor_id'> =
+      mode === 'create'
+        ? {
+            vendor_id: vendorId,
+            title: values.title,
+            street_address: values.street_address,
+            state_id: values.state_id,
+            city_id: values.city_id,
+            zip_code: values.zip_code
+          }
+        : {
+            title: values.title,
+            street_address: values.street_address,
+            state_id: values.state_id,
+            city_id: values.city_id,
+            zip_code: values.zip_code
+          }
 
     try {
       if (mode === 'create') {
-        await VendorPickupAddressService.store(payload)
+        await VendorPickupAddressService.store(payload as VendorPickupAddressPayload)
         toast.success('Pickup address added successfully')
         form.reset()
         onOpenChange(false)
@@ -207,7 +217,7 @@ const CreateOrEditPickupAddressModal = ({
                 </FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className='w-full'>
                       <SelectValue placeholder='Select country' />
                     </SelectTrigger>
                   </FormControl>
@@ -239,7 +249,7 @@ const CreateOrEditPickupAddressModal = ({
                   disabled={!selectedCountryId || availableStates.length === 0}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className='w-full'>
                       <SelectValue placeholder='Select state' />
                     </SelectTrigger>
                   </FormControl>
@@ -277,7 +287,7 @@ const CreateOrEditPickupAddressModal = ({
                   disabled={!selectedStateId || availableCities.length === 0}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className='w-full'>
                       <SelectValue placeholder='Select city' />
                     </SelectTrigger>
                   </FormControl>

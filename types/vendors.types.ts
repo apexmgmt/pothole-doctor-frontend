@@ -138,5 +138,5 @@ export interface VendorPickupAddressPayload {
   state_id: string
   city_id: string
   zip_code: string
-  vendor_id: string
+  vendor_id?: string
 }
