@@ -43,6 +43,7 @@ export default class VendorService {
       }
 
       await revalidate('vendors')
+      await revalidate('vendors-all')
 
       return await response.json()
     } catch (error) {
