@@ -27,7 +27,6 @@ export default function EmailTemplates({ templates: initialTemplates }: { templa
   }
 
   const handleSuccess = () => {
-    toast.success('Template updated successfully')
     // Refresh server-side data
     router.refresh()
   }
