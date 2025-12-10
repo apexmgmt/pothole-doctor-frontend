@@ -360,15 +360,20 @@ export default function EditEmailTemplateDialog({
         description
       }
 
-      await EmailTemplateService.update(template.id, payload)
-      toast.success('Email template updated successfully')
-      onSuccess()
-      onOpenChange(false)
+      EmailTemplateService.update(template.id, payload)
+        .then(response => {
+          setIsLoading(false)
+          toast.success('Email template updated successfully')
+          onSuccess()
+          onOpenChange(false)
+        })
+        .catch(error => {
+          setIsLoading(false)
+          toast.error('Failed to update email template')
+        })
     } catch (error) {
-      toast.error('Failed to update email template')
-      console.error(error)
-    } finally {
       setIsLoading(false)
+      toast.error('Failed to update email template')
     }
   }
 
