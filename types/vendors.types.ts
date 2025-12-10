@@ -92,3 +92,23 @@ export interface CreateOrEditVendorModalProps {
   vendorDetails?: Vendor
   onSuccess?: () => void
 }
+
+export interface VendorRebateCredit {
+  id: string
+  vendor_id: string
+  reference: string
+  amount: number
+  date: string
+  note: string
+  created_at: string
+  updated_at: string
+  vendor?: Vendor
+}
+
+export interface VendorRebateCreditPayload {
+  vendor_id: string
+  amount: number
+  date: string
+  reference: string
+  note: string
+}

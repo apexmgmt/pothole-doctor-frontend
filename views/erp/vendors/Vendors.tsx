@@ -21,6 +21,7 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CreateOrEditVendorModal from './CreateOrEditVendorModal'
 import VendorDetails from './VendorDetails'
 import VendorDocuments from './documents/VendorDocuments'
+import VendorRebateCredits from './rebate-credits/VendorRebateCredits'
 
 const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCities, paymentTerms }) => {
   const router = useRouter()
@@ -281,6 +282,13 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
       onClick: () => setActiveTab('documents'),
       isActive: activeTab === 'documents',
       disabled: !selectedVendorId && !selectedUserAbleId
+    },
+    {
+      label: 'Rebate & Credits',
+      icon: DocumentIcon,
+      onClick: () => setActiveTab('rebate-credits'),
+      isActive: activeTab === 'rebate-credits',
+      disabled: !selectedVendorId && !selectedUserAbleId
     }
   ]
 
@@ -319,6 +327,9 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
         )}
         {activeTab === 'documents' && selectedVendorId && selectedUserAbleId && (
           <VendorDocuments vendorId={selectedUserAbleId || ''} />
+        )}
+        {activeTab === 'rebate-credits' && selectedVendorId && selectedUserAbleId && (
+          <VendorRebateCredits vendorId={selectedUserAbleId || ''} />
         )}
       </CommonLayout>
 
