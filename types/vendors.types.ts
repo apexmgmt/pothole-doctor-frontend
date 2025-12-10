@@ -112,3 +112,31 @@ export interface VendorRebateCreditPayload {
   reference: string
   note: string
 }
+
+export interface VendorPickupAddress {
+  id: string
+  addressable_id: string
+  addressable_type: string
+  title: string
+  street_address: string
+  state_id: string
+  city_id: string
+  email: string | null
+  phone: string | null
+  is_default: number | 1 | 0 | null
+  zip_code: string
+  created_at: string
+  updated_at: string
+  addressable?: Vendor
+  city?: City
+  state?: State
+}
+
+export interface VendorPickupAddressPayload {
+  title: string
+  street_address: string
+  state_id: string
+  city_id: string
+  zip_code: string
+  vendor_id: string
+}
