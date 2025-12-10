@@ -100,7 +100,8 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
           phone: userable?.phone || 'N/A',
           address: userable?.street_address + ', ' + userable?.city?.name + ', ' + userable?.state?.name || 'N/A',
           profit_margin: userable?.profit_margin || 0,
-          is_enable_b2b: userable?.is_enable_b2b ? 'Yes' : 'No'
+          is_enable_b2b: userable?.is_enable_b2b ? 'Yes' : 'No',
+          userable_id: vendor.userable_id || null
         }
       })
     : []
