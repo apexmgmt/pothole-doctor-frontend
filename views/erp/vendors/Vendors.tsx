@@ -22,6 +22,7 @@ import CreateOrEditVendorModal from './CreateOrEditVendorModal'
 import VendorDetails from './VendorDetails'
 import VendorDocuments from './documents/VendorDocuments'
 import VendorRebateCredits from './rebate-credits/VendorRebateCredits'
+import VendorPickupAddresses from './pickup-addresses/VendorPickupAddresses'
 
 const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCities, paymentTerms }) => {
   const router = useRouter()
@@ -289,6 +290,13 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
       onClick: () => setActiveTab('rebate-credits'),
       isActive: activeTab === 'rebate-credits',
       disabled: !selectedVendorId && !selectedUserAbleId
+    },
+    {
+      label: 'Pickup Addresses',
+      icon: DocumentIcon,
+      onClick: () => setActiveTab('pickup-addresses'),
+      isActive: activeTab === 'pickup-addresses',
+      disabled: !selectedVendorId && !selectedUserAbleId
     }
   ]
 
@@ -330,6 +338,9 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
         )}
         {activeTab === 'rebate-credits' && selectedVendorId && selectedUserAbleId && (
           <VendorRebateCredits vendorId={selectedUserAbleId || ''} />
+        )}
+        {activeTab === 'pickup-addresses' && selectedVendorId && selectedUserAbleId && (
+          <VendorPickupAddresses countriesWithStatesAndCities={countriesWithStatesAndCities} vendorId={selectedUserAbleId || ''} />
         )}
       </CommonLayout>
 

@@ -44,3 +44,18 @@ export const VENDOR_DOCUMENTS: string = '/v1/vendor-documents/'
  * Data delete method: DELETE /{id}
  */
 export const VENDOR_REBATE_CREDITS: string = '/v1/rebate-credits/'
+
+/**
+ * API endpoint for vendor pickup addresses
+ * 
+ * Data table operation method: GET
+ * 
+ * Data create method: POST
+ * 
+ * Data update method: PUT /{id}
+ * 
+ * Data retrieve method: GET /{id}
+ * 
+ * Data delete method: DELETE /{id}
+ */
+export const VENDOR_PICKUP_ADDRESSES: string = '/v1/pickup-addresses/'
