@@ -15,6 +15,10 @@ export function HoldAmountFields({ form }: HoldAmountFieldsProps) {
       <FormField
         control={form.control}
         name='hold_amount'
+        rules={{
+          required: 'Hold amount is required',
+          min: { value: 0, message: 'Hold amount must be at least 0' }
+        }}
         render={({ field }) => (
           <FormItem>
             <FormLabel>
@@ -32,6 +36,11 @@ export function HoldAmountFields({ form }: HoldAmountFieldsProps) {
       <FormField
         control={form.control}
         name='hold_amount_percent'
+        rules={{
+          required: 'Hold amount percent is required',
+          min: { value: 0, message: 'Percentage must be at least 0' },
+          max: { value: 100, message: 'Percentage cannot exceed 100' }
+        }}
         render={({ field }) => (
           <FormItem>
             <FormLabel>

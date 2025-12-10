@@ -21,6 +21,7 @@ export function BasicInformationFields({ form, businessLocations, companies }: B
       <FormField
         control={form.control}
         name='user_type'
+        rules={{ required: 'Role is required' }}
         render={({ field }) => (
           <FormItem className='flex flex-row gap-4'>
             <FormLabel>Role</FormLabel>
@@ -53,6 +54,10 @@ export function BasicInformationFields({ form, businessLocations, companies }: B
         <FormField
           control={form.control}
           name='location_id'
+          rules={{
+            required: 'Location is required',
+            validate: value => (value && value.length > 0) || 'At least one location must be selected'
+          }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -102,6 +107,10 @@ export function BasicInformationFields({ form, businessLocations, companies }: B
         <FormField
           control={form.control}
           name='first_name'
+          rules={{
+            required: 'First name is required',
+            minLength: { value: 2, message: 'First name must be at least 2 characters' }
+          }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -120,9 +129,7 @@ export function BasicInformationFields({ form, businessLocations, companies }: B
           name='last_name'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Last Name<span className='text-red-500'>*</span>
-              </FormLabel>
+              <FormLabel>Last Name</FormLabel>
               <FormControl>
                 <Input placeholder='Enter last name' {...field} />
               </FormControl>
@@ -136,6 +143,13 @@ export function BasicInformationFields({ form, businessLocations, companies }: B
         <FormField
           control={form.control}
           name='email'
+          rules={{
+            required: 'Email is required',
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: 'Invalid email address'
+            }
+          }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -152,6 +166,9 @@ export function BasicInformationFields({ form, businessLocations, companies }: B
         <FormField
           control={form.control}
           name='phone'
+          rules={{
+            minLength: { value: 7, message: 'Phone number must be at least 7 characters' }
+          }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Phone</FormLabel>
