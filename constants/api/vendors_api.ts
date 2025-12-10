@@ -59,3 +59,18 @@ export const VENDOR_REBATE_CREDITS: string = '/v1/rebate-credits/'
  * Data delete method: DELETE /{id}
  */
 export const VENDOR_PICKUP_ADDRESSES: string = '/v1/pickup-addresses/'
+
+/**
+ * API endpoint for vendor sales-man
+ * 
+ * Data table operation method: GET
+ * 
+ * Data create method: POST
+ * 
+ * Data update method: PUT /{id}
+ * 
+ * Data retrieve method: GET /{id}
+ * 
+ * Data delete method: DELETE /{id}
+ */
+export const VENDOR_SALESMAN: string = '/v1/sales-man/'

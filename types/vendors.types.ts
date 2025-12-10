@@ -140,3 +140,26 @@ export interface VendorPickupAddressPayload {
   zip_code: string
   vendor_id?: string
 }
+
+export interface VendorSalesman {
+  id: string
+  vendor_id: string
+  name: string
+  email: string
+  phone: string
+  ext: string
+  comment: string
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+  vendor?: Vendor
+}
+
+export interface VendorSalesmanPayload {
+  vendor_id: string
+  name: string
+  email: string
+  comment: string
+  ext: string
+  phone: string
+}
