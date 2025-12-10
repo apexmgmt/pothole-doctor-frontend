@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { NavigationItem } from '@/types'
 
 import { SettingsIcon, HomeIcon } from '@/public/icons'
-import { Boxes, Building2, LocateIcon, Map, UserLock, Users, Warehouse } from 'lucide-react'
+import { Boxes, Building2, LocateIcon, Map, Package, UserLock, Users, Warehouse } from 'lucide-react'
 import SidebarFooter from './SidebarFooter'
 import MenuItem from './menu-item'
 
@@ -49,6 +49,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       label: 'Roles',
       icon: <UserLock className='h-4 w-4' />,
       href: '/erp/roles',
+      hasSubItems: false,
+      exactMatch: false
+    },
+    {
+      id: 'vendors',
+      label: 'Vendors',
+      icon: <Package className='h-4 w-4' />,
+      href: '/erp/vendors',
       hasSubItems: false,
       exactMatch: false
     },
@@ -178,6 +186,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           id: 'task-types',
           label: 'Task Types',
           href: '/erp/settings/task-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'email-templates',
+          label: 'Email Templates',
+          href: '/erp/settings/email-templates',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
           exactMatch: false

@@ -18,12 +18,9 @@ export default class AuthService {
       }
 
       const apiUrl: string = await getApiUrl()
-      const response = await fetch(apiUrl + AUTH_LOGIN, {
+      const response = await apiInterceptor(apiUrl + AUTH_LOGIN, {
+        requiresAuth: false,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
         body: JSON.stringify(payload)
       })
 
@@ -49,12 +46,9 @@ export default class AuthService {
     try {
       const apiUrl: string = await getApiUrl()
       const payload: object = { refresh_token: refresh_token }
-      const response = await fetch(apiUrl + AUTH_REFRESH_TOKEN, {
+      const response = await apiInterceptor(apiUrl + AUTH_REFRESH_TOKEN, {
+        requiresAuth: false,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
         body: JSON.stringify(payload)
       })
 

@@ -23,5 +23,6 @@ export * from './menu.types'
 export * from './warehouses.types'
 export * from './product_categories.types'
 export * from './task_reminders.types'
-
-export * from './email_templates.types';
+export * from './email_templates.types'
+export * from './vendors.types'
+export * from './tax_types.types'
