@@ -1,6 +1,6 @@
 import { getApiUrl } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { VENDORS } from '@/constants/api'
+import { VENDORS, VENDORS_ALL } from '@/constants/api'
 import { VendorPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
 
@@ -131,6 +131,27 @@ export default class VendorService {
       await revalidate('vendors')
       await revalidate(`vendors/${vendorId}`)
       await revalidate('vendors-all')
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /** Get all vendors api */
+  static getAllVendors = async () => {
+    try {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + VENDORS_ALL, {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 3600, tags: ['vendors-all'] } // Cache for 1 hour
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to fetch vendors')
+      }
+
       return await response.json()
     } catch (error) {
       throw error
