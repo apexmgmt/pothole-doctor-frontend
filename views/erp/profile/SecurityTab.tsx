@@ -1,132 +1,18 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { EyeOpenIcon, EyeCloseIcon } from '@/public/icons'
-import EditButton from '@/components/erp/common/buttons/EditButton'
+import ChangePasswordSection from './ChangePasswordSection'
 
 interface SecurityTabProps {
   // Add any props if needed in the future
 }
 
 const SecurityTab: React.FC<SecurityTabProps> = () => {
-  // Password visibility states
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-
-  // Password form states
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-
   return (
     <div className='space-y-5'>
       {/* Change Password Section */}
-      <div className='space-y-5'>
-        <div className='flex items-center justify-between'>
-          <h3 className='text-lg font-semibold text-light'>Change Password</h3>
-        </div>
-
-        {/* Password Fields in One Row */}
-        <div className='grid grid-cols-3 gap-4'>
-          {/* Current Password */}
-          <div className='space-y-2'>
-            <Label htmlFor='current-password' className='text-sm text-light'>
-              Current Password
-            </Label>
-            <div className='relative'>
-              <Input
-                id='current-password'
-                type={showCurrentPassword ? 'text' : 'password'}
-                value={currentPassword}
-                onChange={e => setCurrentPassword(e.target.value)}
-                className='pr-10 bg-transparent border-border text-light placeholder:text-gray'
-                placeholder='Enter current password'
-              />
-              <button
-                type='button'
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className='absolute right-3 top-1/2 -translate-y-1/2 text-gray hover:text-light transition-colors'
-              >
-                {showCurrentPassword ? <EyeCloseIcon className='h-4 w-4' /> : <EyeOpenIcon className='h-4 w-4' />}
-              </button>
-            </div>
-          </div>
-
-          {/* New Password */}
-          <div className='space-y-2'>
-            <Label htmlFor='new-password' className='text-sm text-light'>
-              New Password
-            </Label>
-            <div className='relative'>
-              <Input
-                id='new-password'
-                type={showNewPassword ? 'text' : 'password'}
-                value={newPassword}
-                onChange={e => setNewPassword(e.target.value)}
-                className='pr-10 bg-transparent border-border text-light placeholder:text-gray'
-                placeholder='Enter new password'
-              />
-              <button
-                type='button'
-                onClick={() => setShowNewPassword(!showNewPassword)}
-                className='absolute right-3 top-1/2 -translate-y-1/2 text-gray hover:text-light transition-colors'
-              >
-                {showNewPassword ? <EyeCloseIcon className='h-4 w-4' /> : <EyeOpenIcon className='h-4 w-4' />}
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm Password */}
-          <div className='space-y-2'>
-            <Label htmlFor='confirm-password' className='text-sm text-light'>
-              Confirm Password
-            </Label>
-            <div className='relative'>
-              <Input
-                id='confirm-password'
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
-                className='pr-10 bg-transparent border-border text-light placeholder:text-gray'
-                placeholder='Confirm new password'
-              />
-              <button
-                type='button'
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className='absolute right-3 top-1/2 -translate-y-1/2 text-gray hover:text-light transition-colors'
-              >
-                {showConfirmPassword ? <EyeCloseIcon className='h-4 w-4' /> : <EyeOpenIcon className='h-4 w-4' />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Password Requirements */}
-        <div className='mt-6'>
-          <h4 className='text-sm font-medium text-light mb-3'>Password Requirements</h4>
-          <ul className='space-y-2 text-sm text-gray'>
-            <li>• Minimum 8 characters long - the more, the better</li>
-            <li>• At least one lowercase & one uppercase character</li>
-            <li>• At least one number</li>
-            <li>• At least one symbol or whitespace character</li>
-          </ul>
-        </div>
-
-        {/* Change Password Button */}
-        <div className='flex justify-end'>
-          <Button
-            variant='outline'
-            size='sm'
-            className='py-2.5 px-3 inline-block h-auto leading-[1] bg-light text-bg hover:text-bg hover:bg-light/90 border-border'
-          >
-            Change Password
-          </Button>
-        </div>
-      </div>
+      <ChangePasswordSection />
 
       {/* Two-step verification Section */}
       <div className='space-y-5 pt-6 border-t border-border'>
