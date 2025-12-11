@@ -3,7 +3,6 @@ export interface ProfileDetailsPayload {
     last_name: string
     phone: string
     address: string
-    email: string
 }
 
 export interface ProfileChangePasswordPayload {

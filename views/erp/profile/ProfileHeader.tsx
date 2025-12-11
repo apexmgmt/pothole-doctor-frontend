@@ -4,12 +4,12 @@ import React, { useRef, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { User } from '@/types'
 import Image from 'next/image'
-import { generateFileUrl } from '../../../utils/utility'
 import { toast } from 'sonner'
 import AuthService from '@/services/api/auth.service'
 import { Loader2 } from 'lucide-react'
 import { useAppDispatch } from '@/lib/hooks'
 import { setUserData } from '@/lib/features/auth/authSlice'
+import { generateFileUrl } from '@/utils/utility'
 
 interface ProfileHeaderProps {
   userData: User | null
