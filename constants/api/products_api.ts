@@ -13,5 +13,5 @@
  *
  * Data restore method: POST /{id}/restore
  */
-export const PRODUCTS: string = '/v1/products'
+export const PRODUCTS: string = '/v1/products/'
 export const PRODUCTS_ALL: string = '/v1/get-products/'

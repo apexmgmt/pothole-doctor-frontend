@@ -10,9 +10,10 @@ import { useEffect } from 'react'
 interface UOMFieldsProps {
   form: UseFormReturn<any>
   uomUnits: Unit[]
+  disabled?: boolean
 }
 
-export function UOMFields({ form, uomUnits }: UOMFieldsProps) {
+export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) {
   // Watch is_rolled_good and set purchase_uom to "Roll" if needed
   const isRolledGood = form.watch('is_rolled_good')
 
@@ -37,7 +38,7 @@ export function UOMFields({ form, uomUnits }: UOMFieldsProps) {
             <FormLabel>
               Purchase UOM <span className='text-red-500'>*</span>
             </FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={disabled}>
               <FormControl>
                 <SelectTrigger className='w-full'>
                   <SelectValue placeholder='Select UOM' />
@@ -66,7 +67,7 @@ export function UOMFields({ form, uomUnits }: UOMFieldsProps) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input type='number' placeholder='Carton/Pallet' {...field} />
+                  <Input type='number' placeholder='Carton/Pallet' {...field} disabled={disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -78,7 +79,7 @@ export function UOMFields({ form, uomUnits }: UOMFieldsProps) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input type='number' placeholder='Piece/Carton' {...field} />
+                  <Input type='number' placeholder='Piece/Carton' {...field} disabled={disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -90,7 +91,7 @@ export function UOMFields({ form, uomUnits }: UOMFieldsProps) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input type='number' placeholder='lb' {...field} />
+                  <Input type='number' placeholder='lb' {...field} disabled={disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -112,7 +113,7 @@ export function UOMFields({ form, uomUnits }: UOMFieldsProps) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input type='number' step='0.01' placeholder='1.0000' {...field} />
+                  <Input type='number' step='0.01' placeholder='1.0000' {...field} disabled={disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -124,7 +125,7 @@ export function UOMFields({ form, uomUnits }: UOMFieldsProps) {
             rules={{ required: 'Unit is required' }}
             render={({ field }) => (
               <FormItem>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value} disabled={disabled}>
                   <FormControl>
                     <SelectTrigger className='w-full'>
                       <SelectValue placeholder='Select Unit' />

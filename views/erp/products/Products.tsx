@@ -17,7 +17,8 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import ProductService from '@/services/api/products.service'
-import CreateProductModal from './CreateProductModal'
+import CreateEditViewProductModal from './CreateEditViewProductModal'
+import ViewButton from '@/components/erp/common/buttons/ViewButton'
 
 const Products: React.FC<ProductsProps> = ({ productCategories, uomUnits, serviceTypes, vendors }) => {
   const router = useRouter()
@@ -30,7 +31,7 @@ const Products: React.FC<ProductsProps> = ({ productCategories, uomUnits, servic
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
 
@@ -125,6 +126,19 @@ const Products: React.FC<ProductsProps> = ({ productCategories, uomUnits, servic
     }
   }
 
+  const handleOpenViewModal = async (id: string) => {
+    setModalMode('view')
+    setSelectedProductId(id)
+
+    try {
+      const response = await ProductService.show(id)
+      setSelectedProduct(response.data)
+      setIsModalOpen(true)
+    } catch (error) {
+      toast.error('Failed to fetch product details')
+    }
+  }
+
   const handleModalClose = () => {
     setIsModalOpen(false)
     setSelectedProductId(null)
@@ -206,6 +220,11 @@ const Products: React.FC<ProductsProps> = ({ productCategories, uomUnits, servic
         <div className='flex items-center justify-center gap-2'>
           <ThreeDotButton
             buttons={[
+              <ViewButton
+                tooltip='View Product Information'
+                onClick={() => handleOpenViewModal(row.id)}
+                variant='text'
+              />,
               <EditButton
                 tooltip='Edit Product Information'
                 onClick={() => handleOpenEditModal(row.id)}
@@ -304,10 +323,13 @@ const Products: React.FC<ProductsProps> = ({ productCategories, uomUnits, servic
         />
       </CommonLayout>
 
-      <CreateProductModal
+      <CreateEditViewProductModal
+        mode={modalMode}
         open={isModalOpen}
         onOpenChange={handleModalClose}
         onSuccess={handleSuccess}
+        productId={selectedProductId || undefined}
+        productDetails={selectedProduct || undefined}
         productCategories={productCategories}
         uomUnits={uomUnits}
         serviceTypes={serviceTypes}

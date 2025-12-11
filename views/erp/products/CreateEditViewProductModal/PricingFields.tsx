@@ -9,9 +9,10 @@ import { Unit } from '@/types'
 interface PricingFieldsProps {
   form: UseFormReturn<any>
   uomUnits: Unit[]
+  disabled?: boolean
 }
 
-export function PricingFields({ form, uomUnits }: PricingFieldsProps) {
+export function PricingFields({ form, uomUnits, disabled = false }: PricingFieldsProps) {
   return (
     <div className='space-y-4'>
       {/* Product Cost Field */}
@@ -25,7 +26,7 @@ export function PricingFields({ form, uomUnits }: PricingFieldsProps) {
               Product Cost <span className='text-red-500'>*</span>
             </FormLabel>
             <FormControl>
-              <Input type='number' step='0.01' placeholder='Enter product cost' {...field} />
+              <Input type='number' step='0.01' placeholder='Enter product cost' {...field} disabled={disabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -40,7 +41,15 @@ export function PricingFields({ form, uomUnits }: PricingFieldsProps) {
           <FormItem>
             <FormLabel>Margin (%)</FormLabel>
             <FormControl>
-              <Input type='number' step='0.01' min={0} max={100} placeholder='Enter margin' {...field} />
+              <Input
+                type='number'
+                step='0.01'
+                min={0}
+                max={100}
+                placeholder='Enter margin'
+                {...field}
+                disabled={disabled}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -60,7 +69,7 @@ export function PricingFields({ form, uomUnits }: PricingFieldsProps) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input type='number' step='0.01' placeholder='Enter price' {...field} />
+                  <Input type='number' step='0.01' placeholder='Enter price' {...field} disabled={disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -72,7 +81,7 @@ export function PricingFields({ form, uomUnits }: PricingFieldsProps) {
             rules={{ required: 'Price unit is required' }}
             render={({ field }) => (
               <FormItem>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value} disabled={disabled}>
                   <FormControl>
                     <SelectTrigger className='w-full'>
                       <SelectValue placeholder='Select Unit' />
@@ -101,7 +110,7 @@ export function PricingFields({ form, uomUnits }: PricingFieldsProps) {
             <FormItem>
               <FormLabel>Minimum Quantity</FormLabel>
               <FormControl>
-                <Input type='number' step='0.01' placeholder='Enter minimum quantity' {...field} />
+                <Input type='number' step='0.01' placeholder='Enter minimum quantity' {...field} disabled={disabled} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -116,7 +125,7 @@ export function PricingFields({ form, uomUnits }: PricingFieldsProps) {
             <FormItem>
               <FormLabel>Round up Quantity</FormLabel>
               <FormControl>
-                <Input type='number' step='0.01' placeholder='Enter round up quantity' {...field} />
+                <Input type='number' step='0.01' placeholder='Enter round up quantity' {...field} disabled={disabled} />
               </FormControl>
               <FormMessage />
             </FormItem>

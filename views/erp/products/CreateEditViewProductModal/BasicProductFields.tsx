@@ -15,9 +15,16 @@ interface BasicProductFieldsProps {
   vendors: Vendor[]
   productCategories: ProductCategory[]
   serviceTypes: ServiceType[]
+  disabled?: boolean
 }
 
-export function BasicProductFields({ form, vendors, productCategories, serviceTypes }: BasicProductFieldsProps) {
+export function BasicProductFields({
+  form,
+  vendors,
+  productCategories,
+  serviceTypes,
+  disabled = false
+}: BasicProductFieldsProps) {
   return (
     <div className='space-y-4'>
       {/* Vendor Field */}
@@ -30,7 +37,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
             <FormLabel>
               Vendor <span className='text-red-500'>*</span>
             </FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={disabled}>
               <FormControl>
                 <SelectTrigger className='w-full'>
                   <SelectValue placeholder='Select Vendor' />
@@ -60,7 +67,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
             <FormLabel>
               Category <span className='text-red-500'>*</span>
             </FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={disabled}>
               <FormControl>
                 <SelectTrigger className='w-full'>
                   <SelectValue placeholder='Select Product Category' />
@@ -95,6 +102,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
                 selected={field.value || []}
                 onChange={field.onChange}
                 placeholder='Select service types'
+                disabled={disabled}
               />
             </FormControl>
             <FormMessage />
@@ -113,6 +121,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
                 checked={!!field.value}
                 onCheckedChange={checked => field.onChange(checked ? 1 : 0)}
                 id='is_rolled_good'
+                disabled={disabled}
               />
             </FormControl>
             <FormLabel htmlFor='is_rolled_good' className='mb-0 cursor-pointer'>
@@ -131,7 +140,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
           <FormItem>
             <FormLabel>SKU</FormLabel>
             <FormControl>
-              <Input placeholder='Enter SKU' {...field} />
+              <Input placeholder='Enter SKU' {...field} disabled={disabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -160,6 +169,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
                     form.setValue('private_product_name', e.target.value)
                   }
                 }}
+                disabled={disabled}
               />
             </FormControl>
             <FormMessage />
@@ -187,6 +197,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
                       form.setValue('private_style', e.target.value)
                     }
                   }}
+                  disabled={disabled}
                 />
               </FormControl>
               <FormMessage />
@@ -213,6 +224,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
                       form.setValue('private_color', e.target.value)
                     }
                   }}
+                  disabled={disabled}
                 />
               </FormControl>
               <FormMessage />
@@ -228,7 +240,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
           <FormItem>
             <FormLabel>Private Prod. Name</FormLabel>
             <FormControl>
-              <Input placeholder='Enter private product name' {...field} />
+              <Input placeholder='Enter private product name' {...field} disabled={disabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -243,7 +255,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
             <FormItem>
               <FormLabel>Private Style</FormLabel>
               <FormControl>
-                <Input placeholder='Enter private style' {...field} />
+                <Input placeholder='Enter private style' {...field} disabled={disabled} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -258,7 +270,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
             <FormItem>
               <FormLabel>Private Color</FormLabel>
               <FormControl>
-                <Input placeholder='Enter private color' {...field} />
+                <Input placeholder='Enter private color' {...field} disabled={disabled} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -273,7 +285,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
           <FormItem>
             <FormLabel>Collection</FormLabel>
             <FormControl>
-              <Input placeholder='Enter collection' {...field} />
+              <Input placeholder='Enter collection' {...field} disabled={disabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -294,6 +306,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
                     field.onChange(val ? val.toISOString().slice(0, 10) : '')
                   }}
                   placeholder='Select date'
+                  disabled={disabled}
                 />
               </FormControl>
               <FormMessage />
@@ -309,7 +322,7 @@ export function BasicProductFields({ form, vendors, productCategories, serviceTy
           <FormItem>
             <FormLabel>Size/Description</FormLabel>
             <FormControl>
-              <Textarea rows={3} placeholder='Enter description' {...field} />
+              <Textarea rows={3} placeholder='Enter description' {...field} disabled={disabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
