@@ -51,6 +51,7 @@ export function AdditionalInfoFields({ form, disabled = false }: AdditionalInfoF
                   onValueChange={val => field.onChange(val === 'yes' ? 1 : 0)}
                   value={field.value === 1 ? 'yes' : 'no'}
                   className='flex flex-row gap-4'
+                  disabled={disabled}
                 >
                   <div className='flex gap-2 items-center'>
                     <RadioGroupItem value='yes' id='visible-yes' />
@@ -79,7 +80,7 @@ export function AdditionalInfoFields({ form, disabled = false }: AdditionalInfoF
           <FormItem className='flex flex-row gap-4 items-center'>
             <FormLabel>Product Type</FormLabel>
             <FormControl>
-              <RadioGroup onValueChange={field.onChange} value={field.value} className='flex flex-row gap-4'>
+              <RadioGroup disabled={disabled} onValueChange={field.onChange} value={field.value} className='flex flex-row gap-4'>
                 <div className='flex gap-2 items-center'>
                   <RadioGroupItem value='inventory' id='type-inventory' />
                   <Label htmlFor='type-inventory' className='cursor-pointer'>
@@ -111,6 +112,7 @@ export function AdditionalInfoFields({ form, disabled = false }: AdditionalInfoF
                   onValueChange={val => field.onChange(val === 'yes' ? 1 : 0)}
                   value={field.value === 1 ? 'yes' : 'no'}
                   className='flex flex-row gap-4'
+                  disabled={disabled}
                 >
                   <div className='flex gap-2 items-center'>
                     <RadioGroupItem value='yes' id='freight-yes' />
@@ -165,6 +167,7 @@ export function AdditionalInfoFields({ form, disabled = false }: AdditionalInfoF
                 onValueChange={val => field.onChange(val === 'yes' ? 1 : 0)}
                 value={field.value === 1 ? 'yes' : 'no'}
                 className='flex flex-row gap-4'
+                disabled={disabled}
               >
                 <div className='flex gap-2 items-center'>
                   <RadioGroupItem value='yes' id='discontinued-yes' />
