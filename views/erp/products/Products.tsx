@@ -16,7 +16,7 @@ import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import ProductService from '@/services/api/products.service'
+import ProductService from '@/services/api/products/products.service'
 import CreateEditViewProductModal from './CreateEditViewProductModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
 

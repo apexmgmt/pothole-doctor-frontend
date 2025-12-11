@@ -1,8 +1,8 @@
 import { getApiUrl } from '@/utils/utility'
-import apiInterceptor from './api.interceptor'
+import apiInterceptor from '../api.interceptor'
 import { PRODUCTS, PRODUCTS_ALL } from '@/constants/api'
 import { ProductPayload } from '@/types'
-import { revalidate } from './../app/cache.service'
+import { revalidate } from '../../app/cache.service'
 
 export default class ProductService {
   /** Product DataTable API */

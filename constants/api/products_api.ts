@@ -15,3 +15,16 @@
  */
 export const PRODUCTS: string = '/v1/products/'
 export const PRODUCTS_ALL: string = '/v1/get-products/'
+
+/**
+ * API endpoint for product galleries
+ * 
+ * Data table operation method: GET
+ * 
+ * Data create method: POST
+ * 
+ * Data update method: PUT /{id} {POST - _method=PUT}
+ * 
+ * Data delete method: DELETE /{id}  
+ */
+export const PRODUCTS_GALLERIES: string = '/v1/galleries/'
