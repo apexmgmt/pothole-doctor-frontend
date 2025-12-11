@@ -137,7 +137,7 @@ export default class ServiceTypeService {
   }
 
   /** Get All Service Types API */
-  static getServiceTypeTypes = async () => {
+  static getAllServiceTypes = async () => {
     try {
       const apiUrl: string = await getApiUrl()
       const response = await apiInterceptor(apiUrl + SERVICE_TYPES_ALL, {

@@ -14,6 +14,7 @@
  * Data restore method: POST /{id}/restore
  */
 export const VENDORS: string = '/v1/vendors/'
+export const VENDORS_ALL: string = '/v1/get-vendors/'
 
 /**
  * API endpoint for vendor documents

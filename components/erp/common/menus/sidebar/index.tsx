@@ -76,9 +76,17 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       hasSubItems: true,
       subItems: [
         {
+          id: 'products',
+          label: 'Products',
+          href: '/erp/products',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
           id: 'product-categories',
           label: 'Categories',
-          href: '/erp/product/categories',
+          href: '/erp/products/categories',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
           exactMatch: false
