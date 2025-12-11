@@ -9,6 +9,10 @@ import AuthService from '@/services/api/auth.service'
 import { ProfileChangePasswordPayload } from '@/types'
 import { toast } from 'sonner'
 import { EyeOpenIcon, EyeCloseIcon } from '@/public/icons'
+import CookieService from '@/services/app/cookie.service'
+import { useAppDispatch } from '@/lib/hooks'
+import { logoutUserSuccess } from '@/lib/features/auth/authSlice'
+import { useRouter } from 'next/navigation'
 
 interface FormValues {
   current_password: string
@@ -17,6 +21,8 @@ interface FormValues {
 }
 
 const ChangePasswordSection = () => {
+  const dispatch = useAppDispatch()
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
@@ -43,6 +49,12 @@ const ChangePasswordSection = () => {
       await AuthService.updatePassword(payload)
       toast.success('Password updated successfully')
       form.reset()
+      CookieService.delete('access_token')
+      CookieService.delete('refresh_token')
+      CookieService.delete('token_type')
+      CookieService.delete('user')
+      dispatch(logoutUserSuccess())
+      router.push('/login')
     } catch (error: any) {
       toast.error(error?.message || 'Failed to update password')
     } finally {
