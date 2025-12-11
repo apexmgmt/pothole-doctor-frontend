@@ -28,5 +28,5 @@ export * from './vendors.types'
 export * from './tax_types.types'
 export * from './products.types'
 export * from './auth.types'
-
-export * from './interest_levels.types';
+export * from './interest_levels.types'
+export * from './installation_requests.types'

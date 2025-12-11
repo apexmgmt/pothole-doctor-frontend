@@ -30,5 +30,5 @@ export * from './email_templates_api'
 export * from './tax_type_api'
 export * from './vendors_api'
 export * from './products_api'
-
 export * from './interest_levels_api'
+export * from './installation_requests_api'
