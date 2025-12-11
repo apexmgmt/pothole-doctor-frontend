@@ -1,4 +1,4 @@
-import { AUTH_LOGIN, AUTH_LOGOUT, AUTH_ME, AUTH_REFRESH_TOKEN } from '@/constants/api'
+import { AUTH_LOGIN, AUTH_LOGOUT, AUTH_ME, AUTH_REFRESH_TOKEN, PROFILE_PICTURE } from '@/constants/api'
 import { getApiUrl } from '@/utils/utility'
 import CookieService from '../app/cookie.service'
 import apiInterceptor from './api.interceptor'
@@ -102,6 +102,26 @@ export default class AuthService {
       const data = await response.json()
       CookieService.store('user', data?.data)
       return data
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static updateProfilePicture = async (payload: any) => {
+    try {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + PROFILE_PICTURE, {
+        requiresAuth: true,
+        method: 'POST',
+        body: payload
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to update profile picture')
+      }
+
+      return await response.json()
     } catch (error) {
       throw error
     }

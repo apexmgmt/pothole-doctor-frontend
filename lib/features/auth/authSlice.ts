@@ -1,4 +1,4 @@
-import { decryptData } from '@/utils/encryption'
+import { decryptData, encryptData } from '@/utils/encryption'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import CookieService from '@/services/app/cookie.service'
 import { User } from '@/types'
@@ -61,10 +61,7 @@ const authSlice = createSlice({
       state.user = action.payload
       try {
         // store as JSON string; encryption/decryption handled elsewhere
-        CookieService.storeSync('user', JSON.stringify(action.payload), {
-          expires: 7,
-          path: '/'
-        })
+        CookieService.storeSync('user', JSON.stringify(encryptData(action.payload)))
       } catch {
         // eslint-disable-next-line no-console
         console.error('Failed to set user cookie')
