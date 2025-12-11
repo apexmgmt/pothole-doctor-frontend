@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { PlusIcon, Search } from 'lucide-react'
+import { PlusIcon, Search, User2Icon } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -23,6 +23,7 @@ import VendorDetails from './VendorDetails'
 import VendorDocuments from './documents/VendorDocuments'
 import VendorRebateCredits from './rebate-credits/VendorRebateCredits'
 import VendorPickupAddresses from './pickup-addresses/VendorPickupAddresses'
+import VendorSalesmen from './salesman/VendorSalesmen'
 
 const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCities, paymentTerms }) => {
   const router = useRouter()
@@ -278,6 +279,13 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
       disabled: !selectedVendorId
     },
     {
+      label: 'Salesmen',
+      icon: UserIcon,
+      onClick: () => setActiveTab('salesman'),
+      isActive: activeTab === 'salesman',
+      disabled: !selectedVendorId && !selectedUserAbleId
+    },
+    {
       label: 'Documents',
       icon: DocumentIcon,
       onClick: () => setActiveTab('documents'),
@@ -341,6 +349,9 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
         )}
         {activeTab === 'pickup-addresses' && selectedVendorId && selectedUserAbleId && (
           <VendorPickupAddresses countriesWithStatesAndCities={countriesWithStatesAndCities} vendorId={selectedUserAbleId || ''} />
+        )}
+        {activeTab === 'salesman' && selectedVendorId && selectedUserAbleId && (
+          <VendorSalesmen vendorId={selectedUserAbleId || ''} />
         )}
       </CommonLayout>
 
