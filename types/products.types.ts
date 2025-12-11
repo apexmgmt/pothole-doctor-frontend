@@ -41,7 +41,7 @@ export interface Product {
   category?: ProductCategory
   service_types?: ServiceType[]
   vendor?: Vendor
-  galleries?: any[]
+  galleries?: ProductGallery[]
 }
 
 export interface SellingInfo {
@@ -88,9 +88,9 @@ export interface ProductPayload {
 }
 
 export interface UomInfo {
-    carton_per_pallet: number
-    piece_per_carton: number
-    lb: number
+  carton_per_pallet: number
+  piece_per_carton: number
+  lb: number
 }
 
 export interface ProductsProps {
@@ -98,4 +98,13 @@ export interface ProductsProps {
   uomUnits: Unit[]
   vendors: Vendor[]
   serviceTypes: ServiceType[]
+}
+
+export interface ProductGallery {
+  id: string
+  name: string
+  full_path: string
+  product_id: string
+  created_at: string
+  updated_at: string
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { ProductPayload, ProductsProps, Product, Unit } from '@/types'
+import { ProductPayload, ProductsProps, Product, Unit, ProductGallery } from '@/types'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { useForm } from 'react-hook-form'
@@ -8,11 +8,13 @@ import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import ProductService from '@/services/api/products/products.service'
+import ProductGalleryService from '@/services/api/products/product-galleries.service'
 import { Separator } from '@/components/ui/separator'
 import { BasicProductFields } from './BasicProductFields'
 import { UOMFields } from './UOMFields'
 import { PricingFields } from './PricingFields'
 import { AdditionalInfoFields } from './AdditionalInfoFields'
+import { ProductGallerySection } from './ProductGallerySection'
 
 interface CreateEditViewProductModalProps extends ProductsProps {
   mode?: 'create' | 'edit' | 'view'
@@ -79,6 +81,8 @@ const CreateEditViewProductModal = ({
   vendors
 }: CreateEditViewProductModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [galleries, setGalleries] = useState<ProductGallery[]>(productDetails?.galleries || [])
+  const [isLoadingGalleries, setIsLoadingGalleries] = useState<boolean>(false)
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -125,8 +129,21 @@ const CreateEditViewProductModal = ({
     }
   })
 
+  // Fetch galleries when in edit or view mode
+  const fetchGalleries = async (prodId: string) => {
+    setIsLoadingGalleries(true)
+    try {
+      const response = await ProductGalleryService.index(prodId)
+      setGalleries(response.data || [])
+    } catch (error) {
+      toast.error('Failed to fetch product galleries')
+    } finally {
+      setIsLoadingGalleries(false)
+    }
+  }
+
   useEffect(() => {
-    if (open && productDetails && (mode === 'edit' || mode === 'view')) {
+    if (open && productDetails && (mode === 'edit' || mode === 'view') && productId) {
       form.reset({
         name: productDetails.name ?? '',
         vendor_id: productDetails.vendor_id?.toString() ?? '',
@@ -169,7 +186,11 @@ const CreateEditViewProductModal = ({
         status: productDetails.status ?? 1,
         sku: productDetails.sku ?? ''
       })
+
+      // Fetch galleries
+      // fetchGalleries(productId)
     } else if (open && mode === 'create') {
+      setGalleries([])
       form.reset({
         name: '',
         vendor_id: '',
@@ -213,7 +234,7 @@ const CreateEditViewProductModal = ({
         sku: ''
       })
     }
-  }, [open, productDetails, mode, form])
+  }, [open, productDetails, mode, productId, form])
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true)
@@ -308,6 +329,12 @@ const CreateEditViewProductModal = ({
     }
   }
 
+  const handleGalleryUpdate = () => {
+    if (productId) {
+      fetchGalleries(productId)
+    }
+  }
+
   return (
     <CommonDialog
       isLoading={isLoading}
@@ -350,7 +377,7 @@ const CreateEditViewProductModal = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mb-4'>
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+          <div className={`grid grid-cols-1 ${mode !== 'create' ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-6`}>
             {/* Basic Product Information */}
             <div className='space-y-4'>
               <h3 className='text-lg font-semibold'>Product Information</h3>
@@ -374,6 +401,20 @@ const CreateEditViewProductModal = ({
               {/* Additional Information */}
               <AdditionalInfoFields form={form} disabled={mode === 'view'} />
             </div>
+
+            {/* Gallery Section - Only show in edit/view mode */}
+            {mode !== 'create' && productId && (
+              <div className='space-y-4'>
+                <h3 className='text-lg font-semibold'>Product Gallery</h3>
+                <ProductGallerySection
+                  productId={productId}
+                  galleries={galleries}
+                  isLoading={isLoadingGalleries}
+                  onUpdate={handleGalleryUpdate}
+                  disabled={mode === 'view'}
+                />
+              </div>
+            )}
           </div>
         </form>
       </Form>
