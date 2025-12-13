@@ -10,6 +10,12 @@ const nextConfig = {
             },
         ],
     },
+    allowedDevOrigins: [
+        'localhost',
+        '127.0.0.1',
+        'potholedoctor.test', // Add your dev domain(s) here
+        '*.potholedoctor.test', // If you use subdomains
+    ],
 };
 
 export default nextConfig;
