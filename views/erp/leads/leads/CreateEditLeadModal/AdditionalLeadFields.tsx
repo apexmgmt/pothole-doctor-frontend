@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useCallback } from 'react'
 import { Controller, UseFormReturn } from 'react-hook-form'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -9,17 +9,41 @@ import { MultiSelect } from '@/components/ui/select'
 import { LeadPayload, ServiceType } from '@/types'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
+import { useLoadScript, Autocomplete } from '@react-google-maps/api'
 
 interface AdditionalLeadFieldsProps {
   methods: UseFormReturn<LeadPayload>
   serviceTypes: ServiceType[]
 }
 
+const libraries: ('places')[] = ['places']
+
 const AdditionalLeadFields: React.FC<AdditionalLeadFieldsProps> = ({ methods, serviceTypes }) => {
   const {
     control,
-    formState: { errors }
+    formState: { errors },
+    setValue
   } = methods
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+    libraries
+  })
+
+  const [autocomplete, setAutocomplete] = React.useState<google.maps.places.Autocomplete | null>(null)
+
+  const onLoad = useCallback((autocompleteInstance: google.maps.places.Autocomplete) => {
+    setAutocomplete(autocompleteInstance)
+  }, [])
+
+  const onPlaceChanged = useCallback(() => {
+    if (autocomplete) {
+      const place = autocomplete.getPlace()
+      if (place.formatted_address) {
+        setValue('address', place.formatted_address)
+      }
+    }
+  }, [autocomplete, setValue])
 
   const serviceTypeOptions = serviceTypes.map(service => ({
     value: service.id,
@@ -99,6 +123,18 @@ const AdditionalLeadFields: React.FC<AdditionalLeadFieldsProps> = ({ methods, se
         <div className='col-span-1 lg:col-span-2'>
           <Separator />
         </div>
+
+        <div className='space-y-2 col-span-2'>
+          <Label htmlFor='address-search'>Search Location</Label>
+          {isLoaded ? (
+            <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+              <Input type='text' placeholder='Search for an address...' />
+            </Autocomplete>
+          ) : (
+            <Input type='text' placeholder='Loading...' disabled />
+          )}
+        </div>
+
         <div className='space-y-2 col-span-2'>
           <Label htmlFor='address'>
             Address <span className='text-red-500'>*</span>
