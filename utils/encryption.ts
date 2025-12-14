@@ -15,7 +15,7 @@ const NODE_ENV: string = process.env.NODE_ENV || 'production'
  * @param data - The data to encrypt (object, array, or string).
  * @returns The encrypted string or original data in development.
  */
-export const encryptData = (data: unknown): string | unknown => {
+export const encryptData = (data: any): string | any => {
   try {
     if (NODE_ENV === 'development') {
       return data
@@ -39,7 +39,7 @@ export const encryptData = (data: unknown): string | unknown => {
  * @param value - The encrypted string or object.
  * @returns The decrypted data or original value if decryption fails.
  */
-export const decryptData = (value: unknown): unknown => {
+export const decryptData = (value: any): any => {
   try {
     if (!value) {
       return null
