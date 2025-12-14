@@ -8,7 +8,17 @@ import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { DetailsIcon, UserIcon } from '@/public/icons'
 import { Button } from '@/components/ui/button'
-import { BusinessLocation, ClientSource, Column, Company, DataTableApiResponse, InterestLevel, Lead, ServiceType, Staff } from '@/types'
+import {
+  BusinessLocation,
+  ClientSource,
+  Column,
+  Company,
+  DataTableApiResponse,
+  InterestLevel,
+  Lead,
+  ServiceType,
+  Staff
+} from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -20,6 +30,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import LeadService from '@/services/api/leads.service'
 import { formatDate } from '@/utils/date'
 import CreateEditLeadModal from './CreateEditLeadModal'
+import LeadDetails from './LeadDetails'
 
 const Leads: React.FC<{
   interestLevels: InterestLevel[]
@@ -280,15 +291,6 @@ const Leads: React.FC<{
 
   const handleRowSelect = (lead: any) => {
     setSelectedLeadId(lead?.id || null)
-
-    LeadService.show(lead?.id)
-      .then(response => {
-        setSelectedLead(response.data)
-      })
-      .catch(error => {
-        setSelectedLead(null)
-        console.error('Error fetching lead details:', error)
-      })
   }
 
   // Check if filters are active (excluding pagination)
@@ -370,6 +372,8 @@ const Leads: React.FC<{
           handleRowSelect={handleRowSelect}
         />
       )}
+
+      {activeTab === 'details' && <LeadDetails leadId={selectedLeadId} />}
 
       <CreateEditLeadModal
         isOpen={isModalOpen}
