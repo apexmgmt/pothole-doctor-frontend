@@ -26,3 +26,12 @@ export * from './labor_costs_api'
 export * from './warehouses_api'
 export * from './product_categories_api'
 export * from './task_reminders_api'
+export * from './email_templates_api'
+export * from './tax_type_api'
+export * from './vendors_api'
+export * from './products_api'
+export * from './interest_levels_api'
+export * from './installation_requests_api'
+export * from './client_sources_api'
+
+export * from './leads_api';

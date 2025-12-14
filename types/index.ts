@@ -23,3 +23,13 @@ export * from './menu.types'
 export * from './warehouses.types'
 export * from './product_categories.types'
 export * from './task_reminders.types'
+export * from './email_templates.types'
+export * from './vendors.types'
+export * from './tax_types.types'
+export * from './products.types'
+export * from './auth.types'
+export * from './interest_levels.types'
+export * from './installation_requests.types'
+export * from './client_sources.types'
+
+export * from './leads.types';

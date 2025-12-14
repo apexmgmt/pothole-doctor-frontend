@@ -1,7 +1,17 @@
-import { AUTH_LOGIN, AUTH_LOGOUT, AUTH_ME, AUTH_REFRESH_TOKEN } from '@/constants/api'
+import {
+  AUTH_LOGIN,
+  AUTH_LOGOUT,
+  AUTH_ME,
+  AUTH_REFRESH_TOKEN,
+  PROFILE_CHANGE_PASSWORD,
+  PROFILE_LAST_ACTIVITY,
+  PROFILE_PICTURE,
+  PROFILE_UPDATE,
+} from '@/constants/api'
 import { getApiUrl } from '@/utils/utility'
 import CookieService from '../app/cookie.service'
 import apiInterceptor from './api.interceptor'
+import { ProfileChangePasswordPayload, ProfileDetailsPayload } from '@/types'
 
 export default class AuthService {
   /**
@@ -18,12 +28,9 @@ export default class AuthService {
       }
 
       const apiUrl: string = await getApiUrl()
-      const response = await fetch(apiUrl + AUTH_LOGIN, {
+      const response = await apiInterceptor(apiUrl + AUTH_LOGIN, {
+        requiresAuth: false,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
         body: JSON.stringify(payload)
       })
 
@@ -49,12 +56,9 @@ export default class AuthService {
     try {
       const apiUrl: string = await getApiUrl()
       const payload: object = { refresh_token: refresh_token }
-      const response = await fetch(apiUrl + AUTH_REFRESH_TOKEN, {
+      const response = await apiInterceptor(apiUrl + AUTH_REFRESH_TOKEN, {
+        requiresAuth: false,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
         body: JSON.stringify(payload)
       })
 
@@ -111,5 +115,122 @@ export default class AuthService {
     } catch (error) {
       throw error
     }
+  }
+
+  static updateProfilePicture = async (payload: any) => {
+    try {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + PROFILE_PICTURE, {
+        requiresAuth: true,
+        method: 'POST',
+        body: payload
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to update profile picture')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static updateProfileDetails = async (payload: ProfileDetailsPayload) => {
+    try {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + PROFILE_UPDATE, {
+        requiresAuth: true,
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to update profile details')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static updatePassword = async (payload: ProfileChangePasswordPayload) => {
+    try {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + PROFILE_CHANGE_PASSWORD, {
+        requiresAuth: true,
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to update profile profile')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static getActivity = async () => {
+    try {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + PROFILE_LAST_ACTIVITY, {
+        requiresAuth: true,
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to get activity')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static endSession = async (sessionId: string) => {
+    // try {
+    //   const apiUrl: string = await getApiUrl()
+    //   const response = await apiInterceptor(apiUrl + PROFILE_END_SESSION.replace(':id', sessionId), {
+    //     requiresAuth: true,
+    //     method: 'DELETE'
+    //   })
+
+    //   if (!response.ok) {
+    //     const errorData = await response.json()
+    //     throw new Error(errorData.message || 'Failed to end session')
+    //   }
+
+    //   return await response.json()
+    // } catch (error) {
+    //   throw error
+    // }
+  }
+
+  static logoutAllDevices = async () => {
+    // try {
+    //   const apiUrl: string = await getApiUrl()
+    //   const response = await apiInterceptor(apiUrl + PROFILE_LOGOUT_ALL_DEVICES, {
+    //     requiresAuth: true,
+    //     method: 'POST'
+    //   })
+
+    //   if (!response.ok) {
+    //     const errorData = await response.json()
+    //     throw new Error(errorData.message || 'Failed to logout from all devices')
+    //   }
+
+    //   return await response.json()
+    // } catch (error) {
+    //   throw error
+    // }
   }
 }

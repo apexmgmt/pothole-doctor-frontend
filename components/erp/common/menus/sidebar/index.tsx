@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { NavigationItem } from '@/types'
 
 import { SettingsIcon, HomeIcon } from '@/public/icons'
-import { Boxes, Building2, LocateIcon, Map, UserLock, Users, Warehouse } from 'lucide-react'
+import { Boxes, Building2, LocateIcon, Map, Package, UserLock, Users, Users2, Warehouse } from 'lucide-react'
 import SidebarFooter from './SidebarFooter'
 import MenuItem from './menu-item'
 
@@ -53,6 +53,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       exactMatch: false
     },
     {
+      id: 'vendors',
+      label: 'Vendors',
+      icon: <Package className='h-4 w-4' />,
+      href: '/erp/vendors',
+      hasSubItems: false,
+      exactMatch: false
+    },
+    {
       id: 'warehouses',
       label: 'Warehouses',
       icon: <Warehouse className='h-4 w-4' />,
@@ -68,12 +76,46 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       hasSubItems: true,
       subItems: [
         {
-          id: 'product-categories',
-          label: 'Categories',
-          href: '/erp/product/categories',
+          id: 'products',
+          label: 'Products',
+          href: '/erp/products',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
           exactMatch: false
+        },
+        {
+          id: 'product-categories',
+          label: 'Categories',
+          href: '/erp/products/categories',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        }
+      ],
+      exactMatch: false
+    },
+    {
+      id: 'leads',
+      label: 'Leads',
+      icon: <Users2 className='h-4 w-4' />,
+      href: '/erp/leads',
+      hasSubItems: true,
+      subItems: [
+        {
+          id: 'leads',
+          label: 'Leads',
+          href: '/erp/leads',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true
+        },
+        {
+          id: 'interest-levels',
+          label: 'Interest Levels',
+          href: '/erp/leads/interest-levels',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true
         }
       ],
       exactMatch: false
@@ -178,6 +220,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           id: 'task-types',
           label: 'Task Types',
           href: '/erp/settings/task-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'email-templates',
+          label: 'Email Templates',
+          href: '/erp/settings/email-templates',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
           exactMatch: false
