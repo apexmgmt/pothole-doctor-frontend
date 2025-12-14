@@ -6,7 +6,7 @@ import { PlusIcon, Search } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
-import { DetailsIcon, UserIcon } from '@/public/icons'
+import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
 import { Button } from '@/components/ui/button'
 import {
   BusinessLocation,
@@ -27,10 +27,11 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { toast } from 'sonner'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
-import LeadService from '@/services/api/leads.service'
+import LeadService from '@/services/api/leads/leads.service'
 import { formatDate } from '@/utils/date'
 import CreateEditLeadModal from './CreateEditLeadModal'
 import LeadDetails from './LeadDetails'
+import LeadDocuments from './documents/LeadDocuments'
 
 const Leads: React.FC<{
   interestLevels: InterestLevel[]
@@ -48,6 +49,7 @@ const Leads: React.FC<{
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null)
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
@@ -129,7 +131,8 @@ const Leads: React.FC<{
         days_since_created: Math.floor(
           (new Date().getTime() - new Date(lead.created_at).getTime()) / (1000 * 60 * 60 * 24)
         ),
-        updated_at: lead.updated_at
+        updated_at: lead.updated_at,
+        client_id: lead?.client?.id || null
       }))
     : []
 
@@ -291,6 +294,7 @@ const Leads: React.FC<{
 
   const handleRowSelect = (lead: any) => {
     setSelectedLeadId(lead?.id || null)
+    setSelectedClientId(lead?.client_id || null)
   }
 
   // Check if filters are active (excluding pagination)
@@ -346,6 +350,13 @@ const Leads: React.FC<{
       onClick: () => setActiveTab('details'),
       isActive: activeTab === 'details',
       disabled: !selectedLeadId
+    },
+    {
+      label: 'Documents',
+      icon: DocumentIcon,
+      onClick: () => setActiveTab('documents'),
+      isActive: activeTab === 'documents',
+      disabled: !selectedLeadId
     }
   ]
 
@@ -374,7 +385,7 @@ const Leads: React.FC<{
       )}
 
       {activeTab === 'details' && <LeadDetails leadId={selectedLeadId} />}
-
+      {activeTab === 'documents' && selectedLeadId && selectedClientId && <LeadDocuments clientId={selectedClientId || ''} />}
       <CreateEditLeadModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

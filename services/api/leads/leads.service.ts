@@ -1,8 +1,8 @@
 import { getApiUrl } from '@/utils/utility'
-import apiInterceptor from './api.interceptor'
 import { LEADS, LEADS_ALL } from '@/constants/api'
 import { LeadPayload } from '@/types'
-import { revalidate } from '../app/cache.service'
+import apiInterceptor from '../api.interceptor'
+import { revalidate } from '@/services/app/cache.service'
 
 export default class LeadService {
   /** Leads DataTable API */
