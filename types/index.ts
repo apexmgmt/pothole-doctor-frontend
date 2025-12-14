@@ -31,3 +31,5 @@ export * from './auth.types'
 export * from './interest_levels.types'
 export * from './installation_requests.types'
 export * from './client_sources.types'
+
+export * from './leads.types';
