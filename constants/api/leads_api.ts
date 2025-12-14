@@ -15,3 +15,18 @@
  */
 export const LEADS: string = '/v1/leads/';
 export const LEADS_ALL: string = LEADS + '/v1/get-leads/';
+
+/**
+ * API endpoint for leads documents
+ * 
+ * Data table operation method: GET
+ * 
+ * Data create method: POST
+ * 
+ * Data update method: PUT /{id}
+ * 
+ * Data retrieve method: GET /{id}
+ * 
+ * Data delete method: DELETE /{id}
+ */
+export const LEAD_DOCUMENTS: string = '/v1/client-documents/'

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useForm } from 'react-hook-form'
-import LeadService from '@/services/api/leads.service'
+import LeadService from '@/services/api/leads/leads.service'
 import {
   BusinessLocation,
   ClientSource,

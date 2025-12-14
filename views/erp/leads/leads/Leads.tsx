@@ -6,7 +6,7 @@ import { PlusIcon, Search } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
-import { DetailsIcon, UserIcon } from '@/public/icons'
+import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
 import { Button } from '@/components/ui/button'
 import {
   BusinessLocation,
@@ -27,10 +27,11 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { toast } from 'sonner'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
-import LeadService from '@/services/api/leads.service'
+import LeadService from '@/services/api/leads/leads.service'
 import { formatDate } from '@/utils/date'
 import CreateEditLeadModal from './CreateEditLeadModal'
 import LeadDetails from './LeadDetails'
+import LeadDocuments from './documents/LeadDocuments'
 
 const Leads: React.FC<{
   interestLevels: InterestLevel[]
@@ -346,6 +347,13 @@ const Leads: React.FC<{
       onClick: () => setActiveTab('details'),
       isActive: activeTab === 'details',
       disabled: !selectedLeadId
+    },
+    {
+      label: 'Documents',
+      icon: DocumentIcon,
+      onClick: () => setActiveTab('documents'),
+      isActive: activeTab === 'documents',
+      disabled: !selectedLeadId
     }
   ]
 
@@ -374,7 +382,7 @@ const Leads: React.FC<{
       )}
 
       {activeTab === 'details' && <LeadDetails leadId={selectedLeadId} />}
-
+      {activeTab === 'documents' && selectedLeadId && <LeadDocuments leadId={selectedLeadId || ''} />}
       <CreateEditLeadModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
