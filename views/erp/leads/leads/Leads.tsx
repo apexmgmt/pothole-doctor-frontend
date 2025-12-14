@@ -6,7 +6,7 @@ import { PlusIcon, Search } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
-import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
+import { DetailsIcon, DocumentIcon, MessageIcon, UserIcon } from '@/public/icons'
 import { Button } from '@/components/ui/button'
 import {
   BusinessLocation,
@@ -32,6 +32,7 @@ import { formatDate } from '@/utils/date'
 import CreateEditLeadModal from './CreateEditLeadModal'
 import LeadDetails from './LeadDetails'
 import LeadDocuments from './documents/LeadDocuments'
+import LeadSmsTable from './sms/LeadSms'
 
 const Leads: React.FC<{
   interestLevels: InterestLevel[]
@@ -132,7 +133,8 @@ const Leads: React.FC<{
           (new Date().getTime() - new Date(lead.created_at).getTime()) / (1000 * 60 * 60 * 24)
         ),
         updated_at: lead.updated_at,
-        client_id: lead?.client?.id || null
+        client_id: lead?.client?.id || null,
+        data: lead
       }))
     : []
 
@@ -295,6 +297,7 @@ const Leads: React.FC<{
   const handleRowSelect = (lead: any) => {
     setSelectedLeadId(lead?.id || null)
     setSelectedClientId(lead?.client_id || null)
+    setSelectedLead(lead?.data || null)
   }
 
   // Check if filters are active (excluding pagination)
@@ -356,7 +359,14 @@ const Leads: React.FC<{
       icon: DocumentIcon,
       onClick: () => setActiveTab('documents'),
       isActive: activeTab === 'documents',
-      disabled: !selectedLeadId
+      disabled: !selectedLeadId && !selectedClientId
+    },
+    {
+      label: 'SMS',
+      icon: MessageIcon,
+      onClick: () => setActiveTab('sms'),
+      isActive: activeTab === 'sms',
+      disabled: !selectedLeadId && !selectedClientId
     }
   ]
 
@@ -385,7 +395,10 @@ const Leads: React.FC<{
       )}
 
       {activeTab === 'details' && <LeadDetails leadId={selectedLeadId} />}
-      {activeTab === 'documents' && selectedLeadId && selectedClientId && <LeadDocuments clientId={selectedClientId || ''} />}
+      {activeTab === 'documents' && selectedLeadId && selectedClientId && (
+        <LeadDocuments clientId={selectedClientId || ''} />
+      )}
+      {activeTab === 'sms' && selectedLeadId && selectedClientId && <LeadSmsTable clientId={selectedClientId || ''} lead={selectedLead || null} />}
       <CreateEditLeadModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
