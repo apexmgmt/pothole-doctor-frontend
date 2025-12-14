@@ -15,7 +15,7 @@ import CreateOrEditDocumentModal from './CreateOrEditDocumentModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import LeadDocumentService from '@/services/api/leads/lead-documents.service'
 
-const LeadDocuments = ({ leadId }: { leadId: string }) => {
+const LeadDocuments = ({ clientId }: { clientId: string }) => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
@@ -23,7 +23,7 @@ const LeadDocuments = ({ leadId }: { leadId: string }) => {
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-  const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: leadId })
+  const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: clientId })
   // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
@@ -185,7 +185,7 @@ const LeadDocuments = ({ leadId }: { leadId: string }) => {
   ]
 
   const handleClearFilters = () => {
-    setFilterOptions({ searchable_id: leadId, page: 1, per_page: 10 })
+    setFilterOptions({ searchable_id: clientId, page: 1, per_page: 10 })
     setSearchValue('')
   }
 
@@ -265,7 +265,7 @@ const LeadDocuments = ({ leadId }: { leadId: string }) => {
       />
 
       <CreateOrEditDocumentModal
-        leadId={leadId}
+        clientId={clientId}
         mode={modalMode}
         open={isModalOpen}
         onOpenChange={handleModalClose}

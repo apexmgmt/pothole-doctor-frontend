@@ -15,7 +15,7 @@ interface CreateOrEditDocumentModalProps {
   mode?: 'create' | 'edit'
   open: boolean
   onOpenChange: (open: boolean) => void
-  leadId: string
+  clientId: string
   documentId?: string
   documentDetails?: Document
   onSuccess?: () => void
@@ -29,7 +29,7 @@ const CreateOrEditDocumentModal = ({
   mode = 'create',
   open,
   onOpenChange,
-  leadId,
+  clientId,
   documentId,
   documentDetails,
   onSuccess
@@ -64,7 +64,7 @@ const CreateOrEditDocumentModal = ({
 
     // Create FormData
     const formData = new FormData()
-    formData.append('client_id', leadId)
+    formData.append('client_id', clientId)
 
     if (values.file) {
       formData.append('file', values.file)

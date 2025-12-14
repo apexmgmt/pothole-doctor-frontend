@@ -49,6 +49,7 @@ const Leads: React.FC<{
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null)
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
@@ -130,7 +131,8 @@ const Leads: React.FC<{
         days_since_created: Math.floor(
           (new Date().getTime() - new Date(lead.created_at).getTime()) / (1000 * 60 * 60 * 24)
         ),
-        updated_at: lead.updated_at
+        updated_at: lead.updated_at,
+        client_id: lead?.client?.id || null
       }))
     : []
 
@@ -292,6 +294,7 @@ const Leads: React.FC<{
 
   const handleRowSelect = (lead: any) => {
     setSelectedLeadId(lead?.id || null)
+    setSelectedClientId(lead?.client_id || null)
   }
 
   // Check if filters are active (excluding pagination)
@@ -382,7 +385,7 @@ const Leads: React.FC<{
       )}
 
       {activeTab === 'details' && <LeadDetails leadId={selectedLeadId} />}
-      {activeTab === 'documents' && selectedLeadId && <LeadDocuments leadId={selectedLeadId || ''} />}
+      {activeTab === 'documents' && selectedLeadId && selectedClientId && <LeadDocuments clientId={selectedClientId || ''} />}
       <CreateEditLeadModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
