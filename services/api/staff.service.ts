@@ -43,6 +43,7 @@ export default class StaffService {
       }
 
       await revalidate('staffs')
+      await revalidate('staffs-all')
 
       return await response.json()
     } catch (error) {
@@ -85,6 +86,7 @@ export default class StaffService {
       }
       await revalidate('staffs')
       await revalidate(`staffs/${staffId}`)
+      await revalidate('staffs-all')
 
       return await response.json()
     } catch (error) {
@@ -105,7 +107,26 @@ export default class StaffService {
       }
       await revalidate('staffs')
       await revalidate(`staffs/${staffId}`)
-      
+      await revalidate('staffs-all')
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static getAllStaffs = async () => {
+    try {
+      const apiUrl: string = await getApiUrl()
+      const response = await apiInterceptor(apiUrl + STAFFS, {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 3600, tags: ['staffs-all'] } // Cache for 1 hour
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to fetch all staffs')
+      }
       return await response.json()
     } catch (error) {
       throw error
