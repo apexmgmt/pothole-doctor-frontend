@@ -25,6 +25,6 @@ jobs:
         env:
           SECOND_GIT_TOKEN: ${{ secrets.SECOND_GIT_TOKEN }}
         run: |
-          git remote add mirror https://$SECOND_GIT_TOKEN@github.com/apexmgmt/perfect-billboards.git
+          git remote add mirror https://$SECOND_GIT_TOKEN@github.com/apexmgmt/pothole-doctor-frontend.git
           git push mirror main:main --force
 
