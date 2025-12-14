@@ -20,7 +20,7 @@ export interface LeadClient {
   last_name: string
   display_name: string
   type: string
-  phone: string | number
+  phone: string
   email: string
   source_id: string
   source?: ClientSource
@@ -49,12 +49,12 @@ export interface Lead {
 }
 
 export interface LeadPayload {
-  type: string
+  type: string | 'customer' | 'lead'
   spouse_name: string
   address: string
   best_time: string
-  spouse_phone: number
-  cell_phone: number
+  spouse_phone: string
+  cell_phone: string
   cc_email: string
   pre_qualifi_amount: number
   is_tax_exempt: number
@@ -65,11 +65,11 @@ export interface LeadPayload {
   first_name: string
   last_name: string
   display_name: string
-  phone: number
+  phone: string
   email: string
   source_id: string
   lead_cost: number
-  status: number
+  status: number | 1 | 0
   location_id: string
   service_type_ids: string[]
 }

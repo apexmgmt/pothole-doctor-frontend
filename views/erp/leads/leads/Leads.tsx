@@ -7,24 +7,28 @@ import { PlusIcon, Search } from 'lucide-react'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { DetailsIcon, UserIcon } from '@/public/icons'
-import StaffService from '@/services/api/staff.service'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, Lead } from '@/types'
+import { BusinessLocation, ClientSource, Column, Company, DataTableApiResponse, InterestLevel, Lead, ServiceType, Staff } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { toast } from 'sonner'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import Link from 'next/link'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import LeadService from '@/services/api/leads.service'
-import { first } from 'slate'
 import { formatDate } from '@/utils/date'
+import CreateEditLeadModal from './CreateEditLeadModal'
 
-const Leads: React.FC = () => {
+const Leads: React.FC<{
+  interestLevels: InterestLevel[]
+  companies: Company[]
+  staffs: Staff[]
+  clientSources: ClientSource[]
+  serviceTypes: ServiceType[]
+  businessLocations: BusinessLocation[]
+}> = ({ interestLevels, companies, staffs, clientSources, serviceTypes, businessLocations }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -35,8 +39,9 @@ const Leads: React.FC = () => {
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
-
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
   // Set initial search value from filterOptions
   useEffect(() => {
@@ -232,9 +237,6 @@ const Leads: React.FC = () => {
     }
   ]
 
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-
   const handleOpenCreateModal = () => {
     setModalMode('create')
     setSelectedLeadId(null)
@@ -369,9 +371,20 @@ const Leads: React.FC = () => {
         />
       )}
 
-      {/* {activeTab === 'details' && (
-        <LeadDetails leadData={selectedLead} setLeadData={setSelectedLead} fetchData={fetchData} />
-      )} */}
+      <CreateEditLeadModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        mode={modalMode}
+        leadId={selectedLeadId}
+        leadData={selectedLead}
+        onSuccess={fetchData}
+        interestLevels={interestLevels}
+        companies={companies}
+        staffs={staffs}
+        clientSources={clientSources}
+        serviceTypes={serviceTypes}
+        businessLocations={businessLocations}
+      />
     </CommonLayout>
   )
 }

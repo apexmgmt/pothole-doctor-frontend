@@ -1,6 +1,6 @@
 import { StaffPayload } from '@/types'
 import { getApiUrl } from '@/utils/utility'
-import { STAFFS } from '@/constants/api'
+import { STAFFS, STAFFS_ALL } from '@/constants/api'
 import apiInterceptor from './api.interceptor'
 import { revalidate } from '../app/cache.service'
 
@@ -118,7 +118,7 @@ export default class StaffService {
   static getAllStaffs = async () => {
     try {
       const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + STAFFS, {
+      const response = await apiInterceptor(apiUrl + STAFFS_ALL, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['staffs-all'] } // Cache for 1 hour
