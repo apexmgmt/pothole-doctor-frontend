@@ -1,9 +1,9 @@
-import { BusinessLocation } from './business_location.types'
-import { ClientSource } from './client_sources.types'
-import { Company } from './companies.type'
-import { InterestLevel } from './interest_levels.types'
-import { ServiceType } from './service_types.types'
-import { Staff } from './staff.types'
+import { BusinessLocation } from '../business_location.types'
+import { ClientSource } from '../client_sources.types'
+import { Company } from '../companies.type'
+import { InterestLevel } from '../interest_levels.types'
+import { ServiceType } from '../service_types.types'
+import { Staff } from '../staff.types'
 
 export interface LeadClient {
   id: string
@@ -37,7 +37,7 @@ export interface Lead {
   address: string | null
   best_time: string | null
   spouse_phone: string
-  cell_phone: string 
+  cell_phone: string
   cc_email: string | null
   pre_qualifi_amount?: string | number | null
   is_tax_exempt: number
@@ -74,26 +74,4 @@ export interface LeadPayload {
   service_type_ids: string[]
 }
 
-export interface LeadSms {
-  id: string
-  client_id: string
-  message: string
-  to: string
-  type: string | null
-  received_from: string | null
-  sent_date: string | null
-  status: number | 1 | 0
-  created_at: string
-  updated_at: string
-  client?: LeadClient
-}
-
-export interface LeadSmsPayload {
-  client_id: string
-  message: string
-  to: string
-  received_from?: string
-  type?: string 
-  send_date?: string
-  status?: number | 1 | 0
-}
+export * from './leads_sms.types'
