@@ -13,6 +13,7 @@ import {
   ClientSource,
   Column,
   Company,
+  CountryWithStates,
   DataTableApiResponse,
   InterestLevel,
   Lead,
@@ -35,6 +36,7 @@ import LeadDetails from './LeadDetails'
 import LeadDocuments from './documents/LeadDocuments'
 import LeadSmsTable from './sms/LeadSms'
 import LeadNotes from './notes/LeadNotes'
+import LeadContacts from './contacts/LeadContacts'
 
 const Leads: React.FC<{
   interestLevels: InterestLevel[]
@@ -44,7 +46,17 @@ const Leads: React.FC<{
   serviceTypes: ServiceType[]
   businessLocations: BusinessLocation[]
   noteTypes: NoteType[]
-}> = ({ interestLevels, companies, staffs, clientSources, serviceTypes, businessLocations, noteTypes }) => {
+  countriesWithStatesAndCities: CountryWithStates[]
+}> = ({
+  interestLevels,
+  companies,
+  staffs,
+  clientSources,
+  serviceTypes,
+  businessLocations,
+  noteTypes,
+  countriesWithStatesAndCities
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -373,9 +385,16 @@ const Leads: React.FC<{
     },
     {
       label: 'Notes',
-      icon: MessageIcon,
+      icon: DocumentIcon,
       onClick: () => setActiveTab('notes'),
       isActive: activeTab === 'notes',
+      disabled: !selectedLeadId && !selectedClientId
+    },
+    {
+      label: 'Contacts',
+      icon: UserIcon,
+      onClick: () => setActiveTab('contacts'),
+      isActive: activeTab === 'contacts',
       disabled: !selectedLeadId && !selectedClientId
     }
   ]
@@ -411,7 +430,12 @@ const Leads: React.FC<{
       {activeTab === 'sms' && selectedLeadId && selectedClientId && (
         <LeadSmsTable clientId={selectedClientId || ''} lead={selectedLead || null} />
       )}
-      {activeTab === 'notes' && selectedLeadId && selectedClientId && <LeadNotes clientId={selectedClientId || ''} noteTypes={noteTypes} />}
+      {activeTab === 'notes' && selectedLeadId && selectedClientId && (
+        <LeadNotes clientId={selectedClientId || ''} noteTypes={noteTypes} />
+      )}
+      {activeTab === 'contacts' && selectedLeadId && selectedClientId && (
+        <LeadContacts clientId={selectedClientId || ''} countriesWithStatesAndCities={countriesWithStatesAndCities} />
+      )}
       <CreateEditLeadModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
