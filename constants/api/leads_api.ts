@@ -48,30 +48,45 @@ export const LEAD_SMS: string = '/v1/client-sms/'
 
 /**
  * API endpoint for leads notes
- * 
+ *
  * Data table operation method: GET
- * 
+ *
  * Data create method: POST
- * 
+ *
  * Data update method: PUT /{id}
- * 
+ *
  * Data retrieve method: GET /{id}
- * 
+ *
  * Data delete method: DELETE /{id}
  */
 export const LEAD_NOTES: string = '/v1/notes/'
 
 /**
  * API endpoint for lead contacts
- * 
+ *
  * Data table operation method: GET
- * 
+ *
  * Data create method: POST
- * 
+ *
  * Data update method: PUT /{id}
- * 
+ *
  * Data retrieve method: GET /{id}
- * 
+ *
  * Data delete method: DELETE /{id}
  */
 export const LEAD_CONTACTS: string = '/v1/client-contact/'
+
+/**
+ * API endpoint for Lead Email
+ *
+ * Data table operation method: GET
+ *
+ * Data create method: POST
+ *
+ * Data update method: PUT /{id}
+ *
+ * Data retrieve method: GET /{id}
+ *
+ * Data delete method: DELETE /{id}
+ */
+export const LEAD_EMAILS: string = '/v1/client-email/'

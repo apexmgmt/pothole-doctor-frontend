@@ -13,6 +13,7 @@ export interface LeadClient {
   interest_level?: InterestLevel
   clientable_id: string
   clientable_type: string
+  clientable?: LeadClientAble
   added_by: string
   reference_id: string
   reference?: Staff
@@ -31,6 +32,21 @@ export interface LeadClient {
   deleted_at?: string | null
 }
 
+export interface LeadClientAble {
+  id: string
+  spouse_name: string
+  address: string 
+  best_time: string
+  spouse_phone: string 
+  cell_phone: string
+  cc_email: string
+  pre_qualifi_amount: number
+  is_tax_exempt: number | 0 | 1
+  is_quic_book: number | 0 | 1
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
 export interface Lead {
   id: string
   spouse_name: string | null
@@ -77,3 +93,4 @@ export interface LeadPayload {
 export * from './leads_sms.types'
 export * from './leads_notes.types'
 export * from './leads_contacts.types'
+export * from './leads_emails.types'
