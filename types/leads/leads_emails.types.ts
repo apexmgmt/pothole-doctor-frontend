@@ -1,9 +1,11 @@
+import { User } from '../user.types'
 import { LeadClient } from './leads.types'
 
 export interface LeadEmail {
   id: string
   client_id: string
   user_id: string
+  user?: User
   cc_email: string
   subject: string
   source: string
