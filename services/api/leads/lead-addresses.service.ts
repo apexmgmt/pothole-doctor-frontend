@@ -2,7 +2,7 @@ import { getApiUrl } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
 import { LEAD_ADDRESSES } from '@/constants/api'
 import { revalidate } from '@/services/app/cache.service'
-import { LeadContactPayload } from '@/types'
+import { LeadAddressPayload } from '@/types'
 
 export default class LeadAddressService {
   /**Lead Addresses DataTable API */
@@ -28,7 +28,7 @@ export default class LeadAddressService {
   }
 
   /**Create Lead Addresses API */
-  static store = async (payload: LeadContactPayload) => {
+  static store = async (payload: LeadAddressPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
       const response = await apiInterceptor(apiUrl + LEAD_ADDRESSES, {
@@ -72,7 +72,7 @@ export default class LeadAddressService {
   }
 
   /** Update Lead Addresses API */
-  static update = async (leadNoteId: string, payload: LeadContactPayload) => {
+  static update = async (leadNoteId: string, payload: LeadAddressPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
 

@@ -28,6 +28,7 @@ export interface LeadAddressPayload {
     email: string 
     phone: string
     is_default: number | 0 | 1
+    country_id?: string
     state_id: string
     city_id: string
     zip_code?: string
