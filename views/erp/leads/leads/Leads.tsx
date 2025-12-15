@@ -16,6 +16,7 @@ import {
   DataTableApiResponse,
   InterestLevel,
   Lead,
+  NoteType,
   ServiceType,
   Staff
 } from '@/types'
@@ -33,6 +34,7 @@ import CreateEditLeadModal from './CreateEditLeadModal'
 import LeadDetails from './LeadDetails'
 import LeadDocuments from './documents/LeadDocuments'
 import LeadSmsTable from './sms/LeadSms'
+import LeadNotes from './notes/LeadNotes'
 
 const Leads: React.FC<{
   interestLevels: InterestLevel[]
@@ -41,7 +43,8 @@ const Leads: React.FC<{
   clientSources: ClientSource[]
   serviceTypes: ServiceType[]
   businessLocations: BusinessLocation[]
-}> = ({ interestLevels, companies, staffs, clientSources, serviceTypes, businessLocations }) => {
+  noteTypes: NoteType[]
+}> = ({ interestLevels, companies, staffs, clientSources, serviceTypes, businessLocations, noteTypes }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -367,6 +370,13 @@ const Leads: React.FC<{
       onClick: () => setActiveTab('sms'),
       isActive: activeTab === 'sms',
       disabled: !selectedLeadId && !selectedClientId
+    },
+    {
+      label: 'Notes',
+      icon: MessageIcon,
+      onClick: () => setActiveTab('notes'),
+      isActive: activeTab === 'notes',
+      disabled: !selectedLeadId && !selectedClientId
     }
   ]
 
@@ -398,7 +408,10 @@ const Leads: React.FC<{
       {activeTab === 'documents' && selectedLeadId && selectedClientId && (
         <LeadDocuments clientId={selectedClientId || ''} />
       )}
-      {activeTab === 'sms' && selectedLeadId && selectedClientId && <LeadSmsTable clientId={selectedClientId || ''} lead={selectedLead || null} />}
+      {activeTab === 'sms' && selectedLeadId && selectedClientId && (
+        <LeadSmsTable clientId={selectedClientId || ''} lead={selectedLead || null} />
+      )}
+      {activeTab === 'notes' && selectedLeadId && selectedClientId && <LeadNotes clientId={selectedClientId || ''} noteTypes={noteTypes} />}
       <CreateEditLeadModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

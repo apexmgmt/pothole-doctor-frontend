@@ -2,9 +2,10 @@ import ClientSourceService from '@/services/api/client-sources.service'
 import CompanyService from '@/services/api/companies.service'
 import InterestLevelService from '@/services/api/interest_levels.service'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
+import NoteTypeService from '@/services/api/settings/note_types.service'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
 import StaffService from '@/services/api/staff.service'
-import { BusinessLocation, ClientSource, Company, InterestLevel, ServiceType, Staff } from '@/types'
+import { BusinessLocation, ClientSource, Company, InterestLevel, NoteType, ServiceType, Staff } from '@/types'
 import Leads from '@/views/erp/leads/leads/Leads'
 
 export default async function LeadsPage() {
@@ -14,6 +15,7 @@ export default async function LeadsPage() {
   let clientSources: ClientSource[] = []
   let serviceTypes: ServiceType[] = []
   let businessLocations: BusinessLocation[] = []
+  let noteTypes: NoteType[] = []
 
   // fetch interest levels
   try {
@@ -63,5 +65,23 @@ export default async function LeadsPage() {
     businessLocations = []
   }
 
-  return <Leads interestLevels={interestLevels} companies={companies} staffs={staffs} clientSources={clientSources} serviceTypes={serviceTypes} businessLocations={businessLocations} />
+  // fetch note types
+  try {
+    const response = await NoteTypeService.index()
+    noteTypes = response.data.data || []
+  } catch (error) {
+    noteTypes = []
+  }
+
+  return (
+    <Leads
+      interestLevels={interestLevels}
+      companies={companies}
+      staffs={staffs}
+      clientSources={clientSources}
+      serviceTypes={serviceTypes}
+      businessLocations={businessLocations}
+      noteTypes={noteTypes}
+    />
+  )
 }
