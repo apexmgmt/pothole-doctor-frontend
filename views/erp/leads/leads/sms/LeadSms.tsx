@@ -162,7 +162,14 @@ const LeadSmsTable = ({ clientId, lead }: { clientId: string; lead: Lead | null 
       header: 'Action',
       cell: row => (
         <ThreeDotButton
-          buttons={[<DeleteButton tooltip='Delete SMS' variant='text' onClick={() => handleDeleteSms(row.id)} />]}
+          buttons={[
+            <DeleteButton
+              tooltip='Delete SMS'
+              variant='text'
+              onClick={() => handleDeleteSms(row.id)}
+              disabled={row.status !== 0}
+            />
+          ]}
         />
       ),
       sortable: false,
