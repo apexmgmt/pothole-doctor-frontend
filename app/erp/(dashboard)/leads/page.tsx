@@ -3,6 +3,7 @@ import CompanyService from '@/services/api/companies.service'
 import InterestLevelService from '@/services/api/interest_levels.service'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
 import LocationService from '@/services/api/locations/location.service'
+import ContactTypeService from '@/services/api/settings/contact_types.service'
 import NoteTypeService from '@/services/api/settings/note_types.service'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
 import StaffService from '@/services/api/staff.service'
@@ -10,12 +11,14 @@ import {
   BusinessLocation,
   ClientSource,
   Company,
+  ContactType,
   CountryWithStates,
   InterestLevel,
   NoteType,
   ServiceType,
   Staff
 } from '@/types'
+import Clients from '@/views/erp/clients/Clients'
 import Leads from '@/views/erp/leads/leads/Leads'
 
 export default async function LeadsPage() {
@@ -27,6 +30,7 @@ export default async function LeadsPage() {
   let businessLocations: BusinessLocation[] = []
   let noteTypes: NoteType[] = []
   let countriesWithStatesAndCities: CountryWithStates[] = []
+  let contactTypes: ContactType[] = []
 
   // fetch interest levels
   try {
@@ -84,6 +88,7 @@ export default async function LeadsPage() {
     noteTypes = []
   }
 
+  // fetch countries with states and cities
   try {
     const response = await LocationService.index()
     countriesWithStatesAndCities = response.data || []
@@ -91,8 +96,17 @@ export default async function LeadsPage() {
     countriesWithStatesAndCities = []
   }
 
+  // fetch contact types
+  try {
+    const response = await ContactTypeService.getAllContactTypes()
+    contactTypes = response.data || []
+  } catch (error) {
+    contactTypes = []
+  }
+
   return (
-    <Leads
+    <Clients
+      type='lead'
       interestLevels={interestLevels}
       companies={companies}
       staffs={staffs}
@@ -101,6 +115,7 @@ export default async function LeadsPage() {
       businessLocations={businessLocations}
       noteTypes={noteTypes}
       countriesWithStatesAndCities={countriesWithStatesAndCities}
+      contactTypes={contactTypes}
     />
   )
 }

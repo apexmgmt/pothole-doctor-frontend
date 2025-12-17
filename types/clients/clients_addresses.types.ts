@@ -23,8 +23,8 @@ export interface ClientAddressPayload {
     client_id: string
     title: string
     street_address: string
-    email: string 
-    phone: string
+    email?: string 
+    phone?: string
     is_default: number | 0 | 1
     country_id?: string
     state_id: string

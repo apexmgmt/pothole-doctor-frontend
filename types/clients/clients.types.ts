@@ -58,9 +58,16 @@ export interface ClientAble {
 }
 
 export interface ClientPayload {
-  type: 'customer' | 'lead'
+  type: 'lead' | 'customer'
   spouse_name: string
-  address: string
+  address?: string
+  address_id?: string
+  address_title?: string
+  address_is_default?: number | 0 | 1
+  city_id?: string
+  state_id?: string
+  country_id?: string
+  zip_code?: string
   best_time: string
   spouse_phone: string
   cell_phone: string
