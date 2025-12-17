@@ -33,3 +33,4 @@ export * from './installation_requests.types'
 export * from './client_sources.types'
 
 export * from './leads/leads.types'
+export * from './clients/clients.types'
