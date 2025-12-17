@@ -207,7 +207,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
             // Now create the client address
             // if address has the value street_address, state_id, city_id, title
             if (address_title && address && state_id && city_id) {
-              ClientAddressService.store(addressPayload)
+              ClientAddressService.store({ ...addressPayload, client_id: createdClientId })
             }
             toast.success(`${type === 'lead' ? 'Lead' : 'Customer'} created successfully`)
             onSuccess()
