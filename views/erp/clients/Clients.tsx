@@ -40,6 +40,7 @@ import ClientSmsView from './sms/ClientSms'
 import ClientEmails from './emails/ClientEmails'
 import ClientNotes from './notes/ClientNotes'
 import ClientContacts from './contacts/ClientContacts'
+import ClientAddresses from './addresses/ClientAddresses'
 
 const Clients: React.FC<{
   type: 'lead' | 'customer'
@@ -530,15 +531,9 @@ const Clients: React.FC<{
       {activeTab === 'contacts' && selectedClientId && (
         <ClientContacts clientId={selectedClientId || ''} countriesWithStatesAndCities={countriesWithStatesAndCities} />
       )}
-      {/* 
-      
-
-      
-      
-      
-      {activeTab === 'addresses' && selectedLeadId && selectedClientId && (
-        <LeadAddresses clientId={selectedClientId || ''} countriesWithStatesAndCities={countriesWithStatesAndCities} />
-      )}*/}
+      {activeTab === 'addresses' && selectedClientId && (
+        <ClientAddresses clientId={selectedClientId || ''} countriesWithStatesAndCities={countriesWithStatesAndCities} />
+      )}
       <CreateEditClientModal
         type={type}
         isOpen={isModalOpen}
