@@ -33,5 +33,5 @@ export * from './products_api'
 export * from './interest_levels_api'
 export * from './installation_requests_api'
 export * from './client_sources_api'
-
-export * from './leads_api';
+export * from './leads_api'
+export * from './clients_api'
