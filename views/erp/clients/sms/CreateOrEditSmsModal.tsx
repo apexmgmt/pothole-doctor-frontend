@@ -5,9 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import LeadSmsService from '@/services/api/leads/lead-sms.service'
 import { toast } from 'sonner'
-import { Client, Lead } from '@/types'
+import { Client } from '@/types'
 import ClientSmsService from '@/services/api/clients/client-sms.service'
 
 interface SmsFormValues {

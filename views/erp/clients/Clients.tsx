@@ -495,7 +495,7 @@ const Clients: React.FC<{
   ]
 
   return (
-    <CommonLayout title={type === 'lead' ? 'Leads' : 'Clients'} buttons={tabs}>
+    <CommonLayout title={type === 'lead' ? 'Leads' : 'Customers'} buttons={tabs}>
       {activeTab === 'clients' && (
         <CommonTable
           data={{

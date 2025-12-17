@@ -20,7 +20,7 @@ import {
 } from '@/types'
 import Clients from '@/views/erp/clients/Clients'
 
-export default async function LeadsPage() {
+export default async function CustomersPage() {
   let interestLevels: InterestLevel[] = []
   let companies: Company[] = []
   let staffs: Staff[] = []
@@ -105,7 +105,7 @@ export default async function LeadsPage() {
 
   return (
     <Clients
-      type='lead'
+      type='customer'
       interestLevels={interestLevels}
       companies={companies}
       staffs={staffs}
