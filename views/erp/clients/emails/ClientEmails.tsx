@@ -3,14 +3,15 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { Client, ClientSms, Column, DataTableApiResponse } from '@/types'
+import { Client, ClientEmail, Column, DataTableApiResponse } from '@/types'
 import { PlusIcon, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import CreateOrEditSmsModal from './CreateOrEditSmsModal'
-import ClientSmsService from '@/services/api/clients/client-sms.service'
+import { formatDate } from '@/utils/date'
+import CreateOrEditEmailModal from './CreateOrEditEmailModal'
+import ClientEmailService from '@/services/api/clients/client-emails.service'
 
-const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client | null }) => {
+const ClientEmails = ({ clientId, client }: { clientId: string; client: Client | null }) => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
@@ -47,18 +48,18 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      ClientSmsService.index(filterOptions)
+      ClientEmailService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          toast.error('Error fetching SMS')
+          toast.error('Error fetching emails')
         })
     } catch (error) {
       setIsLoading(false)
-      toast.error('Error fetching SMS')
+      toast.error('Error fetching emails')
     }
   }
 
@@ -66,25 +67,6 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
   useEffect(() => {
     fetchData()
   }, [filterOptions])
-
-  // Transform API data to match table format
-  const smsData = apiResponse?.data
-    ? apiResponse.data.map((sms: ClientSms, index: number) => {
-        return {
-          id: sms.id,
-          index: (apiResponse?.from || 1) + index,
-          client_id: sms.client_id,
-          to: sms.to,
-          message: sms.message,
-          received_from: sms.received_from,
-          type: sms.type,
-          status: sms.status,
-          sent_date: sms.sent_date,
-          created_at: sms.created_at,
-          updated_at: sms.updated_at
-        }
-      })
-    : []
 
   const handleOpenCreateModal = () => {
     setIsModalOpen(true)
@@ -99,62 +81,48 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
     handleModalClose()
   }
 
-  const handleDeleteSms = async (id: string) => {
+  const handleDeleteEmail = async (id: string) => {
     try {
-      ClientSmsService.destroy(id)
+      ClientEmailService.destroy(id)
         .then(response => {
-          toast.success('SMS deleted successfully')
+          toast.success('Email deleted successfully')
           fetchData()
         })
         .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete SMS')
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete email')
         })
     } catch (error) {
-      toast.error('Something went wrong while deleting the SMS!')
+      toast.error('Something went wrong while deleting the email!')
     }
   }
 
   // Column definitions for CommonTable
   const columns: Column[] = [
     {
-      id: 'index',
-      header: '#',
-      cell: row => <span className='text-gray'>{row.index}</span>,
-      sortable: false,
-      size: 16
-    },
-    {
-      id: 'status',
-      header: 'Status',
-      cell: row => (
-        <span className={row.status === 1 ? 'text-green-600 font-medium' : 'text-gray-400'}>
-          {row.status === 1 ? 'Sent' : 'Failed'}
-        </span>
-      ),
+      id: 'user',
+      header: 'Sent By',
+      cell: row => {
+        const parts = [row?.user?.first_name, row?.user?.last_name].filter(Boolean)
+        return <span className='font-medium'>{parts.join(', ')}</span>
+      },
       sortable: true
     },
     {
-      id: 'to',
-      header: 'To',
-      cell: row => <span className='font-medium'>{row.to}</span>,
-      sortable: true
-    },
-    {
-      id: 'message',
-      header: 'Message',
-      cell: row => <span className='truncate max-w-xs block'>{row.message}</span>,
+      id: 'source',
+      header: 'Source',
+      cell: row => <span className='font-medium'>{row.source}</span>,
       sortable: false
     },
     {
-      id: 'received_from',
-      header: 'Sent/Received From',
-      cell: row => <span>{row.received_from || '-'}</span>,
+      id: 'subject',
+      header: 'Subject',
+      cell: row => <span className='font-medium'>{row.subject || ''}</span>,
       sortable: false
     },
     {
-      id: 'type',
-      header: 'Type',
-      cell: row => <span>{row.type || '-'}</span>,
+      id: 'created_at',
+      header: 'Date Sent',
+      cell: row => <span className='font-medium'>{formatDate(row.created_at)}</span>,
       sortable: true
     },
     {
@@ -164,10 +132,9 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
         <ThreeDotButton
           buttons={[
             <DeleteButton
-              tooltip='Delete SMS'
+              tooltip='Delete Email'
               variant='text'
-              onClick={() => handleDeleteSms(row.id)}
-              disabled={row.status !== 0}
+              onClick={() => handleDeleteEmail(row.id)}
             />
           ]}
         />
@@ -217,7 +184,7 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Send SMS
+        Send Email
       </Button>
     </div>
   )
@@ -226,7 +193,7 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
     <>
       <CommonTable
         data={{
-          data: smsData,
+          data: apiResponse?.data as ClientEmail[] || [],
           per_page: apiResponse?.per_page || 10,
           total: apiResponse?.total || 0,
           from: apiResponse?.from || 1,
@@ -240,10 +207,10 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
         showFilters={true}
         pagination={true}
         isLoading={isLoading}
-        emptyMessage='No SMS found'
+        emptyMessage='No email found'
       />
 
-      <CreateOrEditSmsModal
+      <CreateOrEditEmailModal
         clientId={clientId}
         client={client}
         isOpen={isModalOpen}
@@ -254,4 +221,4 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
   )
 }
 
-export default ClientSmsView
+export default ClientEmails

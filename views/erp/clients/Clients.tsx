@@ -37,6 +37,7 @@ import CreateEditClientModal from './CreateEditClientModal'
 import ClientDetails from './ClientDetails'
 import ClientDocuments from './documents/ClientDocuments'
 import ClientSmsView from './sms/ClientSms'
+import ClientEmails from './emails/ClientEmails'
 
 const Clients: React.FC<{
   type: 'lead' | 'customer'
@@ -518,14 +519,13 @@ const Clients: React.FC<{
       {activeTab === 'sms' && selectedClientId && (
         <ClientSmsView clientId={selectedClientId || ''} client={selectedClient || null} />
       )}
+      {activeTab === 'emails' && selectedClientId && (
+        <ClientEmails clientId={selectedClientId || ''} client={selectedClient || null} />
+      )}
       {/* 
       
-      {activeTab === 'sms' && selectedLeadId && selectedClientId && (
-        <LeadSmsTable clientId={selectedClientId || ''} lead={selectedLead || null} />
-      )}
-      {activeTab === 'emails' && selectedLeadId && selectedClientId && (
-        <LeadEmails clientId={selectedClientId || ''} lead={selectedLead || null} />
-      )}
+
+      
       {activeTab === 'notes' && selectedLeadId && selectedClientId && (
         <LeadNotes clientId={selectedClientId || ''} noteTypes={noteTypes} />
       )}
