@@ -18,7 +18,6 @@ import {
   CountryWithStates,
   DataTableApiResponse,
   InterestLevel,
-  Lead,
   NoteType,
   ServiceType,
   Staff
@@ -36,6 +35,7 @@ import ClientService from '@/services/api/clients/clients.service'
 import { Badge } from '@/components/ui/badge'
 import CreateEditClientModal from './CreateEditClientModal'
 import ClientDetails from './ClientDetails'
+import ClientDocuments from './documents/ClientDocuments'
 
 const Clients: React.FC<{
   type: 'lead' | 'customer'
@@ -513,10 +513,9 @@ const Clients: React.FC<{
         />
       )}
       {activeTab === 'details' && <ClientDetails type={type} clientId={selectedClientId} />}
+      {activeTab === 'documents' && selectedClientId && <ClientDocuments clientId={selectedClientId || ''} />}
       {/* 
-      {activeTab === 'documents' && selectedLeadId && selectedClientId && (
-        <LeadDocuments clientId={selectedClientId || ''} />
-      )}
+      
       {activeTab === 'sms' && selectedLeadId && selectedClientId && (
         <LeadSmsTable clientId={selectedClientId || ''} lead={selectedLead || null} />
       )}
