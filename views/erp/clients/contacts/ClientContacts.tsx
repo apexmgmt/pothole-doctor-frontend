@@ -3,31 +3,38 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { Client, ClientEmail, Column, DataTableApiResponse } from '@/types'
+import { Column, CountryWithStates, DataTableApiResponse, ClientContact } from '@/types'
+import { formatDate } from '@/utils/date'
 import { PlusIcon, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { formatDate } from '@/utils/date'
-import CreateOrEditEmailModal from './CreateOrEditEmailModal'
-import ClientEmailService from '@/services/api/clients/client-emails.service'
+import EditButton from '@/components/erp/common/buttons/EditButton'
+import CreateOrEditContactModal from './CreateOrEditContactModal'
+import ClientContactService from '@/services/api/clients/client-contacts.service'
 
-const ClientEmails = ({ clientId, client }: { clientId: string; client: Client | null }) => {
+const ClientContacts = ({
+  clientId,
+  countriesWithStatesAndCities
+}: {
+  clientId: string
+  countriesWithStatesAndCities: CountryWithStates[]
+}) => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [selectedContactId, setSelectedContactId] = useState<string | null>(null)
+  const [selectedContact, setSelectedContact] = useState<ClientContact | null>(null)
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: clientId })
 
-  // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
   }, [])
 
-  // Debounced search update
   useEffect(() => {
     const timer = setTimeout(() => {
       setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
@@ -40,40 +47,54 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
         return newOptions
       })
     }, 500)
-
     return () => clearTimeout(timer)
   }, [searchValue])
 
-  // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      ClientEmailService.index(filterOptions)
+      ClientContactService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          toast.error('Error fetching emails')
+          toast.error('Error fetching Contacts')
         })
     } catch (error) {
       setIsLoading(false)
-      toast.error('Error fetching emails')
+      toast.error('Error fetching Contacts')
     }
   }
 
-  // Fetch data when filterOptions change
   useEffect(() => {
     fetchData()
   }, [filterOptions])
 
   const handleOpenCreateModal = () => {
+    setModalMode('create')
+    setSelectedContactId(null)
+    setSelectedContact(null)
     setIsModalOpen(true)
+  }
+
+  const handleOpenEditModal = async (id: string) => {
+    setModalMode('edit')
+    setSelectedContactId(id)
+    try {
+      const response = await ClientContactService.show(id)
+      setSelectedContact(response.data)
+      setIsModalOpen(true)
+    } catch (error) {
+      toast.error('Failed to fetch contact details')
+    }
   }
 
   const handleModalClose = () => {
     setIsModalOpen(false)
+    setSelectedContactId(null)
+    setSelectedContact(null)
   }
 
   const handleSuccess = () => {
@@ -81,47 +102,52 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
     handleModalClose()
   }
 
-  const handleDeleteEmail = async (id: string) => {
+  const handleDeleteContact = async (id: string) => {
     try {
-      ClientEmailService.destroy(id)
+      ClientContactService.destroy(id)
         .then(response => {
-          toast.success('Email deleted successfully')
+          toast.success('Contact deleted successfully')
           fetchData()
         })
         .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete email')
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete Contact')
         })
     } catch (error) {
-      toast.error('Something went wrong while deleting the email!')
+      toast.error('Something went wrong while deleting the Contact!')
     }
   }
 
-  // Column definitions for CommonTable
   const columns: Column[] = [
     {
-      id: 'user',
-      header: 'Sent By',
+      id: 'name',
+      header: 'Name',
+      cell: row => <span className='font-medium'>{row?.name || ''}</span>,
+      sortable: false
+    },
+    {
+      id: 'email',
+      header: 'Email',
+      cell: row => <span className='font-medium'>{row?.email || ''}</span>,
+      sortable: false
+    },
+    {
+      id: 'phone',
+      header: 'Phone',
+      cell: row => <span className='font-medium'>{row.phone || ''}</span>,
+      sortable: true
+    },
+    {
+      id: 'address',
+      header: 'Address',
       cell: row => {
-        const parts = [row?.user?.first_name, row?.user?.last_name].filter(Boolean)
-        return <span className='font-medium'>{parts.join(' ')}</span>
+        const parts = [row.address, row?.city?.name, row?.state?.name, row?.country?.name].filter(Boolean)
+        return <span className='font-medium'>{parts.join(', ')}</span>
       },
       sortable: true
     },
     {
-      id: 'source',
-      header: 'Source',
-      cell: row => <span className='font-medium'>{row.source}</span>,
-      sortable: false
-    },
-    {
-      id: 'subject',
-      header: 'Subject',
-      cell: row => <span className='font-medium'>{row.subject || ''}</span>,
-      sortable: false
-    },
-    {
       id: 'created_at',
-      header: 'Date Sent',
+      header: 'Created At',
       cell: row => <span className='font-medium'>{formatDate(row.created_at)}</span>,
       sortable: true
     },
@@ -131,10 +157,19 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
       cell: row => (
         <ThreeDotButton
           buttons={[
-            <DeleteButton
-              tooltip='Delete Email'
+            <EditButton
+              title='Edit'
+              key='edit'
               variant='text'
-              onClick={() => handleDeleteEmail(row.id)}
+              tooltip='Edit Contact'
+              onClick={() => handleOpenEditModal(row.id)}
+            />,
+            <DeleteButton
+              title='Delete'
+              key='delete'
+              tooltip='Delete Contact'
+              variant='text'
+              onClick={() => handleDeleteContact(row.id)}
             />
           ]}
         />
@@ -150,13 +185,11 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
     setSearchValue('')
   }
 
-  // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
     return filterKeys.length > 0
   }
 
-  // Custom filters component
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
@@ -184,7 +217,7 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Send Email
+        Add Contact
       </Button>
     </div>
   )
@@ -193,7 +226,7 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
     <>
       <CommonTable
         data={{
-          data: apiResponse?.data as ClientEmail[] || [],
+          data: (apiResponse?.data as ClientContact[]) || [],
           per_page: apiResponse?.per_page || 10,
           total: apiResponse?.total || 0,
           from: apiResponse?.from || 1,
@@ -207,18 +240,21 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
         showFilters={true}
         pagination={true}
         isLoading={isLoading}
-        emptyMessage='No email found'
+        emptyMessage='No Contact Found'
       />
 
-      <CreateOrEditEmailModal
-        clientId={clientId}
-        client={client}
+      <CreateOrEditContactModal
+        mode={modalMode}
         isOpen={isModalOpen}
         onClose={handleModalClose}
+        clientId={clientId}
+        contact_id={selectedContactId}
+        contact={selectedContact}
+        countriesWithStatesAndCities={countriesWithStatesAndCities}
         onSuccess={handleSuccess}
       />
     </>
   )
 }
 
-export default ClientEmails
+export default ClientContacts
