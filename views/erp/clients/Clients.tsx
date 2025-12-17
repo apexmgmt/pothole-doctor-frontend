@@ -36,6 +36,7 @@ import { Badge } from '@/components/ui/badge'
 import CreateEditClientModal from './CreateEditClientModal'
 import ClientDetails from './ClientDetails'
 import ClientDocuments from './documents/ClientDocuments'
+import ClientSmsView from './sms/ClientSms'
 
 const Clients: React.FC<{
   type: 'lead' | 'customer'
@@ -388,7 +389,7 @@ const Clients: React.FC<{
 
   const handleRowSelect = (client: any) => {
     setSelectedClientId(client?.id || null)
-    setSelectedClient(client?.data || null)
+    setSelectedClient(client || null)
   }
 
   // Check if filters are active (excluding pagination)
@@ -514,6 +515,9 @@ const Clients: React.FC<{
       )}
       {activeTab === 'details' && <ClientDetails type={type} clientId={selectedClientId} />}
       {activeTab === 'documents' && selectedClientId && <ClientDocuments clientId={selectedClientId || ''} />}
+      {activeTab === 'sms' && selectedClientId && (
+        <ClientSmsView clientId={selectedClientId || ''} client={selectedClient || null} />
+      )}
       {/* 
       
       {activeTab === 'sms' && selectedLeadId && selectedClientId && (
