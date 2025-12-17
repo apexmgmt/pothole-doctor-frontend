@@ -35,6 +35,7 @@ import { formatDate } from '@/utils/date'
 import ClientService from '@/services/api/clients/clients.service'
 import { Badge } from '@/components/ui/badge'
 import CreateEditClientModal from './CreateEditClientModal'
+import ClientDetails from './ClientDetails'
 
 const Clients: React.FC<{
   type: 'lead' | 'customer'
@@ -511,8 +512,8 @@ const Clients: React.FC<{
           handleRowSelect={handleRowSelect}
         />
       )}
+      {activeTab === 'details' && <ClientDetails type={type} clientId={selectedClientId} />}
       {/* 
-      {activeTab === 'details' && <LeadDetails leadId={selectedLeadId} />}
       {activeTab === 'documents' && selectedLeadId && selectedClientId && (
         <LeadDocuments clientId={selectedClientId || ''} />
       )}
