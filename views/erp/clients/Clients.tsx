@@ -329,12 +329,12 @@ const Clients: React.FC<{
           <ThreeDotButton
             buttons={[
               <EditButton
-                tooltip={`Edit ${type === 'lead' ? 'Lead' : 'Client'} Information`}
+                tooltip={`Edit ${type === 'lead' ? 'Lead' : 'Customer'} Information`}
                 onClick={() => handleOpenEditModal(row.id)}
                 variant='text'
               />,
               <DeleteButton
-                tooltip={`Delete ${type === 'lead' ? 'Lead' : 'Client'}`}
+                tooltip={`Delete ${type === 'lead' ? 'Lead' : 'Customer'}`}
                 variant='text'
                 onClick={() => handleDeleteClient(row.id)}
               />
@@ -430,7 +430,7 @@ const Clients: React.FC<{
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add {type === 'lead' ? 'Lead' : 'Client'}
+        Add {type === 'lead' ? 'Lead' : 'Customer'}
       </Button>
     </div>
   )
@@ -438,7 +438,7 @@ const Clients: React.FC<{
   // Button configuration for CommonLayout
   const tabs = [
     {
-      label: type === 'lead' ? 'Leads' : 'Clients',
+      label: type === 'lead' ? 'Leads' : 'Customers',
       icon: UserIcon,
       onClick: () => setActiveTab('clients'),
       isActive: activeTab === 'clients'
@@ -513,7 +513,7 @@ const Clients: React.FC<{
           showFilters={true}
           pagination={true}
           isLoading={isLoading}
-          emptyMessage={type === 'lead' ? 'No lead found' : 'No client found'}
+          emptyMessage={type === 'lead' ? 'No lead found' : 'No customer found'}
           handleRowSelect={handleRowSelect}
         />
       )}
