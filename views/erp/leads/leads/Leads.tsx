@@ -38,6 +38,7 @@ import LeadSmsTable from './sms/LeadSms'
 import LeadNotes from './notes/LeadNotes'
 import LeadContacts from './contacts/LeadContacts'
 import LeadEmails from './emails/LeadEmails'
+import LeadAddresses from './addresses/LeadAddresses'
 
 const Leads: React.FC<{
   interestLevels: InterestLevel[]
@@ -404,6 +405,13 @@ const Leads: React.FC<{
       onClick: () => setActiveTab('contacts'),
       isActive: activeTab === 'contacts',
       disabled: !selectedLeadId && !selectedClientId
+    },
+    {
+      label: 'Addresses',
+      icon: UserIcon,
+      onClick: () => setActiveTab('addresses'),
+      isActive: activeTab === 'addresses',
+      disabled: !selectedLeadId && !selectedClientId
     }
   ]
 
@@ -446,6 +454,9 @@ const Leads: React.FC<{
       )}
       {activeTab === 'contacts' && selectedLeadId && selectedClientId && (
         <LeadContacts clientId={selectedClientId || ''} countriesWithStatesAndCities={countriesWithStatesAndCities} />
+      )}
+      {activeTab === 'addresses' && selectedLeadId && selectedClientId && (
+        <LeadAddresses clientId={selectedClientId || ''} countriesWithStatesAndCities={countriesWithStatesAndCities} />
       )}
       <CreateEditLeadModal
         isOpen={isModalOpen}
