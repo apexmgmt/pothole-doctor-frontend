@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { formatDate } from '@/utils/date'
 import LeadService from '@/services/api/leads/leads.service'
-import { Lead } from '@/types/leads.types'
+import { Lead } from '@/types/leads/leads.types'
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 

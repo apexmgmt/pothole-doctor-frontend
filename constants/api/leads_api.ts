@@ -45,3 +45,18 @@ export const LEAD_DOCUMENTS: string = '/v1/client-documents/'
  * Data delete method: DELETE /{id}
  */
 export const LEAD_SMS: string = '/v1/client-sms/'
+
+/**
+ * API endpoint for leads notes
+ * 
+ * Data table operation method: GET
+ * 
+ * Data create method: POST
+ * 
+ * Data update method: PUT /{id}
+ * 
+ * Data retrieve method: GET /{id}
+ * 
+ * Data delete method: DELETE /{id}
+ */
+export const LEAD_NOTES: string = '/v1/notes/'

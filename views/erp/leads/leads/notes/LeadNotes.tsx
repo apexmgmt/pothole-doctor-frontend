@@ -3,30 +3,32 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import LeadSmsService from '@/services/api/leads/lead-sms.service'
-import { Column, DataTableApiResponse, Lead, LeadSms } from '@/types'
+import LeadNoteService from '@/services/api/leads/lead-notes.service'
+import { Column, DataTableApiResponse, LeadNote, NoteType } from '@/types'
+import { formatDate } from '@/utils/date'
 import { PlusIcon, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import CreateOrEditSmsModal from './CreateOrEditSmsModal'
+import CreateOrEditNoteModal from './CreateOrEditNoteModal'
+import EditButton from '@/components/erp/common/buttons/EditButton'
 
-const LeadSmsTable = ({ clientId, lead }: { clientId: string; lead: Lead | null }) => {
+const LeadNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: NoteType[] }) => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
+  const [selectedNote, setSelectedNote] = useState<LeadNote | null>(null)
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: clientId })
 
-  // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
   }, [])
 
-  // Debounced search update
   useEffect(() => {
     const timer = setTimeout(() => {
       setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
@@ -39,59 +41,54 @@ const LeadSmsTable = ({ clientId, lead }: { clientId: string; lead: Lead | null 
         return newOptions
       })
     }, 500)
-
     return () => clearTimeout(timer)
   }, [searchValue])
 
-  // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      LeadSmsService.index(filterOptions)
+      LeadNoteService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          toast.error('Error fetching SMS')
+          toast.error('Error fetching Notes')
         })
     } catch (error) {
       setIsLoading(false)
-      toast.error('Error fetching SMS')
+      toast.error('Error fetching Notes')
     }
   }
 
-  // Fetch data when filterOptions change
   useEffect(() => {
     fetchData()
   }, [filterOptions])
 
-  // Transform API data to match table format
-  const smsData = apiResponse?.data
-    ? apiResponse.data.map((sms: LeadSms, index: number) => {
-        return {
-          id: sms.id,
-          index: (apiResponse?.from || 1) + index,
-          client_id: sms.client_id,
-          to: sms.to,
-          message: sms.message,
-          received_from: sms.received_from,
-          type: sms.type,
-          status: sms.status,
-          sent_date: sms.sent_date,
-          created_at: sms.created_at,
-          updated_at: sms.updated_at
-        }
-      })
-    : []
-
   const handleOpenCreateModal = () => {
+    setModalMode('create')
+    setSelectedNoteId(null)
+    setSelectedNote(null)
     setIsModalOpen(true)
+  }
+
+  const handleOpenEditModal = async (id: string) => {
+    setModalMode('edit')
+    setSelectedNoteId(id)
+    try {
+      const response = await LeadNoteService.show(id)
+      setSelectedNote(response.data)
+      setIsModalOpen(true)
+    } catch (error) {
+      toast.error('Failed to fetch note details')
+    }
   }
 
   const handleModalClose = () => {
     setIsModalOpen(false)
+    setSelectedNoteId(null)
+    setSelectedNote(null)
   }
 
   const handleSuccess = () => {
@@ -99,62 +96,52 @@ const LeadSmsTable = ({ clientId, lead }: { clientId: string; lead: Lead | null 
     handleModalClose()
   }
 
-  const handleDeleteSms = async (id: string) => {
+  const handleDeleteNote = async (id: string) => {
     try {
-      LeadSmsService.destroy(id)
+      LeadNoteService.destroy(id)
         .then(response => {
-          toast.success('SMS deleted successfully')
+          toast.success('Note deleted successfully')
           fetchData()
         })
         .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete SMS')
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete Note')
         })
     } catch (error) {
-      toast.error('Something went wrong while deleting the SMS!')
+      toast.error('Something went wrong while deleting the Note!')
     }
   }
 
-  // Column definitions for CommonTable
   const columns: Column[] = [
     {
-      id: 'index',
-      header: '#',
-      cell: row => <span className='text-gray'>{row.index}</span>,
-      sortable: false,
-      size: 16
+      id: 'note_type',
+      header: 'Note Type',
+      cell: row => <span className='font-medium'>{row?.note_type?.name || ''}</span>,
+      sortable: false
     },
     {
-      id: 'status',
-      header: 'Status',
+      id: 'user',
+      header: 'Noted By',
       cell: row => (
-        <span className={row.status === 1 ? 'text-green-600 font-medium' : 'text-gray-400'}>
-          {row.status === 1 ? 'Sent' : 'Failed'}
-        </span>
+        <span className='font-medium'>{(row?.user?.first_name || '') + ' ' + (row?.user?.last_name || '')}</span>
       ),
-      sortable: true
-    },
-    {
-      id: 'to',
-      header: 'To',
-      cell: row => <span className='font-medium'>{row.to}</span>,
-      sortable: true
-    },
-    {
-      id: 'message',
-      header: 'Message',
-      cell: row => <span className='truncate max-w-xs block'>{row.message}</span>,
       sortable: false
     },
     {
-      id: 'received_from',
-      header: 'Sent/Received From',
-      cell: row => <span>{row.received_from || '-'}</span>,
-      sortable: false
+      id: 'subject',
+      header: 'Subject',
+      cell: row => <span className='font-medium'>{row.subject || ''}</span>,
+      sortable: true
     },
     {
-      id: 'type',
-      header: 'Type',
-      cell: row => <span>{row.type || '-'}</span>,
+      id: 'comment',
+      header: 'Comment',
+      cell: row => <span className='font-medium'>{row.comment || ''}</span>,
+      sortable: true
+    },
+    {
+      id: 'created_at',
+      header: 'Created At',
+      cell: row => <span className='font-medium'>{formatDate(row.created_at)}</span>,
       sortable: true
     },
     {
@@ -163,12 +150,8 @@ const LeadSmsTable = ({ clientId, lead }: { clientId: string; lead: Lead | null 
       cell: row => (
         <ThreeDotButton
           buttons={[
-            <DeleteButton
-              tooltip='Delete SMS'
-              variant='text'
-              onClick={() => handleDeleteSms(row.id)}
-              disabled={row.status !== 0}
-            />
+            <EditButton title='Edit' key='edit' variant='text' onClick={() => handleOpenEditModal(row.id)}/>,
+            <DeleteButton title='Delete' key='delete' tooltip='Delete Note' variant='text' onClick={() => handleDeleteNote(row.id)} />
           ]}
         />
       ),
@@ -183,13 +166,11 @@ const LeadSmsTable = ({ clientId, lead }: { clientId: string; lead: Lead | null 
     setSearchValue('')
   }
 
-  // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
     return filterKeys.length > 0
   }
 
-  // Custom filters component
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
@@ -217,7 +198,7 @@ const LeadSmsTable = ({ clientId, lead }: { clientId: string; lead: Lead | null 
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Send SMS
+        Add Note
       </Button>
     </div>
   )
@@ -226,7 +207,7 @@ const LeadSmsTable = ({ clientId, lead }: { clientId: string; lead: Lead | null 
     <>
       <CommonTable
         data={{
-          data: smsData,
+          data: (apiResponse?.data as LeadNote[]) || [],
           per_page: apiResponse?.per_page || 10,
           total: apiResponse?.total || 0,
           from: apiResponse?.from || 1,
@@ -240,18 +221,21 @@ const LeadSmsTable = ({ clientId, lead }: { clientId: string; lead: Lead | null 
         showFilters={true}
         pagination={true}
         isLoading={isLoading}
-        emptyMessage='No SMS found'
+        emptyMessage='No Note found'
       />
 
-      <CreateOrEditSmsModal
-        clientId={clientId}
-        lead={lead}
+      <CreateOrEditNoteModal
+        mode={modalMode}
         isOpen={isModalOpen}
         onClose={handleModalClose}
+        clientId={clientId}
+        noteTypes={noteTypes}
+        note_id={selectedNoteId}
+        note={selectedNote}
         onSuccess={handleSuccess}
       />
     </>
   )
 }
 
-export default LeadSmsTable
+export default LeadNotes

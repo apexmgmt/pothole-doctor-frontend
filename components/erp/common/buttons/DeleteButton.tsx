@@ -14,6 +14,7 @@ type DeleteButtonProps = {
   confirmTitle?: string
   confirmMessage?: string
   loading?: boolean
+  disabled?: boolean
 }
 
 export default function DeleteButton({
@@ -25,7 +26,8 @@ export default function DeleteButton({
   tooltip = '',
   confirmTitle = 'Confirm Deletion',
   confirmMessage = 'Are you sure you want to delete this item? This action cannot be undone.',
-  loading = false
+  loading = false,
+  disabled = false
 }: DeleteButtonProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -45,7 +47,7 @@ export default function DeleteButton({
               onClick={() => setIsDialogOpen(true)}
               type='button'
               aria-label={title}
-              disabled={loading}
+              disabled={loading || disabled}
               className={`hover:text-destructive ${variant !== 'icon' ? 'w-full' : ''}`}
             >
               {variant === 'icon' ? <Trash2Icon className='h-6 w-6' /> : <span>{title}</span>}
