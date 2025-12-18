@@ -37,6 +37,7 @@ import LeadDocuments from './documents/LeadDocuments'
 import LeadSmsTable from './sms/LeadSms'
 import LeadNotes from './notes/LeadNotes'
 import LeadContacts from './contacts/LeadContacts'
+import LeadEmails from './emails/LeadEmails'
 
 const Leads: React.FC<{
   interestLevels: InterestLevel[]
@@ -384,6 +385,13 @@ const Leads: React.FC<{
       disabled: !selectedLeadId && !selectedClientId
     },
     {
+      label: 'Emails',
+      icon: MessageIcon,
+      onClick: () => setActiveTab('emails'),
+      isActive: activeTab === 'emails',
+      disabled: !selectedLeadId && !selectedClientId
+    },
+    {
       label: 'Notes',
       icon: DocumentIcon,
       onClick: () => setActiveTab('notes'),
@@ -429,6 +437,9 @@ const Leads: React.FC<{
       )}
       {activeTab === 'sms' && selectedLeadId && selectedClientId && (
         <LeadSmsTable clientId={selectedClientId || ''} lead={selectedLead || null} />
+      )}
+      {activeTab === 'emails' && selectedLeadId && selectedClientId && (
+        <LeadEmails clientId={selectedClientId || ''} lead={selectedLead || null} />
       )}
       {activeTab === 'notes' && selectedLeadId && selectedClientId && (
         <LeadNotes clientId={selectedClientId || ''} noteTypes={noteTypes} />
