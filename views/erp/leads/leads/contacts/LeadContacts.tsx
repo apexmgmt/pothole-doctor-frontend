@@ -3,23 +3,29 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import LeadNoteService from '@/services/api/leads/lead-notes.service'
-import { Column, DataTableApiResponse, LeadNote, NoteType } from '@/types'
+import { Column, CountryWithStates, DataTableApiResponse, LeadContact } from '@/types'
 import { formatDate } from '@/utils/date'
 import { PlusIcon, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import CreateOrEditNoteModal from './CreateOrEditNoteModal'
 import EditButton from '@/components/erp/common/buttons/EditButton'
+import LeadContactService from '@/services/api/leads/lead-contacts.service'
+import CreateOrEditContactModal from './CreateOrEditContactModal'
 
-const LeadNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: NoteType[] }) => {
+const LeadContacts = ({
+  clientId,
+  countriesWithStatesAndCities
+}: {
+  clientId: string
+  countriesWithStatesAndCities: CountryWithStates[]
+}) => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
-  const [selectedNote, setSelectedNote] = useState<LeadNote | null>(null)
+  const [selectedContactId, setSelectedContactId] = useState<string | null>(null)
+  const [selectedContact, setSelectedContact] = useState<LeadContact | null>(null)
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: clientId })
 
   useEffect(() => {
@@ -47,18 +53,18 @@ const LeadNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: NoteT
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      LeadNoteService.index(filterOptions)
+      LeadContactService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          toast.error('Error fetching Notes')
+          toast.error('Error fetching Contacts')
         })
     } catch (error) {
       setIsLoading(false)
-      toast.error('Error fetching Notes')
+      toast.error('Error fetching Contacts')
     }
   }
 
@@ -68,27 +74,27 @@ const LeadNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: NoteT
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
-    setSelectedNoteId(null)
-    setSelectedNote(null)
+    setSelectedContactId(null)
+    setSelectedContact(null)
     setIsModalOpen(true)
   }
 
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
-    setSelectedNoteId(id)
+    setSelectedContactId(id)
     try {
-      const response = await LeadNoteService.show(id)
-      setSelectedNote(response.data)
+      const response = await LeadContactService.show(id)
+      setSelectedContact(response.data)
       setIsModalOpen(true)
     } catch (error) {
-      toast.error('Failed to fetch note details')
+      toast.error('Failed to fetch contact details')
     }
   }
 
   const handleModalClose = () => {
     setIsModalOpen(false)
-    setSelectedNoteId(null)
-    setSelectedNote(null)
+    setSelectedContactId(null)
+    setSelectedContact(null)
   }
 
   const handleSuccess = () => {
@@ -96,46 +102,47 @@ const LeadNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: NoteT
     handleModalClose()
   }
 
-  const handleDeleteNote = async (id: string) => {
+  const handleDeleteContact = async (id: string) => {
     try {
-      LeadNoteService.destroy(id)
+      LeadContactService.destroy(id)
         .then(response => {
-          toast.success('Note deleted successfully')
+          toast.success('Contact deleted successfully')
           fetchData()
         })
         .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete Note')
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete Contact')
         })
     } catch (error) {
-      toast.error('Something went wrong while deleting the Note!')
+      toast.error('Something went wrong while deleting the Contact!')
     }
   }
 
   const columns: Column[] = [
     {
-      id: 'note_type',
-      header: 'Note Type',
-      cell: row => <span className='font-medium'>{row?.note_type?.name || ''}</span>,
+      id: 'name',
+      header: 'Name',
+      cell: row => <span className='font-medium'>{row?.name || ''}</span>,
       sortable: false
     },
     {
-      id: 'user',
-      header: 'Noted By',
-      cell: row => (
-        <span className='font-medium'>{(row?.user?.first_name || '') + ' ' + (row?.user?.last_name || '')}</span>
-      ),
+      id: 'email',
+      header: 'Email',
+      cell: row => <span className='font-medium'>{row?.email || ''}</span>,
       sortable: false
     },
     {
-      id: 'subject',
-      header: 'Subject',
-      cell: row => <span className='font-medium'>{row.subject || ''}</span>,
+      id: 'phone',
+      header: 'Phone',
+      cell: row => <span className='font-medium'>{row.phone || ''}</span>,
       sortable: true
     },
     {
-      id: 'comment',
-      header: 'Comment',
-      cell: row => <span className='font-medium'>{row.comment || ''}</span>,
+      id: 'address',
+      header: 'Address',
+      cell: row => {
+        const parts = [row.address, row?.city?.name, row?.state?.name, row?.country?.name].filter(Boolean)
+        return <span className='font-medium'>{parts.join(', ')}</span>
+      },
       sortable: true
     },
     {
@@ -150,8 +157,20 @@ const LeadNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: NoteT
       cell: row => (
         <ThreeDotButton
           buttons={[
-            <EditButton title='Edit' key='edit' tooltip='Edit Note' variant='text' onClick={() => handleOpenEditModal(row.id)}/>,
-            <DeleteButton title='Delete' key='delete' tooltip='Delete Note' variant='text' onClick={() => handleDeleteNote(row.id)} />
+            <EditButton
+              title='Edit'
+              key='edit'
+              variant='text'
+              tooltip='Edit Contact'
+              onClick={() => handleOpenEditModal(row.id)}
+            />,
+            <DeleteButton
+              title='Delete'
+              key='delete'
+              tooltip='Delete Contact'
+              variant='text'
+              onClick={() => handleDeleteContact(row.id)}
+            />
           ]}
         />
       ),
@@ -198,7 +217,7 @@ const LeadNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: NoteT
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Note
+        Add Contact
       </Button>
     </div>
   )
@@ -207,7 +226,7 @@ const LeadNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: NoteT
     <>
       <CommonTable
         data={{
-          data: (apiResponse?.data as LeadNote[]) || [],
+          data: (apiResponse?.data as LeadContact[]) || [],
           per_page: apiResponse?.per_page || 10,
           total: apiResponse?.total || 0,
           from: apiResponse?.from || 1,
@@ -221,21 +240,21 @@ const LeadNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: NoteT
         showFilters={true}
         pagination={true}
         isLoading={isLoading}
-        emptyMessage='No Note found'
+        emptyMessage='No Contact found'
       />
 
-      <CreateOrEditNoteModal
+      <CreateOrEditContactModal
         mode={modalMode}
         isOpen={isModalOpen}
         onClose={handleModalClose}
         clientId={clientId}
-        noteTypes={noteTypes}
-        note_id={selectedNoteId}
-        note={selectedNote}
+        contact_id={selectedContactId}
+        contact={selectedContact}
+        countriesWithStatesAndCities={countriesWithStatesAndCities}
         onSuccess={handleSuccess}
       />
     </>
   )
 }
 
-export default LeadNotes
+export default LeadContacts

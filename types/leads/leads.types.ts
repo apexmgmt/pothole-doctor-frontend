@@ -76,3 +76,4 @@ export interface LeadPayload {
 
 export * from './leads_sms.types'
 export * from './leads_notes.types'
+export * from './leads_contacts.types'

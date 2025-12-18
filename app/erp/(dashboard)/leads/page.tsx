@@ -2,10 +2,20 @@ import ClientSourceService from '@/services/api/client-sources.service'
 import CompanyService from '@/services/api/companies.service'
 import InterestLevelService from '@/services/api/interest_levels.service'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
+import LocationService from '@/services/api/locations/location.service'
 import NoteTypeService from '@/services/api/settings/note_types.service'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
 import StaffService from '@/services/api/staff.service'
-import { BusinessLocation, ClientSource, Company, InterestLevel, NoteType, ServiceType, Staff } from '@/types'
+import {
+  BusinessLocation,
+  ClientSource,
+  Company,
+  CountryWithStates,
+  InterestLevel,
+  NoteType,
+  ServiceType,
+  Staff
+} from '@/types'
 import Leads from '@/views/erp/leads/leads/Leads'
 
 export default async function LeadsPage() {
@@ -16,6 +26,7 @@ export default async function LeadsPage() {
   let serviceTypes: ServiceType[] = []
   let businessLocations: BusinessLocation[] = []
   let noteTypes: NoteType[] = []
+  let countriesWithStatesAndCities: CountryWithStates[] = []
 
   // fetch interest levels
   try {
@@ -73,6 +84,13 @@ export default async function LeadsPage() {
     noteTypes = []
   }
 
+  try {
+    const response = await LocationService.index()
+    countriesWithStatesAndCities = response.data || []
+  } catch (error) {
+    countriesWithStatesAndCities = []
+  }
+
   return (
     <Leads
       interestLevels={interestLevels}
@@ -82,6 +100,7 @@ export default async function LeadsPage() {
       serviceTypes={serviceTypes}
       businessLocations={businessLocations}
       noteTypes={noteTypes}
+      countriesWithStatesAndCities={countriesWithStatesAndCities}
     />
   )
 }
