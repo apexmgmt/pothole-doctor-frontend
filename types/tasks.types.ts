@@ -24,6 +24,8 @@ export interface Task {
   client?: Client
   task_type?: TaskType
   employees?: Staff[]
+  completed_date?: string
+  close_comment?: string
 }
 
 export interface TaskPayload {
