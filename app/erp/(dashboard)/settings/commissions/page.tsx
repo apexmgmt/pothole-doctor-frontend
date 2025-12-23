@@ -1,3 +1,4 @@
+import CommissionTypeService from '@/services/api/settings/commission_types.service'
 import CommissionService from '@/services/api/settings/commissions.service'
 import { CommissionBase, CommissionFilter, CommissionType } from '@/types'
 import Commissions from '@/views/erp/settings/commissions/Commissions'
@@ -8,7 +9,7 @@ export default async function CommissionsPage() {
   let commissionBases: CommissionBase[] = []
 
   try {
-    const response = await CommissionService.getAllCommissionTypes()
+    const response = await CommissionTypeService.getAllCommissionTypes()
     commissionTypes = response.data || []
   } catch (error) {
     commissionTypes = []

@@ -1,3 +1,5 @@
+import { CommissionType } from './commission_types.types'
+
 export interface CommissionsParams {
   commissionTypes: CommissionType[] | []
   commissionFilters: CommissionFilter[] | []
@@ -29,14 +31,6 @@ export interface CommissionPayload {
   max_amount: number
   filter_percent: number | 0 | 1
   commission_percent: number | 0 | 1
-}
-
-export interface CommissionType {
-  id: string
-  name: string
-  slug: string
-  created_at: string
-  updated_at: string
 }
 
 export interface CommissionFilter {
