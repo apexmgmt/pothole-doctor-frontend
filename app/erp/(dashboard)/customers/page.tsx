@@ -47,7 +47,7 @@ export default async function CustomersPage() {
     companies = []
   }
 
-  // fetch companies
+  // fetch staffs
   try {
     const response = await StaffService.getAllStaffs()
     staffs = response.data || []
