@@ -38,6 +38,7 @@ export interface Client {
   reference?: Staff
   location?: BusinessLocation
   address: ClientAddress
+  addresses?: ClientAddress[]
   desired_services?: ServiceType[]
   source?: ClientSource
 }

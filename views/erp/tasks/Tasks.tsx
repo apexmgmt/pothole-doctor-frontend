@@ -7,7 +7,7 @@ import { PlusIcon, Search } from 'lucide-react'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, CommissionType, DataTableApiResponse, Task } from '@/types'
+import { Client, Column, DataTableApiResponse, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -16,12 +16,18 @@ import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import CommissionTypeService from '@/services/api/settings/commission_types.service'
 import TaskService from '@/services/api/tasks.service'
 import { formatDate } from '@/utils/date'
 import { Badge } from '@/components/ui/badge'
+import CreateOrEditTaskModal from './CreateOrEditTaskModal'
 
-const Tasks: React.FC = () => {
+const Tasks: React.FC<{
+  staffs: Staff[]
+  clients: Client[]
+  taskTypes: TaskType[]
+  taskReminders: TaskReminder[]
+  taskReminderChannels: TaskReminderChannel[]
+}> = ({ staffs, clients, taskTypes, taskReminders, taskReminderChannels }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -127,8 +133,12 @@ const Tasks: React.FC = () => {
     {
       id: 'status',
       header: 'Status',
-      cell: row => <Badge key={row.id} variant='default' className='mr-1 mb-1'>{row.status}</Badge>,
-      sortable: true,
+      cell: row => (
+        <Badge key={row.id} variant='default' className='mr-1 mb-1'>
+          {row.status}
+        </Badge>
+      ),
+      sortable: true
     },
     {
       id: 'task_type',
@@ -315,14 +325,19 @@ const Tasks: React.FC = () => {
         />
       </CommonLayout>
 
-      {/* <CreateOrEditTaskModal
+      <CreateOrEditTaskModal
         mode={modalMode}
         open={isModalOpen}
         onOpenChange={handleModalClose}
         taskId={selectedTaskId || undefined}
         taskDetails={selectedTask || undefined}
         onSuccess={handleSuccess}
-      /> */}
+        staffs={staffs}
+        clients={clients}
+        taskTypes={taskTypes}
+        taskReminders={taskReminders}
+        taskReminderChannels={taskReminderChannels}
+      />
     </>
   )
 }
