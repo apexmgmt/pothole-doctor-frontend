@@ -8,7 +8,7 @@ export default async function LaborCostsPage() {
   let units: Unit[] = []
 
   try {
-    const response = await ServiceTypeService.getServiceTypeTypes()
+    const response = await ServiceTypeService.getAllServiceTypes()
     serviceTypes = response.data || []
   } catch (error) {
     serviceTypes = []
