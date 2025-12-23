@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import CommissionTypeService from '@/services/api/settings/commission_types.service'
 
-interface CreateOrEditNoteTypeModalProps {
+interface CreateOrEditCommissionTypeModalProps {
   mode?: 'create' | 'edit'
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -30,7 +30,7 @@ const CreateOrEditCommissionTypeModal = ({
   commissionTypeId,
   commissionTypeDetails,
   onSuccess
-}: CreateOrEditNoteTypeModalProps) => {
+}: CreateOrEditCommissionTypeModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const form = useForm<FormValues>({
