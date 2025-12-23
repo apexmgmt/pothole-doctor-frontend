@@ -32,5 +32,5 @@ export * from './interest_levels.types'
 export * from './installation_requests.types'
 export * from './client_sources.types'
 export * from './clients/clients.types'
-
 export * from './commissions/commission_types.types'
+export * from './tasks.types'
