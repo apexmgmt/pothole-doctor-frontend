@@ -248,7 +248,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
                         isSelected ? 'bg-gray-800 hover:bg-gray-900' : 'hover:bg-gray-900'
                       } ${rowIndex + 1 === tableData.length ? '' : 'border-b border-border'}`}
                     >
-                      {columns.map(column => {
+                      {columns.map((column) => {
                         const columnWidth = getColumnWidth(column?.size)
 
                         return (
@@ -269,7 +269,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
                               }
                             }}
                           >
-                            {column.cell(row)}
+                            {column.cell(row, rowIndex)}
                           </td>
                         )
                       })}

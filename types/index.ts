@@ -34,3 +34,5 @@ export * from './client_sources.types'
 export * from './clients/clients.types'
 export * from './commissions/commission_types.types'
 export * from './tasks.types'
+
+export * from './estimate_types.types';

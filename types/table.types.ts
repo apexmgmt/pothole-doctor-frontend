@@ -3,7 +3,7 @@ import { ReactNode } from 'react'
 export type Column = {
   id: string
   header: string
-  cell: (row: any) => ReactNode
+  cell: (row: any, rowIndex?: number) => ReactNode
   sortable?: boolean
   enableSorting?: boolean
   headerAlign?: 'left' | 'center' | 'right'

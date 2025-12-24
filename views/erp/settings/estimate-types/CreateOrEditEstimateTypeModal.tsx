@@ -1,6 +1,6 @@
 'use client'
 
-import { CommissionType, CommissionTypePayload } from '@/types'
+import { EstimateType, EstimateTypePayload } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -8,14 +8,14 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import CommissionTypeService from '@/services/api/settings/commission_types.service'
+import EstimateTypeService from '@/services/api/settings/estimate_types.service'
 
-interface CreateOrEditCommissionTypeModalProps {
+interface CreateOrEditEstimateTypeModalProps {
   mode?: 'create' | 'edit'
   open: boolean
   onOpenChange: (open: boolean) => void
-  commissionTypeId?: string
-  commissionTypeDetails?: CommissionType
+  estimateTypeId?: string
+  estimateTypeDetails?: EstimateType
   onSuccess?: () => void
 }
 
@@ -23,76 +23,71 @@ interface FormValues {
   name: string
 }
 
-const CreateOrEditCommissionTypeModal = ({
+const CreateOrEditEstimateTypeModal = ({
   mode = 'create',
   open,
   onOpenChange,
-  commissionTypeId,
-  commissionTypeDetails,
+  estimateTypeId,
+  estimateTypeDetails,
   onSuccess
-}: CreateOrEditCommissionTypeModalProps) => {
+}: CreateOrEditEstimateTypeModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const form = useForm<FormValues>({
     defaultValues: {
-      name: commissionTypeDetails?.name || ''
+      name: estimateTypeDetails?.name || ''
     }
   })
 
-  // Reset form when commissionTypeDetails changes or modal opens
+  // Reset form when estimateTypeDetails changes or modal opens
   useEffect(() => {
     if (open) {
       form.reset({
-        name: commissionTypeDetails?.name || ''
+        name: estimateTypeDetails?.name || ''
       })
     }
-  }, [commissionTypeDetails, open, form])
+  }, [estimateTypeDetails, open, form])
 
   const onSubmit = async (values: FormValues) => {
-    if (!values.name || values.name.length < 2) {
-      toast.error('Commission type name must be at least 2 characters')
-      return
-    }
-
-    const payload: CommissionTypePayload = {
+    const payload: EstimateTypePayload = {
       name: values.name
     }
 
     if (mode === 'create') {
       try {
-        await CommissionTypeService.store(payload)
+        await EstimateTypeService.store(payload)
           .then(response => {
-            toast.success('Commission type created successfully')
+            toast.success('Estimate type created successfully')
             form.reset()
             onOpenChange(false)
             onSuccess?.()
           })
           .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to create commission type')
+            toast.error(typeof error.message === 'string' ? error.message : 'Failed to create estimate type')
           })
       } catch (error) {
-        toast.error('Something went wrong while creating the commission type!')
+        toast.error('Something went wrong while creating the estimate type!')
       }
-    } else if (mode === 'edit' && commissionTypeId) {
+    } else if (mode === 'edit' && estimateTypeId) {
       try {
-        await CommissionTypeService.update(commissionTypeId, payload)
+        await EstimateTypeService.update(estimateTypeId, payload)
           .then(response => {
-            toast.success('Commission type updated successfully')
+            toast.success('Estimate type updated successfully')
             onOpenChange(false)
             onSuccess?.()
           })
           .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to update commission type')
+            toast.error(typeof error.message === 'string' ? error.message : 'Failed to update estimate type')
           })
       } catch (error) {
-        toast.error('Something went wrong while updating the commission type!')
+        toast.error('Something went wrong while updating the estimate type!')
       }
     }
   }
 
   const onCancel = () => {
     form.reset({
-      name: commissionTypeDetails?.name || ''
+      name: estimateTypeDetails?.name || ''
     })
     onOpenChange(false)
   }
@@ -100,11 +95,11 @@ const CreateOrEditCommissionTypeModal = ({
   return (
     <CommonDialog
       isLoading={form.formState.isSubmitting}
-      loadingMessage='Loading commission type...'
+      loadingMessage='Loading estimate type...'
       open={open}
       onOpenChange={onOpenChange}
-      title={mode === 'create' ? 'Create New Commission Type' : 'Edit Commission Type'}
-      description={mode === 'create' ? 'Add a new commission type to the system' : 'Update commission type information'}
+      title={mode === 'create' ? 'Create New Estimate Type' : 'Edit Estimate Type'}
+      description={mode === 'create' ? 'Add a new estimate type to the system' : 'Update estimate type information'}
       maxWidth='sm'
       disableClose={form.formState.isSubmitting}
       actions={
@@ -131,13 +126,13 @@ const CreateOrEditCommissionTypeModal = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          {/* Commission Type Name Field */}
+          {/* Estimate Type Name Field */}
           <FormField
             control={form.control}
             name='name'
             rules={{
-              required: 'Commission type name is required',
-              minLength: { value: 2, message: 'Commission type name must be at least 2 characters' }
+              required: 'Estimate type name is required',
+              minLength: { value: 2, message: 'Estimate type name must be at least 2 characters' }
             }}
             render={({ field }) => (
               <FormItem>
@@ -145,7 +140,7 @@ const CreateOrEditCommissionTypeModal = ({
                   Name <span className='text-red-500'>*</span>
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter commission type name' {...field} />
+                  <Input placeholder='Enter estimate type name' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -157,4 +152,4 @@ const CreateOrEditCommissionTypeModal = ({
   )
 }
 
-export default CreateOrEditCommissionTypeModal
+export default CreateOrEditEstimateTypeModal
