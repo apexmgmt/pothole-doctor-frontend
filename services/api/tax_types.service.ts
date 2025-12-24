@@ -6,6 +6,7 @@ export default class TaxTypeService {
   static getAllTaxTypes = async () => {
     try {
       const apiUrl = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + TAX_TYPES, {
         requiresAuth: true,
         method: 'GET',
@@ -14,6 +15,7 @@ export default class TaxTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch tax types')
       }
 

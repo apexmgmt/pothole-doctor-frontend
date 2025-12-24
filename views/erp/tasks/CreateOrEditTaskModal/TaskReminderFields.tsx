@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Checkbox } from '@/components/ui/checkbox'
 import { TaskReminderChannel } from '@/types'
@@ -29,6 +30,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
       const employeeTimes = smsEmployeeTimes || {}
       const customerSelected = Object.values(customerTimes).some(Boolean)
       const employeeSelected = Object.values(employeeTimes).some(Boolean)
+
       if (!customerSelected) {
         form.setError('sms_customer_times', {
           type: 'manual',
@@ -37,6 +39,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
       } else {
         form.clearErrors('sms_customer_times')
       }
+
       if (!employeeSelected) {
         form.setError('sms_employee_times', {
           type: 'manual',
@@ -56,6 +59,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
       const employeeTimes = emailEmployeeTimes || {}
       const customerSelected = Object.values(customerTimes).some(Boolean)
       const employeeSelected = Object.values(employeeTimes).some(Boolean)
+
       if (!customerSelected) {
         form.setError('email_customer_times', {
           type: 'manual',
@@ -64,6 +68,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
       } else {
         form.clearErrors('email_customer_times')
       }
+
       if (!employeeSelected) {
         form.setError('email_employee_times', {
           type: 'manual',
@@ -92,8 +97,10 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
   const handleTimeCheckedChange =
     (type: 'sms' | 'email', role: 'customer' | 'employee', timeId: string) => (checked: boolean) => {
       const fieldName = `${type}_${role}_times`
+
       form.setValue(`${fieldName}.${timeId}`, checked ? 1 : 0)
       const values = form.getValues(fieldName) || {}
+
       if (Object.values(values).some(Boolean)) {
         form.clearErrors(fieldName)
       } else {

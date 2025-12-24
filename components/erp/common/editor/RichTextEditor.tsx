@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react'
+
 import { createEditor, Descendant, Editor, Transforms, Element as SlateElement, BaseEditor, Text } from 'slate'
 import { Slate, Editable, withReact, RenderLeafProps, RenderElementProps, ReactEditor } from 'slate-react'
 import { withHistory, HistoryEditor } from 'slate-history'
@@ -16,6 +17,7 @@ import {
   Image as ImageIcon,
   Quote
 } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
@@ -51,10 +53,12 @@ export const serializeToHtml = (nodes: Descendant[]): string => {
 const serializeNode = (node: any): string => {
   if (Text.isText(node)) {
     let text = node.text
+
     if (node.bold) text = `<strong>${text}</strong>`
     if (node.italic) text = `<em>${text}</em>`
     if (node.underline) text = `<u>${text}</u>`
-    return text
+    
+return text
   }
 
   const children = node.children.map((n: any) => serializeNode(n)).join('')
@@ -95,16 +99,20 @@ const serializeNode = (node: any): string => {
 export const deserializeFromHtml = (html: string): Descendant[] => {
   if (!html || (!html.includes('<') && !html.includes('>'))) {
     const lines = html.split('\n').filter(line => line.trim() !== '')
+
     if (lines.length === 0) {
       return [{ type: 'paragraph', children: [{ text: '' }] }]
     }
-    return lines.map(line => ({
+
+    
+return lines.map(line => ({
       type: 'paragraph',
       children: [{ text: line }]
     }))
   }
 
   const doc = new DOMParser().parseFromString(html, 'text/html')
+
   const nodes = Array.from(doc.body.childNodes)
     .map(node => deserializeNode(node))
     .filter(Boolean) as Descendant[]
@@ -115,10 +123,13 @@ export const deserializeFromHtml = (html: string): Descendant[] => {
 const deserializeNode = (node: Node): any => {
   if (node.nodeType === Node.TEXT_NODE) {
     const text = node.textContent || ''
+
     if (text.trim() && node.parentNode?.nodeName === 'BODY') {
       return { type: 'paragraph', children: [{ text }] }
     }
-    return text.trim() ? { text } : null
+
+    
+return text.trim() ? { text } : null
   }
 
   if (node.nodeType !== Node.ELEMENT_NODE) {
@@ -129,15 +140,23 @@ const deserializeNode = (node: Node): any => {
 
   if (element.nodeName === 'STRONG' || element.nodeName === 'B') {
     const text = element.textContent || ''
-    return { text, bold: true }
+
+    
+return { text, bold: true }
   }
+
   if (element.nodeName === 'EM' || element.nodeName === 'I') {
     const text = element.textContent || ''
-    return { text, italic: true }
+
+    
+return { text, italic: true }
   }
+
   if (element.nodeName === 'U') {
     const text = element.textContent || ''
-    return { text, underline: true }
+
+    
+return { text, underline: true }
   }
 
   let children = Array.from(element.childNodes)
@@ -184,17 +203,22 @@ const deserializeNode = (node: Node): any => {
       return children
     default:
       const hasOnlyText = children.every((child: any) => Text.isText(child))
+
       if (hasOnlyText) {
         return { type: 'paragraph', children }
       }
-      return children.length === 1 ? children[0] : { type: 'paragraph', children }
+
+      
+return children.length === 1 ? children[0] : { type: 'paragraph', children }
   }
 }
 
 const withImages = (editor: Editor) => {
   const { isVoid } = editor
+
   editor.isVoid = element => (element.type === 'image' ? true : isVoid(element))
-  return editor
+  
+return editor
 }
 
 interface RichTextEditorProps {
@@ -216,6 +240,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const renderElement = useCallback((props: RenderElementProps) => {
     const style = { textAlign: (props.element as any).align }
+
     switch (props.element.type) {
       case 'heading-one':
         return (
@@ -305,19 +330,24 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const renderLeaf = useCallback((props: RenderLeafProps) => {
     let { children } = props
+
     if (props.leaf.bold) children = <strong>{children}</strong>
     if (props.leaf.italic) children = <em>{children}</em>
     if (props.leaf.underline) children = <u>{children}</u>
-    return <span {...props.attributes}>{children}</span>
+    
+return <span {...props.attributes}>{children}</span>
   }, [])
 
   const isMarkActive = (editor: Editor, format: keyof Omit<CustomText, 'text'>) => {
     const marks = Editor.marks(editor)
-    return marks ? marks[format] === true : false
+
+    
+return marks ? marks[format] === true : false
   }
 
   const toggleMark = (format: keyof Omit<CustomText, 'text'>) => {
     const isActive = isMarkActive(editor, format)
+
     if (isActive) {
       Editor.removeMark(editor, format)
     } else {
@@ -327,6 +357,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const isBlockActive = (editor: Editor, format: string, blockType = 'type') => {
     const { selection } = editor
+
     if (!selection) return false
 
     const [match] = Array.from(
@@ -353,6 +384,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     })
 
     let newProperties: Partial<SlateElement>
+
     if (TEXT_ALIGN_TYPES.includes(format)) {
       newProperties = {
         align: isActive ? undefined : format
@@ -367,12 +399,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     if (!isActive && isList) {
       const block = { type: format, children: [] } as SlateElement
+
       Transforms.wrapNodes(editor, block)
     }
   }
 
   const insertLink = () => {
     const url = window.prompt('Enter the URL:')
+
     if (!url) return
 
     const { selection } = editor
@@ -391,14 +425,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const insertImage = () => {
     const url = window.prompt('Enter image URL:')
+
     if (!url) return
 
     const image = { type: 'image', url, children: [{ text: '' }] }
+
     Transforms.insertNodes(editor, image as any)
   }
 
   const getCurrentBlockType = () => {
     const { selection } = editor
+
     if (!selection) return 'paragraph'
 
     const [match] = Array.from(
@@ -410,7 +447,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     if (match) {
       const element = match[0] as CustomElement
-      return element.type || 'paragraph'
+
+      
+return element.type || 'paragraph'
     }
 
     return 'paragraph'
@@ -544,6 +583,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           renderLeaf={renderLeaf}
           placeholder={placeholder}
           className='p-4'
+
         //   style={{ minHeight }}
         />
       </Slate>

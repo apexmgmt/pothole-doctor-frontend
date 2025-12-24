@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+
 import * as SelectPrimitive from '@radix-ui/react-select'
 import { ChevronDownIcon, ChevronUpIcon, Check, X, Plus } from 'lucide-react'
 
@@ -169,6 +170,7 @@ function MultiSelect({
 
   const handleSelect = (value: string) => {
     const newSelected = selected.includes(value) ? selected.filter(item => item !== value) : [...selected, value]
+
     onChange(newSelected)
   }
 
@@ -191,7 +193,9 @@ function MultiSelect({
             {selected.length > 0 ? (
               selected.map(value => {
                 const option = options.find(opt => opt.value === value)
-                return (
+
+                
+return (
                   <Badge key={value} variant='default' className='mr-1'>
                     {option?.label}
                     <span
@@ -233,7 +237,9 @@ function MultiSelect({
             <CommandGroup>
               {options.map(option => {
                 const isSelected = selected.includes(option.value)
-                return (
+
+                
+return (
                   <CommandItem
                     key={option.value}
                     onSelect={() => handleSelect(option.value)}
@@ -282,6 +288,7 @@ function CreatableMultiSelect({
 
   const handleSelect = (value: string) => {
     const newSelected = selected.includes(value) ? selected.filter(item => item !== value) : [...selected, value]
+
     onChange(newSelected)
   }
 
@@ -299,6 +306,7 @@ function CreatableMultiSelect({
       if (!selected.includes(trimmedValue)) {
         onChange([...selected, trimmedValue])
       }
+
       setSearchValue('')
     }
   }
@@ -325,7 +333,9 @@ function CreatableMultiSelect({
               selected.map(value => {
                 const option = options.find(opt => opt.value === value)
                 const label = option?.label || value
-                return (
+
+                
+return (
                   <Badge key={value} variant='default' className='mr-1'>
                     {label}
                     <span
@@ -372,7 +382,9 @@ function CreatableMultiSelect({
             <CommandGroup>
               {filteredOptions.map(option => {
                 const isSelected = selected.includes(option.value)
-                return (
+
+                
+return (
                   <CommandItem
                     key={option.value}
                     onSelect={() => handleSelect(option.value)}
@@ -516,6 +528,7 @@ function CreatableSelect({
     </Popover>
   )
 }
+
 export {
   Select,
   SelectContent,

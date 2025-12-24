@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
+
 import { useAppDispatch, useAppSelector } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import CookieService from '@/services/app/cookie.service'
@@ -26,14 +27,19 @@ const Profile: React.FC<ProfileProps> = ({ userData: propUser }) => {
   // Get user from Redux, props, or cookies (in priority order)
   const cookieUser: User | null = useMemo(() => {
     if (reduxUser || propUser) return null
+
     try {
       const raw = CookieService.getSync('user')
+
       if (!raw) return null
       const decrypted = decryptData(raw)
+
       if (typeof decrypted === 'string') {
         return JSON.parse(decrypted) as User
       }
-      return decrypted as User
+
+      
+return decrypted as User
     } catch {
       return null
     }

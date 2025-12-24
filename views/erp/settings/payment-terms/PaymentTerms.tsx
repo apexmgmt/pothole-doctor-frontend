@@ -1,8 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -12,7 +16,6 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import CityService from '@/services/api/locations/city.service'
 import CreateOrEditCityModal from '../../locations/cities/CreateOrEditCityModal'
@@ -47,15 +50,19 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
-        return newOptions
+
+        
+return newOptions
       })
     }, 500)
 
@@ -65,6 +72,7 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       PaymentTermsService.index(filterOptions)
         .then(response => {
@@ -91,7 +99,9 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
   const paymentTermsData = apiResponse?.data
     ? apiResponse.data.map((paymentTerm: any, index: number) => {
         const typeObj = paymentTermTypes.find(t => t.type === paymentTerm.type)
-        return {
+
+        
+return {
           id: paymentTerm.id,
           index: (apiResponse?.from || 1) + index,
           name: paymentTerm.name,
@@ -117,6 +127,7 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
     // Fetch payment term details
     try {
       const response = await PaymentTermsService.show(id)
+
       setSelectedPaymentTerm(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -218,7 +229,9 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
-    return filterKeys.length > 0
+
+    
+return filterKeys.length > 0
   }
 
   // Custom filters component

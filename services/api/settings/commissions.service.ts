@@ -10,6 +10,7 @@ export default class CommissionService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + COMMISSIONS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class CommissionService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch commissions')
       }
 
@@ -31,6 +33,7 @@ export default class CommissionService {
   static store = async (payload: CommissionPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COMMISSIONS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class CommissionService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create commissions')
       }
 
@@ -55,6 +59,7 @@ export default class CommissionService {
   static show = async (commissionId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COMMISSIONS + commissionId, {
         requiresAuth: true,
         method: 'GET',
@@ -63,6 +68,7 @@ export default class CommissionService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch commissions details')
       }
 
@@ -76,6 +82,7 @@ export default class CommissionService {
   static update = async (commissionId: string, payload: CommissionPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COMMISSIONS + commissionId, {
         requiresAuth: true,
         method: 'PUT',
@@ -84,12 +91,15 @@ export default class CommissionService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update commissions')
       }
+
       await revalidate('commissions')
       await revalidate(`commissions/${commissionId}`)
       await revalidate('commissions-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -99,18 +109,23 @@ export default class CommissionService {
   static destroy = async (commissionId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COMMISSIONS + commissionId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete commissions')
       }
+
       await revalidate('commissions')
       await revalidate(`commissions/${commissionId}`)
       await revalidate('commissions-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -120,16 +135,21 @@ export default class CommissionService {
   static getAllCommissionFilters = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COMMISSION_FILTERS_ALL, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['commission-filters-all'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch commission filters')
       }
-      return await response.json()
+
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -139,16 +159,21 @@ export default class CommissionService {
   static getAllCommissionBases = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COMMISSION_BASES_ALL, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['commission-bases-all'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch commission bases')
       }
-      return await response.json()
+
+      
+return await response.json()
     } catch (error) {
       throw error
     }

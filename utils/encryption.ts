@@ -21,14 +21,18 @@ export const encryptData = (data: any): string | any => {
       return data
     } else if (NODE_ENV === 'production') {
       const jsonData = JSON.stringify(data)
-      return CryptoJS.AES.encrypt(jsonData, SECRET_KEY).toString()
+
+      
+return CryptoJS.AES.encrypt(jsonData, SECRET_KEY).toString()
     } else {
       console.warn('NODE_ENV is not set correctly. Defaulting to JSON.stringify.')
-      return JSON.stringify(data)
+      
+return JSON.stringify(data)
     }
   } catch (error) {
     console.error('Encryption error:', error)
-    return null
+    
+return null
   }
 }
 
@@ -68,18 +72,22 @@ export const decryptData = (value: any): any => {
 
       try {
         const parsed = JSON.parse(value)
-        return parsed
+
+        
+return parsed
       } catch {
         // Not valid JSON, continue with decryption
       }
 
       try {
         const decryptedBytes = CryptoJS.AES.decrypt(value, SECRET_KEY)
+
         if (!decryptedBytes || !decryptedBytes.words || decryptedBytes.words.length === 0) {
           return value
         }
 
         let decrypted: string
+
         try {
           decrypted = decryptedBytes.toString(CryptoJS.enc.Utf8)
         } catch {
@@ -92,7 +100,9 @@ export const decryptData = (value: any): any => {
 
         try {
           const parsed = JSON.parse(decrypted)
-          return parsed
+
+          
+return parsed
         } catch {
           return decrypted
         }
@@ -115,10 +125,13 @@ export const decryptData = (value: any): any => {
 export const decryptUserData = (encryptedData: unknown): unknown | null => {
   try {
     const decrypted = decryptData(encryptedData)
+
     if (!decrypted) {
       return null
     }
-    return decrypted
+
+    
+return decrypted
   } catch {
     return encryptedData
   }
@@ -132,10 +145,13 @@ export const decryptUserData = (encryptedData: unknown): unknown | null => {
 export const encryptRedirectUrl = (url: string): string | null => {
   try {
     const encrypted = CryptoJS.AES.encrypt(url, SECRET_KEY).toString()
-    return encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+
+    
+return encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
   } catch (error) {
     console.error('URL Encryption error:', error)
-    return null
+    
+return null
   }
 }
 
@@ -147,13 +163,18 @@ export const encryptRedirectUrl = (url: string): string | null => {
 export const decryptRedirectUrl = (encryptedUrl: string): string | null => {
   try {
     let restored = encryptedUrl.replace(/-/g, '+').replace(/_/g, '/')
+
     while (restored.length % 4) {
       restored += '='
     }
+
     const decrypted = CryptoJS.AES.decrypt(restored, SECRET_KEY).toString(CryptoJS.enc.Utf8)
-    return decrypted
+
+    
+return decrypted
   } catch (error) {
     console.error('URL Decryption error:', error)
-    return null
+    
+return null
   }
 }

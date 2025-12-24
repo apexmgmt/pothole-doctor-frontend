@@ -1,5 +1,11 @@
 'use client'
 
+import { useEffect, useState, useMemo } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { LaborCost, LaborCostPayload } from '@/types/labor_costs.types'
 import { ServiceType } from '@/types/service_types.types'
 import { Unit } from '@/types/units.types'
@@ -8,9 +14,8 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState, useMemo } from 'react'
+
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import LaborCostService from '@/services/api/labor_costs.service'
 
@@ -82,6 +87,7 @@ const CreateOrEditLaborCostModal = ({
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true)
+
     const payload: LaborCostPayload = {
       name: values.name,
       description: values.description,
@@ -100,6 +106,7 @@ const CreateOrEditLaborCostModal = ({
         await LaborCostService.update(laborCostId, payload)
         toast.success('Labor cost updated successfully')
       }
+
       onOpenChange(false)
       onSuccess?.()
       form.reset()

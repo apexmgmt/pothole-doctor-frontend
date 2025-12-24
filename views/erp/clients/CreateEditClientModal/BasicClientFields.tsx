@@ -1,7 +1,9 @@
 'use client'
 
 import React from 'react'
+
 import { Controller, UseFormReturn } from 'react-hook-form'
+
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, CreatableSelect, MultiSelect } from '@/components/ui/select'
@@ -42,7 +44,9 @@ const BasicClientFields: React.FC<BasicClientFieldsProps> = ({
     value: service.id,
     label: service.name
   }))
-  return (
+
+  
+return (
     <div className='space-y-4'>
       <div className='grid grid-cols-2 gap-4'>
         <div className='space-y-2'>
@@ -175,7 +179,9 @@ const BasicClientFields: React.FC<BasicClientFieldsProps> = ({
               required: 'Main Phone is required',
               validate: value => {
                 const numStr = String(value).replace(/\D/g, '')
-                return numStr.length === 10 || 'Phone number must be 10 digits'
+
+                
+return numStr.length === 10 || 'Phone number must be 10 digits'
               }
             }}
             render={({ field }) => <Input {...field} type='tel' placeholder='10 digit phone number' />}
@@ -192,7 +198,9 @@ const BasicClientFields: React.FC<BasicClientFieldsProps> = ({
               validate: value => {
                 if (!value || value === '') return true
                 const numStr = String(value).replace(/\D/g, '')
-                return numStr.length === 10 || 'Phone number must be 10 digits'
+
+                
+return numStr.length === 10 || 'Phone number must be 10 digits'
               }
             }}
             render={({ field }) => <Input {...field} type='tel' placeholder='10 digit phone number' />}
@@ -253,7 +261,9 @@ const BasicClientFields: React.FC<BasicClientFieldsProps> = ({
               validate: value => {
                 if (!value || value === '') return true
                 const numStr = String(value).replace(/\D/g, '')
-                return numStr.length === 10 || 'Phone number must be 10 digits'
+
+                
+return numStr.length === 10 || 'Phone number must be 10 digits'
               }
             }}
             render={({ field }) => <Input {...field} type='tel' placeholder='10 digit phone number' />}

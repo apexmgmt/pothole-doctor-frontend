@@ -10,6 +10,7 @@ export default async function CommissionsPage() {
 
   try {
     const response = await CommissionTypeService.getAllCommissionTypes()
+
     commissionTypes = response.data || []
   } catch (error) {
     commissionTypes = []
@@ -17,6 +18,7 @@ export default async function CommissionsPage() {
 
   try {
     const response = await CommissionService.getAllCommissionFilters()
+
     commissionFilters = response.data || []
   } catch (error) {
     commissionFilters = []
@@ -24,6 +26,7 @@ export default async function CommissionsPage() {
 
   try {
     const response = await CommissionService.getAllCommissionBases()
+
     commissionBases = response.data || []
   } catch (error) {
     commissionBases = []

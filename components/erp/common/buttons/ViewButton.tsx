@@ -1,7 +1,9 @@
 import Link from 'next/link'
+
+import { EyeIcon } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
-import { EyeIcon } from 'lucide-react'
 
 type ViewButtonProps = {
   title?: string

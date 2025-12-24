@@ -1,3 +1,15 @@
+import { useEffect, useState } from 'react'
+
+import Image from 'next/image'
+
+import Link from 'next/link'
+
+import { id, se } from 'date-fns/locale'
+
+import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
+
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import CommonTable from '@/components/erp/common/table'
@@ -7,12 +19,10 @@ import { DocumentIcon } from '@/public/icons'
 import PartnerDocumentService from '@/services/api/partners/partner-documents.service'
 import { Column, DataTableApiResponse, Document } from '@/types'
 import { generateFileUrl, getFileType } from '@/utils/utility'
-import { id, se } from 'date-fns/locale'
-import { PlusIcon, Search } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+
+
+
+
 import CreateOrEditDocumentModal from './CreateOrEditDocumentModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
@@ -25,6 +35,8 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: userId })
+
+
   // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
@@ -36,15 +48,19 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
-        return newOptions
+
+        
+return newOptions
       })
     }, 500)
 
@@ -54,6 +70,7 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       PartnerDocumentService.index(filterOptions)
         .then(response => {
@@ -105,6 +122,7 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
     // Fetch contact type details
     try {
       const response = await PartnerDocumentService.show(id)
+
       setSelectedDocument(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -208,7 +226,9 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
-    return filterKeys.length > 0
+
+    
+return filterKeys.length > 0
   }
 
   // Custom filters component

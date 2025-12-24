@@ -1,17 +1,30 @@
 'use client'
 
-import { PermissionsByModule, Role } from '@/types'
+import { useEffect } from 'react'
+
+import { useRouter } from 'next/navigation'
+
 import { zodResolver } from '@hookform/resolvers/zod'
+
 import * as z from 'zod'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
+import { PermissionsByModule, Role } from '@/types'
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
+
+
 import RoleService from '@/services/api/role.service'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+
+
+
+
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 

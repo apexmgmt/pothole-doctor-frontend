@@ -1,10 +1,12 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+
+import { toast } from 'sonner'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Client } from '@/types'
-import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 import ClientService from '@/services/api/clients/clients.service'
 
@@ -21,12 +23,15 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
   const fetchClientDetails = async () => {
     if (!clientId) {
       setClientData(null)
-      return
+      
+return
     }
 
     setIsLoading(true)
+
     try {
       const response = await ClientService.show(clientId)
+
       setClientData(response.data)
     } catch (error: any) {
       toast.error(error?.message || `Failed to fetch ${type} details`)
@@ -83,6 +88,7 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
   }
 
   const fullName = `${clientData?.first_name || ''} ${clientData?.last_name || ''}`.trim()
+
   const initials = fullName
     .split(' ')
     .map((name: string) => name.charAt(0))

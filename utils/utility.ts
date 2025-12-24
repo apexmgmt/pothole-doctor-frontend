@@ -21,11 +21,15 @@ export async function getApiUrl(): Promise<string> {
     const { headers } = await import('next/headers')
     const headersList = await headers()
     const host = headersList.get('host') || ''
-    return buildUrl(apiBaseUrl, appBaseUrl, host)
+
+    
+return buildUrl(apiBaseUrl, appBaseUrl, host)
   } else {
     // Client-side logic
     const host = window.location.host
-    return buildUrl(apiBaseUrl, appBaseUrl, host)
+
+    
+return buildUrl(apiBaseUrl, appBaseUrl, host)
   }
 }
 
@@ -47,8 +51,10 @@ export function appUrl(subdomain?: string): string {
 
   try {
     const appUrl = new URL(appBaseUrl)
+
     appUrl.hostname = `${subdomain}.${appUrl.hostname}`
-    return appUrl.toString()
+    
+return appUrl.toString()
   } catch {
     return appBaseUrl
   }
@@ -72,8 +78,10 @@ function buildUrl(apiBaseUrl: string, appBaseUrl: string, host: string): string 
     if (hostParts.length > baseParts.length) {
       const subdomain = hostParts.slice(0, hostParts.length - baseParts.length).join('.')
       const api = new URL(apiBaseUrl)
+
       api.hostname = `${subdomain}.${api.hostname}`
-      return api.toString() + 'api'
+      
+return api.toString() + 'api'
     }
 
     return apiBaseUrl + '/api'
@@ -85,6 +93,7 @@ function buildUrl(apiBaseUrl: string, appBaseUrl: string, host: string): string 
 // Initialize filterOptions from URL params
 export const getInitialFilters = (searchParams: URLSearchParams) => {
   const filters: any = {}
+
   searchParams.forEach((value, key) => {
     // Convert numeric values
     if (key === 'page' || key === 'per_page') {
@@ -116,15 +125,21 @@ export const updateURL = (router: any, filters: any) => {
 /**Generate fill url from full path */
 export const generateFileUrl = (fullPath: string) => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
-  return apiUrl + fullPath
+
+  
+return apiUrl + fullPath
 }
 
 /** Get file extension from full path */
 export const getFileExtension = (fullPath: string) => {
   if (!fullPath) return 'unknown'
   const ext = fullPath.split('.').pop()?.toLowerCase() || ''
-  return ext
+
+  
+return ext
 }
+
+
 /** Get file type from full path */
 export const getFileType = (fullPath: string) => {
   const ext = getFileExtension(fullPath)
@@ -145,11 +160,13 @@ export const getFileType = (fullPath: string) => {
     'raw',
     'heif'
   ]
+
   const videoExts = ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm', 'mkv']
   const docExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv', 'rtf']
 
   if (imageExts.includes(ext)) return 'image'
   if (videoExts.includes(ext)) return 'video'
   if (docExts.includes(ext)) return 'document'
-  return 'other'
+  
+return 'other'
 }

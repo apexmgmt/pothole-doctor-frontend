@@ -1,11 +1,14 @@
+import { useState } from 'react'
+
+import { toast } from 'sonner'
+
 import { TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useState } from 'react'
 import TaskReminderService from '@/services/api/settings/task_reminders.service'
-import { toast } from 'sonner'
+
 
 const TaskReminderCard = ({
   taskReminders: initialTaskReminders,
@@ -47,8 +50,10 @@ const TaskReminderCard = ({
 
         if (existingIndex !== -1) {
           const updated = [...prev]
+
           updated[existingIndex] = { ...updated[existingIndex], is_enabled: isEnabled ? 1 : 0 }
-          return updated
+          
+return updated
         } else {
           return [
             ...prev,
@@ -79,6 +84,8 @@ const TaskReminderCard = ({
             setTaskReminders(prev => {
               // Remove temporary entry
               const withoutTemp = prev.filter(r => !r.id.startsWith('temp-'))
+
+
               // Remove existing entry with same identifiers
               const withoutDuplicate = withoutTemp.filter(
                 r =>
@@ -89,10 +96,13 @@ const TaskReminderCard = ({
                     r.role_type === response.data.role_type
                   )
               )
+
+
               // Add the new response data
               return [...withoutDuplicate, response.data]
             })
           }
+
           toast.success('Task reminder updated successfully')
         })
         .catch(error => {

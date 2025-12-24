@@ -41,8 +41,12 @@ export const isPublicRoute = (pathname: string): boolean => {
     if (route.includes(':')) {
       const routePattern = route.replace(/:[^/]+/g, '[^/]+')
       const regex = new RegExp(`^${routePattern}$`)
-      return regex.test(pathname)
+
+      
+return regex.test(pathname)
     }
+
+
     // Handle exact matches
     return route === pathname
   })
@@ -59,8 +63,12 @@ export const isUnauthenticatedRoute = (pathname: string): boolean => {
     if (route.includes(':')) {
       const routePattern = route.replace(/:[^/]+/g, '[^/]+')
       const regex = new RegExp(`^${routePattern}$`)
-      return regex.test(pathname)
+
+      
+return regex.test(pathname)
     }
+
+
     // Handle exact matches
     return route === pathname
   })
@@ -91,12 +99,14 @@ export const hasRouteAccess = (pathname: string, user?: User): boolean => {
 
   // Check permission-based routes
   const requiredPermission = PERMISSION_BASED_ROUTES[pathname]
+
   if (requiredPermission) {
     return user.permissions?.includes(requiredPermission) || false
   }
 
   // Check type-based routes
   const allowedTypes = TYPE_BASED_ROUTES[pathname]
+
   if (allowedTypes) {
     return allowedTypes.includes(user.type ?? '')
   }

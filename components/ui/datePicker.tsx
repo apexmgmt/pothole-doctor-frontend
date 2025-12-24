@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+
 import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 import { DateRange as ReactDayPickerDateRange } from 'react-day-picker'
@@ -93,6 +94,8 @@ export function DateRangePicker({
   const handleSelect = (range: ReactDayPickerDateRange | undefined) => {
     if (range) {
       onChange(range)
+
+
       // Only close if both from and to are selected
       if (range.from && range.to) {
         setOpen(false)

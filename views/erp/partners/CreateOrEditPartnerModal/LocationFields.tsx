@@ -1,7 +1,9 @@
 'use client'
 
 import { useMemo, useEffect } from 'react'
+
 import { UseFormReturn } from 'react-hook-form'
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -21,20 +23,25 @@ export function LocationFields({ form, countriesWithStatesAndCities }: LocationF
   const availableStates = useMemo(() => {
     if (!selectedCountryId) return []
     const country = countriesWithStatesAndCities.find(c => c.id.toString() === selectedCountryId)
-    return country?.states || []
+
+    
+return country?.states || []
   }, [selectedCountryId, countriesWithStatesAndCities])
 
   // Get available cities based on selected state
   const availableCities = useMemo(() => {
     if (!selectedStateId) return []
     const state = availableStates.find(s => s.id.toString() === selectedStateId)
-    return state?.cities || []
+
+    
+return state?.cities || []
   }, [selectedStateId, availableStates])
 
   // Reset state when country changes
   useEffect(() => {
     if (selectedCountryId && form.getValues('state_id')) {
       const stateExists = availableStates.some(s => s.id.toString() === form.getValues('state_id'))
+
       if (!stateExists) {
         form.setValue('state_id', '')
         form.setValue('city_id', '')
@@ -46,6 +53,7 @@ export function LocationFields({ form, countriesWithStatesAndCities }: LocationF
   useEffect(() => {
     if (selectedStateId && form.getValues('city_id')) {
       const cityExists = availableCities.some(c => c.id.toString() === form.getValues('city_id'))
+
       if (!cityExists) {
         form.setValue('city_id', '')
       }

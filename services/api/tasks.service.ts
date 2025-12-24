@@ -10,6 +10,7 @@ export default class TaskService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + TASKS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class TaskService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch tasks')
       }
 
@@ -31,6 +33,7 @@ export default class TaskService {
   static store = async (payload: TaskPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + TASKS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,12 +42,14 @@ export default class TaskService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create tasks')
       }
 
       await revalidate('tasks')
       await revalidate('tasks-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -54,6 +59,7 @@ export default class TaskService {
   static show = async (taskId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + TASKS + taskId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +68,7 @@ export default class TaskService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch tasks details')
       }
 
@@ -75,6 +82,7 @@ export default class TaskService {
   static update = async (taskId: string, payload: TaskPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + TASKS + taskId, {
         requiresAuth: true,
         method: 'PUT',
@@ -83,12 +91,15 @@ export default class TaskService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update tasks')
       }
+
       await revalidate('tasks')
       await revalidate(`tasks/${taskId}`)
       await revalidate('tasks-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -98,18 +109,23 @@ export default class TaskService {
   static destroy = async (taskId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + TASKS + taskId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete tasks')
       }
+
       await revalidate('tasks')
       await revalidate(`tasks/${taskId}`)
       await revalidate('tasks-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -119,16 +135,21 @@ export default class TaskService {
   static getAllTasks = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + TASKS_ALL, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['tasks-all'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch tasks')
       }
-      return await response.json()
+
+      
+return await response.json()
     } catch (error) {
       throw error
     }

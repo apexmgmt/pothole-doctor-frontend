@@ -1,8 +1,9 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import { TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import TaskReminderCard from './TaskReminderCard'
-import { useEffect } from 'react'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
@@ -20,7 +21,8 @@ export default function TaskReminders({
   useEffect(() => {
     dispatch(setPageTitle('Task Reminders Settings'))
   }, [])
-  return (
+  
+return (
     <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
       <TaskReminderCard
         taskReminders={taskReminders}

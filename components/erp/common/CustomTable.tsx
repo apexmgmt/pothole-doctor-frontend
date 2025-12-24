@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useMemo, ReactNode } from 'react'
+
 import CustomButton from './CustomButton'
 import { FilterIcon, PDFIcon, ExcelIcon, SearchIcon } from '@/public/icons'
 import TableFooter from './TableFooter'
@@ -46,6 +47,7 @@ interface CustomTableProps {
   pageSizeOptions?: number[]
   onPageChange?: (page: number) => void
   onPageSizeChange?: (size: number) => void
+
   // Server-side pagination props
   current_page?: number
   total?: number
@@ -53,6 +55,7 @@ interface CustomTableProps {
   from?: number
   to?: number
   last_page?: number
+
   // ...existing props...
   showRowSelection?: boolean
   onRowSelectionChange?: (selectedRows: any[]) => void
@@ -108,6 +111,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   pageSizeOptions = [10, 25, 50, 100],
   onPageChange,
   onPageSizeChange,
+
   // Server-side pagination
   current_page,
   total,
@@ -115,6 +119,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   from,
   to,
   last_page,
+
   // ...existing props...
   showRowSelection = true,
   onRowSelectionChange,
@@ -164,7 +169,8 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
         if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1
         if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1
-        return 0
+        
+return 0
       })
     }
 
@@ -174,9 +180,11 @@ const CustomTable: React.FC<CustomTableProps> = ({
   // Use server pagination if provided, otherwise client-side
   const isServerPagination = current_page !== undefined
   const displayCurrentPage = isServerPagination ? current_page : currentPage
+
   const displayTotalPages = isServerPagination
     ? last_page || 1
     : Math.max(1, Math.ceil(processedData.length / currentPageSize))
+
   const displayPageSize = isServerPagination ? per_page || pageSize : currentPageSize
   const displayTotal = isServerPagination ? total || 0 : processedData.length
 
@@ -203,6 +211,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
   const handlePageChange = (page: number) => {
     const validPage = Math.max(1, Math.min(page, totalPages))
+
     setCurrentPage(validPage)
     onPageChange?.(validPage)
   }
@@ -215,6 +224,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
   const handleSelectAll = (checked: boolean) => {
     const newSelection = checked ? paginatedData.map(row => row[rowKey]) : []
+
     setLocalSelectedRows(newSelection)
     onRowSelectionChange?.(newSelection)
   }

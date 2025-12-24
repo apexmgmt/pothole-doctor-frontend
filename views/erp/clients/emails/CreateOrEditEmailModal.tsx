@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react'
+
 import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
+import { Descendant } from 'slate'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import { toast } from 'sonner'
 import { Client } from '@/types'
-import { Descendant } from 'slate'
+
+
 import RichTextEditor, { serializeToHtml } from '@/components/erp/common/editor/RichTextEditor'
 import ClientEmailService from '@/services/api/clients/client-emails.service'
 
@@ -51,9 +57,11 @@ const CreateOrEditEmailModal: React.FC<{
       setEditorValue(initialValue)
     }
   }, [isOpen, client, clientId, form])
+
   const onSubmit = async (values: EmailFormValues) => {
     try {
       const message = serializeToHtml(editorValue)
+
       await ClientEmailService.store({ ...values, message })
       toast.success('Email sent successfully')
       form.reset()

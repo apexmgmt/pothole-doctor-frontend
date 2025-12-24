@@ -7,8 +7,10 @@ const EditRolePage = async ({ params }: { params: { id: string } }) => {
 
   // Fetch permissions
   let permissions = {}
+
   try {
     const response = await PermissionService.index()
+
     permissions = response.data || {}
   } catch (error) {
     permissions = {}
@@ -16,8 +18,10 @@ const EditRolePage = async ({ params }: { params: { id: string } }) => {
 
   // Fetch role details
   let roleDetails = {}
+
   try {
     const response = await RoleService.show(id)
+
     roleDetails = response.data || {}
   } catch (error) {
     roleDetails = {}

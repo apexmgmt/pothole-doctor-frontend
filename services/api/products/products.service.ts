@@ -10,6 +10,7 @@ export default class ProductService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + PRODUCTS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class ProductService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch products')
       }
 
@@ -31,6 +33,7 @@ export default class ProductService {
   static store = async (payload: ProductPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCTS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class ProductService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create product')
       }
 
@@ -55,6 +59,7 @@ export default class ProductService {
   static show = async (productId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCTS + productId, {
         requiresAuth: true,
         method: 'GET',
@@ -63,6 +68,7 @@ export default class ProductService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch product details')
       }
 
@@ -76,6 +82,7 @@ export default class ProductService {
   static update = async (productId: string, payload: ProductPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCTS + productId, {
         requiresAuth: true,
         method: 'PUT',
@@ -84,12 +91,15 @@ export default class ProductService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update product')
       }
+
       await revalidate('products')
       await revalidate(`products/${productId}`)
       await revalidate('products-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -99,18 +109,23 @@ export default class ProductService {
   static destroy = async (productId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCTS + productId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete product')
       }
+
       await revalidate('products')
       await revalidate(`products/${productId}`)
       await revalidate('products-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -120,18 +135,23 @@ export default class ProductService {
   static restore = async (productId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCTS + productId + '/restore', {
         requiresAuth: true,
         method: 'POST'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to restore product')
       }
+
       await revalidate('products')
       await revalidate(`products/${productId}`)
       await revalidate('products-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -141,6 +161,7 @@ export default class ProductService {
   static getAllProducts = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCTS_ALL, {
         requiresAuth: true,
         method: 'GET',
@@ -149,6 +170,7 @@ export default class ProductService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch products')
       }
 

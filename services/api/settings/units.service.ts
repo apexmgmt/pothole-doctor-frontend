@@ -10,6 +10,7 @@ export default class UnitService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + UNITS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class UnitService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch units')
       }
 
@@ -31,6 +33,7 @@ export default class UnitService {
   static store = async (payload: UnitPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + UNITS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class UnitService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create units')
       }
 
@@ -46,7 +50,8 @@ export default class UnitService {
       await revalidate('units-all')
       await revalidate('units-all-uom')
       await revalidate('units-all-measure')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -56,6 +61,7 @@ export default class UnitService {
   static show = async (unitId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + UNITS + unitId, {
         requiresAuth: true,
         method: 'GET',
@@ -64,6 +70,7 @@ export default class UnitService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch units details')
       }
 
@@ -77,6 +84,7 @@ export default class UnitService {
   static update = async (unitId: string, payload: UnitPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + UNITS + unitId, {
         requiresAuth: true,
         method: 'PUT',
@@ -85,14 +93,17 @@ export default class UnitService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update units')
       }
+
       await revalidate('units')
       await revalidate(`units/${unitId}`)
       await revalidate('units-all')
       await revalidate('units-all-uom')
       await revalidate('units-all-measure')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -102,20 +113,25 @@ export default class UnitService {
   static destroy = async (unitId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + UNITS + unitId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete units')
       }
+
       await revalidate('units')
       await revalidate(`units/${unitId}`)
       await revalidate('units-all')
       await revalidate('units-all-uom')
       await revalidate('units-all-measure')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -125,16 +141,21 @@ export default class UnitService {
   static getAllUnits = async (group?: string | 'uom' | 'measure') => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + UNITS_ALL + (group ? `?group=${group}` : ''), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['units-all' + (group ? `-${group}` : '')] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch units')
       }
-      return await response.json()
+
+      
+return await response.json()
     } catch (error) {
       throw error
     }

@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useMemo, useState } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { useAppSelector, useAppDispatch } from '@/lib/hooks'
 import CookieService from '@/services/app/cookie.service'
 import { decryptData } from '@/utils/encryption'
@@ -44,13 +46,18 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
   const cookieUser: FallbackUser | null = useMemo(() => {
     if (reduxUser || propUser) return null
     const raw = CookieService.get('user')
+
     if (!raw) return null
+
     try {
       const decrypted = decryptData(raw)
+
       if (typeof decrypted === 'string') {
         return JSON.parse(decrypted) as FallbackUser
       }
-      return decrypted as FallbackUser
+
+      
+return decrypted as FallbackUser
     } catch {
       return null
     }

@@ -9,6 +9,7 @@ export default class OrganizationService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + ORGANIZATIONS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class OrganizationService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch companies')
       }
 
@@ -31,6 +33,7 @@ export default class OrganizationService {
   static store = async (payload: object) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + ORGANIZATIONS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,12 +42,14 @@ export default class OrganizationService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create company')
       }
 
       // Revalidate organizations cache tag
       await revalidate('organizations')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -54,6 +59,7 @@ export default class OrganizationService {
   static show = async (organizationId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + ORGANIZATIONS + organizationId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +68,7 @@ export default class OrganizationService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch company details')
       }
 
@@ -75,6 +82,7 @@ export default class OrganizationService {
   static update = async (organizationId: string, payload: object) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + ORGANIZATIONS + organizationId, {
         requiresAuth: true,
         method: 'PUT',
@@ -83,13 +91,15 @@ export default class OrganizationService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update company details')
       }
 
       // Revalidate organizations cache tag
       await revalidate('organizations')
       await revalidate(`organizations/${organizationId}`)
-      return await response.json()
+      
+return await response.json()
     } catch (error) {}
   }
 
@@ -97,6 +107,7 @@ export default class OrganizationService {
   static changeStatus = async (organizationId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + ORGANIZATION_STATUS_CHANGE, {
         requiresAuth: true,
         method: 'POST',
@@ -105,13 +116,15 @@ export default class OrganizationService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to change company status')
       }
 
       // Revalidate organizations cache tag
       await revalidate('organizations')
       await revalidate(`organizations/${organizationId}`)
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }

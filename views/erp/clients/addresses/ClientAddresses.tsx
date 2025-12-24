@@ -1,12 +1,17 @@
+import { useEffect, useState } from 'react'
+
+import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
+
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Column, CountryWithStates, DataTableApiResponse, ClientAddress } from '@/types'
-import { PlusIcon, Search } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+
+
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import CreateOrEditAddressModal from './CreateOrEditAddressModal'
 import ClientAddressService from '@/services/api/clients/client-addresses.service'
@@ -35,22 +40,29 @@ const ClientAddresses = ({
     const timer = setTimeout(() => {
       setFilterOptions((prev: any) => {
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
-        return newOptions
+
+        
+return newOptions
       })
     }, 500)
-    return () => clearTimeout(timer)
+
+    
+return () => clearTimeout(timer)
   }, [searchValue])
 
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       ClientAddressService.index(filterOptions)
         .then(response => {
@@ -81,8 +93,10 @@ const ClientAddresses = ({
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
     setSelectedAddressId(id)
+
     try {
       const response = await ClientAddressService.show(id)
+
       setSelectedAddress(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -146,7 +160,9 @@ const ClientAddresses = ({
       header: 'Address',
       cell: row => {
         const parts = [row.street_address, row?.city?.name, row?.state?.name].filter(Boolean)
-        return <span className='font-medium'>{parts.join(', ')}</span>
+
+        
+return <span className='font-medium'>{parts.join(', ')}</span>
       },
       sortable: true
     },
@@ -192,7 +208,9 @@ const ClientAddresses = ({
 
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
-    return filterKeys.length > 0
+
+    
+return filterKeys.length > 0
   }
 
   const customFilters = (

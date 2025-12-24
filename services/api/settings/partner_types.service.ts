@@ -10,6 +10,7 @@ export default class PartnerTypesService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + PARTNER_TYPES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class PartnerTypesService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch payment terms')
       }
 
@@ -31,6 +33,7 @@ export default class PartnerTypesService {
   static store = async (payload: PartnerTypePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PARTNER_TYPES, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class PartnerTypesService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create partner types')
       }
 
@@ -55,6 +59,7 @@ export default class PartnerTypesService {
   static show = async (partnerTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PARTNER_TYPES + partnerTypeId, {
         requiresAuth: true,
         method: 'GET',
@@ -63,6 +68,7 @@ export default class PartnerTypesService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch partner types details')
       }
 
@@ -76,6 +82,7 @@ export default class PartnerTypesService {
   static update = async (partnerTypeId: string, payload: PartnerTypePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PARTNER_TYPES + partnerTypeId, {
         requiresAuth: true,
         method: 'PUT',
@@ -84,12 +91,15 @@ export default class PartnerTypesService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update partner types')
       }
+
       await revalidate('partner-types')
       await revalidate(`partner-types/${partnerTypeId}`)
       await revalidate('partner-types-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -99,18 +109,23 @@ export default class PartnerTypesService {
   static destroy = async (partnerTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PARTNER_TYPES + partnerTypeId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete partner types')
       }
+
       await revalidate('partner-types')
       await revalidate(`partner-types/${partnerTypeId}`)
       await revalidate('partner-types-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -120,16 +135,21 @@ export default class PartnerTypesService {
   static getAllPartnerTypes = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PARTNER_TYPES_ALL, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['partner-types-all'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch partner types')
       }
-      return await response.json()
+
+      
+return await response.json()
     } catch (error) {
       throw error
     }

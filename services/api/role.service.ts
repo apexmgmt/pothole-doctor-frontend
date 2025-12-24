@@ -10,6 +10,7 @@ export default class RoleService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + ROLES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class RoleService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch roles')
       }
 
@@ -30,6 +32,7 @@ export default class RoleService {
   static getAllRoles = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + GET_ROLES, {
         requiresAuth: true,
         method: 'GET',
@@ -38,6 +41,7 @@ export default class RoleService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch roles')
       }
 
@@ -51,6 +55,7 @@ export default class RoleService {
   static store = async (payload: RolePermissionPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + ROLES, {
         requiresAuth: true,
         method: 'POST',
@@ -59,6 +64,7 @@ export default class RoleService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create role')
       }
 
@@ -74,6 +80,7 @@ export default class RoleService {
   static show = async (roleId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + ROLES + roleId, {
         requiresAuth: true,
         method: 'GET',
@@ -82,6 +89,7 @@ export default class RoleService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch role details')
       }
 
@@ -94,6 +102,7 @@ export default class RoleService {
   static update = async (roleId: string, payload: RolePermissionPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + ROLES + roleId, {
         requiresAuth: true,
         method: 'PUT',
@@ -102,8 +111,10 @@ export default class RoleService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update role')
       }
+
       await revalidate('roles')
       await revalidate(`roles/${roleId}`)
       await revalidate('roles-selection-list')
@@ -117,14 +128,18 @@ export default class RoleService {
   static destroy = async (roleId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + ROLES + roleId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete role')
       }
+
       await revalidate('roles')
       await revalidate(`roles/${roleId}`)
       await revalidate('roles-selection-list')

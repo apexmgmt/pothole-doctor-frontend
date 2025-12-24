@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { EllipsisVertical } from 'lucide-react'
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,7 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { EllipsisVertical } from 'lucide-react'
 
 type ThreeDotButtonProps = {
   title?: string

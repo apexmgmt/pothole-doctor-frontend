@@ -11,9 +11,12 @@ export default async function TasksPage() {
   let taskTypes: TaskType[] = []
   let taskReminders: TaskReminder[] = []
   let taskReminderChannels: TaskReminderChannel[] = []
+
+
   // fetch staffs
   try {
     const response = await StaffService.getAllStaffs()
+
     staffs = response.data || []
   } catch (error) {
     staffs = []
@@ -22,6 +25,7 @@ export default async function TasksPage() {
   // fetch clients type=customer
   try {
     const response = await ClientService.getAllClients('customer')
+
     clients = response.data || []
   } catch (error) {
     clients = []
@@ -30,6 +34,7 @@ export default async function TasksPage() {
   // fetch task types
   try {
     const response = await TaskTypeService.getAllTaskType()
+
     taskTypes = response.data || []
   } catch (error) {
     taskTypes = []
@@ -38,6 +43,7 @@ export default async function TasksPage() {
   // fetch task reminders
   try {
     const response = await TaskReminderService.index()
+
     taskReminders = response.data || []
   } catch (error) {
     taskReminders = []
@@ -46,6 +52,7 @@ export default async function TasksPage() {
   // fetch task reminder channels
   try {
     const response = await TaskReminderService.getReminderChannels()
+
     taskReminderChannels = response.data || []
   } catch (error) {
     taskReminderChannels = []

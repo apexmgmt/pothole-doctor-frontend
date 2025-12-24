@@ -1,10 +1,14 @@
 'use client'
 
 import * as React from 'react'
+
+import { CalendarIcon } from 'lucide-react'
+
+import DatePicker from 'react-datepicker'
+
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
-import { CalendarIcon } from 'lucide-react'
-import DatePicker from 'react-datepicker'
+
 import 'react-datepicker/dist/react-datepicker.css'
 import { cn } from '@/lib/utils'
 

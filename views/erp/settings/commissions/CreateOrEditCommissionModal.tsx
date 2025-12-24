@@ -1,5 +1,15 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+
+import * as z from 'zod'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import {
   PaymentTermPayload,
   PartnerType,
@@ -14,14 +24,13 @@ import {
   CreateOrEditCommissionModalProps,
   CommissionPayload
 } from '@/types'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
+
+
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import ContactTypeService from '@/services/api/settings/contact_types.service'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -45,7 +54,9 @@ const formSchema = z
       if (data.filter_percent && parseFloat(data.min_amount) > 0) {
         return parseFloat(data.min_amount) <= 100
       }
-      return true
+
+      
+return true
     },
     {
       message: 'Min amount cannot be greater than 100 when using percentage',
@@ -57,7 +68,9 @@ const formSchema = z
       if (data.filter_percent && parseFloat(data.max_amount) > 0) {
         return parseFloat(data.max_amount) <= 100
       }
-      return true
+
+      
+return true
     },
     {
       message: 'Max amount cannot be greater than 100 when using percentage',
@@ -69,7 +82,9 @@ const formSchema = z
       if (data.commission_percent && parseFloat(data.amount) > 0) {
         return parseFloat(data.amount) <= 100
       }
-      return true
+
+      
+return true
     },
     {
       message: 'Commission cannot be greater than 100 when using percentage',

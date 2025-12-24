@@ -10,6 +10,7 @@ export default class CountryService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + COUNTRIES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class CountryService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch countries')
       }
 
@@ -31,6 +33,7 @@ export default class CountryService {
   static store = async (payload: CountryPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COUNTRIES, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class CountryService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create country')
       }
 
@@ -54,6 +58,7 @@ export default class CountryService {
   static show = async (countryId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COUNTRIES + countryId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class CountryService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch country details')
       }
 
@@ -74,6 +80,7 @@ export default class CountryService {
   static update = async (countryId: string, payload: CountryPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COUNTRIES + countryId, {
         requiresAuth: true,
         method: 'PUT',
@@ -82,12 +89,15 @@ export default class CountryService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update country')
       }
+
       await revalidate('countries')
       await revalidate(`countries/${countryId}`)
       await revalidate('locations')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -96,18 +106,23 @@ export default class CountryService {
   static destroy = async (countryId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COUNTRIES + countryId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete country')
       }
+
       await revalidate('countries')
       await revalidate(`countries/${countryId}`)
       await revalidate('locations')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }

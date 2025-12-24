@@ -10,6 +10,7 @@ export default class ClientNoteService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + CLIENT_NOTES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET'
@@ -17,6 +18,7 @@ export default class ClientNoteService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch client notes')
       }
 
@@ -30,6 +32,7 @@ export default class ClientNoteService {
   static store = async (payload: ClientNotePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_NOTES, {
         requiresAuth: true,
         method: 'POST',
@@ -38,6 +41,7 @@ export default class ClientNoteService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create client notes')
       }
 
@@ -53,6 +57,7 @@ export default class ClientNoteService {
   static show = async (clientNoteId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_NOTES + clientNoteId, {
         requiresAuth: true,
         method: 'GET'
@@ -60,6 +65,7 @@ export default class ClientNoteService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch client notes details')
       }
 
@@ -82,9 +88,12 @@ export default class ClientNoteService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update client notes')
       }
-      return await response.json()
+
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -94,15 +103,20 @@ export default class ClientNoteService {
   static destroy = async (clientNoteId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_NOTES + clientNoteId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete client notes')
       }
-      return await response.json()
+
+      
+return await response.json()
     } catch (error) {
       throw error
     }

@@ -10,12 +10,15 @@ export default async function TaskRemindersPage() {
 
   try {
     const response = await TaskReminderService.index()
+
     taskReminders = response.data || []
   } catch (error) {
     taskReminders = []
   }
+
   try {
     const response = await TaskTypeService.getAllTaskType()
+
     taskTypes = response.data || []
   } catch (error) {
     taskTypes = []
@@ -23,6 +26,7 @@ export default async function TaskRemindersPage() {
 
   try {
     const response = await TaskReminderService.getReminderChannels()
+
     reminderChannels = response.data || []
   } catch (error) {
     reminderChannels = []

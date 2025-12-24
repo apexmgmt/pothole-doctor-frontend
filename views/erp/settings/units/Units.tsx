@@ -1,8 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -12,7 +16,6 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import CreateOrEditUnitModal from './CreateOrEditUnitModal'
@@ -45,15 +48,19 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
-        return newOptions
+
+        
+return newOptions
       })
     }, 500)
 
@@ -63,8 +70,10 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       const params = { ...filterOptions, ...(group ? { group } : {}) }
+
       UnitService.index(params)
         .then(response => {
           setApiResponse(response.data)
@@ -112,6 +121,7 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
     // Fetch unit details
     try {
       const response = await UnitService.show(id)
+
       setSelectedUnit(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -193,7 +203,9 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
-    return filterKeys.length > 0
+
+    
+return filterKeys.length > 0
   }
 
   // Custom filters component

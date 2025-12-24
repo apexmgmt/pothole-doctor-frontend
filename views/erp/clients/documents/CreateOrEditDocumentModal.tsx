@@ -1,12 +1,17 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { Document } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useRef, useState } from 'react'
+
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { generateFileUrl, getFileType } from '@/utils/utility'
 import ClientDocumentService from '@/services/api/clients/client-documents.service'
@@ -47,6 +52,7 @@ const CreateOrEditDocumentModal = ({
   useEffect(() => {
     if (open) {
       form.reset({ file: null })
+
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
@@ -57,13 +63,15 @@ const CreateOrEditDocumentModal = ({
     // Validate file on create
     if (mode === 'create' && !values.file) {
       form.setError('file', { message: 'Please upload a file' })
-      return
+      
+return
     }
 
     setIsLoading(true)
 
     // Create FormData
     const formData = new FormData()
+
     formData.append('client_id', clientId)
 
     if (values.file) {
@@ -98,9 +106,11 @@ const CreateOrEditDocumentModal = ({
 
   const onCancel = () => {
     form.reset({ file: null })
+
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+
     onOpenChange(false)
   }
 
@@ -147,7 +157,8 @@ const CreateOrEditDocumentModal = ({
                     required: 'File is required',
                     validate: (value) => {
                       if (!value) return 'Please select a file'
-                      return true
+                      
+return true
                     }
                   }
                 : undefined
@@ -162,10 +173,12 @@ const CreateOrEditDocumentModal = ({
                     type='file'
                     accept='*'
                     placeholder='Upload file'
+
                     // ref={fileInputRef}
                     {...field}
                     onChange={e => {
                       const file = e.target.files?.[0] || null
+
                       onChange(file)
                     }}
                   />

@@ -9,6 +9,7 @@ export default class ClientContactService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + CLIENT_CONTACTS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -16,6 +17,7 @@ export default class ClientContactService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch client contacts')
       }
 
@@ -29,6 +31,7 @@ export default class ClientContactService {
   static store = async (payload: ClientContactPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_CONTACTS, {
         requiresAuth: true,
         method: 'POST',
@@ -37,6 +40,7 @@ export default class ClientContactService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create client contact')
       }
 
@@ -50,6 +54,7 @@ export default class ClientContactService {
   static show = async (clientContactId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_CONTACTS + clientContactId, {
         requiresAuth: true,
         method: 'GET',
@@ -57,6 +62,7 @@ export default class ClientContactService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch client contact details')
       }
 
@@ -79,9 +85,12 @@ export default class ClientContactService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update client contact')
       }
-      return await response.json()
+
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -91,15 +100,20 @@ export default class ClientContactService {
   static destroy = async (clientContactId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_CONTACTS + clientContactId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete client contact')
       }
-      return await response.json()
+
+      
+return await response.json()
     } catch (error) {
       throw error
     }

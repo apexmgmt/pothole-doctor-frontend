@@ -14,6 +14,7 @@
  * @method: POST - Restore a deleted client entry by ID. /id/restore
  */
 export const CLIENTS: string = '/v1/clients/'
+
 /** ? type = customer | lead */
 export const CLIENTS_ALL: string = '/v1/get-clients'  
 

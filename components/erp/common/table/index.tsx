@@ -1,9 +1,11 @@
 'use client'
 
 import React, { useMemo, ReactNode, useState } from 'react'
+
+import { ArrowDown, ArrowUp } from 'lucide-react'
+
 import { SpinnerCustom } from '@/components/ui/spinner'
 import Pagination from './Pagination'
-import { ArrowDown, ArrowUp } from 'lucide-react'
 import { Column } from '@/types'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
@@ -92,6 +94,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
   // Handle row click
   const handleRowClick = (row: any) => {
     const rowId = row[rowKey]
+
     setSelectedRowId(rowId)
 
     if (handleRowSelect) {
@@ -104,9 +107,11 @@ const CommonTable: React.FC<CommonTableProps> = ({
     if (setFilterOptions) {
       setFilterOptions((prevOptions: any) => {
         const newOptions = { ...prevOptions, per_page: value, page: 1 }
+
         if (newOptions.per_page === 10) delete newOptions.per_page
         if (newOptions.page === 1) delete newOptions.page
-        return newOptions
+        
+return newOptions
       })
     }
   }
@@ -116,9 +121,11 @@ const CommonTable: React.FC<CommonTableProps> = ({
     if (setFilterOptions) {
       setFilterOptions((prevOptions: any) => {
         const newOptions = { ...prevOptions, per_page: perPage, page: value }
+
         if (newOptions.per_page === 10) delete newOptions.per_page
         if (newOptions.page === 1) delete newOptions.page
-        return newOptions
+        
+return newOptions
       })
     }
   }
@@ -197,7 +204,8 @@ const CommonTable: React.FC<CommonTableProps> = ({
   const getColumnWidth = (size?: number | string) => {
     if (!size) return {}
     if (typeof size === 'number') return { width: `${size}px` }
-    return { width: size }
+    
+return { width: size }
   }
 
   return (
@@ -240,7 +248,9 @@ const CommonTable: React.FC<CommonTableProps> = ({
                 tableData.map((row, rowIndex) => {
                   const rowId = row[rowKey]
                   const isSelected = selectedRowId === rowId
-                  return (
+
+                  
+return (
                     <tr
                       key={rowIndex}
                       onClick={() => handleRowClick(row)}
@@ -259,6 +269,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
                             onClick={e => {
                               // Stop propagation if clicked element is a button, link, or inside one
                               const target = e.target as HTMLElement
+
                               if (
                                 target.closest('button') ||
                                 target.closest('a') ||

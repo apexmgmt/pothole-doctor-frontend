@@ -1,12 +1,17 @@
+import { useEffect, useState } from 'react'
+
+import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
+
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Client, ClientSms, Column, DataTableApiResponse } from '@/types'
-import { PlusIcon, Search } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+
+
 import CreateOrEditSmsModal from './CreateOrEditSmsModal'
 import ClientSmsService from '@/services/api/clients/client-sms.service'
 
@@ -28,15 +33,19 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
-        return newOptions
+
+        
+return newOptions
       })
     }, 500)
 
@@ -46,6 +55,7 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       ClientSmsService.index(filterOptions)
         .then(response => {
@@ -186,7 +196,9 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
-    return filterKeys.length > 0
+
+    
+return filterKeys.length > 0
   }
 
   // Custom filters component

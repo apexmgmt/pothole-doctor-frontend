@@ -1,14 +1,19 @@
 'use client'
 
+import { useEffect, useState, useMemo } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { WarehousePayload, WarehouseFormValues, CreateOrEditWarehouseModalProps } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { MultiSelect } from '@/components/ui/select'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState, useMemo } from 'react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue , MultiSelect } from '@/components/ui/select'
+
+
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import WarehouseService from '@/services/api/warehouses.service'
 import { Separator } from '@/components/ui/separator'
@@ -68,20 +73,25 @@ const CreateOrEditWarehouseModal = ({
   const availableStates = useMemo(() => {
     if (!selectedCountryId) return []
     const country = countriesWithStateAndCities.find(c => c.id.toString() === selectedCountryId)
-    return country?.states || []
+
+    
+return country?.states || []
   }, [selectedCountryId, countriesWithStateAndCities])
 
   // Get available cities based on selected state
   const availableCities = useMemo(() => {
     if (!selectedStateId) return []
     const state = availableStates.find(s => s.id.toString() === selectedStateId)
-    return state?.cities || []
+
+    
+return state?.cities || []
   }, [selectedStateId, availableStates])
 
   // Reset state when country changes
   useEffect(() => {
     if (selectedCountryId && form.getValues('state_id')) {
       const stateExists = availableStates.some(s => s.id.toString() === form.getValues('state_id'))
+
       if (!stateExists) {
         form.setValue('state_id', '')
         form.setValue('city_id', '')
@@ -93,6 +103,7 @@ const CreateOrEditWarehouseModal = ({
   useEffect(() => {
     if (selectedStateId && form.getValues('city_id')) {
       const cityExists = availableCities.some(c => c.id.toString() === form.getValues('city_id'))
+
       if (!cityExists) {
         form.setValue('city_id', '')
       }
@@ -101,6 +112,7 @@ const CreateOrEditWarehouseModal = ({
 
   const onSubmit = async (values: WarehouseFormValues) => {
     setIsLoading(true)
+
     const payload: WarehousePayload = {
       location_id: values.location_id,
       title: values.title,
@@ -122,6 +134,7 @@ const CreateOrEditWarehouseModal = ({
         await WarehouseService.update(warehouseId, payload)
         toast.success('Warehouse updated successfully')
       }
+
       onOpenChange(false)
       onSuccess?.()
       form.reset()

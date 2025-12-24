@@ -12,5 +12,6 @@
  * Data delete method: DELETE /{id}
  */
 export const UNITS: string = '/v1/units/';
+
 /**?group=measure/uom */
 export const UNITS_ALL: string = '/v1/get-units/'; 

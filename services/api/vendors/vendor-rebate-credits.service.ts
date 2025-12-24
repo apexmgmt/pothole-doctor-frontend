@@ -10,6 +10,7 @@ export default class VendorRebateCreditService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + VENDOR_REBATE_CREDITS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class VendorRebateCreditService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch vendor rebate credits')
       }
 
@@ -31,6 +33,7 @@ export default class VendorRebateCreditService {
   static store = async (payload: VendorRebateCreditPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDOR_REBATE_CREDITS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class VendorRebateCreditService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to add rebate credit')
       }
 
@@ -54,6 +58,7 @@ export default class VendorRebateCreditService {
   static show = async (vendorRebateCreditId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDOR_REBATE_CREDITS + vendorRebateCreditId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class VendorRebateCreditService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch rebate credit details')
       }
 
@@ -84,11 +90,14 @@ export default class VendorRebateCreditService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update rebate credit')
       }
+
       await revalidate('vendor-rebate-credits')
       await revalidate(`vendor-rebate-credits/${vendorRebateCreditId}`)
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -98,17 +107,22 @@ export default class VendorRebateCreditService {
   static destroy = async (vendorRebateCreditId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDOR_REBATE_CREDITS + vendorRebateCreditId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete rebate credit')
       }
+
       await revalidate('vendor-rebate-credits')
       await revalidate(`vendor-rebate-credits/${vendorRebateCreditId}`)
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }

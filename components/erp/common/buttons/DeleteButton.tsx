@@ -1,7 +1,9 @@
 import { useState } from 'react'
+
+import { Trash2Icon } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
-import { Trash2Icon } from 'lucide-react'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 
 type DeleteButtonProps = {

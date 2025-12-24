@@ -54,7 +54,8 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
   // Initialize filters based on provided fields
   const initialFilters = fields.reduce<Record<string, any>>((acc, field) => {
     acc[field.key] = field.defaultValue || ''
-    return acc
+    
+return acc
   }, {})
 
   const [filters, setFilters] = useState<Record<string, any>>(initialFilters)
@@ -63,10 +64,12 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
   useEffect(() => {
     const newInitialFilters = fields.reduce<Record<string, any>>((acc, field) => {
       acc[field.key] = field.defaultValue || ''
-      return acc
+      
+return acc
     }, {})
+
     setFilters(newInitialFilters)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [fields])
 
   const handleInputChange = (field: string, value: any) => {
@@ -161,6 +164,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
           {fields.map(field => (
             <div key={field.key} className={field.gridCols ? `grid grid-cols-${field.gridCols} gap-4` : 'space-y-2'}>
               {field.gridCols ? (
+
                 // Handle grid layout for fields like date range
                 field.fields?.map(subField => (
                   <div key={subField.key} className='space-y-2'>
@@ -171,6 +175,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
                   </div>
                 ))
               ) : (
+
                 // Single field
                 <>
                   <Label htmlFor={field.key} className='text-white text-sm font-medium'>

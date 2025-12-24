@@ -7,9 +7,12 @@ export default async function EmailTemplatesPage() {
 
   try {
     const response = await EmailTemplateService.index()
+
     emailTemplates = response.data || []
   } catch (error) {
     emailTemplates = []
   }
-  return <EmailTemplates templates={emailTemplates} />
+
+  
+return <EmailTemplates templates={emailTemplates} />
 }

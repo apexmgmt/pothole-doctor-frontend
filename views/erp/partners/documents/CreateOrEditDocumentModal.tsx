@@ -1,14 +1,23 @@
 'use client'
 
-import { Document, DocumentPayload } from '@/types'
+import { useEffect, useRef, useState } from 'react'
+
 import { zodResolver } from '@hookform/resolvers/zod'
+
 import * as z from 'zod'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
+import { Document, DocumentPayload } from '@/types'
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useRef, useState } from 'react'
+
+
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import PartnerDocumentService from '@/services/api/partners/partner-documents.service'
 import { generateFileUrl, getFileType } from '@/utils/utility'
@@ -55,6 +64,7 @@ const CreateOrEditDocumentModal = ({
   useEffect(() => {
     if (open) {
       form.reset({ file: undefined })
+
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
@@ -66,6 +76,7 @@ const CreateOrEditDocumentModal = ({
 
     // Create FormData instead of plain object
     const formData = new FormData()
+
     formData.append('user_id', userId)
 
     if (values.file) {
@@ -79,8 +90,10 @@ const CreateOrEditDocumentModal = ({
         if (!values.file) {
           toast.error('Please upload a file')
           setIsLoading(false)
-          return
+          
+return
         }
+
         await PartnerDocumentService.store(formData)
         toast.success('Document added successfully')
         form.reset()
@@ -107,9 +120,11 @@ const CreateOrEditDocumentModal = ({
 
   const onCancel = () => {
     form.reset({ file: undefined })
+
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+
     onOpenChange(false)
   }
 
@@ -163,6 +178,7 @@ const CreateOrEditDocumentModal = ({
                     ref={fileInputRef}
                     onChange={e => {
                       const file = e.target.files?.[0]
+
                       field.onChange(file)
                     }}
                   />

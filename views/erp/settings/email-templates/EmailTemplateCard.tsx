@@ -1,7 +1,8 @@
+import { Info } from 'lucide-react'
+
 import { EmailTemplate } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import EditButton from '@/components/erp/common/buttons/EditButton'
-import { Info } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface EmailTemplateCardProps {

@@ -10,6 +10,7 @@ export default class BusinessLocationService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + BUSINESS_LOCATIONS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class BusinessLocationService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch business locations')
       }
 
@@ -31,6 +33,7 @@ export default class BusinessLocationService {
   static store = async (payload: BusinessLocationPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + BUSINESS_LOCATIONS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,12 +42,14 @@ export default class BusinessLocationService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create state')
       }
 
       await revalidate('business-locations')
       await revalidate('business-locations-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -54,6 +59,7 @@ export default class BusinessLocationService {
   static show = async (businessLocationId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + BUSINESS_LOCATIONS + businessLocationId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +68,7 @@ export default class BusinessLocationService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch business location details')
       }
 
@@ -75,6 +82,7 @@ export default class BusinessLocationService {
   static update = async (businessLocationId: string, payload: BusinessLocationPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + BUSINESS_LOCATIONS + businessLocationId, {
         requiresAuth: true,
         method: 'PUT',
@@ -83,8 +91,10 @@ export default class BusinessLocationService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update business location')
       }
+
       await revalidate('business-locations')
       await revalidate(`business-locations/${businessLocationId}`)
       await revalidate('business-locations-all')
@@ -99,14 +109,18 @@ export default class BusinessLocationService {
   static destroy = async (businessLocationId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + BUSINESS_LOCATIONS + businessLocationId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete business location')
       }
+
       await revalidate('business-locations')
       await revalidate(`business-locations/${businessLocationId}`)
       await revalidate('business-locations-all')
@@ -121,14 +135,18 @@ export default class BusinessLocationService {
   static restore = async (businessLocationId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + BUSINESS_LOCATIONS + businessLocationId + '/restore', {
         requiresAuth: true,
         method: 'POST'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to restore business location')
       }
+
       await revalidate('business-locations')
       await revalidate(`business-locations/${businessLocationId}`)
       await revalidate('business-locations-all')
@@ -143,6 +161,7 @@ export default class BusinessLocationService {
   static getAllBusinessLocations = async () => {
     try {
       const apiUrl = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + BUSINESS_LOCATIONS_ALL, {
         requiresAuth: true,
         method: 'GET',
@@ -151,10 +170,14 @@ export default class BusinessLocationService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch all business locations')
       }
+
       const result = await response.json()
-      return result.data
+
+      
+return result.data
     } catch (error) {
       throw error
     }

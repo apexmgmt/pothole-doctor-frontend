@@ -1,5 +1,6 @@
-import { decryptData, encryptData } from '@/utils/encryption'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+
+import { decryptData, encryptData } from '@/utils/encryption'
 import CookieService from '@/services/app/cookie.service'
 import { User } from '@/types'
 
@@ -16,6 +17,7 @@ const getUserFromCookie = (): User | null => {
     if (typeof window === 'undefined') return null
 
     const userCookie = CookieService.getSync('user')
+
     if (!userCookie) return null
 
     const decrypted = decryptData(userCookie)
@@ -28,14 +30,17 @@ const getUserFromCookie = (): User | null => {
           return decrypted as unknown as User
         }
       }
-      return decrypted as User
+
+      
+return decrypted as User
     }
 
     return decrypted as User
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.error('Error reading user cookie', error)
-    return null
+    
+return null
   }
 }
 
@@ -50,6 +55,8 @@ const authSlice = createSlice({
   reducers: {
     logoutUserSuccess: state => {
       state.user = null
+
+
       // remove cookie on logout (client only)
       try {
         CookieService.deleteSync('user')
@@ -59,11 +66,12 @@ const authSlice = createSlice({
     },
     setUserData: (state, action: PayloadAction<User | null>) => {
       state.user = action.payload
+
       try {
         // store as JSON string; encryption/decryption handled elsewhere
         CookieService.storeSync('user', JSON.stringify(encryptData(action.payload)))
       } catch {
-        // eslint-disable-next-line no-console
+         
         console.error('Failed to set user cookie')
       }
     },

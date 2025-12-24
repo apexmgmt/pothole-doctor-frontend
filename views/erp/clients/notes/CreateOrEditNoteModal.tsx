@@ -1,12 +1,15 @@
 import React, { useEffect } from 'react'
+
 import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
-import { toast } from 'sonner'
 import { ClientNote, ClientNotePayload, NoteType } from '@/types'
 import ClientNoteService from '@/services/api/clients/client-notes.service'
 
@@ -60,6 +63,7 @@ const CreateOrEditNoteModal: React.FC<CreateOrEditNoteModalProps> = ({
         await ClientNoteService.store(values)
         toast.success('Note created successfully')
       }
+
       form.reset()
       onSuccess()
       onClose()

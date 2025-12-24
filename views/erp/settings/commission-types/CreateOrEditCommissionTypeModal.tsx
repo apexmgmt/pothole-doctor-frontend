@@ -1,12 +1,17 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { CommissionType, CommissionTypePayload } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
+
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import CommissionTypeService from '@/services/api/settings/commission_types.service'
 
@@ -51,7 +56,8 @@ const CreateOrEditCommissionTypeModal = ({
   const onSubmit = async (values: FormValues) => {
     if (!values.name || values.name.length < 2) {
       toast.error('Commission type name must be at least 2 characters')
-      return
+      
+return
     }
 
     const payload: CommissionTypePayload = {

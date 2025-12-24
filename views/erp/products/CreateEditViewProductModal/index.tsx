@@ -1,11 +1,16 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { ProductPayload, ProductsProps, Product, Unit, ProductGallery } from '@/types'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
+
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import ProductService from '@/services/api/products/products.service'
 import ProductGalleryService from '@/services/api/products/product-galleries.service'
@@ -132,8 +137,10 @@ const CreateEditViewProductModal = ({
   // Fetch galleries when in edit or view mode
   const fetchGalleries = async (prodId: string) => {
     setIsLoadingGalleries(true)
+
     try {
       const response = await ProductGalleryService.index(prodId)
+
       setGalleries(response.data || [])
     } catch (error) {
       toast.error('Failed to fetch product galleries')

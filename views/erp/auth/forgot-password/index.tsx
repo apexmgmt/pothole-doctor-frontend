@@ -2,14 +2,11 @@
 
 import React, { useState } from "react";
 
-import Image from "next/image";
-
 import Field from "@/components/erp/common/Field";
 import CustomButton from "@/components/erp/common/CustomButton";
 
-const ForgotPassIndex = () => {
-  const [email, setEmail] = useState("");
-
+const ForgotPassIndex: React.FC = () => {
+  const [email, setEmail] = useState<string>("");
 
   return (
     <>

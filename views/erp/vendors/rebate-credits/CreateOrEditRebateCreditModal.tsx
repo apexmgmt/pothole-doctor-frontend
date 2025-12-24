@@ -1,12 +1,17 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { VendorRebateCredit, VendorRebateCreditPayload } from '@/types'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
+
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import VendorRebateCreditService from '@/services/api/vendors/vendor-rebate-credits.service'
 import { DatePicker } from '@/components/ui/datePicker'
@@ -61,6 +66,7 @@ const CreateOrEditRebateCreditModal = ({
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true)
+
     const payload: VendorRebateCreditPayload = {
       vendor_id: vendorId,
       amount: values.amount,

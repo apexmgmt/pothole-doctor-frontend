@@ -10,6 +10,7 @@ export default class CommissionTypeService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + COMMISSION_TYPES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class CommissionTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch commission-types')
       }
 
@@ -31,6 +33,7 @@ export default class CommissionTypeService {
   static store = async (payload: CommissionTypePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COMMISSION_TYPES, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class CommissionTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create commission types')
       }
 
@@ -55,6 +59,7 @@ export default class CommissionTypeService {
   static show = async (commissionTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COMMISSION_TYPES + commissionTypeId, {
         requiresAuth: true,
         method: 'GET',
@@ -63,6 +68,7 @@ export default class CommissionTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch commission types details')
       }
 
@@ -76,6 +82,7 @@ export default class CommissionTypeService {
   static update = async (commissionTypeId: string, payload: CommissionTypePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COMMISSION_TYPES + commissionTypeId, {
         requiresAuth: true,
         method: 'PUT',
@@ -84,12 +91,15 @@ export default class CommissionTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update commission types')
       }
+
       await revalidate('commission-types')
       await revalidate(`commission-types/${commissionTypeId}`)
       await revalidate('commission-types-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -99,18 +109,23 @@ export default class CommissionTypeService {
   static destroy = async (commissionTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COMMISSION_TYPES + commissionTypeId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete commission types')
       }
+
       await revalidate('commission-types')
       await revalidate(`commission-types/${commissionTypeId}`)
       await revalidate('commission-types-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -120,16 +135,21 @@ export default class CommissionTypeService {
   static getAllCommissionTypes = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + COMMISSION_TYPES_ALL, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['commission-types-all'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch commission types')
       }
-      return await response.json()
+
+      
+return await response.json()
     } catch (error) {
       throw error
     }

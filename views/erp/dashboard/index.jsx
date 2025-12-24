@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+
+
 // import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import CustomTable from "@/components/erp/common/CustomTable";
 
@@ -121,6 +123,7 @@ const DashboardIndex = () => {
       label: "+ Add Customer",
       action: "add_customer",
       variant: "primary",
+
       // icon: PlusIcon,
     },
   ];
@@ -136,6 +139,7 @@ const DashboardIndex = () => {
       label: "+ Add Job",
       action: "add_job",
       variant: "primary",
+
       // icon: PlusIcon,
     },
   ];
@@ -162,7 +166,9 @@ const DashboardIndex = () => {
         </span>
       );
     }
-    return value;
+
+    
+return value;
   };
 
   // Custom actions renderer for Customers table
@@ -296,6 +302,7 @@ const DashboardIndex = () => {
 
   const handleExport = (format, data) => {
     console.log(`Exporting ${format}:`, data);
+
     // Implement your export logic here
   };
 
@@ -402,7 +409,8 @@ const DashboardIndex = () => {
 
       if (aVal < bVal) return direction === "asc" ? -1 : 1;
       if (aVal > bVal) return direction === "asc" ? 1 : -1;
-      return 0;
+      
+return 0;
     });
   };
 

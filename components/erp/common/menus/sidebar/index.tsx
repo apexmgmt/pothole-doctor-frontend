@@ -1,12 +1,15 @@
 'use client'
 
 import React from 'react'
+
 import Image from 'next/image'
 import Link from 'next/link'
+
+import { Boxes, Building2, CalendarCheck, LocateIcon, Map, Package, UserLock, Users, Users2, Warehouse } from 'lucide-react'
+
 import { NavigationItem } from '@/types'
 
 import { SettingsIcon, HomeIcon } from '@/public/icons'
-import { Boxes, Building2, CalendarCheck, LocateIcon, Map, Package, UserLock, Users, Users2, Warehouse } from 'lucide-react'
 import SidebarFooter from './SidebarFooter'
 import MenuItem from './menu-item'
 

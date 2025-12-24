@@ -1,6 +1,8 @@
 import React, { useState, ReactNode } from 'react'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+
 import { NavigationSubItem, ExpandedSections } from '@/types'
 
 import { ArrowDownIcon, ArrowUpIcon } from '@/public/icons'

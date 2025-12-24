@@ -15,6 +15,7 @@ export default async function PartnersPage() {
   
   try {
     const response = await BusinessLocationService.getAllBusinessLocations()
+
     businessLocations = response.data || []
   } catch (error) {
     businessLocations = []
@@ -22,6 +23,7 @@ export default async function PartnersPage() {
 
   try {
     const response = await PartnerTypesService.getAllPartnerTypes()
+
     partnerTypes = response.data || []
   } catch (error) {
     partnerTypes = []
@@ -29,6 +31,7 @@ export default async function PartnersPage() {
 
   try {
     const response = await LocationService.index()
+
     countriesWithStatesAndCities = response.data || []
   } catch (error) {
     countriesWithStatesAndCities = []
@@ -36,6 +39,7 @@ export default async function PartnersPage() {
 
   try {
     const response = await CompanyService.getAllCompanies()
+
     companies = response.data || []
   } catch (error) {
     companies = []
@@ -43,6 +47,7 @@ export default async function PartnersPage() {
 
   try {
     const response = await SkillService.getAllSkills()
+
     skills = response.data || []
   } catch (error) {
     skills = []

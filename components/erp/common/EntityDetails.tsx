@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useState, ReactNode } from 'react'
+
 import { PhoneIcon, PlusIcon } from 'lucide-react'
+
 import CustomButton from './CustomButton'
 import CustomTable from './CustomTable'
 import {
@@ -289,6 +291,7 @@ const EntityDetails: React.FC<EntityDetailsProps> = ({
 
   const handleActionButtonClick = (action: string) => {
     console.log(`${entityType} action clicked:`, action)
+
     // Handle different actions based on the tab and entity type
   }
 
@@ -444,6 +447,7 @@ const EntityDetails: React.FC<EntityDetailsProps> = ({
         {/* Tab Content */}
         <div className=''>
           {activeTab === 'documents' ? (
+
             // <DocumentsGallery
             //   entityData={entityData}
             //   onUpload={() => handleActionButtonClick('upload_document')}

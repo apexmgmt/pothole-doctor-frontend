@@ -36,7 +36,9 @@ export function TaskLocationAndCommentFields({
                       const value = [address.street_address, address.city?.name, address.state?.name, address.zip_code]
                         .filter(Boolean)
                         .join(', ')
-                      return (
+
+                      
+return (
                         <SelectItem key={address.id} value={value}>
                           {address.title} - {value}
                         </SelectItem>

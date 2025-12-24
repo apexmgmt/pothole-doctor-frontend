@@ -10,6 +10,7 @@ export default class VendorService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + VENDORS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class VendorService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch vendors')
       }
 
@@ -31,6 +33,7 @@ export default class VendorService {
   static store = async (payload: VendorPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDORS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class VendorService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create vendor')
       }
 
@@ -55,6 +59,7 @@ export default class VendorService {
   static show = async (vendorId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDORS + vendorId, {
         requiresAuth: true,
         method: 'GET',
@@ -63,6 +68,7 @@ export default class VendorService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch vendor details')
       }
 
@@ -76,6 +82,7 @@ export default class VendorService {
   static update = async (vendorId: string, payload: VendorPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDORS + vendorId, {
         requiresAuth: true,
         method: 'PUT',
@@ -84,12 +91,15 @@ export default class VendorService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update vendor')
       }
+
       await revalidate('vendors')
       await revalidate(`vendors/${vendorId}`)
       await revalidate('vendors-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -99,14 +109,18 @@ export default class VendorService {
   static destroy = async (vendorId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDORS + vendorId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete vendor')
       }
+
       await revalidate('vendors')
       await revalidate(`vendors/${vendorId}`)
       await revalidate('vendors-all')
@@ -121,18 +135,23 @@ export default class VendorService {
   static restore = async (vendorId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDORS + vendorId + '/restore', {
         requiresAuth: true,
         method: 'POST'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to restore vendor')
       }
+
       await revalidate('vendors')
       await revalidate(`vendors/${vendorId}`)
       await revalidate('vendors-all')
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -142,6 +161,7 @@ export default class VendorService {
   static getAllVendors = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDORS_ALL, {
         requiresAuth: true,
         method: 'GET',
@@ -150,6 +170,7 @@ export default class VendorService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch vendors')
       }
 

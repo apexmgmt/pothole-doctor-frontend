@@ -9,6 +9,7 @@ export default class ClientDocumentService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + CLIENT_DOCUMENTS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -16,6 +17,7 @@ export default class ClientDocumentService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch client documents')
       }
 
@@ -29,6 +31,7 @@ export default class ClientDocumentService {
   static store = async (payload: any) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_DOCUMENTS, {
         requiresAuth: true,
         method: 'POST',
@@ -37,6 +40,7 @@ export default class ClientDocumentService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to add document')
       }
 
@@ -50,6 +54,7 @@ export default class ClientDocumentService {
   static show = async (clientDocumentId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_DOCUMENTS + clientDocumentId, {
         requiresAuth: true,
         method: 'GET',
@@ -57,6 +62,7 @@ export default class ClientDocumentService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch document details')
       }
 
@@ -82,9 +88,12 @@ export default class ClientDocumentService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update document')
       }
-      return await response.json()
+
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -94,15 +103,20 @@ export default class ClientDocumentService {
   static destroy = async (clientDocumentId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_DOCUMENTS + clientDocumentId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete document')
       }
-      return await response.json()
+
+      
+return await response.json()
     } catch (error) {
       throw error
     }

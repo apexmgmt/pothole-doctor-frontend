@@ -10,6 +10,7 @@ export default class StaffService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + STAFFS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class StaffService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch staffs')
       }
 
@@ -31,6 +33,7 @@ export default class StaffService {
   static store = async (payload: StaffPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + STAFFS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class StaffService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create staff')
       }
 
@@ -54,6 +58,7 @@ export default class StaffService {
   static show = async (staffId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + STAFFS + staffId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class StaffService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch staff details')
       }
 
@@ -74,6 +80,7 @@ export default class StaffService {
   static update = async (staffId: string, payload: StaffPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + STAFFS + staffId, {
         requiresAuth: true,
         method: 'PUT',
@@ -82,8 +89,10 @@ export default class StaffService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update staff')
       }
+
       await revalidate('staffs')
       await revalidate(`staffs/${staffId}`)
       await revalidate('staffs-all')
@@ -97,14 +106,18 @@ export default class StaffService {
   static destroy = async (staffId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + STAFFS + staffId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete staff')
       }
+
       await revalidate('staffs')
       await revalidate(`staffs/${staffId}`)
       await revalidate('staffs-all')
@@ -118,16 +131,21 @@ export default class StaffService {
   static getAllStaffs = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + STAFFS_ALL, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['staffs-all'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch all staffs')
       }
-      return await response.json()
+
+      
+return await response.json()
     } catch (error) {
       throw error
     }

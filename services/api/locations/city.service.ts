@@ -10,6 +10,7 @@ export default class CityService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + CITIES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class CityService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch cities')
       }
 
@@ -31,6 +33,7 @@ export default class CityService {
   static store = async (payload: CityPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CITIES, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class CityService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create state')
       }
 
@@ -54,6 +58,7 @@ export default class CityService {
   static show = async (stateId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CITIES + stateId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class CityService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch city details')
       }
 
@@ -74,6 +80,7 @@ export default class CityService {
   static update = async (cityId: string, payload: CityPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CITIES + cityId, {
         requiresAuth: true,
         method: 'PUT',
@@ -82,8 +89,10 @@ export default class CityService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update city')
       }
+
       await revalidate('cities')
       await revalidate(`cities/${cityId}`)
       await revalidate('locations')
@@ -97,14 +106,18 @@ export default class CityService {
   static destroy = async (cityId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CITIES + cityId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete city')
       }
+
       await revalidate('cities')
       await revalidate(`cities/${cityId}`)
       await revalidate('locations')

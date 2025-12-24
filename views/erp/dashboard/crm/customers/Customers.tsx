@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { PlusIcon } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
@@ -141,6 +143,7 @@ const Customers: React.FC = () => {
       label: 'Add Customer',
       action: 'add_customer',
       variant: 'primary'
+
       // icon: PlusIcon,
     }
   ]
@@ -280,6 +283,7 @@ const Customers: React.FC = () => {
 
   const handleApplyFilters = (filters: Record<string, any>) => {
     console.log('Applied customer filters:', filters)
+
     // Handle filter application logic here
   }
 

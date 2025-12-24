@@ -1,11 +1,14 @@
 'use client'
 
 import * as React from 'react'
+
 import { ClockIcon } from 'lucide-react'
+
+import ReactTimePicker from 'react-time-picker'
+
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popoverContent'
 import { cn } from '@/lib/utils'
-import ReactTimePicker from 'react-time-picker'
 import 'react-time-picker/dist/TimePicker.css'
 
 interface TimePickerProps {

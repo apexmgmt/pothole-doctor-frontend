@@ -2,6 +2,7 @@ export interface ServiceType {
   id: string
   name: string
   is_editable: number | 1 | 0
+
   /**
    * Value from 0 to 100 (inclusive)
    */
@@ -14,6 +15,7 @@ export interface ServiceType {
 export interface ServiceTypePayload {
     name: string
     is_editable: number | 1 | 0
+
     /**
      * Value from 0 to 100 (inclusive)
      */

@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -102,14 +104,18 @@ const CreateOrEditBusinessLocation = ({
   const availableStates = useMemo(() => {
     if (!selectedCountryId) return []
     const selectedCountry = countriesWithStateAndCities.find(country => country.id.toString() === selectedCountryId)
-    return selectedCountry?.states || []
+
+    
+return selectedCountry?.states || []
   }, [selectedCountryId, countriesWithStateAndCities])
 
   // Get cities based on selected state
   const availableCities = useMemo(() => {
     if (!selectedStateId) return []
     const selectedState = availableStates.find(state => state.id.toString() === selectedStateId)
-    return selectedState?.cities || []
+
+    
+return selectedState?.cities || []
   }, [selectedStateId, availableStates])
 
   // Set page title on mount
@@ -148,20 +154,24 @@ const CreateOrEditBusinessLocation = ({
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+
     if (file) {
       form.setValue('logo', file)
 
       // Create preview
       const reader = new FileReader()
+
       reader.onloadend = () => {
         setLogoPreview(reader.result as string)
       }
+
       reader.readAsDataURL(file)
     }
   }
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true)
+
     try {
       // Create payload object
       const payload: any = {
@@ -184,6 +194,7 @@ const CreateOrEditBusinessLocation = ({
       // Add sales_tax if present
       if (data.sales_tax) {
         const salesTaxNumber = parseFloat(data.sales_tax)
+
         if (!isNaN(salesTaxNumber)) {
           payload.sales_tax = salesTaxNumber
         }
@@ -535,6 +546,7 @@ const CreateOrEditBusinessLocation = ({
                               onChange={e => {
                                 const newValue = e.target.value
                                 const newZip = zipExt ? `${newValue}-${zipExt}` : newValue
+
                                 field.onChange(newZip)
                               }}
                             />
@@ -547,6 +559,7 @@ const CreateOrEditBusinessLocation = ({
                               onChange={e => {
                                 const newValue = e.target.value
                                 const newZip = zipMain ? `${zipMain}-${newValue}` : `-${newValue}`
+
                                 field.onChange(newZip)
                               }}
                             />

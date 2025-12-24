@@ -10,6 +10,7 @@ export default class VendorDocumentService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + VENDOR_DOCUMENTS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class VendorDocumentService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch vendor documents')
       }
 
@@ -31,6 +33,7 @@ export default class VendorDocumentService {
   static store = async (payload: any) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDOR_DOCUMENTS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class VendorDocumentService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to add document')
       }
 
@@ -54,6 +58,7 @@ export default class VendorDocumentService {
   static show = async (vendorDocumentId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDOR_DOCUMENTS + vendorDocumentId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class VendorDocumentService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch document details')
       }
 
@@ -87,11 +93,14 @@ export default class VendorDocumentService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update document')
       }
+
       await revalidate('vendor-documents')
       await revalidate(`vendor-documents/${vendorDocumentId}`)
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }
@@ -101,17 +110,22 @@ export default class VendorDocumentService {
   static destroy = async (vendorDocumentId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDOR_DOCUMENTS + vendorDocumentId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete document')
       }
+
       await revalidate('vendor-documents')
       await revalidate(`vendor-documents/${vendorDocumentId}`)
-      return await response.json()
+      
+return await response.json()
     } catch (error) {
       throw error
     }

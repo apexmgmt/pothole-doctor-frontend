@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
+
 import Image from "next/image";
+
 import CustomButton from "@/components/erp/common/CustomButton";
 import Field from "@/components/erp/common/Field";
 
 const NewPassIndex = () => {
   const [form, setForm] = useState({ password: "", newPassword: "" });
+
   const handle = (e) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 

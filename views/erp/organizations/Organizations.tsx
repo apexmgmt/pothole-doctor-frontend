@@ -1,7 +1,11 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
+import Link from 'next/link'
+
 import { PlusIcon, Search } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
@@ -19,7 +23,6 @@ import OrganizationStatusSwitch from '@/views/erp/organizations/OrganizationStat
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import Link from 'next/link'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 interface CompanyData {
@@ -64,6 +67,7 @@ const Organizations: React.FC = () => {
   // Initialize filterOptions from URL params
   const getInitialFilters = () => {
     const filters: any = {}
+
     searchParams.forEach((value, key) => {
       // Convert numeric values
       if (key === 'page' || key === 'per_page') {
@@ -89,15 +93,19 @@ const Organizations: React.FC = () => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
-        return newOptions
+
+        
+return newOptions
       })
     }, 500)
 
@@ -123,6 +131,7 @@ const Organizations: React.FC = () => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       OrganizationService.index(filterOptions)
         .then(response => {
@@ -206,6 +215,7 @@ const Organizations: React.FC = () => {
             checked={row.status}
             loading={statusLoading[row.id]}
             companyId={row.id}
+
             // fetchData={fetchData} // pass only if you want to refetch after change
           />
         </div>
@@ -250,7 +260,9 @@ const Organizations: React.FC = () => {
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
-    return filterKeys.length > 0
+
+    
+return filterKeys.length > 0
   }
 
   // Custom filters component
@@ -302,14 +314,17 @@ const Organizations: React.FC = () => {
 
   const handleStatusToggle = async (companyId: string) => {
     setStatusLoading(prev => ({ ...prev, [companyId]: true }))
+
     try {
       await OrganizationService.changeStatus(companyId)
+
       // Refetch data after status change
       fetchData()
     } catch (error) {
       // Optionally show error
       console.error('Failed to change status', error)
     }
+
     setStatusLoading(prev => ({ ...prev, [companyId]: false }))
   }
 

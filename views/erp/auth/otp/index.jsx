@@ -1,19 +1,25 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+
 import Image from "next/image";
+
 import CustomButton from "@/components/erp/common/CustomButton";
 
 const OTPIndex = () => {
   const [code, setCode] = useState(["", "", "", ""]);
   const inputRefs = useRef([]);
+
   const setAt = (i, v) => {
     setCode((p) => p.map((x, idx) => (idx === i ? v.slice(-1) : x)));
+
     if (v && i < code.length - 1) {
       inputRefs.current[i + 1].focus();
     }
   };
-  return (
+
+  
+return (
     <>
       <h1 className="text-light-2 text-2xl font-semibold mb-1">
         Verify Your Email
