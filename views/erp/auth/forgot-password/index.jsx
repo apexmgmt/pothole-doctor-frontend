@@ -1,12 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
+
 import Image from "next/image";
+
 import Field from "@/components/erp/common/Field";
 import CustomButton from "@/components/erp/common/CustomButton";
 
 const ForgotPassIndex = () => {
   const [email, setEmail] = useState("");
+
+
   return (
     <>
       <h1 className="text-light-2 text-xl md:text-2xl font-semibold mb-2.5">

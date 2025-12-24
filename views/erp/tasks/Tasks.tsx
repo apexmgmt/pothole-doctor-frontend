@@ -1,8 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -12,7 +16,6 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
@@ -53,15 +56,19 @@ const Tasks: React.FC<{
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
-        return newOptions
+
+        
+return newOptions
       })
     }, 500)
 
@@ -71,6 +78,7 @@ const Tasks: React.FC<{
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       TaskService.index(filterOptions)
         .then(response => {
@@ -103,6 +111,7 @@ const Tasks: React.FC<{
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
     setSelectedTaskId(id)
+
     try {
       TaskService.show(id)
         .then(response => {
@@ -128,13 +137,18 @@ const Tasks: React.FC<{
     handleModalClose()
   }
 
+
   // Column definitions for CommonTable
   const columns: Column[] = [
     {
       id: 'status',
       header: 'Status',
       cell: row => (
-        <Badge key={row.id} variant='default' className='mr-1 mb-1'>
+        <Badge
+          key={row.id}
+          variant={row.status === 'Completed' ? 'default' : row.status === 'In Progress' ? 'secondary' : 'destructive'}
+          className='mr-1 mb-1'
+        >
           {row.status}
         </Badge>
       ),
@@ -163,7 +177,9 @@ const Tasks: React.FC<{
       header: 'Created By',
       cell: (row: Task) => {
         const parts = [row?.created_by?.first_name, row?.created_by?.last_name].filter(Boolean)
-        return <span className='font-medium'>{parts.join(' ') || ''}</span>
+
+        
+return <span className='font-medium'>{parts.join(' ') || ''}</span>
       },
       sortable: true
     },
@@ -202,7 +218,9 @@ const Tasks: React.FC<{
       header: 'Customer Name',
       cell: (row: Task) => {
         const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
-        return <span className='font-medium'>{parts.join(' ') || ''}</span>
+
+        
+return <span className='font-medium'>{parts.join(' ') || ''}</span>
       },
       sortable: true
     },
@@ -266,7 +284,9 @@ const Tasks: React.FC<{
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
-    return filterKeys.length > 0
+
+    
+return filterKeys.length > 0
   }
 
   // Custom filters component
@@ -304,7 +324,7 @@ const Tasks: React.FC<{
 
   return (
     <>
-      <CommonLayout title='Commission Types' noTabs={true}>
+      <CommonLayout title='Tasks' noTabs={true}>
         <CommonTable
           data={{
             data: (apiResponse?.data as Task[]) || [],

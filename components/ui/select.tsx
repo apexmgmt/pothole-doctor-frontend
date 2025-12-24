@@ -221,7 +221,11 @@ function MultiSelect({
           <ChevronDownIcon className='h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-full p-0' align='start'>
+      <PopoverContent
+        className={cn('p-0', className)}
+        align='start'
+        style={{ width: 'var(--radix-popover-trigger-width)' }}
+      >
         <Command>
           <CommandInput placeholder='Search...' />
           <CommandList>
@@ -233,7 +237,7 @@ function MultiSelect({
                   <CommandItem
                     key={option.value}
                     onSelect={() => handleSelect(option.value)}
-                    className={cn('cursor-pointer', isSelected && 'bg-accent/80')}
+                    className={cn('cursor-pointer w-full', isSelected && 'bg-accent/80')}
                   >
                     <div
                       className={cn(
@@ -351,7 +355,11 @@ function CreatableMultiSelect({
           <ChevronDownIcon className='h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-full p-0' align='start'>
+      <PopoverContent
+        className={cn('p-0', className)}
+        align='start'
+        style={{ width: 'var(--radix-popover-trigger-width)' }}
+      >
         <Command shouldFilter={false}>
           <CommandInput
             placeholder='Search or type to add...'
@@ -461,7 +469,11 @@ function CreatableSelect({
           <ChevronDownIcon className='h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-full p-0' align='start'>
+      <PopoverContent
+        className={cn('p-0', className)}
+        align='start'
+        style={{ width: 'var(--radix-popover-trigger-width)' }}
+      >
         <Command shouldFilter={false}>
           <CommandInput
             placeholder='Search or type to add...'
