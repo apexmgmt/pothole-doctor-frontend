@@ -7,7 +7,7 @@ import { PlusIcon, Search } from 'lucide-react'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, CommissionType, DataTableApiResponse } from '@/types'
+import { Client, Column, DataTableApiResponse, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -16,18 +16,26 @@ import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import CommissionTypeService from '@/services/api/settings/commission_types.service'
-import CreateOrEditCommissionTypeModal from './CreateOrEditCommissionTypeModal'
+import TaskService from '@/services/api/tasks.service'
+import { formatDate } from '@/utils/date'
+import { Badge } from '@/components/ui/badge'
+import CreateOrEditTaskModal from './CreateOrEditTaskModal'
 
-const CommissionTypes: React.FC = () => {
+const Tasks: React.FC<{
+  staffs: Staff[]
+  clients: Client[]
+  taskTypes: TaskType[]
+  taskReminders: TaskReminder[]
+  taskReminderChannels: TaskReminderChannel[]
+}> = ({ staffs, clients, taskTypes, taskReminders, taskReminderChannels }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [selectedCommissionTypeId, setSelectedCommissionTypeId] = useState<string | null>(null)
-  const [selectedCommissionType, setSelectedCommissionType] = useState<CommissionType | null>(null)
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
@@ -64,45 +72,55 @@ const CommissionTypes: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      CommissionTypeService.index(filterOptions)
+      TaskService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          console.error('Error fetching commission types:', error)
+          console.error('Error fetching tasks:', error)
         })
     } catch (error) {
       setIsLoading(false)
-      console.error('Error fetching commission types:', error)
+      console.error('Error fetching tasks:', error)
     }
   }
 
   useEffect(() => {
     fetchData()
     updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Commission Types'))
+    dispatch(setPageTitle('Manage Tasks'))
   }, [filterOptions])
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
-    setSelectedCommissionTypeId(null)
-    setSelectedCommissionType(null)
+    setSelectedTaskId(null)
+    setSelectedTask(null)
     setIsModalOpen(true)
   }
 
-  const handleOpenEditModal = async (id: string, commissionType: CommissionType) => {
+  const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
-    setSelectedCommissionTypeId(id)
-    setSelectedCommissionType(commissionType)
-    setIsModalOpen(true)
+    setSelectedTaskId(id)
+    try {
+      TaskService.show(id)
+        .then(response => {
+          setSelectedTask(response.data)
+          setIsModalOpen(true)
+        })
+        .catch(error => {
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch task details')
+        })
+    } catch (error) {
+      toast.error('Something went wrong while fetching the task details!')
+    }
   }
 
   const handleModalClose = () => {
     setIsModalOpen(false)
-    setSelectedCommissionTypeId(null)
-    setSelectedCommissionType(null)
+    setSelectedTaskId(null)
+    setSelectedTask(null)
   }
 
   const handleSuccess = () => {
@@ -113,20 +131,97 @@ const CommissionTypes: React.FC = () => {
   // Column definitions for CommonTable
   const columns: Column[] = [
     {
-      id: 'index',
-      header: '#',
-      cell: (row, rowIndex) => {
-        // Calculate the absolute index based on pagination
-        const from = apiResponse?.from || 1
-        return <span className='text-gray'>{from + (rowIndex || 0)}</span>
+      id: 'status',
+      header: 'Status',
+      cell: row => (
+        <Badge key={row.id} variant='default' className='mr-1 mb-1'>
+          {row.status}
+        </Badge>
+      ),
+      sortable: true
+    },
+    {
+      id: 'task_type',
+      header: 'Task Type',
+      cell: (row: Task) => <span className='font-medium'>{row?.task_type?.name || ''}</span>,
+      sortable: false
+    },
+    {
+      id: 'start_date',
+      header: 'Start Date',
+      cell: (row: Task) => <span className='font-medium'>{formatDate(row?.start_date) || ''}</span>,
+      sortable: true
+    },
+    {
+      id: 'start_time',
+      header: 'Start Time',
+      cell: (row: Task) => <span className='font-medium'>{row?.start_time || ''}</span>,
+      sortable: true
+    },
+    {
+      id: 'created_by',
+      header: 'Created By',
+      cell: (row: Task) => {
+        const parts = [row?.created_by?.first_name, row?.created_by?.last_name].filter(Boolean)
+        return <span className='font-medium'>{parts.join(' ') || ''}</span>
       },
-      sortable: false,
-      size: 16
+      sortable: true
+    },
+    {
+      id: 'created_at',
+      header: 'Created Date',
+      cell: (row: Task) => <span className='font-medium'>{formatDate(row?.created_at) || ''}</span>,
+      sortable: true
+    },
+    {
+      id: 'employees',
+      header: 'Assigned To',
+      cell: (row: Task) => (
+        <div className='flex flex-wrap gap-1'>
+          {row.employees && row.employees.length > 0 ? (
+            row.employees.map(emp => (
+              <Badge key={emp.id} variant='outline' className='mr-1 mb-1'>
+                {emp.first_name} {emp.last_name}
+              </Badge>
+            ))
+          ) : (
+            <span className='text-gray-400'>-</span>
+          )}
+        </div>
+      ),
+      sortable: false
+    },
+    {
+      id: 'company',
+      header: 'Company Name',
+      cell: (row: Task) => <span className='font-medium'>{row?.client?.company?.name || ''}</span>,
+      sortable: true
+    },
+    {
+      id: 'client',
+      header: 'Customer Name',
+      cell: (row: Task) => {
+        const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
+        return <span className='font-medium'>{parts.join(' ') || ''}</span>
+      },
+      sortable: true
     },
     {
       id: 'name',
-      header: 'Title',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      header: 'Task Name',
+      cell: (row: Task) => <span className='font-medium'>{row?.name || ''}</span>,
+      sortable: true
+    },
+    {
+      id: 'comment',
+      header: 'Comment',
+      cell: (row: Task) => <span className='font-medium'>{row?.comment || ''}</span>,
+      sortable: true
+    },
+    {
+      id: 'location',
+      header: 'Event Location',
+      cell: (row: Task) => <span className='font-medium'>{row?.location || ''}</span>,
       sortable: true
     },
     {
@@ -136,16 +231,8 @@ const CommissionTypes: React.FC = () => {
         <div className='flex items-center justify-center gap-2'>
           <ThreeDotButton
             buttons={[
-              <EditButton
-                tooltip='Edit Commission Type Information'
-                onClick={() => handleOpenEditModal(row.id, row)}
-                variant='text'
-              />,
-              <DeleteButton
-                tooltip='Delete Commission Type'
-                variant='text'
-                onClick={() => handleDeleteCommissionType(row.id)}
-              />
+              <EditButton tooltip='Edit Task Information' onClick={() => handleOpenEditModal(row.id)} variant='text' />,
+              <DeleteButton tooltip='Delete Task' variant='text' onClick={() => handleDeleteTask(row.id)} />
             ]}
           />
         </div>
@@ -161,18 +248,18 @@ const CommissionTypes: React.FC = () => {
     setSearchValue('')
   }
 
-  const handleDeleteCommissionType = async (id: string) => {
+  const handleDeleteTask = async (id: string) => {
     try {
-      CommissionTypeService.destroy(id)
+      TaskService.destroy(id)
         .then(response => {
-          toast.success('Commission type deleted successfully')
+          toast.success('Task deleted successfully')
           fetchData()
         })
         .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete commission type')
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete task')
         })
     } catch (error) {
-      toast.error('Something went wrong while deleting the commission type!')
+      toast.error('Something went wrong while deleting the task!')
     }
   }
 
@@ -210,7 +297,7 @@ const CommissionTypes: React.FC = () => {
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Commission Type
+        Add Task
       </Button>
     </div>
   )
@@ -220,7 +307,7 @@ const CommissionTypes: React.FC = () => {
       <CommonLayout title='Commission Types' noTabs={true}>
         <CommonTable
           data={{
-            data: apiResponse?.data || [],
+            data: (apiResponse?.data as Task[]) || [],
             per_page: apiResponse?.per_page || 10,
             total: apiResponse?.total || 0,
             from: apiResponse?.from || 1,
@@ -234,20 +321,25 @@ const CommissionTypes: React.FC = () => {
           showFilters={true}
           pagination={true}
           isLoading={isLoading}
-          emptyMessage='No commission type found'
+          emptyMessage='No task found'
         />
       </CommonLayout>
 
-      <CreateOrEditCommissionTypeModal
+      <CreateOrEditTaskModal
         mode={modalMode}
         open={isModalOpen}
         onOpenChange={handleModalClose}
-        commissionTypeId={selectedCommissionTypeId || undefined}
-        commissionTypeDetails={selectedCommissionType || undefined}
+        taskId={selectedTaskId || undefined}
+        taskDetails={selectedTask || undefined}
         onSuccess={handleSuccess}
+        staffs={staffs}
+        clients={clients}
+        taskTypes={taskTypes}
+        taskReminders={taskReminders}
+        taskReminderChannels={taskReminderChannels}
       />
     </>
   )
 }
 
-export default CommissionTypes
+export default Tasks

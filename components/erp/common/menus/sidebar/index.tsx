@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { NavigationItem } from '@/types'
 
 import { SettingsIcon, HomeIcon } from '@/public/icons'
-import { Boxes, Building2, LocateIcon, Map, Package, UserLock, Users, Users2, Warehouse } from 'lucide-react'
+import { Boxes, Building2, CalendarCheck, LocateIcon, Map, Package, UserLock, Users, Users2, Warehouse } from 'lucide-react'
 import SidebarFooter from './SidebarFooter'
 import MenuItem from './menu-item'
 
@@ -129,6 +129,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       exactMatch: false
     },
     {
+      id: 'tasks',
+      label: 'Tasks',
+      icon: <CalendarCheck className='h-4 w-4' />,
+      href: '/erp/tasks',
+      hasSubItems: false,
+      exactMatch: false
+    },
+    {
       id: 'labor-costs',
       label: 'Labor Costs',
       icon: <UserLock className='h-4 w-4' />,
@@ -204,6 +212,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           id: 'contact-types',
           label: 'Contact Types',
           href: '/erp/settings/contact-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false
+        },
+        {
+          id: 'estimate-types',
+          label: 'Estimate Types',
+          href: '/erp/settings/estimate-types',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
           exactMatch: false

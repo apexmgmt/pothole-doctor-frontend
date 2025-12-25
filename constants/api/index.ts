@@ -35,5 +35,7 @@ export * from './installation_requests_api'
 export * from './client_sources_api'
 export * from './leads_api'
 export * from './clients_api'
+export * from './commissions/commission_types_api'
+export * from './tasks_api'
 
-export * from './commissions/commission_types_api';
+export * from './estimate_types_api';

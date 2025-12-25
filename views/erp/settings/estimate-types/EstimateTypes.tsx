@@ -7,7 +7,7 @@ import { PlusIcon, Search } from 'lucide-react'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, CommissionType, DataTableApiResponse } from '@/types'
+import { Column, EstimateType, DataTableApiResponse } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -16,18 +16,18 @@ import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import CommissionTypeService from '@/services/api/settings/commission_types.service'
-import CreateOrEditCommissionTypeModal from './CreateOrEditCommissionTypeModal'
+import EstimateTypeService from '@/services/api/settings/estimate_types.service'
+import CreateOrEditEstimateTypeModal from './CreateOrEditEstimateTypeModal'
 
-const CommissionTypes: React.FC = () => {
+const EstimateTypes: React.FC = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [selectedCommissionTypeId, setSelectedCommissionTypeId] = useState<string | null>(null)
-  const [selectedCommissionType, setSelectedCommissionType] = useState<CommissionType | null>(null)
+  const [selectedEstimateTypeId, setSelectedEstimateTypeId] = useState<string | null>(null)
+  const [selectedEstimateType, setSelectedEstimateType] = useState<EstimateType | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
@@ -64,45 +64,45 @@ const CommissionTypes: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      CommissionTypeService.index(filterOptions)
+      EstimateTypeService.index(filterOptions)
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
         })
         .catch(error => {
           setIsLoading(false)
-          console.error('Error fetching commission types:', error)
+          console.error('Error fetching estimate types:', error)
         })
     } catch (error) {
       setIsLoading(false)
-      console.error('Error fetching commission types:', error)
+      console.error('Error fetching estimate types:', error)
     }
   }
 
   useEffect(() => {
     fetchData()
     updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Commission Types'))
+    dispatch(setPageTitle('Manage Estimate Types'))
   }, [filterOptions])
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
-    setSelectedCommissionTypeId(null)
-    setSelectedCommissionType(null)
+    setSelectedEstimateTypeId(null)
+    setSelectedEstimateType(null)
     setIsModalOpen(true)
   }
 
-  const handleOpenEditModal = async (id: string, commissionType: CommissionType) => {
+  const handleOpenEditModal = async (id: string, commissionType: EstimateType) => {
     setModalMode('edit')
-    setSelectedCommissionTypeId(id)
-    setSelectedCommissionType(commissionType)
+    setSelectedEstimateTypeId(id)
+    setSelectedEstimateType(commissionType)
     setIsModalOpen(true)
   }
 
   const handleModalClose = () => {
     setIsModalOpen(false)
-    setSelectedCommissionTypeId(null)
-    setSelectedCommissionType(null)
+    setSelectedEstimateTypeId(null)
+    setSelectedEstimateType(null)
   }
 
   const handleSuccess = () => {
@@ -137,14 +137,14 @@ const CommissionTypes: React.FC = () => {
           <ThreeDotButton
             buttons={[
               <EditButton
-                tooltip='Edit Commission Type Information'
+                tooltip='Edit Estimate Type Information'
                 onClick={() => handleOpenEditModal(row.id, row)}
                 variant='text'
               />,
               <DeleteButton
-                tooltip='Delete Commission Type'
+                tooltip='Delete Estimate Type'
                 variant='text'
-                onClick={() => handleDeleteCommissionType(row.id)}
+                onClick={() => handleDeleteEstimateType(row.id)}
               />
             ]}
           />
@@ -161,18 +161,18 @@ const CommissionTypes: React.FC = () => {
     setSearchValue('')
   }
 
-  const handleDeleteCommissionType = async (id: string) => {
+  const handleDeleteEstimateType = async (id: string) => {
     try {
-      CommissionTypeService.destroy(id)
+      EstimateTypeService.destroy(id)
         .then(response => {
-          toast.success('Commission type deleted successfully')
+          toast.success('Estimate type deleted successfully')
           fetchData()
         })
         .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete commission type')
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete estimate type')
         })
     } catch (error) {
-      toast.error('Something went wrong while deleting the commission type!')
+      toast.error('Something went wrong while deleting the estimate type!')
     }
   }
 
@@ -210,14 +210,14 @@ const CommissionTypes: React.FC = () => {
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Commission Type
+        Add Estimate Type
       </Button>
     </div>
   )
 
   return (
     <>
-      <CommonLayout title='Commission Types' noTabs={true}>
+      <CommonLayout title='Estimate Types' noTabs={true}>
         <CommonTable
           data={{
             data: apiResponse?.data || [],
@@ -234,20 +234,20 @@ const CommissionTypes: React.FC = () => {
           showFilters={true}
           pagination={true}
           isLoading={isLoading}
-          emptyMessage='No commission type found'
+          emptyMessage='No estimate type found'
         />
       </CommonLayout>
 
-      <CreateOrEditCommissionTypeModal
+      <CreateOrEditEstimateTypeModal
         mode={modalMode}
         open={isModalOpen}
         onOpenChange={handleModalClose}
-        commissionTypeId={selectedCommissionTypeId || undefined}
-        commissionTypeDetails={selectedCommissionType || undefined}
+        estimateTypeId={selectedEstimateTypeId || undefined}
+        estimateTypeDetails={selectedEstimateType || undefined}
         onSuccess={handleSuccess}
       />
     </>
   )
 }
 
-export default CommissionTypes
+export default EstimateTypes
