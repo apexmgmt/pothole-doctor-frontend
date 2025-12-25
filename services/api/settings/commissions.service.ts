@@ -116,25 +116,6 @@ export default class CommissionService {
     }
   }
 
-  /** Get all commission types API */
-  static getAllCommissionTypes = async () => {
-    try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + COMMISSION_TYPES_ALL, {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 3600, tags: ['commission-types-all'] } // Cache for 1 hour
-      })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to fetch commission types')
-      }
-      return await response.json()
-    } catch (error) {
-      throw error
-    }
-  }
-
   /** Get all commission filters API */
   static getAllCommissionFilters = async () => {
     try {
