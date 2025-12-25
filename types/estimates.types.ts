@@ -6,6 +6,7 @@ import { Staff } from './staff.types'
 
 export interface Estimate {
   id: string
+  status: string
   title: string
   location: string
   client_id: string
@@ -13,7 +14,7 @@ export interface Estimate {
   estimate_type_id: string
   estimate_type?: EstimateType
   assign_id: string
-  assign?: Staff
+  assign_user?: Staff
   service_type_id: string
   service_type?: ServiceType
   payment_term_id: string

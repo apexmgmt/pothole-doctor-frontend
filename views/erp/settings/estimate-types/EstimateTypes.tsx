@@ -99,10 +99,10 @@ const EstimateTypes: React.FC = () => {
     setIsModalOpen(true)
   }
 
-  const handleOpenEditModal = async (id: string, commissionType: EstimateType) => {
+  const handleOpenEditModal = async (id: string, estimateType: EstimateType) => {
     setModalMode('edit')
     setSelectedEstimateTypeId(id)
-    setSelectedEstimateType(commissionType)
+    setSelectedEstimateType(estimateType)
     setIsModalOpen(true)
   }
 

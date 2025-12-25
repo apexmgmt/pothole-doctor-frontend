@@ -20,7 +20,7 @@ import {
 
 import { NavigationItem } from '@/types'
 
-import { SettingsIcon, HomeIcon } from '@/public/icons'
+import { SettingsIcon, HomeIcon, EstimateIcon } from '@/public/icons'
 import SidebarFooter from './SidebarFooter'
 import MenuItem from './menu-item'
 
@@ -139,6 +139,14 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       label: 'Customers',
       icon: <UserLock className='h-4 w-4' />,
       href: '/erp/customers',
+      hasSubItems: false,
+      exactMatch: false
+    },
+    {
+      id: 'estimates',
+      label: 'Estimates',
+      icon: <EstimateIcon className='h-4 w-4' />,
+      href: '/erp/estimates',
       hasSubItems: false,
       exactMatch: false
     },

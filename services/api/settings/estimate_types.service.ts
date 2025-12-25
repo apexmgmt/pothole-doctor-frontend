@@ -131,7 +131,7 @@ export default class EstimateTypeService {
   }
 
   /** Get All Estimate Types API */
-  static getAllNoteTypes = async () => {
+  static getAllEstimateTypes = async () => {
     try {
       const apiUrl: string = await getApiUrl()
 
