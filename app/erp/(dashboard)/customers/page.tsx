@@ -34,6 +34,7 @@ export default async function CustomersPage() {
   // fetch interest levels
   try {
     const response = await InterestLevelService.getAllInterestLevels()
+
     interestLevels = response.data || []
   } catch (error) {
     interestLevels = []
@@ -42,6 +43,7 @@ export default async function CustomersPage() {
   // fetch client sources
   try {
     const response = await CompanyService.getAllCompanies()
+
     companies = response.data || []
   } catch (error) {
     companies = []
@@ -50,6 +52,7 @@ export default async function CustomersPage() {
   // fetch staffs
   try {
     const response = await StaffService.getAllStaffs()
+
     staffs = response.data || []
   } catch (error) {
     staffs = []
@@ -58,6 +61,7 @@ export default async function CustomersPage() {
   // fetch client sources
   try {
     const response = await ClientSourceService.getAllClientSources()
+
     clientSources = response.data || []
   } catch (error) {
     clientSources = []
@@ -66,6 +70,7 @@ export default async function CustomersPage() {
   // fetch service types
   try {
     const response = await ServiceTypeService.getAllServiceTypes()
+
     serviceTypes = response.data || []
   } catch (error) {
     serviceTypes = []
@@ -74,6 +79,7 @@ export default async function CustomersPage() {
   // fetch business locations
   try {
     const response = await BusinessLocationService.getAllBusinessLocations()
+
     businessLocations = response.data || []
   } catch (error) {
     businessLocations = []
@@ -82,6 +88,7 @@ export default async function CustomersPage() {
   // fetch note types
   try {
     const response = await NoteTypeService.index()
+
     noteTypes = response.data.data || []
   } catch (error) {
     noteTypes = []
@@ -90,6 +97,7 @@ export default async function CustomersPage() {
   // fetch countries with states and cities
   try {
     const response = await LocationService.index()
+
     countriesWithStatesAndCities = response.data || []
   } catch (error) {
     countriesWithStatesAndCities = []
@@ -98,6 +106,7 @@ export default async function CustomersPage() {
   // fetch contact types
   try {
     const response = await ContactTypeService.getAllContactTypes()
+
     contactTypes = response.data || []
   } catch (error) {
     contactTypes = []

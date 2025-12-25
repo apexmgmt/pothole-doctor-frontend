@@ -1,8 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -12,7 +16,6 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import NoteTypeService from '@/services/api/settings/note_types.service'
@@ -45,14 +48,17 @@ const NoteTypes: React.FC = () => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -63,6 +69,7 @@ const NoteTypes: React.FC = () => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       NoteTypeService.index(filterOptions)
         .then(response => {
@@ -111,6 +118,7 @@ const NoteTypes: React.FC = () => {
     // Fetch note type details
     try {
       const response = await NoteTypeService.show(id)
+
       setSelectedNoteType(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -200,6 +208,7 @@ const NoteTypes: React.FC = () => {
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 

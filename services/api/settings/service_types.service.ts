@@ -10,6 +10,7 @@ export default class ServiceTypeService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + SERVICE_TYPES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class ServiceTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch service types')
       }
 
@@ -31,6 +33,7 @@ export default class ServiceTypeService {
   static store = async (payload: ServiceTypePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + SERVICE_TYPES, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class ServiceTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create service types')
       }
 
@@ -54,6 +58,7 @@ export default class ServiceTypeService {
   static show = async (serviceTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + SERVICE_TYPES + serviceTypeId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class ServiceTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch service types details')
       }
 
@@ -75,6 +81,7 @@ export default class ServiceTypeService {
   static update = async (serviceTypeId: string, payload: ServiceTypePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + SERVICE_TYPES + serviceTypeId, {
         requiresAuth: true,
         method: 'PUT',
@@ -83,11 +90,14 @@ export default class ServiceTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update service types')
       }
+
       await revalidate('service-types')
       await revalidate(`service-types/${serviceTypeId}`)
       await revalidate('service-types-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -98,17 +108,22 @@ export default class ServiceTypeService {
   static destroy = async (serviceTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + SERVICE_TYPES + serviceTypeId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete service types')
       }
+
       await revalidate('service-types')
       await revalidate(`service-types/${serviceTypeId}`)
       await revalidate('service-types-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -119,17 +134,22 @@ export default class ServiceTypeService {
   static restore = async (serviceTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + SERVICE_TYPES + serviceTypeId + '/restore', {
         requiresAuth: true,
         method: 'POST'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to restore service types')
       }
+
       await revalidate('service-types')
       await revalidate(`service-types/${serviceTypeId}`)
       await revalidate('service-types-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -140,15 +160,19 @@ export default class ServiceTypeService {
   static getAllServiceTypes = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + SERVICE_TYPES_ALL, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['service-type-types'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch service type types')
       }
+
       return await response.json()
     } catch (error) {
       throw error

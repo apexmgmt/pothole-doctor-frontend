@@ -1,12 +1,18 @@
 'use client'
 
 import React, { useRef, useState } from 'react'
+
+import Image from 'next/image'
+
+import { toast } from 'sonner'
+
+import { Loader2 } from 'lucide-react'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { User } from '@/types'
-import Image from 'next/image'
-import { toast } from 'sonner'
+
 import AuthService from '@/services/api/auth.service'
-import { Loader2 } from 'lucide-react'
+
 import { useAppDispatch } from '@/lib/hooks'
 import { setUserData } from '@/lib/features/auth/authSlice'
 import { generateFileUrl } from '@/utils/utility'
@@ -24,6 +30,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ userData }) => {
   const lastName = userData?.last_name || ''
   const fullName = userData?.name || [firstName, lastName].filter(Boolean).join(' ') || 'User'
   const email = userData?.email || '---'
+
   const profilePicture = userData?.profile_picture
     ? generateFileUrl(userData?.profile_picture)
     : userData?.userable?.profile_picture
@@ -43,17 +50,20 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ userData }) => {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+
     if (!file) return
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('Please select a valid image file')
+
       return
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Image size should be less than 5MB')
+
       return
     }
 
@@ -61,6 +71,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ userData }) => {
 
     try {
       const formData = new FormData()
+
       formData.append('image', file)
 
       AuthService.updateProfilePicture(formData)

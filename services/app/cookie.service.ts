@@ -20,6 +20,7 @@ export default class CookieService {
   private static async getServerCookies() {
     if (!this.isServer()) return null
     const { cookies } = await import('next/headers')
+
     return cookies()
   }
 
@@ -32,11 +33,14 @@ export default class CookieService {
   static async store(name: string, value: string, options?: Cookies.CookieAttributes): Promise<void> {
     if (this.isServer()) {
       const cookieStore = await this.getServerCookies()
+
       if (cookieStore) {
         const serverOptions: any = {}
+
         if (options?.expires) {
           serverOptions.maxAge = typeof options.expires === 'number' ? options.expires * 86400 : undefined
         }
+
         if (options?.path) serverOptions.path = options.path
         if (options?.domain) serverOptions.domain = options.domain
         if (options?.secure) serverOptions.secure = options.secure
@@ -57,6 +61,7 @@ export default class CookieService {
   static async get(name: string): Promise<string | undefined> {
     if (this.isServer()) {
       const cookieStore = await this.getServerCookies()
+
       return cookieStore?.get(name)?.value
     } else {
       return Cookies.get(name)
@@ -81,8 +86,10 @@ export default class CookieService {
   static async delete(name: string, options?: Cookies.CookieAttributes): Promise<void> {
     if (this.isServer()) {
       const cookieStore = await this.getServerCookies()
+
       if (cookieStore) {
         const serverOptions: any = {}
+
         if (options?.path) serverOptions.path = options.path
         if (options?.domain) serverOptions.domain = options.domain
 
@@ -100,14 +107,17 @@ export default class CookieService {
   static async clear(): Promise<void> {
     if (this.isServer()) {
       const cookieStore = await this.getServerCookies()
+
       if (cookieStore) {
         const allCookies = cookieStore.getAll()
+
         allCookies.forEach(cookie => {
           cookieStore.delete(cookie.name)
         })
       }
     } else {
       const allCookies = Cookies.get()
+
       Object.keys(allCookies).forEach(cookieName => {
         Cookies.remove(cookieName)
       })
@@ -122,6 +132,7 @@ export default class CookieService {
     if (this.isServer()) {
       throw new Error('storeSync cannot be used on server-side. Use store() instead.')
     }
+
     Cookies.set(name, value, options)
   }
 
@@ -129,6 +140,7 @@ export default class CookieService {
     if (this.isServer()) {
       throw new Error('getSync cannot be used on server-side. Use get() instead.')
     }
+
     return Cookies.get(name)
   }
 
@@ -136,6 +148,7 @@ export default class CookieService {
     if (this.isServer()) {
       throw new Error('deleteSync cannot be used on server-side. Use delete() instead.')
     }
+
     Cookies.remove(name, options)
   }
 
@@ -143,7 +156,9 @@ export default class CookieService {
     if (this.isServer()) {
       throw new Error('clearSync cannot be used on server-side. Use clear() instead.')
     }
+
     const allCookies = Cookies.get()
+
     Object.keys(allCookies).forEach(cookieName => {
       Cookies.remove(cookieName)
     })

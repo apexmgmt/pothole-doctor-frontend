@@ -1,3 +1,9 @@
+import { useEffect, useState } from 'react'
+
+import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
+
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CommonTable from '@/components/erp/common/table'
@@ -5,9 +11,7 @@ import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Column, CountryWithStates, DataTableApiResponse, ClientContact } from '@/types'
 import { formatDate } from '@/utils/date'
-import { PlusIcon, Search } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import CreateOrEditContactModal from './CreateOrEditContactModal'
 import ClientContactService from '@/services/api/clients/client-contacts.service'
@@ -36,22 +40,27 @@ const ClientContacts = ({
     const timer = setTimeout(() => {
       setFilterOptions((prev: any) => {
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
+
     return () => clearTimeout(timer)
   }, [searchValue])
 
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       ClientContactService.index(filterOptions)
         .then(response => {
@@ -82,8 +91,10 @@ const ClientContacts = ({
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
     setSelectedContactId(id)
+
     try {
       const response = await ClientContactService.show(id)
+
       setSelectedContact(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -141,6 +152,7 @@ const ClientContacts = ({
       header: 'Address',
       cell: row => {
         const parts = [row.address, row?.city?.name, row?.state?.name, row?.country?.name].filter(Boolean)
+
         return <span className='font-medium'>{parts.join(', ')}</span>
       },
       sortable: true
@@ -187,6 +199,7 @@ const ClientContacts = ({
 
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 

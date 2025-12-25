@@ -1,22 +1,25 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse } from '@/types'
+import { Column, DataTableApiResponse, Country } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import CountryService from '@/services/api/locations/country.service'
 import CreateOrEditCountryModal from './CreateOrEditCountryModal'
-import { Country } from '@/types'
+
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const Countries: React.FC = () => {
@@ -36,6 +39,7 @@ const Countries: React.FC = () => {
   // Initialize filterOptions from URL params
   const getInitialFilters = () => {
     const filters: any = {}
+
     searchParams.forEach((value, key) => {
       // Convert numeric values
       if (key === 'page' || key === 'per_page') {
@@ -61,14 +65,17 @@ const Countries: React.FC = () => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -95,6 +102,7 @@ const Countries: React.FC = () => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       CountryService.index(filterOptions)
         .then(response => {
@@ -141,6 +149,7 @@ const Countries: React.FC = () => {
     // Fetch country details
     try {
       const response = await CountryService.show(id)
+
       setSelectedCountry(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -226,6 +235,7 @@ const Countries: React.FC = () => {
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 

@@ -10,6 +10,7 @@ export default class NoteTypeService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + NOTE_TYPES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class NoteTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch note types')
       }
 
@@ -31,6 +33,7 @@ export default class NoteTypeService {
   static store = async (payload: NoteTypePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + NOTE_TYPES, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class NoteTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create note types')
       }
 
@@ -54,6 +58,7 @@ export default class NoteTypeService {
   static show = async (noteTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + NOTE_TYPES + noteTypeId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class NoteTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch note types details')
       }
 
@@ -75,6 +81,7 @@ export default class NoteTypeService {
   static update = async (noteTypeId: string, payload: NoteTypePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + NOTE_TYPES + noteTypeId, {
         requiresAuth: true,
         method: 'PUT',
@@ -83,11 +90,14 @@ export default class NoteTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update note types')
       }
+
       await revalidate('note-types')
       await revalidate(`note-types/${noteTypeId}`)
       await revalidate('note-types-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -98,17 +108,22 @@ export default class NoteTypeService {
   static destroy = async (noteTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + NOTE_TYPES + noteTypeId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete note types')
       }
+
       await revalidate('note-types-all')
       await revalidate(`note-types/${noteTypeId}`)
       await revalidate('note-types')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -119,15 +134,19 @@ export default class NoteTypeService {
   static getAllNoteTypes = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + NOTE_TYPES_ALL, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['note-types-all'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch note types list')
       }
+
       return await response.json()
     } catch (error) {
       throw error

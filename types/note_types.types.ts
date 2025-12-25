@@ -7,6 +7,6 @@ export interface NoteType {
 }
 
 export interface NoteTypePayload {
-    name: string
-    status: number | 1 | 0
+  name: string
+  status: number | 1 | 0
 }

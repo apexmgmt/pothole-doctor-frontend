@@ -1,14 +1,18 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+
+import { toast } from 'sonner'
+
+import { Loader2 } from 'lucide-react'
+
+import { formatDistanceToNow } from 'date-fns'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import AuthService from '@/services/api/auth.service'
 import { LoginActivities, LoginActivity } from '@/types'
-import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
 
 const LoginActivitySection = () => {
   const [activities, setActivities] = useState<LoginActivities | null>(null)
@@ -17,8 +21,10 @@ const LoginActivitySection = () => {
 
   const fetchActivities = async () => {
     setIsLoading(true)
+
     try {
       const response = await AuthService.getActivity()
+
       setActivities(response.data)
     } catch (error: any) {
       toast.error(error?.message || 'Failed to fetch login activities')
@@ -33,6 +39,7 @@ const LoginActivitySection = () => {
 
   const handleLogoutAllDevices = async () => {
     setIsLoading(true)
+
     try {
       await AuthService.logoutAllDevices()
       toast.success('Logged out from all devices successfully')
@@ -46,6 +53,7 @@ const LoginActivitySection = () => {
 
   const handleEndSession = async (sessionId: string) => {
     setEndingSessionId(sessionId)
+
     try {
       await AuthService.endSession(sessionId)
       toast.success('Session ended successfully')

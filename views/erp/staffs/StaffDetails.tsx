@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -19,6 +20,7 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
     StaffService.show(staffData?.id)
       .then(response => {
         setStaffData(response.data)
+
         if (fetchData) {
           fetchData()
         }
@@ -37,6 +39,7 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
   }
 
   const fullName = `${staffData.first_name || ''} ${staffData.last_name || ''}`.trim()
+
   const initials = fullName
     .split(' ')
     .map((name: string) => name.charAt(0))

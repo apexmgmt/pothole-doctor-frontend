@@ -10,6 +10,6 @@ export interface EmailTemplate {
 }
 
 export interface EmailTemplatePayload {
-    title: string
-    description: string
+  title: string
+  description: string
 }

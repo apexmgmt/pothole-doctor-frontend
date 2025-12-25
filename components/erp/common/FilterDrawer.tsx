@@ -54,6 +54,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
   // Initialize filters based on provided fields
   const initialFilters = fields.reduce<Record<string, any>>((acc, field) => {
     acc[field.key] = field.defaultValue || ''
+
     return acc
   }, {})
 
@@ -63,10 +64,11 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
   useEffect(() => {
     const newInitialFilters = fields.reduce<Record<string, any>>((acc, field) => {
       acc[field.key] = field.defaultValue || ''
+
       return acc
     }, {})
+
     setFilters(newInitialFilters)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields])
 
   const handleInputChange = (field: string, value: any) => {

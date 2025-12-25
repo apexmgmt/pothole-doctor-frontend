@@ -10,6 +10,7 @@ export default class ClientSmsService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + CLIENT_SMS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET'
@@ -17,6 +18,7 @@ export default class ClientSmsService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch client sms')
       }
 
@@ -30,6 +32,7 @@ export default class ClientSmsService {
   static store = async (payload: ClientSmsPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_SMS, {
         requiresAuth: true,
         method: 'POST',
@@ -38,6 +41,7 @@ export default class ClientSmsService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to send sms')
       }
 
@@ -51,6 +55,7 @@ export default class ClientSmsService {
   static show = async (clientSmsId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_SMS + clientSmsId, {
         requiresAuth: true,
         method: 'GET'
@@ -58,6 +63,7 @@ export default class ClientSmsService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch lead sms details')
       }
 
@@ -80,8 +86,10 @@ export default class ClientSmsService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update client sms')
       }
+
       return await response.json()
     } catch (error) {
       throw error
@@ -92,14 +100,18 @@ export default class ClientSmsService {
   static destroy = async (clientSmsId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_SMS + clientSmsId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete client sms')
       }
+
       return await response.json()
     } catch (error) {
       throw error

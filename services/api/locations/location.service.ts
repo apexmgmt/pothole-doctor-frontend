@@ -7,6 +7,7 @@ export default class LocationService {
   static index = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + LOCATIONS_ALL, {
         requiresAuth: true,
         method: 'GET',
@@ -15,6 +16,7 @@ export default class LocationService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch locations')
       }
 

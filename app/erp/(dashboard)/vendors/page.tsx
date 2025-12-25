@@ -11,6 +11,7 @@ export default async function VendorsPage() {
 
   try {
     const response = await TaxTypeService.getAllTaxTypes()
+
     taxTypes = response.data || []
   } catch (error) {
     taxTypes = []
@@ -18,6 +19,7 @@ export default async function VendorsPage() {
 
   try {
     const response = await LocationService.index()
+
     countriesWithStatesAndCities = response.data || []
   } catch (error) {
     countriesWithStatesAndCities = []
@@ -25,10 +27,17 @@ export default async function VendorsPage() {
 
   try {
     const response = await PaymentTermsService.getAllPaymentTerms()
+
     paymentTerms = response.data || []
   } catch (error) {
     paymentTerms = []
   }
 
-  return <Vendors taxTypes={taxTypes} countriesWithStatesAndCities={countriesWithStatesAndCities} paymentTerms={paymentTerms} />
+  return (
+    <Vendors
+      taxTypes={taxTypes}
+      countriesWithStatesAndCities={countriesWithStatesAndCities}
+      paymentTerms={paymentTerms}
+    />
+  )
 }

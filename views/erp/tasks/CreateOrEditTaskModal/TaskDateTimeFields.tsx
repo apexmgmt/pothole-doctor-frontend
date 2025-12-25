@@ -1,7 +1,8 @@
+import { Clock8Icon } from 'lucide-react'
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { DatePicker } from '@/components/ui/datePicker'
 import { Input } from '@/components/ui/input'
-import { Clock8Icon } from 'lucide-react'
 
 interface TaskDateTimeFieldsProps {
   form: any

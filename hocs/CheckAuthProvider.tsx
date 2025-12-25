@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import { useDispatch, useSelector } from 'react-redux'
+
 import { setRefreshData, setUserData } from '@/lib/features/auth/authSlice'
 import AuthService from '@/services/api/auth.service'
 import { RootState } from '@/lib/store'
@@ -30,14 +32,17 @@ export const CheckAuthProvider = ({ children }: CheckAuthProviderProps) => {
       try {
         // Check if access token exists before making API call
         const accessToken = CookieService.get('access_token')
+
         if (!accessToken) {
           console.log('CheckAuthProvider: No access token available')
           dispatch(setRefreshData(false))
+
           return
         }
 
         console.log('CheckAuthProvider: Fetching auth details')
         const response = await AuthService.getAuthDetails()
+
         dispatch(setUserData(response.data?.user))
         await CookieService.store('user', JSON.stringify(encryptData(response?.data?.user)))
         await CookieService.store('roles', JSON.stringify(encryptData(response?.data?.roles || [])))

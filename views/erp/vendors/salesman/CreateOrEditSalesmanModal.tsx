@@ -1,12 +1,16 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { VendorSalesman, VendorSalesmanPayload } from '@/types'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import VendorSalesmanService from '@/services/api/vendors/vendor-salesman.service'
 
@@ -63,6 +67,7 @@ const CreateOrEditSalesmanModal = ({
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true)
+
     const payload: VendorSalesmanPayload = {
       vendor_id: vendorId,
       name: values.name,
@@ -156,7 +161,6 @@ const CreateOrEditSalesmanModal = ({
             rules={{
               required: 'Email is required',
               minLength: { value: 2, message: 'Email must be at least 2 characters' }
-              
             }}
             render={({ field }) => (
               <FormItem>
@@ -194,9 +198,7 @@ const CreateOrEditSalesmanModal = ({
             name='ext'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Ext
-                </FormLabel>
+                <FormLabel>Ext</FormLabel>
                 <FormControl>
                   <Input placeholder='Enter ext' {...field} />
                 </FormControl>

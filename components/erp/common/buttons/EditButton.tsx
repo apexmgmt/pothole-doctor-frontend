@@ -1,7 +1,9 @@
 import Link from 'next/link'
+
+import { EditIcon } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
-import { EditIcon } from 'lucide-react'
 
 type EditButtonProps = {
   title?: string

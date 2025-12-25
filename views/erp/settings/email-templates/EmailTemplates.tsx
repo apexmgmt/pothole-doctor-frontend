@@ -1,14 +1,19 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+
+import { useRouter } from 'next/navigation'
+
+import { toast } from 'sonner'
+
+import { Info } from 'lucide-react'
+
 import { EmailTemplate } from '@/types'
 import EmailTemplateCard from './EmailTemplateCard'
 import EditEmailTemplateDialog from './EditEmailTemplateDialog'
-import { useState, useEffect } from 'react'
-import { toast } from 'sonner'
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Info } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 
 export default function EmailTemplates({ templates: initialTemplates }: { templates: EmailTemplate[] }) {
   const [templates, setTemplates] = useState(initialTemplates)
@@ -37,7 +42,9 @@ export default function EmailTemplates({ templates: initialTemplates }: { templa
       if (!acc[template.group]) {
         acc[template.group] = []
       }
+
       acc[template.group].push(template)
+
       return acc
     },
     {} as Record<string, EmailTemplate[]>

@@ -1,7 +1,7 @@
-import Customers from "@/views/erp/dashboard/crm/customers/Customers";
+import Customers from '@/views/erp/dashboard/crm/customers/Customers'
 
 const CustomersPage = () => {
-  return <Customers />;
-};
+  return <Customers />
+}
 
-export default CustomersPage;
+export default CustomersPage

@@ -1,3 +1,9 @@
+import { useEffect, useState } from 'react'
+
+import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
+
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CommonTable from '@/components/erp/common/table'
@@ -5,9 +11,7 @@ import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { ClientNote, Column, DataTableApiResponse, NoteType } from '@/types'
 import { formatDate } from '@/utils/date'
-import { PlusIcon, Search } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+
 import CreateOrEditNoteModal from './CreateOrEditNoteModal'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import ClientNoteService from '@/services/api/clients/client-notes.service'
@@ -30,22 +34,27 @@ const ClientNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: Not
     const timer = setTimeout(() => {
       setFilterOptions((prev: any) => {
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
+
     return () => clearTimeout(timer)
   }, [searchValue])
 
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       ClientNoteService.index(filterOptions)
         .then(response => {
@@ -76,8 +85,10 @@ const ClientNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: Not
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
     setSelectedNoteId(id)
+
     try {
       const response = await ClientNoteService.show(id)
+
       setSelectedNote(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -150,8 +161,20 @@ const ClientNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: Not
       cell: row => (
         <ThreeDotButton
           buttons={[
-            <EditButton title='Edit' key='edit' tooltip='Edit Note' variant='text' onClick={() => handleOpenEditModal(row.id)}/>,
-            <DeleteButton title='Delete' key='delete' tooltip='Delete Note' variant='text' onClick={() => handleDeleteNote(row.id)} />
+            <EditButton
+              title='Edit'
+              key='edit'
+              tooltip='Edit Note'
+              variant='text'
+              onClick={() => handleOpenEditModal(row.id)}
+            />,
+            <DeleteButton
+              title='Delete'
+              key='delete'
+              tooltip='Delete Note'
+              variant='text'
+              onClick={() => handleDeleteNote(row.id)}
+            />
           ]}
         />
       ),
@@ -168,6 +191,7 @@ const ClientNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: Not
 
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 

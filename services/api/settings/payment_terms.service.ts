@@ -10,6 +10,7 @@ export default class PaymentTermsService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + PAYMENT_TERMS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class PaymentTermsService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch payment terms')
       }
 
@@ -31,6 +33,7 @@ export default class PaymentTermsService {
   static store = async (payload: PaymentTermPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PAYMENT_TERMS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class PaymentTermsService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create payment terms')
       }
 
@@ -54,6 +58,7 @@ export default class PaymentTermsService {
   static show = async (paymentTermId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PAYMENT_TERMS + paymentTermId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class PaymentTermsService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch payment terms details')
       }
 
@@ -75,6 +81,7 @@ export default class PaymentTermsService {
   static update = async (paymentTermId: string, payload: PaymentTermPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PAYMENT_TERMS + paymentTermId, {
         requiresAuth: true,
         method: 'PUT',
@@ -83,8 +90,10 @@ export default class PaymentTermsService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update payment terms')
       }
+
       await revalidate('payment-terms')
       await revalidate(`payment-terms/${paymentTermId}`)
       await revalidate('payment-terms-all')
@@ -99,17 +108,22 @@ export default class PaymentTermsService {
   static destroy = async (paymentTermId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PAYMENT_TERMS + paymentTermId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete payment terms')
       }
+
       await revalidate('payment-terms-all')
       await revalidate(`payment-terms/${paymentTermId}`)
       await revalidate('payment-terms')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -120,17 +134,22 @@ export default class PaymentTermsService {
   static restore = async (paymentTermId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PAYMENT_TERMS + paymentTermId + '/restore', {
         requiresAuth: true,
         method: 'POST'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to restore payment terms')
       }
+
       await revalidate('payment-terms')
       await revalidate(`payment-terms/${paymentTermId}`)
       await revalidate('payment-terms-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -141,15 +160,19 @@ export default class PaymentTermsService {
   static getAllPaymentTerms = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PAYMENT_TERMS_ALL, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['payment-terms-all'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch payment term list')
       }
+
       return await response.json()
     } catch (error) {
       throw error
@@ -160,15 +183,19 @@ export default class PaymentTermsService {
   static getPaymentTermTypes = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PAYMENT_TERMS_TYPES, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['payment-term-types'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch payment term types')
       }
+
       return await response.json()
     } catch (error) {
       throw error

@@ -1,14 +1,17 @@
 'use client'
 
 import React, { useCallback, useEffect, useMemo } from 'react'
+
 import { Controller, UseFormReturn } from 'react-hook-form'
+
+import { useLoadScript, Autocomplete } from '@react-google-maps/api'
+
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { MultiSelect, Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { ClientPayload, CountryWithStates, ServiceType } from '@/types'
 import { Textarea } from '@/components/ui/textarea'
-import { useLoadScript, Autocomplete } from '@react-google-maps/api'
 
 interface AddressFieldsProps {
   methods: UseFormReturn<ClientPayload>
@@ -40,6 +43,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
   const availableStates = useMemo(() => {
     if (!selectedCountryId) return []
     const country = countriesWithStatesAndCities.find(c => c.id.toString() === selectedCountryId)
+
     return country?.states || []
   }, [selectedCountryId, countriesWithStatesAndCities])
 
@@ -47,6 +51,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
   const availableCities = useMemo(() => {
     if (!selectedStateId) return []
     const state = availableStates.find(s => s.id.toString() === selectedStateId)
+
     return state?.cities || []
   }, [selectedStateId, availableStates])
 
@@ -54,6 +59,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
   useEffect(() => {
     if (selectedCountryId) {
       const stateExists = availableStates.some(s => s.id.toString() === watch('state_id'))
+
       if (!stateExists) {
         setValue('state_id', '')
         setValue('city_id', '')
@@ -65,6 +71,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
   useEffect(() => {
     if (selectedStateId) {
       const cityExists = availableCities.some(c => c.id.toString() === watch('city_id'))
+
       if (!cityExists) {
         setValue('city_id', '')
       }
@@ -78,12 +85,14 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
   const onPlaceChanged = useCallback(() => {
     if (autocomplete) {
       const place = autocomplete.getPlace()
+
       if (place.formatted_address) {
         setValue('address', place.formatted_address)
       }
 
       // Extract address components
       const addressComponents = place.address_components
+
       if (addressComponents) {
         let countryName = ''
         let stateName = ''
@@ -96,12 +105,15 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
           if (types.includes('country')) {
             countryName = component.long_name
           }
+
           if (types.includes('administrative_area_level_1')) {
             stateName = component.long_name
           }
+
           if (types.includes('locality') || types.includes('administrative_area_level_2')) {
             cityName = component.long_name
           }
+
           if (types.includes('postal_code')) {
             zipCode = component.long_name
           }
@@ -117,6 +129,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
           const matchedCountry = countriesWithStatesAndCities.find(
             country => country.name.toLowerCase() === countryName.toLowerCase()
           )
+
           if (matchedCountry) {
             setValue('country_id', matchedCountry.id.toString())
 
@@ -125,6 +138,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
               const matchedState = matchedCountry.states.find(
                 state => state.name.toLowerCase() === stateName.toLowerCase()
               )
+
               if (matchedState) {
                 setValue('state_id', matchedState.id.toString())
 
@@ -133,6 +147,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
                   const matchedCity = matchedState.cities.find(
                     city => city.name.toLowerCase() === cityName.toLowerCase()
                   )
+
                   if (matchedCity) {
                     setValue('city_id', matchedCity.id.toString())
                   }

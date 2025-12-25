@@ -8,15 +8,19 @@ export default class EmailTemplateService {
   static index = async (group?: string) => {
     try {
       const apiUrl = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + EMAIL_TEMPLATES + (group ? `?group=${group}` : ''), {
         requiresAuth: true,
         method: 'GET',
         cache: 'no-store'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch email templates')
       }
+
       return await response.json()
     } catch (error) {
       throw error
@@ -27,6 +31,7 @@ export default class EmailTemplateService {
   static update = async (id: string, payload: EmailTemplatePayload) => {
     try {
       const apiUrl = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + EMAIL_TEMPLATES + id, {
         requiresAuth: true,
         method: 'PUT',
@@ -35,6 +40,7 @@ export default class EmailTemplateService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update email template')
       }
 

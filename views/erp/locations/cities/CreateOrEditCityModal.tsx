@@ -1,15 +1,22 @@
 'use client'
 
-import { State, StatePayload, Location, City, CityPayload } from '@/types'
+import { useEffect, useState, useMemo } from 'react'
+
 import { zodResolver } from '@hookform/resolvers/zod'
+
 import * as z from 'zod'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
+import { State, StatePayload, Location, City, CityPayload } from '@/types'
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState, useMemo } from 'react'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import StateService from '@/services/api/locations/state.service'
 import LocationService from '@/services/api/locations/location.service'
@@ -77,6 +84,7 @@ const CreateOrEditCityModal = ({
   const availableStates = useMemo(() => {
     if (!selectedCountryId) return []
     const selectedCountry = countriesWithStateAndCities.find(country => country.id.toString() === selectedCountryId)
+
     return selectedCountry?.states || []
   }, [selectedCountryId, countriesWithStateAndCities])
 

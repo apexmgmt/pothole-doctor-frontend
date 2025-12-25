@@ -1,3 +1,13 @@
+import { useEffect, useState } from 'react'
+
+import Image from 'next/image'
+
+import Link from 'next/link'
+
+import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
+
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import CommonTable from '@/components/erp/common/table'
@@ -6,11 +16,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { DocumentIcon } from '@/public/icons'
 import { Column, DataTableApiResponse, Document } from '@/types'
 import { generateFileUrl, getFileType } from '@/utils/utility'
-import { PlusIcon, Search } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+
 import CreateOrEditDocumentModal from './CreateOrEditDocumentModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import ClientDocumentService from '@/services/api/clients/client-documents.service'
@@ -24,6 +30,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: clientId })
+
   // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
@@ -35,14 +42,17 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -53,6 +63,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       ClientDocumentService.index(filterOptions)
         .then(response => {
@@ -104,6 +115,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
     // Fetch contact type details
     try {
       const response = await ClientDocumentService.show(id)
+
       setSelectedDocument(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -207,6 +219,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 

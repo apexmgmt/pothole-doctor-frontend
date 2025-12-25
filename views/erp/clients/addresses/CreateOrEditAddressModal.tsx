@@ -1,11 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react'
+
 import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
-import { toast } from 'sonner'
 import { CountryWithStates, ClientAddress, ClientAddressPayload } from '@/types'
 import ClientAddressService from '@/services/api/clients/client-addresses.service'
 
@@ -71,6 +74,7 @@ const CreateOrEditAddressModal: React.FC<CreateOrEditAddressModalProps> = ({
   const availableStates = useMemo(() => {
     if (!selectedCountryId) return []
     const country = countriesWithStatesAndCities.find(c => c.id.toString() === selectedCountryId)
+
     return country?.states || []
   }, [selectedCountryId, countriesWithStatesAndCities])
 
@@ -78,6 +82,7 @@ const CreateOrEditAddressModal: React.FC<CreateOrEditAddressModalProps> = ({
   const availableCities = useMemo(() => {
     if (!selectedStateId) return []
     const state = availableStates.find(s => s.id.toString() === selectedStateId)
+
     return state?.cities || []
   }, [selectedStateId, availableStates])
 
@@ -85,6 +90,7 @@ const CreateOrEditAddressModal: React.FC<CreateOrEditAddressModalProps> = ({
   useEffect(() => {
     if (selectedCountryId && form.getValues('state_id')) {
       const stateExists = availableStates.some(s => s.id.toString() === form.getValues('state_id'))
+
       if (!stateExists) {
         form.setValue('state_id', '')
         form.setValue('city_id', '')
@@ -96,6 +102,7 @@ const CreateOrEditAddressModal: React.FC<CreateOrEditAddressModalProps> = ({
   useEffect(() => {
     if (selectedStateId && form.getValues('city_id')) {
       const cityExists = availableCities.some(c => c.id.toString() === form.getValues('city_id'))
+
       if (!cityExists) {
         form.setValue('city_id', '')
       }
@@ -106,6 +113,7 @@ const CreateOrEditAddressModal: React.FC<CreateOrEditAddressModalProps> = ({
     try {
       // Remove country_id from payload
       const { country_id, ...payload } = values
+
       if (mode === 'edit' && address_id) {
         await ClientAddressService.update(address_id, payload)
         toast.success('Address updated successfully')
@@ -113,6 +121,7 @@ const CreateOrEditAddressModal: React.FC<CreateOrEditAddressModalProps> = ({
         await ClientAddressService.store(payload)
         toast.success('Address created successfully')
       }
+
       form.reset()
       onSuccess()
       onClose()

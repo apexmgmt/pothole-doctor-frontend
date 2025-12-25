@@ -13,6 +13,7 @@ export default async function ProductsPage() {
 
   try {
     const response = await ProductCategoryService.getAllProductCategories()
+
     productCategories = response.data || []
   } catch (error) {
     productCategories = []
@@ -20,6 +21,7 @@ export default async function ProductsPage() {
 
   try {
     const response = await UnitService.getAllUnits('uom')
+
     uomUnits = response.data || []
   } catch (error) {
     uomUnits = []
@@ -27,6 +29,7 @@ export default async function ProductsPage() {
 
   try {
     const response = await ServiceTypeService.getAllServiceTypes()
+
     serviceTypes = response.data || []
   } catch (error) {
     serviceTypes = []
@@ -34,6 +37,7 @@ export default async function ProductsPage() {
 
   try {
     const response = await VendorService.getAllVendors()
+
     vendors = response.data || []
   } catch (error) {
     vendors = []

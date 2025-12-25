@@ -1,13 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react'
+
 import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
-import { toast } from 'sonner'
-import { ClientContact, ClientContactPayload } from '@/types'
-import { CountryWithStates } from '@/types'
+import { ClientContact, ClientContactPayload, CountryWithStates } from '@/types'
+
 import ClientContactService from '@/services/api/clients/client-contacts.service'
 
 interface CreateOrEditContactModalProps {
@@ -38,6 +41,7 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
       email: contact?.email || '',
       phone: contact?.phone || '',
       address: contact?.address || '',
+
       // zip_code: contact?.zip_code || '',
       country_id: contact?.country_id.toString() || '',
       state_id: contact?.state_id.toString() || '',
@@ -54,6 +58,7 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
         email: contact?.email || '',
         phone: contact?.phone || '',
         address: contact?.address || '',
+
         // zip_code: contact?.zip_code || '',
         country_id: contact?.country_id.toString() || '',
         state_id: contact?.state_id.toString() || '',
@@ -70,6 +75,7 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
   const availableStates = useMemo(() => {
     if (!selectedCountryId) return []
     const country = countriesWithStatesAndCities.find(c => c.id.toString() === selectedCountryId)
+
     return country?.states || []
   }, [selectedCountryId, countriesWithStatesAndCities])
 
@@ -77,6 +83,7 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
   const availableCities = useMemo(() => {
     if (!selectedStateId) return []
     const state = availableStates.find(s => s.id.toString() === selectedStateId)
+
     return state?.cities || []
   }, [selectedStateId, availableStates])
 
@@ -84,6 +91,7 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
   useEffect(() => {
     if (selectedCountryId && form.getValues('state_id')) {
       const stateExists = availableStates.some(s => s.id.toString() === form.getValues('state_id'))
+
       if (!stateExists) {
         form.setValue('state_id', '')
         form.setValue('city_id', '')
@@ -95,6 +103,7 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
   useEffect(() => {
     if (selectedStateId && form.getValues('city_id')) {
       const cityExists = availableCities.some(c => c.id.toString() === form.getValues('city_id'))
+
       if (!cityExists) {
         form.setValue('city_id', '')
       }
@@ -110,6 +119,7 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
         await ClientContactService.store(values)
         toast.success('Contact created successfully')
       }
+
       form.reset()
       onSuccess()
       onClose()
@@ -125,6 +135,7 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
       email: contact?.email || '',
       phone: contact?.phone || '',
       address: contact?.address || '',
+
       // zip_code: contact?.zip_code || '',
       country_id: contact?.country_id.toString() || '',
       state_id: contact?.state_id.toString() || '',

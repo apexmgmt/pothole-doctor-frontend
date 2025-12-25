@@ -1,10 +1,12 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useForm } from 'react-hook-form'
+
+import { Button } from '@/components/ui/button'
 import {
   BusinessLocation,
   Client,
@@ -175,6 +177,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       })
     }
   }, [mode, clientData, isOpen, reset])
+
   const onSubmit = async (data: ClientPayload) => {
     try {
       // separate address, state_id, city_id and zip_code from data
@@ -189,7 +192,9 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
         zip_code,
         ...rest
       } = data
+
       const payload = { ...rest }
+
       const addressPayload: ClientAddressPayload = {
         client_id: clientId || '',
         title: address_title || 'Primary Address',
@@ -204,11 +209,13 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
         ClientService.store(payload)
           .then(response => {
             const createdClientId = response.data.id
+
             // Now create the client address
             // if address has the value street_address, state_id, city_id, title
             if (address_title && address && state_id && city_id) {
               ClientAddressService.store({ ...addressPayload, client_id: createdClientId })
             }
+
             toast.success(`${type === 'lead' ? 'Lead' : 'Customer'} created successfully`)
             onSuccess()
             onClose()
@@ -228,6 +235,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
                 ClientAddressService.store({ ...addressPayload, client_id: clientId })
               }
             }
+
             toast.success(`${type === 'lead' ? 'Lead' : 'Customer'} updated successfully`)
             onSuccess()
             onClose()

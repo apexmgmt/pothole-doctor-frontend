@@ -16,6 +16,7 @@ interface ApiInterceptorOptions extends RequestInit {
  */
 const storeTokens = (data: any) => {
   if (!data) return
+
   // keep same storage strategy as login
   CookieService.store('access_token', data.access_token, { expires: data.expires_in })
   CookieService.store('refresh_token', data.refresh_token)
@@ -57,6 +58,7 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
       }
     } else {
       isRefreshing = true
+
       // Import AuthService dynamically to avoid circular dependency
       const { default: AuthService } = await import('@/services/api/auth.service')
 
@@ -66,6 +68,7 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
             storeTokens(refreshed)
             isRefreshing = false
             refreshPromise = null
+
             return refreshed
           } else {
             isRefreshing = false
@@ -82,6 +85,7 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
 
       try {
         const refreshed = await refreshPromise
+
         accessToken = refreshed.access_token
         refreshToken = refreshed.refresh_token
       } catch (err) {
@@ -125,8 +129,10 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
           try {
             await refreshPromise
             const newAccessToken = await CookieService.get('access_token')
+
             if (newAccessToken) {
               const retryHeaders = { ...headers, Authorization: `Bearer ${newAccessToken}` }
+
               response = await fetch(url, { ...fetchOptions, headers: retryHeaders })
               if (response.status !== 401) return response
             }
@@ -135,6 +141,7 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
           }
         } else {
           isRefreshing = true
+
           // Import AuthService dynamically to avoid circular dependency
           const { default: AuthService } = await import('@/services/api/auth.service')
 
@@ -144,6 +151,7 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
                 storeTokens(refreshed)
                 isRefreshing = false
                 refreshPromise = null
+
                 return refreshed
               } else {
                 isRefreshing = false
@@ -160,8 +168,10 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
 
           try {
             const refreshed = await refreshPromise
+
             // Retry request with new token
             const retryHeaders = { ...headers, Authorization: `Bearer ${refreshed.access_token}` }
+
             response = await fetch(url, { ...fetchOptions, headers: retryHeaders })
             if (response.status !== 401) return response
           } catch {

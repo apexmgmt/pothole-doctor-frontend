@@ -1,7 +1,7 @@
-import DashboardIndex from "@/views/erp/dashboard";
+import DashboardIndex from '@/views/erp/dashboard'
 
 const DashboardPage = () => {
-  return <DashboardIndex />;
-};
+  return <DashboardIndex />
+}
 
-export default DashboardPage;
+export default DashboardPage

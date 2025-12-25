@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { User } from '@/types'
 import { useAppSelector } from '@/lib/hooks'

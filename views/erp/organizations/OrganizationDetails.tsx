@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { appUrl } from '@/utils/utility'
@@ -19,6 +20,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({ companyData, 
     OrganizationService.show(companyData?.id)
       .then(response => {
         setCompanyData(response.data)
+
         if (fetchData) {
           fetchData()
         }
@@ -37,6 +39,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({ companyData, 
   }
 
   const fullName = `${companyData.first_name || ''} ${companyData.last_name || ''}`.trim()
+
   const initials = fullName
     .split(' ')
     .map((name: string) => name.charAt(0))

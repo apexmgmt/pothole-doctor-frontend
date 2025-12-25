@@ -4,12 +4,15 @@ import CreateOrEditBusinessLocation from '@/views/erp/locations/businesses/Creat
 
 const CreateBusinessLocationPage = async () => {
   let countriesWithStateAndCities: Location['countries'] = []
+
   try {
     const response = await LocationService.index()
+
     countriesWithStateAndCities = response.data || []
   } catch (error) {
     countriesWithStateAndCities = []
   }
+
   return <CreateOrEditBusinessLocation countriesWithStateAndCities={countriesWithStateAndCities} />
 }
 

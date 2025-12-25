@@ -3,8 +3,10 @@ import CreateOrEditRole from '@/views/erp/roles/CreateOrEditRole'
 
 const CreateRole = async () => {
   let permissions = {}
+
   try {
     const response = await PermissionService.index()
+
     permissions = response.data || {}
   } catch (error) {
     permissions = {}

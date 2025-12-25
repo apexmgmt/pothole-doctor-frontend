@@ -7,9 +7,11 @@ export default async function PaymentTermsPage() {
 
   try {
     const response = await PaymentTermsService.getPaymentTermTypes()
+
     paymentTermTypes = response.data || []
   } catch (error) {
     paymentTermTypes = []
   }
+
   return <PaymentTerms paymentTermTypes={paymentTermTypes} />
 }

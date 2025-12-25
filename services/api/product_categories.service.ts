@@ -10,6 +10,7 @@ export default class ProductCategoryService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + PRODUCT_CATEGORIES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class ProductCategoryService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch product categories')
       }
 
@@ -31,6 +33,7 @@ export default class ProductCategoryService {
   static store = async (payload: ProductCategoryPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCT_CATEGORIES, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class ProductCategoryService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create product category')
       }
 
@@ -54,6 +58,7 @@ export default class ProductCategoryService {
   static show = async (productCategoryId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCT_CATEGORIES + productCategoryId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class ProductCategoryService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch product category details')
       }
 
@@ -75,6 +81,7 @@ export default class ProductCategoryService {
   static update = async (productCategoryId: string, payload: ProductCategoryPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCT_CATEGORIES + productCategoryId, {
         requiresAuth: true,
         method: 'PUT',
@@ -83,11 +90,14 @@ export default class ProductCategoryService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update product category')
       }
+
       await revalidate('product-categories')
       await revalidate(`product-categories/${productCategoryId}`)
       await revalidate('product-categories-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -98,17 +108,22 @@ export default class ProductCategoryService {
   static destroy = async (productCategoryId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCT_CATEGORIES + productCategoryId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete product category')
       }
+
       await revalidate('product-categories')
       await revalidate(`product-categories/${productCategoryId}`)
       await revalidate('product-categories-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -119,15 +134,19 @@ export default class ProductCategoryService {
   static getAllProductCategories = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCT_CATEGORIES_ALL, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['product-categories-all'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch product categories')
       }
+
       return await response.json()
     } catch (error) {
       throw error

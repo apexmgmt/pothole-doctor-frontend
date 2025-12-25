@@ -1,8 +1,14 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
+import Link from 'next/link'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -16,9 +22,7 @@ import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import StaffDetails from './StaffDetails'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import Link from 'next/link'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const Staffs: React.FC = () => {
@@ -36,6 +40,7 @@ const Staffs: React.FC = () => {
   // Initialize filterOptions from URL params
   const getInitialFilters = () => {
     const filters: any = {}
+
     searchParams.forEach((value, key) => {
       // Convert numeric values
       if (key === 'page' || key === 'per_page') {
@@ -61,14 +66,17 @@ const Staffs: React.FC = () => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -95,6 +103,7 @@ const Staffs: React.FC = () => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       StaffService.index(filterOptions)
         .then(response => {
@@ -226,6 +235,7 @@ const Staffs: React.FC = () => {
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 

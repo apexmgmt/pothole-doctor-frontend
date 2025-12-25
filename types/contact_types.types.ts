@@ -1,4 +1,4 @@
-import { PaymentTerm } from "./payment_terms.types"
+import { PaymentTerm } from './payment_terms.types'
 
 export interface ContactType {
   id: string

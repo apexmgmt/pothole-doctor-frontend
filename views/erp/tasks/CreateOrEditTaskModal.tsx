@@ -1,5 +1,11 @@
 'use client'
 
+import { useEffect, useMemo, useState } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import {
   Client,
   CommissionType,
@@ -16,9 +22,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useMemo, useState } from 'react'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import TaskService from '@/services/api/tasks.service'
 import { MultiSelect, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -132,6 +136,7 @@ const CreateOrEditTaskModal = ({
     () => clients.find(c => c.id === form.watch('client_id')),
     [clients, form.watch('client_id')]
   )
+
   const addressOptions = selectedClient?.addresses || []
 
   // Find default address value (comma separated)
@@ -153,7 +158,6 @@ const CreateOrEditTaskModal = ({
     } else {
       form.setValue('location', '')
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch('client_id')])
 
   // Watch task_type_id changes
@@ -181,6 +185,7 @@ const CreateOrEditTaskModal = ({
       taskTypeReminders.forEach(reminder => {
         if (reminder.reminder_channel?.type === 'sms') {
           hasSmsReminder = true
+
           if (reminder.role_type === 'customer') {
             smsCustomerTimes[reminder.reminder_time_id] = reminder.is_enabled
           } else if (reminder.role_type === 'employee') {
@@ -188,6 +193,7 @@ const CreateOrEditTaskModal = ({
           }
         } else if (reminder.reminder_channel?.type === 'email') {
           hasEmailReminder = true
+
           if (reminder.role_type === 'customer') {
             emailCustomerTimes[reminder.reminder_time_id] = reminder.is_enabled
           } else if (reminder.role_type === 'employee') {
@@ -212,7 +218,6 @@ const CreateOrEditTaskModal = ({
       form.setValue('email_customer_times', {})
       form.setValue('email_employee_times', {})
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTaskTypeId, taskReminders, taskReminderChannels])
 
   const onSubmit = async (values: FormValues) => {
@@ -221,6 +226,7 @@ const CreateOrEditTaskModal = ({
     // Build SMS reminders
     if (values.sms_reminder === 1) {
       const smsChannel = taskReminderChannels.find(ch => ch.type === 'sms')
+
       if (smsChannel) {
         // Customer SMS reminders
         const customerSmsTimeIds = Object.entries(values.sms_customer_times || {})
@@ -255,6 +261,7 @@ const CreateOrEditTaskModal = ({
     // Build Email reminders
     if (values.email_reminder === 1) {
       const emailChannel = taskReminderChannels.find(ch => ch.type === 'email')
+
       if (emailChannel) {
         // Customer Email reminders
         const customerEmailTimeIds = Object.entries(values.email_customer_times || {})
@@ -411,6 +418,7 @@ const CreateOrEditTaskModal = ({
                       value={field.value}
                       onValueChange={value => {
                         field.onChange(value)
+
                         // Reset location when customer changes
                         form.setValue('location', '')
                       }}

@@ -56,6 +56,7 @@ export default class ContactService {
           projectDescription: formData.projectDescription,
           timeline: formData.timeline,
           hearAboutUs: formData.hearAboutUs
+
           // privacy: formData.privacy,
         })
       })
@@ -63,6 +64,7 @@ export default class ContactService {
       // Check local API response
       if (localApiResponse.ok) {
         const result: LocalApiResponse = await localApiResponse.json()
+
         return {
           success: true,
           message: result.message || 'Form submitted successfully!'
@@ -73,6 +75,7 @@ export default class ContactService {
       }
     } catch (error) {
       console.error('Error submitting form:', error)
+
       return {
         success: false,
         message: 'Failed to submit form. Please try again.'

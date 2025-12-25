@@ -6,7 +6,7 @@ import {
   PROFILE_CHANGE_PASSWORD,
   PROFILE_LAST_ACTIVITY,
   PROFILE_PICTURE,
-  PROFILE_UPDATE,
+  PROFILE_UPDATE
 } from '@/constants/api'
 import { getApiUrl } from '@/utils/utility'
 import CookieService from '../app/cookie.service'
@@ -28,6 +28,7 @@ export default class AuthService {
       }
 
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + AUTH_LOGIN, {
         requiresAuth: false,
         method: 'POST',
@@ -51,11 +52,13 @@ export default class AuthService {
     if (!refresh_token) {
       refresh_token = await CookieService.get('refresh_token')
     }
+
     if (!refresh_token) throw new Error('No refresh token available')
 
     try {
       const apiUrl: string = await getApiUrl()
       const payload: object = { refresh_token: refresh_token }
+
       const response = await apiInterceptor(apiUrl + AUTH_REFRESH_TOKEN, {
         requiresAuth: false,
         method: 'POST',
@@ -64,6 +67,7 @@ export default class AuthService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to refresh token')
       }
 
@@ -80,6 +84,7 @@ export default class AuthService {
   static logout = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + AUTH_LOGOUT, {
         requiresAuth: true,
         method: 'POST'
@@ -87,6 +92,7 @@ export default class AuthService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to logout')
       }
 
@@ -99,6 +105,7 @@ export default class AuthService {
   static getAuthDetails = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + AUTH_ME, {
         requiresAuth: true,
         method: 'GET'
@@ -106,11 +113,14 @@ export default class AuthService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to get user details')
       }
 
       const data = await response.json()
+
       CookieService.store('user', data?.data)
+
       return data
     } catch (error) {
       throw error
@@ -120,6 +130,7 @@ export default class AuthService {
   static updateProfilePicture = async (payload: any) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PROFILE_PICTURE, {
         requiresAuth: true,
         method: 'POST',
@@ -128,6 +139,7 @@ export default class AuthService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update profile picture')
       }
 
@@ -140,6 +152,7 @@ export default class AuthService {
   static updateProfileDetails = async (payload: ProfileDetailsPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PROFILE_UPDATE, {
         requiresAuth: true,
         method: 'PUT',
@@ -148,6 +161,7 @@ export default class AuthService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update profile details')
       }
 
@@ -160,6 +174,7 @@ export default class AuthService {
   static updatePassword = async (payload: ProfileChangePasswordPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PROFILE_CHANGE_PASSWORD, {
         requiresAuth: true,
         method: 'POST',
@@ -168,6 +183,7 @@ export default class AuthService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update profile profile')
       }
 
@@ -180,6 +196,7 @@ export default class AuthService {
   static getActivity = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PROFILE_LAST_ACTIVITY, {
         requiresAuth: true,
         method: 'GET'
@@ -187,6 +204,7 @@ export default class AuthService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to get activity')
       }
 
@@ -203,12 +221,10 @@ export default class AuthService {
     //     requiresAuth: true,
     //     method: 'DELETE'
     //   })
-
     //   if (!response.ok) {
     //     const errorData = await response.json()
     //     throw new Error(errorData.message || 'Failed to end session')
     //   }
-
     //   return await response.json()
     // } catch (error) {
     //   throw error
@@ -222,12 +238,10 @@ export default class AuthService {
     //     requiresAuth: true,
     //     method: 'POST'
     //   })
-
     //   if (!response.ok) {
     //     const errorData = await response.json()
     //     throw new Error(errorData.message || 'Failed to logout from all devices')
     //   }
-
     //   return await response.json()
     // } catch (error) {
     //   throw error

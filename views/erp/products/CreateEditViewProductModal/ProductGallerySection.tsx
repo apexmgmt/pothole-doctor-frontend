@@ -1,13 +1,19 @@
 'use client'
 
 import { useState } from 'react'
+
+import Image from 'next/image'
+
+import { ImageIcon, Trash2, Upload, Loader2 } from 'lucide-react'
+
+import { toast } from 'sonner'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { ImageIcon, Trash2, Upload, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
+
 import ProductGalleryService from '@/services/api/products/product-galleries.service'
-import Image from 'next/image'
+
 import { generateFileUrl } from '@/utils/utility'
 import { ProductGallery } from '@/types'
 
@@ -31,10 +37,12 @@ export function ProductGallerySection({
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
+
     if (!files || files.length === 0) return
 
     // Validate all files
     const validFiles: File[] = []
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
 
@@ -61,6 +69,7 @@ export function ProductGallerySection({
 
     try {
       const formData = new FormData()
+
       formData.append('product_id', productId)
 
       // Append all valid files

@@ -1,7 +1,12 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+
+import { useRouter } from 'next/navigation'
+
 import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -11,8 +16,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import OrganizationService from '@/services/api/organizations.service'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
@@ -90,6 +93,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
 
   const onSubmit = async (data: StaffPayload) => {
     setIsLoading(true)
+
     if (mode === 'create') {
       try {
         StaffService.store(data)
@@ -147,14 +151,17 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
 
   const handleRoleSelect = (roleName: string) => {
     const currentRoles = getValues('roles') || []
+
     if (!currentRoles.includes(roleName)) {
       form.setValue('roles', [...currentRoles, roleName])
     }
+
     setSelectedRole('')
   }
 
   const handleRoleRemove = (roleName: string) => {
     const currentRoles = getValues('roles') || []
+
     form.setValue(
       'roles',
       currentRoles.filter(r => r !== roleName)
@@ -284,7 +291,9 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                 required: mode === 'create' ? 'Required' : false,
                 validate: (value: string) => {
                   const password = getValues('password')
+
                   if (password && value !== password) return 'Does not match'
+
                   return true
                 }
               }}

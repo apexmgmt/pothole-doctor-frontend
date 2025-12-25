@@ -10,6 +10,7 @@ export default class WarehouseService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + WAREHOUSES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class WarehouseService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch warehouses')
       }
 
@@ -31,6 +33,7 @@ export default class WarehouseService {
   static store = async (payload: WarehousePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + WAREHOUSES, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class WarehouseService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create warehouse')
       }
 
@@ -54,6 +58,7 @@ export default class WarehouseService {
   static show = async (warehouseId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + WAREHOUSES + warehouseId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class WarehouseService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch warehouse details')
       }
 
@@ -75,6 +81,7 @@ export default class WarehouseService {
   static update = async (warehouseId: string, payload: WarehousePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + WAREHOUSES + warehouseId, {
         requiresAuth: true,
         method: 'PUT',
@@ -83,11 +90,14 @@ export default class WarehouseService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update warehouse')
       }
+
       await revalidate('warehouses')
       await revalidate(`warehouses/${warehouseId}`)
       await revalidate('warehouses-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -98,17 +108,22 @@ export default class WarehouseService {
   static destroy = async (warehouseId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + WAREHOUSES + warehouseId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete warehouse')
       }
+
       await revalidate('warehouses')
       await revalidate(`warehouses/${warehouseId}`)
       await revalidate('warehouses-all')
+
       return await response.json()
     } catch (error) {
       throw error

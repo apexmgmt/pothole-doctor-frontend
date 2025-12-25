@@ -1,11 +1,13 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import { UseFormReturn } from 'react-hook-form'
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Unit } from '@/types'
-import { useEffect } from 'react'
 
 interface UOMFieldsProps {
   form: UseFormReturn<any>
@@ -20,6 +22,7 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
   useEffect(() => {
     if (isRolledGood === 1) {
       const rollUnit = uomUnits.find(u => u.name.toLowerCase() === 'roll')
+
       if (rollUnit) {
         form.setValue('purchase_uom', rollUnit.name)
       }

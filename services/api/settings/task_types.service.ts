@@ -10,6 +10,7 @@ export default class TaskTypeService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + TASK_TYPES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class TaskTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch task types')
       }
 
@@ -31,6 +33,7 @@ export default class TaskTypeService {
   static store = async (payload: TaskTypePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + TASK_TYPES, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class TaskTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create task type')
       }
 
@@ -55,6 +59,7 @@ export default class TaskTypeService {
   static show = async (taskTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + TASK_TYPES + taskTypeId, {
         requiresAuth: true,
         method: 'GET',
@@ -63,6 +68,7 @@ export default class TaskTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch task type details')
       }
 
@@ -76,6 +82,7 @@ export default class TaskTypeService {
   static update = async (taskTypeId: string, payload: TaskTypePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + TASK_TYPES + taskTypeId, {
         requiresAuth: true,
         method: 'PUT',
@@ -84,11 +91,14 @@ export default class TaskTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update task type')
       }
+
       await revalidate('task-types')
       await revalidate(`task-types/${taskTypeId}`)
       await revalidate('task-types-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -99,14 +109,18 @@ export default class TaskTypeService {
   static destroy = async (taskTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + TASK_TYPES + taskTypeId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete task type')
       }
+
       await revalidate('task-types')
       await revalidate(`task-types/${taskTypeId}`)
       await revalidate('task-types-all')
@@ -121,17 +135,22 @@ export default class TaskTypeService {
   static restore = async (taskTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + TASK_TYPES + taskTypeId + '/restore', {
         requiresAuth: true,
         method: 'POST'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to restore task type')
       }
+
       await revalidate('task-types')
       await revalidate(`task-types/${taskTypeId}`)
       await revalidate('task-types-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -142,6 +161,7 @@ export default class TaskTypeService {
   static getAllTaskType = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + TASK_TYPES_ALL, {
         requiresAuth: true,
         method: 'GET',
@@ -150,6 +170,7 @@ export default class TaskTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch all task types')
       }
 

@@ -10,6 +10,7 @@ export default class VendorPickupAddressService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + VENDOR_PICKUP_ADDRESSES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class VendorPickupAddressService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch vendor pickup addresses')
       }
 
@@ -31,6 +33,7 @@ export default class VendorPickupAddressService {
   static store = async (payload: VendorPickupAddressPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDOR_PICKUP_ADDRESSES, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class VendorPickupAddressService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to add vendor pickup address')
       }
 
@@ -54,6 +58,7 @@ export default class VendorPickupAddressService {
   static show = async (vendorPickupAddressId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDOR_PICKUP_ADDRESSES + vendorPickupAddressId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class VendorPickupAddressService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch vendor pickup address details')
       }
 
@@ -84,10 +90,13 @@ export default class VendorPickupAddressService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update vendor pickup address')
       }
+
       await revalidate('vendor-pickup-addresses')
       await revalidate(`vendor-pickup-addresses/${vendorPickupAddressId}`)
+
       return await response.json()
     } catch (error) {
       throw error
@@ -98,16 +107,21 @@ export default class VendorPickupAddressService {
   static destroy = async (vendorPickupAddressId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + VENDOR_PICKUP_ADDRESSES + vendorPickupAddressId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete vendor pickup address')
       }
+
       await revalidate('vendor-pickup-addresses')
       await revalidate(`vendor-pickup-addresses/${vendorPickupAddressId}`)
+
       return await response.json()
     } catch (error) {
       throw error

@@ -1,15 +1,18 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+
+import { useRouter } from 'next/navigation'
+
 import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import OrganizationService from '@/services/api/organizations.service'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
@@ -52,6 +55,7 @@ const CreateOrganization: React.FC = () => {
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true)
+
     try {
       OrganizationService.store(data)
         .then(response => {
@@ -196,6 +200,7 @@ const CreateOrganization: React.FC = () => {
                           .replace(/^-+/, '') // no leading hyphen
                           .replace(/-+$/, '') // no trailing hyphen
                           .slice(0, 63) // max label length
+
                         field.onChange(sanitized)
                       }}
                     />

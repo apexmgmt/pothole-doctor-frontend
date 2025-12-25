@@ -1,8 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search, User2Icon } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -12,7 +16,6 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import VendorService from '@/services/api/vendors/vendors.service'
@@ -52,14 +55,17 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -70,6 +76,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       VendorService.index(filterOptions)
         .then(response => {
@@ -96,6 +103,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const vendorsData = apiResponse?.data
     ? apiResponse.data.map((vendor: Vendor, index: number) => {
         const userable = vendor.userable
+
         return {
           id: vendor.id,
           index: (apiResponse?.from || 1) + index,
@@ -123,6 +131,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
     // Fetch contact type details
     try {
       const response = await VendorService.show(id)
+
       setSelectedVendor(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -227,6 +236,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -348,7 +358,10 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
           <VendorRebateCredits vendorId={selectedUserAbleId || ''} />
         )}
         {activeTab === 'pickup-addresses' && selectedVendorId && selectedUserAbleId && (
-          <VendorPickupAddresses countriesWithStatesAndCities={countriesWithStatesAndCities} vendorId={selectedUserAbleId || ''} />
+          <VendorPickupAddresses
+            countriesWithStatesAndCities={countriesWithStatesAndCities}
+            vendorId={selectedUserAbleId || ''}
+          />
         )}
         {activeTab === 'salesman' && selectedVendorId && selectedUserAbleId && (
           <VendorSalesmen vendorId={selectedUserAbleId || ''} />

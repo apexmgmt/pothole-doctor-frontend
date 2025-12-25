@@ -9,6 +9,7 @@ export default class ClientAddressService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + CLIENT_ADDRESSES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET'
@@ -16,6 +17,7 @@ export default class ClientAddressService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch client addresses')
       }
 
@@ -29,6 +31,7 @@ export default class ClientAddressService {
   static store = async (payload: ClientAddressPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_ADDRESSES, {
         requiresAuth: true,
         method: 'POST',
@@ -37,6 +40,7 @@ export default class ClientAddressService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create client address')
       }
 
@@ -50,6 +54,7 @@ export default class ClientAddressService {
   static show = async (clientAddressId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_ADDRESSES + clientAddressId, {
         requiresAuth: true,
         method: 'GET'
@@ -57,6 +62,7 @@ export default class ClientAddressService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch client address details')
       }
 
@@ -79,8 +85,10 @@ export default class ClientAddressService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update client address')
       }
+
       return await response.json()
     } catch (error) {
       throw error
@@ -91,14 +99,18 @@ export default class ClientAddressService {
   static destroy = async (clientAddressId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_ADDRESSES + clientAddressId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete client address')
       }
+
       return await response.json()
     } catch (error) {
       throw error

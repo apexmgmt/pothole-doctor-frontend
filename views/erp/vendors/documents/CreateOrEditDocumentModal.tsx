@@ -1,12 +1,16 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { Document, DocumentPayload } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useRef, useState } from 'react'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { generateFileUrl, getFileType } from '@/utils/utility'
 import VendorDocumentService from '@/services/api/vendors/vendor-documents.service'
@@ -47,6 +51,7 @@ const CreateOrEditDocumentModal = ({
   useEffect(() => {
     if (open) {
       form.reset({ file: null })
+
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
@@ -57,6 +62,7 @@ const CreateOrEditDocumentModal = ({
     // Validate file on create
     if (mode === 'create' && !values.file) {
       form.setError('file', { message: 'Please upload a file' })
+
       return
     }
 
@@ -64,6 +70,7 @@ const CreateOrEditDocumentModal = ({
 
     // Create FormData
     const formData = new FormData()
+
     formData.append('vendor_id', vendorId)
 
     if (values.file) {
@@ -98,9 +105,11 @@ const CreateOrEditDocumentModal = ({
 
   const onCancel = () => {
     form.reset({ file: null })
+
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+
     onOpenChange(false)
   }
 
@@ -145,8 +154,9 @@ const CreateOrEditDocumentModal = ({
               mode === 'create'
                 ? {
                     required: 'File is required',
-                    validate: (value) => {
+                    validate: value => {
                       if (!value) return 'Please select a file'
+
                       return true
                     }
                   }
@@ -166,6 +176,7 @@ const CreateOrEditDocumentModal = ({
                     {...field}
                     onChange={e => {
                       const file = e.target.files?.[0] || null
+
                       onChange(file)
                     }}
                   />

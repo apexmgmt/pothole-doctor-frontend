@@ -10,6 +10,7 @@ export default class PartnerDocumentService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + PARTNER_DOCUMENTS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class PartnerDocumentService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch partner documents')
       }
 
@@ -31,6 +33,7 @@ export default class PartnerDocumentService {
   static store = async (payload: any) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PARTNER_DOCUMENTS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class PartnerDocumentService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to add document')
       }
 
@@ -54,6 +58,7 @@ export default class PartnerDocumentService {
   static show = async (partnerDocumentId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PARTNER_DOCUMENTS + partnerDocumentId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class PartnerDocumentService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch document details')
       }
 
@@ -87,10 +93,13 @@ export default class PartnerDocumentService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update document')
       }
+
       await revalidate('partner-documents')
       await revalidate(`partner-documents/${partnerDocumentId}`)
+
       return await response.json()
     } catch (error) {
       throw error
@@ -101,16 +110,21 @@ export default class PartnerDocumentService {
   static destroy = async (partnerDocumentId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PARTNER_DOCUMENTS + partnerDocumentId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete document')
       }
+
       await revalidate('partner-documents')
       await revalidate(`partner-documents/${partnerDocumentId}`)
+
       return await response.json()
     } catch (error) {
       throw error

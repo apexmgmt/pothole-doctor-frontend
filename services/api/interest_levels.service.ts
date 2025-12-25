@@ -10,6 +10,7 @@ export default class InterestLevelService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + INTEREST_LEVELS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class InterestLevelService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch interest levels')
       }
 
@@ -31,6 +33,7 @@ export default class InterestLevelService {
   static store = async (payload: InterestLevelPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + INTEREST_LEVELS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class InterestLevelService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create interest level')
       }
 
@@ -54,6 +58,7 @@ export default class InterestLevelService {
   static show = async (interestLevelId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + INTEREST_LEVELS + interestLevelId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class InterestLevelService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch interest level details')
       }
 
@@ -75,6 +81,7 @@ export default class InterestLevelService {
   static update = async (interestLevelId: string, payload: InterestLevelPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + INTEREST_LEVELS + interestLevelId, {
         requiresAuth: true,
         method: 'PUT',
@@ -83,11 +90,14 @@ export default class InterestLevelService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update interest level')
       }
+
       await revalidate('interest-levels')
       await revalidate(`interest-levels/${interestLevelId}`)
       await revalidate('interest-levels-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -98,17 +108,22 @@ export default class InterestLevelService {
   static destroy = async (interestLevelId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + INTEREST_LEVELS + interestLevelId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete interest level')
       }
+
       await revalidate('interest-levels')
       await revalidate(`interest-levels/${interestLevelId}`)
       await revalidate('interest-levels-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -119,15 +134,19 @@ export default class InterestLevelService {
   static getAllInterestLevels = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + INTEREST_LEVELS_ALL, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['interest-levels-all'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch all interest levels')
       }
+
       return await response.json()
     } catch (error) {
       throw error

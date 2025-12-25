@@ -1,8 +1,9 @@
 'use client'
 
+import React, { useState, ChangeEvent, FormEvent } from 'react'
+
 import ContactService from '@/services/api/contact.service'
 import { ContactFormData, ContactFormSubmitStatus } from '@/types'
-import React, { useState, ChangeEvent, FormEvent } from 'react'
 
 const ContactSection: React.FC = () => {
   // Add CSS to fix dropdown width issues

@@ -10,6 +10,7 @@ export default class ContactTypeService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + CONTACT_TYPES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class ContactTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch contact types')
       }
 
@@ -31,6 +33,7 @@ export default class ContactTypeService {
   static store = async (payload: ContactTypePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CONTACT_TYPES, {
         requiresAuth: true,
         method: 'POST',
@@ -39,6 +42,7 @@ export default class ContactTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create contact types')
       }
 
@@ -54,6 +58,7 @@ export default class ContactTypeService {
   static show = async (contactTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CONTACT_TYPES + contactTypeId, {
         requiresAuth: true,
         method: 'GET',
@@ -62,6 +67,7 @@ export default class ContactTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch contact types details')
       }
 
@@ -75,6 +81,7 @@ export default class ContactTypeService {
   static update = async (contactTypeId: string, payload: ContactTypePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CONTACT_TYPES + contactTypeId, {
         requiresAuth: true,
         method: 'PUT',
@@ -83,11 +90,14 @@ export default class ContactTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update contact types')
       }
+
       await revalidate('contact-types')
       await revalidate(`contact-types/${contactTypeId}`)
       await revalidate('contact-types-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -98,17 +108,22 @@ export default class ContactTypeService {
   static destroy = async (contactTypeId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CONTACT_TYPES + contactTypeId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete contact types')
       }
+
       await revalidate('contact-types-all')
       await revalidate(`contact-types/${contactTypeId}`)
       await revalidate('contact-types')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -119,15 +134,19 @@ export default class ContactTypeService {
   static getAllContactTypes = async () => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CONTACT_TYPES_ALL, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['contact-types-all'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch contact types list')
       }
+
       return await response.json()
     } catch (error) {
       throw error

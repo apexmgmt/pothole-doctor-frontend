@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Checkbox } from '@/components/ui/checkbox'
 import { TaskReminderChannel } from '@/types'
@@ -13,6 +15,101 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
 
   const smsReminderEnabled = form.watch('sms_reminder')
   const emailReminderEnabled = form.watch('email_reminder')
+
+  // Watch all relevant time fields
+  const smsCustomerTimes = form.watch('sms_customer_times')
+  const smsEmployeeTimes = form.watch('sms_employee_times')
+  const emailCustomerTimes = form.watch('email_customer_times')
+  const emailEmployeeTimes = form.watch('email_employee_times')
+
+  // Custom validation effect
+  useEffect(() => {
+    // Validate SMS reminders
+    if (smsReminderEnabled === 1 && smsChannel) {
+      const customerTimes = smsCustomerTimes || {}
+      const employeeTimes = smsEmployeeTimes || {}
+      const customerSelected = Object.values(customerTimes).some(Boolean)
+      const employeeSelected = Object.values(employeeTimes).some(Boolean)
+
+      if (!customerSelected) {
+        form.setError('sms_customer_times', {
+          type: 'manual',
+          message: 'Select at least one customer SMS reminder time.'
+        })
+      } else {
+        form.clearErrors('sms_customer_times')
+      }
+
+      if (!employeeSelected) {
+        form.setError('sms_employee_times', {
+          type: 'manual',
+          message: 'Select at least one employee SMS reminder time.'
+        })
+      } else {
+        form.clearErrors('sms_employee_times')
+      }
+    } else {
+      form.clearErrors('sms_customer_times')
+      form.clearErrors('sms_employee_times')
+    }
+
+    // Validate Email reminders
+    if (emailReminderEnabled === 1 && emailChannel) {
+      const customerTimes = emailCustomerTimes || {}
+      const employeeTimes = emailEmployeeTimes || {}
+      const customerSelected = Object.values(customerTimes).some(Boolean)
+      const employeeSelected = Object.values(employeeTimes).some(Boolean)
+
+      if (!customerSelected) {
+        form.setError('email_customer_times', {
+          type: 'manual',
+          message: 'Select at least one customer Email reminder time.'
+        })
+      } else {
+        form.clearErrors('email_customer_times')
+      }
+
+      if (!employeeSelected) {
+        form.setError('email_employee_times', {
+          type: 'manual',
+          message: 'Select at least one employee Email reminder time.'
+        })
+      } else {
+        form.clearErrors('email_employee_times')
+      }
+    } else {
+      form.clearErrors('email_customer_times')
+      form.clearErrors('email_employee_times')
+    }
+  }, [
+    smsReminderEnabled,
+    emailReminderEnabled,
+    smsCustomerTimes,
+    smsEmployeeTimes,
+    emailCustomerTimes,
+    emailEmployeeTimes,
+    form,
+    smsChannel,
+    emailChannel
+  ])
+
+  // Helper to clear error if any checkbox is checked
+  const handleTimeCheckedChange =
+    (type: 'sms' | 'email', role: 'customer' | 'employee', timeId: string) => (checked: boolean) => {
+      const fieldName = `${type}_${role}_times`
+
+      form.setValue(`${fieldName}.${timeId}`, checked ? 1 : 0)
+      const values = form.getValues(fieldName) || {}
+
+      if (Object.values(values).some(Boolean)) {
+        form.clearErrors(fieldName)
+      } else {
+        form.setError(fieldName, {
+          type: 'manual',
+          message: `Select at least one ${role} ${type === 'sms' ? 'SMS' : 'Email'} reminder time.`
+        })
+      }
+    }
 
   return (
     <div className='space-y-4'>
@@ -47,7 +144,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
                         <FormControl>
                           <Checkbox
                             checked={!!field.value}
-                            onCheckedChange={checked => field.onChange(checked ? 1 : 0)}
+                            onCheckedChange={handleTimeCheckedChange('sms', 'customer', time.id)}
                           />
                         </FormControl>
                         <FormLabel className='font-normal text-sm'>{time.label}</FormLabel>
@@ -57,7 +154,14 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
                 ))}
               </div>
             </div>
-
+            {/* Show error messages below each section */}
+            {smsReminderEnabled === 1 && (
+              <div className='ml-6'>
+                {form.formState.errors.sms_customer_times && (
+                  <p className='text-red-500 text-xs'>{form.formState.errors.sms_customer_times.message}</p>
+                )}
+              </div>
+            )}
             {/* Employee SMS Times */}
             <div>
               <p className='text-sm font-medium mb-2'>Employee:</p>
@@ -72,7 +176,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
                         <FormControl>
                           <Checkbox
                             checked={!!field.value}
-                            onCheckedChange={checked => field.onChange(checked ? 1 : 0)}
+                            onCheckedChange={handleTimeCheckedChange('sms', 'employee', time.id)}
                           />
                         </FormControl>
                         <FormLabel className='font-normal text-sm'>{time.label}</FormLabel>
@@ -82,6 +186,14 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
                 ))}
               </div>
             </div>
+            {/* Show error messages below each section */}
+            {smsReminderEnabled === 1 && (
+              <div className='ml-6'>
+                {form.formState.errors.sms_employee_times && (
+                  <p className='text-red-500 text-xs'>{form.formState.errors.sms_employee_times.message}</p>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -117,7 +229,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
                         <FormControl>
                           <Checkbox
                             checked={!!field.value}
-                            onCheckedChange={checked => field.onChange(checked ? 1 : 0)}
+                            onCheckedChange={handleTimeCheckedChange('email', 'customer', time.id)}
                           />
                         </FormControl>
                         <FormLabel className='font-normal text-sm'>{time.label}</FormLabel>
@@ -127,7 +239,14 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
                 ))}
               </div>
             </div>
-
+            {/* Show error messages below each section */}
+            {emailReminderEnabled === 1 && (
+              <div className='ml-6'>
+                {form.formState.errors.email_customer_times && (
+                  <p className='text-red-500 text-xs'>{form.formState.errors.email_customer_times.message}</p>
+                )}
+              </div>
+            )}
             {/* Employee Email Times */}
             <div>
               <p className='text-sm font-medium mb-2'>Employee:</p>
@@ -142,7 +261,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
                         <FormControl>
                           <Checkbox
                             checked={!!field.value}
-                            onCheckedChange={checked => field.onChange(checked ? 1 : 0)}
+                            onCheckedChange={handleTimeCheckedChange('email', 'employee', time.id)}
                           />
                         </FormControl>
                         <FormLabel className='font-normal text-sm'>{time.label}</FormLabel>
@@ -152,6 +271,14 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
                 ))}
               </div>
             </div>
+            {/* Show error messages below each section */}
+            {emailReminderEnabled === 1 && (
+              <div className='ml-6'>
+                {form.formState.errors.email_employee_times && (
+                  <p className='text-red-500 text-xs'>{form.formState.errors.email_employee_times.message}</p>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

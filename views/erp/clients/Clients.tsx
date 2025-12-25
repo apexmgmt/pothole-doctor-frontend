@@ -1,8 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -27,7 +31,6 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { toast } from 'sonner'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import { formatDate } from '@/utils/date'
@@ -90,14 +93,17 @@ const Clients: React.FC<{
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -108,6 +114,7 @@ const Clients: React.FC<{
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       ClientService.index({ ...filterOptions, type: type })
         .then(response => {
@@ -246,7 +253,10 @@ const Clients: React.FC<{
       id: 'address',
       header: 'Address',
       cell: (row: Client) => {
-        const parts = [row?.address?.street_address, row?.address?.city?.name, row?.address?.state?.name].filter(Boolean)
+        const parts = [row?.address?.street_address, row?.address?.city?.name, row?.address?.state?.name].filter(
+          Boolean
+        )
+
         return <span className='font-medium'>{parts.join(', ')}</span>
       },
       sortable: false
@@ -360,6 +370,7 @@ const Clients: React.FC<{
     // Fetch partner type details
     try {
       const response = await ClientService.show(id)
+
       setSelectedClient(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -399,6 +410,7 @@ const Clients: React.FC<{
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -532,7 +544,10 @@ const Clients: React.FC<{
         <ClientContacts clientId={selectedClientId || ''} countriesWithStatesAndCities={countriesWithStatesAndCities} />
       )}
       {activeTab === 'addresses' && selectedClientId && (
-        <ClientAddresses clientId={selectedClientId || ''} countriesWithStatesAndCities={countriesWithStatesAndCities} />
+        <ClientAddresses
+          clientId={selectedClientId || ''}
+          countriesWithStatesAndCities={countriesWithStatesAndCities}
+        />
       )}
       <CreateEditClientModal
         type={type}

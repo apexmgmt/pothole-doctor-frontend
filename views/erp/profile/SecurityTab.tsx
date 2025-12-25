@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+
 import ChangePasswordSection from './ChangePasswordSection'
 import LoginActivitySection from './LoginActivitySection'
 

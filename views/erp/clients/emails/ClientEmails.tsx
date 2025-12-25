@@ -1,12 +1,16 @@
+import { useEffect, useState } from 'react'
+
+import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
+
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Client, ClientEmail, Column, DataTableApiResponse } from '@/types'
-import { PlusIcon, Search } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+
 import { formatDate } from '@/utils/date'
 import CreateOrEditEmailModal from './CreateOrEditEmailModal'
 import ClientEmailService from '@/services/api/clients/client-emails.service'
@@ -29,14 +33,17 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -47,6 +54,7 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       ClientEmailService.index(filterOptions)
         .then(response => {
@@ -103,6 +111,7 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
       header: 'Sent By',
       cell: row => {
         const parts = [row?.user?.first_name, row?.user?.last_name].filter(Boolean)
+
         return <span className='font-medium'>{parts.join(' ')}</span>
       },
       sortable: true
@@ -130,13 +139,7 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
       header: 'Action',
       cell: row => (
         <ThreeDotButton
-          buttons={[
-            <DeleteButton
-              tooltip='Delete Email'
-              variant='text'
-              onClick={() => handleDeleteEmail(row.id)}
-            />
-          ]}
+          buttons={[<DeleteButton tooltip='Delete Email' variant='text' onClick={() => handleDeleteEmail(row.id)} />]}
         />
       ),
       sortable: false,
@@ -153,6 +156,7 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -193,7 +197,7 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
     <>
       <CommonTable
         data={{
-          data: apiResponse?.data as ClientEmail[] || [],
+          data: (apiResponse?.data as ClientEmail[]) || [],
           per_page: apiResponse?.per_page || 10,
           total: apiResponse?.total || 0,
           from: apiResponse?.from || 1,

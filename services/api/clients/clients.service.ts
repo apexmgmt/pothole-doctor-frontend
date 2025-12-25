@@ -10,6 +10,7 @@ export default class ClientService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + CLIENTS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -18,6 +19,7 @@ export default class ClientService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch clients')
       }
 
@@ -31,6 +33,7 @@ export default class ClientService {
   static store = async (payload: ClientPayload, type: string = '') => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENTS, {
         requiresAuth: true,
         method: 'POST',
@@ -39,12 +42,14 @@ export default class ClientService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create client')
       }
 
       await revalidate(`clients${type ? `-${type}` : ''}`)
       await revalidate(`clients-all${type ? `-${type}` : ''}`)
       await revalidate('clients-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -55,6 +60,7 @@ export default class ClientService {
   static show = async (clientId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENTS + clientId, {
         requiresAuth: true,
         method: 'GET',
@@ -63,6 +69,7 @@ export default class ClientService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch client details')
       }
 
@@ -76,6 +83,7 @@ export default class ClientService {
   static update = async (clientId: string, payload: ClientPayload, type: string = '') => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENTS + clientId, {
         requiresAuth: true,
         method: 'PUT',
@@ -84,12 +92,15 @@ export default class ClientService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update client')
       }
+
       await revalidate(`clients${type ? `-${type}` : ''}`)
       await revalidate(`clients/${clientId}`)
       await revalidate(`clients-all${type ? `-${type}` : ''}`)
       await revalidate('clients-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -100,18 +111,23 @@ export default class ClientService {
   static destroy = async (clientId: string, type: string = '') => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENTS + clientId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete client')
       }
+
       await revalidate(`clients${type ? `-${type}` : ''}`)
       await revalidate(`clients/${clientId}`)
       await revalidate(`clients-all${type ? `-${type}` : ''}`)
       await revalidate('clients-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -122,18 +138,23 @@ export default class ClientService {
   static restore = async (clientId: string, type: string = '') => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENTS + clientId + '/restore', {
         requiresAuth: true,
         method: 'POST'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to restore client')
       }
+
       await revalidate(`clients${type ? `-${type}` : ''}`)
       await revalidate(`clients/${clientId}`)
       await revalidate(`clients-all${type ? `-${type}` : ''}`)
       await revalidate('clients-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -144,6 +165,7 @@ export default class ClientService {
   static getAllClients = async (type: string = '') => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENTS_ALL + (type ? `?type=${type}` : ''), {
         requiresAuth: true,
         method: 'GET',
@@ -152,6 +174,7 @@ export default class ClientService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch clients')
       }
 

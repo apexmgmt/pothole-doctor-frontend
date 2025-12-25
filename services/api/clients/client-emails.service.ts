@@ -9,6 +9,7 @@ export default class ClientEmailService {
     try {
       const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
       const response = await apiInterceptor(apiUrl + CLIENT_EMAILS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET'
@@ -16,6 +17,7 @@ export default class ClientEmailService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch client emails')
       }
 
@@ -29,6 +31,7 @@ export default class ClientEmailService {
   static store = async (payload: ClientEmailPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_EMAILS, {
         requiresAuth: true,
         method: 'POST',
@@ -37,6 +40,7 @@ export default class ClientEmailService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to send email')
       }
 
@@ -50,6 +54,7 @@ export default class ClientEmailService {
   static show = async (clientEmailId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_EMAILS + clientEmailId, {
         requiresAuth: true,
         method: 'GET'
@@ -57,6 +62,7 @@ export default class ClientEmailService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch client email details')
       }
 
@@ -79,8 +85,10 @@ export default class ClientEmailService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update client email')
       }
+
       return await response.json()
     } catch (error) {
       throw error
@@ -91,14 +99,18 @@ export default class ClientEmailService {
   static destroy = async (clientEmailId: string) => {
     try {
       const apiUrl: string = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + CLIENT_EMAILS + clientEmailId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete client email')
       }
+
       return await response.json()
     } catch (error) {
       throw error

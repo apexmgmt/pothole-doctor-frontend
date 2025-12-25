@@ -7,6 +7,7 @@ export default class ProductGalleryService {
   static index = async (productId: string) => {
     try {
       const apiUrl = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCTS_GALLERIES + `?product_id=${productId}`, {
         requiresAuth: true,
         method: 'GET',
@@ -15,8 +16,10 @@ export default class ProductGalleryService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch product galleries')
       }
+
       return await response.json()
     } catch (error) {
       throw error
@@ -26,6 +29,7 @@ export default class ProductGalleryService {
   static store = async (payload: any) => {
     try {
       const apiUrl = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCTS_GALLERIES, {
         requiresAuth: true,
         method: 'POST',
@@ -34,10 +38,12 @@ export default class ProductGalleryService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to add product gallery')
       }
 
       await revalidate('product-galleries')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -47,6 +53,7 @@ export default class ProductGalleryService {
   static destroy = async (galleryId: string) => {
     try {
       const apiUrl = await getApiUrl()
+
       const response = await apiInterceptor(apiUrl + PRODUCTS_GALLERIES + galleryId, {
         requiresAuth: true,
         method: 'DELETE'
@@ -54,10 +61,12 @@ export default class ProductGalleryService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete product gallery')
       }
 
       await revalidate('product-galleries')
+
       return await response.json()
     } catch (error) {
       throw error

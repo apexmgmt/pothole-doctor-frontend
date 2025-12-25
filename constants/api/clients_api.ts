@@ -14,8 +14,9 @@
  * @method: POST - Restore a deleted client entry by ID. /id/restore
  */
 export const CLIENTS: string = '/v1/clients/'
+
 /** ? type = customer | lead */
-export const CLIENTS_ALL: string = '/v1/get-clients'  
+export const CLIENTS_ALL: string = '/v1/get-clients'
 
 /**
  * API endpoint for Clients documents
@@ -96,13 +97,13 @@ export const CLIENT_EMAILS: string = '/v1/client-email/'
  * API endpoint for Client Addresses
  *
  * Data table operation method: GET
- * 
+ *
  * Data create method: POST
- * 
+ *
  * Data update method: PUT /{id}
- * 
+ *
  * Data retrieve method: GET /{id}
- * 
+ *
  * Data delete method: DELETE /{id}
  */
 export const CLIENT_ADDRESSES: string = '/v1/client-address/'
