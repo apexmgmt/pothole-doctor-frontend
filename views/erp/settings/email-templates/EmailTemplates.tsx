@@ -15,8 +15,6 @@ import EditEmailTemplateDialog from './EditEmailTemplateDialog'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-
-
 export default function EmailTemplates({ templates: initialTemplates }: { templates: EmailTemplate[] }) {
   const [templates, setTemplates] = useState(initialTemplates)
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
@@ -46,8 +44,8 @@ export default function EmailTemplates({ templates: initialTemplates }: { templa
       }
 
       acc[template.group].push(template)
-      
-return acc
+
+      return acc
     },
     {} as Record<string, EmailTemplate[]>
   )

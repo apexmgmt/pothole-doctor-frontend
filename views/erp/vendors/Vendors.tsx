@@ -66,8 +66,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
@@ -105,8 +104,7 @@ return newOptions
     ? apiResponse.data.map((vendor: Vendor, index: number) => {
         const userable = vendor.userable
 
-        
-return {
+        return {
           id: vendor.id,
           index: (apiResponse?.from || 1) + index,
           name: vendor.first_name,
@@ -197,7 +195,6 @@ return {
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
           <ThreeDotButton
-
             // title='Action'
             buttons={[
               <EditButton
@@ -240,8 +237,7 @@ return {
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   // Custom filters component
@@ -362,7 +358,10 @@ return filterKeys.length > 0
           <VendorRebateCredits vendorId={selectedUserAbleId || ''} />
         )}
         {activeTab === 'pickup-addresses' && selectedVendorId && selectedUserAbleId && (
-          <VendorPickupAddresses countriesWithStatesAndCities={countriesWithStatesAndCities} vendorId={selectedUserAbleId || ''} />
+          <VendorPickupAddresses
+            countriesWithStatesAndCities={countriesWithStatesAndCities}
+            vendorId={selectedUserAbleId || ''}
+          />
         )}
         {activeTab === 'salesman' && selectedVendorId && selectedUserAbleId && (
           <VendorSalesmen vendorId={selectedUserAbleId || ''} />

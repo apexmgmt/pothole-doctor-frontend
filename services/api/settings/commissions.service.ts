@@ -98,8 +98,8 @@ export default class CommissionService {
       await revalidate('commissions')
       await revalidate(`commissions/${commissionId}`)
       await revalidate('commissions-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -124,8 +124,8 @@ return await response.json()
       await revalidate('commissions')
       await revalidate(`commissions/${commissionId}`)
       await revalidate('commissions-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -148,8 +148,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to fetch commission filters')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -172,8 +171,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to fetch commission bases')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

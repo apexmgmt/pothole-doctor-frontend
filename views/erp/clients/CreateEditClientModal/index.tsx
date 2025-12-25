@@ -210,7 +210,6 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
           .then(response => {
             const createdClientId = response.data.id
 
-
             // Now create the client address
             // if address has the value street_address, state_id, city_id, title
             if (address_title && address && state_id && city_id) {

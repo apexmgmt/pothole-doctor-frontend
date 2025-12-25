@@ -10,9 +10,7 @@ import { WarehousePayload, WarehouseFormValues, CreateOrEditWarehouseModalProps 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue , MultiSelect } from '@/components/ui/select'
-
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, MultiSelect } from '@/components/ui/select'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import WarehouseService from '@/services/api/warehouses.service'
@@ -74,8 +72,7 @@ const CreateOrEditWarehouseModal = ({
     if (!selectedCountryId) return []
     const country = countriesWithStateAndCities.find(c => c.id.toString() === selectedCountryId)
 
-    
-return country?.states || []
+    return country?.states || []
   }, [selectedCountryId, countriesWithStateAndCities])
 
   // Get available cities based on selected state
@@ -83,8 +80,7 @@ return country?.states || []
     if (!selectedStateId) return []
     const state = availableStates.find(s => s.id.toString() === selectedStateId)
 
-    
-return state?.cities || []
+    return state?.cities || []
   }, [selectedStateId, availableStates])
 
   // Reset state when country changes

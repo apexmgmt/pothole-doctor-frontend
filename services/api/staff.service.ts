@@ -144,8 +144,7 @@ export default class StaffService {
         throw new Error(errorData.message || 'Failed to fetch all staffs')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

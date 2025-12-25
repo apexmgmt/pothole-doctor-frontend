@@ -21,8 +21,7 @@ export default class CookieService {
     if (!this.isServer()) return null
     const { cookies } = await import('next/headers')
 
-    
-return cookies()
+    return cookies()
   }
 
   /**
@@ -63,8 +62,7 @@ return cookies()
     if (this.isServer()) {
       const cookieStore = await this.getServerCookies()
 
-      
-return cookieStore?.get(name)?.value
+      return cookieStore?.get(name)?.value
     } else {
       return Cookies.get(name)
     }
@@ -143,8 +141,7 @@ return cookieStore?.get(name)?.value
       throw new Error('getSync cannot be used on server-side. Use get() instead.')
     }
 
-    
-return Cookies.get(name)
+    return Cookies.get(name)
   }
 
   static deleteSync(name: string, options?: Cookies.CookieAttributes): void {

@@ -96,8 +96,8 @@ export default class VendorPickupAddressService {
 
       await revalidate('vendor-pickup-addresses')
       await revalidate(`vendor-pickup-addresses/${vendorPickupAddressId}`)
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -121,8 +121,8 @@ return await response.json()
 
       await revalidate('vendor-pickup-addresses')
       await revalidate(`vendor-pickup-addresses/${vendorPickupAddressId}`)
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

@@ -32,12 +32,5 @@ export default async function TaskRemindersPage() {
     reminderChannels = []
   }
 
-
-  return (
-    <TaskReminders
-      taskReminders={taskReminders}
-      taskTypes={taskTypes}
-      reminderChannels={reminderChannels}
-    />
-  )
+  return <TaskReminders taskReminders={taskReminders} taskTypes={taskTypes} reminderChannels={reminderChannels} />
 }

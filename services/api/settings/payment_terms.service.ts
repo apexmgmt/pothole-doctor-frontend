@@ -123,8 +123,8 @@ export default class PaymentTermsService {
       await revalidate('payment-terms-all')
       await revalidate(`payment-terms/${paymentTermId}`)
       await revalidate('payment-terms')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -149,8 +149,8 @@ return await response.json()
       await revalidate('payment-terms')
       await revalidate(`payment-terms/${paymentTermId}`)
       await revalidate('payment-terms-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -173,8 +173,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to fetch payment term list')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -197,8 +196,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to fetch payment term types')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

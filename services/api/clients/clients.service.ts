@@ -49,8 +49,8 @@ export default class ClientService {
       await revalidate(`clients${type ? `-${type}` : ''}`)
       await revalidate(`clients-all${type ? `-${type}` : ''}`)
       await revalidate('clients-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -100,8 +100,8 @@ return await response.json()
       await revalidate(`clients/${clientId}`)
       await revalidate(`clients-all${type ? `-${type}` : ''}`)
       await revalidate('clients-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -127,8 +127,8 @@ return await response.json()
       await revalidate(`clients/${clientId}`)
       await revalidate(`clients-all${type ? `-${type}` : ''}`)
       await revalidate('clients-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -154,8 +154,8 @@ return await response.json()
       await revalidate(`clients/${clientId}`)
       await revalidate(`clients-all${type ? `-${type}` : ''}`)
       await revalidate('clients-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

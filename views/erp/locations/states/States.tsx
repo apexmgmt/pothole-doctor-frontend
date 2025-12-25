@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, State , Country } from '@/types'
+import { Column, DataTableApiResponse, State, Country } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -76,8 +76,7 @@ const States: React.FC = () => {
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
@@ -238,8 +237,7 @@ return newOptions
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   // Custom filters component

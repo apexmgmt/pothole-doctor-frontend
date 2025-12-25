@@ -61,8 +61,7 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
@@ -100,8 +99,7 @@ return newOptions
     ? apiResponse.data.map((paymentTerm: any, index: number) => {
         const typeObj = paymentTermTypes.find(t => t.type === paymentTerm.type)
 
-        
-return {
+        return {
           id: paymentTerm.id,
           index: (apiResponse?.from || 1) + index,
           name: paymentTerm.name,
@@ -230,8 +228,7 @@ return {
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   // Custom filters component

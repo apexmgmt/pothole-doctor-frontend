@@ -97,8 +97,8 @@ export default class ProductCategoryService {
       await revalidate('product-categories')
       await revalidate(`product-categories/${productCategoryId}`)
       await revalidate('product-categories-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -123,8 +123,8 @@ return await response.json()
       await revalidate('product-categories')
       await revalidate(`product-categories/${productCategoryId}`)
       await revalidate('product-categories-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -147,8 +147,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to fetch product categories')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

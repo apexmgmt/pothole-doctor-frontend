@@ -14,7 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import VendorService from '@/services/api/vendors/vendors.service'
 import { Separator } from '@/components/ui/separator'
@@ -127,8 +126,7 @@ const CreateOrEditVendorModal = ({
     if (!selectedCountryId) return []
     const country = countriesWithStatesAndCities.find(c => c.id.toString() === selectedCountryId)
 
-    
-return country?.states || []
+    return country?.states || []
   }, [selectedCountryId, countriesWithStatesAndCities])
 
   // Get available cities based on selected state
@@ -136,8 +134,7 @@ return country?.states || []
     if (!selectedStateId) return []
     const state = availableStates.find(s => s.id.toString() === selectedStateId)
 
-    
-return state?.cities || []
+    return state?.cities || []
   }, [selectedStateId, availableStates])
 
   // Reset state when country changes

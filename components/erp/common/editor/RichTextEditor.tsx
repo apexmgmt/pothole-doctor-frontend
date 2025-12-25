@@ -57,8 +57,8 @@ const serializeNode = (node: any): string => {
     if (node.bold) text = `<strong>${text}</strong>`
     if (node.italic) text = `<em>${text}</em>`
     if (node.underline) text = `<u>${text}</u>`
-    
-return text
+
+    return text
   }
 
   const children = node.children.map((n: any) => serializeNode(n)).join('')
@@ -104,8 +104,7 @@ export const deserializeFromHtml = (html: string): Descendant[] => {
       return [{ type: 'paragraph', children: [{ text: '' }] }]
     }
 
-    
-return lines.map(line => ({
+    return lines.map(line => ({
       type: 'paragraph',
       children: [{ text: line }]
     }))
@@ -128,8 +127,7 @@ const deserializeNode = (node: Node): any => {
       return { type: 'paragraph', children: [{ text }] }
     }
 
-    
-return text.trim() ? { text } : null
+    return text.trim() ? { text } : null
   }
 
   if (node.nodeType !== Node.ELEMENT_NODE) {
@@ -141,22 +139,19 @@ return text.trim() ? { text } : null
   if (element.nodeName === 'STRONG' || element.nodeName === 'B') {
     const text = element.textContent || ''
 
-    
-return { text, bold: true }
+    return { text, bold: true }
   }
 
   if (element.nodeName === 'EM' || element.nodeName === 'I') {
     const text = element.textContent || ''
 
-    
-return { text, italic: true }
+    return { text, italic: true }
   }
 
   if (element.nodeName === 'U') {
     const text = element.textContent || ''
 
-    
-return { text, underline: true }
+    return { text, underline: true }
   }
 
   let children = Array.from(element.childNodes)
@@ -208,8 +203,7 @@ return { text, underline: true }
         return { type: 'paragraph', children }
       }
 
-      
-return children.length === 1 ? children[0] : { type: 'paragraph', children }
+      return children.length === 1 ? children[0] : { type: 'paragraph', children }
   }
 }
 
@@ -217,8 +211,8 @@ const withImages = (editor: Editor) => {
   const { isVoid } = editor
 
   editor.isVoid = element => (element.type === 'image' ? true : isVoid(element))
-  
-return editor
+
+  return editor
 }
 
 interface RichTextEditorProps {
@@ -334,15 +328,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     if (props.leaf.bold) children = <strong>{children}</strong>
     if (props.leaf.italic) children = <em>{children}</em>
     if (props.leaf.underline) children = <u>{children}</u>
-    
-return <span {...props.attributes}>{children}</span>
+
+    return <span {...props.attributes}>{children}</span>
   }, [])
 
   const isMarkActive = (editor: Editor, format: keyof Omit<CustomText, 'text'>) => {
     const marks = Editor.marks(editor)
 
-    
-return marks ? marks[format] === true : false
+    return marks ? marks[format] === true : false
   }
 
   const toggleMark = (format: keyof Omit<CustomText, 'text'>) => {
@@ -448,8 +441,7 @@ return marks ? marks[format] === true : false
     if (match) {
       const element = match[0] as CustomElement
 
-      
-return element.type || 'paragraph'
+      return element.type || 'paragraph'
     }
 
     return 'paragraph'
@@ -584,7 +576,7 @@ return element.type || 'paragraph'
           placeholder={placeholder}
           className='p-4'
 
-        //   style={{ minHeight }}
+          //   style={{ minHeight }}
         />
       </Slate>
     </div>

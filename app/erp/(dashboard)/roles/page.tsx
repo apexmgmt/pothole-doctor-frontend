@@ -1,10 +1,7 @@
-import Roles from "@/views/erp/roles/Roles"
+import Roles from '@/views/erp/roles/Roles'
 
 const RolesPage = () => {
-  return (
-    <Roles />
-  )
+  return <Roles />
 }
 
 export default RolesPage
-

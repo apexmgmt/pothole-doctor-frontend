@@ -1,9 +1,9 @@
-import React from "react";
+import React from 'react'
 
-import AddCustomer from "@/views/erp/dashboard/crm/customers/AddCustomer";
+import AddCustomer from '@/views/erp/dashboard/crm/customers/AddCustomer'
 
 const AddCustomerPage = () => {
-  return <AddCustomer />;
-};
+  return <AddCustomer />
+}
 
-export default AddCustomerPage;
+export default AddCustomerPage

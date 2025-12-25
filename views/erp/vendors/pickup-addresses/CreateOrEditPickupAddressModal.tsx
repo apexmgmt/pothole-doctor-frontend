@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import VendorPickupAddressService from '@/services/api/vendors/vendor-pickup-addresses.service'
 
@@ -81,8 +80,7 @@ const CreateOrEditPickupAddressModal = ({
     if (!selectedCountryId) return []
     const country = countriesWithStatesAndCities.find(c => c.id.toString() === selectedCountryId)
 
-    
-return country?.states || []
+    return country?.states || []
   }, [selectedCountryId, countriesWithStatesAndCities])
 
   // Get available cities based on selected state
@@ -90,8 +88,7 @@ return country?.states || []
     if (!selectedStateId) return []
     const state = availableStates.find(s => s.id.toString() === selectedStateId)
 
-    
-return state?.cities || []
+    return state?.cities || []
   }, [selectedStateId, availableStates])
 
   // Reset state when country changes

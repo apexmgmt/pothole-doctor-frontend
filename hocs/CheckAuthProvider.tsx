@@ -36,8 +36,8 @@ export const CheckAuthProvider = ({ children }: CheckAuthProviderProps) => {
         if (!accessToken) {
           console.log('CheckAuthProvider: No access token available')
           dispatch(setRefreshData(false))
-          
-return
+
+          return
         }
 
         console.log('CheckAuthProvider: Fetching auth details')

@@ -16,8 +16,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
-
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import PartnerDocumentService from '@/services/api/partners/partner-documents.service'
 import { generateFileUrl, getFileType } from '@/utils/utility'
@@ -90,8 +88,8 @@ const CreateOrEditDocumentModal = ({
         if (!values.file) {
           toast.error('Please upload a file')
           setIsLoading(false)
-          
-return
+
+          return
         }
 
         await PartnerDocumentService.store(formData)

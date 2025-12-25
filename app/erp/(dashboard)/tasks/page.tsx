@@ -12,7 +12,6 @@ export default async function TasksPage() {
   let taskReminders: TaskReminder[] = []
   let taskReminderChannels: TaskReminderChannel[] = []
 
-
   // fetch staffs
   try {
     const response = await StaffService.getAllStaffs()
@@ -58,5 +57,13 @@ export default async function TasksPage() {
     taskReminderChannels = []
   }
 
-  return <Tasks staffs={staffs} clients={clients} taskTypes={taskTypes} taskReminders={taskReminders} taskReminderChannels={taskReminderChannels} />
+  return (
+    <Tasks
+      staffs={staffs}
+      clients={clients}
+      taskTypes={taskTypes}
+      taskReminders={taskReminders}
+      taskReminderChannels={taskReminderChannels}
+    />
+  )
 }

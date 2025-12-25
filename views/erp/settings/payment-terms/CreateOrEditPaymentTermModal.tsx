@@ -18,8 +18,6 @@ import { Button } from '@/components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 
-
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 
@@ -68,8 +66,8 @@ const CreateOrEditPaymentTermModal = ({
   const getDueTimeLabel = () => {
     if (selectedType === 'day') return 'Due Days'
     if (selectedType === 'month') return 'Day of the Month'
-    
-return 'Due Time'
+
+    return 'Due Time'
   }
 
   // Reset form when paymentTermDetails changes or modal opens

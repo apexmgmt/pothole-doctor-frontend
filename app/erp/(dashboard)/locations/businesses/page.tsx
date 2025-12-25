@@ -1,4 +1,4 @@
-import BusinessLocations from "@/views/erp/locations/businesses/Businesses"
+import BusinessLocations from '@/views/erp/locations/businesses/Businesses'
 
 const BusinessLocationsPage = () => {
   return <BusinessLocations />

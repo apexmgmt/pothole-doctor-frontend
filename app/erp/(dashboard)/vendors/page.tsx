@@ -33,5 +33,11 @@ export default async function VendorsPage() {
     paymentTerms = []
   }
 
-  return <Vendors taxTypes={taxTypes} countriesWithStatesAndCities={countriesWithStatesAndCities} paymentTerms={paymentTerms} />
+  return (
+    <Vendors
+      taxTypes={taxTypes}
+      countriesWithStatesAndCities={countriesWithStatesAndCities}
+      paymentTerms={paymentTerms}
+    />
+  )
 }

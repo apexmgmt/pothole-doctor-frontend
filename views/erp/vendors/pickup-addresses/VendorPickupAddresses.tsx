@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Column, CountryWithStates, DataTableApiResponse, VendorPickupAddress, VendorRebateCredit } from '@/types'
 
-
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import VendorRebateCreditService from '@/services/api/vendors/vendor-rebate-credits.service'
 import { formatDate } from '@/utils/date'
@@ -33,7 +32,6 @@ const VendorPickupAddresses = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: vendorId })
-
 
   // Set initial search value from filterOptions
   useEffect(() => {
@@ -57,8 +55,7 @@ const VendorPickupAddresses = ({
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
@@ -210,8 +207,7 @@ return newOptions
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   // Custom filters component

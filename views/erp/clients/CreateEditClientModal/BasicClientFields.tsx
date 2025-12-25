@@ -6,13 +6,16 @@ import { Controller, UseFormReturn } from 'react-hook-form'
 
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, CreatableSelect, MultiSelect } from '@/components/ui/select'
 import {
-  ClientPayload,
-  Company,
-  InterestLevel,
-  ServiceType,
-} from '@/types'
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  CreatableSelect,
+  MultiSelect
+} from '@/components/ui/select'
+import { ClientPayload, Company, InterestLevel, ServiceType } from '@/types'
 import { Checkbox } from '@/components/ui/checkbox'
 
 interface BasicClientFieldsProps {
@@ -40,13 +43,12 @@ const BasicClientFields: React.FC<BasicClientFieldsProps> = ({
     label: company.name
   }))
 
-    const serviceTypeOptions = serviceTypes.map(service => ({
+  const serviceTypeOptions = serviceTypes.map(service => ({
     value: service.id,
     label: service.name
   }))
 
-  
-return (
+  return (
     <div className='space-y-4'>
       <div className='grid grid-cols-2 gap-4'>
         <div className='space-y-2'>
@@ -180,8 +182,7 @@ return (
               validate: value => {
                 const numStr = String(value).replace(/\D/g, '')
 
-                
-return numStr.length === 10 || 'Phone number must be 10 digits'
+                return numStr.length === 10 || 'Phone number must be 10 digits'
               }
             }}
             render={({ field }) => <Input {...field} type='tel' placeholder='10 digit phone number' />}
@@ -199,8 +200,7 @@ return numStr.length === 10 || 'Phone number must be 10 digits'
                 if (!value || value === '') return true
                 const numStr = String(value).replace(/\D/g, '')
 
-                
-return numStr.length === 10 || 'Phone number must be 10 digits'
+                return numStr.length === 10 || 'Phone number must be 10 digits'
               }
             }}
             render={({ field }) => <Input {...field} type='tel' placeholder='10 digit phone number' />}
@@ -262,8 +262,7 @@ return numStr.length === 10 || 'Phone number must be 10 digits'
                 if (!value || value === '') return true
                 const numStr = String(value).replace(/\D/g, '')
 
-                
-return numStr.length === 10 || 'Phone number must be 10 digits'
+                return numStr.length === 10 || 'Phone number must be 10 digits'
               }
             }}
             render={({ field }) => <Input {...field} type='tel' placeholder='10 digit phone number' />}
@@ -273,11 +272,7 @@ return numStr.length === 10 || 'Phone number must be 10 digits'
 
         <div className='space-y-2'>
           <Label htmlFor='best_time'>Best Time to Reach</Label>
-          <Controller
-            name='best_time'
-            control={control}
-            render={({ field }) => <Input {...field} type='text' />}
-          />
+          <Controller name='best_time' control={control} render={({ field }) => <Input {...field} type='text' />} />
         </div>
 
         <div className='space-y-2'>

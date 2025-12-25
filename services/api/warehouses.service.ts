@@ -97,8 +97,8 @@ export default class WarehouseService {
       await revalidate('warehouses')
       await revalidate(`warehouses/${warehouseId}`)
       await revalidate('warehouses-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -123,8 +123,8 @@ return await response.json()
       await revalidate('warehouses')
       await revalidate(`warehouses/${warehouseId}`)
       await revalidate('warehouses-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

@@ -96,8 +96,8 @@ export default class CountryService {
       await revalidate('countries')
       await revalidate(`countries/${countryId}`)
       await revalidate('locations')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -121,8 +121,8 @@ return await response.json()
       await revalidate('countries')
       await revalidate(`countries/${countryId}`)
       await revalidate('locations')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

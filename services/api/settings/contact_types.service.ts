@@ -97,8 +97,8 @@ export default class ContactTypeService {
       await revalidate('contact-types')
       await revalidate(`contact-types/${contactTypeId}`)
       await revalidate('contact-types-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -123,8 +123,8 @@ return await response.json()
       await revalidate('contact-types-all')
       await revalidate(`contact-types/${contactTypeId}`)
       await revalidate('contact-types')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -147,8 +147,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to fetch contact types list')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

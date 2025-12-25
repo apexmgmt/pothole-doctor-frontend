@@ -104,8 +104,7 @@ const Clients: React.FC<{
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
@@ -254,10 +253,11 @@ return newOptions
       id: 'address',
       header: 'Address',
       cell: (row: Client) => {
-        const parts = [row?.address?.street_address, row?.address?.city?.name, row?.address?.state?.name].filter(Boolean)
+        const parts = [row?.address?.street_address, row?.address?.city?.name, row?.address?.state?.name].filter(
+          Boolean
+        )
 
-        
-return <span className='font-medium'>{parts.join(', ')}</span>
+        return <span className='font-medium'>{parts.join(', ')}</span>
       },
       sortable: false
     },
@@ -411,8 +411,7 @@ return <span className='font-medium'>{parts.join(', ')}</span>
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   // Custom filters component
@@ -545,7 +544,10 @@ return filterKeys.length > 0
         <ClientContacts clientId={selectedClientId || ''} countriesWithStatesAndCities={countriesWithStatesAndCities} />
       )}
       {activeTab === 'addresses' && selectedClientId && (
-        <ClientAddresses clientId={selectedClientId || ''} countriesWithStatesAndCities={countriesWithStatesAndCities} />
+        <ClientAddresses
+          clientId={selectedClientId || ''}
+          countriesWithStatesAndCities={countriesWithStatesAndCities}
+        />
       )}
       <CreateEditClientModal
         type={type}

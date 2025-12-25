@@ -98,8 +98,8 @@ export default class VendorService {
       await revalidate('vendors')
       await revalidate(`vendors/${vendorId}`)
       await revalidate('vendors-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -150,8 +150,8 @@ return await response.json()
       await revalidate('vendors')
       await revalidate(`vendors/${vendorId}`)
       await revalidate('vendors-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

@@ -59,8 +59,7 @@ const EstimateTypes: React.FC = () => {
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
@@ -127,8 +126,7 @@ return newOptions
         // Calculate the absolute index based on pagination
         const from = apiResponse?.from || 1
 
-        
-return <span className='text-gray'>{from + (rowIndex || 0)}</span>
+        return <span className='text-gray'>{from + (rowIndex || 0)}</span>
       },
       sortable: false,
       size: 16
@@ -190,8 +188,7 @@ return <span className='text-gray'>{from + (rowIndex || 0)}</span>
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   // Custom filters component

@@ -35,8 +35,7 @@ const StaffEditPage = async ({ params }: { params: { id: string } }) => {
     staffDetails = null
   }
 
-  
-return <CreateOrEditStaff mode='edit' permissions={permissions} roles={roles} staffId={id} staffData={staffDetails} />
+  return <CreateOrEditStaff mode='edit' permissions={permissions} roles={roles} staffId={id} staffData={staffDetails} />
 }
 
 export default StaffEditPage

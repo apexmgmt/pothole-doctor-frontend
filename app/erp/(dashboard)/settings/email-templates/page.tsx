@@ -3,7 +3,7 @@ import { EmailTemplate } from '@/types'
 import EmailTemplates from '@/views/erp/settings/email-templates/EmailTemplates'
 
 export default async function EmailTemplatesPage() {
-  let emailTemplates: EmailTemplate[] = []  
+  let emailTemplates: EmailTemplate[] = []
 
   try {
     const response = await EmailTemplateService.index()
@@ -13,6 +13,5 @@ export default async function EmailTemplatesPage() {
     emailTemplates = []
   }
 
-  
-return <EmailTemplates templates={emailTemplates} />
+  return <EmailTemplates templates={emailTemplates} />
 }

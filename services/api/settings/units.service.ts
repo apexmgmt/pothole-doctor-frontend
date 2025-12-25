@@ -50,8 +50,8 @@ export default class UnitService {
       await revalidate('units-all')
       await revalidate('units-all-uom')
       await revalidate('units-all-measure')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -102,8 +102,8 @@ return await response.json()
       await revalidate('units-all')
       await revalidate('units-all-uom')
       await revalidate('units-all-measure')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -130,8 +130,8 @@ return await response.json()
       await revalidate('units-all')
       await revalidate('units-all-uom')
       await revalidate('units-all-measure')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -154,8 +154,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to fetch units')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

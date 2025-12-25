@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
-import { ClientContact, ClientContactPayload , CountryWithStates } from '@/types'
+import { ClientContact, ClientContactPayload, CountryWithStates } from '@/types'
 
 import ClientContactService from '@/services/api/clients/client-contacts.service'
 
@@ -76,8 +76,7 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
     if (!selectedCountryId) return []
     const country = countriesWithStatesAndCities.find(c => c.id.toString() === selectedCountryId)
 
-    
-return country?.states || []
+    return country?.states || []
   }, [selectedCountryId, countriesWithStatesAndCities])
 
   // Get available cities based on selected state
@@ -85,8 +84,7 @@ return country?.states || []
     if (!selectedStateId) return []
     const state = availableStates.find(s => s.id.toString() === selectedStateId)
 
-    
-return state?.cities || []
+    return state?.cities || []
   }, [selectedStateId, availableStates])
 
   // Reset state when country changes

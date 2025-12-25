@@ -23,8 +23,8 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
   const fetchClientDetails = async () => {
     if (!clientId) {
       setClientData(null)
-      
-return
+
+      return
     }
 
     setIsLoading(true)

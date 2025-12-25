@@ -29,7 +29,13 @@ interface CommonLayoutProps {
  * @param {string} props.className - Additional CSS classes for the container
  * @param {React.ReactNode} props.children - Content to render below the header
  */
-const CommonLayout: React.FC<CommonLayoutProps> = ({ title, noTabs = false, buttons = [], className = '', children }) => {
+const CommonLayout: React.FC<CommonLayoutProps> = ({
+  title,
+  noTabs = false,
+  buttons = [],
+  className = '',
+  children
+}) => {
   return (
     <div className={`bg-bg-2 rounded-lg border border-border p-5 ${className}`}>
       {/* Header Section */}

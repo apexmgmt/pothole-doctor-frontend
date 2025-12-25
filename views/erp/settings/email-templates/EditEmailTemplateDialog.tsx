@@ -33,7 +33,6 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import EmailTemplateService from '@/services/api/settings/email_templates.service'
 
-
 interface EditEmailTemplateDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -74,8 +73,8 @@ const serializeNode = (node: any): string => {
     if (node.bold) text = `<strong>${text}</strong>`
     if (node.italic) text = `<em>${text}</em>`
     if (node.underline) text = `<u>${text}</u>`
-    
-return text
+
+    return text
   }
 
   const children = node.children.map((n: any) => serializeNode(n)).join('')
@@ -112,8 +111,7 @@ const deserialize = (html: string): Descendant[] => {
       return [{ type: 'paragraph', children: [{ text: '' }] }]
     }
 
-    
-return lines.map(line => ({
+    return lines.map(line => ({
       type: 'paragraph',
       children: [{ text: line }]
     }))
@@ -132,14 +130,12 @@ const deserializeNode = (node: Node): any => {
   if (node.nodeType === Node.TEXT_NODE) {
     const text = node.textContent || ''
 
-
     // Wrap orphan text nodes in paragraphs
     if (text.trim() && node.parentNode?.nodeName === 'BODY') {
       return { type: 'paragraph', children: [{ text }] }
     }
 
-    
-return text.trim() ? { text } : null
+    return text.trim() ? { text } : null
   }
 
   if (node.nodeType !== Node.ELEMENT_NODE) {
@@ -152,22 +148,19 @@ return text.trim() ? { text } : null
   if (element.nodeName === 'STRONG' || element.nodeName === 'B') {
     const text = element.textContent || ''
 
-    
-return { text, bold: true }
+    return { text, bold: true }
   }
 
   if (element.nodeName === 'EM' || element.nodeName === 'I') {
     const text = element.textContent || ''
 
-    
-return { text, italic: true }
+    return { text, italic: true }
   }
 
   if (element.nodeName === 'U') {
     const text = element.textContent || ''
 
-    
-return { text, underline: true }
+    return { text, underline: true }
   }
 
   let children = Array.from(element.childNodes)
@@ -211,7 +204,6 @@ return { text, underline: true }
         return { type: 'paragraph', children }
       }
 
-
       // If it contains only text, wrap in paragraph
       const hasOnlyText = children.every((child: any) => Text.isText(child))
 
@@ -219,8 +211,7 @@ return { text, underline: true }
         return { type: 'paragraph', children }
       }
 
-      
-return children.length === 1 ? children[0] : { type: 'paragraph', children }
+      return children.length === 1 ? children[0] : { type: 'paragraph', children }
   }
 }
 
@@ -315,16 +306,15 @@ export default function EditEmailTemplateDialog({
     if (props.leaf.bold) children = <strong>{children}</strong>
     if (props.leaf.italic) children = <em>{children}</em>
     if (props.leaf.underline) children = <u>{children}</u>
-    
-return <span {...props.attributes}>{children}</span>
+
+    return <span {...props.attributes}>{children}</span>
   }, [])
 
   // To:
   const isMarkActive = (editor: Editor, format: keyof Omit<CustomText, 'text'>) => {
     const marks = Editor.marks(editor)
 
-    
-return marks ? marks[format] === true : false
+    return marks ? marks[format] === true : false
   }
 
   // Also update the toggleMark function signature:

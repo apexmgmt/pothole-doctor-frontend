@@ -95,7 +95,6 @@ export function DateRangePicker({
     if (range) {
       onChange(range)
 
-
       // Only close if both from and to are selected
       if (range.from && range.to) {
         setOpen(false)

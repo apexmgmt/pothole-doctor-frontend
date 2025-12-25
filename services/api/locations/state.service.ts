@@ -121,7 +121,7 @@ export default class StateService {
       await revalidate('states')
       await revalidate(`states/${stateId}`)
       await revalidate('locations')
-      
+
       return await response.json()
     } catch (error) {
       throw error

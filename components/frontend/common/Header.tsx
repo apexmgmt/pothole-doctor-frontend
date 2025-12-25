@@ -24,8 +24,7 @@ export default function Header() {
       document.body.style.overflow = 'unset'
     }
 
-    
-return () => {
+    return () => {
       document.body.style.overflow = 'unset'
     }
   }, [isMobileMenuOpen])

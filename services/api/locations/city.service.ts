@@ -121,7 +121,7 @@ export default class CityService {
       await revalidate('cities')
       await revalidate(`cities/${cityId}`)
       await revalidate('locations')
-      
+
       return await response.json()
     } catch (error) {
       throw error

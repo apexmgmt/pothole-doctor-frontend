@@ -94,7 +94,7 @@ export interface PartnerUserAble {
   hold_amount: number
   hold_amount_percent: number
   street_address: string | number
-  city_id: string,
+  city_id: string
   city: City
   state_id: string
   state: State

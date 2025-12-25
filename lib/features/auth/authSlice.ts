@@ -31,16 +31,14 @@ const getUserFromCookie = (): User | null => {
         }
       }
 
-      
-return decrypted as User
+      return decrypted as User
     }
 
     return decrypted as User
   } catch (error) {
-     
     console.error('Error reading user cookie', error)
-    
-return null
+
+    return null
   }
 }
 
@@ -56,7 +54,6 @@ const authSlice = createSlice({
     logoutUserSuccess: state => {
       state.user = null
 
-
       // remove cookie on logout (client only)
       try {
         CookieService.deleteSync('user')
@@ -71,7 +68,6 @@ const authSlice = createSlice({
         // store as JSON string; encryption/decryption handled elsewhere
         CookieService.storeSync('user', JSON.stringify(encryptData(action.payload)))
       } catch {
-         
         console.error('Failed to set user cookie')
       }
     },

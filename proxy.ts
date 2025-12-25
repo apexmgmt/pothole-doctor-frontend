@@ -17,20 +17,20 @@ export async function proxy(req: NextRequest) {
     const erpUrl = req.nextUrl.clone()
 
     erpUrl.pathname = '/erp'
-    
-return NextResponse.redirect(erpUrl)
+
+    return NextResponse.redirect(erpUrl)
   }
 
   if (isPublicRoute(pathname) || isUnauthenticatedRoute(pathname)) {
     console.log('Proxy: Public route')
-    
-return NextResponse.next()
+
+    return NextResponse.next()
   }
 
   if (accessToken) {
     console.log('Proxy: Access token available')
-    
-return NextResponse.next()
+
+    return NextResponse.next()
   }
 
   if (refreshToken) {
@@ -52,7 +52,6 @@ return NextResponse.next()
 
       // Set tokens on the NextResponse so subsequent requests include them
       const nextRes = NextResponse.next()
-
 
       // Set cookie options appropriate for your app (httpOnly, secure, maxAge, path, sameSite...)
       nextRes.cookies.set({
@@ -82,8 +81,8 @@ return NextResponse.next()
       }
 
       console.log('Proxy: Refreshing token successful')
-      
-return nextRes
+
+      return nextRes
     } catch (error) {
       console.log('Proxy: Failed to refresh token. Clearing cookies and redirecting to login...')
 
@@ -95,13 +94,12 @@ return nextRes
 
       const redirectRes = NextResponse.redirect(loginUrl)
 
-
       // Clear auth cookies
       redirectRes.cookies.delete('access_token')
       redirectRes.cookies.delete('refresh_token')
       redirectRes.cookies.delete('token_type')
-      
-return redirectRes
+
+      return redirectRes
     }
   }
 
@@ -111,8 +109,8 @@ return redirectRes
 
   loginUrl.pathname = '/erp/login'
   loginUrl.searchParams.set('redirect', pathname)
-  
-return NextResponse.redirect(loginUrl)
+
+  return NextResponse.redirect(loginUrl)
 }
 
 export const config = {

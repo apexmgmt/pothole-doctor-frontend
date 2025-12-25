@@ -67,8 +67,7 @@ const Partners: React.FC<PartnersProps> = ({
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
@@ -106,8 +105,7 @@ return newOptions
     ? apiResponse.data.map((partner: Partner, index: number) => {
         const userable = partner.userable
 
-        
-return {
+        return {
           id: partner.id,
           index: (apiResponse?.from || 1) + index,
           name: partner.first_name + ' ' + (partner.last_name || ''),
@@ -239,7 +237,6 @@ return {
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
           <ThreeDotButton
-
             // title='Action'
             buttons={[
               <EditButton
@@ -282,8 +279,7 @@ return {
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   // Custom filters component

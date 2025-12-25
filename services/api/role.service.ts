@@ -143,7 +143,7 @@ export default class RoleService {
       await revalidate('roles')
       await revalidate(`roles/${roleId}`)
       await revalidate('roles-selection-list')
-      
+
       return await response.json()
     } catch (error) {
       throw error

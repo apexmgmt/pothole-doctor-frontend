@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Client, ClientEmail, Column, DataTableApiResponse } from '@/types'
 
-
 import { formatDate } from '@/utils/date'
 import CreateOrEditEmailModal from './CreateOrEditEmailModal'
 import ClientEmailService from '@/services/api/clients/client-emails.service'
@@ -45,8 +44,7 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
@@ -114,8 +112,7 @@ return newOptions
       cell: row => {
         const parts = [row?.user?.first_name, row?.user?.last_name].filter(Boolean)
 
-        
-return <span className='font-medium'>{parts.join(' ')}</span>
+        return <span className='font-medium'>{parts.join(' ')}</span>
       },
       sortable: true
     },
@@ -142,13 +139,7 @@ return <span className='font-medium'>{parts.join(' ')}</span>
       header: 'Action',
       cell: row => (
         <ThreeDotButton
-          buttons={[
-            <DeleteButton
-              tooltip='Delete Email'
-              variant='text'
-              onClick={() => handleDeleteEmail(row.id)}
-            />
-          ]}
+          buttons={[<DeleteButton tooltip='Delete Email' variant='text' onClick={() => handleDeleteEmail(row.id)} />]}
         />
       ),
       sortable: false,
@@ -166,8 +157,7 @@ return <span className='font-medium'>{parts.join(' ')}</span>
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   // Custom filters component
@@ -207,7 +197,7 @@ return filterKeys.length > 0
     <>
       <CommonTable
         data={{
-          data: apiResponse?.data as ClientEmail[] || [],
+          data: (apiResponse?.data as ClientEmail[]) || [],
           per_page: apiResponse?.per_page || 10,
           total: apiResponse?.total || 0,
           from: apiResponse?.from || 1,

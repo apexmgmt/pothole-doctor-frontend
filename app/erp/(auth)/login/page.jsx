@@ -1,9 +1,9 @@
-import React from "react";
+import React from 'react'
 
-import Login from "@/views/erp/auth/login/Login";
+import Login from '@/views/erp/auth/login/Login'
 
 const LoginPage = () => {
-  return <Login />;
-};
+  return <Login />
+}
 
-export default LoginPage;
+export default LoginPage

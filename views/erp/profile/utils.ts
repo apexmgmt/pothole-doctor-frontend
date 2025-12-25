@@ -4,8 +4,7 @@ export const formatDate = (dateString?: string): string => {
   try {
     const date = new Date(dateString)
 
-    
-return date.toLocaleString('en-US', {
+    return date.toLocaleString('en-US', {
       month: '2-digit',
       day: '2-digit',
       year: 'numeric',
@@ -37,4 +36,3 @@ export const getUserDisplayData = (userData: any) => {
     profilePicture
   }
 }
-

@@ -48,8 +48,8 @@ export default class OrganizationService {
 
       // Revalidate organizations cache tag
       await revalidate('organizations')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -98,8 +98,8 @@ return await response.json()
       // Revalidate organizations cache tag
       await revalidate('organizations')
       await revalidate(`organizations/${organizationId}`)
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {}
   }
 
@@ -123,8 +123,8 @@ return await response.json()
       // Revalidate organizations cache tag
       await revalidate('organizations')
       await revalidate(`organizations/${organizationId}`)
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

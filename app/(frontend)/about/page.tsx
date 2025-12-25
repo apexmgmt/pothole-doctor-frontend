@@ -1,9 +1,9 @@
-import AboutIndex from "@/views/frontend/about";
+import AboutIndex from '@/views/frontend/about'
 
 export default function AboutPage() {
   return (
     <>
       <AboutIndex />
     </>
-  );
+  )
 }

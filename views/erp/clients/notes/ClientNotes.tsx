@@ -12,7 +12,6 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { ClientNote, Column, DataTableApiResponse, NoteType } from '@/types'
 import { formatDate } from '@/utils/date'
 
-
 import CreateOrEditNoteModal from './CreateOrEditNoteModal'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import ClientNoteService from '@/services/api/clients/client-notes.service'
@@ -46,13 +45,11 @@ const ClientNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: Not
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
-    
-return () => clearTimeout(timer)
+    return () => clearTimeout(timer)
   }, [searchValue])
 
   const fetchData = async () => {
@@ -164,8 +161,20 @@ return () => clearTimeout(timer)
       cell: row => (
         <ThreeDotButton
           buttons={[
-            <EditButton title='Edit' key='edit' tooltip='Edit Note' variant='text' onClick={() => handleOpenEditModal(row.id)}/>,
-            <DeleteButton title='Delete' key='delete' tooltip='Delete Note' variant='text' onClick={() => handleDeleteNote(row.id)} />
+            <EditButton
+              title='Edit'
+              key='edit'
+              tooltip='Edit Note'
+              variant='text'
+              onClick={() => handleOpenEditModal(row.id)}
+            />,
+            <DeleteButton
+              title='Delete'
+              key='delete'
+              tooltip='Delete Note'
+              variant='text'
+              onClick={() => handleDeleteNote(row.id)}
+            />
           ]}
         />
       ),
@@ -183,8 +192,7 @@ return () => clearTimeout(timer)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   const customFilters = (

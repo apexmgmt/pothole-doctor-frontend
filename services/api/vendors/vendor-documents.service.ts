@@ -99,8 +99,8 @@ export default class VendorDocumentService {
 
       await revalidate('vendor-documents')
       await revalidate(`vendor-documents/${vendorDocumentId}`)
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -124,8 +124,8 @@ return await response.json()
 
       await revalidate('vendor-documents')
       await revalidate(`vendor-documents/${vendorDocumentId}`)
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

@@ -8,7 +8,6 @@ import { Staff } from '../staff.types'
 import { User } from '../user.types'
 import { ClientAddress } from './clients_addresses.types'
 
-
 export interface Client {
   id: string
   company_id: string
@@ -49,7 +48,7 @@ export interface ClientAble {
   spouse_phone: string
   cell_phone: string
   cc_email: string
-  pre_qualified_amount: number 
+  pre_qualified_amount: number
   is_tax_exempt: number | 0 | 1
   is_quick_book: number | 0 | 1
   created_at: string
@@ -91,7 +90,6 @@ export interface ClientPayload {
   contact_type_id: string
   service_type_ids: string[]
 }
-
 
 export * from './clients_notes.types'
 export * from './clients_contacts.types'

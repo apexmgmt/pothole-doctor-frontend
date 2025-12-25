@@ -97,8 +97,8 @@ export default class EstimateTypeService {
       await revalidate('estimate-types')
       await revalidate(`estimate-types/${estimateTypeId}`)
       await revalidate('estimate-types-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -123,8 +123,8 @@ return await response.json()
       await revalidate('estimate-types-all')
       await revalidate(`estimate-types/${estimateTypeId}`)
       await revalidate('estimate-types')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -147,8 +147,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to fetch estimate types list')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

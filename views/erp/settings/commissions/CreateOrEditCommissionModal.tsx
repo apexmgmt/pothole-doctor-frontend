@@ -29,8 +29,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
-
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import ContactTypeService from '@/services/api/settings/contact_types.service'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -55,8 +53,7 @@ const formSchema = z
         return parseFloat(data.min_amount) <= 100
       }
 
-      
-return true
+      return true
     },
     {
       message: 'Min amount cannot be greater than 100 when using percentage',
@@ -69,8 +66,7 @@ return true
         return parseFloat(data.max_amount) <= 100
       }
 
-      
-return true
+      return true
     },
     {
       message: 'Max amount cannot be greater than 100 when using percentage',
@@ -83,8 +79,7 @@ return true
         return parseFloat(data.amount) <= 100
       }
 
-      
-return true
+      return true
     },
     {
       message: 'Commission cannot be greater than 100 when using percentage',

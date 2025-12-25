@@ -22,6 +22,6 @@ export default async function WarehousesPage() {
   } catch (error) {
     countriesWithStateAndCities = []
   }
-  
+
   return <Warehouses businessLocations={businessLocations} countriesWithStateAndCities={countriesWithStateAndCities} />
 }

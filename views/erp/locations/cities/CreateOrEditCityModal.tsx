@@ -17,8 +17,6 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import StateService from '@/services/api/locations/state.service'
 import LocationService from '@/services/api/locations/location.service'
@@ -87,8 +85,7 @@ const CreateOrEditCityModal = ({
     if (!selectedCountryId) return []
     const selectedCountry = countriesWithStateAndCities.find(country => country.id.toString() === selectedCountryId)
 
-    
-return selectedCountry?.states || []
+    return selectedCountry?.states || []
   }, [selectedCountryId, countriesWithStateAndCities])
 
   // Reset state_id when country changes

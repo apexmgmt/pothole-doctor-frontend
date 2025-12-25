@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import TaskReminderService from '@/services/api/settings/task_reminders.service'
 
-
 const TaskReminderCard = ({
   taskReminders: initialTaskReminders,
   taskTypes,
@@ -52,8 +51,8 @@ const TaskReminderCard = ({
           const updated = [...prev]
 
           updated[existingIndex] = { ...updated[existingIndex], is_enabled: isEnabled ? 1 : 0 }
-          
-return updated
+
+          return updated
         } else {
           return [
             ...prev,
@@ -85,7 +84,6 @@ return updated
               // Remove temporary entry
               const withoutTemp = prev.filter(r => !r.id.startsWith('temp-'))
 
-
               // Remove existing entry with same identifiers
               const withoutDuplicate = withoutTemp.filter(
                 r =>
@@ -96,7 +94,6 @@ return updated
                     r.role_type === response.data.role_type
                   )
               )
-
 
               // Add the new response data
               return [...withoutDuplicate, response.data]

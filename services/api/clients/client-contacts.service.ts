@@ -12,7 +12,7 @@ export default class ClientContactService {
 
       const response = await apiInterceptor(apiUrl + CLIENT_CONTACTS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
-        method: 'GET',
+        method: 'GET'
       })
 
       if (!response.ok) {
@@ -57,7 +57,7 @@ export default class ClientContactService {
 
       const response = await apiInterceptor(apiUrl + CLIENT_CONTACTS + clientContactId, {
         requiresAuth: true,
-        method: 'GET',
+        method: 'GET'
       })
 
       if (!response.ok) {
@@ -89,8 +89,7 @@ export default class ClientContactService {
         throw new Error(errorData.message || 'Failed to update client contact')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -112,8 +111,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to delete client contact')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

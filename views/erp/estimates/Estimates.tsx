@@ -1,3 +1,3 @@
 export default function Estimates() {
-    return <div>Estimates View</div>;
-    }
+  return <div>Estimates View</div>
+}

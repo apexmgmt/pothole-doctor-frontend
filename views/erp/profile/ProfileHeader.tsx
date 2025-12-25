@@ -13,7 +13,6 @@ import { User } from '@/types'
 
 import AuthService from '@/services/api/auth.service'
 
-
 import { useAppDispatch } from '@/lib/hooks'
 import { setUserData } from '@/lib/features/auth/authSlice'
 import { generateFileUrl } from '@/utils/utility'
@@ -57,15 +56,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ userData }) => {
     // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('Please select a valid image file')
-      
-return
+
+      return
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Image size should be less than 5MB')
-      
-return
+
+      return
     }
 
     setIsUploading(true)

@@ -56,8 +56,7 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
         return JSON.parse(decrypted) as FallbackUser
       }
 
-      
-return decrypted as FallbackUser
+      return decrypted as FallbackUser
     } catch {
       return null
     }

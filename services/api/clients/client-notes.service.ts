@@ -92,8 +92,7 @@ export default class ClientNoteService {
         throw new Error(errorData.message || 'Failed to update client notes')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -115,8 +114,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to delete client notes')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

@@ -18,8 +18,6 @@ import { Button } from '@/components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 
-
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import PartnerTypesService from '@/services/api/settings/partner_types.service'
@@ -104,7 +102,7 @@ const CreateOrEditPartnerTypeModal = ({
 
   const onCancel = () => {
     form.reset({
-      name: partnerTypeDetails?.name || '',
+      name: partnerTypeDetails?.name || ''
     })
     onOpenChange(false)
   }

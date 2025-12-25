@@ -25,8 +25,7 @@ const EditBusinessLocationPage = async ({ params }: { params: { id: string } }) 
     businessLocationDetails = null
   }
 
-  
-return (
+  return (
     <CreateOrEditBusinessLocation
       mode='edit'
       businessLocationId={id}

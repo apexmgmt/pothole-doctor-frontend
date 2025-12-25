@@ -1,8 +1,8 @@
-import { getApiUrl } from "@/utils/utility"
-import apiInterceptor from "./api.interceptor"
-import { LABOR_COSTS } from "@/constants/api"
-import { LaborCostPayload } from "@/types"
-import { revalidate } from "../app/cache.service"
+import { getApiUrl } from '@/utils/utility'
+import apiInterceptor from './api.interceptor'
+import { LABOR_COSTS } from '@/constants/api'
+import { LaborCostPayload } from '@/types'
+import { revalidate } from '../app/cache.service'
 
 export default class LaborCostService {
   /**Labor costs DataTable API */
@@ -97,8 +97,8 @@ export default class LaborCostService {
       await revalidate('labor-costs')
       await revalidate(`labor-costs/${laborCostId}`)
       await revalidate('labor-costs-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -123,8 +123,8 @@ return await response.json()
       await revalidate('labor-costs')
       await revalidate(`labor-costs/${laborCostId}`)
       await revalidate('labor-costs-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

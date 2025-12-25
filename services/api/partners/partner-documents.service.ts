@@ -99,8 +99,8 @@ export default class PartnerDocumentService {
 
       await revalidate('partner-documents')
       await revalidate(`partner-documents/${partnerDocumentId}`)
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -124,8 +124,8 @@ return await response.json()
 
       await revalidate('partner-documents')
       await revalidate(`partner-documents/${partnerDocumentId}`)
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

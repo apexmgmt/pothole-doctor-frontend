@@ -48,8 +48,8 @@ export default class BusinessLocationService {
 
       await revalidate('business-locations')
       await revalidate('business-locations-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -176,8 +176,7 @@ return await response.json()
 
       const result = await response.json()
 
-      
-return result.data
+      return result.data
     } catch (error) {
       throw error
     }

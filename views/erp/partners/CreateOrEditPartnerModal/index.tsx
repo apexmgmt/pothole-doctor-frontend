@@ -10,7 +10,6 @@ import { CreateOrEditPartnerModalProps, PartnerPayload } from '@/types'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import PartnerService from '@/services/api/partners/partners.service'
 
@@ -212,8 +211,7 @@ const CreateOrEditPartnerModal = ({
     if (!selectedCountryId) return []
     const country = countriesWithStatesAndCities.find(c => c.id.toString() === selectedCountryId)
 
-    
-return country?.states || []
+    return country?.states || []
   }, [selectedCountryId, countriesWithStatesAndCities])
 
   // Get available cities based on selected state
@@ -221,8 +219,7 @@ return country?.states || []
     if (!selectedStateId) return []
     const state = availableStates.find(s => s.id.toString() === selectedStateId)
 
-    
-return state?.cities || []
+    return state?.cities || []
   }, [selectedStateId, availableStates])
 
   // Reset state when country changes

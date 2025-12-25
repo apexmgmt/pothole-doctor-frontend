@@ -42,10 +42,8 @@ export const isPublicRoute = (pathname: string): boolean => {
       const routePattern = route.replace(/:[^/]+/g, '[^/]+')
       const regex = new RegExp(`^${routePattern}$`)
 
-      
-return regex.test(pathname)
+      return regex.test(pathname)
     }
-
 
     // Handle exact matches
     return route === pathname
@@ -64,10 +62,8 @@ export const isUnauthenticatedRoute = (pathname: string): boolean => {
       const routePattern = route.replace(/:[^/]+/g, '[^/]+')
       const regex = new RegExp(`^${routePattern}$`)
 
-      
-return regex.test(pathname)
+      return regex.test(pathname)
     }
-
 
     // Handle exact matches
     return route === pathname

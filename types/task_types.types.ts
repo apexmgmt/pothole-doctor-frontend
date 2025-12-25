@@ -7,6 +7,6 @@ export interface TaskType {
 }
 
 export interface TaskTypePayload {
-    name: string
-    is_editable: number | 1 | 0
+  name: string
+  is_editable: number | 1 | 0
 }

@@ -23,7 +23,7 @@ const CreateStaffPage = async () => {
     roles = []
   }
 
-  return <CreateOrEditStaff mode="create" permissions={permissions} roles={roles}/>
+  return <CreateOrEditStaff mode='create' permissions={permissions} roles={roles} />
 }
 
 export default CreateStaffPage

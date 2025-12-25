@@ -98,8 +98,8 @@ export default class PartnerTypesService {
       await revalidate('partner-types')
       await revalidate(`partner-types/${partnerTypeId}`)
       await revalidate('partner-types-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -124,8 +124,8 @@ return await response.json()
       await revalidate('partner-types')
       await revalidate(`partner-types/${partnerTypeId}`)
       await revalidate('partner-types-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -148,8 +148,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to fetch partner types')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

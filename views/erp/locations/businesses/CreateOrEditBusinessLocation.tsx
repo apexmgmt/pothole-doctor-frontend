@@ -105,8 +105,7 @@ const CreateOrEditBusinessLocation = ({
     if (!selectedCountryId) return []
     const selectedCountry = countriesWithStateAndCities.find(country => country.id.toString() === selectedCountryId)
 
-    
-return selectedCountry?.states || []
+    return selectedCountry?.states || []
   }, [selectedCountryId, countriesWithStateAndCities])
 
   // Get cities based on selected state
@@ -114,8 +113,7 @@ return selectedCountry?.states || []
     if (!selectedStateId) return []
     const selectedState = availableStates.find(state => state.id.toString() === selectedStateId)
 
-    
-return selectedState?.cities || []
+    return selectedState?.cities || []
   }, [selectedStateId, availableStates])
 
   // Set page title on mount

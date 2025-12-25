@@ -194,8 +194,7 @@ function MultiSelect({
               selected.map(value => {
                 const option = options.find(opt => opt.value === value)
 
-                
-return (
+                return (
                   <Badge key={value} variant='default' className='mr-1'>
                     {option?.label}
                     <span
@@ -238,8 +237,7 @@ return (
               {options.map(option => {
                 const isSelected = selected.includes(option.value)
 
-                
-return (
+                return (
                   <CommandItem
                     key={option.value}
                     onSelect={() => handleSelect(option.value)}
@@ -334,8 +332,7 @@ function CreatableMultiSelect({
                 const option = options.find(opt => opt.value === value)
                 const label = option?.label || value
 
-                
-return (
+                return (
                   <Badge key={value} variant='default' className='mr-1'>
                     {label}
                     <span
@@ -383,8 +380,7 @@ return (
               {filteredOptions.map(option => {
                 const isSelected = selected.includes(option.value)
 
-                
-return (
+                return (
                   <CommandItem
                     key={option.value}
                     onSelect={() => handleSelect(option.value)}

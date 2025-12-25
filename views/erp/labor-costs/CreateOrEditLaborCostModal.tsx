@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import LaborCostService from '@/services/api/labor_costs.service'
 

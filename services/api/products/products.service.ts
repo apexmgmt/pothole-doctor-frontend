@@ -98,8 +98,8 @@ export default class ProductService {
       await revalidate('products')
       await revalidate(`products/${productId}`)
       await revalidate('products-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -124,8 +124,8 @@ return await response.json()
       await revalidate('products')
       await revalidate(`products/${productId}`)
       await revalidate('products-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -150,8 +150,8 @@ return await response.json()
       await revalidate('products')
       await revalidate(`products/${productId}`)
       await revalidate('products-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

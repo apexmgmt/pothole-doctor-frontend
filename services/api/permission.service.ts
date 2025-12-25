@@ -1,6 +1,6 @@
-import { getApiUrl } from "@/utils/utility"
-import apiInterceptor from "./api.interceptor"
-import { PERMISSIONS } from "@/constants/api"
+import { getApiUrl } from '@/utils/utility'
+import apiInterceptor from './api.interceptor'
+import { PERMISSIONS } from '@/constants/api'
 
 export default class PermissionService {
   static index = async (filterOptions: object = {}) => {

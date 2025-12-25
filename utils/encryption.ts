@@ -22,17 +22,16 @@ export const encryptData = (data: any): string | any => {
     } else if (NODE_ENV === 'production') {
       const jsonData = JSON.stringify(data)
 
-      
-return CryptoJS.AES.encrypt(jsonData, SECRET_KEY).toString()
+      return CryptoJS.AES.encrypt(jsonData, SECRET_KEY).toString()
     } else {
       console.warn('NODE_ENV is not set correctly. Defaulting to JSON.stringify.')
-      
-return JSON.stringify(data)
+
+      return JSON.stringify(data)
     }
   } catch (error) {
     console.error('Encryption error:', error)
-    
-return null
+
+    return null
   }
 }
 
@@ -73,8 +72,7 @@ export const decryptData = (value: any): any => {
       try {
         const parsed = JSON.parse(value)
 
-        
-return parsed
+        return parsed
       } catch {
         // Not valid JSON, continue with decryption
       }
@@ -101,8 +99,7 @@ return parsed
         try {
           const parsed = JSON.parse(decrypted)
 
-          
-return parsed
+          return parsed
         } catch {
           return decrypted
         }
@@ -130,8 +127,7 @@ export const decryptUserData = (encryptedData: unknown): unknown | null => {
       return null
     }
 
-    
-return decrypted
+    return decrypted
   } catch {
     return encryptedData
   }
@@ -146,12 +142,11 @@ export const encryptRedirectUrl = (url: string): string | null => {
   try {
     const encrypted = CryptoJS.AES.encrypt(url, SECRET_KEY).toString()
 
-    
-return encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+    return encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
   } catch (error) {
     console.error('URL Encryption error:', error)
-    
-return null
+
+    return null
   }
 }
 
@@ -170,11 +165,10 @@ export const decryptRedirectUrl = (encryptedUrl: string): string | null => {
 
     const decrypted = CryptoJS.AES.decrypt(restored, SECRET_KEY).toString(CryptoJS.enc.Utf8)
 
-    
-return decrypted
+    return decrypted
   } catch (error) {
     console.error('URL Decryption error:', error)
-    
-return null
+
+    return null
   }
 }

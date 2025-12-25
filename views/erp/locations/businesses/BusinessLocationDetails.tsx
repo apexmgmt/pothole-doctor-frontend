@@ -12,7 +12,6 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
 import { BusinessLocation } from '@/types'
 
-
 import { Card } from '@/components/ui/card'
 
 interface BusinessLocationDetailsProps {

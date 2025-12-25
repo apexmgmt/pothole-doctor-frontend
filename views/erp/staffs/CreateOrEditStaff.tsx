@@ -293,8 +293,8 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                   const password = getValues('password')
 
                   if (password && value !== password) return 'Does not match'
-                  
-return true
+
+                  return true
                 }
               }}
               render={({ field }) => (

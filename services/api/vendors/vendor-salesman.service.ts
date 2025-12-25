@@ -96,8 +96,8 @@ export default class VendorSalesmanService {
 
       await revalidate('vendor-salesman')
       await revalidate(`vendor-salesman/${vendorSalesmanId}`)
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -121,8 +121,8 @@ return await response.json()
 
       await revalidate('vendor-salesman')
       await revalidate(`vendor-salesman/${vendorSalesmanId}`)
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

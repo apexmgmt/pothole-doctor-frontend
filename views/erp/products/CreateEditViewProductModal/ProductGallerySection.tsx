@@ -14,7 +14,6 @@ import { Card } from '@/components/ui/card'
 
 import ProductGalleryService from '@/services/api/products/product-galleries.service'
 
-
 import { generateFileUrl } from '@/utils/utility'
 import { ProductGallery } from '@/types'
 

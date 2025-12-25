@@ -12,7 +12,7 @@ export default async function PartnersPage() {
   let countriesWithStatesAndCities: CountryWithStates[] = []
   let companies: Company[] = []
   let skills: Skill[] = []
-  
+
   try {
     const response = await BusinessLocationService.getAllBusinessLocations()
 

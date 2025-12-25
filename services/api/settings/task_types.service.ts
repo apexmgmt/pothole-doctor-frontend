@@ -98,8 +98,8 @@ export default class TaskTypeService {
       await revalidate('task-types')
       await revalidate(`task-types/${taskTypeId}`)
       await revalidate('task-types-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -150,8 +150,8 @@ return await response.json()
       await revalidate('task-types')
       await revalidate(`task-types/${taskTypeId}`)
       await revalidate('task-types-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

@@ -19,8 +19,7 @@ export default class ClientSourceService {
         throw new Error(errorData.message || 'Failed to fetch all client sources')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

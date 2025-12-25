@@ -97,8 +97,8 @@ export default class ServiceTypeService {
       await revalidate('service-types')
       await revalidate(`service-types/${serviceTypeId}`)
       await revalidate('service-types-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -123,8 +123,8 @@ return await response.json()
       await revalidate('service-types')
       await revalidate(`service-types/${serviceTypeId}`)
       await revalidate('service-types-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -149,8 +149,8 @@ return await response.json()
       await revalidate('service-types')
       await revalidate(`service-types/${serviceTypeId}`)
       await revalidate('service-types-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -173,8 +173,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to fetch service type types')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

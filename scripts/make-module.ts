@@ -103,13 +103,12 @@ function normalizeModuleName(name: string) {
   const kebab = words.join('-')
   const constant = words.join('_').toUpperCase()
 
-
   // Create plural versions
   const pluralize = (str: string) => {
     if (str.endsWith('y')) return str.slice(0, -1) + 'ies'
     if (str.endsWith('s') || str.endsWith('x') || str.endsWith('ch') || str.endsWith('sh')) return str + 'es'
-    
-return str + 's'
+
+    return str + 's'
   }
 
   const lastWord = words[words.length - 1]

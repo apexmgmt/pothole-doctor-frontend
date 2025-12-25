@@ -38,8 +38,7 @@ const Profile: React.FC<ProfileProps> = ({ userData: propUser }) => {
         return JSON.parse(decrypted) as User
       }
 
-      
-return decrypted as User
+      return decrypted as User
     } catch {
       return null
     }
@@ -51,7 +50,6 @@ return decrypted as User
   useEffect(() => {
     dispatch(setPageTitle('Profile'))
   }, [dispatch])
-
 
   if (!userData) {
     return (

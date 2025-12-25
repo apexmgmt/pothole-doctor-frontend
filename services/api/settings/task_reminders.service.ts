@@ -20,8 +20,7 @@ export default class TaskReminderService {
         throw new Error(errorData.message || 'Failed to fetch task reminders')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -43,8 +42,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to create task reminder')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

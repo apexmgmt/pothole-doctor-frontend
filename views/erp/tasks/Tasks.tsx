@@ -67,8 +67,7 @@ const Tasks: React.FC<{
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
@@ -137,7 +136,6 @@ return newOptions
     handleModalClose()
   }
 
-
   // Column definitions for CommonTable
   const columns: Column[] = [
     {
@@ -178,8 +176,7 @@ return newOptions
       cell: (row: Task) => {
         const parts = [row?.created_by?.first_name, row?.created_by?.last_name].filter(Boolean)
 
-        
-return <span className='font-medium'>{parts.join(' ') || ''}</span>
+        return <span className='font-medium'>{parts.join(' ') || ''}</span>
       },
       sortable: true
     },
@@ -219,8 +216,7 @@ return <span className='font-medium'>{parts.join(' ') || ''}</span>
       cell: (row: Task) => {
         const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
 
-        
-return <span className='font-medium'>{parts.join(' ') || ''}</span>
+        return <span className='font-medium'>{parts.join(' ') || ''}</span>
       },
       sortable: true
     },
@@ -285,8 +281,7 @@ return <span className='font-medium'>{parts.join(' ') || ''}</span>
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   // Custom filters component

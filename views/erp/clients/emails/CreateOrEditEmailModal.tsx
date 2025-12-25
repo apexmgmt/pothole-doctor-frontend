@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Client } from '@/types'
 
-
 import RichTextEditor, { serializeToHtml } from '@/components/erp/common/editor/RichTextEditor'
 import ClientEmailService from '@/services/api/clients/client-emails.service'
 

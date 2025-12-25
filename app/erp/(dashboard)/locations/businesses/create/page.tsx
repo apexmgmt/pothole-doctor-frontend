@@ -13,8 +13,7 @@ const CreateBusinessLocationPage = async () => {
     countriesWithStateAndCities = []
   }
 
-  
-return <CreateOrEditBusinessLocation countriesWithStateAndCities={countriesWithStateAndCities} />
+  return <CreateOrEditBusinessLocation countriesWithStateAndCities={countriesWithStateAndCities} />
 }
 
 export default CreateBusinessLocationPage

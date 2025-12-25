@@ -97,8 +97,8 @@ export default class PartnerService {
       await revalidate('partners')
       await revalidate(`partners/${partnerId}`)
       await revalidate('partners-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -149,8 +149,8 @@ return await response.json()
       await revalidate('partners')
       await revalidate(`partners/${partnerId}`)
       await revalidate('partners-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

@@ -113,11 +113,7 @@ const CreateOrEditNoteModal: React.FC<CreateOrEditNoteModalProps> = ({
             }
             className='flex-1'
           >
-            {form.formState.isSubmitting
-              ? 'Saving...'
-              : mode === 'edit'
-                ? 'Update'
-                : 'Save'}
+            {form.formState.isSubmitting ? 'Saving...' : mode === 'edit' ? 'Update' : 'Save'}
           </Button>
         </div>
       }

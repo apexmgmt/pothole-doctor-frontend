@@ -5,7 +5,18 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { Boxes, Building2, CalendarCheck, LocateIcon, Map, Package, UserLock, Users, Users2, Warehouse } from 'lucide-react'
+import {
+  Boxes,
+  Building2,
+  CalendarCheck,
+  LocateIcon,
+  Map,
+  Package,
+  UserLock,
+  Users,
+  Users2,
+  Warehouse
+} from 'lucide-react'
 
 import { NavigationItem } from '@/types'
 

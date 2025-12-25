@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Client, ClientSms, Column, DataTableApiResponse } from '@/types'
 
-
 import CreateOrEditSmsModal from './CreateOrEditSmsModal'
 import ClientSmsService from '@/services/api/clients/client-sms.service'
 
@@ -44,8 +43,7 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
@@ -197,8 +195,7 @@ return newOptions
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   // Custom filters component

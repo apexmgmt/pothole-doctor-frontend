@@ -13,6 +13,5 @@ export default async function PaymentTermsPage() {
     paymentTermTypes = []
   }
 
-  
-return <PaymentTerms paymentTermTypes={paymentTermTypes} />
+  return <PaymentTerms paymentTermTypes={paymentTermTypes} />
 }

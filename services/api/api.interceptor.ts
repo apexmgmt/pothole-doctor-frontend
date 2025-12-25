@@ -68,8 +68,8 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
             storeTokens(refreshed)
             isRefreshing = false
             refreshPromise = null
-            
-return refreshed
+
+            return refreshed
           } else {
             isRefreshing = false
             refreshPromise = null
@@ -151,8 +151,8 @@ return refreshed
                 storeTokens(refreshed)
                 isRefreshing = false
                 refreshPromise = null
-                
-return refreshed
+
+                return refreshed
               } else {
                 isRefreshing = false
                 refreshPromise = null

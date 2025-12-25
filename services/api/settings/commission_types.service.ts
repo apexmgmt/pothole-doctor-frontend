@@ -98,8 +98,8 @@ export default class CommissionTypeService {
       await revalidate('commission-types')
       await revalidate(`commission-types/${commissionTypeId}`)
       await revalidate('commission-types-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -124,8 +124,8 @@ return await response.json()
       await revalidate('commission-types')
       await revalidate(`commission-types/${commissionTypeId}`)
       await revalidate('commission-types-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -148,8 +148,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to fetch commission types')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

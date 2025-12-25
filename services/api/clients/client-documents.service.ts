@@ -12,7 +12,7 @@ export default class ClientDocumentService {
 
       const response = await apiInterceptor(apiUrl + CLIENT_DOCUMENTS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
-        method: 'GET',
+        method: 'GET'
       })
 
       if (!response.ok) {
@@ -57,7 +57,7 @@ export default class ClientDocumentService {
 
       const response = await apiInterceptor(apiUrl + CLIENT_DOCUMENTS + clientDocumentId, {
         requiresAuth: true,
-        method: 'GET',
+        method: 'GET'
       })
 
       if (!response.ok) {
@@ -92,8 +92,7 @@ export default class ClientDocumentService {
         throw new Error(errorData.message || 'Failed to update document')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -115,8 +114,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to delete document')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

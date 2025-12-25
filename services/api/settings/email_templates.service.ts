@@ -21,8 +21,7 @@ export default class EmailTemplateService {
         throw new Error(errorData.message || 'Failed to fetch email templates')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

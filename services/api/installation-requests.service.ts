@@ -19,8 +19,7 @@ export default class InstallationRequestService {
         throw new Error(errorData.message || 'Failed to fetch all installation requests')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

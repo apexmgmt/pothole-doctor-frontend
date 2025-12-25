@@ -16,9 +16,9 @@ export interface PaymentTermPayload {
 }
 
 export interface PaymentTermType {
-    id: string
-    name: string
-    type: string
-    created_at: string
-    updated_at: string
+  id: string
+  name: string
+  type: string
+  created_at: string
+  updated_at: string
 }

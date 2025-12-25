@@ -110,8 +110,8 @@ const CommonTable: React.FC<CommonTableProps> = ({
 
         if (newOptions.per_page === 10) delete newOptions.per_page
         if (newOptions.page === 1) delete newOptions.page
-        
-return newOptions
+
+        return newOptions
       })
     }
   }
@@ -124,8 +124,8 @@ return newOptions
 
         if (newOptions.per_page === 10) delete newOptions.per_page
         if (newOptions.page === 1) delete newOptions.page
-        
-return newOptions
+
+        return newOptions
       })
     }
   }
@@ -204,8 +204,8 @@ return newOptions
   const getColumnWidth = (size?: number | string) => {
     if (!size) return {}
     if (typeof size === 'number') return { width: `${size}px` }
-    
-return { width: size }
+
+    return { width: size }
   }
 
   return (
@@ -249,8 +249,7 @@ return { width: size }
                   const rowId = row[rowKey]
                   const isSelected = selectedRowId === rowId
 
-                  
-return (
+                  return (
                     <tr
                       key={rowIndex}
                       onClick={() => handleRowClick(row)}
@@ -258,7 +257,7 @@ return (
                         isSelected ? 'bg-gray-800 hover:bg-gray-900' : 'hover:bg-gray-900'
                       } ${rowIndex + 1 === tableData.length ? '' : 'border-b border-border'}`}
                     >
-                      {columns.map((column) => {
+                      {columns.map(column => {
                         const columnWidth = getColumnWidth(column?.size)
 
                         return (

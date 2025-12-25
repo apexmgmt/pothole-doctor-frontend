@@ -20,8 +20,7 @@ export default class ProductGalleryService {
         throw new Error(errorData.message || 'Failed to fetch product galleries')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -44,8 +43,8 @@ return await response.json()
       }
 
       await revalidate('product-galleries')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -67,8 +66,8 @@ return await response.json()
       }
 
       await revalidate('product-galleries')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

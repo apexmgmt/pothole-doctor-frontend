@@ -10,7 +10,6 @@ type Option = {
 }
 
 type FieldProps = {
-
   // common
   type?: 'text' | 'email' | 'password' | 'select' | 'checkbox' | 'radio' | 'textarea'
   label?: string
@@ -75,19 +74,16 @@ const Field: React.FC<FieldProps> = ({
       return { value, onChange, required, disabled, placeholder, onBlur, name }
     }
 
-     
     const { ref, ...rest } = register
 
-    
-return { ...rest, required, disabled, placeholder, onBlur, name, inputRef: ref }
+    return { ...rest, required, disabled, placeholder, onBlur, name, inputRef: ref }
   }
 
   const renderTextLike = (resolvedType: string) => {
     if (register) {
       const { ref, ...rest } = register
 
-      
-return (
+      return (
         <div className='relative'>
           <input
             type={resolvedType}
@@ -109,15 +105,14 @@ return (
               className='absolute right-2 top-1/2 -translate-y-1/2 text-gray hover:text-light-2 cursor-pointer'
               tabIndex={-1}
             >
-              {showPassword ? <EyeCloseIcon/> : <EyeOpenIcon/>}
+              {showPassword ? <EyeCloseIcon /> : <EyeOpenIcon />}
             </button>
           )}
         </div>
       )
     }
 
-    
-return (
+    return (
       <div className='relative'>
         <input
           type={resolvedType}
@@ -139,7 +134,7 @@ return (
             className='absolute right-2 top-1/2 -translate-y-1/2 text-gray hover:text-light-2 cursor-pointer'
             tabIndex={-1}
           >
-            {showPassword ? <EyeCloseIcon/> : <EyeOpenIcon/>}
+            {showPassword ? <EyeCloseIcon /> : <EyeOpenIcon />}
           </button>
         )}
       </div>
@@ -150,15 +145,13 @@ return (
     if (register) {
       const { ref, ...rest } = register
 
-      
-return (
+      return (
         <select
           className={baseFieldClass}
           {...rest}
           required={required}
           disabled={disabled}
-
-        //   placeholder={placeholder}
+          //   placeholder={placeholder}
           onBlur={onBlur}
           name={name}
           ref={ref}
@@ -172,15 +165,13 @@ return (
       )
     }
 
-    
-return (
+    return (
       <select
         className={baseFieldClass}
         value={typeof value === 'string' ? value : ''}
         onChange={onChange as React.ChangeEventHandler<HTMLSelectElement>}
         required={required}
         disabled={disabled}
-
         // placeholder={placeholder}
         onBlur={onBlur}
         name={name}
@@ -198,8 +189,7 @@ return (
     if (register) {
       const { ref, ...rest } = register
 
-      
-return (
+      return (
         <textarea
           rows={rows}
           className={`${baseFieldClass} resize-y`}
@@ -214,8 +204,7 @@ return (
       )
     }
 
-    
-return (
+    return (
       <textarea
         rows={rows}
         className={`${baseFieldClass} resize-y`}
@@ -236,8 +225,8 @@ return (
     if (type === 'textarea') return renderTextarea()
     if (type === 'select') return renderSelect()
     if (type === 'password') return renderTextLike(showPassword ? 'text' : 'password')
-    
-return renderTextLike(type)
+
+    return renderTextLike(type)
   }, [type, showPassword, value, error, options, placeholder, disabled, required, register])
 
   return (

@@ -11,7 +11,6 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import VendorSalesmanService from '@/services/api/vendors/vendor-salesman.service'
 
@@ -162,7 +161,6 @@ const CreateOrEditSalesmanModal = ({
             rules={{
               required: 'Email is required',
               minLength: { value: 2, message: 'Email must be at least 2 characters' }
-              
             }}
             render={({ field }) => (
               <FormItem>
@@ -200,9 +198,7 @@ const CreateOrEditSalesmanModal = ({
             name='ext'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Ext
-                </FormLabel>
+                <FormLabel>Ext</FormLabel>
                 <FormControl>
                   <Input placeholder='Enter ext' {...field} />
                 </FormControl>

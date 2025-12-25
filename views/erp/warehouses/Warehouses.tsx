@@ -60,8 +60,7 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
@@ -199,7 +198,8 @@ return newOptions
       header: 'Address',
       cell: row => (
         <span className='font-medium'>
-          {row.street ? `${row.street}, ` : ''}{row.city}, {row.state}, {row.zip_code}
+          {row.street ? `${row.street}, ` : ''}
+          {row.city}, {row.state}, {row.zip_code}
         </span>
       ),
       sortable: false
@@ -251,8 +251,7 @@ return newOptions
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   // Custom filters component

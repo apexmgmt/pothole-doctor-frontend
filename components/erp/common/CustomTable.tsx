@@ -169,8 +169,8 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
         if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1
         if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1
-        
-return 0
+
+        return 0
       })
     }
 

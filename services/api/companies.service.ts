@@ -10,7 +10,7 @@ export default class CompanyService {
 
       const response = await apiInterceptor(apiUrl + COMPANIES_ALL, {
         requiresAuth: true,
-        method: 'GET',
+        method: 'GET'
 
         // next: { revalidate: 3600, tags: ['companies-all'] } // Cache for 1 hour
       })
@@ -21,8 +21,7 @@ export default class CompanyService {
         throw new Error(errorData.message || 'Failed to fetch companies')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

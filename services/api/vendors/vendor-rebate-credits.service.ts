@@ -96,8 +96,8 @@ export default class VendorRebateCreditService {
 
       await revalidate('vendor-rebate-credits')
       await revalidate(`vendor-rebate-credits/${vendorRebateCreditId}`)
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -121,8 +121,8 @@ return await response.json()
 
       await revalidate('vendor-rebate-credits')
       await revalidate(`vendor-rebate-credits/${vendorRebateCreditId}`)
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }

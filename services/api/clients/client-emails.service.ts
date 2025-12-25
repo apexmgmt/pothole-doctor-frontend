@@ -89,8 +89,7 @@ export default class ClientEmailService {
         throw new Error(errorData.message || 'Failed to update client email')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -112,8 +111,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to delete client email')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

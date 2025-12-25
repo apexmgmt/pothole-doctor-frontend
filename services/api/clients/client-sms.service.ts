@@ -90,8 +90,7 @@ export default class ClientSmsService {
         throw new Error(errorData.message || 'Failed to update client sms')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -113,8 +112,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to delete client sms')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

@@ -1,9 +1,9 @@
-import React from "react";
+import React from 'react'
 
-import NewPassIndex from "@/views/erp/auth/new-password";
+import NewPassIndex from '@/views/erp/auth/new-password'
 
 const NewPasswordPage = () => {
-  return <NewPassIndex />;
-};
+  return <NewPassIndex />
+}
 
-export default NewPasswordPage;
+export default NewPasswordPage

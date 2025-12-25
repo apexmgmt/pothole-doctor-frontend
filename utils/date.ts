@@ -4,8 +4,7 @@ export function formatDateTime(timestamp: Date | string | number | null): string
   const date = new Date(timestamp)
   const pad = (n: number) => n.toString().padStart(2, '0')
 
-  
-return (
+  return (
     date.getFullYear() +
     '-' +
     pad(date.getMonth() + 1) +

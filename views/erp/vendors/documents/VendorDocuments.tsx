@@ -19,9 +19,6 @@ import { DocumentIcon } from '@/public/icons'
 import { Column, DataTableApiResponse, Document } from '@/types'
 import { generateFileUrl, getFileType } from '@/utils/utility'
 
-
-
-
 import CreateOrEditDocumentModal from './CreateOrEditDocumentModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import VendorDocumentService from '@/services/api/vendors/vendor-documents.service'
@@ -35,7 +32,6 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: vendorId })
-
 
   // Set initial search value from filterOptions
   useEffect(() => {
@@ -59,8 +55,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
@@ -227,8 +222,7 @@ return newOptions
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   // Custom filters component

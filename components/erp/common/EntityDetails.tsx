@@ -447,7 +447,6 @@ const EntityDetails: React.FC<EntityDetailsProps> = ({
         {/* Tab Content */}
         <div className=''>
           {activeTab === 'documents' ? (
-
             // <DocumentsGallery
             //   entityData={entityData}
             //   onUpload={() => handleActionButtonClick('upload_document')}

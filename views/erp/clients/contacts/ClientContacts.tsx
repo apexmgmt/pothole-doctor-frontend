@@ -12,7 +12,6 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Column, CountryWithStates, DataTableApiResponse, ClientContact } from '@/types'
 import { formatDate } from '@/utils/date'
 
-
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import CreateOrEditContactModal from './CreateOrEditContactModal'
 import ClientContactService from '@/services/api/clients/client-contacts.service'
@@ -52,13 +51,11 @@ const ClientContacts = ({
           delete newOptions.page
         }
 
-        
-return newOptions
+        return newOptions
       })
     }, 500)
 
-    
-return () => clearTimeout(timer)
+    return () => clearTimeout(timer)
   }, [searchValue])
 
   const fetchData = async () => {
@@ -156,8 +153,7 @@ return () => clearTimeout(timer)
       cell: row => {
         const parts = [row.address, row?.city?.name, row?.state?.name, row?.country?.name].filter(Boolean)
 
-        
-return <span className='font-medium'>{parts.join(', ')}</span>
+        return <span className='font-medium'>{parts.join(', ')}</span>
       },
       sortable: true
     },
@@ -204,8 +200,7 @@ return <span className='font-medium'>{parts.join(', ')}</span>
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    
-return filterKeys.length > 0
+    return filterKeys.length > 0
   }
 
   const customFilters = (

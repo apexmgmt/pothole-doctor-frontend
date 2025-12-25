@@ -1,9 +1,9 @@
-import React from "react";
+import React from 'react'
 
-import Leads from "@/views/erp/dashboard/crm/leads/Leads";
+import Leads from '@/views/erp/dashboard/crm/leads/Leads'
 
 const LeadsPage = () => {
-  return <Leads />;
-};
+  return <Leads />
+}
 
-export default LeadsPage;
+export default LeadsPage

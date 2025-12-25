@@ -97,8 +97,8 @@ export default class InterestLevelService {
       await revalidate('interest-levels')
       await revalidate(`interest-levels/${interestLevelId}`)
       await revalidate('interest-levels-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -123,8 +123,8 @@ return await response.json()
       await revalidate('interest-levels')
       await revalidate(`interest-levels/${interestLevelId}`)
       await revalidate('interest-levels-all')
-      
-return await response.json()
+
+      return await response.json()
     } catch (error) {
       throw error
     }
@@ -147,8 +147,7 @@ return await response.json()
         throw new Error(errorData.message || 'Failed to fetch all interest levels')
       }
 
-      
-return await response.json()
+      return await response.json()
     } catch (error) {
       throw error
     }

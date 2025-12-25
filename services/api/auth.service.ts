@@ -6,7 +6,7 @@ import {
   PROFILE_CHANGE_PASSWORD,
   PROFILE_LAST_ACTIVITY,
   PROFILE_PICTURE,
-  PROFILE_UPDATE,
+  PROFILE_UPDATE
 } from '@/constants/api'
 import { getApiUrl } from '@/utils/utility'
 import CookieService from '../app/cookie.service'
@@ -120,8 +120,8 @@ export default class AuthService {
       const data = await response.json()
 
       CookieService.store('user', data?.data)
-      
-return data
+
+      return data
     } catch (error) {
       throw error
     }
@@ -221,12 +221,10 @@ return data
     //     requiresAuth: true,
     //     method: 'DELETE'
     //   })
-
     //   if (!response.ok) {
     //     const errorData = await response.json()
     //     throw new Error(errorData.message || 'Failed to end session')
     //   }
-
     //   return await response.json()
     // } catch (error) {
     //   throw error
@@ -240,12 +238,10 @@ return data
     //     requiresAuth: true,
     //     method: 'POST'
     //   })
-
     //   if (!response.ok) {
     //     const errorData = await response.json()
     //     throw new Error(errorData.message || 'Failed to logout from all devices')
     //   }
-
     //   return await response.json()
     // } catch (error) {
     //   throw error

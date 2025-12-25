@@ -21,8 +21,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ tabs, activeTab, onTabChange 
         {tabs.map(tab => {
           const Icon = tab.icon
 
-          
-return (
+          return (
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}

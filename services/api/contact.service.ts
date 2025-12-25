@@ -65,8 +65,7 @@ export default class ContactService {
       if (localApiResponse.ok) {
         const result: LocalApiResponse = await localApiResponse.json()
 
-        
-return {
+        return {
           success: true,
           message: result.message || 'Form submitted successfully!'
         }
@@ -76,8 +75,8 @@ return {
       }
     } catch (error) {
       console.error('Error submitting form:', error)
-      
-return {
+
+      return {
         success: false,
         message: 'Failed to submit form. Please try again.'
       }

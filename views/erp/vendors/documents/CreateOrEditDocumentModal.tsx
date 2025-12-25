@@ -11,7 +11,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { generateFileUrl, getFileType } from '@/utils/utility'
 import VendorDocumentService from '@/services/api/vendors/vendor-documents.service'
@@ -63,8 +62,8 @@ const CreateOrEditDocumentModal = ({
     // Validate file on create
     if (mode === 'create' && !values.file) {
       form.setError('file', { message: 'Please upload a file' })
-      
-return
+
+      return
     }
 
     setIsLoading(true)
@@ -155,10 +154,10 @@ return
               mode === 'create'
                 ? {
                     required: 'File is required',
-                    validate: (value) => {
+                    validate: value => {
                       if (!value) return 'Please select a file'
-                      
-return true
+
+                      return true
                     }
                   }
                 : undefined
@@ -173,7 +172,6 @@ return true
                     type='file'
                     accept='*'
                     placeholder='Upload file'
-
                     // ref={fileInputRef}
                     {...field}
                     onChange={e => {
