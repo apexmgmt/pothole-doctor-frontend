@@ -183,7 +183,7 @@ const CreateOrEditEstimateModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create New Estimate' : 'Edit Estimate'}
       description={mode === 'create' ? 'Add a new estimate to the system' : 'Update estimate information'}
-      maxWidth='lg'
+      maxWidth='2xl'
       disableClose={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>

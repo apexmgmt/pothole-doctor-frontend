@@ -42,7 +42,15 @@ const EstimateDetails = ({
           <PerformTakeOfSection />
           <NotesSection />
         </div>
-        <EstimateSection estimateId={estimateId} estimate={estimate} serviceTypes={serviceTypes} estimateTypes={estimateTypes} clients={clients} staffs={staffs} paymentTerms={paymentTerms} />
+        <EstimateSection
+          estimateId={estimateId}
+          estimate={estimate}
+          serviceTypes={serviceTypes}
+          estimateTypes={estimateTypes}
+          clients={clients}
+          staffs={staffs}
+          paymentTerms={paymentTerms}
+        />
       </div>
     </>
   )
