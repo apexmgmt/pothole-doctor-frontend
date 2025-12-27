@@ -6,6 +6,7 @@ import { Staff } from './staff.types'
 
 export interface Estimate {
   id: string
+  estimate_number: number,
   status: string
   title: string
   location: string
