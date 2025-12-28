@@ -23,7 +23,7 @@ import CreateOrEditLaborCostModal from './CreateOrEditLaborCostModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 
-const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
+const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units, isFromModal = false }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -90,27 +90,12 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
   useEffect(() => {
     fetchData()
     updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Labor Costs'))
+
+    // set the page title only if the view from page
+    if (!isFromModal) dispatch(setPageTitle('Manage Labor Costs'))
   }, [filterOptions])
 
-  // Transform API data to match table format
-  const laborCostsData = apiResponse?.data
-    ? apiResponse.data.map((laborCost: LaborCost, index: number) => {
-        return {
-          id: laborCost.id,
-          index: (apiResponse?.from || 1) + index,
-          name: laborCost.name,
-          description: laborCost.description,
-          cost: laborCost.cost,
-          price: laborCost.price,
-          margin: laborCost.margin,
-          service_type_id: laborCost.service_type_id,
-          service_type: laborCost?.service_type ? laborCost?.service_type?.name : '',
-          unit_id: laborCost.unit_id,
-          unit: laborCost?.unit ? laborCost?.unit?.name : ''
-        }
-      })
-    : []
+  
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
@@ -167,56 +152,61 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
     {
       id: 'index',
       header: '#',
-      cell: row => <span className='text-gray'>{row.index}</span>,
+      cell: (row, rowIndex) => {
+        // Calculate the absolute index based on pagination
+        const from = apiResponse?.from || 1
+
+        return <span className='text-gray'>{from + (rowIndex || 0)}</span>
+      },
       sortable: false,
       size: 16
     },
     {
       id: 'service_type',
       header: 'Service Type',
-      cell: row => <span className='font-medium'>{row.service_type}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row?.service_type?.name || ''}</span>,
       sortable: true
     },
     {
       id: 'name',
       header: 'Labor Name',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row.name}</span>,
       sortable: true
     },
     {
       id: 'description',
       header: 'Description',
-      cell: row => <span className='font-medium'>{row.description}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row.description}</span>,
       sortable: true
     },
     {
       id: 'cost',
       header: 'Cost',
-      cell: row => <span className='font-medium'>{row.cost}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row.cost}</span>,
       sortable: true
     },
     {
       id: 'margin',
       header: 'Margin',
-      cell: row => <span className='font-medium'>{row.margin}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row.margin}</span>,
       sortable: true
     },
     {
       id: 'price',
       header: 'Labor Price',
-      cell: row => <span className='font-medium'>{row.price}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row.price}</span>,
       sortable: true
     },
     {
       id: 'unit',
       header: 'Per',
-      cell: row => <span className='font-medium'>{row.unit}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row?.unit?.name || ''}</span>,
       sortable: true
     },
     {
       id: 'actions',
       header: 'Action',
-      cell: row => (
+      cell: (row: LaborCost) => (
         <>
           <ThreeDotButton
             buttons={[
@@ -327,7 +317,7 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
       <CommonLayout title='Labor Costs' noTabs={true}>
         <CommonTable
           data={{
-            data: laborCostsData,
+            data: apiResponse?.data || [],
             per_page: apiResponse?.per_page || 10,
             total: apiResponse?.total || 0,
             from: apiResponse?.from || 1,
