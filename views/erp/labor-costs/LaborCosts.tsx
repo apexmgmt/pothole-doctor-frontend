@@ -21,6 +21,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import LaborCostService from '@/services/api/labor_costs.service'
 import CreateOrEditLaborCostModal from './CreateOrEditLaborCostModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 
 const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
   const router = useRouter()
@@ -144,6 +145,23 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
     handleModalClose()
   }
 
+  const handleServiceTypeChange = (value: string) => {
+    setFilterOptions((prev: any) => {
+      const newOptions = { ...prev }
+
+      if (value === 'all') {
+        delete newOptions.service_type_id
+      } else {
+        newOptions.service_type_id = value
+      }
+
+      // Optionally reset page on filter change
+      if (newOptions.page) delete newOptions.page
+
+      return newOptions
+    })
+  }
+
   // Column definitions for CommonTable
   const columns: Column[] = [
     {
@@ -249,19 +267,45 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='w-80'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+        {/* Global search filter */}
+        <div className='flex flex-col'>
+          <label htmlFor='product-search' className='text-xs font-medium mb-1 text-muted-foreground'>
+            Search
+          </label>
+          <InputGroup>
+            <InputGroupInput
+              id='product-search'
+              placeholder='Search...'
+              value={searchValue}
+              onChange={e => setSearchValue(e.target.value)}
+              className='w-80'
+            />
+            <InputGroupAddon>
+              <Search />
+            </InputGroupAddon>
+          </InputGroup>
+        </div>
+        {/* Service type filter */}
+        <div className='flex flex-col'>
+          <label htmlFor='service-type-filter' className='text-xs font-medium mb-1 text-muted-foreground'>
+            Service Type
+          </label>
+          <Select value={filterOptions.service_type_id || 'all'} onValueChange={handleServiceTypeChange}>
+            <SelectTrigger id='service-type-filter' className='w-72'>
+              <SelectValue placeholder='All' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='all'>All</SelectItem>
+              {serviceTypes.map(st => (
+                <SelectItem key={st.id} value={st.id}>
+                  {st.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light mt-5'>
             Clear
           </Button>
         )}
@@ -269,7 +313,7 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
       <Button
         variant='default'
         size='sm'
-        className='bg-light text-bg hover:bg-light/90'
+        className='bg-light text-bg hover:bg-light/90 mt-5'
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
