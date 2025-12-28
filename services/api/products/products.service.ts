@@ -158,7 +158,7 @@ export default class ProductService {
   }
 
   /** Get all products api */
-  static getAllProducts = async () => {
+  static getAll = async () => {
     try {
       const apiUrl: string = await getApiUrl()
 
