@@ -47,6 +47,7 @@ export default class ProductCategoryService {
       }
 
       await revalidate('product-categories')
+      await revalidate('product-categories-all')
 
       return await response.json()
     } catch (error) {
