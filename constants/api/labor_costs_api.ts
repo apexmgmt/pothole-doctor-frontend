@@ -12,3 +12,4 @@
  * @method: DELETE - Remove a specific labor cost entry by ID. /id
  */
 export const LABOR_COSTS: string = '/v1/labor-costs/'
+export const LABOR_COSTS_ALL: string = '/v1/get-labor-costs/'

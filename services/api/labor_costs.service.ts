@@ -1,6 +1,6 @@
 import { getApiUrl } from '@/utils/utility'
 import apiInterceptor from './api.interceptor'
-import { LABOR_COSTS } from '@/constants/api'
+import { LABOR_COSTS, LABOR_COSTS_ALL } from '@/constants/api'
 import { LaborCostPayload } from '@/types'
 import { revalidate } from '../app/cache.service'
 
@@ -123,6 +123,29 @@ export default class LaborCostService {
       await revalidate('labor-costs')
       await revalidate(`labor-costs/${laborCostId}`)
       await revalidate('labor-costs-all')
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /** Get All Labor Costs API */
+  static getAll = async () => {
+    try {
+      const apiUrl: string = await getApiUrl()
+
+      const response = await apiInterceptor(apiUrl + LABOR_COSTS_ALL, {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 120, tags: ['labor-costs-all'] } // Cache for 120 seconds
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to fetch all labor costs')
+      }
 
       return await response.json()
     } catch (error) {
