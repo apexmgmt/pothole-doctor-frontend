@@ -22,6 +22,7 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import ProductService from '@/services/api/products/products.service'
 import CreateEditViewProductModal from './CreateEditViewProductModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 
 const Products: React.FC<ProductsProps> = ({ productCategories, uomUnits, serviceTypes, vendors }) => {
   const router = useRouter()
@@ -159,6 +160,20 @@ const Products: React.FC<ProductsProps> = ({ productCategories, uomUnits, servic
     handleModalClose()
   }
 
+  const handleCategoryChange = (value: string) => {
+    setFilterOptions((prev: any) => {
+      const newOptions = { ...prev }
+
+      if (value === 'all') {
+        delete newOptions.category_id
+      } else {
+        newOptions.category_id = value
+      }
+
+      return newOptions
+    })
+  }
+
   // Column definitions for CommonTable
   const columns: Column[] = [
     {
@@ -281,19 +296,77 @@ const Products: React.FC<ProductsProps> = ({ productCategories, uomUnits, servic
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='w-80'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+        {/* Global search filter */}
+        <div className='flex flex-col'>
+          <label htmlFor='product-search' className='text-xs font-medium mb-1 text-muted-foreground'>
+            Search
+          </label>
+          <InputGroup>
+            <InputGroupInput
+              id='product-search'
+              placeholder='Search...'
+              value={searchValue}
+              onChange={e => setSearchValue(e.target.value)}
+              className='w-80'
+            />
+            <InputGroupAddon>
+              <Search />
+            </InputGroupAddon>
+          </InputGroup>
+        </div>
+        {/* Category filter */}
+        <div className='flex flex-col'>
+          <label htmlFor='category-filter' className='text-xs font-medium mb-1 text-muted-foreground'>
+            Category
+          </label>
+          <Select value={filterOptions.category_id || 'all'} onValueChange={handleCategoryChange}>
+            <SelectTrigger id='category-filter' className='w-40'>
+              <SelectValue placeholder='All' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='all'>All</SelectItem>
+              {productCategories.map(cat => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {/* SKU filter */}
+        <div className='flex flex-col'>
+          <label htmlFor='sku-filter' className='text-xs font-medium mb-1 text-muted-foreground'>
+            SKU
+          </label>
+          <InputGroup>
+            <InputGroupInput
+              id='sku-filter'
+              placeholder='SKU...'
+              value={filterOptions.sku || ''}
+              onChange={e => {
+                const value = e.target.value
+
+                setFilterOptions((prev: any) => {
+                  const newOptions = { ...prev }
+
+                  if (value && value.trim() !== '') {
+                    newOptions.sku = value
+                  } else {
+                    delete newOptions.sku
+                  }
+
+                  // Optionally reset page on filter change
+                  if (newOptions.page) delete newOptions.page
+
+                  return newOptions
+                })
+              }}
+              className='w-40'
+            />
+          </InputGroup>
+        </div>
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light mt-5'>
             Clear
           </Button>
         )}
@@ -301,7 +374,7 @@ const Products: React.FC<ProductsProps> = ({ productCategories, uomUnits, servic
       <Button
         variant='default'
         size='sm'
-        className='bg-light text-bg hover:bg-light/90'
+        className='bg-light text-bg hover:bg-light/90 mt-5'
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
