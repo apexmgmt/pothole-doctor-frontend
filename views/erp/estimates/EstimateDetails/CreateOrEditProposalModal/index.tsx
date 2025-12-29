@@ -1,7 +1,15 @@
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Estimate, ProductCategory, ProposalServiceItemPayload, ServiceType, Unit, Vendor } from '@/types'
+import {
+  Estimate,
+  ProductCategory,
+  ProposalPayload,
+  ProposalServiceItemPayload,
+  ServiceType,
+  Unit,
+  Vendor
+} from '@/types'
 import { SettingsIcon, UserIcon } from 'lucide-react'
 import { useState } from 'react'
 import ClientDetailsCard from './ClientDetailsCard'
@@ -12,6 +20,8 @@ import TotalCalculationCard from './TotalCalculationCard'
 import { Select, SelectTrigger, SelectContent, SelectItem } from '@/components/ui/select'
 import ServiceTypeSection from './ServiceTypeSection'
 import { Textarea } from '@/components/ui/textarea'
+import ProposalService from '@/services/api/proposals.service'
+import { toast } from 'sonner'
 
 const CreateOrEditProposalModal = ({
   open,
@@ -38,12 +48,13 @@ const CreateOrEditProposalModal = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
-  const [selectedServiceType, setSelectedServiceType] = useState<string[]>([])
+  const [selectedServiceType, setSelectedServiceType] = useState<{ id: string; name: string }[]>([])
   const [serviceSelectValue, setServiceSelectValue] = useState<string | undefined>(undefined)
+  const [customMessage, setCustomMessage] = useState('')
 
   // Each service type section has an array of line items
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
-    { serviceTypeName: string; lines: ProposalServiceItemPayload[] }[]
+    { serviceTypeName: string; serviceTypeId: string; lines: ProposalServiceItemPayload[] }[]
   >([])
 
   const onCancel = () => {
@@ -54,7 +65,7 @@ const CreateOrEditProposalModal = ({
     const found = serviceTypes.find(st => st.id === serviceTypeId)
 
     if (found) {
-      setSelectedServiceType(prev => [...prev, found.name]) // just add name, allow duplicates
+      setSelectedServiceType(prev => [...prev, { id: found.id, name: found.name }])
     }
 
     setServiceSelectOpen(false)
@@ -111,6 +122,32 @@ const CreateOrEditProposalModal = ({
 
   const total = totalSales + salesTax
 
+  const onSubmit = async () => {
+    const payload: ProposalPayload = {
+      estimate_id: estimateId || '',
+      message: customMessage,
+      discount_type: 'percentage',
+      discount: 0,
+      services: serviceTypeLineItems.map((st, index) => {
+        return {
+          service_type_id: selectedServiceType[index].id,
+          items: st.lines
+        }
+      })
+    }
+
+    if (mode === 'create') {
+      ProposalService.store(payload)
+        .then(response => {
+          toast.success('Proposal created successfully')
+          onOpenChange(false)
+        })
+        .catch(error => {
+          toast.error(error.message || 'Failed to create proposal.')
+        })
+    }
+  }
+
   return (
     <CommonDialog
       isLoading={isLoading}
@@ -126,7 +163,7 @@ const CreateOrEditProposalModal = ({
           <Button type='button' variant='outline' onClick={onCancel} disabled={isLoading} className='flex-1'>
             Cancel
           </Button>
-          <Button type='submit' onClick={() => {}} disabled={isLoading} className='flex-1'>
+          <Button type='submit' onClick={() => onSubmit()} disabled={isLoading} className='flex-1'>
             {isLoading ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
           </Button>
         </div>
@@ -198,10 +235,11 @@ const CreateOrEditProposalModal = ({
 
         {/* Service Type Sections */}
         <div className='space-y-4'>
-          {selectedServiceType.map((name, idx) => (
+          {selectedServiceType.map((item, idx) => (
             <ServiceTypeSection
               key={idx}
-              serviceTypeName={name}
+              serviceTypeName={item.name}
+              serviceTypeId={item.id}
               onRemove={() => handleRemoveServiceType(idx)}
               serviceTypes={serviceTypes}
               units={units}
@@ -227,7 +265,13 @@ const CreateOrEditProposalModal = ({
             <label htmlFor='custom-message' className='block text-sm font-medium text-zinc-200 mb-2'>
               Custom Message
             </label>
-            <Textarea id='custom-message' className='w-full' placeholder='Enter a custom message for the proposal...' />
+            <Textarea
+              id='custom-message'
+              className='w-full'
+              placeholder='Enter a custom message for the proposal...'
+              value={customMessage}
+              onChange={e => setCustomMessage(e.target.value)}
+            />
           </CardContent>
         </Card>
       </>

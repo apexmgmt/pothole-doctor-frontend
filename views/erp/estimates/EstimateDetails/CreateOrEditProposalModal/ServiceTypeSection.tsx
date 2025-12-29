@@ -6,11 +6,8 @@ import {
   Settings2Icon,
   GridIcon,
   MessageSquareIcon,
-  UserIcon,
-  CopyIcon,
   ClipboardIcon,
   XIcon,
-  Settings,
   Wrench,
   Boxes,
   Minus
@@ -25,6 +22,7 @@ import { cn } from '@/lib/utils'
 import { Textarea } from '@/components/ui/textarea'
 
 interface ServiceTypeSectionProps {
+  serviceTypeId: string
   serviceTypeName: string
   onRemove: () => void
   serviceTypes: ServiceType[]
@@ -56,6 +54,7 @@ const defaultLine: ProposalServiceItemPayload = {
 
 const ServiceTypeSection = ({
   serviceTypeName,
+  serviceTypeId,
   onRemove,
   serviceTypes = [],
   units = [],
