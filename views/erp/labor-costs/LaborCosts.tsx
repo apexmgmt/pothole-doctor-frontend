@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, LaborCost, LaborCostsProps, ServiceType } from '@/types'
+import { Column, DataTableApiResponse, LaborCost, LaborCostsProps, ServiceType, Unit } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -22,12 +22,18 @@ import LaborCostService from '@/services/api/labor_costs.service'
 import CreateOrEditLaborCostModal from './CreateOrEditLaborCostModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
 
-const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units, isFromModal = false }) => {
+const LaborCosts: React.FC<{
+  serviceTypes: ServiceType[]
+  units: Unit[]
+  isFromModal?: boolean
+  selectedRows?: LaborCost[]
+  setSelectedRows?: React.Dispatch<React.SetStateAction<LaborCost[]>>
+}> = ({ serviceTypes, units, isFromModal = false, selectedRows, setSelectedRows }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
-
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedLaborCostId, setSelectedLaborCostId] = useState<string | null>(null)
@@ -95,8 +101,6 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units, isFromModa
     if (!isFromModal) dispatch(setPageTitle('Manage Labor Costs'))
   }, [filterOptions])
 
-  
-
   const handleOpenCreateModal = () => {
     setModalMode('create')
     setSelectedLaborCostId(null)
@@ -149,18 +153,48 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units, isFromModa
 
   // Column definitions for CommonTable
   const columns: Column[] = [
-    {
-      id: 'index',
-      header: '#',
-      cell: (row, rowIndex) => {
-        // Calculate the absolute index based on pagination
-        const from = apiResponse?.from || 1
+    ...(isFromModal
+      ? [
+          {
+            id: 'select',
+            header: '',
+            cell: (row: LaborCost) => (
+              <Checkbox
+                checked={selectedRows?.some((r: LaborCost) => r.id === row.id)}
+                onCheckedChange={checked => {
+                  setSelectedRows?.((prev: LaborCost[]) => {
+                    if (checked) {
+                      // Add if not already present
+                      if (!prev.some(r => r.id === row.id)) return [...prev, row]
 
-        return <span className='text-gray'>{from + (rowIndex || 0)}</span>
-      },
-      sortable: false,
-      size: 16
-    },
+                      return prev
+                    } else {
+                      // Remove
+                      return prev.filter(r => r.id !== row.id)
+                    }
+                  })
+                }}
+              />
+            ),
+            sortable: false,
+            size: 16
+          }
+        ]
+      : [
+          {
+            id: 'index',
+            header: '#',
+            cell: (row: LaborCost, rowIndex: number | undefined) => {
+              // Calculate the absolute index based on pagination
+              const from = apiResponse?.from || 1
+
+              return <span className='text-gray'>{from + (rowIndex || 0)}</span>
+            },
+            sortable: false,
+            size: 16
+          }
+        ]),
+
     {
       id: 'service_type',
       header: 'Service Type',
