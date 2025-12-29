@@ -2,16 +2,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { LaborCost, Product, ProductCategory, ProposalServiceItemPayload, ServiceType, Unit, Vendor } from '@/types'
-import {
-  Settings2Icon,
-  GridIcon,
-  MessageSquareIcon,
-  ClipboardIcon,
-  XIcon,
-  Wrench,
-  Boxes,
-  Minus
-} from 'lucide-react'
+import { Settings2Icon, GridIcon, MessageSquareIcon, ClipboardIcon, XIcon, Wrench, Boxes, Minus } from 'lucide-react'
 import { useState } from 'react'
 import LaborCostsModal from '@/views/erp/labor-costs/LaborCostsModal'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -300,7 +291,7 @@ const ServiceTypeSection = ({
         <CardContent className='space-y-4'>
           {/* Input Section */}
           <div className='flex items-center gap-2 bg-zinc-800 p-3 rounded-md'>
-            <div className='flex items-center gap-2 flex-1'>
+            {/* <div className='flex items-center gap-2 flex-1'>
               <span className='text-sm font-medium text-zinc-300'>Total SQFT:</span>
               <Input
                 type='number'
@@ -311,7 +302,7 @@ const ServiceTypeSection = ({
               <Button variant='ghost' size='sm' className='h-8 w-8 p-0'>
                 <span className='text-zinc-400'>↻</span>
               </Button>
-            </div>
+            </div> */}
 
             <div className='flex items-center gap-2 flex-1'>
               <span className='text-sm font-medium text-zinc-300'>% Margin:</span>
@@ -323,7 +314,22 @@ const ServiceTypeSection = ({
                 min={0}
                 max={100}
               />
-              <Button variant='ghost' size='sm' className='h-8 w-8 p-0'>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='h-8 w-8 p-0'
+                onClick={() => {
+                  const marginValue = parseFloat(margin) || 0
+
+                  const updated = lines.map(line =>
+                    line.type !== 'deduction' && line.type !== 'comment'
+                      ? recalculateLine({ ...line, margin: marginValue })
+                      : line
+                  )
+
+                  onLinesChange(updated)
+                }}
+              >
                 <span className='text-zinc-400'>↻</span>
               </Button>
             </div>
