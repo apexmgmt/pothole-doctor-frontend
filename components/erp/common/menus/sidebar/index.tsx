@@ -95,7 +95,7 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/products',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: true
         },
         {
           id: 'product-categories',
@@ -103,7 +103,7 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/products/categories',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: true
         }
       ],
       exactMatch: false

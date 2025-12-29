@@ -1,6 +1,6 @@
 'use client'
 
-import { Client, Estimate, EstimateType, PaymentTerm, ServiceType, Staff } from '@/types'
+import { Client, Estimate, EstimateType, PaymentTerm, ProductCategory, ServiceType, Staff, Unit, Vendor } from '@/types'
 import ProposalSection from './ProposalSection'
 import PerformTakeOfSection from './PerformTakeOfSection'
 import NotesSection from './NotesSection'
@@ -16,7 +16,11 @@ const EstimateDetails = ({
   estimateTypes,
   clients,
   staffs,
-  paymentTerms
+  paymentTerms,
+  units,
+  productCategories,
+  uomUnits,
+  vendors
 }: {
   estimateId: string
   estimate: Estimate
@@ -25,6 +29,10 @@ const EstimateDetails = ({
   clients: Client[]
   staffs: Staff[]
   paymentTerms: PaymentTerm[]
+  units: Unit[]
+  productCategories: ProductCategory[]
+  uomUnits: Unit[]
+  vendors: Vendor[]
 }) => {
   const dispatch = useAppDispatch()
 
@@ -37,7 +45,15 @@ const EstimateDetails = ({
   return (
     <>
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-4 items-start'>
-        <ProposalSection />
+        <ProposalSection
+          estimateId={estimateId}
+          estimateDetails={estimate}
+          serviceTypes={serviceTypes}
+          units={units}
+          productCategories={productCategories}
+          uomUnits={uomUnits}
+          vendors={vendors}
+        />
         <div className='flex flex-col gap-4'>
           <PerformTakeOfSection />
           <NotesSection />
