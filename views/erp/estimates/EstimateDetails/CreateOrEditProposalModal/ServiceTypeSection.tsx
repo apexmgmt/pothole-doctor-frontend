@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge'
 import ProductsModal from '@/views/erp/products/ProductsModal'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { Textarea } from '@/components/ui/textarea'
 
 interface ServiceTypeSectionProps {
   serviceTypeName: string
@@ -608,7 +609,24 @@ const ServiceTypeSection = ({
                           <span className='text-zinc-400'>—</span>
                         )}
                       </td>
-                      <td className='px-2 py-1'>
+                      <td className='px-2 py-1 flex gap-1'>
+                        {/* Note Button with Dropdown */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size='icon' variant='ghost'>
+                              📝
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align='end' className='w-64 p-2'>
+                            <Textarea
+                              value={line.note || ''}
+                              onChange={e => updateLine(idx, 'note', e.target.value)}
+                              placeholder='Add note...'
+                              className='min-h-20'
+                            />
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        {/* Delete Button */}
                         <Button size='icon' variant='ghost' onClick={() => removeLine(idx)}>
                           🗑️
                         </Button>
