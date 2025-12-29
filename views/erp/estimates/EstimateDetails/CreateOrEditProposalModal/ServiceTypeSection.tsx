@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { LaborCost, Product, ProductCategory, ServiceType, Unit, Vendor } from '@/types'
+import { LaborCost, Product, ProductCategory, ProposalServiceItemPayload, ServiceType, Unit, Vendor } from '@/types'
 import {
   Settings2Icon,
   GridIcon,
@@ -23,42 +23,34 @@ import ProductsModal from '@/views/erp/products/ProductsModal'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-interface LineItemType {
-  name: string
-  description: string
-  unit_cost: number
-  qty: number
-  margin: number
-  unit_name: string
-  is_sale: boolean
-  type: 'invoice' | 'product' | 'labor-cost' | 'expense' | 'comment' | 'deduction'
-  discount?: number // percentage
-  freight_cost?: number // NEW: Freight cost per line
-}
-
 interface ServiceTypeSectionProps {
   serviceTypeName: string
   onRemove: () => void
   serviceTypes: ServiceType[]
   units: Unit[]
-  lines: LineItemType[]
-  onLinesChange: (lines: LineItemType[]) => void
+  lines: ProposalServiceItemPayload[]
+  onLinesChange: (lines: ProposalServiceItemPayload[]) => void
   productCategories: ProductCategory[]
   uomUnits: Unit[]
   vendors: Vendor[]
 }
 
-const defaultLine: LineItemType = {
+const defaultLine: ProposalServiceItemPayload = {
   name: '',
   description: '',
+  type: 'invoice',
   unit_cost: 0,
   qty: 0,
-  margin: 40,
   unit_name: '',
-  is_sale: true,
-  type: 'invoice',
+  margin: 0,
+  unit_price: 0,
   discount: 0,
-  freight_cost: 0
+  freight_cost: 0,
+  is_sale: 0,
+  tax_amount: 0,
+  note: '',
+  total_cost: 0,
+  total_price: 0
 }
 
 const ServiceTypeSection = ({
@@ -77,11 +69,26 @@ const ServiceTypeSection = ({
   const [totalSqft, setTotalSqft] = useState('0')
   const [margin, setMargin] = useState('0')
 
-  const getDiscountedUnitPrice = (line: LineItemType) => {
+  const getDiscountedUnitPrice = (line: ProposalServiceItemPayload) => {
     const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
     const discount = line.discount ?? 0
 
     return baseUnitPrice * (1 - discount / 100)
+  }
+
+  const recalculateLine = (line: ProposalServiceItemPayload): ProposalServiceItemPayload => {
+    const unit_price = getDiscountedUnitPrice(line)
+    const total_cost = line.unit_cost * line.qty
+    const total_price = unit_price * line.qty
+    const tax_amount = line.is_sale ? unit_price * line.qty * 0.1 : 0 // Example: 10% tax
+
+    return {
+      ...line,
+      unit_price,
+      total_cost,
+      total_price,
+      tax_amount
+    }
   }
 
   // Calculate summary values from lines
@@ -159,52 +166,66 @@ const ServiceTypeSection = ({
 
   // Handle labor cost selection from modal
   const onLaborCostSelect = (laborCosts: LaborCost[]) => {
-    const newLines: LineItemType[] = laborCosts.map(lc => ({
-      name: lc.name,
-      description: lc.description,
-      unit_cost: lc.cost,
-      qty: 1,
-      margin: lc.margin,
-      unit_name: lc.unit?.name || '',
-      is_sale: false,
-      type: 'labor-cost'
-    }))
+    const newLines: ProposalServiceItemPayload[] = laborCosts.map(lc =>
+      recalculateLine({
+        name: lc.name,
+        description: lc.description,
+        type: 'labor-cost',
+        unit_cost: lc.cost,
+        qty: 1,
+        margin: lc.margin,
+        unit_name: lc?.unit?.name || '',
+        unit_price: 0,
+        discount: 0,
+        freight_cost: 0,
+        is_sale: 0,
+        tax_amount: 0,
+        note: ''
+      })
+    )
 
     onLinesChange([...lines, ...newLines])
   }
 
   // Handle product selection from modal
   const onProductSelect = (products: Product[]) => {
-    const newLines: LineItemType[] = products.map(product => ({
-      name: product.name,
-      description: product.description,
-      unit_cost: product.product_cost,
-      qty: 1,
-      margin: product.margin,
-      unit_name: product.coverage_per_uom?.unit?.name || '',
-      is_sale: false,
-      type: 'product'
-
-      // Optionally add more fields like SKU, vendor, etc. if needed
-      // sku: product.sku,
-      // vendor: product.vendor?.name,
-      // category: product.category?.name,
-    }))
+    const newLines: ProposalServiceItemPayload[] = products.map(product =>
+      recalculateLine({
+        name: product.name,
+        description: product.description,
+        type: 'product',
+        unit_cost: product.product_cost,
+        qty: 1,
+        unit_name: product.coverage_per_uom?.unit?.name || '',
+        margin: product.margin,
+        unit_price: 0,
+        discount: 0,
+        freight_cost: 0,
+        is_sale: 1,
+        tax_amount: 0,
+        note: ''
+      })
+    )
 
     onLinesChange([...lines, ...newLines])
   }
 
   // Add new line
-  const addLine = (type: LineItemType['type']) => {
-    let newLine: LineItemType = {
+  const addLine = (type: ProposalServiceItemPayload['type']) => {
+    let newLine: ProposalServiceItemPayload = {
       name: '',
       description: '',
+      type: type,
       unit_cost: 0,
       qty: 1,
-      margin: 0,
       unit_name: '',
-      is_sale: false,
-      type: type
+      margin: 0,
+      unit_price: 0,
+      discount: 0,
+      freight_cost: 0,
+      is_sale: 0,
+      tax_amount: 0,
+      note: ''
     }
 
     // For comment, qty/unit_cost/margin/unit are not needed
@@ -233,8 +254,8 @@ const ServiceTypeSection = ({
   }
 
   // Update a line
-  const updateLine = (idx: number, field: keyof LineItemType, value: any) => {
-    const updated = lines.map((line, i) => (i === idx ? { ...line, [field]: value } : line))
+  const updateLine = (idx: number, field: keyof ProposalServiceItemPayload, value: any) => {
+    const updated = lines.map((line, i) => (i === idx ? recalculateLine({ ...line, [field]: value }) : line))
 
     onLinesChange(updated)
   }
@@ -540,18 +561,21 @@ const ServiceTypeSection = ({
                         {line.type !== 'deduction' && <Input value={unitPrice.toFixed(2)} readOnly className='w-28' />}
                       </td>
                       <td className='px-2 py-1'>
-                        <Input
-                          value={totalPrice.toFixed(2)}
-                          onChange={() => {}}
-                          readOnly={line.type !== 'deduction'}
-                          className='w-28'
-                        />
+                        {line.type === 'deduction' ? (
+                          <Input
+                            value={line.total_price?.toFixed(2) ?? ''}
+                            onChange={e => updateLine(idx, 'total_price', e.target.value)}
+                            className='w-28'
+                          />
+                        ) : (
+                          <Input value={line.total_price?.toFixed(2) ?? ''} readOnly className='w-28' />
+                        )}
                       </td>
                       <td className='px-2 py-1 text-center'>
                         {line.type !== 'deduction' && (
                           <Checkbox
-                            checked={line.is_sale}
-                            onCheckedChange={checked => updateLine(idx, 'is_sale', !!checked)}
+                            checked={line.is_sale === 1 ? true : false}
+                            onCheckedChange={checked => updateLine(idx, 'is_sale', !!checked ? 1 : 0)}
                           />
                         )}
                       </td>

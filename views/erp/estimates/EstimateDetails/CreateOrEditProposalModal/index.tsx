@@ -1,7 +1,7 @@
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Estimate, ProductCategory, ServiceType, Unit, Vendor } from '@/types'
+import { Estimate, ProductCategory, ProposalServiceItemPayload, ServiceType, Unit, Vendor } from '@/types'
 import { SettingsIcon, UserIcon } from 'lucide-react'
 import { useState } from 'react'
 import ClientDetailsCard from './ClientDetailsCard'
@@ -12,19 +12,6 @@ import TotalCalculationCard from './TotalCalculationCard'
 import { Select, SelectTrigger, SelectContent, SelectItem } from '@/components/ui/select'
 import ServiceTypeSection from './ServiceTypeSection'
 import { Textarea } from '@/components/ui/textarea'
-
-interface LineItemType {
-  name: string
-  description: string
-  unit_cost: number
-  qty: number
-  margin: number
-  unit_name: string
-  is_sale: boolean
-  type: 'invoice' | 'product' | 'labor-cost' | 'expense' | 'comment' | 'deduction'
-  discount?: number // percentage
-  freight_cost?: number // Freight cost per line
-}
 
 const CreateOrEditProposalModal = ({
   open,
@@ -56,7 +43,7 @@ const CreateOrEditProposalModal = ({
 
   // Each service type section has an array of line items
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
-    { serviceTypeName: string; lines: LineItemType[] }[]
+    { serviceTypeName: string; lines: ProposalServiceItemPayload[] }[]
   >([])
 
   const onCancel = () => {
