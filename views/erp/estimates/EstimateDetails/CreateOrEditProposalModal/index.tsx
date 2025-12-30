@@ -51,6 +51,8 @@ const CreateOrEditProposalModal = ({
   const [selectedServiceType, setSelectedServiceType] = useState<{ id: string; name: string }[]>([])
   const [serviceSelectValue, setServiceSelectValue] = useState<string | undefined>(undefined)
   const [customMessage, setCustomMessage] = useState('')
+  const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>('percentage')
+  const [discountValue, setDiscountValue] = useState(0)
 
   // Each service type section has an array of line items
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
@@ -79,21 +81,21 @@ const CreateOrEditProposalModal = ({
 
   // Profit and sales calculations
   const totalSales = allLines.reduce((sum, line) => {
-    const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
-
     if (line.type === 'deduction') {
-      return sum - unitPrice * line.qty
+      return sum - (line.total_price ?? 0) // Use total_price directly for deductions
     }
+
+    const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
 
     return sum + unitPrice * line.qty
   }, 0)
 
   const profitAmount = allLines.reduce((sum, line) => {
-    const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
-
     if (line.type === 'deduction') {
-      return sum - (unitPrice - line.unit_cost) * line.qty
+      return sum - (line.total_price ?? 0) // Deduction reduces profit
     }
+
+    const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
 
     return sum + (unitPrice - line.unit_cost) * line.qty
   }, 0)
@@ -102,7 +104,11 @@ const CreateOrEditProposalModal = ({
 
   const subtotal = allLines.reduce((sum, line) => {
     if (line.type === 'deduction') {
-      return sum - line.unit_cost * line.qty
+      return sum - (line.total_price ?? 0) // Use total_price directly for deductions
+    }
+
+    if (line.type === 'comment') {
+      return sum
     }
 
     return sum + line.unit_cost * line.qty
@@ -122,12 +128,35 @@ const CreateOrEditProposalModal = ({
 
   const total = totalSales + salesTax
 
+  // Calculate total discount amount
+  const totalDiscount = allLines.reduce((sum, line) => {
+    if (line.type === 'comment' || line.type === 'deduction') {
+      return sum
+    }
+
+    const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
+    const discount = line.discount ?? 0
+    const discountType = line.discount_type ?? 'percentage'
+
+    let discountAmount = 0
+
+    if (discountType === 'fixed') {
+      discountAmount = discount * line.qty
+    } else {
+      discountAmount = (baseUnitPrice * discount) / 100
+    }
+
+    return sum + discountAmount
+  }, 0)
+
   const onSubmit = async () => {
+    setIsLoading(true)
+
     const payload: ProposalPayload = {
       estimate_id: estimateId || '',
       message: customMessage,
-      discount_type: 'percentage',
-      discount: 0,
+      discount_type: discountType,
+      discount: discountValue,
       services: serviceTypeLineItems.map((st, index) => {
         return {
           service_type_id: selectedServiceType[index].id,
@@ -141,9 +170,20 @@ const CreateOrEditProposalModal = ({
         .then(response => {
           toast.success('Proposal created successfully')
           onOpenChange(false)
+          setIsLoading(false)
+
+          // Reset the data
+          setSelectedServiceType([])
+          setServiceTypeLineItems([])
+          setCustomMessage('')
+          setDiscountType('percentage')
+          setDiscountValue(0)
+          setServiceSelectValue(undefined)
+          setServiceSelectOpen(false)
         })
         .catch(error => {
           toast.error(error.message || 'Failed to create proposal.')
+          setIsLoading(false)
         })
     }
   }
@@ -222,7 +262,47 @@ const CreateOrEditProposalModal = ({
           {/* Sales representative details */}
           <SalesRepresentativeCard estimateDetails={estimateDetails} />
           {/* Discount details */}
-          <DiscountDetailsCard estimateDetails={estimateDetails} />
+          <DiscountDetailsCard
+            estimateDetails={estimateDetails}
+            discountType={discountType}
+            discountValue={discountValue}
+            totalDiscount={totalDiscount}
+            onApplyDiscount={(type, value) => {
+              // Validate and apply discount to all product and labor-cost lines
+              const allProductAndLaborLines = serviceTypeLineItems.flatMap(st =>
+                st.lines.filter(line => line.type === 'product' || line.type === 'labor-cost')
+              )
+
+              // For fixed discount, check if it's less than all unit costs
+              if (type === 'fixed') {
+                const maxUnitCost = Math.max(...allProductAndLaborLines.map(line => line.unit_cost))
+
+                if (value > maxUnitCost) {
+                  toast.error(
+                    `Fixed discount ($${value.toFixed(2)}) cannot exceed the maximum unit cost ($${maxUnitCost.toFixed(2)})`
+                  )
+
+                  return
+                }
+              }
+
+              // Apply discount to all service type line items
+              setServiceTypeLineItems(prev =>
+                prev.map(st => ({
+                  ...st,
+                  lines: st.lines.map(line =>
+                    line.type === 'product' || line.type === 'labor-cost'
+                      ? { ...line, discount: value, discount_type: type }
+                      : line
+                  )
+                }))
+              )
+
+              setDiscountType(type)
+              setDiscountValue(value)
+              toast.success(`Discount applied: ${type === 'percentage' ? `${value}%` : `$${value.toFixed(2)}`}`)
+            }}
+          />
           {/* Profit details */}
           <ProfitDetailsCard
             profitPercent={profitPercent}

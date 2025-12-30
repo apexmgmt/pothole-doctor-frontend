@@ -25,9 +25,12 @@ export interface ProposalServiceItemPayload {
   total_cost?: number
   margin: number
   unit_price: number
-  discount: number // percentage
-  freight_cost?: number
+  discount: number // percentage or fixed amount
+  discount_type?: 'percentage' | 'fixed'
+  freight_charge?: number
   is_sale: number | 1 | 0
+  tax_type?: 'percentage' | 'fixed'
+  tax?: number
   tax_amount: number
   total_price?: number
   note: string

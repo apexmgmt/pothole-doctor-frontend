@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { LaborCost, Product, ProductCategory, ProposalServiceItemPayload, ServiceType, Unit, Vendor } from '@/types'
 import { Settings2Icon, GridIcon, MessageSquareIcon, ClipboardIcon, XIcon, Wrench, Boxes, Minus } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import LaborCostsModal from '@/views/erp/labor-costs/LaborCostsModal'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
@@ -35,8 +35,11 @@ const defaultLine: ProposalServiceItemPayload = {
   margin: 0,
   unit_price: 0,
   discount: 0,
-  freight_cost: 0,
+  discount_type: 'percentage',
+  freight_charge: 0,
   is_sale: 0,
+  tax_type: 'percentage',
+  tax: 0,
   tax_amount: 0,
   note: '',
   total_cost: 0,
@@ -59,26 +62,34 @@ const ServiceTypeSection = ({
   const [openProductsModal, setOpenProductsModal] = useState(false)
   const [totalSqft, setTotalSqft] = useState('0')
   const [margin, setMargin] = useState('0')
+  const [editingValues, setEditingValues] = useState<{ [key: number]: string }>({})
+  const timeoutRefs = useRef<{ [key: number]: NodeJS.Timeout }>({})
 
   const getDiscountedUnitPrice = (line: ProposalServiceItemPayload) => {
     const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
     const discount = line.discount ?? 0
+    const discountType = line.discount_type ?? 'percentage'
 
-    return baseUnitPrice * (1 - discount / 100)
+    if (discountType === 'fixed') {
+      return Math.max(0, baseUnitPrice - discount)
+    } else {
+      return baseUnitPrice * (1 - discount / 100)
+    }
   }
 
   const recalculateLine = (line: ProposalServiceItemPayload): ProposalServiceItemPayload => {
     const unit_price = getDiscountedUnitPrice(line)
     const total_cost = line.unit_cost * line.qty
     const total_price = unit_price * line.qty
-    const tax_amount = line.is_sale ? unit_price * line.qty * 0.1 : 0 // Example: 10% tax
+    const tax_amount = line.is_sale ? unit_price * line.qty * 0 : 0 // Example: 0% tax
 
     return {
       ...line,
       unit_price,
       total_cost,
       total_price,
-      tax_amount
+      tax_amount,
+      tax: tax_amount
     }
   }
 
@@ -86,28 +97,32 @@ const ServiceTypeSection = ({
   // Calculate material cost for product lines
   const materialCost = lines
     .filter(line => line.type === 'product')
-    .reduce((sum, line) => sum + (line.unit_cost + (line.freight_cost ?? 0)) * line.qty, 0)
+    .reduce((sum, line) => sum + (line.unit_cost + (line.freight_charge ?? 0)) * line.qty, 0)
 
   const laborCost = lines
     .filter(line => line.type === 'labor-cost')
-    .reduce((sum, line) => sum + (line.unit_cost + (line.freight_cost ?? 0)) * line.qty, 0)
+    .reduce((sum, line) => sum + (line.unit_cost + (line.freight_charge ?? 0)) * line.qty, 0)
 
   const totalCosts = lines.reduce((sum, line) => {
     if (line.type === 'deduction') {
-      return sum - (line.unit_cost + (line.freight_cost ?? 0)) * line.qty
+      return sum - (line.total_price ?? 0) // Use total_price directly for deductions
     }
 
     if (line.type === 'comment') {
       return sum
     }
 
-    return sum + (line.unit_cost + (line.freight_cost ?? 0)) * line.qty
+    return sum + (line.unit_cost + (line.freight_charge ?? 0)) * line.qty
   }, 0)
 
-  // Example: sales tax is applied only to lines with salesTax checked
+  // Example: sales tax is applied only to lines with is_sale checked
   const salesTax = lines
     .filter(line => line.is_sale)
     .reduce((sum, line) => {
+      if (line.type === 'deduction') {
+        return sum
+      }
+
       const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
 
       return sum + unitPrice * line.qty * 0.1 // 10% tax as example
@@ -117,7 +132,7 @@ const ServiceTypeSection = ({
     const unitPrice = getDiscountedUnitPrice(line)
 
     if (line.type === 'deduction') {
-      return sum - unitPrice * line.qty
+      return sum - (line.total_price ?? 0) // Use total_price directly for deductions
     }
 
     return sum + unitPrice * line.qty
@@ -151,9 +166,9 @@ const ServiceTypeSection = ({
 
   const totalExpense = lines
     .filter(line => line.type === 'expense')
-    .reduce((sum, line) => sum + (line.unit_cost + (line.freight_cost ?? 0)) * line.qty, 0)
+    .reduce((sum, line) => sum + (line.unit_cost + (line.freight_charge ?? 0)) * line.qty, 0)
 
-  const totalFreight = lines.reduce((sum, line) => sum + (line.freight_cost ?? 0) * line.qty, 0)
+  const totalFreight = lines.reduce((sum, line) => sum + (line.freight_charge ?? 0) * line.qty, 0)
 
   // Handle labor cost selection from modal
   const onLaborCostSelect = (laborCosts: LaborCost[]) => {
@@ -168,9 +183,11 @@ const ServiceTypeSection = ({
         unit_name: lc?.unit?.name || '',
         unit_price: 0,
         discount: 0,
-        freight_cost: 0,
+        discount_type: 'percentage',
+        freight_charge: 0,
         is_sale: 0,
         tax_amount: 0,
+        tax_type: 'percentage',
         note: ''
       })
     )
@@ -191,8 +208,11 @@ const ServiceTypeSection = ({
         margin: product.margin,
         unit_price: 0,
         discount: 0,
-        freight_cost: 0,
+        discount_type: 'percentage',
+        freight_charge: 0,
         is_sale: 1,
+        tax_type: 'percentage',
+        tax: 0,
         tax_amount: 0,
         note: ''
       })
@@ -213,8 +233,11 @@ const ServiceTypeSection = ({
       margin: 0,
       unit_price: 0,
       discount: 0,
-      freight_cost: 0,
+      discount_type: 'percentage',
+      freight_charge: 0,
       is_sale: 0,
+      tax_type: 'percentage',
+      tax: 0,
       tax_amount: 0,
       note: ''
     }
@@ -246,7 +269,21 @@ const ServiceTypeSection = ({
 
   // Update a line
   const updateLine = (idx: number, field: keyof ProposalServiceItemPayload, value: any) => {
-    const updated = lines.map((line, i) => (i === idx ? recalculateLine({ ...line, [field]: value }) : line))
+    const updated = lines.map((line, i) => {
+      if (i === idx) {
+        const updatedLine = { ...line, [field]: value }
+
+        // For deduction lines, allow direct editing of total_price without recalculation
+        if (line.type === 'deduction') {
+          return updatedLine
+        }
+
+        // For all other cases, recalculate
+        return recalculateLine(updatedLine)
+      }
+
+      return line
+    })
 
     onLinesChange(updated)
   }
@@ -258,11 +295,11 @@ const ServiceTypeSection = ({
 
   // Calculate total profit and profit percentage
   const profitAmount = lines.reduce((sum, line) => {
-    const unitPrice = getDiscountedUnitPrice(line)
-
     if (line.type === 'deduction') {
-      return sum - (unitPrice - line.unit_cost) * line.qty
+      return sum - (line.total_price ?? 0) // Deduction reduces profit
     }
+
+    const unitPrice = getDiscountedUnitPrice(line)
 
     return sum + (unitPrice - line.unit_cost) * line.qty
   }, 0)
@@ -464,8 +501,6 @@ const ServiceTypeSection = ({
                   <th className='px-2 py-1'>Unit Price</th>
                   <th className='px-2 py-1'>Total Price</th>
                   <th className='px-2 py-1'>Sales Tax</th>
-                  <th className='px-2 py-1'>Discount (%)</th>
-                  <th className='px-2 py-1'>Freight</th>
                   <th className='px-2 py-1'></th>
                 </tr>
               </thead>
@@ -569,8 +604,27 @@ const ServiceTypeSection = ({
                       <td className='px-2 py-1'>
                         {line.type === 'deduction' ? (
                           <Input
-                            value={line.total_price?.toFixed(2) ?? ''}
-                            onChange={e => updateLine(idx, 'total_price', e.target.value)}
+                            type='number'
+                            min={0}
+                            value={
+                              editingValues[idx] !== undefined
+                                ? editingValues[idx]
+                                : (line.total_price?.toFixed(2) ?? '')
+                            }
+                            onChange={e => setEditingValues({ ...editingValues, [idx]: e.target.value })}
+                            onBlur={e => {
+                              // Update the array when user leaves the field
+                              updateLine(idx, 'total_price', parseFloat(e.target.value) || 0)
+
+                              // Clear the local state
+                              setEditingValues(prev => {
+                                const newState = { ...prev }
+
+                                delete newState[idx]
+
+                                return newState
+                              })
+                            }}
                             className='w-28'
                           />
                         ) : (
@@ -585,40 +639,97 @@ const ServiceTypeSection = ({
                           />
                         )}
                       </td>
-                      <td className='px-2 py-1'>
-                        {line.type !== 'deduction' && (
-                          <Input
-                            type='number'
-                            value={line.discount ?? 0}
-                            onChange={e => updateLine(idx, 'discount', parseFloat(e.target.value) || 0)}
-                            className='w-20'
-                            min={0}
-                            max={100}
-                            step={1}
-                            placeholder='0'
-                          />
+                      <td className='px-2 py-1 flex gap-1 justify-end'>
+                        {/* Freight charge dropdown */}
+                        {line.type === 'product' && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size='icon' variant='ghost' title='Freight Charge'>
+                                🚚
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align='end' className='w-64 p-3'>
+                              <div className='space-y-2'>
+                                <label className='text-sm font-medium text-zinc-300'>Freight Charge</label>
+                                <Input
+                                  type='number'
+                                  value={line.freight_charge ?? 0}
+                                  onChange={e => updateLine(idx, 'freight_charge', parseFloat(e.target.value) || 0)}
+                                  placeholder='0.00'
+                                  min={0}
+                                  step={0.01}
+                                  className='w-full'
+                                />
+                                <div className='text-xs text-zinc-400'>Enter freight charge</div>
+                              </div>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         )}
-                      </td>
-                      <td className='px-2 py-1'>
-                        {line.type === 'product' ? (
-                          <Input
-                            type='number'
-                            value={line.freight_cost ?? 0}
-                            onChange={e => updateLine(idx, 'freight_cost', parseFloat(e.target.value) || 0)}
-                            className='w-20'
-                            min={0}
-                            step={0.01}
-                            placeholder='0.00'
-                          />
-                        ) : (
-                          <span className='text-zinc-400'>—</span>
+                        {/* Discount button dropdown */}
+                        {line.type !== 'expense' && line.type !== 'deduction' && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size='icon' variant='ghost' title='Discount'>
+                                💰
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align='end' className='w-64 p-3'>
+                              <div className='space-y-2'>
+                                <div className='flex gap-2'>
+                                  <Button
+                                    variant={line.discount_type === 'percentage' ? 'default' : 'outline'}
+                                    size='sm'
+                                    onClick={() => updateLine(idx, 'discount_type', 'percentage')}
+                                    className='flex-1'
+                                  >
+                                    %
+                                  </Button>
+                                  <Button
+                                    variant={line.discount_type === 'fixed' ? 'default' : 'outline'}
+                                    size='sm'
+                                    onClick={() => updateLine(idx, 'discount_type', 'fixed')}
+                                    className='flex-1'
+                                  >
+                                    $
+                                  </Button>
+                                </div>
+                                <Input
+                                  type='number'
+                                  value={line.discount ?? 0}
+                                  onChange={e => {
+                                    const value = parseFloat(e.target.value) || 0
+                                    const discountType = line.discount_type ?? 'percentage'
+
+                                    // Validation
+                                    if (discountType === 'percentage' && (value < 0 || value > 100)) {
+                                      return
+                                    }
+
+                                    if (discountType === 'fixed' && value > line.unit_cost) {
+                                      return
+                                    }
+
+                                    updateLine(idx, 'discount', value)
+                                  }}
+                                  placeholder={line.discount_type === 'fixed' ? 'Amount' : '0-100'}
+                                  min={0}
+                                  max={line.discount_type === 'percentage' ? 100 : undefined}
+                                  step={line.discount_type === 'percentage' ? 1 : 0.01}
+                                />
+                                <div className='text-xs text-zinc-400'>
+                                  {line.discount_type === 'fixed'
+                                    ? `Discount can't greater than the unit cost`
+                                    : 'Enter 0-100%'}
+                                </div>
+                              </div>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         )}
-                      </td>
-                      <td className='px-2 py-1 flex gap-1'>
+
                         {/* Note Button with Dropdown */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button size='icon' variant='ghost'>
+                            <Button size='icon' variant='ghost' title='Note'>
                               📝
                             </Button>
                           </DropdownMenuTrigger>
@@ -631,8 +742,9 @@ const ServiceTypeSection = ({
                             />
                           </DropdownMenuContent>
                         </DropdownMenu>
+
                         {/* Delete Button */}
-                        <Button size='icon' variant='ghost' onClick={() => removeLine(idx)}>
+                        <Button size='icon' variant='ghost' onClick={() => removeLine(idx)} title='Delete'>
                           🗑️
                         </Button>
                       </td>
