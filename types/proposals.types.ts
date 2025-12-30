@@ -1,7 +1,65 @@
+import { Estimate, ServiceType } from '@/types'
 export interface Proposal {
   id: string
+  estimate_id: string
+  discount: number
+  subtotal: number
+  sale_tax: number
+  total: number
+  message: string
+  created_at: string
+  updated_at: string
+  discount_type: 'percentage' | 'fixed'
+  estimate?: Estimate
+  services?: ProposalService[]
 }
 
+export interface ProposalService {
+  id: string
+  proposal_id: string
+  proposal_estimate_id: string
+  service_type_id: string
+  material_cost: number
+  material_tax: number
+  labor_cost: number
+  freight_cost: number
+  expense_cost: number
+  sale_tax: number
+  total_sale: number
+  material_sale: number
+  labor_sale: number
+  profit: number
+  created_at: string
+  updated_at: string
+  items: ProposalServiceItem[]
+  service_type?: ServiceType
+}
+
+export interface ProposalServiceItem {
+  id: string
+  proposal_service_id: string
+  service_type_id: string
+  name: string
+  description: string
+  type: 'invoice' | 'product' | 'labor-cost' | 'expense' | 'comment' | 'deduction'
+  unit_cost: number
+  qty: number
+  total_cost: number
+  margin: number
+  unit_price: number
+  unit_name: string | null
+  total_price: number
+  discount: number
+  tax: number
+  discount_type: 'percentage' | 'fixed'
+  tax_type: 'percentage' | 'fixed'
+  note: string | null
+  is_sale: number | 1 | 0
+  created_at: string
+  updated_at: string
+  tax_amount: number
+  freight_charge: number
+}
 export interface ProposalPayload {
   estimate_id: string
   discount_type: 'percentage' | 'fixed'
