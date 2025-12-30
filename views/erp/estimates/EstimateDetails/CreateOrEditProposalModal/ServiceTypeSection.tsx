@@ -97,11 +97,11 @@ const ServiceTypeSection = ({
   // Calculate material cost for product lines
   const materialCost = lines
     .filter(line => line.type === 'product')
-    .reduce((sum, line) => sum + (line.unit_cost + (line.freight_charge ?? 0)) * line.qty, 0)
+    .reduce((sum, line) => sum + (line.unit_cost) * line.qty, 0)
 
   const laborCost = lines
     .filter(line => line.type === 'labor')
-    .reduce((sum, line) => sum + (line.unit_cost + (line.freight_charge ?? 0)) * line.qty, 0)
+    .reduce((sum, line) => sum + (line.unit_cost) * line.qty, 0)
 
   const totalCosts = lines.reduce((sum, line) => {
     if (line.type === 'deduction') {
@@ -112,7 +112,7 @@ const ServiceTypeSection = ({
       return sum
     }
 
-    return sum + (line.unit_cost + (line.freight_charge ?? 0)) * line.qty
+    return sum + (line.unit_cost) * line.qty
   }, 0)
 
   // Example: sales tax is applied only to lines with is_sale checked
@@ -125,7 +125,7 @@ const ServiceTypeSection = ({
 
       const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
 
-      return sum + unitPrice * line.qty * 0.1 // 10% tax as example
+      return sum + unitPrice * line.qty * 0 // 0% tax as example
     }, 0)
 
   const totalSales = lines.reduce((sum, line) => {
@@ -166,9 +166,9 @@ const ServiceTypeSection = ({
 
   const totalExpense = lines
     .filter(line => line.type === 'expense')
-    .reduce((sum, line) => sum + (line.unit_cost + (line.freight_charge ?? 0)) * line.qty, 0)
+    .reduce((sum, line) => sum + (line.unit_cost) * line.qty, 0)
 
-  const totalFreight = lines.reduce((sum, line) => sum + (line.freight_charge ?? 0) * line.qty, 0)
+  const totalFreight = lines.reduce((sum, line) => sum + (line.freight_charge ?? 0), 0)
 
   // Handle labor cost selection from modal
   const onLaborCostSelect = (laborCosts: LaborCost[]) => {
@@ -305,7 +305,7 @@ const ServiceTypeSection = ({
 
     const unitPrice = getDiscountedUnitPrice(line)
 
-    return sum + (unitPrice - line.unit_cost) * line.qty
+    return sum + ((unitPrice - line.unit_cost) * line.qty) - (line.freight_charge ?? 0)
   }, 0)
 
   const profitPercent = totalSales > 0 ? (profitAmount / totalSales) * 100 : 0

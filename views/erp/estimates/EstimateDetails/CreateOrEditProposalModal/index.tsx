@@ -92,7 +92,13 @@ const CreateOrEditProposalModal = ({
 
     const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
 
-    return sum + unitPrice * line.qty
+    return (
+      sum +
+      unitPrice * line.qty -
+      (line.discount_type === 'fixed'
+        ? (line.discount ?? 0)
+        : (line.unit_cost / (1 - line.margin / 100)) * ((line.discount ?? 0) / 100))
+    )
   }, 0)
 
   const profitAmount = allLines.reduce((sum, line) => {
@@ -102,7 +108,7 @@ const CreateOrEditProposalModal = ({
 
     const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
 
-    return sum + (unitPrice - line.unit_cost) * line.qty
+    return sum + (unitPrice - line.unit_cost) * line.qty - (line.freight_charge ?? 0)
   }, 0)
 
   const profitPercent = totalSales > 0 ? (profitAmount / totalSales) * 100 : 0
@@ -116,7 +122,7 @@ const CreateOrEditProposalModal = ({
       return sum
     }
 
-    return sum + line.unit_cost * line.qty
+    return sum + (line?.total_price ?? 0)
   }, 0)
 
   const salesTax = allLines
@@ -128,7 +134,14 @@ const CreateOrEditProposalModal = ({
         return sum - unitPrice * line.qty * 0.0 // 0% tax as example
       }
 
-      return sum + unitPrice * line.qty * 0.0 // 0% tax as example
+      return (
+        sum +
+        (unitPrice * line.qty -
+          (line.discount_type === 'fixed'
+            ? (line.discount ?? 0)
+            : (line.unit_cost / (1 - line.margin / 100)) * ((line.discount ?? 0) / 100))) *
+          0.0
+      ) // 0% tax as example
     }, 0)
 
   const total = totalSales + salesTax
