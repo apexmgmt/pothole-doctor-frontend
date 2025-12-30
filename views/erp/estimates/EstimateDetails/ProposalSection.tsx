@@ -36,7 +36,7 @@ const ProposalSection = ({
   })
 
   const [proposals, setProposals] = useState<Proposal[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const observerTarget = useRef<HTMLDivElement>(null)
@@ -164,7 +164,11 @@ const ProposalSection = ({
 
                   {/* Infinity scroll trigger */}
                   <div ref={observerTarget} className='flex justify-center py-4'>
-                    {isLoading && <SpinnerCustom className='w-6 h-6' />}
+                    {isLoading && (
+                      <div className='absolute inset-0 backdrop-blur-xs flex items-center justify-center z-10'>
+                        <SpinnerCustom size='size-8' />
+                      </div>
+                    )}
                   </div>
                 </>
               )}
