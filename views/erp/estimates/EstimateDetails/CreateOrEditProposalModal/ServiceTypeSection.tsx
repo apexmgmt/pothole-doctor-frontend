@@ -100,7 +100,7 @@ const ServiceTypeSection = ({
     .reduce((sum, line) => sum + (line.unit_cost + (line.freight_charge ?? 0)) * line.qty, 0)
 
   const laborCost = lines
-    .filter(line => line.type === 'labor-cost')
+    .filter(line => line.type === 'labor')
     .reduce((sum, line) => sum + (line.unit_cost + (line.freight_charge ?? 0)) * line.qty, 0)
 
   const totalCosts = lines.reduce((sum, line) => {
@@ -157,7 +157,7 @@ const ServiceTypeSection = ({
     }, 0)
 
   const laborSales = lines
-    .filter(line => line.type === 'labor-cost')
+    .filter(line => line.type === 'labor')
     .reduce((sum, line) => {
       const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
 
@@ -176,7 +176,7 @@ const ServiceTypeSection = ({
       recalculateLine({
         name: lc.name,
         description: lc.description,
-        type: 'labor-cost',
+        type: 'labor',
         unit_cost: lc.cost,
         qty: 1,
         margin: lc.margin,
@@ -405,7 +405,7 @@ const ServiceTypeSection = ({
                     <DropdownMenuItem onClick={() => addLine('product')}>
                       <Boxes className='mr-2 h-4 w-4' /> Add Material Line Item
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => addLine('labor-cost')}>
+                    <DropdownMenuItem onClick={() => addLine('labor')}>
                       <Wrench className='mr-2 h-4 w-4' /> Add Labor Line Item
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => addLine('expense')}>

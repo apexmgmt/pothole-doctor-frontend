@@ -41,7 +41,7 @@ export interface ProposalServiceItem {
   service_type_id: string
   name: string
   description: string
-  type: 'invoice' | 'product' | 'labor-cost' | 'expense' | 'comment' | 'deduction'
+  type: 'invoice' | 'product' | 'labor' | 'expense' | 'comment' | 'deduction'
   unit_cost: number
   qty: number
   total_cost: number
@@ -76,7 +76,7 @@ export interface ProposalServicePayload {
 export interface ProposalServiceItemPayload {
   name: string
   description: string
-  type: 'invoice' | 'product' | 'labor-cost' | 'expense' | 'comment' | 'deduction'
+  type: 'invoice' | 'product' | 'labor' | 'expense' | 'comment' | 'deduction'
   unit_cost: number
   qty: number
   unit_name: string

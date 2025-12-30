@@ -270,7 +270,7 @@ const CreateOrEditProposalModal = ({
             onApplyDiscount={(type, value) => {
               // Validate and apply discount to all product and labor-cost lines
               const allProductAndLaborLines = serviceTypeLineItems.flatMap(st =>
-                st.lines.filter(line => line.type === 'product' || line.type === 'labor-cost')
+                st.lines.filter(line => line.type === 'product' || line.type === 'labor')
               )
 
               // For fixed discount, check if it's less than all unit costs
@@ -291,7 +291,7 @@ const CreateOrEditProposalModal = ({
                 prev.map(st => ({
                   ...st,
                   lines: st.lines.map(line =>
-                    line.type === 'product' || line.type === 'labor-cost'
+                    line.type === 'product' || line.type === 'labor'
                       ? { ...line, discount: value, discount_type: type }
                       : line
                   )
