@@ -1,4 +1,4 @@
-import { Estimate, ServiceType } from '@/types'
+import { Estimate, LaborCost, Product, ServiceType } from '@/types'
 export interface Proposal {
   id: string
   estimate_id: string
@@ -36,6 +36,10 @@ export interface ProposalService {
 }
 
 export interface ProposalServiceItem {
+  product_id?: string
+  product?: Product
+  labor_cost_id?: string
+  labor_cost?: LaborCost
   id: string
   proposal_service_id: string
   service_type_id: string
@@ -74,6 +78,10 @@ export interface ProposalServicePayload {
 }
 
 export interface ProposalServiceItemPayload {
+  product_id?: string
+  product?: Product
+  labor_cost_id?: string
+  labor_cost?: LaborCost
   name: string
   description: string
   type: 'invoice' | 'product' | 'labor' | 'expense' | 'comment' | 'deduction'

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import {
   Estimate,
   ProductCategory,
+  Proposal,
   ProposalPayload,
   ProposalServiceItemPayload,
   ServiceType,
@@ -29,6 +30,8 @@ const CreateOrEditProposalModal = ({
   mode = 'create',
   estimateId,
   estimateDetails,
+  proposalId,
+  proposalDetails,
   serviceTypes = [],
   units = [],
   productCategories = [],
@@ -40,6 +43,8 @@ const CreateOrEditProposalModal = ({
   mode: 'create' | 'edit'
   estimateId?: string
   estimateDetails?: Estimate
+  proposalId?: string | null
+  proposalDetails?: Proposal | null
   serviceTypes: ServiceType[]
   units: Unit[]
   productCategories: ProductCategory[]
@@ -160,7 +165,28 @@ const CreateOrEditProposalModal = ({
       services: serviceTypeLineItems.map((st, index) => {
         return {
           service_type_id: selectedServiceType[index].id,
-          items: st.lines
+          items: st.lines.map(line => ({
+            product_id: line.product_id, // Send only ID
+            labor_cost_id: line.labor_cost_id, // Send only ID
+            name: line.name,
+            description: line.description,
+            type: line.type,
+            unit_cost: line.unit_cost,
+            qty: line.qty,
+            unit_name: line.unit_name,
+            total_cost: line.total_cost,
+            margin: line.margin,
+            unit_price: line.unit_price,
+            discount: line.discount,
+            discount_type: line.discount_type,
+            freight_charge: line.freight_charge,
+            is_sale: line.is_sale,
+            tax_type: line.tax_type,
+            tax: line.tax,
+            tax_amount: line.tax_amount,
+            total_price: line.total_price,
+            note: line.note
+          }))
         }
       })
     }

@@ -174,6 +174,8 @@ const ServiceTypeSection = ({
   const onLaborCostSelect = (laborCosts: LaborCost[]) => {
     const newLines: ProposalServiceItemPayload[] = laborCosts.map(lc =>
       recalculateLine({
+        labor_cost_id: lc.id,
+        labor_cost: lc,
         name: lc.name,
         description: lc.description,
         type: 'labor',
@@ -199,12 +201,14 @@ const ServiceTypeSection = ({
   const onProductSelect = (products: Product[]) => {
     const newLines: ProposalServiceItemPayload[] = products.map(product =>
       recalculateLine({
+        product_id: product.id,
+        product: product,
         name: product.name,
         description: product.description,
         type: 'product',
         unit_cost: product.product_cost,
         qty: 1,
-        unit_name: product.coverage_per_uom?.unit?.name || '',
+        unit_name: product.selling_info?.unit?.name || '',
         margin: product.margin,
         unit_price: 0,
         discount: 0,
