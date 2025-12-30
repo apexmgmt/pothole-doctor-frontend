@@ -12,7 +12,7 @@ import {
   Vendor
 } from '@/types'
 import { SettingsIcon, UserIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ClientDetailsCard from './ClientDetailsCard'
 import SalesRepresentativeCard from './SalesRepresentativeCard'
 import DiscountDetailsCard from './DiscountDetailsCard'
@@ -211,8 +211,73 @@ const CreateOrEditProposalModal = ({
           toast.error(error.message || 'Failed to create proposal.')
           setIsLoading(false)
         })
+    } else {
+      ProposalService.update(proposalId || '', payload)
+        .then(response => {
+          toast.success('Proposal updated successfully')
+          onOpenChange(false)
+          setIsLoading(false)
+
+          // Reset the data
+          setSelectedServiceType([])
+          setServiceTypeLineItems([])
+          setCustomMessage('')
+          setDiscountType('percentage')
+          setDiscountValue(0)
+          setServiceSelectValue(undefined)
+          setServiceSelectOpen(false)
+        })
+        .catch(error => {
+          toast.error(error.message || 'Failed to update proposal.')
+          setIsLoading(false)
+        })
     }
   }
+
+  useEffect(() => {
+    if (mode === 'edit' && proposalDetails) {
+      // Prepare selectedServiceType
+      const newSelectedServiceType = (proposalDetails.services || []).map(service => ({
+        id: service.service_type_id,
+        name: service.service_type?.name || ''
+      }))
+
+      setSelectedServiceType(newSelectedServiceType)
+
+      // Prepare serviceTypeLineItems
+      const newServiceTypeLineItems = (proposalDetails.services || []).map(service => ({
+        serviceTypeName: service.service_type?.name || '',
+        serviceTypeId: service.service_type_id,
+        lines: (service.items || []).map(item => ({
+          product_id: item.product_id,
+          labor_cost_id: item.labor_cost_id,
+          name: item.name,
+          description: item.description,
+          type: item.type,
+          unit_cost: item.unit_cost,
+          qty: item.qty,
+          unit_name: item.unit_name || '',
+          total_cost: item.total_cost,
+          margin: item.margin,
+          unit_price: item.unit_price,
+          discount: item.discount,
+          discount_type: item.discount_type,
+          freight_charge: item.freight_charge,
+          is_sale: item.is_sale,
+          tax_type: item.tax_type,
+          tax: item.tax,
+          tax_amount: item.tax_amount,
+          total_price: item.total_price,
+          note: item.note || ''
+        }))
+      }))
+
+      setServiceTypeLineItems(newServiceTypeLineItems)
+      setCustomMessage(proposalDetails.message || '')
+      setDiscountType(proposalDetails.discount_type)
+      setDiscountValue(proposalDetails.discount)
+    }
+  }, [mode, proposalDetails])
 
   return (
     <CommonDialog
