@@ -19,18 +19,22 @@ const ClientDetailsCard = ({ estimateDetails }: { estimateDetails?: Estimate }) 
             </span>
             {estimateDetails?.location}
           </p>
-          <p className='text-sm text-zinc-400'>
-            <span>
-              <MailIcon className='h-4 w-4 inline-block mr-2' />
-            </span>
-            {estimateDetails?.client?.email}
-          </p>
-          <p className='text-sm text-zinc-400'>
-            <span>
-              <PhoneIcon className='h-4 w-4 inline-block mr-2' />
-            </span>
-            {estimateDetails?.client?.phone}
-          </p>
+          {estimateDetails?.client?.email && (
+            <p className='text-sm text-zinc-400'>
+              <span>
+                <MailIcon className='h-4 w-4 inline-block mr-2' />
+              </span>
+              {estimateDetails?.client?.email}
+            </p>
+          )}
+          {estimateDetails?.client?.phone && (
+            <p className='text-sm text-zinc-400'>
+              <span>
+                <PhoneIcon className='h-4 w-4 inline-block mr-2' />
+              </span>
+              {estimateDetails?.client?.phone}
+            </p>
+          )}
         </CardContent>
       </Card>
     </>
