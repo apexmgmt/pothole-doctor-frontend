@@ -520,12 +520,16 @@ const ServiceTypeSection = ({
                       <tr key={idx} className={cn('border-b border-zinc-800 bg-muted')}>
                         <td className='px-2 py-1'>{idx + 1}.</td>
                         <td colSpan={11} className='px-2 py-1'>
-                          <Input
-                            value={line.description}
-                            onChange={e => updateLine(idx, 'description', e.target.value)}
-                            className='w-full bg-muted'
-                            placeholder='Comment'
-                          />
+                          <div className='flex items-center gap-2'>
+                            <MessageSquareIcon className='h-4 w-4 text-zinc-400' />
+
+                            <Input
+                              value={line.description}
+                              onChange={e => updateLine(idx, 'description', e.target.value)}
+                              className='w-full bg-muted'
+                              placeholder='Comment'
+                            />
+                          </div>
                         </td>
                         <td className='px-2 py-1'>
                           <Button size='icon' variant='ghost' onClick={() => removeLine(idx)}>
@@ -547,12 +551,19 @@ const ServiceTypeSection = ({
                     >
                       <td className='px-2 py-1'>{idx + 1}.</td>
                       <td className='px-2 py-1'>
-                        <Input
-                          value={line.name}
-                          onChange={e => updateLine(idx, 'name', e.target.value)}
-                          className={cn('w-full', line.type === 'deduction' && 'text-red-500')}
-                          placeholder='Item Name'
-                        />
+                        <div className='flex items-center gap-2'>
+                          {line.type === 'product' && line.product_id && <Boxes className='h-4 w-4 text-zinc-400' />}
+                          {line.type === 'labor' && <Wrench className='h-4 w-4 text-zinc-400' />}
+                          {line.type === 'expense' && <ClipboardIcon className='h-4 w-4 text-zinc-400' />}
+                          {line.type === 'invoice' && <GridIcon className='h-4 w-4 text-zinc-400' />}
+                          {line.type === 'deduction' && <Minus className='h-4 w-4 text-red-500' />}
+                          <Input
+                            value={line.name}
+                            onChange={e => updateLine(idx, 'name', e.target.value)}
+                            className={cn('w-full', line.type === 'deduction' && 'text-red-500')}
+                            placeholder='Item Name'
+                          />
+                        </div>
                       </td>
                       <td className='px-2 py-1'>
                         <Input
