@@ -22,6 +22,8 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { cn } from '@/lib/utils'
 import { Textarea } from '@/components/ui/textarea'
 import { getDiscountedUnitPrice } from '@/utils/business_calculation'
+import ServiceTypeSummary from './ServiceTypeSummary'
+import ServiceTypeActions from './ServiceTypeActions'
 
 const ServiceTypeSection = ({
   mode,
@@ -144,7 +146,7 @@ const ServiceTypeSection = ({
 
   const totalExpense = lines
     .filter(line => line.type === 'expense')
-    .reduce((sum, line) => sum + (getDiscountedUnitPrice(line) * line.qty), 0)
+    .reduce((sum, line) => sum + getDiscountedUnitPrice(line) * line.qty, 0)
 
   const totalFreight = lines.reduce(
     (sum, line) =>
@@ -313,169 +315,32 @@ const ServiceTypeSection = ({
           </div>
         </CardHeader>
         <CardContent className='space-y-4'>
-          {/* Input Section */}
-          <div className='flex items-center gap-2 bg-zinc-800 p-3 rounded-md'>
-            {/* <div className='flex items-center gap-2 flex-1'>
-              <span className='text-sm font-medium text-zinc-300'>Total SQFT:</span>
-              <Input
-                type='number'
-                value={totalSqft}
-                onChange={e => setTotalSqft(e.target.value)}
-                className='w-24 h-8 bg-zinc-900 border-zinc-700'
-              />
-              <Button variant='ghost' size='sm' className='h-8 w-8 p-0'>
-                <span className='text-zinc-400'>↻</span>
-              </Button>
-            </div> */}
-
-            {mode !== 'view' && (
-              <div className='flex items-center gap-2 flex-1'>
-                <span className='text-sm font-medium text-zinc-300'>% Margin:</span>
-                <Input
-                  type='number'
-                  value={margin}
-                  onChange={e => setMargin(e.target.value)}
-                  className='w-24 h-8 bg-zinc-900 border-zinc-700'
-                  min={0}
-                  max={100}
-                />
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  className='h-8 w-8 p-0'
-                  onClick={() => {
-                    const marginValue = parseFloat(margin) || 0
-
-                    const updated = lines.map(line =>
-                      line.type !== 'deduction' && line.type !== 'comment'
-                        ? recalculateLine({ ...line, margin: marginValue })
-                        : line
-                    )
-
-                    onLinesChange(updated)
-                  }}
-                >
-                  <span className='text-zinc-400'>↻</span>
-                </Button>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            {mode !== 'view' && (
-              <div className='flex items-center gap-1'>
-                <Button
-                  onClick={() => {
-                    setOpenProductsModal(true)
-                  }}
-                  variant='ghost'
-                  size='sm'
-                  className='h-8 w-8 p-0 text-zinc-400'
-                >
-                  <Boxes className='h-4 w-4' />
-                </Button>
-                <Button
-                  onClick={() => {
-                    setOpenLaborCostModal(true)
-                  }}
-                  variant='ghost'
-                  size='sm'
-                  className='h-8 w-8 p-0 text-zinc-400'
-                >
-                  <Wrench className='h-4 w-4' />
-                </Button>
-                <Button asChild variant='outline' size='sm' className='h-8 px-3 text-xs'>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant='outline'>Add Line Item</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align='end'>
-                      <DropdownMenuItem onClick={() => addLine('invoice')}>
-                        <GridIcon className='mr-2 h-4 w-4' /> Add Quote/Invoice Line Item
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => addLine('product')}>
-                        <Boxes className='mr-2 h-4 w-4' /> Add Material Line Item
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => addLine('labor')}>
-                        <Wrench className='mr-2 h-4 w-4' /> Add Labor Line Item
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => addLine('expense')}>
-                        <ClipboardIcon className='mr-2 h-4 w-4' /> Add Expense Line Item
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => addLine('comment')}>
-                        <MessageSquareIcon className='mr-2 h-4 w-4' /> Add Comment Line Item
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => addLine('deduction')}>
-                        <Minus className='mr-2 h-4 w-4' /> Add Deduction Line Item
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </Button>
-              </div>
-            )}
-          </div>
-
+          <ServiceTypeActions
+            mode={mode}
+            margin={margin}
+            setMargin={setMargin}
+            lines={lines}
+            recalculateLine={recalculateLine}
+            onLinesChange={onLinesChange}
+            setOpenProductsModal={setOpenProductsModal}
+            setOpenLaborCostModal={setOpenLaborCostModal}
+            addLine={addLine}
+          />
           {/* Summary Section */}
-          <div className='grid grid-cols-3 gap-4 text-sm bg-zinc-800 p-3 rounded-md'>
-            <div className='space-y-1'>
-              <div className='flex justify-between'>
-                <span className='text-zinc-400'>Material Cost:</span>
-                <span className='text-white font-medium'>${materialCost.toFixed(2)}</span>
-              </div>
-              <div className='flex justify-between'>
-                <span className='text-zinc-400'>Material Sales:</span>
-                <span className='text-white font-medium'>${materialSales.toFixed(2)}</span>
-              </div>
-              <div className='flex justify-between'>
-                <span className='text-zinc-400'>Material Tax:</span>
-                <span className='text-white font-medium'>${materialTax.toFixed(2)}</span>
-              </div>
-              <div className='flex justify-between'>
-                <span className='text-zinc-400'>Labor Cost:</span>
-                <span className='text-white font-medium'>${laborCost.toFixed(2)}</span>
-              </div>
-              <div className='flex justify-between pt-1 border-t border-zinc-700'>
-                <span className='text-zinc-300 font-medium'>Total Costs:</span>
-                <span className='text-white font-semibold'>${totalCosts.toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div className='space-y-1'>
-              <div className='flex justify-between'>
-                <span className='text-zinc-400'>Expenses:</span>
-                <span className='text-white font-medium'>${totalExpense.toFixed(2)}</span>
-              </div>
-              <div className='flex justify-between'>
-                <span className='text-zinc-400'>Freight:</span>
-                <span className='text-white font-medium'>${Number(totalFreight).toFixed(2)}</span>
-              </div>
-              <div className='flex justify-between'>
-                <span className='text-zinc-400'>Sales Tax:</span>
-                <span className='text-white font-medium'>${salesTax.toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div className='space-y-1'>
-              <div className='flex justify-between'>
-                <span className='text-zinc-400'>Total Sales:</span>
-                <span className='text-white font-medium'>${totalSales.toFixed(2)}</span>
-              </div>
-              <div className='flex justify-between'>
-                <span className='text-zinc-400'>Material Sales:</span>
-                <span className='text-white font-medium'>${materialSales.toFixed(2)}</span>
-              </div>
-              <div className='flex justify-between'>
-                <span className='text-zinc-400'>Labor Sales:</span>
-                <span className='text-white font-medium'>${laborSales.toFixed(2)}</span>
-              </div>
-              <div className='flex justify-between'>
-                <span className='text-zinc-400'>Profit:</span>
-                <span className='text-white font-medium flex items-center gap-2'>
-                  ${profitAmount.toFixed(2)}
-                  <Badge variant='outline'>{profitPercent.toFixed(2)}%</Badge>
-                </span>
-              </div>
-            </div>
-          </div>
+          <ServiceTypeSummary
+            materialCost={materialCost}
+            materialSales={materialSales}
+            materialTax={materialTax}
+            laborCost={laborCost}
+            totalCosts={totalCosts}
+            totalExpense={totalExpense}
+            totalFreight={totalFreight}
+            salesTax={salesTax}
+            totalSales={totalSales}
+            laborSales={laborSales}
+            profitAmount={profitAmount}
+            profitPercent={profitPercent}
+          />
 
           {/* Line Items Table */}
           <div className='overflow-x-auto rounded border border-zinc-800 mt-4'>
