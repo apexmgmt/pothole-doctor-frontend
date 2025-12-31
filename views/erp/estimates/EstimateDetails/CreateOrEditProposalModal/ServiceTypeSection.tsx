@@ -112,7 +112,7 @@ const ServiceTypeSection = ({
         return sum
       }
 
-      const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
+      const unitPrice = getDiscountedUnitPrice(line)
 
       return sum + unitPrice * line.qty * 0 // 0% tax as example
     }, 0)
@@ -131,7 +131,7 @@ const ServiceTypeSection = ({
   const materialSales = lines
     .filter(line => line.type === 'product')
     .reduce((sum, line) => {
-      const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
+      const unitPrice = getDiscountedUnitPrice(line)
 
       return sum + unitPrice * line.qty
     }, 0)
@@ -140,7 +140,7 @@ const ServiceTypeSection = ({
   const materialTax = lines
     .filter(line => line.type === 'product' && line.is_sale)
     .reduce((sum, line) => {
-      const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
+      const unitPrice = getDiscountedUnitPrice(line)
 
       return sum + unitPrice * line.qty * 0.0 // 0% tax as example
     }, 0)
@@ -148,14 +148,14 @@ const ServiceTypeSection = ({
   const laborSales = lines
     .filter(line => line.type === 'labor')
     .reduce((sum, line) => {
-      const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
+      const unitPrice = getDiscountedUnitPrice(line)
 
       return sum + unitPrice * line.qty
     }, 0)
 
   const totalExpense = lines
     .filter(line => line.type === 'expense')
-    .reduce((sum, line) => sum + line.unit_cost * line.qty, 0)
+    .reduce((sum, line) => sum + (getDiscountedUnitPrice(line) * line.qty), 0)
 
   const totalFreight = lines.reduce(
     (sum, line) =>
@@ -507,7 +507,7 @@ const ServiceTypeSection = ({
                 </tr>
               </thead>
               <tbody>
-                {lines.map((line, idx) => {
+                {lines.map((line: ProposalServiceItemPayload, idx) => {
                   const totalCost = line.unit_cost * line.qty
                   const unitPrice = getDiscountedUnitPrice(line)
                   const totalPrice = unitPrice * line.qty
@@ -562,7 +562,7 @@ const ServiceTypeSection = ({
                           {line.type === 'invoice' && <GridIcon className='h-4 w-4 text-zinc-400' />}
                           {line.type === 'deduction' && <Minus className='h-4 w-4 text-red-500' />}
                           <Input
-                            value={line.name}
+                            value={line.name ?? ''}
                             onChange={e => updateLine(idx, 'name', e.target.value)}
                             className={cn('w-full', line.type === 'deduction' && 'text-red-500')}
                             placeholder='Item Name'
@@ -572,7 +572,7 @@ const ServiceTypeSection = ({
                       </td>
                       <td className='px-2 py-1'>
                         <Input
-                          value={line.description}
+                          value={line.description ?? ''}
                           onChange={e => updateLine(idx, 'description', e.target.value)}
                           className='w-full text-red-500'
                           placeholder='Empty'
@@ -583,7 +583,7 @@ const ServiceTypeSection = ({
                         {line.type !== 'deduction' && (
                           <Input
                             type='number'
-                            value={line.unit_cost}
+                            value={line.unit_cost ?? 1}
                             onChange={e => updateLine(idx, 'unit_cost', parseFloat(e.target.value) || 0)}
                             className='w-28'
                             min={0}
@@ -595,7 +595,7 @@ const ServiceTypeSection = ({
                         {line.type !== 'deduction' && (
                           <Input
                             type='number'
-                            value={line.qty}
+                            value={line.qty ?? 1}
                             onChange={e => updateLine(idx, 'qty', parseFloat(e.target.value) || 0)}
                             className='w-28 bg-yellow-200 text-black'
                             min={0}
@@ -604,14 +604,16 @@ const ServiceTypeSection = ({
                         )}
                       </td>
                       <td className='px-2 py-1'>
-                        {line.type !== 'deduction' && <Input value={totalCost.toFixed(2)} readOnly className='w-28' />}
+                        {line.type !== 'deduction' && (
+                          <Input value={totalCost.toFixed(2) ?? ''} readOnly className='w-28' />
+                        )}
                       </td>
                       <td className='px-2 py-1 flex items-center gap-1'>
                         {line.type !== 'deduction' && (
                           <>
                             <Input
                               type='number'
-                              value={line.margin}
+                              value={line.margin ?? 0}
                               onChange={e => updateLine(idx, 'margin', parseFloat(e.target.value) || 0)}
                               className='w-28'
                               min={0}
@@ -623,7 +625,9 @@ const ServiceTypeSection = ({
                         )}
                       </td>
                       <td className='px-2 py-1'>
-                        {line.type !== 'deduction' && <Input value={unitPrice.toFixed(2)} readOnly className='w-28' />}
+                        {line.type !== 'deduction' && (
+                          <Input value={unitPrice.toFixed(2) ?? ''} readOnly className='w-28' />
+                        )}
                       </td>
                       <td className='px-2 py-1'>
                         {line.type === 'deduction' ? (
