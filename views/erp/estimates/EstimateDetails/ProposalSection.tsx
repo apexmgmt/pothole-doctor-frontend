@@ -136,7 +136,8 @@ const ProposalSection = ({
           </Button>
         </CardHeader>
         <CardContent className='relative'>
-          <ScrollArea className='min-h-32 max-h-[80vh] w-full rounded-md'>
+          <ScrollArea className={`w-full rounded-md ${proposals.length === 0 ? 'h-32' : 'h-[80vh]'}`}>
+            {' '}
             <div className='space-y-4'>
               {proposals.length === 0 && !isLoading ? (
                 <div className='flex items-center justify-center h-32 bg-zinc-800 rounded-md'>
