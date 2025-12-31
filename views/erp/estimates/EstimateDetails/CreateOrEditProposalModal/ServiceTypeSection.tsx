@@ -2,7 +2,17 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { LaborCost, Product, ProductCategory, ProposalServiceItemPayload, ServiceType, Unit, Vendor } from '@/types'
-import { Settings2Icon, GridIcon, MessageSquareIcon, ClipboardIcon, XIcon, Wrench, Boxes, Minus } from 'lucide-react'
+import {
+  Settings2Icon,
+  GridIcon,
+  MessageSquareIcon,
+  ClipboardIcon,
+  XIcon,
+  Wrench,
+  Boxes,
+  Minus,
+  Box
+} from 'lucide-react'
 import { useState, useRef } from 'react'
 import LaborCostsModal from '@/views/erp/labor-costs/LaborCostsModal'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -12,41 +22,8 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { cn } from '@/lib/utils'
 import { Textarea } from '@/components/ui/textarea'
 
-interface ServiceTypeSectionProps {
-  serviceTypeId: string
-  serviceTypeName: string
-  onRemove: () => void
-  serviceTypes: ServiceType[]
-  units: Unit[]
-  lines: ProposalServiceItemPayload[]
-  onLinesChange: (lines: ProposalServiceItemPayload[]) => void
-  productCategories: ProductCategory[]
-  uomUnits: Unit[]
-  vendors: Vendor[]
-}
-
-const defaultLine: ProposalServiceItemPayload = {
-  name: '',
-  description: '',
-  type: 'invoice',
-  unit_cost: 0,
-  qty: 0,
-  unit_name: '',
-  margin: 0,
-  unit_price: 0,
-  discount: 0,
-  discount_type: 'percentage',
-  freight_charge: 0,
-  is_sale: 0,
-  tax_type: 'percentage',
-  tax: 0,
-  tax_amount: 0,
-  note: '',
-  total_cost: 0,
-  total_price: 0
-}
-
 const ServiceTypeSection = ({
+  mode,
   serviceTypeName,
   serviceTypeId,
   onRemove,
@@ -57,7 +34,19 @@ const ServiceTypeSection = ({
   productCategories = [],
   uomUnits = [],
   vendors = []
-}: ServiceTypeSectionProps) => {
+}: {
+  mode: 'create' | 'edit' | 'view'
+  serviceTypeId: string
+  serviceTypeName: string
+  onRemove: () => void
+  serviceTypes: ServiceType[]
+  units: Unit[]
+  lines: ProposalServiceItemPayload[]
+  onLinesChange: (lines: ProposalServiceItemPayload[]) => void
+  productCategories: ProductCategory[]
+  uomUnits: Unit[]
+  vendors: Vendor[]
+}) => {
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
   const [openProductsModal, setOpenProductsModal] = useState(false)
   const [totalSqft, setTotalSqft] = useState('0')
@@ -97,11 +86,11 @@ const ServiceTypeSection = ({
   // Calculate material cost for product lines
   const materialCost = lines
     .filter(line => line.type === 'product')
-    .reduce((sum, line) => sum + (line.unit_cost) * line.qty, 0)
+    .reduce((sum, line) => sum + line.unit_cost * line.qty, 0)
 
   const laborCost = lines
     .filter(line => line.type === 'labor')
-    .reduce((sum, line) => sum + (line.unit_cost) * line.qty, 0)
+    .reduce((sum, line) => sum + line.unit_cost * line.qty, 0)
 
   const totalCosts = lines.reduce((sum, line) => {
     if (line.type === 'deduction') {
@@ -112,7 +101,7 @@ const ServiceTypeSection = ({
       return sum
     }
 
-    return sum + (line.unit_cost) * line.qty
+    return sum + line.unit_cost * line.qty
   }, 0)
 
   // Example: sales tax is applied only to lines with is_sale checked
@@ -166,9 +155,14 @@ const ServiceTypeSection = ({
 
   const totalExpense = lines
     .filter(line => line.type === 'expense')
-    .reduce((sum, line) => sum + (line.unit_cost) * line.qty, 0)
+    .reduce((sum, line) => sum + line.unit_cost * line.qty, 0)
 
-  const totalFreight = lines.reduce((sum, line) => sum + (line.freight_charge ?? 0), 0)
+  const totalFreight = lines.reduce(
+    (sum, line) =>
+      sum +
+      (typeof line.freight_charge === 'number' ? line.freight_charge : parseFloat(line.freight_charge ?? '0') || 0),
+    0
+  )
 
   // Handle labor cost selection from modal
   const onLaborCostSelect = (laborCosts: LaborCost[]) => {
@@ -305,7 +299,7 @@ const ServiceTypeSection = ({
 
     const unitPrice = getDiscountedUnitPrice(line)
 
-    return sum + ((unitPrice - line.unit_cost) * line.qty) - (line.freight_charge ?? 0)
+    return sum + (unitPrice - line.unit_cost) * line.qty - (line.freight_charge ?? 0)
   }, 0)
 
   const profitPercent = totalSales > 0 ? (profitAmount / totalSales) * 100 : 0
@@ -345,86 +339,90 @@ const ServiceTypeSection = ({
               </Button>
             </div> */}
 
-            <div className='flex items-center gap-2 flex-1'>
-              <span className='text-sm font-medium text-zinc-300'>% Margin:</span>
-              <Input
-                type='number'
-                value={margin}
-                onChange={e => setMargin(e.target.value)}
-                className='w-24 h-8 bg-zinc-900 border-zinc-700'
-                min={0}
-                max={100}
-              />
-              <Button
-                variant='ghost'
-                size='sm'
-                className='h-8 w-8 p-0'
-                onClick={() => {
-                  const marginValue = parseFloat(margin) || 0
+            {mode !== 'view' && (
+              <div className='flex items-center gap-2 flex-1'>
+                <span className='text-sm font-medium text-zinc-300'>% Margin:</span>
+                <Input
+                  type='number'
+                  value={margin}
+                  onChange={e => setMargin(e.target.value)}
+                  className='w-24 h-8 bg-zinc-900 border-zinc-700'
+                  min={0}
+                  max={100}
+                />
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='h-8 w-8 p-0'
+                  onClick={() => {
+                    const marginValue = parseFloat(margin) || 0
 
-                  const updated = lines.map(line =>
-                    line.type !== 'deduction' && line.type !== 'comment'
-                      ? recalculateLine({ ...line, margin: marginValue })
-                      : line
-                  )
+                    const updated = lines.map(line =>
+                      line.type !== 'deduction' && line.type !== 'comment'
+                        ? recalculateLine({ ...line, margin: marginValue })
+                        : line
+                    )
 
-                  onLinesChange(updated)
-                }}
-              >
-                <span className='text-zinc-400'>↻</span>
-              </Button>
-            </div>
+                    onLinesChange(updated)
+                  }}
+                >
+                  <span className='text-zinc-400'>↻</span>
+                </Button>
+              </div>
+            )}
 
             {/* Action Buttons */}
-            <div className='flex items-center gap-1'>
-              <Button
-                onClick={() => {
-                  setOpenProductsModal(true)
-                }}
-                variant='ghost'
-                size='sm'
-                className='h-8 w-8 p-0 text-zinc-400'
-              >
-                <Boxes className='h-4 w-4' />
-              </Button>
-              <Button
-                onClick={() => {
-                  setOpenLaborCostModal(true)
-                }}
-                variant='ghost'
-                size='sm'
-                className='h-8 w-8 p-0 text-zinc-400'
-              >
-                <Wrench className='h-4 w-4' />
-              </Button>
-              <Button asChild variant='outline' size='sm' className='h-8 px-3 text-xs'>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant='outline'>Add Line Item</Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align='end'>
-                    <DropdownMenuItem onClick={() => addLine('invoice')}>
-                      <GridIcon className='mr-2 h-4 w-4' /> Add Quote/Invoice Line Item
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => addLine('product')}>
-                      <Boxes className='mr-2 h-4 w-4' /> Add Material Line Item
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => addLine('labor')}>
-                      <Wrench className='mr-2 h-4 w-4' /> Add Labor Line Item
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => addLine('expense')}>
-                      <ClipboardIcon className='mr-2 h-4 w-4' /> Add Expense Line Item
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => addLine('comment')}>
-                      <MessageSquareIcon className='mr-2 h-4 w-4' /> Add Comment Line Item
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => addLine('deduction')}>
-                      <Minus className='mr-2 h-4 w-4' /> Add Deduction Line Item
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </Button>
-            </div>
+            {mode !== 'view' && (
+              <div className='flex items-center gap-1'>
+                <Button
+                  onClick={() => {
+                    setOpenProductsModal(true)
+                  }}
+                  variant='ghost'
+                  size='sm'
+                  className='h-8 w-8 p-0 text-zinc-400'
+                >
+                  <Boxes className='h-4 w-4' />
+                </Button>
+                <Button
+                  onClick={() => {
+                    setOpenLaborCostModal(true)
+                  }}
+                  variant='ghost'
+                  size='sm'
+                  className='h-8 w-8 p-0 text-zinc-400'
+                >
+                  <Wrench className='h-4 w-4' />
+                </Button>
+                <Button asChild variant='outline' size='sm' className='h-8 px-3 text-xs'>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant='outline'>Add Line Item</Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end'>
+                      <DropdownMenuItem onClick={() => addLine('invoice')}>
+                        <GridIcon className='mr-2 h-4 w-4' /> Add Quote/Invoice Line Item
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => addLine('product')}>
+                        <Boxes className='mr-2 h-4 w-4' /> Add Material Line Item
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => addLine('labor')}>
+                        <Wrench className='mr-2 h-4 w-4' /> Add Labor Line Item
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => addLine('expense')}>
+                        <ClipboardIcon className='mr-2 h-4 w-4' /> Add Expense Line Item
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => addLine('comment')}>
+                        <MessageSquareIcon className='mr-2 h-4 w-4' /> Add Comment Line Item
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => addLine('deduction')}>
+                        <Minus className='mr-2 h-4 w-4' /> Add Deduction Line Item
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Summary Section */}
@@ -459,7 +457,7 @@ const ServiceTypeSection = ({
               </div>
               <div className='flex justify-between'>
                 <span className='text-zinc-400'>Freight:</span>
-                <span className='text-white font-medium'>${totalFreight.toFixed(2)}</span>
+                <span className='text-white font-medium'>${Number(totalFreight).toFixed(2)}</span>
               </div>
               <div className='flex justify-between'>
                 <span className='text-zinc-400'>Sales Tax:</span>
@@ -519,7 +517,7 @@ const ServiceTypeSection = ({
                     return (
                       <tr key={idx} className={cn('border-b border-zinc-800 bg-muted')}>
                         <td className='px-2 py-1'>{idx + 1}.</td>
-                        <td colSpan={11} className='px-2 py-1'>
+                        <td colSpan={7} className='px-2 py-1 pr-8'>
                           <div className='flex items-center gap-2'>
                             <MessageSquareIcon className='h-4 w-4 text-zinc-400' />
 
@@ -528,13 +526,18 @@ const ServiceTypeSection = ({
                               onChange={e => updateLine(idx, 'description', e.target.value)}
                               className='w-full bg-muted'
                               placeholder='Comment'
+                              disabled={mode === 'view'}
                             />
                           </div>
                         </td>
-                        <td className='px-2 py-1'>
-                          <Button size='icon' variant='ghost' onClick={() => removeLine(idx)}>
-                            🗑️
-                          </Button>
+                        <td></td>
+                        <td></td>
+                        <td className='px-2 py-1 flex justify-end gap-1'>
+                          {mode !== 'view' && (
+                            <Button size='icon' variant='ghost' onClick={() => removeLine(idx)}>
+                              🗑️
+                            </Button>
+                          )}
                         </td>
                         <td className='hidden'>
                           <input type='hidden' value={line.type || ''} readOnly />
@@ -553,6 +556,7 @@ const ServiceTypeSection = ({
                       <td className='px-2 py-1'>
                         <div className='flex items-center gap-2'>
                           {line.type === 'product' && line.product_id && <Boxes className='h-4 w-4 text-zinc-400' />}
+                          {line.type === 'product' && <Box className='h-4 w-4 text-zinc-400' />}
                           {line.type === 'labor' && <Wrench className='h-4 w-4 text-zinc-400' />}
                           {line.type === 'expense' && <ClipboardIcon className='h-4 w-4 text-zinc-400' />}
                           {line.type === 'invoice' && <GridIcon className='h-4 w-4 text-zinc-400' />}
@@ -562,6 +566,7 @@ const ServiceTypeSection = ({
                             onChange={e => updateLine(idx, 'name', e.target.value)}
                             className={cn('w-full', line.type === 'deduction' && 'text-red-500')}
                             placeholder='Item Name'
+                            disabled={mode === 'view'}
                           />
                         </div>
                       </td>
@@ -571,6 +576,7 @@ const ServiceTypeSection = ({
                           onChange={e => updateLine(idx, 'description', e.target.value)}
                           className='w-full text-red-500'
                           placeholder='Empty'
+                          disabled={mode === 'view'}
                         />
                       </td>
                       <td className='px-2 py-1'>
@@ -581,6 +587,7 @@ const ServiceTypeSection = ({
                             onChange={e => updateLine(idx, 'unit_cost', parseFloat(e.target.value) || 0)}
                             className='w-28'
                             min={0}
+                            disabled={mode === 'view'}
                           />
                         )}
                       </td>
@@ -592,6 +599,7 @@ const ServiceTypeSection = ({
                             onChange={e => updateLine(idx, 'qty', parseFloat(e.target.value) || 0)}
                             className='w-28 bg-yellow-200 text-black'
                             min={0}
+                            disabled={mode === 'view'}
                           />
                         )}
                       </td>
@@ -608,6 +616,7 @@ const ServiceTypeSection = ({
                               className='w-28'
                               min={0}
                               max={100}
+                              disabled={mode === 'view'}
                             />
                             <span>%</span>
                           </>
@@ -619,12 +628,13 @@ const ServiceTypeSection = ({
                       <td className='px-2 py-1'>
                         {line.type === 'deduction' ? (
                           <Input
+                            disabled={mode === 'view'}
                             type='number'
                             min={0}
                             value={
                               editingValues[idx] !== undefined
                                 ? editingValues[idx]
-                                : (line.total_price?.toFixed(2) ?? '')
+                                : (Number(line.total_price)?.toFixed(2) ?? '')
                             }
                             onChange={e => setEditingValues({ ...editingValues, [idx]: e.target.value })}
                             onBlur={e => {
@@ -643,12 +653,13 @@ const ServiceTypeSection = ({
                             className='w-28'
                           />
                         ) : (
-                          <Input value={line.total_price?.toFixed(2) ?? ''} readOnly className='w-28' />
+                          <Input value={Number(line.total_price)?.toFixed(2) ?? ''} readOnly className='w-28' />
                         )}
                       </td>
                       <td className='px-2 py-1 text-center'>
                         {line.type !== 'deduction' && (
                           <Checkbox
+                            disabled={mode === 'view'}
                             checked={line.is_sale === 1 ? true : false}
                             onCheckedChange={checked => updateLine(idx, 'is_sale', !!checked ? 1 : 0)}
                           />
@@ -674,6 +685,7 @@ const ServiceTypeSection = ({
                                   min={0}
                                   step={0.01}
                                   className='w-full'
+                                  disabled={mode === 'view'}
                                 />
                                 <div className='text-xs text-zinc-400'>Enter freight charge</div>
                               </div>
@@ -709,6 +721,7 @@ const ServiceTypeSection = ({
                                   </Button>
                                 </div>
                                 <Input
+                                  disabled={mode === 'view'}
                                   type='number'
                                   value={line.discount ?? 0}
                                   onChange={e => {
@@ -750,6 +763,7 @@ const ServiceTypeSection = ({
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align='end' className='w-64 p-2'>
                             <Textarea
+                              disabled={mode === 'view'}
                               value={line.note || ''}
                               onChange={e => updateLine(idx, 'note', e.target.value)}
                               placeholder='Add note...'
@@ -759,9 +773,11 @@ const ServiceTypeSection = ({
                         </DropdownMenu>
 
                         {/* Delete Button */}
-                        <Button size='icon' variant='ghost' onClick={() => removeLine(idx)} title='Delete'>
-                          🗑️
-                        </Button>
+                        {mode !== 'view' && (
+                          <Button size='icon' variant='ghost' onClick={() => removeLine(idx)} title='Delete'>
+                            🗑️
+                          </Button>
+                        )}
                       </td>
                       <td className='hidden'>
                         <input type='hidden' value={line.type || ''} readOnly />

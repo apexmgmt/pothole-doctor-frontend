@@ -9,12 +9,14 @@ import { useState } from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 const DiscountDetailsCard = ({
+  mode,
   estimateDetails,
   discountType,
   discountValue,
   totalDiscount = 0, // Add this
   onApplyDiscount
 }: {
+  mode: 'create' | 'edit' | 'view'
   estimateDetails?: Estimate
   discountType: 'percentage' | 'fixed'
   discountValue: number
@@ -46,59 +48,61 @@ const DiscountDetailsCard = ({
           <p className='text-sm font-semibold text-red-400'>${totalDiscount.toFixed(2)}</p>
         </div>
         <Separator className='mb-2' />
-        <div className='flex justify-end gap-1'>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='outline' size='icon'>
-                {localType === 'fixed' ? <DollarSign className='h-4 w-4' /> : <PercentIcon className='h-4 w-4' />}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end' className='w-64 p-3'>
-              <div className='space-y-2'>
-                <div className='flex gap-2'>
-                  <Button
-                    variant={localType === 'percentage' ? 'default' : 'outline'}
-                    size='sm'
-                    onClick={() => setLocalType('percentage')}
-                    className='flex-1'
-                  >
-                    <PercentIcon className='h-4 w-4 mr-1' />
-                  </Button>
-                  <Button
-                    variant={localType === 'fixed' ? 'default' : 'outline'}
-                    size='sm'
-                    onClick={() => setLocalType('fixed')}
-                    className='flex-1'
-                  >
-                    <DollarSign className='h-4 w-4 mr-1' />
+        {mode !== 'view' && (
+          <div className='flex justify-end gap-1'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='outline' size='icon'>
+                  {localType === 'fixed' ? <DollarSign className='h-4 w-4' /> : <PercentIcon className='h-4 w-4' />}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end' className='w-64 p-3'>
+                <div className='space-y-2'>
+                  <div className='flex gap-2'>
+                    <Button
+                      variant={localType === 'percentage' ? 'default' : 'outline'}
+                      size='sm'
+                      onClick={() => setLocalType('percentage')}
+                      className='flex-1'
+                    >
+                      <PercentIcon className='h-4 w-4 mr-1' />
+                    </Button>
+                    <Button
+                      variant={localType === 'fixed' ? 'default' : 'outline'}
+                      size='sm'
+                      onClick={() => setLocalType('fixed')}
+                      className='flex-1'
+                    >
+                      <DollarSign className='h-4 w-4 mr-1' />
+                    </Button>
+                  </div>
+                  <Input
+                    type='number'
+                    value={localValue}
+                    onChange={e => setLocalValue(e.target.value)}
+                    placeholder={localType === 'percentage' ? '0-100' : 'Amount'}
+                    min={0}
+                    max={localType === 'percentage' ? 100 : undefined}
+                    step={localType === 'percentage' ? 1 : 0.01}
+                  />
+                  <Button onClick={handleApply} className='w-full' size='sm'>
+                    Apply
                   </Button>
                 </div>
-                <Input
-                  type='number'
-                  value={localValue}
-                  onChange={e => setLocalValue(e.target.value)}
-                  placeholder={localType === 'percentage' ? '0-100' : 'Amount'}
-                  min={0}
-                  max={localType === 'percentage' ? 100 : undefined}
-                  step={localType === 'percentage' ? 1 : 0.01}
-                />
-                <Button onClick={handleApply} className='w-full' size='sm'>
-                  Apply
-                </Button>
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button
-            variant='outline'
-            size='icon'
-            onClick={() => {
-              onApplyDiscount('percentage', 0)
-              setLocalValue('0')
-            }}
-          >
-            <X className='h-4 w-4' />
-          </Button>
-        </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              variant='outline'
+              size='icon'
+              onClick={() => {
+                onApplyDiscount('percentage', 0)
+                setLocalValue('0')
+              }}
+            >
+              <X className='h-4 w-4' />
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

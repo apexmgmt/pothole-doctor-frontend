@@ -40,7 +40,7 @@ const CreateOrEditProposalModal = ({
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  mode: 'create' | 'edit'
+  mode: 'create' | 'edit' | 'view'
   estimateId?: string
   estimateDetails?: Estimate
   proposalId?: string | null
@@ -65,6 +65,14 @@ const CreateOrEditProposalModal = ({
   >([])
 
   const onCancel = () => {
+    // Reset the data
+    setSelectedServiceType([])
+    setServiceTypeLineItems([])
+    setCustomMessage('')
+    setDiscountType('percentage')
+    setDiscountValue(0)
+    setServiceSelectValue(undefined)
+    setServiceSelectOpen(false)
     onOpenChange(false)
   }
 
@@ -108,7 +116,14 @@ const CreateOrEditProposalModal = ({
 
     const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
 
-    return sum + (unitPrice - line.unit_cost) * line.qty - (line.freight_charge ?? 0)
+    return (
+      sum +
+      (unitPrice - line.unit_cost) * line.qty -
+      (line.freight_charge ?? 0) -
+      (line.discount_type === 'fixed'
+        ? (line.discount ?? 0)
+        : (line.unit_cost / (1 - line.margin / 100)) * ((line.discount ?? 0) / 100))
+    )
   }, 0)
 
   const profitPercent = totalSales > 0 ? (profitAmount / totalSales) * 100 : 0
@@ -224,7 +239,7 @@ const CreateOrEditProposalModal = ({
           toast.error(error.message || 'Failed to create proposal.')
           setIsLoading(false)
         })
-    } else {
+    } else if (mode === 'edit' && proposalId) {
       ProposalService.update(proposalId || '', payload)
         .then(response => {
           toast.success('Proposal updated successfully')
@@ -248,7 +263,7 @@ const CreateOrEditProposalModal = ({
   }
 
   useEffect(() => {
-    if (mode === 'edit' && proposalDetails) {
+    if ((mode === 'edit' || mode === 'view') && proposalDetails) {
       // Prepare selectedServiceType
       const newSelectedServiceType = (proposalDetails.services || []).map(service => ({
         id: service.service_type_id,
@@ -298,8 +313,14 @@ const CreateOrEditProposalModal = ({
       loadingMessage='Loading proposal...'
       open={open}
       onOpenChange={onOpenChange}
-      title={mode === 'create' ? 'Create New Proposal' : 'Edit Proposal'}
-      description={mode === 'create' ? 'Add a new proposal to the system' : 'Update proposal information'}
+      title={mode === 'create' ? 'Create New Proposal' : mode === 'edit' ? 'Edit Proposal' : 'View Proposal'}
+      description={
+        mode === 'create'
+          ? 'Add a new proposal to the system'
+          : mode === 'edit'
+            ? 'Update proposal information'
+            : 'View proposal details'
+      }
       maxWidth='full'
       disableClose={isLoading}
       actions={
@@ -307,9 +328,11 @@ const CreateOrEditProposalModal = ({
           <Button type='button' variant='outline' onClick={onCancel} disabled={isLoading} className='flex-1'>
             Cancel
           </Button>
-          <Button type='submit' onClick={() => onSubmit()} disabled={isLoading} className='flex-1'>
-            {isLoading ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
-          </Button>
+          {mode !== 'view' && (
+            <Button type='submit' onClick={() => onSubmit()} disabled={isLoading} className='flex-1'>
+              {isLoading ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
+            </Button>
+          )}
         </div>
       }
     >
@@ -326,39 +349,41 @@ const CreateOrEditProposalModal = ({
               {estimateDetails?.client?.first_name + ' ' + estimateDetails?.client?.last_name}
             </p>
           </div>
-          <div className='relative'>
-            <Button variant='outline' type='button' onClick={() => setServiceSelectOpen(true)} id='add-service-btn'>
-              <span>
-                <SettingsIcon className='h-4 w-4 inline-block mr-2' />
-              </span>
-              Add Service
-            </Button>
-            <Select
-              open={serviceSelectOpen}
-              value=''
-              onOpenChange={setServiceSelectOpen}
-              onValueChange={value => {
-                handleAddServiceType(value)
-              }}
-            >
-              {/* 
+          {mode !== 'view' && (
+            <div className='relative'>
+              <Button variant='outline' type='button' onClick={() => setServiceSelectOpen(true)} id='add-service-btn'>
+                <span>
+                  <SettingsIcon className='h-4 w-4 inline-block mr-2' />
+                </span>
+                Add Service
+              </Button>
+              <Select
+                open={serviceSelectOpen}
+                value=''
+                onOpenChange={setServiceSelectOpen}
+                onValueChange={value => {
+                  handleAddServiceType(value)
+                }}
+              >
+                {/* 
                 The SelectTrigger is visually hidden but present for popper positioning.
                 It is absolutely positioned over the button.
               */}
-              <SelectTrigger
-                className='absolute top-0 left-0 w-full h-full opacity-0 pointer-events-none'
-                aria-label='Add Service'
-                tabIndex={-1}
-              />
-              <SelectContent position='popper' align='end'>
-                {serviceTypes.map(st => (
-                  <SelectItem key={st.id} value={st.id}>
-                    {st.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                <SelectTrigger
+                  className='absolute top-0 left-0 w-full h-full opacity-0 pointer-events-none'
+                  aria-label='Add Service'
+                  tabIndex={-1}
+                />
+                <SelectContent position='popper' align='end'>
+                  {serviceTypes.map(st => (
+                    <SelectItem key={st.id} value={st.id}>
+                      {st.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
         <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4'>
           {/* Client details */}
@@ -367,6 +392,7 @@ const CreateOrEditProposalModal = ({
           <SalesRepresentativeCard estimateDetails={estimateDetails} />
           {/* Discount details */}
           <DiscountDetailsCard
+            mode={mode}
             estimateDetails={estimateDetails}
             discountType={discountType}
             discountValue={discountValue}
@@ -422,6 +448,7 @@ const CreateOrEditProposalModal = ({
           {selectedServiceType.map((item, idx) => (
             <ServiceTypeSection
               key={idx}
+              mode={mode}
               serviceTypeName={item.name}
               serviceTypeId={item.id}
               onRemove={() => handleRemoveServiceType(idx)}

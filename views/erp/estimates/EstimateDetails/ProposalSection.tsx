@@ -9,6 +9,8 @@ import { DataTableApiResponse, ProductCategory, ServiceType, Unit, Vendor, Propo
 import ProposalService from '@/services/api/proposals.service'
 import { SpinnerCustom } from '@/components/ui/spinner'
 
+type ProposalModalModeType = 'create' | 'edit' | 'view'
+
 const ProposalSection = ({
   estimateId,
   estimateDetails,
@@ -36,6 +38,9 @@ const ProposalSection = ({
   })
 
   const [proposals, setProposals] = useState<Proposal[]>([])
+  const [proposalModalMode, setProposalModalMode] = useState<ProposalModalModeType>('create')
+  const [selectedProposalId, setSelectedProposalId] = useState<string | null>(null)
+  const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
@@ -101,13 +106,28 @@ const ProposalSection = ({
     return () => observer.disconnect()
   }, [isLoading, hasMore, currentPage, fetchData])
 
+  // open proposal modal
+  const handleOpenProposalModal = (mode: ProposalModalModeType, proposal?: Proposal) => {
+    setProposalModalMode(mode)
+
+    if (proposal) {
+      setSelectedProposalId(proposal.id)
+      setSelectedProposal(proposal)
+    } else {
+      setSelectedProposalId(null)
+      setSelectedProposal(null)
+    }
+
+    setIsModalOpen(true)
+  }
+
   return (
     <>
       <Card className='bg-zinc-900 border-zinc-800'>
         <CardHeader className='flex flex-row items-center justify-between pb-2'>
           <CardTitle className='text-white text-base'>Proposals</CardTitle>
           <Button
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => handleOpenProposalModal('create')}
             size='sm'
             variant='outline'
             className='text-xs px-3 py-1 bg-white text-black'
@@ -155,7 +175,12 @@ const ProposalSection = ({
                           <span className='text-zinc-400 text-xs'>Total</span>
                           <p className='text-white font-bold text-lg'>${proposal.total}</p>
                         </div>
-                        <Button size='sm' variant='outline' className='text-xs'>
+                        <Button
+                          onClick={() => handleOpenProposalModal('view', proposal)}
+                          size='sm'
+                          variant='outline'
+                          className='text-xs'
+                        >
                           View Details
                         </Button>
                       </div>
@@ -180,7 +205,9 @@ const ProposalSection = ({
       <CreateOrEditProposalModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        mode={mode}
+        mode={proposalModalMode}
+        proposalId={selectedProposalId}
+        proposalDetails={selectedProposal}
         estimateId={estimateId}
         estimateDetails={estimateDetails}
         serviceTypes={serviceTypes}
