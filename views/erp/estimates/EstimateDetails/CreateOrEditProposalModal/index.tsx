@@ -312,7 +312,7 @@ const CreateOrEditProposalModal = ({
       isLoading={isLoading}
       loadingMessage='Loading proposal...'
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={onCancel}
       title={mode === 'create' ? 'Create New Proposal' : mode === 'edit' ? 'Edit Proposal' : 'View Proposal'}
       description={
         mode === 'create'

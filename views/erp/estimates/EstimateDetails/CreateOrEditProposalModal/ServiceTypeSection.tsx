@@ -556,7 +556,7 @@ const ServiceTypeSection = ({
                       <td className='px-2 py-1'>
                         <div className='flex items-center gap-2'>
                           {line.type === 'product' && line.product_id && <Boxes className='h-4 w-4 text-zinc-400' />}
-                          {line.type === 'product' && <Box className='h-4 w-4 text-zinc-400' />}
+                          {line.type === 'product' && !line.product_id && <Box className='h-4 w-4 text-zinc-400' />}
                           {line.type === 'labor' && <Wrench className='h-4 w-4 text-zinc-400' />}
                           {line.type === 'expense' && <ClipboardIcon className='h-4 w-4 text-zinc-400' />}
                           {line.type === 'invoice' && <GridIcon className='h-4 w-4 text-zinc-400' />}
