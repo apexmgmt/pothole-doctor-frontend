@@ -23,6 +23,7 @@ import ServiceTypeSection from './ServiceTypeSection'
 import { Textarea } from '@/components/ui/textarea'
 import ProposalService from '@/services/api/proposals.service'
 import { toast } from 'sonner'
+import { getDiscountedUnitPrice } from '@/utils/business_calculation'
 
 const CreateOrEditProposalModal = ({
   open,
@@ -98,15 +99,9 @@ const CreateOrEditProposalModal = ({
       return sum - (line.total_price ?? 0) // Use total_price directly for deductions
     }
 
-    const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
+    const unitPrice = getDiscountedUnitPrice(line)
 
-    return (
-      sum +
-      unitPrice * line.qty -
-      (line.discount_type === 'fixed'
-        ? (line.discount ?? 0)
-        : (line.unit_cost / (1 - line.margin / 100)) * ((line.discount ?? 0) / 100))
-    )
+    return sum + unitPrice * line.qty
   }, 0)
 
   const profitAmount = allLines.reduce((sum, line) => {
@@ -114,16 +109,9 @@ const CreateOrEditProposalModal = ({
       return sum - (line.total_price ?? 0) // Deduction reduces profit
     }
 
-    const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
+    const unitPrice = getDiscountedUnitPrice(line)
 
-    return (
-      sum +
-      (unitPrice - line.unit_cost) * line.qty -
-      (line.freight_charge ?? 0) -
-      (line.discount_type === 'fixed'
-        ? (line.discount ?? 0)
-        : (line.unit_cost / (1 - line.margin / 100)) * ((line.discount ?? 0) / 100))
-    )
+    return sum + (unitPrice - line.unit_cost) * line.qty - (line.freight_charge ?? 0)
   }, 0)
 
   const profitPercent = totalSales > 0 ? (profitAmount / totalSales) * 100 : 0
@@ -143,20 +131,13 @@ const CreateOrEditProposalModal = ({
   const salesTax = allLines
     .filter(line => line.is_sale)
     .reduce((sum, line) => {
-      const unitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
+      const unitPrice = getDiscountedUnitPrice(line)
 
       if (line.type === 'deduction') {
         return sum - unitPrice * line.qty * 0.0 // 0% tax as example
       }
 
-      return (
-        sum +
-        (unitPrice * line.qty -
-          (line.discount_type === 'fixed'
-            ? (line.discount ?? 0)
-            : (line.unit_cost / (1 - line.margin / 100)) * ((line.discount ?? 0) / 100))) *
-          0.0
-      ) // 0% tax as example
+      return sum + unitPrice * line.qty * 0.0 // 0% tax as example
     }, 0)
 
   const total = totalSales + salesTax

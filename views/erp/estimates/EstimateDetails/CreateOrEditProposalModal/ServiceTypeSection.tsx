@@ -21,6 +21,7 @@ import ProductsModal from '@/views/erp/products/ProductsModal'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import { Textarea } from '@/components/ui/textarea'
+import { getDiscountedUnitPrice } from '@/utils/business_calculation'
 
 const ServiceTypeSection = ({
   mode,
@@ -53,18 +54,6 @@ const ServiceTypeSection = ({
   const [margin, setMargin] = useState('0')
   const [editingValues, setEditingValues] = useState<{ [key: number]: string }>({})
   const timeoutRefs = useRef<{ [key: number]: NodeJS.Timeout }>({})
-
-  const getDiscountedUnitPrice = (line: ProposalServiceItemPayload) => {
-    const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
-    const discount = line.discount ?? 0
-    const discountType = line.discount_type ?? 'percentage'
-
-    if (discountType === 'fixed') {
-      return Math.max(0, baseUnitPrice - discount)
-    } else {
-      return baseUnitPrice * (1 - discount / 100)
-    }
-  }
 
   const recalculateLine = (line: ProposalServiceItemPayload): ProposalServiceItemPayload => {
     const unit_price = getDiscountedUnitPrice(line)
