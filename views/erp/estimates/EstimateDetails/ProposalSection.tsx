@@ -176,14 +176,24 @@ const ProposalSection = ({
                           <span className='text-zinc-400 text-xs'>Total</span>
                           <p className='text-white font-bold text-lg'>${proposal.total}</p>
                         </div>
-                        <Button
-                          onClick={() => handleOpenProposalModal('view', proposal)}
-                          size='sm'
-                          variant='outline'
-                          className='text-xs'
-                        >
-                          View Details
-                        </Button>
+                        <div className='flex justify-between gap-2'>
+                          <Button
+                            onClick={() => handleOpenProposalModal('edit', proposal)}
+                            size='sm'
+                            variant='outline'
+                            className='text-xs'
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            onClick={() => handleOpenProposalModal('view', proposal)}
+                            size='sm'
+                            variant='outline'
+                            className='text-xs'
+                          >
+                            Details
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
