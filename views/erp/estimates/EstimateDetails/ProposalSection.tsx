@@ -116,7 +116,7 @@ const ProposalSection = ({
           </Button>
         </CardHeader>
         <CardContent className='relative'>
-          <ScrollArea className='h-[80vh] w-full rounded-md'>
+          <ScrollArea className='min-h-32 max-h-[80vh] w-full rounded-md'>
             <div className='space-y-4'>
               {proposals.length === 0 && !isLoading ? (
                 <div className='flex items-center justify-center h-32 bg-zinc-800 rounded-md'>
@@ -163,7 +163,7 @@ const ProposalSection = ({
                   ))}
 
                   {/* Infinity scroll trigger */}
-                  <div ref={observerTarget} className='flex justify-center py-4'>
+                  <div ref={observerTarget} className='flex justify-center py-1'>
                     {isLoading && (
                       <div className='absolute inset-0 backdrop-blur-xs flex items-center justify-center z-10'>
                         <SpinnerCustom size='size-8' />
