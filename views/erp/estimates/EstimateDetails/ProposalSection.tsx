@@ -147,7 +147,6 @@ const ProposalSection = ({
         </CardHeader>
         <CardContent className='relative'>
           <ScrollArea className={`w-full rounded-md ${proposals.length === 0 ? 'h-32' : 'h-[80vh]'}`}>
-            {' '}
             <div className='space-y-4'>
               {proposals.length === 0 && !isLoading ? (
                 <div className='flex items-center justify-center h-32 bg-zinc-800 rounded-md'>
@@ -160,7 +159,7 @@ const ProposalSection = ({
                       <div className='flex justify-between items-start mb-3'>
                         <div>
                           <h3 className='text-white font-semibold text-sm mb-1'>
-                            Proposal: {proposal.proposal_number?.toString().padStart(6, '0') || 'N/A'}
+                            Proposal: #{proposal.proposal_number?.toString().padStart(6, '0') || 'N/A'}
                           </h3>
                           <p className='text-zinc-300 text-sm font-medium'>{proposal.estimate?.title}</p>
                         </div>
@@ -179,6 +178,10 @@ const ProposalSection = ({
                           <div>
                             <span className='text-zinc-400'>Created</span>
                             <p className='text-zinc-200'>{new Date(proposal.created_at).toLocaleDateString()}</p>
+                          </div>
+                          <div>
+                            <span className='text-zinc-400'>Updated</span>
+                            <p className='text-zinc-200'>{new Date(proposal.updated_at).toLocaleDateString()}</p>
                           </div>
                         </div>
                       </div>
