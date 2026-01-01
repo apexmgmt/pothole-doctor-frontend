@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Estimate } from '@/types'
 import { useLoadScript, GoogleMap, Marker } from '@react-google-maps/api'
 import { useMemo, useState, useEffect } from 'react'
+import { SpinnerCustom } from '@/components/ui/spinner'
 
 const libraries: 'places'[] = ['places']
 
@@ -161,8 +162,8 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
       </CardHeader>
       <CardContent>
         {!isLoaded || isLoadingLocation ? (
-          <div className='flex items-center justify-center h-[400px] bg-zinc-800 rounded-md'>
-            <span className='text-zinc-400 text-sm'>Loading map...</span>
+          <div className='relative flex items-center justify-center h-[400px] bg-zinc-800 rounded-md'>
+            <SpinnerCustom />
           </div>
         ) : (
           <div className='rounded-md overflow-hidden'>
