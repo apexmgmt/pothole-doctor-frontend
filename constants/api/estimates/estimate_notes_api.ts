@@ -11,4 +11,4 @@
  *
  * Data delete method: DELETE /{id}
  */
-export const ESTIMATE_NOTES: string = '/estimate-notes'
+export const ESTIMATE_NOTES: string = '/v1/estimate-notes/'

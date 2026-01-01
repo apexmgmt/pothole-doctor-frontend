@@ -1,6 +1,6 @@
 'use client'
 
-import { Client, Estimate, EstimateType, PaymentTerm, ProductCategory, ServiceType, Staff, Unit, Vendor } from '@/types'
+import { Client, Estimate, EstimateType, PaymentTerm, ProductCategory, ServiceType, Staff, Unit, Vendor, EstimateNote } from '@/types'
 import ProposalSection from './ProposalSection'
 import PerformTakeOfSection from './PerformTakeOfSection'
 import NotesSection from './NotesSection'
@@ -12,6 +12,7 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 const EstimateDetails = ({
   estimateId,
   estimate,
+  estimateNotes,
   serviceTypes,
   estimateTypes,
   clients,
@@ -24,6 +25,7 @@ const EstimateDetails = ({
 }: {
   estimateId: string
   estimate: Estimate
+  estimateNotes: EstimateNote[]
   serviceTypes: ServiceType[]
   estimateTypes: EstimateType[]
   clients: Client[]
@@ -56,7 +58,7 @@ const EstimateDetails = ({
         />
         <div className='flex flex-col gap-4'>
           <PerformTakeOfSection />
-          <NotesSection />
+          <NotesSection estimateId={estimateId} estimateNotes={estimateNotes} />
         </div>
         <EstimateSection
           estimateId={estimateId}

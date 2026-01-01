@@ -1,4 +1,5 @@
 import ClientService from '@/services/api/clients/clients.service'
+import EstimateNoteService from '@/services/api/estimates/estimate-notes.service'
 import EstimateService from '@/services/api/estimates/estimates.service'
 import ProductCategoryService from '@/services/api/product_categories.service'
 import EstimateTypeService from '@/services/api/settings/estimate_types.service'
@@ -7,7 +8,18 @@ import ServiceTypeService from '@/services/api/settings/service_types.service'
 import UnitService from '@/services/api/settings/units.service'
 import StaffService from '@/services/api/staff.service'
 import VendorService from '@/services/api/vendors/vendors.service'
-import { Client, Estimate, EstimateType, PaymentTerm, ProductCategory, ServiceType, Staff, Unit, Vendor } from '@/types'
+import {
+  Client,
+  Estimate,
+  EstimateType,
+  PaymentTerm,
+  ProductCategory,
+  ServiceType,
+  Staff,
+  Unit,
+  Vendor,
+  EstimateNote
+} from '@/types'
 import EstimateDetails from '@/views/erp/estimates/EstimateDetails'
 
 const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
@@ -22,6 +34,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
   let productCategories: ProductCategory[] = []
   let uomUnits: Unit[] = []
   let vendors: Vendor[] = []
+  let estimateNotes: EstimateNote[] = []
 
   try {
     const response = await ServiceTypeService.getAllServiceTypes()
@@ -72,6 +85,15 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
     estimate = {} as Estimate
   }
 
+  // fetch estimate notes
+  try {
+    const response = await EstimateNoteService.index({ estimate_id: id })
+
+    estimateNotes = response.data || []
+  } catch (error) {
+    estimateNotes = []
+  }
+
   //fetch units
   try {
     const response = await UnitService.getAllUnits()
@@ -109,6 +131,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
     <EstimateDetails
       estimateId={id}
       estimate={estimate}
+      estimateNotes={estimateNotes}
       serviceTypes={serviceTypes}
       estimateTypes={estimateTypes}
       clients={clients}
