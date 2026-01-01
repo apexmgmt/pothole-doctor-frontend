@@ -12,7 +12,7 @@ import {
   Vendor
 } from '@/types'
 import { SettingsIcon, UserIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import ClientDetailsCard from './ClientDetailsCard'
 import SalesRepresentativeCard from './SalesRepresentativeCard'
 import DiscountDetailsCard from './DiscountDetailsCard'
@@ -61,6 +61,7 @@ const CreateOrEditProposalModal = ({
   const [customMessage, setCustomMessage] = useState('')
   const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>('percentage')
   const [discountValue, setDiscountValue] = useState(0)
+  const customMessageRef = useRef<HTMLTextAreaElement>(null)
 
   // Each service type section has an array of line items
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
@@ -170,7 +171,7 @@ const CreateOrEditProposalModal = ({
 
     const payload: ProposalPayload = {
       estimate_id: estimateId || '',
-      message: customMessage,
+      message: customMessageRef.current?.value || '',
       discount_type: discountType,
       discount: discountValue,
       services: serviceTypeLineItems.map((st, index) => {
@@ -465,8 +466,9 @@ const CreateOrEditProposalModal = ({
               id='custom-message'
               className='w-full'
               placeholder='Enter a custom message for the proposal...'
-              value={customMessage}
-              onChange={e => setCustomMessage(e.target.value)}
+              ref={customMessageRef}
+              defaultValue={proposalDetails?.message || ''}
+              disabled={mode === 'view'}
             />
           </CardContent>
         </Card>
