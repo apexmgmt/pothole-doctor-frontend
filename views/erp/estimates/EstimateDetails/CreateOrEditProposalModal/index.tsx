@@ -37,10 +37,11 @@ const CreateOrEditProposalModal = ({
   units = [],
   productCategories = [],
   uomUnits = [],
-  vendors = []
+  vendors = [],
+  onSuccess
 }: {
   open: boolean
-  onOpenChange: (open: boolean) => void
+  onOpenChange: () => void
   mode: 'create' | 'edit' | 'view'
   estimateId?: string
   estimateDetails?: Estimate
@@ -51,6 +52,7 @@ const CreateOrEditProposalModal = ({
   productCategories: ProductCategory[]
   uomUnits: Unit[]
   vendors: Vendor[]
+  onSuccess?: () => void
 }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
@@ -74,7 +76,7 @@ const CreateOrEditProposalModal = ({
     setDiscountValue(0)
     setServiceSelectValue(undefined)
     setServiceSelectOpen(false)
-    onOpenChange(false)
+    onOpenChange()
   }
 
   const handleAddServiceType = (serviceTypeId: string) => {
@@ -204,7 +206,7 @@ const CreateOrEditProposalModal = ({
       ProposalService.store(payload)
         .then(response => {
           toast.success('Proposal created successfully')
-          onOpenChange(false)
+          onOpenChange()
           setIsLoading(false)
 
           // Reset the data
@@ -215,6 +217,7 @@ const CreateOrEditProposalModal = ({
           setDiscountValue(0)
           setServiceSelectValue(undefined)
           setServiceSelectOpen(false)
+          onSuccess?.()
         })
         .catch(error => {
           toast.error(error.message || 'Failed to create proposal.')
@@ -224,7 +227,7 @@ const CreateOrEditProposalModal = ({
       ProposalService.update(proposalId || '', payload)
         .then(response => {
           toast.success('Proposal updated successfully')
-          onOpenChange(false)
+          onOpenChange()
           setIsLoading(false)
 
           // Reset the data
@@ -235,6 +238,7 @@ const CreateOrEditProposalModal = ({
           setDiscountValue(0)
           setServiceSelectValue(undefined)
           setServiceSelectOpen(false)
+          onSuccess?.()
         })
         .catch(error => {
           toast.error(error.message || 'Failed to update proposal.')

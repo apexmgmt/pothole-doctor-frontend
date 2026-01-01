@@ -1,6 +1,7 @@
 import { Estimate, LaborCost, Product, ServiceType } from '@/types'
 export interface Proposal {
   id: string
+  proposal_number: number
   estimate_id: string
   discount: number
   subtotal: number

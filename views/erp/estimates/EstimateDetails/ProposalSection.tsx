@@ -29,7 +29,6 @@ const ProposalSection = ({
   vendors: Vendor[]
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [mode, setMode] = useState<'create' | 'edit'>('create')
 
   const [filterOptions, setFilterOptions] = useState<any>({
     estimate_id: estimateId,
@@ -45,6 +44,12 @@ const ProposalSection = ({
   const [hasMore, setHasMore] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const observerTarget = useRef<HTMLDivElement>(null)
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedProposalId(null)
+    setSelectedProposal(null)
+  }
 
   // Fetch data from API
   const fetchData = useCallback(
@@ -121,6 +126,11 @@ const ProposalSection = ({
     setIsModalOpen(true)
   }
 
+  // Add this inside ProposalSection
+  const refreshProposals = () => {
+    fetchData(1)
+  }
+
   return (
     <>
       <Card className='bg-zinc-900 border-zinc-800'>
@@ -149,10 +159,12 @@ const ProposalSection = ({
                     <div key={proposal.id} className='border border-zinc-700 rounded-lg p-4 bg-zinc-800'>
                       <div className='flex justify-between items-start mb-3'>
                         <div>
-                          <h3 className='text-white font-semibold text-sm mb-1'>Proposal</h3>
+                          <h3 className='text-white font-semibold text-sm mb-1'>
+                            Proposal: {proposal.proposal_number?.toString().padStart(6, '0') || 'N/A'}
+                          </h3>
                           <p className='text-zinc-300 text-sm font-medium'>{proposal.estimate?.title}</p>
                         </div>
-                        <Badge variant={proposal.services?.[0] ? 'default' : 'secondary'}>In progress</Badge>
+                        <Badge variant={'default'}>{proposal.estimate?.status}</Badge>
                       </div>
 
                       <div className='space-y-2 mb-3 border-t border-zinc-700 pt-3'>
@@ -215,7 +227,7 @@ const ProposalSection = ({
 
       <CreateOrEditProposalModal
         open={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={handleCloseModal}
         mode={proposalModalMode}
         proposalId={selectedProposalId}
         proposalDetails={selectedProposal}
@@ -226,6 +238,7 @@ const ProposalSection = ({
         productCategories={productCategories}
         uomUnits={uomUnits}
         vendors={vendors}
+        onSuccess={refreshProposals}
       />
     </>
   )
