@@ -1,5 +1,5 @@
 import { getApiUrl } from '@/utils/utility'
-import apiInterceptor from './api.interceptor'
+import apiInterceptor from '../api.interceptor'
 import { PROPOSALS_ALL, PROPOSALS } from '@/constants/api'
 import { ProposalPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'

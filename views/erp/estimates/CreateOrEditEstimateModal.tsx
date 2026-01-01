@@ -21,8 +21,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import EstimateTypeService from '@/services/api/settings/estimate_types.service'
-import EstimateService from '@/services/api/estimates.service'
+import EstimateService from '@/services/api/estimates/estimates.service'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DatePicker } from '@/components/ui/datePicker'
 

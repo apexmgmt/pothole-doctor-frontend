@@ -1,5 +1,5 @@
 import ClientService from '@/services/api/clients/clients.service'
-import EstimateService from '@/services/api/estimates.service'
+import EstimateService from '@/services/api/estimates/estimates.service'
 import ProductCategoryService from '@/services/api/product_categories.service'
 import EstimateTypeService from '@/services/api/settings/estimate_types.service'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'

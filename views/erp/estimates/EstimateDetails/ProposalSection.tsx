@@ -6,7 +6,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import CreateOrEditProposalModal from './CreateOrEditProposalModal'
 import { Estimate } from '@/types/estimates.types'
 import { DataTableApiResponse, ProductCategory, ServiceType, Unit, Vendor, Proposal } from '@/types'
-import ProposalService from '@/services/api/proposals.service'
+import ProposalService from '@/services/api/estimates/proposals.service'
 import { SpinnerCustom } from '@/components/ui/spinner'
 
 type ProposalModalModeType = 'create' | 'edit' | 'view'
