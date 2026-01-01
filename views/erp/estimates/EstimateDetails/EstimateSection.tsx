@@ -56,7 +56,7 @@ const EstimateSection = ({
           <div className='flex flex-col gap-2 text-zinc-200 text-sm'>
             <div>
               <span className='font-semibold text-base text-white'>Estimate title</span>
-              <div>{estimate.title}</div>
+              <div>{estimate.title || ''}</div>
             </div>
             <div>
               <span className='font-semibold text-base text-white'>Estimate type</span>
@@ -64,40 +64,52 @@ const EstimateSection = ({
             </div>
             <div>
               <span className='font-semibold text-base text-white'>Estimate number</span>
-              <div>{estimate.estimate_number?.toString().padStart(6, '0')}</div>
+              <div>{estimate.estimate_number?.toString().padStart(6, '0') || 'N/A'}</div>
             </div>
-            <div>
-              <span className='font-semibold text-base text-white'>Service type</span>
-              <div>{estimate.service_type?.name ?? estimate.service_type_id}</div>
-            </div>
+            {estimate.service_type && (
+              <div>
+                <span className='font-semibold text-base text-white'>Service type</span>
+                <div>{estimate.service_type?.name ?? 'N/A'}</div>
+              </div>
+            )}
             <div>
               <span className='font-semibold text-base text-white'>Estimate location</span>
-              <div>{estimate.location}</div>
+              <div>{estimate.location || 'N/A'}</div>
             </div>
-            <div>
-              <span className='font-semibold text-base text-white'>Select bid date</span>
-              <div>{formatDate(estimate.biding_date)}</div>
-            </div>
-            <div>
-              <span className='font-semibold text-base text-white'>Expiration date</span>
-              <div>{formatDate(estimate.expiration_date)}</div>
-            </div>
-            <div>
-              <span className='font-semibold text-base text-white'>Customer</span>
+            {estimate.biding_date && (
               <div>
-                {estimate.client?.first_name} {estimate.client?.last_name}
+                <span className='font-semibold text-base text-white'>Select bid date</span>
+                <div>{formatDate(estimate.biding_date)}</div>
               </div>
-            </div>
-            <div>
-              <span className='font-semibold text-base text-white'>Payment terms</span>
-              <div>{estimate.payment_term?.name ?? estimate.payment_term_id}</div>
-            </div>
-            <div>
-              <span className='font-semibold text-base text-white'>Assigned estimator</span>
+            )}
+            {estimate.expiration_date && (
               <div>
-                {estimate.assign_user?.first_name} {estimate.assign_user?.last_name}
+                <span className='font-semibold text-base text-white'>Expiration date</span>
+                <div>{formatDate(estimate.expiration_date)}</div>
               </div>
-            </div>
+            )}
+            {estimate.client && (
+              <div>
+                <span className='font-semibold text-base text-white'>Customer</span>
+                <div>
+                  {estimate.client?.first_name} {estimate.client?.last_name}
+                </div>
+              </div>
+            )}
+            {estimate.payment_term && (
+              <div>
+                <span className='font-semibold text-base text-white'>Payment terms</span>
+                <div>{estimate.payment_term?.name ?? estimate.payment_term_id}</div>
+              </div>
+            )}
+            {estimate.assign_user && (
+              <div>
+                <span className='font-semibold text-base text-white'>Assigned estimator</span>
+                <div>
+                  {estimate.assign_user?.first_name} {estimate.assign_user?.last_name}
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

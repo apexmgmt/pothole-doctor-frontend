@@ -57,7 +57,7 @@ const EstimateDetails = ({
           vendors={vendors}
         />
         <div className='flex flex-col gap-4'>
-          <PerformTakeOfSection />
+          <PerformTakeOfSection estimate={estimate} />
           <NotesSection estimateId={estimateId} estimateNotes={estimateNotes} />
         </div>
         <EstimateSection

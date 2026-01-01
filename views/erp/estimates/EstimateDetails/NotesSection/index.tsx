@@ -66,7 +66,7 @@ const NotesSection = ({ estimateId, estimateNotes }: { estimateId: string; estim
             </div>
           )}
           {estimateNotes?.length > 0 && (
-            <ScrollArea className='h-[30vh] pr-2'>
+            <ScrollArea className='h-[25vh] pr-2'>
               {estimateNotes.map((note, idx) => (
                 <div key={idx} className='mb-4 relative'>
                   <div className='flex items-start justify-between gap-2'>
