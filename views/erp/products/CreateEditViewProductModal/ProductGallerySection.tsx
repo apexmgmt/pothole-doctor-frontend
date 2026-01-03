@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import Image from 'next/image'
 
@@ -16,6 +16,7 @@ import ProductGalleryService from '@/services/api/products/product-galleries.ser
 
 import { generateFileUrl } from '@/utils/utility'
 import { ProductGallery } from '@/types'
+import { hasPermission } from '@/utils/role-permission'
 
 interface ProductGallerySectionProps {
   productId: string
@@ -34,6 +35,18 @@ export function ProductGallerySection({
 }: ProductGallerySectionProps) {
   const [uploadingImage, setUploadingImage] = useState<boolean>(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [canCreateGallery, setCanCreateGallery] = useState<boolean>(false)
+  const [canDeleteGallery, setCanDeleteGallery] = useState<boolean>(false)
+  const [canViewGallery, setCanViewGallery] = useState<boolean>(false)
+  const [canEditGallery, setCanEditGallery] = useState<boolean>(false)
+
+  // check the permissions
+  useEffect(() => {
+    hasPermission('Create Gallery').then(result => setCanCreateGallery(result))
+    hasPermission('Delete Gallery').then(result => setCanDeleteGallery(result))
+    hasPermission('View Gallery').then(result => setCanViewGallery(result))
+    hasPermission('Update Gallery').then(result => setCanEditGallery(result))
+  }, [])
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -115,7 +128,7 @@ export function ProductGallerySection({
   return (
     <div className='space-y-4'>
       {/* Upload Button */}
-      {!disabled && (
+      {!disabled && (canCreateGallery || canEditGallery) && (
         <div className='relative'>
           <Input
             type='file'
@@ -165,7 +178,7 @@ export function ProductGallerySection({
                   className='object-cover'
                   sizes='(max-width: 768px) 100vw, 300px'
                 />
-                {!disabled && (
+                {!disabled && canDeleteGallery && (
                   <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center'>
                     <Button
                       type='button'

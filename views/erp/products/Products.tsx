@@ -24,6 +24,7 @@ import CreateEditViewProductModal from './CreateEditViewProductModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
+import { hasPermission } from '@/utils/role-permission'
 
 const Products: React.FC<ProductsProps> = ({
   productCategories,
@@ -45,12 +46,19 @@ const Products: React.FC<ProductsProps> = ({
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
-
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateProduct, setCanCreateProduct] = useState<boolean>(false)
+  const [canEditProduct, setCanEditProduct] = useState<boolean>(false)
+  const [canDeleteProduct, setCanDeleteProduct] = useState<boolean>(false)
+  const [canViewProduct, setCanViewProduct] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    hasPermission('Create Product').then(result => setCanCreateProduct(result))
+    hasPermission('Update Product').then(result => setCanEditProduct(result))
+    hasPermission('Delete Product').then(result => setCanDeleteProduct(result))
+    hasPermission('View Product').then(result => setCanViewProduct(result))
   }, [])
 
   // Debounced search update
@@ -275,21 +283,39 @@ const Products: React.FC<ProductsProps> = ({
       header: 'Action',
       cell: (row: Product) => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <ViewButton
-                tooltip='View Product Information'
-                onClick={() => handleOpenViewModal(row.id)}
-                variant='text'
-              />,
-              <EditButton
-                tooltip='Edit Product Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton tooltip='Delete Product' variant='text' onClick={() => handleDeleteProduct(row.id)} />
-            ]}
-          />
+          {(canEditProduct || canDeleteProduct || canViewProduct) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canViewProduct
+                  ? [
+                      <ViewButton
+                        tooltip='View Product Information'
+                        onClick={() => handleOpenViewModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canEditProduct
+                  ? [
+                      <EditButton
+                        tooltip='Edit Product Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteProduct
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Product'
+                        variant='text'
+                        onClick={() => handleDeleteProduct(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -404,15 +430,17 @@ const Products: React.FC<ProductsProps> = ({
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90 mt-5'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Product
-      </Button>
+      {canCreateProduct && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90 mt-5'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Product
+        </Button>
+      )}
     </div>
   )
 
