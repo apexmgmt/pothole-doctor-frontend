@@ -1,4 +1,4 @@
-import { Staff } from '../staff.types'
+import { Staff } from '../staff'
 
 export interface EstimateNote {
   id: string

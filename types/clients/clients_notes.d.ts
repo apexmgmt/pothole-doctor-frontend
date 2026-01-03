@@ -1,5 +1,5 @@
-import { NoteType } from '../note_types.types'
-import { User } from '../user.types'
+import { NoteType } from '../note_types'
+import { User } from '../user'
 
 export interface ClientNote {
   id: string

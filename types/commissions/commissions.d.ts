@@ -1,4 +1,4 @@
-import { CommissionType } from './commission_types.types'
+import { CommissionType } from './commission_types'
 
 export interface CommissionsParams {
   commissionTypes: CommissionType[] | []

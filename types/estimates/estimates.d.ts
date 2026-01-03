@@ -1,8 +1,8 @@
-import { Client } from '../clients/clients.types'
-import { EstimateType } from '../estimate_types.types'
-import { PaymentTerm } from '../payment_terms.types'
-import { ServiceType } from '../service_types.types'
-import { Staff } from '../staff.types'
+import { Client } from '../clients/clients'
+import { EstimateType } from '../estimate_types'
+import { PaymentTerm } from '../payment_terms'
+import { ServiceType } from '../service_types'
+import { Staff } from '../staff'
 
 export interface Estimate {
   id: string

@@ -1,7 +1,7 @@
-import { ProductCategory } from './product_categories.types'
-import { ServiceType } from './service_types.types'
-import { Unit } from './units.types'
-import { Vendor } from './vendors.types'
+import { ProductCategory } from './product_categories'
+import { ServiceType } from './service_types'
+import { Unit } from './units'
+import { Vendor } from './vendors'
 
 export interface Product {
   id: string

@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
-import { ServiceType, ServiceTypePayload } from '@/types/service_types.types'
+import { ServiceType, ServiceTypePayload } from '@/types'
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
