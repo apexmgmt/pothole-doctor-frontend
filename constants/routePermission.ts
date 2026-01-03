@@ -44,6 +44,7 @@ export const PERMISSION_BASED_ROUTES: Record<string, string> = {
 
   // Estimate routes
   '/erp/estimates': 'Manage Estimate',
+  '/erp/estimates/[id]': 'View Estimate',
 
   // Tasks routes
   '/erp/tasks': 'Manage Task',

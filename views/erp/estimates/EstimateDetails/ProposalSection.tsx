@@ -7,6 +7,9 @@ import CreateOrEditProposalModal from './CreateOrEditProposalModal'
 import { Estimate, ProductCategory, ServiceType, Unit, Vendor, Proposal } from '@/types'
 import ProposalService from '@/services/api/estimates/proposals.service'
 import { SpinnerCustom } from '@/components/ui/spinner'
+import { hasPermission } from '@/utils/role-permission'
+import EditButton from '@/components/erp/common/buttons/EditButton'
+import ViewButton from '@/components/erp/common/buttons/ViewButton'
 
 type ProposalModalModeType = 'create' | 'edit' | 'view'
 
@@ -43,6 +46,21 @@ const ProposalSection = ({
   const [hasMore, setHasMore] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const observerTarget = useRef<HTMLDivElement>(null)
+
+  const [canManageProposal, setCanManageProposal] = useState<boolean>(false)
+  const [canViewProposal, setCanViewProposal] = useState<boolean>(false)
+  const [canCreateProposal, setCanCreateProposal] = useState<boolean>(false)
+  const [canEditProposal, setCanEditProposal] = useState<boolean>(false)
+  const [canDeleteProposal, setCanDeleteProposal] = useState<boolean>(false)
+
+  // check the permissions initially
+  useEffect(() => {
+    hasPermission('Manage Proposal').then(result => setCanManageProposal(result))
+    hasPermission('View Proposal').then(result => setCanViewProposal(result))
+    hasPermission('Create Proposal').then(result => setCanCreateProposal(result))
+    hasPermission('Update Proposal').then(result => setCanEditProposal(result))
+    hasPermission('Delete Proposal').then(result => setCanDeleteProposal(result))
+  }, [])
 
   const handleCloseModal = () => {
     setIsModalOpen(false)
@@ -135,14 +153,16 @@ const ProposalSection = ({
       <Card className='bg-zinc-900 border-zinc-800'>
         <CardHeader className='flex flex-row items-center justify-between pb-2'>
           <CardTitle className='text-white text-base'>Proposals</CardTitle>
-          <Button
-            onClick={() => handleOpenProposalModal('create')}
-            size='sm'
-            variant='outline'
-            className='text-xs px-3 py-1 bg-white text-black'
-          >
-            + New
-          </Button>
+          {canCreateProposal && (
+            <Button
+              onClick={() => handleOpenProposalModal('create')}
+              size='sm'
+              variant='outline'
+              className='text-xs px-3 py-1 bg-white text-black'
+            >
+              + New
+            </Button>
+          )}
         </CardHeader>
         <CardContent className='relative'>
           <ScrollArea className={`w-full rounded-md ${proposals.length === 0 ? 'h-32' : 'h-[80vh]'}`}>
@@ -191,22 +211,22 @@ const ProposalSection = ({
                           <p className='text-white font-bold text-lg'>${proposal.total}</p>
                         </div>
                         <div className='flex justify-between gap-2'>
-                          <Button
-                            onClick={() => handleOpenProposalModal('edit', proposal)}
-                            size='sm'
-                            variant='outline'
-                            className='text-xs'
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            onClick={() => handleOpenProposalModal('view', proposal)}
-                            size='sm'
-                            variant='outline'
-                            className='text-xs'
-                          >
-                            Details
-                          </Button>
+                          {canViewProposal && (
+                            <ViewButton
+                              title='View'
+                              onClick={() => handleOpenProposalModal('view', proposal)}
+                              variant='icon'
+                              tooltip='View Proposal'
+                            />
+                          )}
+                          {canEditProposal && (
+                            <EditButton
+                              title='Edit'
+                              onClick={() => handleOpenProposalModal('edit', proposal)}
+                              variant='icon'
+                              tooltip='Edit Proposal'
+                            />
+                          )}
                         </div>
                       </div>
                     </div>

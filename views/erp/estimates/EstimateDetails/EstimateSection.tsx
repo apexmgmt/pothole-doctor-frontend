@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button'
 import { Client, Estimate, EstimateType, PaymentTerm, ServiceType, Staff } from '@/types'
 import { formatDate } from '@/utils/date'
 import CreateOrEditEstimateModal from '../CreateOrEditEstimateModal'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { hasPermission } from '@/utils/role-permission'
 
 const EstimateSection = ({
   estimateId,
@@ -25,6 +26,12 @@ const EstimateSection = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const router = useRouter()
+  const [canEditEstimate, setCanEditEstimate] = useState<boolean>(false)
+
+  // Check permissions
+  useEffect(() => {
+    hasPermission('Update Estimate').then(result => setCanEditEstimate(result))
+  }, [])
 
   // This function will be called after a successful edit
   const handleModalChange = (open: boolean) => {
@@ -41,16 +48,18 @@ const EstimateSection = ({
       <Card className='bg-zinc-900 border-zinc-800'>
         <CardHeader className='flex flex-row items-center justify-between pb-2'>
           <CardTitle className='text-white text-base'>Details</CardTitle>
-          <Button
-            onClick={() => {
-              setIsModalOpen(true)
-            }}
-            size='sm'
-            variant='outline'
-            className='text-xs px-3 py-1 bg-white text-black'
-          >
-            Edit
-          </Button>
+          {canEditEstimate && (
+            <Button
+              onClick={() => {
+                setIsModalOpen(true)
+              }}
+              size='sm'
+              variant='outline'
+              className='text-xs px-3 py-1 bg-white text-black'
+            >
+              Edit
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           <div className='flex flex-col gap-2 text-zinc-200 text-sm'>

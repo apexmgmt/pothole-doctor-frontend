@@ -5,15 +5,26 @@ import { StickyNote } from 'lucide-react'
 import { formatDate } from '@/utils/date'
 import { EstimateNote } from '@/types'
 import CreteEditNoteModal from './CreateEditNoteModal'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import EstimateNoteService from '@/services/api/estimates/estimate-notes.service'
 import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
+import { hasPermission } from '@/utils/role-permission'
 
 const NotesSection = ({ estimateId, estimateNotes }: { estimateId: string; estimateNotes: EstimateNote[] }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const router = useRouter()
+  const [canCreateEstimateNote, setCanCreateEstimateNote] = useState<boolean>(false)
+  const [canEditEstimateNote, setCanEditEstimateNote] = useState<boolean>(false)
+  const [canDeleteEstimateNote, setCanDeleteEstimateNote] = useState<boolean>(false)
+
+  // Check permissions
+  useEffect(() => {
+    hasPermission('Create Estimate Note').then(result => setCanCreateEstimateNote(result))
+    hasPermission('Update Estimate Note').then(result => setCanEditEstimateNote(result))
+    hasPermission('Delete Estimate Note').then(result => setCanDeleteEstimateNote(result))
+  }, [])
 
   // This function will be called after a successful edit
   const handleModalChange = (open: boolean) => {
@@ -48,16 +59,18 @@ const NotesSection = ({ estimateId, estimateNotes }: { estimateId: string; estim
             <StickyNote className='text-zinc-300 w-5 h-5' />
             <CardTitle className='text-white text-base'>Notes</CardTitle>
           </div>
-          <Button
-            onClick={() => {
-              setIsModalOpen(true)
-            }}
-            size='sm'
-            variant='outline'
-            className='text-xs px-3 py-1 flex items-center gap-1 text-black bg-white'
-          >
-            + Add
-          </Button>
+          {canCreateEstimateNote && (
+            <Button
+              onClick={() => {
+                setIsModalOpen(true)
+              }}
+              size='sm'
+              variant='outline'
+              className='text-xs px-3 py-1 flex items-center gap-1 text-black bg-white'
+            >
+              + Add
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           {estimateNotes?.length === 0 && (
@@ -71,14 +84,16 @@ const NotesSection = ({ estimateId, estimateNotes }: { estimateId: string; estim
                 <div key={idx} className='mb-4 relative'>
                   <div className='flex items-start justify-between gap-2'>
                     <div className='text-zinc-200 text-sm mb-2 text-wrap flex-1'>{note.comment}</div>
-                    <DeleteButton
-                      onClick={() => handleNoteDelete(note.id)}
-                      tooltip='Delete note'
-                      confirmTitle='Delete Note'
-                      confirmMessage='Are you sure you want to delete this note? This action cannot be undone.'
-                      buttonSize='icon'
-                      buttonVariant='ghost'
-                    />
+                    {canDeleteEstimateNote && (
+                      <DeleteButton
+                        onClick={() => handleNoteDelete(note.id)}
+                        tooltip='Delete note'
+                        confirmTitle='Delete Note'
+                        confirmMessage='Are you sure you want to delete this note? This action cannot be undone.'
+                        buttonSize='icon'
+                        buttonVariant='ghost'
+                      />
+                    )}
                   </div>
                   <div className='flex items-center justify-between text-xs text-zinc-400 mb-2'>
                     <span>
