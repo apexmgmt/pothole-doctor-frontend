@@ -55,7 +55,25 @@ export const PERMISSION_BASED_ROUTES: Record<string, string> = {
   '/erp/countries': 'Manage Country',
   '/erp/states': 'Manage State',
   '/erp/cities': 'Manage City',
-  '/erp/locations/businesses': 'Manage Location'
+  '/erp/locations/businesses': 'Manage Location',
+
+  // Settings routes
+  '/erp/settings/payment-terms': 'Manage Payment Term',
+  '/erp/settings/contractor-types': 'Manage Contractor Type',
+  '/erp/settings/contact-types': 'Manage Contact Type',
+  '/erp/settings/estimate-types': 'Manage Estimate Type',
+  '/erp/settings/commission-types': 'Manage Commission',
+  '/erp/settings/commissions': 'Manage Commission',
+
+  // '/erp/settings/note-types': 'Manage Note Type', //TODO: Need that permission from backend
+  '/erp/settings/task-types': 'Manage Task Type',
+
+  // '/erp/settings/email-templates': 'Manage Email Template', //TODO: Need that permission from backend
+  // '/erp/settings/task-reminders': 'Manage Task Reminder', //TODO: Need that permission from backend
+  '/erp/settings/uom-units': 'Manage Unit',
+  '/erp/settings/measure-units': 'Manage Unit'
+
+  // '/erp/settings/service-types': 'Manage Service Type' //TODO: Need that permission from backend
 }
 
 /**
