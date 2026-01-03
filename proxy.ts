@@ -1,8 +1,48 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-import { isPublicRoute, isUnauthenticatedRoute } from './constants/routePermission'
+import { isPublicRoute, isUnauthenticatedRoute, getRequiredPermission } from './constants/routePermission'
 import AuthService from './services/api/auth.service'
+import { decryptData } from './utils/encryption'
+
+/**
+ * Get permissions from cookies (server-side)
+ */
+async function getPermissionsFromCookies(req: NextRequest): Promise<string[]> {
+  const encryptedPermissions = req.cookies.get('permissions')?.value
+
+  if (!encryptedPermissions) return []
+
+  try {
+    const decryptedPermissions = decryptData(encryptedPermissions)
+    let userPermissions: string[] = []
+
+    if (process.env.NODE_ENV === 'development') {
+      userPermissions =
+        typeof decryptedPermissions === 'string' ? JSON.parse(decryptedPermissions) : decryptedPermissions
+    } else {
+      userPermissions = decryptedPermissions
+    }
+
+    return userPermissions
+  } catch (error) {
+    return []
+  }
+}
+
+/**
+ * Check if user has permission for the current route
+ */
+function hasRoutePermission(pathname: string, permissions: string[]): boolean {
+  const requiredPermission = getRequiredPermission(pathname)
+
+  if (!requiredPermission) {
+    // Route doesn't require specific permission
+    return true
+  }
+
+  return permissions.includes(requiredPermission)
+}
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
@@ -30,6 +70,19 @@ export async function proxy(req: NextRequest) {
   if (accessToken) {
     console.log('Proxy: Access token available')
 
+    // Check permission for the route
+    const permissions = await getPermissionsFromCookies(req)
+
+    if (!hasRoutePermission(pathname, permissions)) {
+      console.log('Proxy: User does not have permission for this route')
+
+      const forbiddenUrl = req.nextUrl.clone()
+
+      forbiddenUrl.pathname = '/erp' // or '/403' for a forbidden page
+
+      return NextResponse.redirect(forbiddenUrl)
+    }
+
     return NextResponse.next()
   }
 
@@ -40,7 +93,6 @@ export async function proxy(req: NextRequest) {
     try {
       const json = await AuthService.refreshToken(refreshToken)
 
-      // adapt to your API shape — previous code used response.data.access_token
       const payload = json.data || json
       const newAccess = payload.access_token
       const newRefresh = payload.refresh_token
@@ -50,10 +102,8 @@ export async function proxy(req: NextRequest) {
         throw new Error('No access token returned from refresh')
       }
 
-      // Set tokens on the NextResponse so subsequent requests include them
       const nextRes = NextResponse.next()
 
-      // Set cookie options appropriate for your app (httpOnly, secure, maxAge, path, sameSite...)
       nextRes.cookies.set({
         name: 'access_token',
         value: newAccess,
@@ -82,11 +132,23 @@ export async function proxy(req: NextRequest) {
 
       console.log('Proxy: Refreshing token successful')
 
+      // Check permission after token refresh
+      const permissions = await getPermissionsFromCookies(req)
+
+      if (!hasRoutePermission(pathname, permissions)) {
+        console.log('Proxy: User does not have permission for this route')
+
+        const forbiddenUrl = req.nextUrl.clone()
+
+        forbiddenUrl.pathname = '/erp'
+
+        return NextResponse.redirect(forbiddenUrl)
+      }
+
       return nextRes
     } catch (error) {
       console.log('Proxy: Failed to refresh token. Clearing cookies and redirecting to login...')
 
-      // Clear cookies using NextResponse and then redirect
       const loginUrl = req.nextUrl.clone()
 
       loginUrl.pathname = '/erp/login'
@@ -94,7 +156,6 @@ export async function proxy(req: NextRequest) {
 
       const redirectRes = NextResponse.redirect(loginUrl)
 
-      // Clear auth cookies
       redirectRes.cookies.delete('access_token')
       redirectRes.cookies.delete('refresh_token')
       redirectRes.cookies.delete('token_type')
@@ -103,7 +164,6 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  // fallback: redirect to login
   console.log('Proxy: Failed to authorized...... Logging out...........')
   const loginUrl = req.nextUrl.clone()
 
