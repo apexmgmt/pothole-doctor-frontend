@@ -14,7 +14,7 @@ export const PERMISSION_BASED_ROUTES: Record<string, string> = {
 
   // Staffs routes
   '/erp/staffs': 'Manage Staff',
-  '/erp/staffs/create': 'Create staff', // TODO: need to fix that permission spelling on backend
+  '/erp/staffs/create': 'Create Staff',
   '/erp/staffs/[id]/edit': 'Update Staff',
 
   // Roles routes

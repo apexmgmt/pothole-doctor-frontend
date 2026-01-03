@@ -47,7 +47,7 @@ const Staffs: React.FC = () => {
   // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Create staff').then(result => setCanCreateStaff(result)) // TODO: update the permission if this Create Staff permission update for spelling mistake
+    hasPermission('Create Staff').then(result => setCanCreateStaff(result)) 
     hasPermission('Update Staff').then(result => setCanEditStaff(result))
     hasPermission('View Staff').then(result => setCanViewStaff(result))
     hasPermission('Delete Staff').then(result => setCanDeleteStaff(result))
