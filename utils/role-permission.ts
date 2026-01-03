@@ -31,6 +31,33 @@ export const getPermissions = async (): Promise<string[]> => {
 }
 
 /**
+ * @name getRoles
+ * @description Retrieve and decrypt user roles from cookies
+ * @returns string[]
+ */
+export const getRoles = async (): Promise<string[]> => {
+  const encryptedRoles = await CookieService.get('roles')
+
+  if (!encryptedRoles) return []
+
+  try {
+    const decryptedRoles = decryptData(encryptedRoles)
+    let userRoles: string[] = []
+
+    if (process.env.NODE_ENV === 'development') {
+      // In development, the data might already be an object or a JSON string
+      userRoles = typeof decryptedRoles === 'string' ? JSON.parse(decryptedRoles) : decryptedRoles
+    } else {
+      userRoles = decryptedRoles
+    }
+
+    return userRoles
+  } catch (error) {
+    return []
+  }
+}
+
+/**
  * @name hasPermission
  * @description Check if the user has a specific permission
  * @param permission string
@@ -40,6 +67,18 @@ export const hasPermission = async (permission: string): Promise<boolean> => {
   const permissions = await getPermissions()
 
   return permissions.includes(permission)
+}
+
+/**
+ * @name hasRole
+ * @description Check if the user has a specific role
+ * @param role string
+ * @returns boolean
+ */
+export const hasRole = async (role: string): Promise<boolean> => {
+  const roles = await getRoles()
+
+  return roles.includes(role)
 }
 
 /**
