@@ -18,32 +18,19 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { logoutUserSuccess } from '@/lib/features/auth/authSlice'
 import AuthService from '@/services/api/auth.service'
-
-interface FallbackUser {
-  id?: string
-  name?: string
-  email?: string
-  first_name?: string
-  last_name?: string
-  profile_picture?: string | null
-  userable?: {
-    profile_picture?: string | null
-    [k: string]: unknown
-  }
-  [k: string]: unknown
-}
+import { User } from '@/types'
 
 interface SidebarFooterProps {
-  user?: FallbackUser
+  user?: User | null
 }
 
 const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const reduxUser = useAppSelector(state => state.auth.user) as FallbackUser | null
+  const reduxUser = useAppSelector(state => state.auth.user) as User | null
   const [open, setOpen] = useState(false)
 
-  const cookieUser: FallbackUser | null = useMemo(() => {
+  const cookieUser: User | null = useMemo(() => {
     if (reduxUser || propUser) return null
     const raw = CookieService.get('user')
 
@@ -53,10 +40,10 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
       const decrypted = decryptData(raw)
 
       if (typeof decrypted === 'string') {
-        return JSON.parse(decrypted) as FallbackUser
+        return JSON.parse(decrypted) as User
       }
 
-      return decrypted as FallbackUser
+      return decrypted as User
     } catch {
       return null
     }
