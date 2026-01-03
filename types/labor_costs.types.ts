@@ -4,6 +4,7 @@ import { Unit } from './units.types'
 export interface LaborCostsProps {
   serviceTypes: ServiceType[]
   units: Unit[]
+  isFromModal?: boolean
 }
 export interface LaborCost {
   id: string

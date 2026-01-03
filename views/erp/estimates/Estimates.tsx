@@ -19,10 +19,11 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import EstimateService from '@/services/api/estimates.service'
+import EstimateService from '@/services/api/estimates/estimates.service'
 import { Badge } from '@/components/ui/badge'
 import { formatDate } from '@/utils/date'
 import CreateOrEditEstimateModal from './CreateOrEditEstimateModal'
+import ViewButton from '@/components/erp/common/buttons/ViewButton'
 
 const Estimates: React.FC<{
   serviceTypes: ServiceType[]
@@ -136,16 +137,10 @@ const Estimates: React.FC<{
   // Column definitions for CommonTable
   const columns: Column[] = [
     {
-      id: 'index',
-      header: '#',
-      cell: (row, rowIndex) => {
-        // Calculate the absolute index based on pagination
-        const from = apiResponse?.from || 1
-
-        return <span className='text-gray'>{from + (rowIndex || 0)}</span>
-      },
+      id: 'estimate_number',
+      header: 'Estimate#',
+      cell: (row) => <span className='font-medium'>{row.estimate_number?.toString().padStart(6, '0')}</span>,
       sortable: false,
-      size: 16
     },
     {
       id: 'title',
@@ -208,6 +203,11 @@ const Estimates: React.FC<{
         <div className='flex items-center justify-center gap-2'>
           <ThreeDotButton
             buttons={[
+              <ViewButton
+                tooltip='View Estimate Details'
+                link={`/erp/estimates/${row.id}`}
+                variant='text'
+              />,
               <EditButton
                 tooltip='Edit Estimate Information'
                 onClick={() => handleOpenEditModal(row.id)}

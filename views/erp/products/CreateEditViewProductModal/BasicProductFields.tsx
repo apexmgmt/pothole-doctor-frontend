@@ -91,9 +91,13 @@ export function BasicProductFields({
       <FormField
         control={form.control}
         name='service_type_id'
+        rules={{ 
+          required: 'Service type is required',
+          validate: (value) => (value && value.length > 0) || 'At least one service type must be selected'
+         }}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Associated Services</FormLabel>
+            <FormLabel>Associated Services <span className='text-red-500'>*</span></FormLabel>
             <FormControl>
               <MultiSelect
                 options={serviceTypes.map(st => ({

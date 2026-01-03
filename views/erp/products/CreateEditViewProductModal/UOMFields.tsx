@@ -128,7 +128,16 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
             rules={{ required: 'Unit is required' }}
             render={({ field }) => (
               <FormItem>
-                <Select onValueChange={field.onChange} value={field.value} disabled={disabled}>
+                <Select
+                  onValueChange={value => {
+                    // Find the full unit object and pass it
+                    const selectedUnit = uomUnits.find(unit => unit.id === value)
+
+                    field.onChange(selectedUnit)
+                  }}
+                  value={field.value?.id || ''}
+                  disabled={disabled}
+                >
                   <FormControl>
                     <SelectTrigger className='w-full'>
                       <SelectValue placeholder='Select Unit' />
@@ -136,7 +145,7 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
                   </FormControl>
                   <SelectContent>
                     {uomUnits.map(unit => (
-                      <SelectItem key={unit.id} value={unit.id.toString()}>
+                      <SelectItem key={unit.id} value={unit.id}>
                         {unit.name}
                       </SelectItem>
                     ))}

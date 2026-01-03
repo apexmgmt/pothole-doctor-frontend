@@ -46,9 +46,15 @@ export default class ClientService {
         throw new Error(errorData.message || 'Failed to create client')
       }
 
-      await revalidate(`clients${type ? `-${type}` : ''}`)
-      await revalidate(`clients-all${type ? `-${type}` : ''}`)
+      // Revalidate generic tags
+      await revalidate('clients')
       await revalidate('clients-all')
+
+      // Revalidate type-specific tags if type is provided
+      if (type) {
+        await revalidate(`clients-${type}`)
+        await revalidate(`clients-all-${type}`)
+      }
 
       return await response.json()
     } catch (error) {
@@ -96,10 +102,16 @@ export default class ClientService {
         throw new Error(errorData.message || 'Failed to update client')
       }
 
-      await revalidate(`clients${type ? `-${type}` : ''}`)
-      await revalidate(`clients/${clientId}`)
-      await revalidate(`clients-all${type ? `-${type}` : ''}`)
+      // Revalidate generic tags
+      await revalidate('clients')
       await revalidate('clients-all')
+      await revalidate(`clients/${clientId}`)
+
+      // Revalidate type-specific tags if type is provided
+      if (type) {
+        await revalidate(`clients-${type}`)
+        await revalidate(`clients-all-${type}`)
+      }
 
       return await response.json()
     } catch (error) {
@@ -169,7 +181,9 @@ export default class ClientService {
       const response = await apiInterceptor(apiUrl + CLIENTS_ALL + (type ? `?type=${type}` : ''), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: [`clients-all${type ? `-${type}` : ''}`] } // Cache for 1 hour
+        cache: 'no-store'
+
+        // next: { revalidate: 3600, tags: [`clients-all${type ? `-${type}` : ''}`] } // Cache for 1 hour
       })
 
       if (!response.ok) {

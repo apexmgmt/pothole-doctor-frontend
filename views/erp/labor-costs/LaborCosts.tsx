@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, LaborCost, LaborCostsProps, ServiceType } from '@/types'
+import { Column, DataTableApiResponse, LaborCost, LaborCostsProps, ServiceType, Unit } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -21,12 +21,19 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import LaborCostService from '@/services/api/labor_costs.service'
 import CreateOrEditLaborCostModal from './CreateOrEditLaborCostModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
 
-const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
+const LaborCosts: React.FC<{
+  serviceTypes: ServiceType[]
+  units: Unit[]
+  isFromModal?: boolean
+  selectedRows?: LaborCost[]
+  setSelectedRows?: React.Dispatch<React.SetStateAction<LaborCost[]>>
+}> = ({ serviceTypes, units, isFromModal = false, selectedRows, setSelectedRows }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
-
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedLaborCostId, setSelectedLaborCostId] = useState<string | null>(null)
@@ -89,27 +96,10 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
   useEffect(() => {
     fetchData()
     updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Labor Costs'))
-  }, [filterOptions])
 
-  // Transform API data to match table format
-  const laborCostsData = apiResponse?.data
-    ? apiResponse.data.map((laborCost: LaborCost, index: number) => {
-        return {
-          id: laborCost.id,
-          index: (apiResponse?.from || 1) + index,
-          name: laborCost.name,
-          description: laborCost.description,
-          cost: laborCost.cost,
-          price: laborCost.price,
-          margin: laborCost.margin,
-          service_type_id: laborCost.service_type_id,
-          service_type: laborCost?.service_type ? laborCost?.service_type?.name : '',
-          unit_id: laborCost.unit_id,
-          unit: laborCost?.unit ? laborCost?.unit?.name : ''
-        }
-      })
-    : []
+    // set the page title only if the view from page
+    if (!isFromModal) dispatch(setPageTitle('Manage Labor Costs'))
+  }, [filterOptions])
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
@@ -144,61 +134,113 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
     handleModalClose()
   }
 
+  const handleServiceTypeChange = (value: string) => {
+    setFilterOptions((prev: any) => {
+      const newOptions = { ...prev }
+
+      if (value === 'all') {
+        delete newOptions.service_type_id
+      } else {
+        newOptions.service_type_id = value
+      }
+
+      // Optionally reset page on filter change
+      if (newOptions.page) delete newOptions.page
+
+      return newOptions
+    })
+  }
+
   // Column definitions for CommonTable
   const columns: Column[] = [
-    {
-      id: 'index',
-      header: '#',
-      cell: row => <span className='text-gray'>{row.index}</span>,
-      sortable: false,
-      size: 16
-    },
+    ...(isFromModal
+      ? [
+          {
+            id: 'select',
+            header: '',
+            cell: (row: LaborCost) => (
+              <Checkbox
+                checked={selectedRows?.some((r: LaborCost) => r.id === row.id)}
+                onCheckedChange={checked => {
+                  setSelectedRows?.((prev: LaborCost[]) => {
+                    if (checked) {
+                      // Add if not already present
+                      if (!prev.some(r => r.id === row.id)) return [...prev, row]
+
+                      return prev
+                    } else {
+                      // Remove
+                      return prev.filter(r => r.id !== row.id)
+                    }
+                  })
+                }}
+              />
+            ),
+            sortable: false,
+            size: 16
+          }
+        ]
+      : [
+          {
+            id: 'index',
+            header: '#',
+            cell: (row: LaborCost, rowIndex: number | undefined) => {
+              // Calculate the absolute index based on pagination
+              const from = apiResponse?.from || 1
+
+              return <span className='text-gray'>{from + (rowIndex || 0)}</span>
+            },
+            sortable: false,
+            size: 16
+          }
+        ]),
+
     {
       id: 'service_type',
       header: 'Service Type',
-      cell: row => <span className='font-medium'>{row.service_type}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row?.service_type?.name || ''}</span>,
       sortable: true
     },
     {
       id: 'name',
       header: 'Labor Name',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row.name}</span>,
       sortable: true
     },
     {
       id: 'description',
       header: 'Description',
-      cell: row => <span className='font-medium'>{row.description}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row.description}</span>,
       sortable: true
     },
     {
       id: 'cost',
       header: 'Cost',
-      cell: row => <span className='font-medium'>{row.cost}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row.cost}</span>,
       sortable: true
     },
     {
       id: 'margin',
       header: 'Margin',
-      cell: row => <span className='font-medium'>{row.margin}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row.margin}</span>,
       sortable: true
     },
     {
       id: 'price',
       header: 'Labor Price',
-      cell: row => <span className='font-medium'>{row.price}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row.price}</span>,
       sortable: true
     },
     {
       id: 'unit',
       header: 'Per',
-      cell: row => <span className='font-medium'>{row.unit}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row?.unit?.name || ''}</span>,
       sortable: true
     },
     {
       id: 'actions',
       header: 'Action',
-      cell: row => (
+      cell: (row: LaborCost) => (
         <>
           <ThreeDotButton
             buttons={[
@@ -249,19 +291,45 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='w-80'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+        {/* Global search filter */}
+        <div className='flex flex-col'>
+          <label htmlFor='product-search' className='text-xs font-medium mb-1 text-muted-foreground'>
+            Search
+          </label>
+          <InputGroup>
+            <InputGroupInput
+              id='product-search'
+              placeholder='Search...'
+              value={searchValue}
+              onChange={e => setSearchValue(e.target.value)}
+              className='w-80'
+            />
+            <InputGroupAddon>
+              <Search />
+            </InputGroupAddon>
+          </InputGroup>
+        </div>
+        {/* Service type filter */}
+        <div className='flex flex-col'>
+          <label htmlFor='service-type-filter' className='text-xs font-medium mb-1 text-muted-foreground'>
+            Service Type
+          </label>
+          <Select value={filterOptions.service_type_id || 'all'} onValueChange={handleServiceTypeChange}>
+            <SelectTrigger id='service-type-filter' className='w-72'>
+              <SelectValue placeholder='All' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='all'>All</SelectItem>
+              {serviceTypes.map(st => (
+                <SelectItem key={st.id} value={st.id}>
+                  {st.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light mt-5'>
             Clear
           </Button>
         )}
@@ -269,7 +337,7 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
       <Button
         variant='default'
         size='sm'
-        className='bg-light text-bg hover:bg-light/90'
+        className='bg-light text-bg hover:bg-light/90 mt-5'
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
@@ -283,7 +351,7 @@ const LaborCosts: React.FC<LaborCostsProps> = ({ serviceTypes, units }) => {
       <CommonLayout title='Labor Costs' noTabs={true}>
         <CommonTable
           data={{
-            data: laborCostsData,
+            data: apiResponse?.data || [],
             per_page: apiResponse?.per_page || 10,
             total: apiResponse?.total || 0,
             from: apiResponse?.from || 1,

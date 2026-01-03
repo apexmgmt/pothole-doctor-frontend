@@ -98,6 +98,9 @@ export interface ProductsProps {
   uomUnits: Unit[]
   vendors: Vendor[]
   serviceTypes: ServiceType[]
+  isFromModal?: boolean
+  selectedRows?: Product[]
+  setSelectedRows?: React.Dispatch<React.SetStateAction<Product[]>>
 }
 
 export interface ProductGallery {

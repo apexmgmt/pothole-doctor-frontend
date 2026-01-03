@@ -1,5 +1,5 @@
 import { getApiUrl } from '@/utils/utility'
-import apiInterceptor from './api.interceptor'
+import apiInterceptor from '../api.interceptor'
 import { ESTIMATES_ALL, ESTIMATES } from '@/constants/api'
 import { EstimatePayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
