@@ -23,7 +23,7 @@ import ServiceTypeSection from './ServiceTypeSection'
 import { Textarea } from '@/components/ui/textarea'
 import ProposalService from '@/services/api/estimates/proposals.service'
 import { toast } from 'sonner'
-import { getDiscountedUnitPrice } from '@/utils/business_calculation'
+import { getDiscountedUnitPrice } from '@/utils/business-calculation'
 
 const CreateOrEditProposalModal = ({
   open,

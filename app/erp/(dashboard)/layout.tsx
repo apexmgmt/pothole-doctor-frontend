@@ -5,7 +5,7 @@ import { decryptData } from '@/utils/encryption'
 import CookieService from '@/services/app/cookie.service'
 import { CheckAuthProvider } from '@/hocs/CheckAuthProvider'
 import { getAuthUser } from '@/utils/auth'
-import { getPermissions } from '@/utils/role_permission'
+import { getPermissions } from '@/utils/role-permission'
 
 const Layout = async ({ children }: ReactNode) => {
   const user = await getAuthUser()
