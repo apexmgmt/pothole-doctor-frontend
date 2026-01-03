@@ -24,6 +24,7 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { hasPermission } from '@/utils/role-permission'
 
 interface CompanyData {
   id: string
@@ -63,6 +64,9 @@ const Organizations: React.FC = () => {
   const [selectedCompany, setSelectedCompany] = useState<object | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [statusLoading, setStatusLoading] = useState<{ [key: string]: boolean }>({})
+  const [canCreateCompany, setCanCreateCompany] = useState<boolean>(false)
+  const [canViewCompany, setCanViewCompany] = useState<boolean>(false)
+  const [canEditCompany, setCanEditCompany] = useState<boolean>(false)
 
   // Initialize filterOptions from URL params
   const getInitialFilters = () => {
@@ -82,9 +86,14 @@ const Organizations: React.FC = () => {
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters())
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // check permissions
+    hasPermission('Create Company').then(result => setCanCreateCompany(result))
+    hasPermission('View Company').then(result => setCanViewCompany(result))
+    hasPermission('Update Company').then(result => setCanEditCompany(result))
   }, [])
 
   // Debounced search update
@@ -226,11 +235,21 @@ const Organizations: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton tooltip='Edit Company Information' link={`/erp/companies/${row.id}/edit`} variant='text' />
-            ]}
-          />
+          {canEditCompany && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditCompany
+                  ? [
+                      <EditButton
+                        tooltip='Edit Company Information'
+                        link={`/erp/companies/${row.id}/edit`}
+                        variant='text'
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false
@@ -246,14 +265,16 @@ const Organizations: React.FC = () => {
   const handleRowSelect = (company: any) => {
     setSelectedCompanyId(company?.id || null)
 
-    OrganizationService.show(company?.id)
-      .then(response => {
-        setSelectedCompany(response.data)
-      })
-      .catch(error => {
-        setSelectedCompany(null)
-        console.error('Error fetching company details:', error)
-      })
+    if (canViewCompany) {
+      OrganizationService.show(company?.id)
+        .then(response => {
+          setSelectedCompany(response.data)
+        })
+        .catch(error => {
+          setSelectedCompany(null)
+          console.error('Error fetching company details:', error)
+        })
+    }
   }
 
   // Check if filters are active (excluding pagination)
@@ -284,12 +305,14 @@ const Organizations: React.FC = () => {
           </Button>
         )}
       </div>
-      <Link href='/erp/companies/create'>
-        <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
-          <PlusIcon className='w-4 h-4' />
-          Add Company
-        </Button>
-      </Link>
+      {canCreateCompany && (
+        <Link href='/erp/companies/create'>
+          <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
+            <PlusIcon className='w-4 h-4' />
+            Add Company
+          </Button>
+        </Link>
+      )}
     </div>
   )
 
@@ -301,13 +324,17 @@ const Organizations: React.FC = () => {
       onClick: () => setActiveTab('companies'),
       isActive: activeTab === 'companies'
     },
-    {
-      label: 'Details',
-      icon: DetailsIcon,
-      onClick: () => setActiveTab('details'),
-      isActive: activeTab === 'details',
-      disabled: !selectedCompanyId
-    }
+    ...(canViewCompany
+      ? [
+          {
+            label: 'Details',
+            icon: DetailsIcon,
+            onClick: () => setActiveTab('details'),
+            isActive: activeTab === 'details',
+            disabled: !selectedCompanyId
+          }
+        ]
+      : [])
   ]
 
   const handleStatusToggle = async (companyId: string) => {
