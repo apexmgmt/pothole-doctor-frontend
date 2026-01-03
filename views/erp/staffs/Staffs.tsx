@@ -24,6 +24,8 @@ import StaffDetails from './StaffDetails'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { getInitialFilters } from '@/utils/utility'
+import { hasPermission } from '@/utils/role-permission'
 
 const Staffs: React.FC = () => {
   const router = useRouter()
@@ -36,28 +38,19 @@ const Staffs: React.FC = () => {
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null)
   const [selectedStaff, setSelectedStaff] = useState<object | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
+  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateStaff, setCanCreateStaff] = useState<boolean>(false)
+  const [canEditStaff, setCanEditStaff] = useState<boolean>(false)
+  const [canViewStaff, setCanViewStaff] = useState<boolean>(false)
+  const [canDeleteStaff, setCanDeleteStaff] = useState<boolean>(false)
 
-  // Initialize filterOptions from URL params
-  const getInitialFilters = () => {
-    const filters: any = {}
-
-    searchParams.forEach((value, key) => {
-      // Convert numeric values
-      if (key === 'page' || key === 'per_page') {
-        filters[key] = parseInt(value)
-      } else {
-        filters[key] = value
-      }
-    })
-
-    return filters
-  }
-
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters())
-
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    hasPermission('Create staff').then(result => setCanCreateStaff(result)) // TODO: update the permission if this Create Staff permission update for spelling mistake
+    hasPermission('Update Staff').then(result => setCanEditStaff(result))
+    hasPermission('View Staff').then(result => setCanViewStaff(result))
+    hasPermission('Delete Staff').then(result => setCanDeleteStaff(result))
   }, [])
 
   // Debounced search update
@@ -187,12 +180,18 @@ const Staffs: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton tooltip='Edit Staff Information' link={`/erp/staffs/${row.id}/edit`} variant='text' />,
-              <DeleteButton tooltip='Delete Staff' variant='text' onClick={() => handleDeleteStaff(row.id)} />
-            ]}
-          />
+          {(canEditStaff || canDeleteStaff) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditStaff
+                  ? [<EditButton tooltip='Edit Staff Information' link={`/erp/staffs/${row.id}/edit`} variant='text' />]
+                  : []),
+                ...(canDeleteStaff
+                  ? [<DeleteButton tooltip='Delete Staff' variant='text' onClick={() => handleDeleteStaff(row.id)} />]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false
@@ -222,14 +221,16 @@ const Staffs: React.FC = () => {
   const handleRowSelect = (staff: any) => {
     setSelectedStaffId(staff?.id || null)
 
-    StaffService.show(staff?.id)
-      .then(response => {
-        setSelectedStaff(response.data)
-      })
-      .catch(error => {
-        setSelectedStaff(null)
-        console.error('Error fetching staff details:', error)
-      })
+    if (canCreateStaff) {
+      StaffService.show(staff?.id)
+        .then(response => {
+          setSelectedStaff(response.data)
+        })
+        .catch(error => {
+          setSelectedStaff(null)
+          console.error('Error fetching staff details:', error)
+        })
+    }
   }
 
   // Check if filters are active (excluding pagination)
@@ -260,12 +261,14 @@ const Staffs: React.FC = () => {
           </Button>
         )}
       </div>
-      <Link href='/erp/staffs/create'>
-        <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
-          <PlusIcon className='w-4 h-4' />
-          Add Staff
-        </Button>
-      </Link>
+      {canCreateStaff && (
+        <Link href='/erp/staffs/create'>
+          <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
+            <PlusIcon className='w-4 h-4' />
+            Add Staff
+          </Button>
+        </Link>
+      )}
     </div>
   )
 
@@ -277,13 +280,17 @@ const Staffs: React.FC = () => {
       onClick: () => setActiveTab('staffs'),
       isActive: activeTab === 'staffs'
     },
-    {
-      label: 'Details',
-      icon: DetailsIcon,
-      onClick: () => setActiveTab('details'),
-      isActive: activeTab === 'details',
-      disabled: !selectedStaffId
-    }
+    ...(canViewStaff
+      ? [
+          {
+            label: 'Details',
+            icon: DetailsIcon,
+            onClick: () => setActiveTab('details'),
+            isActive: activeTab === 'details',
+            disabled: !selectedStaffId
+          }
+        ]
+      : [])
   ]
 
   return (
@@ -311,7 +318,12 @@ const Staffs: React.FC = () => {
       )}
 
       {activeTab === 'details' && (
-        <StaffDetails staffData={selectedStaff} setStaffData={setSelectedStaff} fetchData={fetchData} />
+        <StaffDetails
+          staffData={selectedStaff}
+          setStaffData={setSelectedStaff}
+          fetchData={fetchData}
+          canEditStaff={canEditStaff}
+        />
       )}
     </CommonLayout>
   )
