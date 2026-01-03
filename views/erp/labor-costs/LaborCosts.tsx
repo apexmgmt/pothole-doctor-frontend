@@ -23,6 +23,7 @@ import CreateOrEditLaborCostModal from './CreateOrEditLaborCostModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
+import { hasPermission } from '@/utils/role-permission'
 
 const LaborCosts: React.FC<{
   serviceTypes: ServiceType[]
@@ -43,10 +44,18 @@ const LaborCosts: React.FC<{
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateLaborCost, setCanCreateLaborCost] = useState<boolean>(false)
+  const [canEditLaborCost, setCanEditLaborCost] = useState<boolean>(false)
+  const [canDeleteLaborCost, setCanDeleteLaborCost] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create Labor Cost').then(result => setCanCreateLaborCost(result))
+    hasPermission('Update Labor Cost').then(result => setCanEditLaborCost(result))
+    hasPermission('Delete Labor Cost').then(result => setCanDeleteLaborCost(result))
   }, [])
 
   // Debounced search update
@@ -242,16 +251,30 @@ const LaborCosts: React.FC<{
       header: 'Action',
       cell: (row: LaborCost) => (
         <>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit Labor Cost Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton tooltip='Delete Labor Cost' variant='text' onClick={() => handleDeleteLaborCost(row.id)} />
-            ]}
-          />
+          {(canEditLaborCost || canDeleteLaborCost) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditLaborCost
+                  ? [
+                      <EditButton
+                        tooltip='Edit Labor Cost Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteLaborCost
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Labor Cost'
+                        variant='text'
+                        onClick={() => handleDeleteLaborCost(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </>
       ),
       sortable: false,
