@@ -23,6 +23,8 @@ import BusinessLocationService from '@/services/api/locations/business_location.
 import { DetailsIcon, InvoiceIcon, LocationIcon, UserIcon } from '@/public/icons'
 import BusinessLocationDetails from './BusinessLocationDetails'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { getInitialFilters } from '@/utils/utility'
+import { hasPermission } from '@/utils/role-permission'
 
 const BusinessLocations: React.FC = () => {
   const router = useRouter()
@@ -37,27 +39,27 @@ const BusinessLocations: React.FC = () => {
   const [selectedBusinessLocation, setSelectedBusinessLocation] = useState<any | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
 
-  // Initialize filterOptions from URL params
-  const getInitialFilters = () => {
-    const filters: any = {}
+  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateLocation, setCanCreateLocation] = useState<boolean>(false)
+  const [canEditLocation, setCanEditLocation] = useState<boolean>(false)
+  const [canDeleteLocation, setCanDeleteLocation] = useState<boolean>(false)
+  const [canViewLocation, setCanViewLocation] = useState<boolean>(false)
+  const [canManageWarehouse, setCanManageWarehouse] = useState<boolean>(false)
+  const [canManageStaff, setCanManageStaff] = useState<boolean>(false)
+  const [canManageEstimate, setCanManageEstimate] = useState<boolean>(false)
 
-    searchParams.forEach((value, key) => {
-      // Convert numeric values
-      if (key === 'page' || key === 'per_page') {
-        filters[key] = parseInt(value)
-      } else {
-        filters[key] = value
-      }
-    })
-
-    return filters
-  }
-
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters())
-
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create Location').then(result => setCanCreateLocation(result))
+    hasPermission('Update Location').then(result => setCanEditLocation(result))
+    hasPermission('Delete Location').then(result => setCanDeleteLocation(result))
+    hasPermission('View Location').then(result => setCanViewLocation(result))
+    hasPermission('Manage Warehouse').then(result => setCanManageWarehouse(result))
+    hasPermission('Manage Staff').then(result => setCanManageStaff(result))
+    hasPermission('Manage Estimate').then(result => setCanManageEstimate(result))
   }, [])
 
   // Debounced search update
@@ -185,20 +187,30 @@ const BusinessLocations: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit Business Location Information'
-                link={`/erp/locations/businesses/${row.id}/edit`}
-                variant='text'
-              />,
-              <DeleteButton
-                tooltip='Delete Business L'
-                variant='text'
-                onClick={() => handleDeleteBusinessLocation(row.id)}
-              />
-            ]}
-          />
+          {(canEditLocation || canDeleteLocation) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditLocation
+                  ? [
+                      <EditButton
+                        tooltip='Edit Business Location Information'
+                        link={`/erp/locations/businesses/${row.id}/edit`}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteLocation
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Business Location'
+                        variant='text'
+                        onClick={() => handleDeleteBusinessLocation(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -285,13 +297,17 @@ const BusinessLocations: React.FC = () => {
     //   isActive: activeTab === 'details',
     //   disabled: !selectedBusinessLocationId
     // },
-    {
-      label: 'Employees',
-      icon: DetailsIcon,
-      onClick: () => setActiveTab('employees'),
-      isActive: activeTab === 'employees',
-      disabled: !selectedBusinessLocationId
-    },
+    ...(canManageStaff
+      ? [
+          {
+            label: 'Employees',
+            icon: DetailsIcon,
+            onClick: () => setActiveTab('employees'),
+            isActive: activeTab === 'employees',
+            disabled: !selectedBusinessLocationId
+          }
+        ]
+      : []),
     {
       label: 'Customers',
       icon: DetailsIcon,
@@ -299,13 +315,17 @@ const BusinessLocations: React.FC = () => {
       isActive: activeTab === 'customers',
       disabled: !selectedBusinessLocationId
     },
-    {
-      label: 'Quotes',
-      icon: DetailsIcon,
-      onClick: () => setActiveTab('quotes'),
-      isActive: activeTab === 'quotes',
-      disabled: !selectedBusinessLocationId
-    },
+    ...(canManageEstimate
+      ? [
+          {
+            label: 'Estimates',
+            icon: DetailsIcon,
+            onClick: () => setActiveTab('estimates'),
+            isActive: activeTab === 'estimates',
+            disabled: !selectedBusinessLocationId
+          }
+        ]
+      : []),
     {
       label: 'Invoice',
       icon: DetailsIcon,
@@ -313,13 +333,17 @@ const BusinessLocations: React.FC = () => {
       isActive: activeTab === 'invoice',
       disabled: !selectedBusinessLocationId
     },
-    {
-      label: 'Warehouses',
-      icon: DetailsIcon,
-      onClick: () => setActiveTab('warehouses'),
-      isActive: activeTab === 'warehouses',
-      disabled: !selectedBusinessLocationId
-    }
+    ...(canManageWarehouse
+      ? [
+          {
+            label: 'Warehouses',
+            icon: DetailsIcon,
+            onClick: () => setActiveTab('warehouses'),
+            isActive: activeTab === 'warehouses',
+            disabled: !selectedBusinessLocationId
+          }
+        ]
+      : [])
   ]
 
   return (
