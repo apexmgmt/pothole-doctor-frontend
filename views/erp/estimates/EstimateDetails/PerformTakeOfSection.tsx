@@ -370,7 +370,7 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
               </GoogleMap>
 
               {/* Drawing Controls Overlay */}
-              <div className='absolute top-4 left-4 bg-zinc-900/95 backdrop-blur-sm border border-zinc-800 rounded-lg p-3 space-y-3'>
+              <div className='absolute top-12 left-2 bg-zinc-900/95 backdrop-blur-sm border border-zinc-800 rounded-lg p-3 space-y-3'>
                 <div className='space-y-2'>
                   <p className='text-xs text-zinc-400 font-medium'>Drawing Tools</p>
                   <Button
