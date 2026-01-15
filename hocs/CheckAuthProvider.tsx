@@ -34,23 +34,19 @@ export const CheckAuthProvider = ({ children }: CheckAuthProviderProps) => {
         const accessToken = CookieService.get('access_token')
 
         if (!accessToken) {
-          console.log('CheckAuthProvider: No access token available')
           dispatch(setRefreshData(false))
 
           return
         }
 
-        console.log('CheckAuthProvider: Fetching auth details')
         const response = await AuthService.getAuthDetails()
 
         dispatch(setUserData(response.data?.user))
-        await CookieService.store('user', JSON.stringify(encryptData(response?.data?.user)))
-        await CookieService.store('roles', JSON.stringify(encryptData(response?.data?.roles || [])))
-        await CookieService.store('permissions', JSON.stringify(encryptData(response?.data?.permissions || [])))
-        console.log('CheckAuthProvider: Auth details fetched successfully')
+        await CookieService.store('user', encryptData(response?.data?.user))
+        await CookieService.store('roles', encryptData(response?.data?.roles || []))
+        await CookieService.store('permissions', encryptData(response?.data?.permissions || []))
         dispatch(setRefreshData(false))
       } catch (error) {
-        console.error('CheckAuthProvider: Error fetching auth details:', error)
         dispatch(setRefreshData(false))
       }
     }
