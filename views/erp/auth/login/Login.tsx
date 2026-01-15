@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import { useForm, SubmitHandler } from 'react-hook-form'
 
@@ -21,6 +21,7 @@ type LoginForm = {
 
 const Login: React.FC = () => {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const dispatch = useAppDispatch()
 
   const {
@@ -50,8 +51,10 @@ const Login: React.FC = () => {
           CookieService.store('permissions', JSON.stringify(encryptData(response?.data?.permissions || [])))
           dispatch(setUserData(response?.data?.user))
 
-          // redirect to dashboard
-          router.push('/erp/')
+          // redirect to the original route or default to /erp/
+          const redirect = searchParams.get('redirect') || '/erp/'
+
+          router.push(redirect)
         })
         .catch(error => {
           setIsLoading(false)
@@ -95,7 +98,7 @@ const Login: React.FC = () => {
         />
 
         <div className='mt-4'>
-          <CustomButton type='submit' variant='primary' fullWidth className='!py-2' disabled={isLoading}>
+          <CustomButton type='submit' variant='primary' fullWidth className='py-2!' disabled={isLoading}>
             {isLoading ? 'Logging in...' : 'Login'}
           </CustomButton>
         </div>
