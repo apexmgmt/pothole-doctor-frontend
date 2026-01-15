@@ -19,6 +19,7 @@ import {
 import { logoutUserSuccess } from '@/lib/features/auth/authSlice'
 import AuthService from '@/services/api/auth.service'
 import { User } from '@/types'
+import { generateFileUrl } from '@/utils/utility'
 
 interface SidebarFooterProps {
   user?: User | null
@@ -56,7 +57,7 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
   const fullName = effectiveUser.name || [firstName, lastName].filter(Boolean).join(' ') || 'User'
 
   const email = effectiveUser.email || '---'
-  const avatar = effectiveUser.profile_picture || effectiveUser.userable?.profile_picture || '/images/avatar.webp'
+  const avatar = generateFileUrl(effectiveUser.profile_picture) || generateFileUrl(effectiveUser.userable?.profile_picture) || '/images/avatar.webp'
 
   const initials = fullName
     .split(' ')
