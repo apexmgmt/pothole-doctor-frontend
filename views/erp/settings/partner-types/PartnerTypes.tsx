@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, PartnerType, PaymentTerm, PaymentTermType } from '@/types'
+import { Column, DataTableApiResponse, PartnerType } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -22,6 +22,7 @@ import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import PartnerTypesService from '@/services/api/settings/partner_types.service'
 import CreateOrEditPartnerTypeModal from './CreateOrEditPartnerTypeModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { hasPermission } from '@/utils/role-permission'
 
 const PartnerTypes: React.FC = () => {
   const router = useRouter()
@@ -35,12 +36,27 @@ const PartnerTypes: React.FC = () => {
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-
+  const [canCreatePartnerType, setCanCreatePartnerType] = useState<boolean>(false)
+  const [canEditPartnerType, setCanEditPartnerType] = useState<boolean>(false)
+  const [canDeletePartnerType, setCanDeletePartnerType] = useState<boolean>(false)
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create Contractor Type').then(result => {
+      setCanCreatePartnerType(result)
+    })
+
+    hasPermission('Update Contractor Type').then(result => {
+      setCanEditPartnerType(result)
+    })
+
+    hasPermission('Delete Contractor Type').then(result => {
+      setCanDeletePartnerType(result)
+    })
   }, [])
 
   // Debounced search update
@@ -157,20 +173,30 @@ const PartnerTypes: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit Contractor Type Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton
-                tooltip='Delete Contractor Type'
-                variant='text'
-                onClick={() => handleDeletePartnerType(row.id)}
-              />
-            ]}
-          />
+          {(canEditPartnerType || canDeletePartnerType) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditPartnerType
+                  ? [
+                      <EditButton
+                        tooltip='Edit Contractor Type Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeletePartnerType
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Contractor Type'
+                        variant='text'
+                        onClick={() => handleDeletePartnerType(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -227,15 +253,17 @@ const PartnerTypes: React.FC = () => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Contractor Type
-      </Button>
+      {canCreatePartnerType && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Contractor Type
+        </Button>
+      )}
     </div>
   )
 

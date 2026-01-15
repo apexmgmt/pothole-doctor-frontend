@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, PartnerType, ProductCategory } from '@/types'
+import { Column, DataTableApiResponse, ProductCategory } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -21,6 +21,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import ProductCategoryService from '@/services/api/product_categories.service'
 import CreateOrEditProductCategoryModal from './CreateOrEditProductCategoryModal'
+import { hasPermission } from '@/utils/role-permission'
 
 const ProductCategories: React.FC = () => {
   const router = useRouter()
@@ -34,12 +35,17 @@ const ProductCategories: React.FC = () => {
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateCategory, setCanCreateCategory] = useState<boolean>(false)
+  const [canEditCategory, setCanEditCategory] = useState<boolean>(false)
+  const [canDeleteCategory, setCanDeleteCategory] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    hasPermission('Create Category').then(result => setCanCreateCategory(result))
+    hasPermission('Update Category').then(result => setCanEditCategory(result))
+    hasPermission('Delete Category').then(result => setCanDeleteCategory(result))
   }, [])
 
   // Debounced search update
@@ -156,20 +162,30 @@ const ProductCategories: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit Product Category Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton
-                tooltip='Delete Product Category'
-                variant='text'
-                onClick={() => handleDeleteProductCategory(row.id)}
-              />
-            ]}
-          />
+          {(canEditCategory || canDeleteCategory) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditCategory
+                  ? [
+                      <EditButton
+                        tooltip='Edit Product Category Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteCategory
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Product Category'
+                        variant='text'
+                        onClick={() => handleDeleteProductCategory(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -226,15 +242,17 @@ const ProductCategories: React.FC = () => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Product Category
-      </Button>
+      {canCreateCategory && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Product Category
+        </Button>
+      )}
     </div>
   )
 

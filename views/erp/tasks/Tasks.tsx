@@ -23,6 +23,7 @@ import TaskService from '@/services/api/tasks.service'
 import { formatDate } from '@/utils/date'
 import { Badge } from '@/components/ui/badge'
 import CreateOrEditTaskModal from './CreateOrEditTaskModal'
+import { hasPermission } from '@/utils/role-permission'
 
 const Tasks: React.FC<{
   staffs: Staff[]
@@ -44,10 +45,18 @@ const Tasks: React.FC<{
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateTask, setCanCreateTask] = useState<boolean>(false)
+  const [canEditTask, setCanEditTask] = useState<boolean>(false)
+  const [canDeleteTask, setCanDeleteTask] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create Task').then(result => setCanCreateTask(result))
+    hasPermission('Update Task').then(result => setCanEditTask(result))
+    hasPermission('Delete Task').then(result => setCanDeleteTask(result))
   }, [])
 
   // Debounced search update
@@ -243,12 +252,24 @@ const Tasks: React.FC<{
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton tooltip='Edit Task Information' onClick={() => handleOpenEditModal(row.id)} variant='text' />,
-              <DeleteButton tooltip='Delete Task' variant='text' onClick={() => handleDeleteTask(row.id)} />
-            ]}
-          />
+          {(canEditTask || canDeleteTask) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditTask
+                  ? [
+                      <EditButton
+                        tooltip='Edit Task Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteTask
+                  ? [<DeleteButton tooltip='Delete Task' variant='text' onClick={() => handleDeleteTask(row.id)} />]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -305,15 +326,17 @@ const Tasks: React.FC<{
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Task
-      </Button>
+      {canCreateTask && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Task
+        </Button>
+      )}
     </div>
   )
 

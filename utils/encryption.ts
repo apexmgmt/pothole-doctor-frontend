@@ -18,7 +18,7 @@ const NODE_ENV: string = process.env.NODE_ENV || 'production'
 export const encryptData = (data: any): string | any => {
   try {
     if (NODE_ENV === 'development') {
-      return data
+      return JSON.stringify(data)
     } else if (NODE_ENV === 'production') {
       const jsonData = JSON.stringify(data)
 

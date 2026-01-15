@@ -121,7 +121,8 @@ export const updateURL = (router: any, filters: any) => {
 }
 
 /**Generate fill url from full path */
-export const generateFileUrl = (fullPath: string) => {
+export const generateFileUrl = (fullPath: string | null | undefined) => {
+  if (!fullPath) return null
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
 
   return apiUrl + fullPath

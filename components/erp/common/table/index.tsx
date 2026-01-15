@@ -317,7 +317,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
       </div>
 
       {/* Pagination Section */}
-      {pagination && tableData.length > 0 && (
+      {pagination && tableData.length > 0 && total > 10 && (
         <Pagination
           total={total}
           from={from}

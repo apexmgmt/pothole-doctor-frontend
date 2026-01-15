@@ -21,6 +21,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import NoteTypeService from '@/services/api/settings/note_types.service'
 import CreateOrEditNoteTypeModal from './CreateOrEditNoteTypeModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { hasPermission } from '@/utils/role-permission'
 
 const NoteTypes: React.FC = () => {
   const router = useRouter()
@@ -34,12 +35,25 @@ const NoteTypes: React.FC = () => {
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-
+  const [canCreateNoteType, setCanCreateNoteType] = useState<boolean>(false)
+  const [canEditNoteType, setCanEditNoteType] = useState<boolean>(false)
+  const [canDeleteNoteType, setCanDeleteNoteType] = useState<boolean>(false)
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create Note Type').then(result => {
+      setCanCreateNoteType(result)
+    })
+    hasPermission('Update Note Type').then(result => {
+      setCanEditNoteType(result)
+    })
+    hasPermission('Delete Note Type').then(result => {
+      setCanDeleteNoteType(result)
+    })
   }, [])
 
   // Debounced search update
@@ -167,16 +181,26 @@ const NoteTypes: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit Note Type Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton tooltip='Delete Note Type' variant='text' onClick={() => handleDeleteNoteType(row.id)} />
-            ]}
-          />
+          {(canEditNoteType || canDeleteNoteType) && (
+            <ThreeDotButton
+              buttons={[
+                canEditNoteType && (
+                  <EditButton
+                    tooltip='Edit Note Type Information'
+                    onClick={() => handleOpenEditModal(row.id)}
+                    variant='text'
+                  />
+                ),
+                canDeleteNoteType && (
+                  <DeleteButton
+                    tooltip='Delete Note Type'
+                    variant='text'
+                    onClick={() => handleDeleteNoteType(row.id)}
+                  />
+                )
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -233,15 +257,17 @@ const NoteTypes: React.FC = () => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Note Type
-      </Button>
+      {canCreateNoteType && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Note Type
+        </Button>
+      )}
     </div>
   )
 

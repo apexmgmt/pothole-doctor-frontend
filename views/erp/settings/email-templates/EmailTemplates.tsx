@@ -14,12 +14,31 @@ import EditEmailTemplateDialog from './EditEmailTemplateDialog'
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { hasPermission } from '@/utils/role-permission'
 
 export default function EmailTemplates({ templates: initialTemplates }: { templates: EmailTemplate[] }) {
   const [templates, setTemplates] = useState(initialTemplates)
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+
+  // Message template permissions
+  const [canManageMessageTemplates, setCanManageMessageTemplates] = useState<boolean>(false)
+  const [canUpdateMessageTemplates, setCanUpdateMessageTemplates] = useState<boolean>(false)
+  const [canViewMessageTemplates, setCanViewMessageTemplates] = useState<boolean>(false)
   const router = useRouter()
+
+  useEffect(() => {
+    // Check permissions for message templates
+    hasPermission('Manage Message Template').then(result => {
+      setCanManageMessageTemplates(result)
+    })
+    hasPermission('Update Message Template').then(result => {
+      setCanUpdateMessageTemplates(result)
+    })
+    hasPermission('View Message Template').then(result => {
+      setCanViewMessageTemplates(result)
+    })
+  }, [])
 
   // Sync state with props when initialTemplates changes
   useEffect(() => {
@@ -82,7 +101,11 @@ export default function EmailTemplates({ templates: initialTemplates }: { templa
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className='px-6 pb-4'>
-                        <EmailTemplateCard template={template} onEdit={handleEdit} />
+                        <EmailTemplateCard
+                          template={template}
+                          canEditMessageTemplate={canUpdateMessageTemplates}
+                          onEdit={handleEdit}
+                        />
                       </AccordionContent>
                     </AccordionItem>
                   ))}
@@ -98,7 +121,11 @@ export default function EmailTemplates({ templates: initialTemplates }: { templa
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className='px-6 pb-4'>
-                        <EmailTemplateCard template={template} onEdit={handleEdit} />
+                        <EmailTemplateCard
+                          template={template}
+                          canEditMessageTemplate={canUpdateMessageTemplates}
+                          onEdit={handleEdit}
+                        />
                       </AccordionContent>
                     </AccordionItem>
                   ))}

@@ -17,12 +17,11 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import CityService from '@/services/api/locations/city.service'
-import CreateOrEditCityModal from '../../locations/cities/CreateOrEditCityModal'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import CreateOrEditPaymentTermModal from './CreateOrEditPaymentTermModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { hasPermission } from '@/utils/role-permission'
 
 const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ paymentTermTypes }) => {
   const router = useRouter()
@@ -38,10 +37,18 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreatePaymentTerm, setCanCreatePaymentTerm] = useState<boolean>(false)
+  const [canEditPaymentTerm, setCanEditPaymentTerm] = useState<boolean>(false)
+  const [canDeletePaymentTerm, setCanDeletePaymentTerm] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create Payment Term').then(result => setCanCreatePaymentTerm(result))
+    hasPermission('Update Payment Term').then(result => setCanEditPaymentTerm(result))
+    hasPermission('Delete Payment Term').then(result => setCanDeletePaymentTerm(result))
   }, [])
 
   // Debounced search update
@@ -182,20 +189,30 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit Payment Term Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton
-                tooltip='Delete Payment Term'
-                variant='text'
-                onClick={() => handleDeletePaymentTerm(row.id)}
-              />
-            ]}
-          />
+          {(canEditPaymentTerm || canDeletePaymentTerm) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditPaymentTerm
+                  ? [
+                      <EditButton
+                        tooltip='Edit Payment Term Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeletePaymentTerm
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Payment Term'
+                        variant='text'
+                        onClick={() => handleDeletePaymentTerm(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -252,15 +269,17 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Payment Term
-      </Button>
+      {canCreatePaymentTerm && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Payment Term
+        </Button>
+      )}
     </div>
   )
 

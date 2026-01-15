@@ -19,10 +19,12 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import EstimateService from '@/services/api/estimates.service'
+import EstimateService from '@/services/api/estimates/estimates.service'
 import { Badge } from '@/components/ui/badge'
 import { formatDate } from '@/utils/date'
 import CreateOrEditEstimateModal from './CreateOrEditEstimateModal'
+import ViewButton from '@/components/erp/common/buttons/ViewButton'
+import { hasPermission } from '@/utils/role-permission'
 
 const Estimates: React.FC<{
   serviceTypes: ServiceType[]
@@ -42,12 +44,19 @@ const Estimates: React.FC<{
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateEstimate, setCanCreateEstimate] = useState<boolean>(false)
+  const [canEditEstimate, setCanEditEstimate] = useState<boolean>(false)
+  const [canDeleteEstimate, setCanDeleteEstimate] = useState<boolean>(false)
+  const [canViewEstimate, setCanViewEstimate] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    hasPermission('Create Estimate').then(result => setCanCreateEstimate(result))
+    hasPermission('Update Estimate').then(result => setCanEditEstimate(result))
+    hasPermission('Delete Estimate').then(result => setCanDeleteEstimate(result))
+    hasPermission('View Estimate').then(result => setCanViewEstimate(result))
   }, [])
 
   // Debounced search update
@@ -136,16 +145,10 @@ const Estimates: React.FC<{
   // Column definitions for CommonTable
   const columns: Column[] = [
     {
-      id: 'index',
-      header: '#',
-      cell: (row, rowIndex) => {
-        // Calculate the absolute index based on pagination
-        const from = apiResponse?.from || 1
-
-        return <span className='text-gray'>{from + (rowIndex || 0)}</span>
-      },
-      sortable: false,
-      size: 16
+      id: 'estimate_number',
+      header: 'Estimate#',
+      cell: row => <span className='font-medium'>{row.estimate_number?.toString().padStart(6, '0')}</span>,
+      sortable: false
     },
     {
       id: 'title',
@@ -206,16 +209,33 @@ const Estimates: React.FC<{
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit Estimate Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton tooltip='Delete Estimate' variant='text' onClick={() => handleDeleteEstimate(row.id)} />
-            ]}
-          />
+          {(canEditEstimate || canViewEstimate || canDeleteEstimate) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canViewEstimate
+                  ? [<ViewButton tooltip='View Estimate Details' link={`/erp/estimates/${row.id}`} variant='text' />]
+                  : []),
+                ...(canEditEstimate
+                  ? [
+                      <EditButton
+                        tooltip='Edit Estimate Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteEstimate
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Estimate'
+                        variant='text'
+                        onClick={() => handleDeleteEstimate(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -272,15 +292,17 @@ const Estimates: React.FC<{
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Estimate
-      </Button>
+      {canCreateEstimate && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Estimate
+        </Button>
+      )}
     </div>
   )
 
