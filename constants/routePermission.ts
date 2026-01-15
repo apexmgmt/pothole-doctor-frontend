@@ -35,12 +35,12 @@ export const PERMISSION_BASED_ROUTES: Record<string, string> = {
   '/erp/products/categories': 'Manage Category',
 
   // Leads routes
-  // '/erp/leads': 'Manage Lead', //TODO: Need that permission from backend
+  '/erp/leads': 'Manage Lead', //TODO: Need that permission from backend
   // Leads Interest Levels routes
   '/erp/leads/interest-levels': 'Manage Interest Level', //TODO: Need that permission from backend
 
   // Customers routes
-  // '/erp/customers': 'Manage Customer' //TODO: Need that permission from backend
+  '/erp/customers': 'Manage Customer', //TODO: Need that permission from backend
 
   // Estimate routes
   '/erp/estimates': 'Manage Estimate',

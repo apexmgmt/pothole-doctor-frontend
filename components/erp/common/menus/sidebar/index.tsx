@@ -133,7 +133,8 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           href: '/erp/leads',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: true
+          exactMatch: true,
+          permissions: ['Manage Lead']
         },
         {
           id: 'interest-levels',
@@ -141,10 +142,12 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           href: '/erp/leads/interest-levels',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: true
+          exactMatch: true,
+          permissions: ['Manage Interest Level']
         }
       ],
-      exactMatch: false
+      exactMatch: false,
+      permissions: ['Manage Lead', 'Manage Interest Level']
     },
     {
       id: 'customers',
@@ -152,7 +155,8 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       icon: <UserLock className='h-4 w-4' />,
       href: '/erp/customers',
       hasSubItems: false,
-      exactMatch: false
+      exactMatch: false,
+      permissions: ['Manage Customer']
     },
     {
       id: 'estimates',

@@ -44,6 +44,7 @@ import ClientEmails from './emails/ClientEmails'
 import ClientNotes from './notes/ClientNotes'
 import ClientContacts from './contacts/ClientContacts'
 import ClientAddresses from './addresses/ClientAddresses'
+import { hasPermission } from '@/utils/role-permission'
 
 const Clients: React.FC<{
   type: 'lead' | 'customer'
@@ -81,10 +82,24 @@ const Clients: React.FC<{
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [canCreateClient, setCanCreateClient] = useState<boolean>(false)
+  const [canEditClient, setCanEditClient] = useState<boolean>(false)
+  const [canDeleteClient, setCanDeleteClient] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and Check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    if (type === 'lead') {
+      hasPermission('Create Lead').then(result => setCanCreateClient(result))
+      hasPermission('Update Lead').then(result => setCanEditClient(result))
+      hasPermission('Delete Lead').then(result => setCanDeleteClient(result))
+    } else {
+      hasPermission('Create Customer').then(result => setCanCreateClient(result))
+      hasPermission('Update Customer').then(result => setCanEditClient(result))
+      hasPermission('Delete Customer').then(result => setCanDeleteClient(result))
+    }
   }, [])
 
   // Debounced search update
@@ -336,20 +351,26 @@ const Clients: React.FC<{
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip={`Edit ${type === 'lead' ? 'Lead' : 'Customer'} Information`}
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton
-                tooltip={`Delete ${type === 'lead' ? 'Lead' : 'Customer'}`}
-                variant='text'
-                onClick={() => handleDeleteClient(row.id)}
-              />
-            ]}
-          />
+          {(canEditClient || canDeleteClient) && (
+            <ThreeDotButton
+              buttons={[
+                canEditClient && (
+                  <EditButton
+                    tooltip={`Edit ${type === 'lead' ? 'Lead' : 'Customer'} Information`}
+                    onClick={() => handleOpenEditModal(row.id)}
+                    variant='text'
+                  />
+                ),
+                canDeleteClient && (
+                  <DeleteButton
+                    tooltip={`Delete ${type === 'lead' ? 'Lead' : 'Customer'}`}
+                    variant='text'
+                    onClick={() => handleDeleteClient(row.id)}
+                  />
+                )
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false
@@ -435,15 +456,17 @@ const Clients: React.FC<{
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add {type === 'lead' ? 'Lead' : 'Customer'}
-      </Button>
+      {canCreateClient && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add {type === 'lead' ? 'Lead' : 'Customer'}
+        </Button>
+      )}
     </div>
   )
 
