@@ -295,9 +295,8 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           href: '/erp/settings/note-types',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
-
-          // permissions: ['Manage Note Type']
+          exactMatch: false,
+          permissions: ['Manage Note Type']
         },
         {
           id: 'task-types',
@@ -314,9 +313,8 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           href: '/erp/settings/email-templates',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
-
-          // permissions: ['Manage Email Template']
+          exactMatch: false,
+          permissions: ['Manage Message Template']
         },
         {
           id: 'task-reminders',
@@ -324,9 +322,8 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           href: '/erp/settings/task-reminders',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
-
-          // permissions: ['Manage Task Reminder']
+          exactMatch: false,
+          permissions: ['Manage Task Reminder']
         },
         {
           id: 'uom-units',
@@ -352,9 +349,8 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           href: '/erp/settings/service-types',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
-
-          // permissions: ['Manage Service Type']
+          exactMatch: false,
+          permissions: ['Manage Service Type']
         }
       ],
       exactMatch: false,
@@ -365,7 +361,10 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
         'Manage Estimate Type',
         'Manage Commission',
         'Manage Task Type',
-        'Manage Unit'
+        'Manage Unit',
+        'Manage Message Template',
+        'Manage Task Reminder',
+        'Manage Service Type'
       ]
     }
   ]
