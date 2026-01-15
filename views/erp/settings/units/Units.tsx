@@ -21,6 +21,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import CreateOrEditUnitModal from './CreateOrEditUnitModal'
 import UnitService from '@/services/api/settings/units.service'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { hasPermission } from '@/utils/role-permission'
 
 const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
   const router = useRouter()
@@ -34,12 +35,25 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-
+  const [canCreateUnit, setCanCreateUnit] = useState<boolean>(false)
+  const [canEditUnit, setCanEditUnit] = useState<boolean>(false)
+  const [canDeleteUnit, setCanDeleteUnit] = useState<boolean>(false)
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create Unit').then(result => {
+      setCanCreateUnit(result)
+    })
+    hasPermission('Update Unit').then(result => {
+      setCanEditUnit(result)
+    })
+    hasPermission('Delete Unit').then(result => {
+      setCanDeleteUnit(result)
+    })
   }, [])
 
   // Debounced search update
@@ -165,12 +179,24 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton tooltip='Edit Unit Information' onClick={() => handleOpenEditModal(row.id)} variant='text' />,
-              <DeleteButton tooltip='Delete Unit' variant='text' onClick={() => handleDeleteUnit(row.id)} />
-            ]}
-          />
+          {(canEditUnit || canDeleteUnit) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditUnit
+                  ? [
+                      <EditButton
+                        tooltip='Edit Unit Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteUnit
+                  ? [<DeleteButton tooltip='Delete Unit' variant='text' onClick={() => handleDeleteUnit(row.id)} />]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -227,15 +253,17 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Unit
-      </Button>
+      {canCreateUnit && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Unit
+        </Button>
+      )}
     </div>
   )
 
