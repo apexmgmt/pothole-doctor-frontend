@@ -21,6 +21,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import EstimateTypeService from '@/services/api/settings/estimate_types.service'
 import CreateOrEditEstimateTypeModal from './CreateOrEditEstimateTypeModal'
+import { hasPermission } from '@/utils/role-permission'
 
 const EstimateTypes: React.FC = () => {
   const router = useRouter()
@@ -34,12 +35,20 @@ const EstimateTypes: React.FC = () => {
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [canCreateEstimateType, setCanCreateEstimateType] = useState<boolean>(false)
+  const [canEditEstimateType, setCanEditEstimateType] = useState<boolean>(false)
+  const [canDeleteEstimateType, setCanDeleteEstimateType] = useState<boolean>(false)
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create Estimate Type').then(result => setCanCreateEstimateType(result))
+    hasPermission('Update Estimate Type').then(result => setCanEditEstimateType(result))
+    hasPermission('Delete Estimate Type').then(result => setCanDeleteEstimateType(result))
   }, [])
 
   // Debounced search update
@@ -142,20 +151,30 @@ const EstimateTypes: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit Estimate Type Information'
-                onClick={() => handleOpenEditModal(row.id, row)}
-                variant='text'
-              />,
-              <DeleteButton
-                tooltip='Delete Estimate Type'
-                variant='text'
-                onClick={() => handleDeleteEstimateType(row.id)}
-              />
-            ]}
-          />
+          {(canEditEstimateType || canDeleteEstimateType) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditEstimateType
+                  ? [
+                      <EditButton
+                        tooltip='Edit Estimate Type Information'
+                        onClick={() => handleOpenEditModal(row.id, row)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteEstimateType
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Estimate Type'
+                        variant='text'
+                        onClick={() => handleDeleteEstimateType(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -212,15 +231,17 @@ const EstimateTypes: React.FC = () => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Estimate Type
-      </Button>
+      {canCreateEstimateType && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Estimate Type
+        </Button>
+      )}
     </div>
   )
 
