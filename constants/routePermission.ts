@@ -35,9 +35,9 @@ export const PERMISSION_BASED_ROUTES: Record<string, string> = {
   '/erp/products/categories': 'Manage Category',
 
   // Leads routes
-  // '/erp/leads': 'Manage Lead' //TODO: Need that permission from backend
+  // '/erp/leads': 'Manage Lead', //TODO: Need that permission from backend
   // Leads Interest Levels routes
-  // '/erp/leads/interest-levels': 'Manage Interest Level', //TODO: Need that permission from backend
+  '/erp/leads/interest-levels': 'Manage Interest Level', //TODO: Need that permission from backend
 
   // Customers routes
   // '/erp/customers': 'Manage Customer' //TODO: Need that permission from backend
@@ -65,16 +65,13 @@ export const PERMISSION_BASED_ROUTES: Record<string, string> = {
   '/erp/settings/estimate-types': 'Manage Estimate Type',
   '/erp/settings/commission-types': 'Manage Commission',
   '/erp/settings/commissions': 'Manage Commission',
-
-  // '/erp/settings/note-types': 'Manage Note Type', //TODO: Need that permission from backend
+  '/erp/settings/note-types': 'Manage Note Type', //TODO: Need that permission from backend
   '/erp/settings/task-types': 'Manage Task Type',
-
-  // '/erp/settings/email-templates': 'Manage Email Template', //TODO: Need that permission from backend
-  // '/erp/settings/task-reminders': 'Manage Task Reminder', //TODO: Need that permission from backend
+  '/erp/settings/email-templates': 'Manage Message Template', //TODO: Need that permission from backend
+  '/erp/settings/task-reminders': 'Manage Task Reminder', //TODO: Need that permission from backend
   '/erp/settings/uom-units': 'Manage Unit',
-  '/erp/settings/measure-units': 'Manage Unit'
-
-  // '/erp/settings/service-types': 'Manage Service Type' //TODO: Need that permission from backend
+  '/erp/settings/measure-units': 'Manage Unit',
+  '/erp/settings/service-types': 'Manage Service Type' //TODO: Need that permission from backend
 }
 
 /**
@@ -192,7 +189,7 @@ export interface User {
 /**
  * Get required permission for a route (handles dynamic routes)
  */
-export const getRequiredPermission = (pathname: string): string | undefined => {
+export const getRequiredPermissionByPath = (pathname: string): string | undefined => {
   // First try exact match
   if (PERMISSION_BASED_ROUTES[pathname]) {
     return PERMISSION_BASED_ROUTES[pathname]
@@ -208,25 +205,25 @@ export const getRequiredPermission = (pathname: string): string | undefined => {
 /**
  * Check if user has permission for a specific route
  */
-export const hasRouteAccess = (pathname: string, user?: User): boolean => {
+export const hasRouteAccess = (pathname: string, user: User, permissions: string[]): boolean => {
   if (isPublicRoute(pathname)) {
     return true
   }
 
-  if (!user) {
+  if (!permissions) {
     return false
   }
 
-  const requiredPermission = getRequiredPermission(pathname)
+  const requiredPermission = getRequiredPermissionByPath(pathname)
 
   if (requiredPermission) {
-    return user.permissions?.includes(requiredPermission) || false
+    return permissions?.includes(requiredPermission) || false
   }
 
-  const allowedTypes = TYPE_BASED_ROUTES[pathname]
+  const allowedTypes = TYPE_BASED_ROUTES[pathname] ?? null
 
   if (allowedTypes) {
-    return allowedTypes.includes(user.type ?? '')
+    return allowedTypes.includes(user.guard ?? '')
   }
 
   return true

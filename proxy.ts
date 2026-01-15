@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-import { isPublicRoute, isUnauthenticatedRoute, getRequiredPermission } from './constants/routePermission'
+import { isPublicRoute, isUnauthenticatedRoute, getRequiredPermissionByPath } from './constants/routePermission'
 import AuthService from './services/api/auth.service'
-import { decryptData } from './utils/encryption'
+import { decryptData, encryptData } from './utils/encryption'
 
 /**
  * Get permissions from cookies (server-side)
@@ -11,7 +11,34 @@ import { decryptData } from './utils/encryption'
 async function getPermissionsFromCookies(req: NextRequest): Promise<string[]> {
   const encryptedPermissions = req.cookies.get('permissions')?.value
 
-  if (!encryptedPermissions) return []
+  // if permissions cookie is not found, then need to fetch user data again
+  if (!encryptedPermissions) {
+    // console.log('Proxy: Permissions cookie not found, fetching user data...')
+    // const response = await AuthService.getAuthDetails()
+    // const nextRes = NextResponse.next()
+
+    // nextRes.cookies.set({
+    //   name: 'user',
+    //   value: JSON.stringify(encryptData(response?.data?.user)),
+    //   httpOnly: false,
+    //   path: '/'
+    // })
+    // nextRes.cookies.set({
+    //   name: 'roles',
+    //   value: JSON.stringify(encryptData(response?.data?.roles || [])),
+    //   httpOnly: false,
+    //   path: '/'
+    // })
+    // nextRes.cookies.set({
+    //   name: 'permissions',
+    //   value: JSON.stringify(encryptData(response?.data?.permissions || [])),
+    //   httpOnly: false,
+    //   path: '/'
+    // })
+
+    // return response?.data?.permissions || []
+    return []
+  }
 
   try {
     const decryptedPermissions = decryptData(encryptedPermissions)
@@ -34,7 +61,7 @@ async function getPermissionsFromCookies(req: NextRequest): Promise<string[]> {
  * Check if user has permission for the current route
  */
 function hasRoutePermission(pathname: string, permissions: string[]): boolean {
-  const requiredPermission = getRequiredPermission(pathname)
+  const requiredPermission = getRequiredPermissionByPath(pathname)
 
   if (!requiredPermission) {
     // Route doesn't require specific permission
