@@ -32,7 +32,6 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
   const [open, setOpen] = useState(false)
 
   const cookieUser: User | null = useMemo(() => {
-    if (reduxUser || propUser) return null
     const raw = CookieService.get('user')
 
     if (!raw) return null
