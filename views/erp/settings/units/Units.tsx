@@ -182,18 +182,16 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
           {(canEditUnit || canDeleteUnit) && (
             <ThreeDotButton
               buttons={[
-                ...(canEditUnit
-                  ? [
-                      <EditButton
-                        tooltip='Edit Unit Information'
-                        onClick={() => handleOpenEditModal(row.id)}
-                        variant='text'
-                      />
-                    ]
-                  : []),
-                ...(canDeleteUnit
-                  ? [<DeleteButton tooltip='Delete Unit' variant='text' onClick={() => handleDeleteUnit(row.id)} />]
-                  : [])
+                canEditUnit && (
+                  <EditButton
+                    tooltip='Edit Unit Information'
+                    onClick={() => handleOpenEditModal(row.id)}
+                    variant='text'
+                  />
+                ),
+                canDeleteUnit && (
+                  <DeleteButton tooltip='Delete Unit' variant='text' onClick={() => handleDeleteUnit(row.id)} />
+                )
               ]}
             />
           )}
