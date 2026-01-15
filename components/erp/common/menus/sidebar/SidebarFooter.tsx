@@ -57,7 +57,11 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
   const fullName = effectiveUser.name || [firstName, lastName].filter(Boolean).join(' ') || 'User'
 
   const email = effectiveUser.email || '---'
-  const avatar = generateFileUrl(effectiveUser.profile_picture) || generateFileUrl(effectiveUser.userable?.profile_picture) || '/images/avatar.webp'
+
+  const avatar =
+    generateFileUrl(effectiveUser.profile_picture) ||
+    generateFileUrl(effectiveUser.userable?.profile_picture) ||
+    '/images/avatar.webp'
 
   const initials = fullName
     .split(' ')
@@ -82,7 +86,7 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
         CookieService.delete('permissions')
         CookieService.delete('roles')
         dispatch(logoutUserSuccess())
-        router.push('/login')
+        router.push('/erp/login')
       })
       .catch(error => {
         CookieService.delete('access_token')
@@ -92,7 +96,7 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
         CookieService.delete('permissions')
         CookieService.delete('roles')
         dispatch(logoutUserSuccess())
-        router.push('/login')
+        router.push('/erp/login')
       })
   }
 
