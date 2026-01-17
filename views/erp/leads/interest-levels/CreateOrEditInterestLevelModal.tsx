@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
-import { InterestLevel, InterestLevelPayload } from '@/types/interest_levels.types'
+import { InterestLevel, InterestLevelPayload } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'

@@ -23,6 +23,7 @@ import CreateOrEditPartnerModal from './CreateOrEditPartnerModal'
 import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
 import PartnerDocuments from './documents/PartnerDocuments'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { hasPermission } from '@/utils/role-permission'
 
 const Partners: React.FC<PartnersProps> = ({
   businessLocations,
@@ -44,10 +45,18 @@ const Partners: React.FC<PartnersProps> = ({
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [activeTab, setActiveTab] = useState<string>('partners')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreatePartner, setCanCreatePartner] = useState<boolean>(false)
+  const [canViewPartner, setCanViewPartner] = useState<boolean>(false)
+  const [canEditPartner, setCanEditPartner] = useState<boolean>(false)
+  const [canDeletePartner, setCanDeletePartner] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    hasPermission('Create Contractor').then(result => setCanCreatePartner(result))
+    hasPermission('View Contractor').then(result => setCanViewPartner(result))
+    hasPermission('Update Contractor').then(result => setCanEditPartner(result))
+    hasPermission('Delete Contractor').then(result => setCanDeletePartner(result))
   }, [])
 
   // Debounced search update
@@ -236,17 +245,30 @@ const Partners: React.FC<PartnersProps> = ({
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            // title='Action'
-            buttons={[
-              <EditButton
-                tooltip='Edit Partner Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton tooltip='Delete Partner' variant='text' onClick={() => handleDeletePartner(row.id)} />
-            ]}
-          />
+          {(canEditPartner || canDeletePartner) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditPartner
+                  ? [
+                      <EditButton
+                        tooltip='Edit Partner Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeletePartner
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Partner'
+                        variant='text'
+                        onClick={() => handleDeletePartner(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -303,15 +325,17 @@ const Partners: React.FC<PartnersProps> = ({
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Contractor
-      </Button>
+      {canCreatePartner && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Contractor
+        </Button>
+      )}
     </div>
   )
 
@@ -323,13 +347,17 @@ const Partners: React.FC<PartnersProps> = ({
       onClick: () => setActiveTab('partners'),
       isActive: activeTab === 'partners'
     },
-    {
-      label: 'Documents',
-      icon: DocumentIcon,
-      onClick: () => setActiveTab('documents'),
-      isActive: activeTab === 'documents',
-      disabled: !selectedPartnerId
-    }
+    ...(canViewPartner
+      ? [
+          {
+            label: 'Documents',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('documents'),
+            isActive: activeTab === 'documents',
+            disabled: !selectedPartnerId
+          }
+        ]
+      : [])
   ]
 
   const handleRowSelect = (partner: any) => {

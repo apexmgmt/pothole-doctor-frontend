@@ -105,7 +105,7 @@ export function AdditionalInfoFields({ form, disabled = false }: AdditionalInfoF
           </FormItem>
         )}
       />
-      <div className='col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4'>
+      <div className='col-span-2 grid grid-cols-1 gap-4'>
         {/* Freight Percentage Radio Group */}
         <FormField
           control={form.control}

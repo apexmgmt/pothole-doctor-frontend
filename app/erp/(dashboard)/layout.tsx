@@ -4,29 +4,18 @@ import { ReactNode } from '@/types'
 import { decryptData } from '@/utils/encryption'
 import CookieService from '@/services/app/cookie.service'
 import { CheckAuthProvider } from '@/hocs/CheckAuthProvider'
+import { getAuthUser } from '@/utils/auth'
+import { getPermissions } from '@/utils/role-permission'
 
 const Layout = async ({ children }: ReactNode) => {
-  const userCookie = await CookieService.get('user')
-  const decryptedUser: unknown = userCookie ? decryptData(userCookie) : null
-
-  let user: Record<string, unknown> = {}
-
-  if (decryptedUser) {
-    if (process.env.NODE_ENV === 'development') {
-      user =
-        typeof decryptedUser === 'string'
-          ? (JSON.parse(decryptedUser) as Record<string, unknown>)
-          : (decryptedUser as Record<string, unknown>)
-    } else {
-      user = decryptedUser as Record<string, unknown>
-    }
-  }
+  const user = await getAuthUser()
+  const permissions = await getPermissions()
 
   return (
     <CheckAuthProvider>
       <section className='flex min-h-screen relative overflow-hidden h-screen'>
         <aside className='w-[260px]'>
-          <Sidebar user={user} />
+          <Sidebar user={user} permissions={permissions} />
         </aside>
         <section className='w-[calc(100%-260px)] flex flex-col'>
           <Header />

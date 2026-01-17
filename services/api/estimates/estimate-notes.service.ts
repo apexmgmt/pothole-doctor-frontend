@@ -2,7 +2,7 @@ import { getApiUrl } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
 import { ESTIMATE_NOTES } from '@/constants/api'
 import { revalidate } from '@/services/app/cache.service'
-import { EstimateNotePayload } from '@/types/estimates/estimate_notes.types'
+import { EstimateNotePayload } from '@/types'
 
 export default class EstimateNoteService {
   /**Estimate Notes API */

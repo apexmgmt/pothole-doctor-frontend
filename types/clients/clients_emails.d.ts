@@ -1,4 +1,4 @@
-import { User } from '../user.types'
+import { User } from '../user'
 
 export interface ClientEmail {
   id: string

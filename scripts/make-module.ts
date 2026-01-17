@@ -21,7 +21,7 @@ const paths = {
   view: `views/${kebabPlural}/${pascalPlural}.tsx`,
   constFile: `constants/api/${snakePlural}_api.ts`,
   constIndex: `constants/api/index.ts`,
-  typeFile: `types/${snakePlural}.types.ts`,
+  typeFile: `types/${snakePlural}.d.ts`,
   typeIndex: `types/index.ts`,
   service: `services/api/${snakePlural}.service.ts`
 }

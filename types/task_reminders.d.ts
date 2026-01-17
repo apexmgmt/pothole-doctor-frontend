@@ -1,4 +1,4 @@
-import { TaskType } from './task_types.types'
+import { TaskType } from './task_types'
 
 export interface TaskReminder {
   id: string

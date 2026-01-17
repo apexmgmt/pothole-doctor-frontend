@@ -1,4 +1,4 @@
-import { City, State } from '../location.types'
+import { City, State } from '../location'
 
 export interface ClientAddress {
   id: string

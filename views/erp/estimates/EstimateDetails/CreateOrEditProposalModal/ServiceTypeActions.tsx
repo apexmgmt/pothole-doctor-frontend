@@ -2,7 +2,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Boxes, Wrench, GridIcon, ClipboardIcon, MessageSquareIcon, Minus } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
-import { ProposalServiceItemPayload } from '@/types/estimates/proposals.types'
+import { ProposalServiceItemPayload } from '@/types'
 
 interface ServiceTypeActionsProps {
   mode: 'create' | 'edit' | 'view'

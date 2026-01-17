@@ -1,7 +1,7 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { ClientAddress } from '@/types/clients/clients_addresses.types'
+import { ClientAddress } from '@/types'
 
 interface TaskLocationAndCommentFieldsProps {
   form: any

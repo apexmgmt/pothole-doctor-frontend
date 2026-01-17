@@ -21,7 +21,7 @@ import ProductsModal from '@/views/erp/products/ProductsModal'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import { Textarea } from '@/components/ui/textarea'
-import { getDiscountedUnitPrice } from '@/utils/business_calculation'
+import { getDiscountedUnitPrice } from '@/utils/business-calculation'
 import ServiceTypeSummary from './ServiceTypeSummary'
 import ServiceTypeActions from './ServiceTypeActions'
 

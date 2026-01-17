@@ -1,7 +1,7 @@
-import { Client } from './clients/clients.types'
-import { Staff } from './staff.types'
-import { TaskType } from './task_types.types'
-import { User } from './user.types'
+import { Client } from './clients/clients'
+import { Staff } from './staff'
+import { TaskType } from './task_types'
+import { User } from './user'
 
 export interface Task {
   id: string

@@ -27,6 +27,7 @@ import VendorDocuments from './documents/VendorDocuments'
 import VendorRebateCredits from './rebate-credits/VendorRebateCredits'
 import VendorPickupAddresses from './pickup-addresses/VendorPickupAddresses'
 import VendorSalesmen from './salesman/VendorSalesmen'
+import { hasPermission } from '@/utils/role-permission'
 
 const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCities, paymentTerms }) => {
   const router = useRouter()
@@ -43,10 +44,18 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [activeTab, setActiveTab] = useState<string>('vendors')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateVendor, setCanCreateVendor] = useState<boolean>(false)
+  const [canEditVendor, setCanEditVendor] = useState<boolean>(false)
+  const [canDeleteVendor, setCanDeleteVendor] = useState<boolean>(false)
+  const [canViewVendor, setCanViewVendor] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    hasPermission('Create Vendor').then(result => setCanCreateVendor(result))
+    hasPermission('Update Vendor').then(result => setCanEditVendor(result))
+    hasPermission('Delete Vendor').then(result => setCanDeleteVendor(result))
+    hasPermission('View Vendor').then(result => setCanViewVendor(result))
   }, [])
 
   // Debounced search update
@@ -194,17 +203,18 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            // title='Action'
-            buttons={[
-              <EditButton
-                tooltip='Edit Vendor Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton tooltip='Delete Vendor' variant='text' onClick={() => handleDeleteVendor(row.id)} />
-            ]}
-          />
+          {(canEditVendor || canDeleteVendor) && (
+            <ThreeDotButton
+              buttons={[
+                <EditButton
+                  tooltip='Edit Vendor Information'
+                  onClick={() => handleOpenEditModal(row.id)}
+                  variant='text'
+                />,
+                <DeleteButton tooltip='Delete Vendor' variant='text' onClick={() => handleDeleteVendor(row.id)} />
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -261,15 +271,17 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Vendor
-      </Button>
+      {canCreateVendor && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Vendor
+        </Button>
+      )}
     </div>
   )
 
@@ -281,41 +293,45 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
       onClick: () => setActiveTab('vendors'),
       isActive: activeTab === 'vendors'
     },
-    {
-      label: 'Details',
-      icon: DetailsIcon,
-      onClick: () => setActiveTab('details'),
-      isActive: activeTab === 'details',
-      disabled: !selectedVendorId
-    },
-    {
-      label: 'Salesmen',
-      icon: UserIcon,
-      onClick: () => setActiveTab('salesman'),
-      isActive: activeTab === 'salesman',
-      disabled: !selectedVendorId && !selectedUserAbleId
-    },
-    {
-      label: 'Documents',
-      icon: DocumentIcon,
-      onClick: () => setActiveTab('documents'),
-      isActive: activeTab === 'documents',
-      disabled: !selectedVendorId && !selectedUserAbleId
-    },
-    {
-      label: 'Rebate & Credits',
-      icon: DocumentIcon,
-      onClick: () => setActiveTab('rebate-credits'),
-      isActive: activeTab === 'rebate-credits',
-      disabled: !selectedVendorId && !selectedUserAbleId
-    },
-    {
-      label: 'Pickup Addresses',
-      icon: DocumentIcon,
-      onClick: () => setActiveTab('pickup-addresses'),
-      isActive: activeTab === 'pickup-addresses',
-      disabled: !selectedVendorId && !selectedUserAbleId
-    }
+    ...(canViewVendor
+      ? [
+          {
+            label: 'Details',
+            icon: DetailsIcon,
+            onClick: () => setActiveTab('details'),
+            isActive: activeTab === 'details',
+            disabled: !selectedVendorId
+          },
+          {
+            label: 'Salesmen',
+            icon: UserIcon,
+            onClick: () => setActiveTab('salesman'),
+            isActive: activeTab === 'salesman',
+            disabled: !selectedVendorId && !selectedUserAbleId
+          },
+          {
+            label: 'Documents',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('documents'),
+            isActive: activeTab === 'documents',
+            disabled: !selectedVendorId && !selectedUserAbleId
+          },
+          {
+            label: 'Rebate & Credits',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('rebate-credits'),
+            isActive: activeTab === 'rebate-credits',
+            disabled: !selectedVendorId && !selectedUserAbleId
+          },
+          {
+            label: 'Pickup Addresses',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('pickup-addresses'),
+            isActive: activeTab === 'pickup-addresses',
+            disabled: !selectedVendorId && !selectedUserAbleId
+          }
+        ]
+      : [])
   ]
 
   const handleRowSelect = (partner: any) => {

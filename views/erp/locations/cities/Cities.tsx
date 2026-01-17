@@ -20,6 +20,8 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import CreateOrEditCityModal from './CreateOrEditCityModal'
 import CityService from '@/services/api/locations/city.service'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { getInitialFilters } from '@/utils/utility'
+import { hasPermission } from '@/utils/role-permission'
 
 const Cities: React.FC = () => {
   const router = useRouter()
@@ -35,27 +37,19 @@ const Cities: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
-  // Initialize filterOptions from URL params
-  const getInitialFilters = () => {
-    const filters: any = {}
+  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateCity, setCanCreateCity] = useState<boolean>(false)
+  const [canEditCity, setCanEditCity] = useState<boolean>(false)
+  const [canDeleteCity, setCanDeleteCity] = useState<boolean>(false)
 
-    searchParams.forEach((value, key) => {
-      // Convert numeric values
-      if (key === 'page' || key === 'per_page') {
-        filters[key] = parseInt(value)
-      } else {
-        filters[key] = value
-      }
-    })
-
-    return filters
-  }
-
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters())
-
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create City').then(result => setCanCreateCity(result))
+    hasPermission('Update City').then(result => setCanEditCity(result))
+    hasPermission('Delete City').then(result => setCanDeleteCity(result))
   }, [])
 
   // Debounced search update
@@ -200,12 +194,24 @@ const Cities: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton tooltip='Edit City Information' onClick={() => handleOpenEditModal(row.id)} variant='text' />,
-              <DeleteButton tooltip='Delete City' variant='text' onClick={() => handleDeleteCity(row.id)} />
-            ]}
-          />
+          {(canEditCity || canDeleteCity) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditCity
+                  ? [
+                      <EditButton
+                        tooltip='Edit City Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteCity
+                  ? [<DeleteButton tooltip='Delete City' variant='text' onClick={() => handleDeleteCity(row.id)} />]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -263,15 +269,17 @@ const Cities: React.FC = () => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add City
-      </Button>
+      {canCreateCity && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add City
+        </Button>
+      )}
     </div>
   )
 

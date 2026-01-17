@@ -1,12 +1,12 @@
-import { BusinessLocation } from '../business_location.types'
-import { ClientSource } from '../client_sources.types'
-import { Company } from '../companies.type'
-import { ContactType } from '../contact_types.types'
-import { InterestLevel } from '../interest_levels.types'
-import { ServiceType } from '../service_types.types'
-import { Staff } from '../staff.types'
-import { User } from '../user.types'
-import { ClientAddress } from './clients_addresses.types'
+import { BusinessLocation } from '../business_location'
+import { ClientSource } from '../client_sources'
+import { Company } from '../companies'
+import { ContactType } from '../contact_types'
+import { InterestLevel } from '../interest_levels'
+import { ServiceType } from '../service_types'
+import { Staff } from '../staff'
+import { User } from '../user'
+import { ClientAddress } from './clients_addresses'
 
 export interface Client {
   id: string
@@ -91,8 +91,8 @@ export interface ClientPayload {
   service_type_ids: string[]
 }
 
-export * from './clients_notes.types'
-export * from './clients_contacts.types'
-export * from './clients_emails.types'
-export * from './clients_addresses.types'
-export * from './clients_sms.types'
+export * from './clients_notes'
+export * from './clients_contacts'
+export * from './clients_emails'
+export * from './clients_addresses'
+export * from './clients_sms'

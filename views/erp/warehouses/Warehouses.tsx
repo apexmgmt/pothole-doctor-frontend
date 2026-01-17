@@ -22,6 +22,7 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import WarehouseService from '@/services/api/warehouses.service'
 import { Badge } from '@/components/ui/badge'
 import CreateOrEditWarehouseModal from './CreateOrEditWarehouseModal'
+import { hasPermission } from '@/utils/role-permission'
 
 const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWithStateAndCities }) => {
   const router = useRouter()
@@ -35,12 +36,17 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateWarehouse, setCanCreateWarehouse] = useState<boolean>(false)
+  const [canEditWarehouse, setCanEditWarehouse] = useState<boolean>(false)
+  const [canDeleteWarehouse, setCanDeleteWarehouse] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    hasPermission('Create Warehouse').then(result => setCanCreateWarehouse(result))
+    hasPermission('Update Warehouse').then(result => setCanEditWarehouse(result))
+    hasPermission('Delete Warehouse').then(result => setCanDeleteWarehouse(result))
   }, [])
 
   // Debounced search update
@@ -209,16 +215,30 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
       header: 'Action',
       cell: row => (
         <>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit Warehouse Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton tooltip='Delete Warehouse' variant='text' onClick={() => handleDeleteWarehouse(row.id)} />
-            ]}
-          />
+          {(canEditWarehouse || canDeleteWarehouse) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditWarehouse
+                  ? [
+                      <EditButton
+                        tooltip='Edit Warehouse Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteWarehouse
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Warehouse'
+                        variant='text'
+                        onClick={() => handleDeleteWarehouse(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </>
       ),
       sortable: false,
@@ -275,15 +295,17 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Warehouse
-      </Button>
+      {canCreateWarehouse && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Warehouse
+        </Button>
+      )}
     </div>
   )
 

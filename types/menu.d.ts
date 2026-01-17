@@ -8,6 +8,7 @@ export interface NavigationSubItem {
   hasSubItems?: boolean
   subItems?: NavigationSubItem[]
   exactMatch?: boolean // default true if undefined
+  permissions?: string[] // Array of permissions (OR logic)
 }
 
 export interface NavigationItem extends NavigationSubItem {

@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
-import { ProductCategory, ProductCategoryPayload } from '@/types/product_categories.types'
+import { ProductCategory, ProductCategoryPayload } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'

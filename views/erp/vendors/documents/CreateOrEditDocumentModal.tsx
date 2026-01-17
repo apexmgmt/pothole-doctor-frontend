@@ -172,6 +172,7 @@ const CreateOrEditDocumentModal = ({
                     type='file'
                     accept='*'
                     placeholder='Upload file'
+                    
                     // ref={fileInputRef}
                     {...field}
                     onChange={e => {
@@ -185,22 +186,22 @@ const CreateOrEditDocumentModal = ({
                 {mode === 'edit' && documentDetails?.full_path && (
                   <div className='mt-2'>
                     <span className='text-xs text-gray-500'>Current file:&nbsp;</span>
-                    {getFileType(generateFileUrl(documentDetails.full_path)) === 'image' ? (
+                    {getFileType(generateFileUrl(documentDetails.full_path) ?? '') === 'image' ? (
                       <a
-                        href={generateFileUrl(documentDetails.full_path)}
+                        href={generateFileUrl(documentDetails.full_path) ?? ''}
                         target='_blank'
                         rel='noopener noreferrer'
                         className='inline-block'
                       >
                         <img
-                          src={generateFileUrl(documentDetails.full_path)}
+                          src={generateFileUrl(documentDetails.full_path) ?? ''}
                           alt='Current file'
                           className='h-16 rounded'
                         />
                       </a>
                     ) : (
                       <a
-                        href={generateFileUrl(documentDetails.full_path)}
+                        href={generateFileUrl(documentDetails.full_path) ?? ''}
                         target='_blank'
                         rel='noopener noreferrer'
                         className='text-blue-600 underline'

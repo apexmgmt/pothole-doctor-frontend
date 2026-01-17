@@ -21,6 +21,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import CommissionService from '@/services/api/settings/commissions.service'
 import CreateOrEditCommissionModal from './CreateOrEditCommissionModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { hasPermission } from '@/utils/role-permission'
 
 const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionFilters, commissionBases }) => {
   const router = useRouter()
@@ -34,12 +35,27 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-
+  const [canCreateCommission, setCanCreateCommission] = useState<boolean>(false)
+  const [canEditCommission, setCanEditCommission] = useState<boolean>(false)
+  const [canDeleteCommission, setCanDeleteCommission] = useState<boolean>(false)
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create Commission').then(result => {
+      setCanCreateCommission(result)
+    })
+
+    hasPermission('Update Commission').then(result => {
+      setCanEditCommission(result)
+    })
+
+    hasPermission('Delete Commission').then(result => {
+      setCanDeleteCommission(result)
+    })
   }, [])
 
   // Debounced search update
@@ -231,16 +247,30 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit Commission Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton tooltip='Delete Commission' variant='text' onClick={() => handleDeleteCommission(row.id)} />
-            ]}
-          />
+          {(canEditCommission || canDeleteCommission) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditCommission
+                  ? [
+                      <EditButton
+                        tooltip='Edit Commission Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteCommission
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Commission'
+                        variant='text'
+                        onClick={() => handleDeleteCommission(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -297,15 +327,17 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Commission
-      </Button>
+      {canCreateCommission && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Commission
+        </Button>
+      )}
     </div>
   )
 

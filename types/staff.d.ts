@@ -1,5 +1,5 @@
-import { Permission, PermissionsByModule, Role } from './role_permission.types'
-import { UserAble } from './user.types'
+import { Permission, PermissionsByModule, Role } from './role_permission'
+import { UserAble } from './user'
 
 export interface Staff {
   id: string

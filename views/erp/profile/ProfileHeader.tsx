@@ -32,9 +32,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ userData }) => {
   const email = userData?.email || '---'
 
   const profilePicture = userData?.profile_picture
-    ? generateFileUrl(userData?.profile_picture)
+    ? (generateFileUrl(userData?.profile_picture) || '/images/avatar.webp')
     : userData?.userable?.profile_picture
-      ? generateFileUrl(userData?.userable?.profile_picture)
+      ? (generateFileUrl(userData?.userable?.profile_picture) || '/images/avatar.webp')
       : '/images/avatar.webp'
 
   const initials = fullName
@@ -132,7 +132,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ userData }) => {
           <Image src='/images/dashboard/profile-cover.webp' fill alt='' className='object-cover' />
         </div>
         {/* Gradient overlay for depth */}
-        <div className='absolute inset-x-2 top-2 bottom-0  bg-gradient-to-br from-border/30 via-border/15 to-border/8' />
+        <div className='absolute inset-x-2 top-2 bottom-0  bg-linear-to-br from-border/30 via-border/15 to-border/8' />
 
         {/* Profile Picture centered over banner */}
         <div className='absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 z-10'>

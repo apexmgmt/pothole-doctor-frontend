@@ -4,8 +4,6 @@ import React from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { appUrl } from '@/utils/utility'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import StaffService from '@/services/api/staff.service'
 
@@ -13,9 +11,10 @@ interface StaffDetailsProps {
   staffData: any
   setStaffData: (options: any) => void
   fetchData?: () => void
+  canEditStaff?: boolean
 }
 
-const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fetchData }) => {
+const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fetchData, canEditStaff }) => {
   const fetchStaffDetails = async () => {
     StaffService.show(staffData?.id)
       .then(response => {
@@ -51,7 +50,7 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
       {/* Header */}
       <div className='flex items-center justify-between'>
         <h3 className='text-xl font-semibold text-light mt-2'>Staff Details</h3>
-        <div className='mt-2'>
+        {canEditStaff && <div className='mt-2'>
           <EditButton
             title='Edit'
             tooltip='Edit Staff Information'
@@ -60,7 +59,7 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
             buttonSize='default'
             buttonVariant='outline'
           />
-        </div>
+        </div>}
       </div>
 
       {/* Profile Section */}

@@ -21,6 +21,8 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import StateService from '@/services/api/locations/state.service'
 import CreateOrEditStateModal from './CreateOrEditStateModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { getInitialFilters } from '@/utils/utility'
+import { hasPermission } from '@/utils/role-permission'
 
 const States: React.FC = () => {
   const router = useRouter()
@@ -36,27 +38,19 @@ const States: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
-  // Initialize filterOptions from URL params
-  const getInitialFilters = () => {
-    const filters: any = {}
+  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateState, setCanCreateState] = useState<boolean>(false)
+  const [canEditState, setCanEditState] = useState<boolean>(false)
+  const [canDeleteState, setCanDeleteState] = useState<boolean>(false)
 
-    searchParams.forEach((value, key) => {
-      // Convert numeric values
-      if (key === 'page' || key === 'per_page') {
-        filters[key] = parseInt(value)
-      } else {
-        filters[key] = value
-      }
-    })
-
-    return filters
-  }
-
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters())
-
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create State').then(result => setCanCreateState(result))
+    hasPermission('Update State').then(result => setCanEditState(result))
+    hasPermission('Delete State').then(result => setCanDeleteState(result))
   }, [])
 
   // Debounced search update
@@ -194,16 +188,24 @@ const States: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit State Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton tooltip='Delete State' variant='text' onClick={() => handleDeleteState(row.id)} />
-            ]}
-          />
+          {(canEditState || canDeleteState) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditState
+                  ? [
+                      <EditButton
+                        tooltip='Edit State Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteState
+                  ? [<DeleteButton tooltip='Delete State' variant='text' onClick={() => handleDeleteState(row.id)} />]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -261,15 +263,17 @@ const States: React.FC = () => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add State
-      </Button>
+      {canCreateState && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add State
+        </Button>
+      )}
     </div>
   )
 

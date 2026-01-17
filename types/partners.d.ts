@@ -1,9 +1,9 @@
-import { BusinessLocation } from './business_location.types'
-import { Company } from './companies.type'
-import { City, CountryWithStates, State } from './location.types'
+import { BusinessLocation } from './business_location'
+import { Company } from './companies'
+import { City, CountryWithStates, State } from './location'
 import { PartnerType } from './partner_types.types'
-import { Skill } from './skills.types'
-import { User } from './user.types'
+import { Skill } from './skills'
+import { User } from './user'
 
 export interface PartnersProps {
   businessLocations: BusinessLocation[]
