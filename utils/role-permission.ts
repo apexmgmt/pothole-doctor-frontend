@@ -1,6 +1,8 @@
 import CookieService from '@/services/app/cookie.service'
 import { decryptData } from './encryption'
 import { getAuthUser } from './auth'
+import { NextRequest } from 'next/server'
+import { getRequiredPermissionByPath } from '@/constants/routePermission'
 
 /**
  * @name getPermissions
@@ -94,3 +96,70 @@ export const isGuardType = async (guardType: string): Promise<boolean> => {
 
   return user?.guard === guardType
 }
+
+/**
+ * Get permissions from cookies (server-side)
+ */
+export async function getPermissionsFromCookies(req: NextRequest): Promise<string[]> {
+  const encryptedPermissions = req.cookies.get('permissions')?.value
+
+  // if permissions cookie is not found, then need to fetch user data again
+  if (!encryptedPermissions) {
+    // console.log('Proxy: Permissions cookie not found, fetching user data...')
+    // const response = await AuthService.getAuthDetails()
+    // const nextRes = NextResponse.next()
+
+    // nextRes.cookies.set({
+    //   name: 'user',
+    //   value: JSON.stringify(encryptData(response?.data?.user)),
+    //   httpOnly: false,
+    //   path: '/'
+    // })
+    // nextRes.cookies.set({
+    //   name: 'roles',
+    //   value: JSON.stringify(encryptData(response?.data?.roles || [])),
+    //   httpOnly: false,
+    //   path: '/'
+    // })
+    // nextRes.cookies.set({
+    //   name: 'permissions',
+    //   value: JSON.stringify(encryptData(response?.data?.permissions || [])),
+    //   httpOnly: false,
+    //   path: '/'
+    // })
+
+    // return response?.data?.permissions || []
+    return []
+  }
+
+  try {
+    const decryptedPermissions = decryptData(encryptedPermissions)
+    let userPermissions: string[] = []
+
+    if (process.env.NODE_ENV === 'development') {
+      userPermissions =
+        typeof decryptedPermissions === 'string' ? JSON.parse(decryptedPermissions) : decryptedPermissions
+    } else {
+      userPermissions = decryptedPermissions
+    }
+
+    return userPermissions
+  } catch (error) {
+    return []
+  }
+}
+
+/**
+ * Check if user has permission for the current route
+ */
+export function hasRoutePermission(pathname: string, permissions: string[]): boolean {
+  const requiredPermission = getRequiredPermissionByPath(pathname)
+
+  if (!requiredPermission) {
+    // Route doesn't require specific permission
+    return true
+  }
+
+  return permissions.includes(requiredPermission)
+}
+

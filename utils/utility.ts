@@ -1,3 +1,5 @@
+import { NextRequest } from 'next/server'
+
 /**
  * Generates an API URL with the subdomain (if any) from the current request host.
  *
@@ -165,4 +167,62 @@ export const getFileType = (fullPath: string) => {
   if (docExts.includes(ext)) return 'document'
 
   return 'other'
+}
+
+/**
+ * Check subdomain and domain information from request
+ * @param req NextRequest
+ * @returns Object with subdomain, domain, isSubdomain, and isApexDomain information
+ */
+export const checkSubdomain = (req: NextRequest) => {
+  const hostname = req.headers.get('host') || req.nextUrl.hostname
+  const isProduction = process.env.NODE_ENV === 'production'
+
+  // Remove port from hostname for domain comparison
+  const hostnameWithoutPort = hostname.split(':')[0]
+  const domainParts = hostnameWithoutPort.split('.')
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+
+  // Extract the apex domain from the app URL (remove protocol and port)
+  const apexDomain = appUrl.replace(/^https?:\/\//, '').split(':')[0]
+
+  let subdomain = ''
+  let domain = hostnameWithoutPort
+  let isSubdomain = false
+  let isApexDomain = hostnameWithoutPort === apexDomain
+
+  console.log('checkSubdomain - hostname:', hostname)
+  console.log('checkSubdomain - hostnameWithoutPort:', hostnameWithoutPort)
+  console.log('checkSubdomain - apexDomain:', apexDomain)
+  console.log('checkSubdomain - domainParts:', domainParts)
+
+  if (!isApexDomain) {
+    // Check if this could be a subdomain of the apex domain
+    if (domainParts.length >= 2) {
+      const possibleBaseDomain = domainParts.slice(1).join('.')
+
+      console.log('checkSubdomain - possibleBaseDomain:', possibleBaseDomain)
+
+      if (possibleBaseDomain === apexDomain && domainParts[0] !== 'www') {
+        // This is a subdomain of the apex domain
+        subdomain = domainParts[0]
+        domain = possibleBaseDomain
+        isSubdomain = true
+      } else {
+        // This is a custom domain (including www.customdomain.com)
+        subdomain = ''
+        domain = hostname
+        isSubdomain = false
+      }
+    } else {
+      // Single part domain (shouldn't happen in practice, but handle it)
+      subdomain = ''
+      domain = hostname
+      isSubdomain = false
+    }
+  }
+
+  console.log('checkSubdomain - result:', { subdomain, domain, isSubdomain, isApexDomain })
+
+  return { subdomain, domain, isSubdomain, isApexDomain }
 }
