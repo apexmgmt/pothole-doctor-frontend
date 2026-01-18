@@ -1,21 +1,24 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
 import { revalidate } from '@/services/app/cache.service'
-import { CLIENTS, CLIENTS_ALL } from '@/constants/api'
+import { API_URL, CLIENTS, CLIENTS_ALL, CLIENTS_ALL_TENANT, CLIENTS_TENANT } from '@/constants/api'
 import { ClientPayload } from '@/types'
 
 export default class ClientService {
   /** Clients DataTable API */
   static index = async (filterOptions: object = {}, type: string = '') => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + CLIENTS + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: [`clients${type ? `-${type}` : ''}`] }
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: [`clients${type ? `-${type}` : ''}`] }
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -32,9 +35,9 @@ export default class ClientService {
   /** Create Client API */
   static store = async (payload: ClientPayload, type: string = '') => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENTS, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -65,9 +68,9 @@ export default class ClientService {
   /** Show Client API */
   static show = async (clientId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENTS + clientId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`clients/${clientId}`] }
@@ -88,9 +91,9 @@ export default class ClientService {
   /** Update Client API */
   static update = async (clientId: string, payload: ClientPayload, type: string = '') => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENTS + clientId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -122,9 +125,9 @@ export default class ClientService {
   /** Delete Client API */
   static destroy = async (clientId: string, type: string = '') => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENTS + clientId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId, {
         requiresAuth: true,
         method: 'DELETE'
       })
@@ -149,12 +152,15 @@ export default class ClientService {
   /** Restore Client API */
   static restore = async (clientId: string, type: string = '') => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENTS + clientId + '/restore', {
-        requiresAuth: true,
-        method: 'POST'
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId + '/restore',
+        {
+          requiresAuth: true,
+          method: 'POST'
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -174,17 +180,20 @@ export default class ClientService {
   }
 
   /** Get all clients api */
-  static getAllClients = async (type: string = '') => {
+  static getAll = async (type: string = '') => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENTS_ALL + (type ? `?type=${type}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        cache: 'no-store'
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? CLIENTS_ALL_TENANT : CLIENTS_ALL) + (type ? `?type=${type}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          cache: 'no-store'
 
-        // next: { revalidate: 3600, tags: [`clients-all${type ? `-${type}` : ''}`] } // Cache for 1 hour
-      })
+          // next: { revalidate: 3600, tags: [`clients-all${type ? `-${type}` : ''}`] } // Cache for 1 hour
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()

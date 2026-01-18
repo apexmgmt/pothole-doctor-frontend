@@ -14,4 +14,6 @@
  * Data restore method: POST /{id}/restore
  */
 export const TASKS: string = '/v1/tasks/'
+export const TASKS_TENANT: string = '/v1/tenant/tasks/'
 export const TASKS_ALL: string = '/v1/get-tasks/'
+export const TASKS_ALL_TENANT: string = '/v1/tenant/get-tasks/'

@@ -32,9 +32,11 @@ export async function proxy(req: NextRequest) {
 
   // Check domain first
   console.log('Proxy: Checking subdomain...')
-  const domainInfo = checkSubdomain(req)
+  const domainInfo: any = checkSubdomain(req)
 
   console.log('Proxy: Domain info result:', domainInfo)
+
+  let tenantId = ''
 
   if (domainInfo.isSubdomain && domainInfo.subdomain) {
     console.log('Proxy: Subdomain detected:', domainInfo.subdomain)
@@ -50,6 +52,9 @@ export async function proxy(req: NextRequest) {
         notFoundUrl.pathname = '/invalid-subdomain'
 
         return NextResponse.redirect(notFoundUrl)
+      } else {
+        console.log('Proxy: Subdomain verification successful')
+        tenantId = res?.data?.tenant_id || ''
       }
     } catch (error) {
       console.log('Proxy: Subdomain verification error - redirecting to /invalid-subdomain', error)
@@ -78,7 +83,19 @@ export async function proxy(req: NextRequest) {
   if (isPublicRoute(pathname) || isUnauthenticatedRoute(pathname)) {
     console.log('Proxy: Public route')
 
-    return NextResponse.next()
+    const response = NextResponse.next()
+
+    // Set tenant cookie if subdomain was verified
+    if (tenantId) {
+      response.cookies.set({
+        name: 'tenant',
+        value: tenantId,
+        httpOnly: false,
+        path: '/'
+      })
+    }
+
+    return response
   }
 
   if (accessToken) {
@@ -97,7 +114,19 @@ export async function proxy(req: NextRequest) {
       return NextResponse.redirect(forbiddenUrl)
     }
 
-    return NextResponse.next()
+    const response = NextResponse.next()
+
+    // Set tenant cookie if subdomain was verified
+    if (tenantId) {
+      response.cookies.set({
+        name: 'tenant',
+        value: tenantId,
+        httpOnly: false,
+        path: '/'
+      })
+    }
+
+    return response
   }
 
   if (refreshToken) {
@@ -144,6 +173,16 @@ export async function proxy(req: NextRequest) {
         })
       }
 
+      // Set tenant cookie if subdomain was verified
+      if (tenantId) {
+        nextRes.cookies.set({
+          name: 'tenant',
+          value: tenantId,
+          httpOnly: false,
+          path: '/'
+        })
+      }
+
       console.log('Proxy: Refreshing token successful')
 
       // Check permission after token refresh
@@ -173,6 +212,10 @@ export async function proxy(req: NextRequest) {
       redirectRes.cookies.delete('access_token')
       redirectRes.cookies.delete('refresh_token')
       redirectRes.cookies.delete('token_type')
+      redirectRes.cookies.delete('permissions_1')
+      redirectRes.cookies.delete('permissions_2')
+      redirectRes.cookies.delete('permissions_3')
+      redirectRes.cookies.delete('roles')
 
       return redirectRes
     }

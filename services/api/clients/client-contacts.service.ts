@@ -1,16 +1,16 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { CLIENT_CONTACTS } from '@/constants/api'
+import { API_URL, CLIENT_CONTACTS, CLIENT_CONTACTS_TENANT } from '@/constants/api'
 import { ClientContactPayload } from '@/types'
 
 export default class ClientContactService {
   /**Client Contacts DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_CONTACTS + (queryParams ? `?${queryParams}` : ''), {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_CONTACTS_TENANT : CLIENT_CONTACTS) + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET'
       })
@@ -30,9 +30,9 @@ export default class ClientContactService {
   /**Create Client Contacts API */
   static store = async (payload: ClientContactPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_CONTACTS, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_CONTACTS_TENANT : CLIENT_CONTACTS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -53,9 +53,9 @@ export default class ClientContactService {
   /** Show Client Contacts API */
   static show = async (clientContactId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_CONTACTS + clientContactId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_CONTACTS_TENANT : CLIENT_CONTACTS) + clientContactId, {
         requiresAuth: true,
         method: 'GET'
       })
@@ -75,9 +75,9 @@ export default class ClientContactService {
   /** Update Client Contacts API */
   static update = async (clientContactId: string, payload: ClientContactPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_CONTACTS + clientContactId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_CONTACTS_TENANT : CLIENT_CONTACTS) + clientContactId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -98,9 +98,9 @@ export default class ClientContactService {
   /** Delete Client Contacts API */
   static destroy = async (clientContactId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_CONTACTS + clientContactId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_CONTACTS_TENANT : CLIENT_CONTACTS) + clientContactId, {
         requiresAuth: true,
         method: 'DELETE'
       })

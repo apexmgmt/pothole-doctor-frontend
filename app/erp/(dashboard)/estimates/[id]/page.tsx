@@ -37,7 +37,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
   let estimateNotes: EstimateNote[] = []
 
   try {
-    const response = await ServiceTypeService.getAllServiceTypes()
+    const response = await ServiceTypeService.getAll()
 
     serviceTypes = response.data || []
   } catch (error) {
@@ -45,7 +45,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
   }
 
   try {
-    const response = await EstimateTypeService.getAllEstimateTypes()
+    const response = await EstimateTypeService.getAll()
 
     estimateTypes = response.data || []
   } catch (error) {
@@ -53,7 +53,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
   }
 
   try {
-    const response = await ClientService.getAllClients('customer')
+    const response = await ClientService.getAll('customer')
 
     clients = response.data || []
   } catch (error) {
@@ -61,7 +61,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
   }
 
   try {
-    const response = await StaffService.getAllStaffs()
+    const response = await StaffService.getAll()
 
     staffs = response.data || []
   } catch (error) {
@@ -96,7 +96,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
 
   //fetch units
   try {
-    const response = await UnitService.getAllUnits()
+    const response = await UnitService.getAll()
 
     units = response.data || []
   } catch (error) {
@@ -104,7 +104,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
   }
 
   try {
-    const response = await ProductCategoryService.getAllProductCategories()
+    const response = await ProductCategoryService.getAll()
 
     productCategories = response.data || []
   } catch (error) {
@@ -112,7 +112,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
   }
 
   try {
-    const response = await UnitService.getAllUnits('uom')
+    const response = await UnitService.getAll('uom')
 
     uomUnits = response.data || []
   } catch (error) {
@@ -120,7 +120,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
   }
 
   try {
-    const response = await VendorService.getAllVendors()
+    const response = await VendorService.getAll()
 
     vendors = response.data || []
   } catch (error) {

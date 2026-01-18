@@ -1,13 +1,13 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from './api.interceptor'
-import { CLIENT_SOURCES_ALL } from '@/constants/api'
+import { API_URL, CLIENT_SOURCES_ALL, CLIENT_SOURCES_ALL_TENANT } from '@/constants/api'
 
 export default class ClientSourceService {
-  static getAllClientSources = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_SOURCES_ALL, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_SOURCES_ALL_TENANT : CLIENT_SOURCES_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['client-sources-all'] } // Cache for 1 hour

@@ -12,4 +12,6 @@
  * @method: DELETE - Remove a specific interest level entry by ID. /id
  */
 export const INTEREST_LEVELS: string = '/v1/interest-levels/'
+export const INTEREST_LEVELS_TENANT: string = '/v1/tenant/interest-levels/'
 export const INTEREST_LEVELS_ALL: string = '/v1/get-interest-levels'
+export const INTEREST_LEVELS_ALL_TENANT: string = '/v1/tenant/get-interest-levels/'

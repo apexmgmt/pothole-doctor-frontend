@@ -1,19 +1,22 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { CLIENT_DOCUMENTS } from '@/constants/api'
+import { API_URL, CLIENT_DOCUMENTS, CLIENT_DOCUMENTS_TENANT } from '@/constants/api'
 import { revalidate } from '@/services/app/cache.service'
 
 export default class ClientDocumentService {
   /**Client Documents DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_DOCUMENTS + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET'
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? CLIENT_DOCUMENTS_TENANT : CLIENT_DOCUMENTS) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -30,9 +33,9 @@ export default class ClientDocumentService {
   /**Create Client Document API */
   static store = async (payload: any) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_DOCUMENTS, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_DOCUMENTS_TENANT : CLIENT_DOCUMENTS), {
         requiresAuth: true,
         method: 'POST',
         body: payload
@@ -53,12 +56,15 @@ export default class ClientDocumentService {
   /** Show Client Document API */
   static show = async (clientDocumentId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_DOCUMENTS + clientDocumentId, {
-        requiresAuth: true,
-        method: 'GET'
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? CLIENT_DOCUMENTS_TENANT : CLIENT_DOCUMENTS) + clientDocumentId,
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -75,16 +81,19 @@ export default class ClientDocumentService {
   /** Update Client Document API */
   static update = async (clientDocumentId: string, payload: FormData) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
       // Add the _method field to simulate PUT request
       payload.append('_method', 'PUT')
 
-      const response = await apiInterceptor(apiUrl + CLIENT_DOCUMENTS + clientDocumentId, {
-        requiresAuth: true,
-        method: 'POST',
-        body: payload // Pass FormData directly
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? CLIENT_DOCUMENTS_TENANT : CLIENT_DOCUMENTS) + clientDocumentId,
+        {
+          requiresAuth: true,
+          method: 'POST',
+          body: payload // Pass FormData directly
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -101,12 +110,15 @@ export default class ClientDocumentService {
   /** Delete Client Document API */
   static destroy = async (clientDocumentId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_DOCUMENTS + clientDocumentId, {
-        requiresAuth: true,
-        method: 'DELETE'
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? CLIENT_DOCUMENTS_TENANT : CLIENT_DOCUMENTS) + clientDocumentId,
+        {
+          requiresAuth: true,
+          method: 'DELETE'
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()

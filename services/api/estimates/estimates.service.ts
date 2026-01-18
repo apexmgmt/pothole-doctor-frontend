@@ -1,6 +1,6 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { ESTIMATES_ALL, ESTIMATES } from '@/constants/api'
+import { ESTIMATES_ALL, ESTIMATES, API_URL, ESTIMATES_TENANT, ESTIMATES_ALL_TENANT } from '@/constants/api'
 import { EstimatePayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -8,14 +8,17 @@ export default class EstimateService {
   /**Estimate DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + ESTIMATES + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['estimates'] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['estimates'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -32,9 +35,9 @@ export default class EstimateService {
   /** Create Estimate API */
   static store = async (payload: EstimatePayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + ESTIMATES, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -58,9 +61,9 @@ export default class EstimateService {
   /** Show Estimate API */
   static show = async (estimateId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + ESTIMATES + estimateId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES) + estimateId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`estimates/${estimateId}`] } // Cache for 60 seconds
@@ -81,9 +84,9 @@ export default class EstimateService {
   /** Update Estimate API */
   static update = async (estimateId: string, payload: EstimatePayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + ESTIMATES + estimateId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES) + estimateId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -108,9 +111,9 @@ export default class EstimateService {
   /** Delete Estimate API */
   static destroy = async (estimateId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + ESTIMATES + estimateId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES) + estimateId, {
         requiresAuth: true,
         method: 'DELETE'
       })
@@ -132,11 +135,11 @@ export default class EstimateService {
   }
 
   /** Get all estimates API */
-  static getAllEstimates = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + ESTIMATES_ALL, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATES_ALL_TENANT : ESTIMATES_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['estimates-all'] } // Cache for 1 hour

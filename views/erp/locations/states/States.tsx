@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, State, Country } from '@/types'
+import { Column, DataTableApiResponse, State, Country, CountryWithStates } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -24,7 +24,7 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
 
-const States: React.FC = () => {
+const States: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = ({ countriesWithStateAndCities = [] }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -306,6 +306,7 @@ const States: React.FC = () => {
         onOpenChange={handleModalClose}
         stateId={selectedStateId || undefined}
         stateDetails={selectedState || undefined}
+        countries={countriesWithStateAndCities as Country[]}
         onSuccess={handleSuccess}
       />
     </>

@@ -12,4 +12,6 @@
  * Data delete method: DELETE /{id}
  */
 export const COMMISSION_TYPES: string = '/v1/commission-types/'
+export const COMMISSION_TYPES_TENANT: string = '/v1/tenant/commission-types/'
 export const COMMISSION_TYPES_ALL: string = '/v1/get-commission-types/'
+export const COMMISSION_TYPES_ALL_TENANT: string = '/v1/tenant/get-commission-types/'

@@ -1,6 +1,12 @@
-import { getApiUrl } from '@/utils/utility'
+import { getApiUrl, isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { ESTIMATE_TYPES, ESTIMATE_TYPES_ALL } from '@/constants/api'
+import {
+  API_URL,
+  ESTIMATE_TYPES,
+  ESTIMATE_TYPES_ALL,
+  ESTIMATE_TYPES_ALL_TENANT,
+  ESTIMATE_TYPES_TENANT
+} from '@/constants/api'
 import { EstimateTypePayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -8,14 +14,17 @@ export default class EstimateTypeService {
   /**Estimate types DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + ESTIMATE_TYPES + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['estimate-types'] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? ESTIMATE_TYPES_TENANT : ESTIMATE_TYPES) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['estimate-types'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -32,9 +41,9 @@ export default class EstimateTypeService {
   /** Create Estimate Types API */
   static store = async (payload: EstimateTypePayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + ESTIMATE_TYPES, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATE_TYPES_TENANT : ESTIMATE_TYPES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -57,13 +66,16 @@ export default class EstimateTypeService {
   /** Show Estimate Types API */
   static show = async (estimateTypeId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + ESTIMATE_TYPES + estimateTypeId, {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: [`estimate-types/${estimateTypeId}`] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? ESTIMATE_TYPES_TENANT : ESTIMATE_TYPES) + estimateTypeId,
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: [`estimate-types/${estimateTypeId}`] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -80,13 +92,16 @@ export default class EstimateTypeService {
   /** Update Estimate Types API */
   static update = async (estimateTypeId: string, payload: EstimateTypePayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + ESTIMATE_TYPES + estimateTypeId, {
-        requiresAuth: true,
-        method: 'PUT',
-        body: JSON.stringify(payload)
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? ESTIMATE_TYPES_TENANT : ESTIMATE_TYPES) + estimateTypeId,
+        {
+          requiresAuth: true,
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -107,12 +122,15 @@ export default class EstimateTypeService {
   /** Delete Estimate Types API */
   static destroy = async (estimateTypeId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + ESTIMATE_TYPES + estimateTypeId, {
-        requiresAuth: true,
-        method: 'DELETE'
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? ESTIMATE_TYPES_TENANT : ESTIMATE_TYPES) + estimateTypeId,
+        {
+          requiresAuth: true,
+          method: 'DELETE'
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -131,11 +149,11 @@ export default class EstimateTypeService {
   }
 
   /** Get All Estimate Types API */
-  static getAllEstimateTypes = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + ESTIMATE_TYPES_ALL, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATE_TYPES_ALL_TENANT : ESTIMATE_TYPES_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['estimate-types-all'] } // Cache for 1 hour

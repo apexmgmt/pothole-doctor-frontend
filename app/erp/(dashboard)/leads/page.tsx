@@ -33,7 +33,7 @@ export default async function LeadsPage() {
 
   // fetch interest levels
   try {
-    const response = await InterestLevelService.getAllInterestLevels()
+    const response = await InterestLevelService.getAll()
 
     interestLevels = response.data || []
   } catch (error) {
@@ -42,7 +42,7 @@ export default async function LeadsPage() {
 
   // fetch client sources
   try {
-    const response = await CompanyService.getAllCompanies()
+    const response = await CompanyService.getAll()
 
     companies = response.data || []
   } catch (error) {
@@ -51,7 +51,7 @@ export default async function LeadsPage() {
 
   // fetch companies
   try {
-    const response = await StaffService.getAllStaffs()
+    const response = await StaffService.getAll()
 
     staffs = response.data || []
   } catch (error) {
@@ -60,7 +60,7 @@ export default async function LeadsPage() {
 
   // fetch client sources
   try {
-    const response = await ClientSourceService.getAllClientSources()
+    const response = await ClientSourceService.getAll()
 
     clientSources = response.data || []
   } catch (error) {
@@ -69,7 +69,7 @@ export default async function LeadsPage() {
 
   // fetch service types
   try {
-    const response = await ServiceTypeService.getAllServiceTypes()
+    const response = await ServiceTypeService.getAll()
 
     serviceTypes = response.data || []
   } catch (error) {
@@ -78,7 +78,7 @@ export default async function LeadsPage() {
 
   // fetch business locations
   try {
-    const response = await BusinessLocationService.getAllBusinessLocations()
+    const response = await BusinessLocationService.getAll()
 
     businessLocations = response.data || []
   } catch (error) {

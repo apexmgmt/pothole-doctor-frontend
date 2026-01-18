@@ -17,7 +17,7 @@ export default async function TaskRemindersPage() {
   }
 
   try {
-    const response = await TaskTypeService.getAllTaskType()
+    const response = await TaskTypeService.getAll()
 
     taskTypes = response.data || []
   } catch (error) {

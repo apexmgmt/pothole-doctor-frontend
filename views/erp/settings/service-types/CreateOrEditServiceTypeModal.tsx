@@ -119,14 +119,14 @@ const CreateOrEditServiceTypeModal = ({
       title={mode === 'create' ? 'Create Service Type' : 'Edit Service Type'}
       description={mode === 'create' ? 'Add a new service type' : 'Update service type information'}
       maxWidth='sm'
-      disableClose={form.formState.isSubmitting}
+      disableClose={isLoading}
       actions={
         <div className='flex gap-3'>
           <Button
             type='button'
             variant='outline'
             onClick={onCancel}
-            disabled={form.formState.isSubmitting}
+            disabled={isLoading}
             className='flex-1'
           >
             Cancel
@@ -134,10 +134,10 @@ const CreateOrEditServiceTypeModal = ({
           <Button
             type='submit'
             onClick={form.handleSubmit(onSubmit)}
-            disabled={form.formState.isSubmitting}
+            disabled={isLoading}
             className='flex-1'
           >
-            {form.formState.isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
+            {isLoading ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
           </Button>
         </div>
       }

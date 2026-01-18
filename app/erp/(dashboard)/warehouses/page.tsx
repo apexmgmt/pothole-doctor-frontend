@@ -8,9 +8,9 @@ export default async function WarehousesPage() {
   let countriesWithStateAndCities: CountryWithStates[] = []
 
   try {
-    const response = await BusinessLocationService.getAllBusinessLocations()
+    const response = await BusinessLocationService.getAll()
 
-    businessLocations = response.data || []
+    businessLocations = response?.data ?? []
   } catch (error) {
     businessLocations = []
   }
@@ -18,7 +18,7 @@ export default async function WarehousesPage() {
   try {
     const response = await LocationService.index()
 
-    countriesWithStateAndCities = response.data || []
+    countriesWithStateAndCities = response.data ?? []
   } catch (error) {
     countriesWithStateAndCities = []
   }

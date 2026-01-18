@@ -1,6 +1,6 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { CLIENT_SMS } from '@/constants/api'
+import { API_URL, CLIENT_SMS, CLIENT_SMS_TENANT } from '@/constants/api'
 import { revalidate } from '@/services/app/cache.service'
 import { ClientSmsPayload } from '@/types'
 
@@ -8,10 +8,10 @@ export default class ClientSmsService {
   /**Client SMS DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_SMS + (queryParams ? `?${queryParams}` : ''), {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS) + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET'
       })
@@ -31,9 +31,9 @@ export default class ClientSmsService {
   /**Create Client SMS API */
   static store = async (payload: ClientSmsPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_SMS, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -54,9 +54,9 @@ export default class ClientSmsService {
   /** Show Client SMS API */
   static show = async (clientSmsId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_SMS + clientSmsId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS) + clientSmsId, {
         requiresAuth: true,
         method: 'GET'
       })
@@ -76,9 +76,9 @@ export default class ClientSmsService {
   /** Update Client SMS API */
   static update = async (clientSmsId: string, payload: ClientSmsPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_SMS + clientSmsId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS) + clientSmsId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -99,9 +99,9 @@ export default class ClientSmsService {
   /** Delete Client SMS API */
   static destroy = async (clientSmsId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CLIENT_SMS + clientSmsId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS) + clientSmsId, {
         requiresAuth: true,
         method: 'DELETE'
       })

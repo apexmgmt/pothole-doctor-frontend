@@ -1,6 +1,6 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { PARTNERS } from '@/constants/api'
+import { API_URL, PARTNERS, PARTNERS_TENANT } from '@/constants/api'
 import { PartnerPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
 
@@ -8,19 +8,22 @@ export default class PartnerService {
   /**Partner DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + PARTNERS + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['partners'] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['partners'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to fetch partners')
+        throw new Error(errorData.message || 'Failed to fetch contractors')
       }
 
       return await response.json()
@@ -32,9 +35,9 @@ export default class PartnerService {
   /**Create Partner API */
   static store = async (payload: PartnerPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PARTNERS, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -43,7 +46,7 @@ export default class PartnerService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create partner')
+        throw new Error(errorData.message || 'Failed to create contractors')
       }
 
       await revalidate('partners')
@@ -57,9 +60,9 @@ export default class PartnerService {
   /** Show Partner API */
   static show = async (partnerId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PARTNERS + partnerId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`partners/${partnerId}`] } // Cache for 60 seconds
@@ -68,7 +71,7 @@ export default class PartnerService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to fetch partner details')
+        throw new Error(errorData.message || 'Failed to fetch contractor details')
       }
 
       return await response.json()
@@ -80,9 +83,9 @@ export default class PartnerService {
   /** Update Partner API */
   static update = async (partnerId: string, payload: PartnerPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PARTNERS + partnerId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -91,7 +94,7 @@ export default class PartnerService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update partner')
+        throw new Error(errorData.message || 'Failed to update contractors')
       }
 
       await revalidate('partners')
@@ -107,9 +110,9 @@ export default class PartnerService {
   /** Delete Partner API */
   static destroy = async (partnerId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PARTNERS + partnerId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId, {
         requiresAuth: true,
         method: 'DELETE'
       })
@@ -117,7 +120,7 @@ export default class PartnerService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to delete partner')
+        throw new Error(errorData.message || 'Failed to delete contractors')
       }
 
       await revalidate('partners')
@@ -133,17 +136,20 @@ export default class PartnerService {
   /** Restore Partner API */
   static restore = async (partnerId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PARTNERS + partnerId + '/restore', {
-        requiresAuth: true,
-        method: 'POST'
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId + '/restore',
+        {
+          requiresAuth: true,
+          method: 'POST'
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to restore partner')
+        throw new Error(errorData.message || 'Failed to restore contractors')
       }
 
       await revalidate('partners')

@@ -6,15 +6,21 @@ import { getRequiredPermissionByPath } from '@/constants/routePermission'
 
 /**
  * @name getPermissions
- * @description Retrieve and decrypt user permissions from cookies
+ * @description Retrieve and decrypt user permissions from chunked cookies
  * @returns string[]
  */
 export const getPermissions = async (): Promise<string[]> => {
-  const encryptedPermissions = await CookieService.get('permissions')
-
-  if (!encryptedPermissions) return []
-
   try {
+    // Get all permission chunks
+    const chunk1 = (await CookieService.get('permissions_1')) || ''
+    const chunk2 = (await CookieService.get('permissions_2')) || ''
+    const chunk3 = (await CookieService.get('permissions_3')) || ''
+
+    // Reassemble the encrypted permissions
+    const encryptedPermissions = chunk1 + chunk2 + chunk3
+
+    if (!encryptedPermissions) return []
+
     const decryptedPermissions = decryptData(encryptedPermissions)
     let userPermissions: string[] = []
 
@@ -28,6 +34,8 @@ export const getPermissions = async (): Promise<string[]> => {
 
     return userPermissions
   } catch (error) {
+    console.error('Error getting permissions:', error)
+
     return []
   }
 }
@@ -98,41 +106,24 @@ export const isGuardType = async (guardType: string): Promise<boolean> => {
 }
 
 /**
- * Get permissions from cookies (server-side)
+ * Get permissions from chunked cookies (server-side)
  */
 export async function getPermissionsFromCookies(req: NextRequest): Promise<string[]> {
-  const encryptedPermissions = req.cookies.get('permissions')?.value
-
-  // if permissions cookie is not found, then need to fetch user data again
-  if (!encryptedPermissions) {
-    // console.log('Proxy: Permissions cookie not found, fetching user data...')
-    // const response = await AuthService.getAuthDetails()
-    // const nextRes = NextResponse.next()
-
-    // nextRes.cookies.set({
-    //   name: 'user',
-    //   value: JSON.stringify(encryptData(response?.data?.user)),
-    //   httpOnly: false,
-    //   path: '/'
-    // })
-    // nextRes.cookies.set({
-    //   name: 'roles',
-    //   value: JSON.stringify(encryptData(response?.data?.roles || [])),
-    //   httpOnly: false,
-    //   path: '/'
-    // })
-    // nextRes.cookies.set({
-    //   name: 'permissions',
-    //   value: JSON.stringify(encryptData(response?.data?.permissions || [])),
-    //   httpOnly: false,
-    //   path: '/'
-    // })
-
-    // return response?.data?.permissions || []
-    return []
-  }
-
   try {
+    // Get all permission chunks
+    const chunk1 = req.cookies.get('permissions_1')?.value || ''
+    const chunk2 = req.cookies.get('permissions_2')?.value || ''
+    const chunk3 = req.cookies.get('permissions_3')?.value || ''
+
+    // Reassemble the encrypted permissions
+    const encryptedPermissions = chunk1 + chunk2 + chunk3
+
+    if (!encryptedPermissions) {
+      console.log('No permissions cookies found')
+
+      return []
+    }
+
     const decryptedPermissions = decryptData(encryptedPermissions)
     let userPermissions: string[] = []
 
@@ -145,6 +136,8 @@ export async function getPermissionsFromCookies(req: NextRequest): Promise<strin
 
     return userPermissions
   } catch (error) {
+    console.error('Error getting permissions from cookies:', error)
+
     return []
   }
 }
@@ -162,4 +155,3 @@ export function hasRoutePermission(pathname: string, permissions: string[]): boo
 
   return permissions.includes(requiredPermission)
 }
-

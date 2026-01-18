@@ -1,6 +1,6 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { VENDOR_DOCUMENTS } from '@/constants/api'
+import { API_URL, VENDOR_DOCUMENTS, VENDOR_DOCUMENTS_TENANT } from '@/constants/api'
 import { DocumentPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -8,14 +8,17 @@ export default class VendorDocumentService {
   /**Vendor Documents DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + VENDOR_DOCUMENTS + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['vendor-documents'] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? VENDOR_DOCUMENTS_TENANT : VENDOR_DOCUMENTS) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['vendor-documents'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -32,9 +35,9 @@ export default class VendorDocumentService {
   /**Create Vendor API */
   static store = async (payload: any) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + VENDOR_DOCUMENTS, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? VENDOR_DOCUMENTS_TENANT : VENDOR_DOCUMENTS), {
         requiresAuth: true,
         method: 'POST',
         body: payload
@@ -57,13 +60,16 @@ export default class VendorDocumentService {
   /** Show Vendor Document API */
   static show = async (vendorDocumentId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + VENDOR_DOCUMENTS + vendorDocumentId, {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: [`vendor-documents/${vendorDocumentId}`] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? VENDOR_DOCUMENTS_TENANT : VENDOR_DOCUMENTS) + vendorDocumentId,
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: [`vendor-documents/${vendorDocumentId}`] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -80,16 +86,19 @@ export default class VendorDocumentService {
   /** Update Vendor Document API */
   static update = async (vendorDocumentId: string, payload: FormData) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
       // Add the _method field to simulate PUT request
       payload.append('_method', 'PUT')
 
-      const response = await apiInterceptor(apiUrl + VENDOR_DOCUMENTS + vendorDocumentId, {
-        requiresAuth: true,
-        method: 'POST',
-        body: payload // Pass FormData directly
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? VENDOR_DOCUMENTS_TENANT : VENDOR_DOCUMENTS) + vendorDocumentId,
+        {
+          requiresAuth: true,
+          method: 'POST',
+          body: payload // Pass FormData directly
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -109,12 +118,15 @@ export default class VendorDocumentService {
   /** Delete Vendor Document API */
   static destroy = async (vendorDocumentId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + VENDOR_DOCUMENTS + vendorDocumentId, {
-        requiresAuth: true,
-        method: 'DELETE'
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? VENDOR_DOCUMENTS_TENANT : VENDOR_DOCUMENTS) + vendorDocumentId,
+        {
+          requiresAuth: true,
+          method: 'DELETE'
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()

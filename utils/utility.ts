@@ -1,6 +1,51 @@
 import { NextRequest } from 'next/server'
 
 /**
+ * Check if the current request is from a tenant (subdomain or different domain)
+ * @returns Promise<boolean> true if tenant, false if main app
+ */
+export async function isTenant(): Promise<boolean> {
+  const isServer = typeof window === 'undefined'
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+
+  try {
+    // Parse the base app URL
+    const baseUrl = new URL(appBaseUrl)
+    const baseDomain = baseUrl.hostname
+
+    let currentHost = ''
+
+    if (isServer) {
+      // Server-side logic
+      const { headers } = await import('next/headers')
+      const headersList = await headers()
+
+      currentHost = headersList.get('host') || ''
+    } else {
+      // Client-side logic
+      currentHost = window.location.host
+    }
+
+    // Remove port for comparison
+    const currentHostWithoutPort = currentHost.split(':')[0]
+
+    // If current host exactly matches base domain, it's NOT a tenant
+    if (currentHostWithoutPort === baseDomain) {
+      return false
+    }
+
+    // If current host is different from base domain (subdomain or completely different domain)
+    // it's a tenant
+    return true
+  } catch (error) {
+    console.error('Error checking tenant status:', error)
+
+    // If there's an error parsing, assume it's a tenant for safety
+    return true
+  }
+}
+
+/**
  * Generates an API URL with the subdomain (if any) from the current request host.
  *
  * Uses NEXT_PUBLIC_API_URL and NEXT_PUBLIC_APP_URL from environment variables.
@@ -14,6 +59,8 @@ import { NextRequest } from 'next/server'
 export async function getApiUrl(): Promise<string> {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || ''
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+
+  return apiBaseUrl
 
   // Check environment
   const isServer = typeof window === 'undefined'

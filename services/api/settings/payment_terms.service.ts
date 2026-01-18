@@ -1,6 +1,14 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { PAYMENT_TERMS, PAYMENT_TERMS_ALL, PAYMENT_TERMS_TYPES } from '@/constants/api'
+import {
+  API_URL,
+  PAYMENT_TERMS,
+  PAYMENT_TERMS_ALL,
+  PAYMENT_TERMS_ALL_TENANT,
+  PAYMENT_TERMS_TENANT,
+  PAYMENT_TERMS_TYPES,
+  PAYMENT_TERMS_TYPES_TENANT
+} from '@/constants/api'
 import { PaymentTermPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
 
@@ -8,14 +16,17 @@ export default class PaymentTermsService {
   /**Payment Terms DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + PAYMENT_TERMS + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['payment-terms'] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['payment-terms'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -32,9 +43,9 @@ export default class PaymentTermsService {
   /** Create Payment Terms API */
   static store = async (payload: PaymentTermPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PAYMENT_TERMS, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -57,13 +68,16 @@ export default class PaymentTermsService {
   /** Show Payment Terms API */
   static show = async (paymentTermId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PAYMENT_TERMS + paymentTermId, {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: [`payment-terms/${paymentTermId}`] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS) + paymentTermId,
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: [`payment-terms/${paymentTermId}`] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -80,13 +94,16 @@ export default class PaymentTermsService {
   /** Update Payment Terms API */
   static update = async (paymentTermId: string, payload: PaymentTermPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PAYMENT_TERMS + paymentTermId, {
-        requiresAuth: true,
-        method: 'PUT',
-        body: JSON.stringify(payload)
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS) + paymentTermId,
+        {
+          requiresAuth: true,
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -107,12 +124,15 @@ export default class PaymentTermsService {
   /** Delete Payment Terms API */
   static destroy = async (paymentTermId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PAYMENT_TERMS + paymentTermId, {
-        requiresAuth: true,
-        method: 'DELETE'
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS) + paymentTermId,
+        {
+          requiresAuth: true,
+          method: 'DELETE'
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -133,12 +153,15 @@ export default class PaymentTermsService {
   /** Restore Payment Terms API */
   static restore = async (paymentTermId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PAYMENT_TERMS + paymentTermId + '/restore', {
-        requiresAuth: true,
-        method: 'POST'
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS) + paymentTermId + '/restore',
+        {
+          requiresAuth: true,
+          method: 'POST'
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -159,9 +182,9 @@ export default class PaymentTermsService {
   /** Get All Payment Term API */
   static getAllPaymentTerms = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PAYMENT_TERMS_ALL, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? PAYMENT_TERMS_ALL_TENANT : PAYMENT_TERMS_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['payment-terms-all'] } // Cache for 1 hour
@@ -182,13 +205,16 @@ export default class PaymentTermsService {
   /** Get Payment Term Types API */
   static getPaymentTermTypes = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PAYMENT_TERMS_TYPES, {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 3600, tags: ['payment-term-types'] } // Cache for 1 hour
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PAYMENT_TERMS_TYPES_TENANT : PAYMENT_TERMS_TYPES),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 3600, tags: ['payment-term-types'] } // Cache for 1 hour
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()

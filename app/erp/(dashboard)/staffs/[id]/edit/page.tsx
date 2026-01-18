@@ -18,7 +18,7 @@ const StaffEditPage = async ({ params }: { params: { id: string } }) => {
   let roles = []
 
   try {
-    const response = await RoleService.getAllRoles()
+    const response = await RoleService.getAll()
 
     roles = response?.data || []
   } catch (error) {

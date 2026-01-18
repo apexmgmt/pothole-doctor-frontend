@@ -1,6 +1,6 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from './api.interceptor'
-import { TASKS_ALL, TASKS } from '@/constants/api'
+import { TASKS_ALL, TASKS, API_URL, TASKS_TENANT, TASKS_ALL_TENANT } from '@/constants/api'
 import { TaskPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -8,14 +8,17 @@ export default class TaskService {
   /**Task DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + TASKS + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['tasks'] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['tasks'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -32,9 +35,9 @@ export default class TaskService {
   /** Create Task API */
   static store = async (payload: TaskPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + TASKS, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? TASKS_TENANT : TASKS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -58,9 +61,9 @@ export default class TaskService {
   /** Show Task API */
   static show = async (taskId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + TASKS + taskId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + taskId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`tasks/${taskId}`] } // Cache for 60 seconds
@@ -81,9 +84,9 @@ export default class TaskService {
   /** Update Task API */
   static update = async (taskId: string, payload: TaskPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + TASKS + taskId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + taskId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -108,9 +111,9 @@ export default class TaskService {
   /** Delete Task API */
   static destroy = async (taskId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + TASKS + taskId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + taskId, {
         requiresAuth: true,
         method: 'DELETE'
       })
@@ -132,11 +135,11 @@ export default class TaskService {
   }
 
   /** Get all tasks API */
-  static getAllTasks = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + TASKS_ALL, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? TASKS_ALL_TENANT : TASKS_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['tasks-all'] } // Cache for 1 hour

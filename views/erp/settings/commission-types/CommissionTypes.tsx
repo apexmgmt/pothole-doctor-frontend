@@ -46,9 +46,9 @@ const CommissionTypes: React.FC = () => {
     setSearchValue(filterOptions.search || '')
 
     // Check permissions
-    hasPermission('Create Commission Type').then(result => setCanCreateCommissionType(result))
-    hasPermission('Update Commission Type').then(result => setCanEditCommissionType(result))
-    hasPermission('Delete Commission Type').then(result => setCanDeleteCommissionType(result))
+    hasPermission('Create Commission').then(result => setCanCreateCommissionType(result))
+    hasPermission('Update Commission').then(result => setCanEditCommissionType(result))
+    hasPermission('Delete Commission').then(result => setCanDeleteCommissionType(result))
   }, [])
 
   // Debounced search update

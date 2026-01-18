@@ -1,11 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-
 import { useRouter, useSearchParams } from 'next/navigation'
-
 import { useForm, SubmitHandler } from 'react-hook-form'
-
 import Field from '@/components/erp/common/Field'
 import CustomButton from '@/components/erp/common/CustomButton'
 import AuthService from '@/services/api/auth.service'
@@ -42,16 +39,28 @@ const Login: React.FC = () => {
         .then(response => {
           setIsLoading(false)
 
-          // save the token and refresh token
-          CookieService.store('access_token', response?.data.access_token, { expires: response?.data.expires_in })
-          CookieService.store('refresh_token', response?.data.refresh_token)
-          CookieService.store('token_type', response?.data.token_type)
-          CookieService.store('user', encryptData(response?.data?.user))
-          CookieService.store('roles', encryptData(response?.data?.roles || []))
-          CookieService.store('permissions', encryptData(response?.data?.permissions || []))
+          // Save the token and refresh token
+          CookieService.storeSync('access_token', response?.data.access_token, { expires: response?.data.expires_in })
+          CookieService.storeSync('refresh_token', response?.data.refresh_token)
+          CookieService.storeSync('token_type', response?.data.token_type)
+          CookieService.storeSync('user', encryptData(response?.data?.user))
+          CookieService.storeSync('roles', encryptData(response?.data?.roles || []))
+
+          // Split permissions into chunks to avoid cookie size limit
+          const encryptedPermissions = encryptData(response?.data?.permissions || [])
+          const chunkSize = Math.ceil(encryptedPermissions.length / 3)
+
+          const chunk1 = encryptedPermissions.slice(0, chunkSize)
+          const chunk2 = encryptedPermissions.slice(chunkSize, chunkSize * 2)
+          const chunk3 = encryptedPermissions.slice(chunkSize * 2)
+
+          CookieService.storeSync('permissions_1', chunk1)
+          CookieService.storeSync('permissions_2', chunk2)
+          CookieService.storeSync('permissions_3', chunk3)
+
           dispatch(setUserData(response?.data?.user))
 
-          // redirect to the original route or default to /erp/
+          // Redirect to the original route or default to /erp/
           const redirect = searchParams.get('redirect') || '/erp/'
 
           router.push(redirect)
@@ -63,8 +72,6 @@ const Login: React.FC = () => {
         })
     } catch (error) {
       setIsLoading(false)
-
-      // Handle error here (e.g., show error message)
     }
   }
 
