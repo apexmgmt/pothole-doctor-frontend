@@ -273,3 +273,4 @@ export const checkSubdomain = (req: NextRequest) => {
 
   return { subdomain, domain, isSubdomain, isApexDomain }
 }
+
