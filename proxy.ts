@@ -18,6 +18,7 @@ export async function proxy(req: NextRequest) {
   // Handle www redirect - strip www from any domain (except localhost)
   const hostname = req.headers.get('host') || req.nextUrl.hostname
 
+  // If hostname starts with 'www.', redirect to non-www version
   if (hostname.startsWith('www.') && !hostname.includes('localhost')) {
     const newUrl = req.nextUrl.clone()
     const newHostname = hostname.replace(/^www\./, '')
@@ -25,39 +26,30 @@ export async function proxy(req: NextRequest) {
     // Update the URL with the new hostname (without www)
     newUrl.host = newHostname
 
-    console.log('Proxy: Redirecting from www -', hostname, 'to', newHostname)
-
     return NextResponse.redirect(newUrl, 301) // 301 permanent redirect
   }
 
-  // Check domain first
-  console.log('Proxy: Checking subdomain...')
+  // Check domain first and get domain info
   const domainInfo: any = checkSubdomain(req)
-
-  console.log('Proxy: Domain info result:', domainInfo)
 
   let tenantId = ''
 
+  // if domain is subdomain and domain info has subdomin then need to verify the subdomain
   if (domainInfo.isSubdomain && domainInfo.subdomain) {
-    console.log('Proxy: Subdomain detected:', domainInfo.subdomain)
-
     // if it is a subdomain then need to verify its existence
     try {
       const res = await SubdomainService.verification(domainInfo.subdomain)
 
       if (res.status !== 'success') {
-        console.log('Proxy: Subdomain verification failed - redirecting to /invalid-subdomain')
         const notFoundUrl = req.nextUrl.clone()
 
         notFoundUrl.pathname = '/invalid-subdomain'
 
         return NextResponse.redirect(notFoundUrl)
       } else {
-        console.log('Proxy: Subdomain verification successful')
         tenantId = res?.data?.tenant_id || ''
       }
     } catch (error) {
-      console.log('Proxy: Subdomain verification error - redirecting to /invalid-subdomain', error)
       const notFoundUrl = req.nextUrl.clone()
 
       notFoundUrl.pathname = '/invalid-subdomain'
@@ -72,7 +64,6 @@ export async function proxy(req: NextRequest) {
 
   // If user tries to access unauthenticated routes and already has tokens, redirect to /erp
   if (isUnauthenticatedRoute(pathname) && (accessToken || refreshToken)) {
-    console.log('Proxy: Unauthenticated route')
     const erpUrl = req.nextUrl.clone()
 
     erpUrl.pathname = '/erp'
@@ -80,9 +71,8 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(erpUrl)
   }
 
+  // if pathname is public or unauthenticated then no need to check further for tokens
   if (isPublicRoute(pathname) || isUnauthenticatedRoute(pathname)) {
-    console.log('Proxy: Public route')
-
     const response = NextResponse.next()
 
     // Set tenant cookie if subdomain was verified
@@ -98,15 +88,12 @@ export async function proxy(req: NextRequest) {
     return response
   }
 
+  // if access token is available 
   if (accessToken) {
-    console.log('Proxy: Access token available')
-
     // Check permission for the route
     const permissions = await getPermissionsFromCookies(req)
 
     if (!hasRoutePermission(pathname, permissions)) {
-      console.log('Proxy: User does not have permission for this route')
-
       const forbiddenUrl = req.nextUrl.clone()
 
       forbiddenUrl.pathname = '/erp' // or '/403' for a forbidden page
@@ -129,10 +116,8 @@ export async function proxy(req: NextRequest) {
     return response
   }
 
+  // if access token is not available but refresh token is available then try to refresh token
   if (refreshToken) {
-    console.log('Proxy: Access token is not available')
-    console.log('Proxy: Refresh token is available')
-
     try {
       const json = await AuthService.refreshToken(refreshToken)
 
@@ -147,6 +132,7 @@ export async function proxy(req: NextRequest) {
 
       const nextRes = NextResponse.next()
 
+      // set the tokens on cookies
       nextRes.cookies.set({
         name: 'access_token',
         value: newAccess,
@@ -183,14 +169,10 @@ export async function proxy(req: NextRequest) {
         })
       }
 
-      console.log('Proxy: Refreshing token successful')
-
       // Check permission after token refresh
       const permissions = await getPermissionsFromCookies(req)
 
       if (!hasRoutePermission(pathname, permissions)) {
-        console.log('Proxy: User does not have permission for this route')
-
         const forbiddenUrl = req.nextUrl.clone()
 
         forbiddenUrl.pathname = '/erp'
@@ -200,8 +182,6 @@ export async function proxy(req: NextRequest) {
 
       return nextRes
     } catch (error) {
-      console.log('Proxy: Failed to refresh token. Clearing cookies and redirecting to login...')
-
       const loginUrl = req.nextUrl.clone()
 
       loginUrl.pathname = '/erp/login'
@@ -221,7 +201,6 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  console.log('Proxy: Failed to authorized...... Logging out...........')
   const loginUrl = req.nextUrl.clone()
 
   loginUrl.pathname = '/erp/login'

@@ -3,6 +3,8 @@ import CommissionService from '@/services/api/settings/commissions.service'
 import { CommissionBase, CommissionFilter, CommissionType } from '@/types'
 import Commissions from '@/views/erp/settings/commissions/Commissions'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CommissionsPage() {
   let commissionTypes: CommissionType[] = []
   let commissionFilters: CommissionFilter[] = []

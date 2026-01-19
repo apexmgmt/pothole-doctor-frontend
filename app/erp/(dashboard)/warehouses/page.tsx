@@ -3,6 +3,8 @@ import LocationService from '@/services/api/locations/location.service'
 import { BusinessLocation, CountryWithStates } from '@/types'
 import Warehouses from '@/views/erp/warehouses/Warehouses'
 
+export const dynamic = 'force-dynamic'
+
 export default async function WarehousesPage() {
   let businessLocations: BusinessLocation[] = []
   let countriesWithStateAndCities: CountryWithStates[] = []

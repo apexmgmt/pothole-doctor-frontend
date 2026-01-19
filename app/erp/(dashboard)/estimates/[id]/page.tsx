@@ -22,6 +22,8 @@ import {
 } from '@/types'
 import EstimateDetails from '@/views/erp/estimates/EstimateDetails'
 
+export const dynamic = 'force-dynamic'
+
 const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
   const { id } = await params
   let estimate: Estimate = {} as Estimate

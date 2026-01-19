@@ -5,6 +5,8 @@ import VendorService from '@/services/api/vendors/vendors.service'
 import { ProductCategory, ServiceType, Unit, Vendor } from '@/types'
 import Products from '@/views/erp/products/Products'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProductsPage() {
   let productCategories: ProductCategory[] = []
   let uomUnits: Unit[] = []

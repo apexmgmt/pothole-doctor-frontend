@@ -2,6 +2,8 @@ import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import { PaymentTerm } from '@/types'
 import ContactTypes from '@/views/erp/settings/contact-types/ContactTypes'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ContactTypesPage() {
   let payment_terms: PaymentTerm[] = []
 

@@ -20,6 +20,8 @@ import {
 } from '@/types'
 import Clients from '@/views/erp/clients/Clients'
 
+export const dynamic = 'force-dynamic'
+
 export default async function LeadsPage() {
   let interestLevels: InterestLevel[] = []
   let companies: Company[] = []

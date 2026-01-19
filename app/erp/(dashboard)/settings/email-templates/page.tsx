@@ -2,6 +2,8 @@ import EmailTemplateService from '@/services/api/settings/email_templates.servic
 import { EmailTemplate } from '@/types'
 import EmailTemplates from '@/views/erp/settings/email-templates/EmailTemplates'
 
+export const dynamic = 'force-dynamic'
+
 export default async function EmailTemplatesPage() {
   let emailTemplates: EmailTemplate[] = []
 

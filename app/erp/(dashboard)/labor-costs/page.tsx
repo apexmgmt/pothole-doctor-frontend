@@ -3,6 +3,8 @@ import UnitService from '@/services/api/settings/units.service'
 import { ServiceType, Unit } from '@/types'
 import LaborCosts from '@/views/erp/labor-costs/LaborCosts'
 
+export const dynamic = 'force-dynamic'
+
 export default async function LaborCostsPage() {
   let serviceTypes: ServiceType[] = []
   let units: Unit[] = []

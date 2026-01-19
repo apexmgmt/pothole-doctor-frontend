@@ -6,6 +6,8 @@ import StaffService from '@/services/api/staff.service'
 import { Client, EstimateType, PaymentTerm, ServiceType, Staff } from '@/types'
 import Estimates from '@/views/erp/estimates/Estimates'
 
+export const dynamic = 'force-dynamic'
+
 export default async function EstimatesPage() {
   let serviceTypes: ServiceType[] = []
   let estimateTypes: EstimateType[] = []

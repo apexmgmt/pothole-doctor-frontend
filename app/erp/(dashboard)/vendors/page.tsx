@@ -4,6 +4,8 @@ import TaxTypeService from '@/services/api/tax_types.service'
 import { CountryWithStates, PaymentTerm, TaxType } from '@/types'
 import Vendors from '@/views/erp/vendors/Vendors'
 
+export const dynamic = 'force-dynamic'
+
 export default async function VendorsPage() {
   let taxTypes: TaxType[] = []
   let countriesWithStatesAndCities: CountryWithStates[] = []

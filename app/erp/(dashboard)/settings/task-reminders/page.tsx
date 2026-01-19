@@ -3,6 +3,8 @@ import TaskTypeService from '@/services/api/settings/task_types.service'
 import { TaskReminder, TaskReminderChannel, TaskReminderTime, TaskType } from '@/types'
 import TaskReminders from '@/views/erp/settings/task-reminders/TaskReminders'
 
+export const dynamic = 'force-dynamic'
+
 export default async function TaskRemindersPage() {
   let taskReminders: TaskReminder[] = []
   let taskTypes: TaskType[] = []

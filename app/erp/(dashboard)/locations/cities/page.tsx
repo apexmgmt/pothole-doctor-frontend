@@ -2,6 +2,8 @@ import LocationService from '@/services/api/locations/location.service'
 import { CountryWithStates } from '@/types'
 import Cities from '@/views/erp/locations/cities/Cities'
 
+export const dynamic = 'force-dynamic'
+
 const CitiesPage = async () => {
   let countriesWithStateAndCities: CountryWithStates[] = []
 

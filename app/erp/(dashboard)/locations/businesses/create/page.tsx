@@ -2,6 +2,8 @@ import LocationService from '@/services/api/locations/location.service'
 import { Location } from '@/types'
 import CreateOrEditBusinessLocation from '@/views/erp/locations/businesses/CreateOrEditBusinessLocation'
 
+export const dynamic = 'force-dynamic'
+
 const CreateBusinessLocationPage = async () => {
   let countriesWithStateAndCities: Location['countries'] = []
 

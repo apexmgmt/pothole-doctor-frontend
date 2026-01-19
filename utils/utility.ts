@@ -238,17 +238,10 @@ export const checkSubdomain = (req: NextRequest) => {
   let isSubdomain = false
   let isApexDomain = hostnameWithoutPort === apexDomain
 
-  console.log('checkSubdomain - hostname:', hostname)
-  console.log('checkSubdomain - hostnameWithoutPort:', hostnameWithoutPort)
-  console.log('checkSubdomain - apexDomain:', apexDomain)
-  console.log('checkSubdomain - domainParts:', domainParts)
-
   if (!isApexDomain) {
     // Check if this could be a subdomain of the apex domain
     if (domainParts.length >= 2) {
       const possibleBaseDomain = domainParts.slice(1).join('.')
-
-      console.log('checkSubdomain - possibleBaseDomain:', possibleBaseDomain)
 
       if (possibleBaseDomain === apexDomain && domainParts[0] !== 'www') {
         // This is a subdomain of the apex domain
@@ -268,8 +261,6 @@ export const checkSubdomain = (req: NextRequest) => {
       isSubdomain = false
     }
   }
-
-  console.log('checkSubdomain - result:', { subdomain, domain, isSubdomain, isApexDomain })
 
   return { subdomain, domain, isSubdomain, isApexDomain }
 }

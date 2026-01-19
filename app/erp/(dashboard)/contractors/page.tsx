@@ -6,6 +6,8 @@ import SkillService from '@/services/api/skills.service'
 import { BusinessLocation, Company, CountryWithStates, PartnerType, Skill } from '@/types'
 import Partners from '@/views/erp/partners/Partners'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PartnersPage() {
   let businessLocations: BusinessLocation[] = []
   let partnerTypes: PartnerType[] = []

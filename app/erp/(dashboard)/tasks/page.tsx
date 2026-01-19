@@ -5,6 +5,8 @@ import StaffService from '@/services/api/staff.service'
 import { Client, Staff, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import Tasks from '@/views/erp/tasks/Tasks'
 
+export const dynamic = 'force-dynamic'
+
 export default async function TasksPage() {
   let staffs: Staff[] = []
   let clients: Client[] = []

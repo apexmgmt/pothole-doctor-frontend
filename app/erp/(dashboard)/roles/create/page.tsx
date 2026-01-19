@@ -1,6 +1,8 @@
 import PermissionService from '@/services/api/permission.service'
 import CreateOrEditRole from '@/views/erp/roles/CreateOrEditRole'
 
+export const dynamic = 'force-dynamic'
+
 const CreateRole = async () => {
   let permissions = {}
 
