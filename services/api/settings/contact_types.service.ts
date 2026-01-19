@@ -1,6 +1,12 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { CONTACT_TYPES, CONTACT_TYPES_ALL } from '@/constants/api'
+import {
+  API_URL,
+  CONTACT_TYPES,
+  CONTACT_TYPES_ALL,
+  CONTACT_TYPES_ALL_TENANT,
+  CONTACT_TYPES_TENANT
+} from '@/constants/api'
 import { ContactTypePayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -8,14 +14,17 @@ export default class ContactTypeService {
   /**Contact types DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + CONTACT_TYPES + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['contact-types'] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? CONTACT_TYPES_TENANT : CONTACT_TYPES) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['contact-types'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -32,9 +41,9 @@ export default class ContactTypeService {
   /** Create Contact Types API */
   static store = async (payload: ContactTypePayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CONTACT_TYPES, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CONTACT_TYPES_TENANT : CONTACT_TYPES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -57,13 +66,16 @@ export default class ContactTypeService {
   /** Show Contact Types API */
   static show = async (contactTypeId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CONTACT_TYPES + contactTypeId, {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: [`contact-types/${contactTypeId}`] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? CONTACT_TYPES_TENANT : CONTACT_TYPES) + contactTypeId,
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: [`contact-types/${contactTypeId}`] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -80,13 +92,16 @@ export default class ContactTypeService {
   /** Update Contact Types API */
   static update = async (contactTypeId: string, payload: ContactTypePayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CONTACT_TYPES + contactTypeId, {
-        requiresAuth: true,
-        method: 'PUT',
-        body: JSON.stringify(payload)
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? CONTACT_TYPES_TENANT : CONTACT_TYPES) + contactTypeId,
+        {
+          requiresAuth: true,
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -107,12 +122,15 @@ export default class ContactTypeService {
   /** Delete Contact Types API */
   static destroy = async (contactTypeId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CONTACT_TYPES + contactTypeId, {
-        requiresAuth: true,
-        method: 'DELETE'
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? CONTACT_TYPES_TENANT : CONTACT_TYPES) + contactTypeId,
+        {
+          requiresAuth: true,
+          method: 'DELETE'
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -131,11 +149,11 @@ export default class ContactTypeService {
   }
 
   /** Get All Contact Types API */
-  static getAllContactTypes = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + CONTACT_TYPES_ALL, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CONTACT_TYPES_ALL_TENANT : CONTACT_TYPES_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['contact-types-all'] } // Cache for 1 hour

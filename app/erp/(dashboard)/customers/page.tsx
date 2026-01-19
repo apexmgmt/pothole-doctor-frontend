@@ -105,7 +105,7 @@ export default async function CustomersPage() {
 
   // fetch contact types
   try {
-    const response = await ContactTypeService.getAllContactTypes()
+    const response = await ContactTypeService.getAll()
 
     contactTypes = response.data || []
   } catch (error) {
