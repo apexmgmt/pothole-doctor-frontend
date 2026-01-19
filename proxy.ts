@@ -1,78 +1,70 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-import { isPublicRoute, isUnauthenticatedRoute, getRequiredPermissionByPath } from './constants/routePermission'
+import { isPublicRoute, isUnauthenticatedRoute } from './constants/routePermission'
 import AuthService from './services/api/auth.service'
-import { decryptData, encryptData } from './utils/encryption'
-
-/**
- * Get permissions from cookies (server-side)
- */
-async function getPermissionsFromCookies(req: NextRequest): Promise<string[]> {
-  const encryptedPermissions = req.cookies.get('permissions')?.value
-
-  // if permissions cookie is not found, then need to fetch user data again
-  if (!encryptedPermissions) {
-    // console.log('Proxy: Permissions cookie not found, fetching user data...')
-    // const response = await AuthService.getAuthDetails()
-    // const nextRes = NextResponse.next()
-
-    // nextRes.cookies.set({
-    //   name: 'user',
-    //   value: JSON.stringify(encryptData(response?.data?.user)),
-    //   httpOnly: false,
-    //   path: '/'
-    // })
-    // nextRes.cookies.set({
-    //   name: 'roles',
-    //   value: JSON.stringify(encryptData(response?.data?.roles || [])),
-    //   httpOnly: false,
-    //   path: '/'
-    // })
-    // nextRes.cookies.set({
-    //   name: 'permissions',
-    //   value: JSON.stringify(encryptData(response?.data?.permissions || [])),
-    //   httpOnly: false,
-    //   path: '/'
-    // })
-
-    // return response?.data?.permissions || []
-    return []
-  }
-
-  try {
-    const decryptedPermissions = decryptData(encryptedPermissions)
-    let userPermissions: string[] = []
-
-    if (process.env.NODE_ENV === 'development') {
-      userPermissions =
-        typeof decryptedPermissions === 'string' ? JSON.parse(decryptedPermissions) : decryptedPermissions
-    } else {
-      userPermissions = decryptedPermissions
-    }
-
-    return userPermissions
-  } catch (error) {
-    return []
-  }
-}
-
-/**
- * Check if user has permission for the current route
- */
-function hasRoutePermission(pathname: string, permissions: string[]): boolean {
-  const requiredPermission = getRequiredPermissionByPath(pathname)
-
-  if (!requiredPermission) {
-    // Route doesn't require specific permission
-    return true
-  }
-
-  return permissions.includes(requiredPermission)
-}
+import { getPermissionsFromCookies, hasRoutePermission } from './utils/role-permission'
+import { checkSubdomain } from './utils/utility'
+import SubdomainService from './services/api/subdomain.service'
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
+
+  // Skip domain validation for error pages to prevent redirect loops
+  if (pathname === '/404' || pathname === '/invalid-subdomain') {
+    return NextResponse.next()
+  }
+
+  // Handle www redirect - strip www from any domain (except localhost)
+  const hostname = req.headers.get('host') || req.nextUrl.hostname
+
+  if (hostname.startsWith('www.') && !hostname.includes('localhost')) {
+    const newUrl = req.nextUrl.clone()
+    const newHostname = hostname.replace(/^www\./, '')
+
+    // Update the URL with the new hostname (without www)
+    newUrl.host = newHostname
+
+    console.log('Proxy: Redirecting from www -', hostname, 'to', newHostname)
+
+    return NextResponse.redirect(newUrl, 301) // 301 permanent redirect
+  }
+
+  // Check domain first
+  console.log('Proxy: Checking subdomain...')
+  const domainInfo: any = checkSubdomain(req)
+
+  console.log('Proxy: Domain info result:', domainInfo)
+
+  let tenantId = ''
+
+  if (domainInfo.isSubdomain && domainInfo.subdomain) {
+    console.log('Proxy: Subdomain detected:', domainInfo.subdomain)
+
+    // if it is a subdomain then need to verify its existence
+    try {
+      const res = await SubdomainService.verification(domainInfo.subdomain)
+
+      if (res.status !== 'success') {
+        console.log('Proxy: Subdomain verification failed - redirecting to /invalid-subdomain')
+        const notFoundUrl = req.nextUrl.clone()
+
+        notFoundUrl.pathname = '/invalid-subdomain'
+
+        return NextResponse.redirect(notFoundUrl)
+      } else {
+        console.log('Proxy: Subdomain verification successful')
+        tenantId = res?.data?.tenant_id || ''
+      }
+    } catch (error) {
+      console.log('Proxy: Subdomain verification error - redirecting to /invalid-subdomain', error)
+      const notFoundUrl = req.nextUrl.clone()
+
+      notFoundUrl.pathname = '/invalid-subdomain'
+
+      return NextResponse.redirect(notFoundUrl)
+    }
+  }
 
   let accessToken = req.cookies.get('access_token')?.value
   let refreshToken = req.cookies.get('refresh_token')?.value
@@ -91,7 +83,19 @@ export async function proxy(req: NextRequest) {
   if (isPublicRoute(pathname) || isUnauthenticatedRoute(pathname)) {
     console.log('Proxy: Public route')
 
-    return NextResponse.next()
+    const response = NextResponse.next()
+
+    // Set tenant cookie if subdomain was verified
+    if (tenantId) {
+      response.cookies.set({
+        name: 'tenant',
+        value: tenantId,
+        httpOnly: false,
+        path: '/'
+      })
+    }
+
+    return response
   }
 
   if (accessToken) {
@@ -110,7 +114,19 @@ export async function proxy(req: NextRequest) {
       return NextResponse.redirect(forbiddenUrl)
     }
 
-    return NextResponse.next()
+    const response = NextResponse.next()
+
+    // Set tenant cookie if subdomain was verified
+    if (tenantId) {
+      response.cookies.set({
+        name: 'tenant',
+        value: tenantId,
+        httpOnly: false,
+        path: '/'
+      })
+    }
+
+    return response
   }
 
   if (refreshToken) {
@@ -157,6 +173,16 @@ export async function proxy(req: NextRequest) {
         })
       }
 
+      // Set tenant cookie if subdomain was verified
+      if (tenantId) {
+        nextRes.cookies.set({
+          name: 'tenant',
+          value: tenantId,
+          httpOnly: false,
+          path: '/'
+        })
+      }
+
       console.log('Proxy: Refreshing token successful')
 
       // Check permission after token refresh
@@ -186,6 +212,10 @@ export async function proxy(req: NextRequest) {
       redirectRes.cookies.delete('access_token')
       redirectRes.cookies.delete('refresh_token')
       redirectRes.cookies.delete('token_type')
+      redirectRes.cookies.delete('permissions_1')
+      redirectRes.cookies.delete('permissions_2')
+      redirectRes.cookies.delete('permissions_3')
+      redirectRes.cookies.delete('roles')
 
       return redirectRes
     }

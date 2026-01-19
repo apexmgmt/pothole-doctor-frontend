@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
-import { State, StatePayload, Location } from '@/types'
+import { State, StatePayload, Location, Country } from '@/types'
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -27,6 +27,7 @@ interface CreateOrEditStateModalProps {
   onOpenChange: (open: boolean) => void
   stateId?: string
   stateDetails?: State
+  countries: Country[]
   onSuccess?: () => void
 }
 
@@ -43,6 +44,7 @@ const CreateOrEditStateModal = ({
   onOpenChange,
   stateId,
   stateDetails,
+  countries,
   onSuccess
 }: CreateOrEditStateModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -77,7 +79,7 @@ const CreateOrEditStateModal = ({
   // Reset form when stateDetails changes or modal opens
   useEffect(() => {
     if (open) {
-      fetchCountriesWithStateAndCities()
+      // fetchCountriesWithStateAndCities()
       form.reset({
         name: stateDetails?.name || '',
         country_id: stateDetails?.country?.id?.toString() || ''
@@ -180,9 +182,9 @@ const CreateOrEditStateModal = ({
                       <SelectValue placeholder='Select a country' />
                     </SelectTrigger>
                   </FormControl>
-                  {countriesWithStateAndCities.length > 0 && (
+                  {countries.length > 0 && (
                     <SelectContent>
-                      {countriesWithStateAndCities?.map(country => (
+                      {countries?.map(country => (
                         <SelectItem key={country.id} value={country.id.toString()}>
                           {country.name}
                         </SelectItem>

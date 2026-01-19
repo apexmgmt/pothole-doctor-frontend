@@ -14,6 +14,7 @@
  * Data restore method: POST /{id}/restore
  */
 export const PARTNERS: string = '/v1/partners/'
+export const PARTNERS_TENANT: string = '/v1/tenant/partners/'
 
 /**
  * API endpoint for partner documents
@@ -29,3 +30,4 @@ export const PARTNERS: string = '/v1/partners/'
  * Data delete method: DELETE /{id}
  */
 export const PARTNER_DOCUMENTS: string = '/v1/partner-documents/'
+export const PARTNER_DOCUMENTS_TENANT: string = '/v1/tenant/partner-documents/'

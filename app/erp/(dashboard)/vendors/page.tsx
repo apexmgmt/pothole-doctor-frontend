@@ -10,7 +10,7 @@ export default async function VendorsPage() {
   let paymentTerms: PaymentTerm[] = []
 
   try {
-    const response = await TaxTypeService.getAllTaxTypes()
+    const response = await TaxTypeService.getAll()
 
     taxTypes = response.data || []
   } catch (error) {

@@ -435,7 +435,7 @@ export default function EditEmailTemplateDialog({
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={isLoading}>
-            Save Changes
+            {isLoading ? 'Saving...' : 'Save Changes'}
           </Button>
         </>
       }

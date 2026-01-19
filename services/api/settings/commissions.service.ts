@@ -1,6 +1,15 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { COMMISSION_BASES_ALL, COMMISSION_FILTERS_ALL, COMMISSION_TYPES_ALL, COMMISSIONS } from '@/constants/api'
+import {
+  API_URL,
+  COMMISSION_BASES_ALL,
+  COMMISSION_BASES_ALL_TENANT,
+  COMMISSION_FILTERS_ALL,
+  COMMISSION_FILTERS_ALL_TENANT,
+  COMMISSION_TYPES_ALL,
+  COMMISSIONS,
+  COMMISSIONS_TENANT
+} from '@/constants/api'
 import { CommissionPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -8,14 +17,17 @@ export default class CommissionService {
   /**Commission DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + COMMISSIONS + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['commissions'] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['commissions'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -32,9 +44,9 @@ export default class CommissionService {
   /** Create Commission API */
   static store = async (payload: CommissionPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + COMMISSIONS, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -58,9 +70,9 @@ export default class CommissionService {
   /** Show Commission API */
   static show = async (commissionId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + COMMISSIONS + commissionId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + commissionId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`commissions/${commissionId}`] } // Cache for 60 seconds
@@ -81,9 +93,9 @@ export default class CommissionService {
   /** Update Commission API */
   static update = async (commissionId: string, payload: CommissionPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + COMMISSIONS + commissionId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + commissionId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -108,9 +120,9 @@ export default class CommissionService {
   /** Delete Commission API */
   static destroy = async (commissionId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + COMMISSIONS + commissionId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + commissionId, {
         requiresAuth: true,
         method: 'DELETE'
       })
@@ -134,13 +146,16 @@ export default class CommissionService {
   /** Get all commission filters API */
   static getAllCommissionFilters = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + COMMISSION_FILTERS_ALL, {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 3600, tags: ['commission-filters-all'] } // Cache for 1 hour
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? COMMISSION_FILTERS_ALL_TENANT : COMMISSION_FILTERS_ALL),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 3600, tags: ['commission-filters-all'] } // Cache for 1 hour
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -157,13 +172,16 @@ export default class CommissionService {
   /** Get all commission bases API */
   static getAllCommissionBases = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + COMMISSION_BASES_ALL, {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 3600, tags: ['commission-bases-all'] } // Cache for 1 hour
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? COMMISSION_BASES_ALL_TENANT : COMMISSION_BASES_ALL),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 3600, tags: ['commission-bases-all'] } // Cache for 1 hour
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()

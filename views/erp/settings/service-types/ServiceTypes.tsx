@@ -45,9 +45,9 @@ const ServiceTypes: React.FC = () => {
     setSearchValue(filterOptions.search || '')
 
     // Check permissions
-    hasPermission('Create Service Types').then(result => setCanCreateServiceType(result))
-    hasPermission('Edit Service Types').then(result => setCanEditServiceType(result))
-    hasPermission('Delete Service Types').then(result => setCanDeleteServiceType(result))
+    hasPermission('Create Service Type').then(result => setCanCreateServiceType(result))
+    hasPermission('Update Service Type').then(result => setCanEditServiceType(result))
+    hasPermission('Delete Service Type').then(result => setCanDeleteServiceType(result))
   }, [])
 
   // Debounced search update
@@ -189,15 +189,13 @@ const ServiceTypes: React.FC = () => {
             {(canEditServiceType || (canDeleteServiceType && row.is_editable)) && (
               <ThreeDotButton
                 buttons={[
-                  ...(canEditServiceType
-                    ? [
-                        <EditButton
-                          tooltip='Edit Service Type Information'
-                          onClick={() => handleOpenEditModal(row.id)}
-                          variant='text'
-                        />
-                      ]
-                    : []),
+                  canEditServiceType && (
+                    <EditButton
+                      tooltip='Edit Service Type Information'
+                      onClick={() => handleOpenEditModal(row.id)}
+                      variant='text'
+                    />
+                  ),
                   row.is_editable && canDeleteServiceType && (
                     <DeleteButton
                       tooltip='Delete Service Type'

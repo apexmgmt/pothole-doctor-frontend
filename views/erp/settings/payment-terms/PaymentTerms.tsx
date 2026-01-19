@@ -192,24 +192,20 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
           {(canEditPaymentTerm || canDeletePaymentTerm) && (
             <ThreeDotButton
               buttons={[
-                ...(canEditPaymentTerm
-                  ? [
-                      <EditButton
-                        tooltip='Edit Payment Term Information'
-                        onClick={() => handleOpenEditModal(row.id)}
-                        variant='text'
-                      />
-                    ]
-                  : []),
-                ...(canDeletePaymentTerm
-                  ? [
-                      <DeleteButton
-                        tooltip='Delete Payment Term'
-                        variant='text'
-                        onClick={() => handleDeletePaymentTerm(row.id)}
-                      />
-                    ]
-                  : [])
+                canEditPaymentTerm && (
+                  <EditButton
+                    tooltip='Edit Payment Term Information'
+                    onClick={() => handleOpenEditModal(row.id)}
+                    variant='text'
+                  />
+                ),
+                canDeletePaymentTerm && (
+                  <DeleteButton
+                    tooltip='Delete Payment Term'
+                    variant='text'
+                    onClick={() => handleDeletePaymentTerm(row.id)}
+                  />
+                )
               ]}
             />
           )}

@@ -1,6 +1,6 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { UNITS, UNITS_ALL } from '@/constants/api'
+import { API_URL, UNITS, UNITS_ALL, UNITS_ALL_TENANT, UNITS_TENANT } from '@/constants/api'
 import { UnitPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
 
@@ -8,14 +8,17 @@ export default class UnitService {
   /**Units DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + UNITS + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['units'] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['units'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -32,9 +35,9 @@ export default class UnitService {
   /** Create Units API */
   static store = async (payload: UnitPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + UNITS, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? UNITS_TENANT : UNITS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -60,9 +63,9 @@ export default class UnitService {
   /** Show Units API */
   static show = async (unitId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + UNITS + unitId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + unitId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`units/${unitId}`] } // Cache for 60 seconds
@@ -83,9 +86,9 @@ export default class UnitService {
   /** Update Units API */
   static update = async (unitId: string, payload: UnitPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + UNITS + unitId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + unitId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -112,9 +115,9 @@ export default class UnitService {
   /** Delete Unit API */
   static destroy = async (unitId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + UNITS + unitId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + unitId, {
         requiresAuth: true,
         method: 'DELETE'
       })
@@ -138,15 +141,18 @@ export default class UnitService {
   }
 
   /** Get all Units API */
-  static getAllUnits = async (group?: string | 'uom' | 'measure') => {
+  static getAll = async (group?: string | 'uom' | 'measure') => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + UNITS_ALL + (group ? `?group=${group}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 3600, tags: ['units-all' + (group ? `-${group}` : '')] } // Cache for 1 hour
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? UNITS_ALL_TENANT : UNITS_ALL) + (group ? `?group=${group}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 3600, tags: ['units-all' + (group ? `-${group}` : '')] } // Cache for 1 hour
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()

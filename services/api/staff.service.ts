@@ -1,6 +1,6 @@
 import { StaffPayload } from '@/types'
-import { getApiUrl } from '@/utils/utility'
-import { STAFFS, STAFFS_ALL } from '@/constants/api'
+import { isTenant } from '@/utils/utility'
+import { API_URL, STAFFS, STAFFS_ALL, STAFFS_ALL_TENANT, STAFFS_TENANT } from '@/constants/api'
 import apiInterceptor from './api.interceptor'
 import { revalidate } from '../app/cache.service'
 
@@ -8,14 +8,17 @@ export default class StaffService {
   /**Staffs DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + STAFFS + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['staffs'] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['staffs'] } // Cache for 60 seconds
+        } 
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -32,9 +35,9 @@ export default class StaffService {
   /**Create Staff API */
   static store = async (payload: StaffPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + STAFFS, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -57,9 +60,9 @@ export default class StaffService {
 
   static show = async (staffId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + STAFFS + staffId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + staffId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`staffs/${staffId}`] } // Cache for 60 seconds
@@ -79,9 +82,9 @@ export default class StaffService {
 
   static update = async (staffId: string, payload: StaffPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + STAFFS + staffId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + staffId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -105,9 +108,9 @@ export default class StaffService {
 
   static destroy = async (staffId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + STAFFS + staffId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + staffId, {
         requiresAuth: true,
         method: 'DELETE'
       })
@@ -128,11 +131,11 @@ export default class StaffService {
     }
   }
 
-  static getAllStaffs = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + STAFFS_ALL, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? STAFFS_ALL_TENANT : STAFFS_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['staffs-all'] } // Cache for 1 hour

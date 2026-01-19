@@ -12,33 +12,33 @@ export default async function ProductsPage() {
   let serviceTypes: ServiceType[] = []
 
   try {
-    const response = await ProductCategoryService.getAllProductCategories()
+    const response = await ProductCategoryService.getAll()
 
-    productCategories = response.data || []
+    productCategories = response.data ?? []
   } catch (error) {
     productCategories = []
   }
 
   try {
-    const response = await UnitService.getAllUnits('uom')
+    const response = await UnitService.getAll('uom')
 
-    uomUnits = response.data || []
+    uomUnits = response.data ?? []
   } catch (error) {
     uomUnits = []
   }
 
   try {
-    const response = await ServiceTypeService.getAllServiceTypes()
+    const response = await ServiceTypeService.getAll()
 
-    serviceTypes = response.data || []
+    serviceTypes = response.data ?? []
   } catch (error) {
     serviceTypes = []
   }
 
   try {
-    const response = await VendorService.getAllVendors()
+    const response = await VendorService.getAll()
 
-    vendors = response.data || []
+    vendors = response.data ?? []
   } catch (error) {
     vendors = []
   }

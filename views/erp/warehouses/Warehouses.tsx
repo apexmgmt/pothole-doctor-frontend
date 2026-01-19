@@ -218,24 +218,20 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
           {(canEditWarehouse || canDeleteWarehouse) && (
             <ThreeDotButton
               buttons={[
-                ...(canEditWarehouse
-                  ? [
-                      <EditButton
-                        tooltip='Edit Warehouse Information'
-                        onClick={() => handleOpenEditModal(row.id)}
-                        variant='text'
-                      />
-                    ]
-                  : []),
-                ...(canDeleteWarehouse
-                  ? [
-                      <DeleteButton
-                        tooltip='Delete Warehouse'
-                        variant='text'
-                        onClick={() => handleDeleteWarehouse(row.id)}
-                      />
-                    ]
-                  : [])
+                canEditWarehouse && (
+                  <EditButton
+                    tooltip='Edit Warehouse Information'
+                    onClick={() => handleOpenEditModal(row.id)}
+                    variant='text'
+                  />
+                ),
+                canDeleteWarehouse && (
+                  <DeleteButton
+                    tooltip='Delete Warehouse'
+                    variant='text'
+                    onClick={() => handleDeleteWarehouse(row.id)}
+                  />
+                )
               ]}
             />
           )}

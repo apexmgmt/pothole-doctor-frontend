@@ -14,7 +14,7 @@ export default async function PartnersPage() {
   let skills: Skill[] = []
 
   try {
-    const response = await BusinessLocationService.getAllBusinessLocations()
+    const response = await BusinessLocationService.getAll()
 
     businessLocations = response.data || []
   } catch (error) {
@@ -22,7 +22,7 @@ export default async function PartnersPage() {
   }
 
   try {
-    const response = await PartnerTypesService.getAllPartnerTypes()
+    const response = await PartnerTypesService.getAll()
 
     partnerTypes = response.data || []
   } catch (error) {
@@ -38,7 +38,7 @@ export default async function PartnersPage() {
   }
 
   try {
-    const response = await CompanyService.getAllCompanies()
+    const response = await CompanyService.getAll()
 
     companies = response.data || []
   } catch (error) {
@@ -46,7 +46,7 @@ export default async function PartnersPage() {
   }
 
   try {
-    const response = await SkillService.getAllSkills()
+    const response = await SkillService.getAll()
 
     skills = response.data || []
   } catch (error) {

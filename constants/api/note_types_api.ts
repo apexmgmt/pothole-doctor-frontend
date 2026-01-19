@@ -12,4 +12,6 @@
  * Data delete method: DELETE /{id}
  */
 export const NOTE_TYPES: string = '/v1/note-types/'
+export const NOTE_TYPES_TENANT: string = '/v1/tenant/note-types/'
 export const NOTE_TYPES_ALL: string = '/v1/get-note-types/'
+export const NOTE_TYPES_ALL_TENANT: string = '/v1/tenant/get-note-types/'

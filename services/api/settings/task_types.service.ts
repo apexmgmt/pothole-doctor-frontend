@@ -1,6 +1,6 @@
-import { getApiUrl } from '@/utils/utility'
+import { getApiUrl, isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { TASK_TYPES, TASK_TYPES_ALL } from '@/constants/api'
+import { API_URL, TASK_TYPES, TASK_TYPES_ALL, TASK_TYPES_ALL_TENANT, TASK_TYPES_TENANT } from '@/constants/api'
 import { TaskTypePayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -8,14 +8,17 @@ export default class TaskTypeService {
   /**Task type DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + TASK_TYPES + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['task-types'] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['task-types'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -32,9 +35,9 @@ export default class TaskTypeService {
   /**Create Task Type API */
   static store = async (payload: TaskTypePayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + TASK_TYPES, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -58,9 +61,9 @@ export default class TaskTypeService {
   /** Show Task Type API */
   static show = async (taskTypeId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + TASK_TYPES + taskTypeId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`task-types/${taskTypeId}`] } // Cache for 60 seconds
@@ -81,9 +84,9 @@ export default class TaskTypeService {
   /** Update Task Type API */
   static update = async (taskTypeId: string, payload: TaskTypePayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + TASK_TYPES + taskTypeId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -108,9 +111,9 @@ export default class TaskTypeService {
   /** Delete Task Type API */
   static destroy = async (taskTypeId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + TASK_TYPES + taskTypeId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId, {
         requiresAuth: true,
         method: 'DELETE'
       })
@@ -134,12 +137,15 @@ export default class TaskTypeService {
   /** Restore Task Type API */
   static restore = async (taskTypeId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + TASK_TYPES + taskTypeId + '/restore', {
-        requiresAuth: true,
-        method: 'POST'
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId + '/restore',
+        {
+          requiresAuth: true,
+          method: 'POST'
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -158,11 +164,11 @@ export default class TaskTypeService {
   }
 
   /**Get all task types */
-  static getAllTaskType = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + TASK_TYPES_ALL, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? TASK_TYPES_ALL_TENANT : TASK_TYPES_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['task-types-all'] } // Cache for 60 seconds

@@ -9,7 +9,7 @@ export default async function CommissionsPage() {
   let commissionBases: CommissionBase[] = []
 
   try {
-    const response = await CommissionTypeService.getAllCommissionTypes()
+    const response = await CommissionTypeService.getAll()
 
     commissionTypes = response.data || []
   } catch (error) {

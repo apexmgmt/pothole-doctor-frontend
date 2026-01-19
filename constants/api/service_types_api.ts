@@ -14,4 +14,6 @@
  * Data restore method: POST /{id}/restore
  */
 export const SERVICE_TYPES: string = '/v1/service-types/'
+export const SERVICE_TYPES_TENANT: string = '/v1/tenant/service-types/'
 export const SERVICE_TYPES_ALL: string = '/v1/get-service-types/'
+export const SERVICE_TYPES_ALL_TENANT: string = '/v1/tenant/get-service-types/'

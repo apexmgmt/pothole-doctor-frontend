@@ -82,6 +82,8 @@ const CreateOrEditPaymentTermModal = ({
   }, [paymentTermDetails, open, form])
 
   const onSubmit = async (values: FormValues) => {
+    setIsLoading(true)
+
     const payload: PaymentTermPayload = {
       name: values.name,
       type: values.type,
@@ -97,12 +99,15 @@ const CreateOrEditPaymentTermModal = ({
             form.reset()
             onOpenChange(false)
             onSuccess?.()
+            setIsLoading(false)
           })
           .catch(error => {
             toast.error(typeof error.message === 'string' ? error.message : 'Failed to create payment term')
+            setIsLoading(false)
           })
       } catch (error) {
         toast.error('Something went wrong while creating the payment term!')
+        setIsLoading(false)
       }
     } else if (mode === 'edit' && paymentTermId) {
       try {
@@ -111,12 +116,15 @@ const CreateOrEditPaymentTermModal = ({
             toast.success('Payment term updated successfully')
             onOpenChange(false)
             onSuccess?.()
+            setIsLoading(false)
           })
           .catch(error => {
             toast.error(typeof error.message === 'string' ? error.message : 'Failed to update payment term')
+            setIsLoading(false)
           })
       } catch (error) {
         toast.error('Something went wrong while updating the payment term!')
+        setIsLoading(false)
       }
     }
   }
@@ -139,14 +147,14 @@ const CreateOrEditPaymentTermModal = ({
       title={mode === 'create' ? 'Create New Payment Term' : 'Edit Payment Term'}
       description={mode === 'create' ? 'Add a new payment term to the system' : 'Update payment term information'}
       maxWidth='xl'
-      disableClose={form.formState.isSubmitting}
+      disableClose={isLoading}
       actions={
         <div className='flex gap-3'>
           <Button
             type='button'
             variant='outline'
             onClick={onCancel}
-            disabled={form.formState.isSubmitting}
+            disabled={isLoading}
             className='flex-1'
           >
             Cancel
@@ -154,7 +162,7 @@ const CreateOrEditPaymentTermModal = ({
           <Button
             type='submit'
             onClick={form.handleSubmit(onSubmit)}
-            disabled={form.formState.isSubmitting}
+            disabled={isLoading}
             className='flex-1'
           >
             {form.formState.isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}

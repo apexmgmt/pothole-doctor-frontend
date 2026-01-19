@@ -12,4 +12,6 @@
  * @method: DELETE - Remove a specific staff entry by ID. /id
  */
 export const STAFFS: string = '/v1/staffs/'
+export const STAFFS_TENANT: string = '/v1/tenant/staffs/'
 export const STAFFS_ALL: string = '/v1/get-staffs'
+export const STAFFS_ALL_TENANT: string = '/v1/tenant/get-staffs'

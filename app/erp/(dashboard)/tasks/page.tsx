@@ -14,7 +14,7 @@ export default async function TasksPage() {
 
   // fetch staffs
   try {
-    const response = await StaffService.getAllStaffs()
+    const response = await StaffService.getAll()
 
     staffs = response.data || []
   } catch (error) {
@@ -23,7 +23,7 @@ export default async function TasksPage() {
 
   // fetch clients type=customer
   try {
-    const response = await ClientService.getAllClients('customer')
+    const response = await ClientService.getAll('customer')
 
     clients = response.data || []
   } catch (error) {
@@ -32,7 +32,7 @@ export default async function TasksPage() {
 
   // fetch task types
   try {
-    const response = await TaskTypeService.getAllTaskType()
+    const response = await TaskTypeService.getAll()
 
     taskTypes = response.data || []
   } catch (error) {

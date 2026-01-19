@@ -27,6 +27,10 @@ const clearAuthAndRedirect = async () => {
   await CookieService.delete('access_token')
   await CookieService.delete('refresh_token')
   await CookieService.delete('token_type')
+  await CookieService.delete('permissions_1')
+  await CookieService.delete('permissions_2')
+  await CookieService.delete('permissions_3')
+  await CookieService.delete('roles')
   await CookieService.delete('user')
 
   // Client-side redirect only (interceptor runs client-side)
@@ -44,6 +48,7 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
   // Read tokens
   let accessToken = await CookieService.get('access_token')
   let refreshToken = await CookieService.get('refresh_token')
+  let tenant = await CookieService.get('tenant')
 
   // If auth required and access token missing but refresh token exists => try refresh first
   if (requiresAuth && !accessToken && refreshToken && !_isRetry) {
@@ -109,6 +114,10 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
 
   if (requiresAuth && accessToken) {
     headers.Authorization = `Bearer ${accessToken}`
+  }
+
+  if (tenant) {
+    headers['tenant'] = tenant
   }
 
   // If sending FormData remove Content-Type to let browser set boundary

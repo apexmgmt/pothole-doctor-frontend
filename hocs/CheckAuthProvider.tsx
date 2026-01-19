@@ -44,7 +44,19 @@ export const CheckAuthProvider = ({ children }: CheckAuthProviderProps) => {
         dispatch(setUserData(response.data?.user))
         await CookieService.store('user', encryptData(response?.data?.user))
         await CookieService.store('roles', encryptData(response?.data?.roles || []))
-        await CookieService.store('permissions', encryptData(response?.data?.permissions || []))
+
+        // Split permissions into chunks to avoid cookie size limit
+        const encryptedPermissions = encryptData(response?.data?.permissions || [])
+        const chunkSize = Math.ceil(encryptedPermissions.length / 3)
+
+        const chunk1 = encryptedPermissions.slice(0, chunkSize)
+        const chunk2 = encryptedPermissions.slice(chunkSize, chunkSize * 2)
+        const chunk3 = encryptedPermissions.slice(chunkSize * 2)
+
+        await CookieService.store('permissions_1', chunk1)
+        await CookieService.store('permissions_2', chunk2)
+        await CookieService.store('permissions_3', chunk3)
+
         dispatch(setRefreshData(false))
       } catch (error) {
         dispatch(setRefreshData(false))

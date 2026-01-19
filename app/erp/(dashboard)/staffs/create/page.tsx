@@ -16,7 +16,7 @@ const CreateStaffPage = async () => {
   let roles = []
 
   try {
-    const response = await RoleService.getAllRoles()
+    const response = await RoleService.getAll()
 
     roles = response?.data || []
   } catch (error) {

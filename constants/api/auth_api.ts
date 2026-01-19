@@ -1,14 +1,18 @@
 /** POST: Login with {email, password} */
 export const AUTH_LOGIN: string = '/v1/auth/login'
+export const AUTH_LOGIN_TENANT: string = '/v1/tenant/auth/login'
 
 /** POST: Refresh Tokens with {refresh_token} */
 export const AUTH_REFRESH_TOKEN: string = '/v1/auth/refresh'
+export const AUTH_REFRESH_TOKEN_TENANT: string = '/v1/tenant/auth/refresh'
 
 /** GET: Get auth user details */
 export const AUTH_ME: string = '/v1/auth/me'
+export const AUTH_ME_TENANT: string = '/v1/tenant/auth/me'
 
 /** POST: Auth user Logout */
 export const AUTH_LOGOUT: string = '/v1/auth/logout'
+export const AUTH_LOGOUT_TENANT: string = '/v1/tenant/auth/logout'
 
 export const PROFILE_PICTURE: string = '/v1/profile-picture' // POST
 export const PROFILE_UPDATE: string = '/v1/profile-update' // PUT

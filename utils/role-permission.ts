@@ -1,18 +1,26 @@
 import CookieService from '@/services/app/cookie.service'
 import { decryptData } from './encryption'
 import { getAuthUser } from './auth'
+import { NextRequest } from 'next/server'
+import { getRequiredPermissionByPath } from '@/constants/routePermission'
 
 /**
  * @name getPermissions
- * @description Retrieve and decrypt user permissions from cookies
+ * @description Retrieve and decrypt user permissions from chunked cookies
  * @returns string[]
  */
 export const getPermissions = async (): Promise<string[]> => {
-  const encryptedPermissions = await CookieService.get('permissions')
-
-  if (!encryptedPermissions) return []
-
   try {
+    // Get all permission chunks
+    const chunk1 = (await CookieService.get('permissions_1')) || ''
+    const chunk2 = (await CookieService.get('permissions_2')) || ''
+    const chunk3 = (await CookieService.get('permissions_3')) || ''
+
+    // Reassemble the encrypted permissions
+    const encryptedPermissions = chunk1 + chunk2 + chunk3
+
+    if (!encryptedPermissions) return []
+
     const decryptedPermissions = decryptData(encryptedPermissions)
     let userPermissions: string[] = []
 
@@ -26,6 +34,8 @@ export const getPermissions = async (): Promise<string[]> => {
 
     return userPermissions
   } catch (error) {
+    console.error('Error getting permissions:', error)
+
     return []
   }
 }
@@ -93,4 +103,55 @@ export const isGuardType = async (guardType: string): Promise<boolean> => {
   if (!user) return false
 
   return user?.guard === guardType
+}
+
+/**
+ * Get permissions from chunked cookies (server-side)
+ */
+export async function getPermissionsFromCookies(req: NextRequest): Promise<string[]> {
+  try {
+    // Get all permission chunks
+    const chunk1 = req.cookies.get('permissions_1')?.value || ''
+    const chunk2 = req.cookies.get('permissions_2')?.value || ''
+    const chunk3 = req.cookies.get('permissions_3')?.value || ''
+
+    // Reassemble the encrypted permissions
+    const encryptedPermissions = chunk1 + chunk2 + chunk3
+
+    if (!encryptedPermissions) {
+      console.log('No permissions cookies found')
+
+      return []
+    }
+
+    const decryptedPermissions = decryptData(encryptedPermissions)
+    let userPermissions: string[] = []
+
+    if (process.env.NODE_ENV === 'development') {
+      userPermissions =
+        typeof decryptedPermissions === 'string' ? JSON.parse(decryptedPermissions) : decryptedPermissions
+    } else {
+      userPermissions = decryptedPermissions
+    }
+
+    return userPermissions
+  } catch (error) {
+    console.error('Error getting permissions from cookies:', error)
+
+    return []
+  }
+}
+
+/**
+ * Check if user has permission for the current route
+ */
+export function hasRoutePermission(pathname: string, permissions: string[]): boolean {
+  const requiredPermission = getRequiredPermissionByPath(pathname)
+
+  if (!requiredPermission) {
+    // Route doesn't require specific permission
+    return true
+  }
+
+  return permissions.includes(requiredPermission)
 }

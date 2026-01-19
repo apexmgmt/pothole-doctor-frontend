@@ -12,4 +12,6 @@
  * Data delete method: DELETE /{id}
  */
 export const PRODUCT_CATEGORIES: string = '/v1/product-categories/'
+export const PRODUCT_CATEGORIES_TENANT: string = '/v1/tenant/product-categories/'
 export const PRODUCT_CATEGORIES_ALL: string = '/v1/get-product-categories/'
+export const PRODUCT_CATEGORIES_ALL_TENANT: string = '/v1/tenant/get-product-categories/'

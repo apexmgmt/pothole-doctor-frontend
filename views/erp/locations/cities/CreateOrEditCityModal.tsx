@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
-import { State, StatePayload, Location, City, CityPayload } from '@/types'
+import { State, StatePayload, Location, City, CityPayload, CountryWithStates } from '@/types'
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -29,6 +29,7 @@ interface CreateOrEditCityModalProps {
   cityId?: string
   cityDetails?: City
   onSuccess?: () => void
+  countriesWithStateAndCities: CountryWithStates[]
 }
 
 const formSchema = z.object({
@@ -45,28 +46,30 @@ const CreateOrEditCityModal = ({
   onOpenChange,
   cityId,
   cityDetails,
-  onSuccess
+  onSuccess,
+  countriesWithStateAndCities
 }: CreateOrEditCityModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [countriesWithStateAndCities, setCountriesWithStateAndCities] = useState<Location['countries']>([])
 
-  const fetchCountriesWithStateAndCities = async () => {
-    try {
-      setIsLoading(true)
-      LocationService.index()
-        .then(response => {
-          setCountriesWithStateAndCities(response.data || [])
-          setIsLoading(false)
-        })
-        .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch locations')
-          setIsLoading(false)
-        })
-    } catch (error) {
-      toast.error('Something went wrong while fetching locations!')
-      setIsLoading(false)
-    }
-  }
+  // const [countriesWithStateAndCities, setCountriesWithStateAndCities] = useState<Location['countries']>([])
+
+  // const fetchCountriesWithStateAndCities = async () => {
+  //   try {
+  //     setIsLoading(true)
+  //     LocationService.index()
+  //       .then(response => {
+  //         setCountriesWithStateAndCities(response.data || [])
+  //         setIsLoading(false)
+  //       })
+  //       .catch(error => {
+  //         toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch locations')
+  //         setIsLoading(false)
+  //       })
+  //   } catch (error) {
+  //     toast.error('Something went wrong while fetching locations!')
+  //     setIsLoading(false)
+  //   }
+  // }
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -104,7 +107,7 @@ const CreateOrEditCityModal = ({
   // Reset form when cityDetails changes or modal opens
   useEffect(() => {
     if (open) {
-      fetchCountriesWithStateAndCities()
+      // fetchCountriesWithStateAndCities()
       form.reset({
         name: cityDetails?.name || '',
         country_id: cityDetails?.state?.country?.id?.toString() || '',

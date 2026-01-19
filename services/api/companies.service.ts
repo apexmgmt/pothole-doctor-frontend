@@ -1,14 +1,14 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from './api.interceptor'
-import { COMPANIES_ALL } from '@/constants/api'
+import { API_URL, COMPANIES_ALL, COMPANIES_ALL_TENANT } from '@/constants/api'
 
 export default class CompanyService {
   /** Get all companies */
-  static getAllCompanies = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + COMPANIES_ALL, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? COMPANIES_ALL_TENANT : COMPANIES_ALL), {
         requiresAuth: true,
         method: 'GET'
 

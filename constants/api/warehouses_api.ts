@@ -12,3 +12,4 @@
  * Data delete method: DELETE /{id}
  */
 export const WAREHOUSES: string = '/v1/warehouses/'
+export const WAREHOUSES_TENANT: string = '/v1/tenant/warehouses/'

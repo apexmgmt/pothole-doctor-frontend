@@ -1,6 +1,6 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { PROPOSALS_ALL, PROPOSALS } from '@/constants/api'
+import { PROPOSALS_ALL, PROPOSALS, API_URL, PROPOSALS_TENANT, PROPOSALS_ALL_TENANT } from '@/constants/api'
 import { ProposalPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -8,14 +8,17 @@ export default class ProposalService {
   /**Proposal DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + PROPOSALS + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['proposals'] } // Cache for 60 seconds
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['proposals'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -32,9 +35,9 @@ export default class ProposalService {
   /** Create Proposal API */
   static store = async (payload: ProposalPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PROPOSALS, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -58,9 +61,9 @@ export default class ProposalService {
   /** Show Proposal API */
   static show = async (proposalId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PROPOSALS + proposalId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS) + proposalId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`proposals/${proposalId}`] } // Cache for 60 seconds
@@ -81,9 +84,9 @@ export default class ProposalService {
   /** Update Proposal API */
   static update = async (proposalId: string, payload: ProposalPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PROPOSALS + proposalId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS) + proposalId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -108,9 +111,9 @@ export default class ProposalService {
   /** Delete Proposal API */
   static destroy = async (proposalId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PROPOSALS + proposalId, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS) + proposalId, {
         requiresAuth: true,
         method: 'DELETE'
       })
@@ -132,11 +135,11 @@ export default class ProposalService {
   }
 
   /** Get all proposals API */
-  static getAllProposals = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + PROPOSALS_ALL, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? PROPOSALS_ALL_TENANT : PROPOSALS_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['proposals-all'] } // Cache for 1 hour

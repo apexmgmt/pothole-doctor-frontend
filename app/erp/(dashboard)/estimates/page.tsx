@@ -14,7 +14,7 @@ export default async function EstimatesPage() {
   let paymentTerms: PaymentTerm[] = []
 
   try {
-    const response = await ServiceTypeService.getAllServiceTypes()
+    const response = await ServiceTypeService.getAll()
 
     serviceTypes = response.data || []
   } catch (error) {
@@ -22,7 +22,7 @@ export default async function EstimatesPage() {
   }
 
   try {
-    const response = await EstimateTypeService.getAllEstimateTypes()
+    const response = await EstimateTypeService.getAll()
 
     estimateTypes = response.data || []
   } catch (error) {
@@ -30,7 +30,7 @@ export default async function EstimatesPage() {
   }
 
   try {
-    const response = await ClientService.getAllClients('customer')
+    const response = await ClientService.getAll('customer')
 
     clients = response.data || []
   } catch (error) {
@@ -38,8 +38,8 @@ export default async function EstimatesPage() {
   }
 
   try {
-    const response = await StaffService.getAllStaffs()
-    
+    const response = await StaffService.getAll()
+
     staffs = response.data || []
   } catch (error) {
     staffs = []
@@ -50,8 +50,16 @@ export default async function EstimatesPage() {
 
     paymentTerms = response.data || []
   } catch (error) {
-    paymentTerms = []  
+    paymentTerms = []
   }
 
-  return <Estimates serviceTypes={serviceTypes} estimateTypes={estimateTypes} clients={clients} staffs={staffs} paymentTerms={paymentTerms} />
+  return (
+    <Estimates
+      serviceTypes={serviceTypes}
+      estimateTypes={estimateTypes}
+      clients={clients}
+      staffs={staffs}
+      paymentTerms={paymentTerms}
+    />
+  )
 }

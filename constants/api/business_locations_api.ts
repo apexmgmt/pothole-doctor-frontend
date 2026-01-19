@@ -14,4 +14,6 @@
  * Data delete method: DELETE /{id}
  */
 export const BUSINESS_LOCATIONS: string = '/v1/business-locations/'
-export const BUSINESS_LOCATIONS_ALL: string = '/v1/business-locations/?per_page=1000'
+export const BUSINESS_LOCATIONS_TENANT: string = '/v1/tenant/business-locations/'
+export const BUSINESS_LOCATIONS_ALL: string = '/v1/get-business-locations'
+export const BUSINESS_LOCATIONS_ALL_TENANT: string = '/v1/tenant/get-business-locations'

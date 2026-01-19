@@ -1,14 +1,19 @@
 import {
+  API_URL,
   AUTH_LOGIN,
+  AUTH_LOGIN_TENANT,
   AUTH_LOGOUT,
+  AUTH_LOGOUT_TENANT,
   AUTH_ME,
+  AUTH_ME_TENANT,
   AUTH_REFRESH_TOKEN,
+  AUTH_REFRESH_TOKEN_TENANT,
   PROFILE_CHANGE_PASSWORD,
   PROFILE_LAST_ACTIVITY,
   PROFILE_PICTURE,
   PROFILE_UPDATE
 } from '@/constants/api'
-import { getApiUrl } from '@/utils/utility'
+import { getApiUrl, isTenant } from '@/utils/utility'
 import CookieService from '../app/cookie.service'
 import apiInterceptor from './api.interceptor'
 import { ProfileChangePasswordPayload, ProfileDetailsPayload } from '@/types'
@@ -27,9 +32,9 @@ export default class AuthService {
         password: password
       }
 
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + AUTH_LOGIN, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? AUTH_LOGIN_TENANT : AUTH_LOGIN), {
         requiresAuth: false,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -56,10 +61,10 @@ export default class AuthService {
     if (!refresh_token) throw new Error('No refresh token available')
 
     try {
-      const apiUrl: string = await getApiUrl()
       const payload: object = { refresh_token: refresh_token }
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + AUTH_REFRESH_TOKEN, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? AUTH_REFRESH_TOKEN_TENANT : AUTH_REFRESH_TOKEN), {
         requiresAuth: false,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -83,9 +88,9 @@ export default class AuthService {
    */
   static logout = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + AUTH_LOGOUT, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? AUTH_LOGOUT_TENANT : AUTH_LOGOUT), {
         requiresAuth: true,
         method: 'POST'
       })
@@ -104,9 +109,9 @@ export default class AuthService {
 
   static getAuthDetails = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + AUTH_ME, {
+      const response = await apiInterceptor(API_URL + (isTenantApi ? AUTH_ME_TENANT : AUTH_ME), {
         requiresAuth: true,
         method: 'GET'
       })
@@ -129,9 +134,7 @@ export default class AuthService {
 
   static updateProfilePicture = async (payload: any) => {
     try {
-      const apiUrl: string = await getApiUrl()
-
-      const response = await apiInterceptor(apiUrl + PROFILE_PICTURE, {
+      const response = await apiInterceptor(API_URL + PROFILE_PICTURE, {
         requiresAuth: true,
         method: 'POST',
         body: payload
@@ -151,9 +154,7 @@ export default class AuthService {
 
   static updateProfileDetails = async (payload: ProfileDetailsPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-
-      const response = await apiInterceptor(apiUrl + PROFILE_UPDATE, {
+      const response = await apiInterceptor(API_URL + PROFILE_UPDATE, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -173,9 +174,7 @@ export default class AuthService {
 
   static updatePassword = async (payload: ProfileChangePasswordPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-
-      const response = await apiInterceptor(apiUrl + PROFILE_CHANGE_PASSWORD, {
+      const response = await apiInterceptor(API_URL + PROFILE_CHANGE_PASSWORD, {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -195,9 +194,7 @@ export default class AuthService {
 
   static getActivity = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
-
-      const response = await apiInterceptor(apiUrl + PROFILE_LAST_ACTIVITY, {
+      const response = await apiInterceptor(API_URL + PROFILE_LAST_ACTIVITY, {
         requiresAuth: true,
         method: 'GET'
       })
