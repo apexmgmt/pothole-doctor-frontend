@@ -9,9 +9,13 @@ import {
   AUTH_REFRESH_TOKEN,
   AUTH_REFRESH_TOKEN_TENANT,
   PROFILE_CHANGE_PASSWORD,
+  PROFILE_CHANGE_PASSWORD_TENANT,
   PROFILE_LAST_ACTIVITY,
+  PROFILE_LAST_ACTIVITY_TENANT,
   PROFILE_PICTURE,
-  PROFILE_UPDATE
+  PROFILE_PICTURE_TENANT,
+  PROFILE_UPDATE,
+  PROFILE_UPDATE_TENANT
 } from '@/constants/api'
 import { getApiUrl, isTenant } from '@/utils/utility'
 import CookieService from '../app/cookie.service'
@@ -134,7 +138,9 @@ export default class AuthService {
 
   static updateProfilePicture = async (payload: any) => {
     try {
-      const response = await apiInterceptor(API_URL + PROFILE_PICTURE, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? PROFILE_PICTURE_TENANT : PROFILE_PICTURE), {
         requiresAuth: true,
         method: 'POST',
         body: payload
@@ -154,7 +160,9 @@ export default class AuthService {
 
   static updateProfileDetails = async (payload: ProfileDetailsPayload) => {
     try {
-      const response = await apiInterceptor(API_URL + PROFILE_UPDATE, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? PROFILE_UPDATE_TENANT : PROFILE_UPDATE), {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -174,11 +182,16 @@ export default class AuthService {
 
   static updatePassword = async (payload: ProfileChangePasswordPayload) => {
     try {
-      const response = await apiInterceptor(API_URL + PROFILE_CHANGE_PASSWORD, {
-        requiresAuth: true,
-        method: 'POST',
-        body: JSON.stringify(payload)
-      })
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PROFILE_CHANGE_PASSWORD_TENANT : PROFILE_CHANGE_PASSWORD),
+        {
+          requiresAuth: true,
+          method: 'POST',
+          body: JSON.stringify(payload)
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -194,10 +207,15 @@ export default class AuthService {
 
   static getActivity = async () => {
     try {
-      const response = await apiInterceptor(API_URL + PROFILE_LAST_ACTIVITY, {
-        requiresAuth: true,
-        method: 'GET'
-      })
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PROFILE_LAST_ACTIVITY_TENANT : PROFILE_LAST_ACTIVITY),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
