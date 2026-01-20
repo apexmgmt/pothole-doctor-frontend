@@ -60,7 +60,7 @@ export async function getApiUrl(): Promise<string> {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || ''
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || ''
 
-  return apiBaseUrl
+  return apiBaseUrl + '/api'
 
   // Check environment
   const isServer = typeof window === 'undefined'
