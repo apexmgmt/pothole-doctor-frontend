@@ -66,7 +66,7 @@ const authSlice = createSlice({
 
       try {
         // store as JSON string; encryption/decryption handled elsewhere
-        CookieService.storeSync('user', JSON.stringify(encryptData(action.payload)))
+        CookieService.storeSync('user', encryptData(action.payload))
       } catch {
         console.error('Failed to set user cookie')
       }
