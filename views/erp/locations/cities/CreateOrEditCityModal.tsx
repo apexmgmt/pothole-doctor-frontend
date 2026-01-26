@@ -49,8 +49,6 @@ const CreateOrEditCityModal = ({
   onSuccess,
   countriesWithStateAndCities
 }: CreateOrEditCityModalProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-
   // const [countriesWithStateAndCities, setCountriesWithStateAndCities] = useState<Location['countries']>([])
 
   // const fetchCountriesWithStateAndCities = async () => {
@@ -166,7 +164,6 @@ const CreateOrEditCityModal = ({
 
   return (
     <CommonDialog
-      isLoading={isLoading}
       loadingMessage='Loading locations...'
       open={open}
       onOpenChange={onOpenChange}
@@ -174,6 +171,7 @@ const CreateOrEditCityModal = ({
       description={mode === 'create' ? 'Add a new city to the system' : 'Update city information'}
       maxWidth='sm'
       disableClose={form.formState.isSubmitting}
+      isLoading={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
           <Button

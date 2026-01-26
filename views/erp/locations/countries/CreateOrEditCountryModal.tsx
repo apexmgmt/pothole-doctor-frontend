@@ -120,6 +120,7 @@ const CreateOrEditCountryModal = ({
       description={mode === 'create' ? 'Add a new country to the system' : 'Update country information'}
       maxWidth='sm'
       disableClose={form.formState.isSubmitting}
+      isLoading={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
           <Button

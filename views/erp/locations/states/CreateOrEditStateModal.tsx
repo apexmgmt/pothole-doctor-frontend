@@ -137,7 +137,6 @@ const CreateOrEditStateModal = ({
 
   return (
     <CommonDialog
-      isLoading={isLoading}
       loadingMessage='Loading countries...'
       open={open}
       onOpenChange={onOpenChange}
@@ -145,6 +144,7 @@ const CreateOrEditStateModal = ({
       description={mode === 'create' ? 'Add a new state to the system' : 'Update state information'}
       maxWidth='sm'
       disableClose={form.formState.isSubmitting}
+      isLoading={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
           <Button
