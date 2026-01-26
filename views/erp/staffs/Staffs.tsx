@@ -24,7 +24,7 @@ import StaffDetails from './StaffDetails'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import { getInitialFilters } from '@/utils/utility'
+import { generateFileUrl, getInitialFilters } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
 
 const Staffs: React.FC = () => {
@@ -125,7 +125,7 @@ const Staffs: React.FC = () => {
         id: staff.id,
         index: (apiResponse?.from || 1) + index,
         name: `${staff.first_name || ''} ${staff.last_name || ''}`.trim(),
-        profilePicture: staff.userable?.profile_picture || null,
+        profilePicture: generateFileUrl(staff.userable?.profile_picture) || null,
         phone: staff.userable?.phone || 'N/A',
         jobAddress: staff.userable?.address || 'N/A',
         email: staff.email
