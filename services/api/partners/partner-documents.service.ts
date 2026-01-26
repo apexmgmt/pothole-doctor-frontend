@@ -45,7 +45,7 @@ export default class PartnerDocumentService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to add document')
+        throw errorData
       }
 
       await revalidate('partner-documents')
@@ -102,7 +102,7 @@ export default class PartnerDocumentService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update document')
+        throw errorData
       }
 
       await revalidate('partner-documents')

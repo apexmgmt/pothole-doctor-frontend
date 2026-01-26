@@ -158,7 +158,7 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
         <>
           {getFileType(row.full_path) === 'image' ? (
             <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
-              <Image src={row.full_path} alt={row.name} width={100} height={100} className='rounded-md' />
+              <Image src={row.full_path} unoptimized alt={row.name} width={100} height={100} className='rounded-md' />
             </Link>
           ) : getFileType(row.full_path) === 'video' ? (
             <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
@@ -172,7 +172,7 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
               href={row.full_path}
               target='_blank'
               rel='noopener noreferrer'
-              className='font-medium flex items-center justify-center'
+              className='font-medium flex items-center'
             >
               <DocumentIcon className='w-10 h-10' />{' '}
             </Link>
@@ -229,7 +229,7 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <InputGroup>
+        {/* <InputGroup>
           <InputGroupInput
             placeholder='Search...'
             value={searchValue}
@@ -244,7 +244,7 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
             Clear
           </Button>
-        )}
+        )} */}
       </div>
       <Button
         variant='default'
