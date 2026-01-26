@@ -7,10 +7,10 @@ import {
   AlertDialogHeader,
   AlertDialogFooter,
   AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel
+  AlertDialogDescription
 } from '@/components/ui/alert-dialog'
+
+import { Button } from '@/components/ui/button'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -20,7 +20,7 @@ interface ConfirmDialogProps {
   message: string
   cancelButtonTitle?: string
   confirmButtonTitle?: string
-  onConfirm: () => void | Promise<void>
+  onConfirm: (e?: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>
   confirmButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>
   loading?: boolean
 }
@@ -45,10 +45,12 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         <AlertDialogDescription>{message}</AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel onClick={() => onOpenChange(false)}>{cancelButtonTitle}</AlertDialogCancel>
-        <AlertDialogAction onClick={onConfirm} disabled={loading} {...confirmButtonProps}>
+        <Button variant='outline' onClick={() => onOpenChange(false)} disabled={loading}>
+          {cancelButtonTitle}
+        </Button>
+        <Button onClick={onConfirm} disabled={loading} {...confirmButtonProps}>
           {confirmButtonTitle}
-        </AlertDialogAction>
+        </Button>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>

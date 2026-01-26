@@ -227,16 +227,11 @@ const Countries: React.FC = () => {
 
   const handleDeleteCountry = async (id: string) => {
     try {
-      CountryService.destroy(id)
-        .then(response => {
-          toast.success('Country deleted successfully')
-          fetchData()
-        })
-        .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete country')
-        })
+      await CountryService.destroy(id)
+        toast.success('Country deleted successfully')
+        fetchData()
     } catch (error) {
-      toast.error('Something went wrong while deleting the country!')
+      toast.error('Failed to delete country')
     }
   }
 
