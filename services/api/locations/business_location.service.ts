@@ -41,20 +41,20 @@ export default class BusinessLocationService {
   }
 
   /**Create Business Location API */
-  static store = async (payload: BusinessLocationPayload) => {
+  static store = async (payload: FormData) => {
     try {
       const isTenantApi = await isTenant()
 
       const response = await apiInterceptor(API_URL + (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: payload
       })
 
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create state')
+        throw errorData
       }
 
       await revalidate('business-locations')
@@ -93,23 +93,26 @@ export default class BusinessLocationService {
   }
 
   /** Update Business Location API */
-  static update = async (businessLocationId: string, payload: BusinessLocationPayload) => {
+  static update = async (businessLocationId: string, payload: FormData) => {
     try {
       const isTenantApi = await isTenant()
+
+      // append _method=PUT to payload for method spoofing
+      payload.append('_method', 'PUT')
 
       const response = await apiInterceptor(
         API_URL + (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS) + businessLocationId,
         {
           requiresAuth: true,
-          method: 'PUT',
-          body: JSON.stringify(payload)
+          method: 'POST',
+          body: payload
         }
       )
 
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update business location')
+        throw errorData
       }
 
       await revalidate('business-locations')

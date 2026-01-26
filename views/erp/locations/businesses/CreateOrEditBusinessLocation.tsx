@@ -20,6 +20,7 @@ import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { Location, BusinessLocation } from '@/types'
 import { Separator } from '@/components/ui/separator'
+import { generateFileUrl } from '@/utils/utility'
 
 const formSchema = z.object({
   name: z.string().min(1, 'Location name is required'),
@@ -122,7 +123,7 @@ const CreateOrEditBusinessLocation = ({
 
     // Set logo preview if exists
     if (businessLocationDetails?.logo) {
-      setLogoPreview(businessLocationDetails.logo)
+      setLogoPreview(generateFileUrl(businessLocationDetails.logo))
     }
   }, [mode, businessLocationDetails, dispatch])
 
@@ -171,50 +172,55 @@ const CreateOrEditBusinessLocation = ({
     setIsLoading(true)
 
     try {
-      // Create payload object
-      const payload: any = {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        is_branding: data.is_branding ? 1 : 0,
-        invoice_prefix: data.invoice_prefix,
-        street_address: data.street_address,
-        city_id: data.city_id,
-        state_id: data.state_id,
-        zip_code: data.zip_code
-      }
+      const formData = new FormData()
+
+      formData.append('name', data.name)
+      formData.append('email', data.email)
+      formData.append('phone', data.phone)
+      formData.append('is_branding', data.is_branding ? '1' : '0')
+      formData.append('invoice_prefix', data.invoice_prefix)
+      formData.append('street_address', data.street_address)
+      formData.append('city_id', data.city_id)
+      formData.append('state_id', data.state_id)
+      formData.append('zip_code', data.zip_code)
 
       // Add optional fields only if they have values
-      if (data.fax) payload.fax = data.fax
-      if (data.website) payload.website = data.website
-      if (data.review_link) payload.review_link = data.review_link
+      if (data.fax) formData.append('fax', data.fax)
+      if (data.website) formData.append('website', data.website)
+      if (data.review_link) formData.append('review_link', data.review_link)
 
       // Add sales_tax if present
       if (data.sales_tax) {
         const salesTaxNumber = parseFloat(data.sales_tax)
 
         if (!isNaN(salesTaxNumber)) {
-          payload.sales_tax = salesTaxNumber
+          formData.append('sales_tax', salesTaxNumber.toString())
         }
       }
 
       // Add logo if it's a File
       if (data.logo && data.logo instanceof File) {
-        payload.logo = data.logo
+        formData.append('logo', data.logo)
       }
 
       if (mode === 'edit' && businessLocationId) {
-        await BusinessLocationService.update(businessLocationId, payload)
+        await BusinessLocationService.update(businessLocationId, formData)
         toast.success('Business location updated successfully')
       } else {
-        await BusinessLocationService.store(payload)
+        await BusinessLocationService.store(formData)
         toast.success('Business location created successfully')
       }
 
       router.push('/erp/locations/businesses')
     } catch (error: any) {
-      toast.error(error?.message || 'Something went wrong')
-      console.error(error)
+      if(error?.errors && typeof error.errors === 'object') {
+        Object.values(error.errors).forEach((errMsg: any) => {
+          errMsg?.map((msg: string) => toast.error(msg))
+        })
+      } else {
+        toast.error(error?.message || 'Something went wrong')
+      }
+
       setIsLoading(false)
     }
   }
@@ -231,7 +237,7 @@ const CreateOrEditBusinessLocation = ({
             {mode === 'edit' ? 'Edit Business Location' : 'Add New Location'}
           </CardTitle>
         </CardHeader>
-        <CardContent className='max-w-[1024px]'>
+        <CardContent className='max-w-5xl'>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
