@@ -27,7 +27,7 @@ const defaultValues: StaffPayload = {
   last_name: '',
   email: '',
   phone: '',
-  user_type: 'admin',
+  user_type: 'staff',
   password: '',
   password_confirmation: '',
   address: '',

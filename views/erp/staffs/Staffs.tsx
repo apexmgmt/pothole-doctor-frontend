@@ -128,7 +128,8 @@ const Staffs: React.FC = () => {
         profilePicture: generateFileUrl(staff.userable?.profile_picture) || null,
         phone: staff.userable?.phone || 'N/A',
         jobAddress: staff.userable?.address || 'N/A',
-        email: staff.email
+        email: staff.email,
+        guard: staff.guard
       }))
     : []
 
@@ -180,7 +181,7 @@ const Staffs: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          {(canEditStaff || canDeleteStaff) && (
+          {(canEditStaff || canDeleteStaff) && row.guard !== 'admin' && (
             <ThreeDotButton
               buttons={[
                 ...(canEditStaff
@@ -219,12 +220,11 @@ const Staffs: React.FC = () => {
   }
 
   const handleRowSelect = (staff: any) => {
-    setSelectedStaffId(staff?.id || null)
-
     if (canCreateStaff) {
       StaffService.show(staff?.id)
         .then(response => {
           setSelectedStaff(response.data)
+          setSelectedStaffId(staff?.id || null)
         })
         .catch(error => {
           setSelectedStaff(null)

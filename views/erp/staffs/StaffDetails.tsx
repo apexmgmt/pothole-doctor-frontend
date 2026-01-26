@@ -50,16 +50,18 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
       {/* Header */}
       <div className='flex items-center justify-between'>
         <h3 className='text-xl font-semibold text-light mt-2'>Staff Details</h3>
-        {canEditStaff && <div className='mt-2'>
-          <EditButton
-            title='Edit'
-            tooltip='Edit Staff Information'
-            link={`/erp/staffs/${staffData.id}/edit`}
-            variant='text'
-            buttonSize='default'
-            buttonVariant='outline'
-          />
-        </div>}
+        {canEditStaff && staffData?.guard !== 'admin' && (
+          <div className='mt-2'>
+            <EditButton
+              title='Edit'
+              tooltip='Edit Staff Information'
+              link={`/erp/staffs/${staffData.id}/edit`}
+              variant='text'
+              buttonSize='default'
+              buttonVariant='outline'
+            />
+          </div>
+        )}
       </div>
 
       {/* Profile Section */}
@@ -121,20 +123,22 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
                 <p className='text-light'>N/A</p>
               )}
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Permissions</label>
-              {staffData?.permissions && staffData?.permissions.length > 0 ? (
-                <div className='flex flex-wrap gap-2 mt-1'>
-                  {staffData.permissions.map((permission: any) => (
-                    <Badge key={permission.id} className='px-2 py-1 rounded-md'>
-                      {permission.name}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className='text-light'>N/A</p>
-              )}
-            </div>
+            {staffData?.permissions.length > 0 && (
+              <div>
+                <label className='text-xs text-gray uppercase'>Permissions</label>
+                {staffData?.permissions && staffData?.permissions.length > 0 ? (
+                  <div className='flex flex-wrap gap-2 mt-1'>
+                    {staffData.permissions.map((permission: any) => (
+                      <Badge key={permission.id} className='px-2 py-1 rounded-md'>
+                        {permission.name}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className='text-light'>N/A</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
