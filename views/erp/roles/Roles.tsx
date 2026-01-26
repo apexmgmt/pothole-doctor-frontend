@@ -125,7 +125,8 @@ const Roles: React.FC = () => {
     ? apiResponse.data.map((role: any, index: number) => ({
         id: role.id,
         index: (apiResponse?.from || 1) + index,
-        name: role.name
+        name: role.name,
+        is_editable: role.is_editable
       }))
     : []
 
@@ -149,18 +150,14 @@ const Roles: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          {canEditRole || canDeleteRole ? (
+          {(canEditRole || canDeleteRole) && row.is_editable && (
             <ThreeDotButton
               buttons={[
-                ...(canEditRole
-                  ? [<EditButton tooltip='Edit Role Information' link={`/erp/roles/${row.id}/edit`} variant='text' />]
-                  : []),
-                ...(canDeleteRole
-                  ? [<DeleteButton tooltip='Delete Role' variant='text' onClick={() => handleDeleteRole(row.id)} />]
-                  : [])
+                canEditRole && <EditButton tooltip='Edit Role Information' link={`/erp/roles/${row.id}/edit`} variant='text' />,
+                canDeleteRole && <DeleteButton tooltip='Delete Role' variant='text' onClick={() => handleDeleteRole(row.id)} />
               ]}
             />
-          ) : null}
+          )}
         </div>
       ),
       sortable: false,
