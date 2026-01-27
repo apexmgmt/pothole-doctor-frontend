@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -99,6 +99,8 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     }
   })
 
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
   const {
     handleSubmit,
     reset,
@@ -180,6 +182,8 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
 
   const onSubmit = async (data: ClientPayload) => {
     try {
+      setIsLoading(true)
+      
       // separate address, state_id, city_id and zip_code from data
       const {
         address,
@@ -220,8 +224,10 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
             onSuccess()
             onClose()
             reset()
+            setIsLoading(false)
           })
           .catch(error => {
+            setIsLoading(false)
             toast.error(`Failed to create ${type === 'lead' ? 'lead' : 'customer'}`)
           })
       } else if (mode === 'edit' && clientId) {
@@ -240,23 +246,26 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
             onSuccess()
             onClose()
             reset()
+            setIsLoading(false)
           })
           .catch(error => {
             toast.error(`Failed to update ${type === 'lead' ? 'lead' : 'customer'}`)
+            setIsLoading(false)
           })
       }
     } catch (error: any) {
       toast.error(error.message || 'Failed to save lead')
+      setIsLoading(false)
     }
   }
 
   const dialogActions = (
     <>
-      <Button type='button' variant='outline' onClick={onClose} disabled={isSubmitting}>
+      <Button type='button' variant='outline' onClick={onClose} disabled={isLoading}>
         Cancel
       </Button>
-      <Button type='submit' form='client-form' disabled={isSubmitting}>
-        {isSubmitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+      <Button type='submit' form='client-form' disabled={isLoading}>
+        {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
         {mode === 'create'
           ? `Create ${type === 'lead' ? 'Lead' : 'Customer'}`
           : `Update ${type === 'lead' ? 'Lead' : 'Customer'}`}
@@ -274,14 +283,14 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
           : `Edit ${type === 'lead' ? 'Lead' : 'Customer'}`
       }
       maxWidth='5xl'
-      isLoading={isSubmitting}
+      isLoading={isLoading}
       loadingMessage={
         mode === 'create'
           ? `Creating ${type === 'lead' ? 'Lead' : 'Customer'}...`
           : `Updating ${type === 'lead' ? 'Lead' : 'Customer'}...`
       }
       actions={dialogActions}
-      disableClose={isSubmitting}
+      disableClose={isLoading}
     >
       <form id='client-form' onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
         <BasicClientReferenceFields
