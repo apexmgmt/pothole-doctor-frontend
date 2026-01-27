@@ -210,7 +210,7 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
 
   const handleDeleteUnit = async (id: string) => {
     try {
-      UnitService.destroy(id)
+      await UnitService.destroy(id)
         .then(response => {
           toast.success('Unit deleted successfully')
           fetchData()

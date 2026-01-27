@@ -222,7 +222,7 @@ const ServiceTypes: React.FC = () => {
 
   const handleDeleteServiceType = async (id: string) => {
     try {
-      ServiceTypeService.destroy(id)
+      await ServiceTypeService.destroy(id)
         .then(response => {
           toast.success('Service type deleted successfully')
           fetchData()

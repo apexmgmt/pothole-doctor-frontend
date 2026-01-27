@@ -227,7 +227,7 @@ const BusinessLocations: React.FC = () => {
 
   const handleDeleteBusinessLocation = async (id: string) => {
     try {
-      BusinessLocationService.destroy(id)
+      await BusinessLocationService.destroy(id)
         .then(response => {
           toast.success('Business location deleted successfully')
           fetchData()

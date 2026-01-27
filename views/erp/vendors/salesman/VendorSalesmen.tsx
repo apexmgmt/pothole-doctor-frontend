@@ -192,7 +192,7 @@ const VendorSalesmen = ({ vendorId }: { vendorId: string }) => {
 
   const handleDeleteSalesman = async (id: string) => {
     try {
-      VendorSalesmanService.destroy(id)
+      await VendorSalesmanService.destroy(id)
         .then(response => {
           toast.success('Salesman deleted successfully')
           fetchData()

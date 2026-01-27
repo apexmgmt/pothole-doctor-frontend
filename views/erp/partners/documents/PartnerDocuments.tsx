@@ -205,7 +205,7 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
 
   const handleDeleteDocument = async (id: string) => {
     try {
-      PartnerDocumentService.destroy(id)
+      await PartnerDocumentService.destroy(id)
         .then(response => {
           toast.success('Document deleted successfully')
           fetchData()

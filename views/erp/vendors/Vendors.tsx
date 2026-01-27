@@ -230,7 +230,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
 
   const handleDeleteVendor = async (id: string) => {
     try {
-      VendorService.destroy(id)
+      await VendorService.destroy(id)
         .then(response => {
           toast.success('Vendor deleted successfully')
           fetchData()

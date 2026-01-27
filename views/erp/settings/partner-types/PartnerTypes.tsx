@@ -212,7 +212,7 @@ const PartnerTypes: React.FC = () => {
 
   const handleDeletePartnerType = async (id: string) => {
     try {
-      PartnerTypesService.destroy(id)
+      await PartnerTypesService.destroy(id)
         .then(response => {
           toast.success('Contractor type deleted successfully')
           fetchData()

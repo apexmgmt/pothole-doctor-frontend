@@ -109,7 +109,7 @@ const ClientNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: Not
 
   const handleDeleteNote = async (id: string) => {
     try {
-      ClientNoteService.destroy(id)
+      await ClientNoteService.destroy(id)
         .then(response => {
           toast.success('Note deleted successfully')
           fetchData()

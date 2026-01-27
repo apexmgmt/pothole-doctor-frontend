@@ -225,7 +225,7 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
 
   const handleDeleteContactType = async (id: string) => {
     try {
-      ContactTypeService.destroy(id)
+      await ContactTypeService.destroy(id)
         .then(response => {
           toast.success('Contact type deleted successfully')
           fetchData()

@@ -190,7 +190,7 @@ const VendorPickupAddresses = ({
 
   const handleDeletePickupAddress = async (id: string) => {
     try {
-      VendorPickupAddressService.destroy(id)
+      await VendorPickupAddressService.destroy(id)
         .then(response => {
           toast.success('Pickup Address deleted successfully')
           fetchData()

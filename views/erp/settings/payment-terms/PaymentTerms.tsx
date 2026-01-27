@@ -224,7 +224,7 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
 
   const handleDeletePaymentTerm = async (id: string) => {
     try {
-      PaymentTermsService.destroy(id)
+      await PaymentTermsService.destroy(id)
         .then(response => {
           toast.success('Payment term deleted successfully')
           fetchData()

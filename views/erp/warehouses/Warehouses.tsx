@@ -250,7 +250,7 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
 
   const handleDeleteWarehouse = async (id: string) => {
     try {
-      WarehouseService.destroy(id)
+      await WarehouseService.destroy(id)
         .then(response => {
           toast.success('Warehouse deleted successfully')
           fetchData()

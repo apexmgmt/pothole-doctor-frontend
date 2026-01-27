@@ -201,7 +201,7 @@ const Staffs: React.FC = () => {
 
   const handleDeleteStaff = async (id: string) => {
     try {
-      StaffService.destroy(id)
+      await StaffService.destroy(id)
         .then(response => {
           toast.success('Staff deleted successfully')
           fetchData()

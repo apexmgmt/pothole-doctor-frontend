@@ -205,7 +205,7 @@ const InterestLevels: React.FC = () => {
 
   const handleDeleteInterestLevel = async (id: string) => {
     try {
-      InterestLevelService.destroy(id)
+      await InterestLevelService.destroy(id)
         .then(response => {
           toast.success('Interest level deleted successfully')
           fetchData()

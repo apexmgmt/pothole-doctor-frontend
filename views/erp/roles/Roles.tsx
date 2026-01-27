@@ -189,7 +189,7 @@ const Roles: React.FC = () => {
     setSelectedRoleId(null)
 
     try {
-      RoleService.destroy(id)
+      await RoleService.destroy(id)
         .then(response => {
           toast.success('Role deleted successfully')
           fetchData()

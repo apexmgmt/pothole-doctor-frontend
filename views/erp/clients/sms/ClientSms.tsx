@@ -109,7 +109,7 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
 
   const handleDeleteSms = async (id: string) => {
     try {
-      ClientSmsService.destroy(id)
+      await ClientSmsService.destroy(id)
         .then(response => {
           toast.success('SMS deleted successfully')
           fetchData()

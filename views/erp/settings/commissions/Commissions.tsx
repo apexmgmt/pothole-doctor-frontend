@@ -286,7 +286,7 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
 
   const handleDeleteCommission = async (id: string) => {
     try {
-      CommissionService.destroy(id)
+      await CommissionService.destroy(id)
         .then(response => {
           toast.success('Commission deleted successfully')
           fetchData()

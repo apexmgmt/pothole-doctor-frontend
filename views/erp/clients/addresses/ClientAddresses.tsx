@@ -114,7 +114,7 @@ const ClientAddresses = ({
 
   const handleDeleteAddress = async (id: string) => {
     try {
-      ClientAddressService.destroy(id)
+      await ClientAddressService.destroy(id)
         .then(response => {
           toast.success('Address deleted successfully')
           fetchData()

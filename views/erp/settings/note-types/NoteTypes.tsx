@@ -216,7 +216,7 @@ const NoteTypes: React.FC = () => {
 
   const handleDeleteNoteType = async (id: string) => {
     try {
-      NoteTypeService.destroy(id)
+      await NoteTypeService.destroy(id)
         .then(response => {
           toast.success('Note type deleted successfully')
           fetchData()

@@ -331,7 +331,7 @@ const Products: React.FC<ProductsProps> = ({
 
   const handleDeleteProduct = async (id: string) => {
     try {
-      ProductService.destroy(id)
+      await ProductService.destroy(id)
         .then(response => {
           toast.success('Product deleted successfully')
           fetchData()

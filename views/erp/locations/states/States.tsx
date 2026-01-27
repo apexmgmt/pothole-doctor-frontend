@@ -222,7 +222,7 @@ const States: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = (
 
   const handleDeleteState = async (id: string) => {
     try {
-      StateService.destroy(id)
+      await StateService.destroy(id)
         .then(response => {
           toast.success('State deleted successfully')
           fetchData()

@@ -201,7 +201,7 @@ const ProductCategories: React.FC = () => {
 
   const handleDeleteProductCategory = async (id: string) => {
     try {
-      ProductCategoryService.destroy(id)
+      await ProductCategoryService.destroy(id)
         .then(response => {
           toast.success('Product category deleted successfully')
           fetchData()

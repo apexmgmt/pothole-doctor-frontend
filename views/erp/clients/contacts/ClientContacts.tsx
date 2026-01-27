@@ -115,7 +115,7 @@ const ClientContacts = ({
 
   const handleDeleteContact = async (id: string) => {
     try {
-      ClientContactService.destroy(id)
+      await ClientContactService.destroy(id)
         .then(response => {
           toast.success('Contact deleted successfully')
           fetchData()

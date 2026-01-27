@@ -204,7 +204,7 @@ const VendorRebateCredits = ({ vendorId }: { vendorId: string }) => {
 
   const handleDeleteRebateCredit = async (id: string) => {
     try {
-      VendorRebateCreditService.destroy(id)
+      await VendorRebateCreditService.destroy(id)
         .then(response => {
           toast.success('Rebate Credit deleted successfully')
           fetchData()

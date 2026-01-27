@@ -285,7 +285,7 @@ const Tasks: React.FC<{
 
   const handleDeleteTask = async (id: string) => {
     try {
-      TaskService.destroy(id)
+      await TaskService.destroy(id)
         .then(response => {
           toast.success('Task deleted successfully')
           fetchData()

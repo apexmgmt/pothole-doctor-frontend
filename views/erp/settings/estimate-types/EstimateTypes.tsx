@@ -190,7 +190,7 @@ const EstimateTypes: React.FC = () => {
 
   const handleDeleteEstimateType = async (id: string) => {
     try {
-      EstimateTypeService.destroy(id)
+      await EstimateTypeService.destroy(id)
         .then(response => {
           toast.success('Estimate type deleted successfully')
           fetchData()

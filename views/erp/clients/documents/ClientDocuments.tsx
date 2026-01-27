@@ -203,7 +203,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
 
   const handleDeleteDocument = async (id: string) => {
     try {
-      ClientDocumentService.destroy(id)
+      await ClientDocumentService.destroy(id)
         .then(response => {
           toast.success('Document deleted successfully')
           fetchData()

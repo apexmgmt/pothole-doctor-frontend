@@ -401,7 +401,7 @@ const Clients: React.FC<{
 
   const handleDeleteClient = async (id: string) => {
     try {
-      ClientService.destroy(id, type)
+      await ClientService.destroy(id, type)
         .then(response => {
           toast.success(`${type === 'lead' ? 'Lead' : 'Client'} deleted successfully`)
           fetchData()

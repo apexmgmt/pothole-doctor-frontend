@@ -205,7 +205,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
 
   const handleDeleteDocument = async (id: string) => {
     try {
-      VendorDocumentService.destroy(id)
+      await VendorDocumentService.destroy(id)
         .then(response => {
           toast.success('Document deleted successfully')
           fetchData()

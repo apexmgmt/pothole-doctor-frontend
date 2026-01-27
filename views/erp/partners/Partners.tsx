@@ -284,7 +284,7 @@ const Partners: React.FC<PartnersProps> = ({
 
   const handleDeletePartner = async (id: string) => {
     try {
-      PartnerService.destroy(id)
+      await PartnerService.destroy(id)
         .then(response => {
           toast.success('Partner deleted successfully')
           fetchData()

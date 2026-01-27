@@ -192,7 +192,7 @@ const TaskTypes: React.FC = () => {
 
   const handleDeleteTaskType = async (id: string) => {
     try {
-      TaskTypeService.destroy(id)
+      await TaskTypeService.destroy(id)
         .then(response => {
           toast.success('Task type deleted successfully')
           fetchData()
