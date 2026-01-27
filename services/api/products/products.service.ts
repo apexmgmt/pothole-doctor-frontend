@@ -46,7 +46,7 @@ export default class ProductService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create product')
+        throw errorData
       }
 
       await revalidate('products')
@@ -95,7 +95,7 @@ export default class ProductService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update product')
+        throw errorData
       }
 
       await revalidate('products')

@@ -141,9 +141,10 @@ export function BasicProductFields({
       <FormField
         control={form.control}
         name='sku'
+        rules={{required: 'SKU is required'}}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>SKU</FormLabel>
+            <FormLabel>SKU <span className='text-red-500'>*</span></FormLabel>
             <FormControl>
               <Input placeholder='Enter SKU' {...field} disabled={disabled} />
             </FormControl>

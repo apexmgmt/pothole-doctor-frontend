@@ -298,7 +298,13 @@ const CreateEditViewProductModal = ({
         onSuccess?.()
       }
     } catch (error: any) {
-      toast.error(typeof error?.message === 'string' ? error.message : 'Failed to save product')
+      if (error?.errors && typeof error.errors === 'object') {
+        Object.values(error.errors).forEach((errMsg: any) => {
+          errMsg?.map((msg: string) => toast.error(msg))
+        })
+      } else {
+        toast.error(error?.message || 'Something went wrong')
+      }
     } finally {
       setIsLoading(false)
     }
