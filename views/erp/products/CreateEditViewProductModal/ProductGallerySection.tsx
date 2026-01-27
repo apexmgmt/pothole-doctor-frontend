@@ -174,6 +174,7 @@ export function ProductGallerySection({
                 <Image
                   src={generateFileUrl(gallery.full_path) || '/images/placeholder-image.png'}
                   alt={gallery.name || 'Product gallery'}
+                  unoptimized
                   fill
                   className='object-cover'
                   sizes='(max-width: 768px) 100vw, 300px'
