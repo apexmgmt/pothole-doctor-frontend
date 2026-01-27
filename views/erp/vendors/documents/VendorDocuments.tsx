@@ -158,7 +158,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
         <>
           {getFileType(row.full_path) === 'image' ? (
             <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
-              <Image src={row.full_path} alt={row.name} width={100} height={100} className='rounded-md' />
+              <Image src={row.full_path} alt={row.name} width={100} height={100} className='rounded-md' unoptimized />
             </Link>
           ) : getFileType(row.full_path) === 'video' ? (
             <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
