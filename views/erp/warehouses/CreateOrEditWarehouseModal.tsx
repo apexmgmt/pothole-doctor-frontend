@@ -111,10 +111,10 @@ const CreateOrEditWarehouseModal = ({
 
     const payload: WarehousePayload = {
       location_id: values.location_id,
-      title: values.title,
-      email: values.email,
-      phone: values.phone,
-      fax_number: values.fax_number,
+      title: values.title.trim(),
+      email: values.email.trim(),
+      phone: values.phone.trim(),
+      fax_number: values.fax_number.trim(),
       tax_rate: Number(values.tax_rate),
       street: values.street,
       state_id: values.state_id,
@@ -135,7 +135,13 @@ const CreateOrEditWarehouseModal = ({
       onSuccess?.()
       form.reset()
     } catch (error: any) {
-      toast.error(error?.message || 'Operation failed')
+      if (error?.errors && typeof error.errors === 'object') {
+        Object.values(error.errors).forEach((errMsg: any) => {
+          errMsg?.map((msg: string) => toast.error(msg))
+        })
+      } else {
+        toast.error(error?.message || 'Something went wrong')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -272,9 +278,12 @@ const CreateOrEditWarehouseModal = ({
             <FormField
               control={form.control}
               name='phone'
+              rules={{
+                required: 'Phone number is required'
+              }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone</FormLabel>
+                  <FormLabel>Phone <span className='text-red-500'>*</span></FormLabel>
                   <FormControl>
                     <Input type='tel' placeholder='Enter phone' {...field} />
                   </FormControl>
