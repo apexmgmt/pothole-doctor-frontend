@@ -156,7 +156,7 @@ const CreateOrEditContactTypeModal = ({
                 message: 'Name must be at least 2 characters'
               }
             }}
-            render={({ field }) => <Input {...field} id='name' placeholder='Enter contractor type name' />}
+            render={({ field }) => <Input {...field} id='name' placeholder='Enter contact type name' />}
           />
           {errors.name && <p className='text-sm font-medium text-destructive mt-1'>{errors.name.message}</p>}
         </div>
