@@ -156,7 +156,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
         <>
           {getFileType(row.full_path) === 'image' ? (
             <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
-              <Image src={row.full_path} alt={row.name} width={100} height={100} className='rounded-md' />
+              <Image src={row.full_path} alt={row.name} width={100} height={100} unoptimized className='rounded-md' />
             </Link>
           ) : getFileType(row.full_path) === 'video' ? (
             <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
@@ -227,7 +227,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <InputGroup>
+        {/* <InputGroup>
           <InputGroupInput
             placeholder='Search...'
             value={searchValue}
@@ -242,7 +242,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
             Clear
           </Button>
-        )}
+        )} */}
       </div>
       <Button
         variant='default'

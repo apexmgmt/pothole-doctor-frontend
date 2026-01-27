@@ -229,7 +229,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <InputGroup>
+        {/* <InputGroup>
           <InputGroupInput
             placeholder='Search...'
             value={searchValue}
@@ -244,7 +244,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
             Clear
           </Button>
-        )}
+        )} */}
       </div>
       <Button
         variant='default'
