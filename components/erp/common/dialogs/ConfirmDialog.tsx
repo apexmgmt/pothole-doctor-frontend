@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/alert-dialog'
 
 import { Button } from '@/components/ui/button'
+import { SpinnerCustom } from '@/components/ui/spinner'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -49,7 +50,14 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           {cancelButtonTitle}
         </Button>
         <Button onClick={onConfirm} disabled={loading} {...confirmButtonProps}>
-          {confirmButtonTitle}
+          <div className='flex items-center justify-center gap-4'>
+            {confirmButtonTitle}
+            {loading && (
+              <div className='relative '>
+                <SpinnerCustom size='size-4' />
+              </div>
+            )}
+          </div>
         </Button>
       </AlertDialogFooter>
     </AlertDialogContent>
