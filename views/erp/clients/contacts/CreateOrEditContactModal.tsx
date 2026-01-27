@@ -228,7 +228,12 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
             <FormField
               control={form.control}
               name='phone'
-              rules={{ required: 'Phone is required' }}
+              rules={{ required: 'Phone is required',
+                pattern: {
+                  value: /^[0-9+\-() ]+$/,
+                  message: 'Invalid phone number'
+                }
+               }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
