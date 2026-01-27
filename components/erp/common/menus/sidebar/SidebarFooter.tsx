@@ -107,7 +107,7 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
     <div className='border-t border-border p-4 space-y-4'>
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
-          <div className='flex items-center gap-3 p-3 rounded-lg bg-bg/30 cursor-pointer hover:bg-bg/50 transition-colors'>
+          <div className='flex items-center gap-3 p-3 rounded-lg bg-accent/80 cursor-pointer hover:bg-accent/50 transition-colors'>
             <Avatar className='h-10 w-10'>
               <AvatarImage src={avatar} alt={fullName} />
               <AvatarFallback className='bg-border text-light text-xs font-medium'>{initials}</AvatarFallback>
