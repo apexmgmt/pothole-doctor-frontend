@@ -129,6 +129,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const handleOpenCreateModal = () => {
     setModalMode('create')
     setSelectedVendorId(null)
+    setSelectedUserAbleId(null)
     setSelectedVendor(null)
     setIsModalOpen(true)
   }
@@ -136,6 +137,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
     setSelectedVendorId(id)
+    setSelectedUserAbleId(null)
 
     // Fetch contact type details
     try {
