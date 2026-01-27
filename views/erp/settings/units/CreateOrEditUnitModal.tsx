@@ -47,8 +47,6 @@ const CreateOrEditUnitModal = ({
   unitDetails,
   onSuccess
 }: CreateOrEditUnitModalProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -115,7 +113,7 @@ const CreateOrEditUnitModal = ({
 
   return (
     <CommonDialog
-      isLoading={isLoading}
+      isLoading={form.formState.isSubmitting}
       loadingMessage='Loading unit...'
       open={open}
       onOpenChange={onOpenChange}
