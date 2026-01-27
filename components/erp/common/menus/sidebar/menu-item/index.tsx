@@ -52,7 +52,7 @@ const MenuItem: React.FC<{
     <div key={item.id}>
       <button
         onClick={() => toggleSection(item.id)}
-        className={`relative w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors ${
+        className={`relative w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors ${
           isActive ? 'bg-accent/40 text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
         }`}
         type='button'
@@ -87,7 +87,7 @@ const MenuItem: React.FC<{
     <Link
       key={item.id}
       href={item.href}
-      className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+      className={`relative flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
         isActive ? 'bg-accent text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
       }`}
     >
