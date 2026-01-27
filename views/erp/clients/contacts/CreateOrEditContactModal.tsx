@@ -235,7 +235,7 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
                     Phone <span className='text-red-500'>*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder='Phone' {...field} />
+                    <Input type='tel' placeholder='Phone' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
