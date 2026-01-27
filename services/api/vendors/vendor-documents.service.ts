@@ -46,7 +46,7 @@ export default class VendorDocumentService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to add document')
+        throw errorData
       }
 
       await revalidate('vendor-documents')
@@ -103,7 +103,7 @@ export default class VendorDocumentService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update document')
+        throw errorData
       }
 
       await revalidate('vendor-documents')

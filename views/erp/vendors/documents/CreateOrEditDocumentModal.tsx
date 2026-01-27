@@ -91,13 +91,13 @@ const CreateOrEditDocumentModal = ({
         onSuccess?.()
       }
     } catch (error: any) {
-      toast.error(
-        error?.message
-          ? typeof error.message === 'string'
-            ? error.message
-            : 'Failed to save document'
-          : 'Something went wrong!'
-      )
+      if (error?.errors && typeof error.errors === 'object') {
+        Object.values(error.errors).forEach((errMsg: any) => {
+          errMsg?.map((msg: string) => toast.error(msg))
+        })
+      } else {
+        toast.error(error?.message || 'Something went wrong')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -172,8 +172,6 @@ const CreateOrEditDocumentModal = ({
                     type='file'
                     accept='*'
                     placeholder='Upload file'
-                    
-                    // ref={fileInputRef}
                     {...field}
                     onChange={e => {
                       const file = e.target.files?.[0] || null

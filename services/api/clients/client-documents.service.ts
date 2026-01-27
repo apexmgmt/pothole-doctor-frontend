@@ -44,7 +44,7 @@ export default class ClientDocumentService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to add document')
+        throw errorData
       }
 
       return await response.json()
@@ -98,7 +98,7 @@ export default class ClientDocumentService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update document')
+        throw errorData
       }
 
       return await response.json()
