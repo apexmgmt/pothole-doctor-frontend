@@ -45,8 +45,6 @@ const CreateOrEditPartnerTypeModal = ({
   partnerTypeDetails,
   onSuccess
 }: CreateOrEditPartnerTypeModalProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -109,7 +107,7 @@ const CreateOrEditPartnerTypeModal = ({
 
   return (
     <CommonDialog
-      isLoading={isLoading}
+      isLoading={form.formState.isSubmitting}
       loadingMessage='Loading contractor type...'
       open={open}
       onOpenChange={onOpenChange}
