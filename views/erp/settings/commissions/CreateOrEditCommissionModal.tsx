@@ -100,8 +100,6 @@ const CreateOrEditCommissionModal = ({
   commissionId,
   commissionDetails
 }: CreateOrEditCommissionModalProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -236,7 +234,7 @@ const CreateOrEditCommissionModal = ({
 
   return (
     <CommonDialog
-      isLoading={isLoading}
+      isLoading={form.formState.isSubmitting}
       loadingMessage='Loading commission...'
       open={open}
       onOpenChange={onOpenChange}
