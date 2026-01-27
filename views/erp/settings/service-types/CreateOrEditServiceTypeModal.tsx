@@ -83,7 +83,7 @@ const CreateOrEditServiceTypeModal = ({
 
     try {
       if (mode === 'create') {
-        ServiceTypeService.store(payload)
+        await ServiceTypeService.store(payload)
         toast.success('Service type created successfully')
       } else if (mode === 'edit' && serviceTypeId) {
         await ServiceTypeService.update(serviceTypeId, payload)
