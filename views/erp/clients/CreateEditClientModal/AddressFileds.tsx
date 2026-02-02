@@ -134,7 +134,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
             setValue('country_id', matchedCountry.id.toString())
 
             // Match and set state
-            if (stateName) {
+            if (stateName) {              
               const matchedState = matchedCountry.states.find(
                 state => state.name.toLowerCase() === stateName.toLowerCase()
               )
@@ -143,7 +143,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
                 setValue('state_id', matchedState.id.toString())
 
                 // Match and set city
-                if (cityName) {
+                if (cityName) {                  
                   const matchedCity = matchedState.cities.find(
                     city => city.name.toLowerCase() === cityName.toLowerCase()
                   )
