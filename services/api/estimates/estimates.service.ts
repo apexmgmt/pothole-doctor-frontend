@@ -1,7 +1,7 @@
 import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
 import { ESTIMATES_ALL, ESTIMATES, API_URL, ESTIMATES_TENANT, ESTIMATES_ALL_TENANT } from '@/constants/api'
-import { EstimatePayload } from '@/types'
+import { EstimatePayload, TakeoffData } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
 export default class EstimateService {
@@ -126,6 +126,35 @@ export default class EstimateService {
 
       await revalidate('estimates')
       await revalidate(`estimates/${estimateId}`)
+      await revalidate('estimates-all')
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static updateTakeOffData = async (estimateId: string, takeOffData: TakeoffData) => {
+    try {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES) + `${estimateId}/take-off`,
+        {
+          requiresAuth: true,
+          method: 'PUT',
+          body: JSON.stringify({ take_off_data: takeOffData })
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      await revalidate(`estimates/${estimateId}`)
+      await revalidate('estimates')
       await revalidate('estimates-all')
 
       return await response.json()
