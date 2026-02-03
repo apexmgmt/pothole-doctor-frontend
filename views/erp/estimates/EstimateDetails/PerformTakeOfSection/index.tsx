@@ -13,6 +13,7 @@ import * as turf from '@turf/turf' // IMPORT TURF
 import { NIGHT_MODE_STYLES, POLYGON_COLORS } from '@/constants/take-off-data'
 import EstimateService from '@/services/api/estimates/estimates.service'
 import { MeasurementsPanel } from './MeasurementsPanel'
+import { Separator } from '@/components/ui/separator'
 
 const libraries: ('places' | 'drawing' | 'geometry')[] = ['places', 'drawing', 'geometry']
 
@@ -33,8 +34,8 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null)
 
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const [mapCenter, setMapCenter] = useState(defaultCenter)
-  const [markerPosition, setMarkerPosition] = useState(defaultCenter)
+  const [mapCenter, setMapCenter] = useState(estimate?.take_off_data?.center || defaultCenter)
+  const [markerPosition, setMarkerPosition] = useState(estimate?.take_off_data?.center || defaultCenter)
   const [isLoadingLocation, setIsLoadingLocation] = useState(true)
   const [activeTool, setActiveTool] = useState<'polygon' | 'cut' | 'hand' | null>(null)
   const [polygons, setPolygons] = useState<SavedPolygon[]>(estimate?.take_off_data?.polygons || [])
@@ -555,7 +556,7 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                   mapTypeControl: true,
                   fullscreenControl: false,
                   styles: NIGHT_MODE_STYLES,
-                  mapTypeId: 'satellite',
+                  mapTypeId: 'hybrid',
                   draggableCursor: activeTool === 'hand' ? 'grab' : 'default',
                   gestureHandling: mapDraggable ? 'auto' : 'none'
                 }}
@@ -569,8 +570,8 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                     drawingControl: false,
                     polygonOptions: {
                       fillColor: POLYGON_COLORS[selectedColorIndex].fill,
-                      fillOpacity: 0.3,
-                      strokeWeight: 2,
+                      fillOpacity: 1,
+                      strokeWeight: 5,
                       strokeColor: POLYGON_COLORS[selectedColorIndex].stroke,
                       editable: false,
                       draggable: false
@@ -598,10 +599,10 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
               {isFullscreen && (
                 <div
                   data-html2canvas-ignore='true'
-                  className='absolute top-16 left-2 bg-zinc-900/95 backdrop-blur-sm border border-zinc-800 rounded-lg p-3 space-y-2 flex flex-col'
+                  className='absolute top-30 lg:top-16 left-2 bg-zinc-900/95 backdrop-blur-sm border border-zinc-800 rounded-lg p-3 lg:space-y-2 flex flex-row lg:flex-col gap-2'
                 >
                   {/* Drawing Tools */}
-                  <div className='space-y-1'>
+                  <div className='lg:space-y-1 flex flex-row lg:flex-col gap-2'>
                     <button
                       onClick={() => toggleTool('polygon')}
                       className={`w-10 h-10 flex items-center justify-center rounded border transition-all ${
@@ -640,10 +641,11 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                   </div>
 
                   {/* Divider */}
-                  <div className='border-t border-zinc-700' />
+                  <Separator orientation='horizontal' className='w-full hidden lg:block' />
+                  <Separator orientation='vertical' className='h-10 lg:hidden' />
 
                   {/* Screenshot & Search */}
-                  <div className='space-y-1'>
+                  <div className='lg:space-y-1 flex flex-row lg:flex-col gap-2'>
                     <button
                       onClick={takeScreenshot}
                       className='w-10 h-10 flex items-center justify-center rounded border bg-zinc-800 border-zinc-700 hover:bg-zinc-700 transition-all'
@@ -665,7 +667,10 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
 
               {/* Search Input */}
               {isFullscreen && (
-                <div data-html2canvas-ignore='true' className='absolute top-3 left-48 right-4 flex gap-2'>
+                <div
+                  data-html2canvas-ignore='true'
+                  className='absolute top-16 lg:top-3 left-2 lg:left-48 right-4 flex gap-2'
+                >
                   <input
                     ref={searchInputRef}
                     type='text'
@@ -686,7 +691,7 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                   className='absolute bottom-8 left-2 bg-zinc-900/95 backdrop-blur-sm border border-zinc-800 rounded-lg p-3 space-y-2'
                 >
                   <p className='text-xs text-zinc-400 font-medium'>Polygon Color</p>
-                  <div className='grid grid-cols-4 gap-2'>
+                  <div className='grid grid-cols-8 lg:grid-cols-4 gap-2'>
                     {POLYGON_COLORS.map((color, index) => (
                       <button
                         key={index}
