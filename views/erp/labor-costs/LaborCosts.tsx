@@ -290,7 +290,7 @@ const LaborCosts: React.FC<{
 
   const handleDeleteLaborCost = async (id: string) => {
     try {
-      LaborCostService.destroy(id)
+      await LaborCostService.destroy(id)
         .then(response => {
           toast.success('Labor cost deleted successfully')
           fetchData()
