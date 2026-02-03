@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Estimate, SavedPolygon, TakeoffData } from '@/types'
-import { useLoadScript, GoogleMap, Marker, DrawingManager, Polygon } from '@react-google-maps/api'
+import { useLoadScript, GoogleMap, Marker, DrawingManager, Polygon, Autocomplete } from '@react-google-maps/api'
 import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { toast } from 'sonner'
@@ -50,6 +50,7 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
 
   // Update the TakeoffData interface usage and add zoom state
   const [mapZoom, setMapZoom] = useState(18)
+  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null)
 
   const address = useMemo(() => {
     return estimate?.location || null
@@ -465,6 +466,32 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
     }
   }, [estimate?.take_off_data])
 
+  const onAutocompleteLoad = useCallback((autocompleteInstance: google.maps.places.Autocomplete) => {
+    setAutocomplete(autocompleteInstance)
+  }, [])
+
+  const onPlaceChanged = useCallback(() => {
+    if (autocomplete) {
+      const place = autocomplete.getPlace()
+
+      if (place.formatted_address) {
+        const coordinates = {
+          lat: place.geometry?.location?.lat() || mapCenter.lat,
+          lng: place.geometry?.location?.lng() || mapCenter.lng
+        }
+
+        setMapCenter(coordinates)
+        setMarkerPosition(coordinates)
+
+        if (searchInputRef.current) {
+          searchInputRef.current.value = place.formatted_address
+        }
+
+        toast.success('Location found')
+      }
+    }
+  }, [autocomplete, mapCenter])
+
   if (!address) {
     return null
   }
@@ -595,15 +622,27 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
               {isFullscreen && (
                 <div
                   data-html2canvas-ignore='true'
-                  className='absolute top-16 lg:top-3 left-2 lg:left-48 right-4 flex gap-2'
+                  className='absolute top-16 lg:top-2.5 left-2 lg:left-48 right-4 flex gap-2 z-10'
                 >
-                  <input
-                    ref={searchInputRef}
-                    type='text'
-                    placeholder='Search location...'
-                    onKeyPress={e => e.key === 'Enter' && searchLocation()}
-                    className='flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  />
+                  {isLoaded ? (
+                    <Autocomplete className='w-full h-10' onLoad={onAutocompleteLoad} onPlaceChanged={onPlaceChanged}>
+                      <input
+                        ref={searchInputRef}
+                        type='text'
+                        placeholder='Search location...'
+                        onKeyPress={e => e.key === 'Enter' && searchLocation()}
+                        className='w-full h-full flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                      />
+                    </Autocomplete>
+                  ) : (
+                    <input
+                      ref={searchInputRef}
+                      type='text'
+                      placeholder='Search location...'
+                      disabled
+                      className='w-full flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded text-white text-sm placeholder-zinc-500 opacity-50'
+                    />
+                  )}
                   <Button onClick={searchLocation} size='lg' className='px-3 text-ms'>
                     Go
                   </Button>
