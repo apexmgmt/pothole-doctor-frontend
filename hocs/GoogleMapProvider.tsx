@@ -1,7 +1,13 @@
 'use client'
 
-import React, { ReactNode } from 'react'
+import React, { ReactNode, createContext, useContext } from 'react'
 import { useLoadScript } from '@react-google-maps/api'
+
+const GoogleMapsContext = createContext<{ isLoaded: boolean }>({ isLoaded: false })
+
+export function useGoogleMaps() {
+  return useContext(GoogleMapsContext)
+}
 
 const libraries: ('places' | 'drawing' | 'geometry')[] = ['places', 'drawing', 'geometry']
 
@@ -14,7 +20,5 @@ export function GoogleMapsProvider({ children }: { children: ReactNode }) {
 
   if (loadError) return <div>Error loading maps</div>
 
-  // We return the children. If you want to show a spinner
-  // until the script is ready, you can do that here.
-  return <>{children}</>
+  return <GoogleMapsContext.Provider value={{ isLoaded }}>{children}</GoogleMapsContext.Provider>
 }

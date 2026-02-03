@@ -15,6 +15,7 @@ import EstimateService from '@/services/api/estimates/estimates.service'
 import { MeasurementsPanel } from './MeasurementsPanel'
 import { Separator } from '@/components/ui/separator'
 import DrawingTools from './DrawingTools'
+import { useGoogleMaps } from '@/hocs/GoogleMapProvider'
 
 const libraries: ('places' | 'drawing' | 'geometry')[] = ['places', 'drawing', 'geometry']
 
@@ -29,7 +30,8 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
   //   googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
   //   libraries
   // })
-  const isLoaded = typeof window !== 'undefined' && !!window.google
+  // const isLoaded = typeof window !== 'undefined' && !!window.google
+  const { isLoaded } = useGoogleMaps()
 
   const mapRef = useRef<google.maps.Map | null>(null)
 

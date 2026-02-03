@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { MultiSelect, Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { ClientPayload, CountryWithStates, ServiceType } from '@/types'
 import { Textarea } from '@/components/ui/textarea'
+import { useGoogleMaps } from '@/hocs/GoogleMapProvider'
 
 interface AddressFieldsProps {
   methods: UseFormReturn<ClientPayload>
@@ -33,7 +34,8 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
   //   googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
   //   libraries
   // })
-  const isLoaded = typeof window !== 'undefined' && !!window.google
+  // const isLoaded = typeof window !== 'undefined' && !!window.google
+  const { isLoaded } = useGoogleMaps()
 
   const [autocomplete, setAutocomplete] = React.useState<google.maps.places.Autocomplete | null>(null)
 
