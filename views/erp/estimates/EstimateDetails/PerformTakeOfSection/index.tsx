@@ -24,10 +24,12 @@ const defaultCenter = {
 }
 
 const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-    libraries
-  })
+  // const { isLoaded } = useLoadScript({
+  //   id: 'google-map-script',
+  //   googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+  //   libraries
+  // })
+  const isLoaded = typeof window !== 'undefined' && !!window.google
 
   const mapRef = useRef<google.maps.Map | null>(null)
 

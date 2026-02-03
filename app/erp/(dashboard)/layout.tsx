@@ -6,6 +6,7 @@ import CookieService from '@/services/app/cookie.service'
 import { CheckAuthProvider } from '@/hocs/CheckAuthProvider'
 import { getAuthUser } from '@/utils/auth'
 import { getPermissions } from '@/utils/role-permission'
+import { GoogleMapsProvider } from '@/hocs/GoogleMapProvider'
 
 const Layout = async ({ children }: ReactNode) => {
   const user = await getAuthUser()
@@ -19,7 +20,9 @@ const Layout = async ({ children }: ReactNode) => {
         </aside>
         <section className='w-[calc(100%-260px)] flex flex-col'>
           <Header />
-          <main className='flex-1 overflow-y-auto p-6'>{children}</main>
+          <main className='flex-1 overflow-y-auto p-6'>
+            <GoogleMapsProvider>{children}</GoogleMapsProvider>
+          </main>
         </section>
       </section>
     </CheckAuthProvider>
