@@ -22,6 +22,7 @@ export interface Estimate {
   payment_term?: PaymentTerm
   expiration_date: string
   biding_date: string
+  take_off_data: TakeoffData | null
   created_at: string
   updated_at: string
 }
@@ -36,4 +37,37 @@ export interface EstimatePayload {
   location: string
   expiration_date: string
   biding_date: string
+}
+
+export interface TakeoffData {
+  address: string
+  center: google.maps.LatLngLiteral
+  zoom?: number
+  polygons: SavedPolygon[]
+  totalArea: {
+    squareFeet: number
+    squareMeters: number
+  }
+}
+export interface PolygonColor {
+  fill: string
+  stroke: string
+  name: string
+}
+interface SavedPolygon {
+  id: string
+
+  // Support holes (Array of Arrays)
+  paths: google.maps.LatLngLiteral[] | google.maps.LatLngLiteral[][]
+  color: PolygonColor
+  area: {
+    squareFeet: number
+    squareMeters: number
+  }
+  perimeter: {
+    yards: number
+    meters: number
+  }
+  name: string
+  notes: string
 }

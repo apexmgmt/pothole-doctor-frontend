@@ -2,125 +2,22 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Estimate } from '@/types'
+import { Estimate, SavedPolygon, TakeoffData } from '@/types'
 import { useLoadScript, GoogleMap, Marker, DrawingManager, Polygon } from '@react-google-maps/api'
-import { useMemo, useState, useEffect, useCallback } from 'react'
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { toast } from 'sonner'
-import { Trash2, Maximize2 } from 'lucide-react'
+import { Trash2, Maximize2, Download, Hand, Search, Scissors } from 'lucide-react'
+import html2canvas from 'html2canvas'
+import * as turf from '@turf/turf' // IMPORT TURF
+import { NIGHT_MODE_STYLES, POLYGON_COLORS } from '@/constants/take-off-data'
+import EstimateService from '@/services/api/estimates/estimates.service'
 
 const libraries: ('places' | 'drawing' | 'geometry')[] = ['places', 'drawing', 'geometry']
-
-const mapContainerStyle = {
-  width: '100%',
-  height: '400px'
-}
 
 const defaultCenter = {
   lat: 37.7749,
   lng: -122.4194
-}
-
-const nightModeStyles = [
-  { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
-  {
-    featureType: 'administrative.locality',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#d59563' }]
-  },
-  {
-    featureType: 'poi',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#d59563' }]
-  },
-  {
-    featureType: 'poi.park',
-    elementType: 'geometry',
-    stylers: [{ color: '#263c3f' }]
-  },
-  {
-    featureType: 'poi.park',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#6b9a76' }]
-  },
-  {
-    featureType: 'road',
-    elementType: 'geometry',
-    stylers: [{ color: '#38414e' }]
-  },
-  {
-    featureType: 'road',
-    elementType: 'geometry.stroke',
-    stylers: [{ color: '#212a37' }]
-  },
-  {
-    featureType: 'road',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#9ca5b3' }]
-  },
-  {
-    featureType: 'road.highway',
-    elementType: 'geometry',
-    stylers: [{ color: '#746855' }]
-  },
-  {
-    featureType: 'road.highway',
-    elementType: 'geometry.stroke',
-    stylers: [{ color: '#1f2835' }]
-  },
-  {
-    featureType: 'road.highway',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#f3d19c' }]
-  },
-  {
-    featureType: 'transit',
-    elementType: 'geometry',
-    stylers: [{ color: '#2f3948' }]
-  },
-  {
-    featureType: 'transit.station',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#d59563' }]
-  },
-  {
-    featureType: 'water',
-    elementType: 'geometry',
-    stylers: [{ color: '#17263c' }]
-  },
-  {
-    featureType: 'water',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#515c6d' }]
-  },
-  {
-    featureType: 'water',
-    elementType: 'labels.text.stroke',
-    stylers: [{ color: '#17263c' }]
-  }
-]
-
-const POLYGON_COLORS = [
-  { fill: '#3b82f6', stroke: '#2563eb', name: 'Blue' },
-  { fill: '#22c55e', stroke: '#16a34a', name: 'Green' },
-  { fill: '#ef4444', stroke: '#dc2626', name: 'Red' },
-  { fill: '#f59e0b', stroke: '#d97706', name: 'Orange' },
-  { fill: '#8b5cf6', stroke: '#7c3aed', name: 'Purple' },
-  { fill: '#ec4899', stroke: '#db2777', name: 'Pink' },
-  { fill: '#06b6d4', stroke: '#0891b2', name: 'Cyan' },
-  { fill: '#eab308', stroke: '#ca8a04', name: 'Yellow' }
-]
-
-interface SavedPolygon {
-  id: string
-  paths: google.maps.LatLngLiteral[]
-  color: (typeof POLYGON_COLORS)[0]
-  area: {
-    squareFeet: number
-    squareMeters: number
-  }
 }
 
 const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
@@ -129,25 +26,32 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
     libraries
   })
 
+  const mapRef = useRef<google.maps.Map | null>(null)
+
+  // New ref for the container div to capture screenshot
+  const mapContainerRef = useRef<HTMLDivElement>(null)
+
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [mapCenter, setMapCenter] = useState(defaultCenter)
   const [markerPosition, setMarkerPosition] = useState(defaultCenter)
   const [isLoadingLocation, setIsLoadingLocation] = useState(true)
-  const [isDrawingMode, setIsDrawingMode] = useState(false)
-  const [polygons, setPolygons] = useState<SavedPolygon[]>([])
+  const [activeTool, setActiveTool] = useState<'polygon' | 'cut' | 'hand' | null>(null)
+  const [polygons, setPolygons] = useState<SavedPolygon[]>(estimate?.take_off_data?.polygons || [])
   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
   const [drawingManager, setDrawingManager] = useState<google.maps.drawing.DrawingManager | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null)
+  const [mapDraggable, setMapDraggable] = useState(true)
+  const [selectedPolygonForCut, setSelectedPolygonForCut] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
 
-  // Get address from estimate
+  // Update the TakeoffData interface usage and add zoom state
+  const [mapZoom, setMapZoom] = useState(18)
+
   const address = useMemo(() => {
-    const clientAddress = estimate?.location
-
-    if (!clientAddress) return null
-
-    return clientAddress ?? null
+    return estimate?.location || null
   }, [estimate])
 
-  // Calculate total area
   const totalArea = useMemo(() => {
     const total = polygons.reduce(
       (acc, polygon) => {
@@ -162,7 +66,32 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
     return total
   }, [polygons])
 
-  // Geocode the address to get coordinates
+  // A callback to handle the map loading
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map
+  }, [])
+
+  const onMapUnmount = useCallback(() => {
+    mapRef.current = null
+  }, [])
+
+  // Add this effect after the geocoding effect
+  useEffect(() => {
+    // Trigger a re-render of polygons after map is loaded
+    if (mapRef.current && polygons.length > 0) {
+      // Force map to refresh and display polygons
+      mapRef.current.setZoom(20)
+    }
+  }, [mapRef.current, isLoaded])
+
+  // Also, ensure polygons from estimate load properly:
+  useEffect(() => {
+    if (estimate?.take_off_data?.polygons && polygons.length === 0) {
+      setPolygons(estimate.take_off_data.polygons)
+    }
+  }, [estimate?.take_off_data?.polygons])
+
+  // Geocode the address
   useEffect(() => {
     if (isLoaded && address && window.google) {
       setIsLoadingLocation(true)
@@ -186,25 +115,151 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
     }
   }, [isLoaded, address])
 
-  // Calculate polygon area
-  const calculateArea = (paths: google.maps.LatLngLiteral[]) => {
-    if (!window.google) return { squareFeet: 0, squareMeters: 0 }
+  // Updated Area Calculation to handle paths with holes
+  const calculateAreaAndPerimeter = (paths: google.maps.LatLngLiteral[] | google.maps.LatLngLiteral[][]) => {
+    if (!window.google) {
+      return {
+        area: { squareFeet: 0, squareMeters: 0 },
+        perimeter: { yards: 0, meters: 0 }
+      }
+    }
 
-    const areaInSquareMeters = google.maps.geometry.spherical.computeArea(
-      paths.map(coord => new google.maps.LatLng(coord.lat, coord.lng))
-    )
+    let areaInSquareMeters = 0
+    let perimeterMeters = 0
+
+    // Check if paths is simple array or array of arrays
+    // Simple array = no holes. Array of arrays = [outer, inner1, inner2...]
+    const isSimplePoly = paths.length > 0 && !Array.isArray((paths as any)[0])
+
+    // Normalize to Array of Arrays for calculation
+    const polygonPaths = isSimplePoly
+      ? [paths as google.maps.LatLngLiteral[]]
+      : (paths as google.maps.LatLngLiteral[][])
+
+    // Calculate Area
+    // The area of a polygon with holes is Area(Outer) - Area(Inner1) - Area(Inner2)...
+    polygonPaths.forEach((path, index) => {
+      const latLngPath = path.map(coord => new google.maps.LatLng(coord.lat, coord.lng))
+      const pathArea = google.maps.geometry.spherical.computeArea(latLngPath)
+
+      if (index === 0) {
+        // Outer ring: Add area
+        areaInSquareMeters += pathArea
+      } else {
+        // Inner rings (holes): Subtract area
+        areaInSquareMeters -= pathArea
+      }
+
+      // Calculate Perimeter
+      // Perimeter is sum of all ring perimeters
+      for (let i = 0; i < latLngPath.length; i++) {
+        const current = latLngPath[i]
+        const next = latLngPath[(i + 1) % latLngPath.length]
+
+        perimeterMeters += google.maps.geometry.spherical.computeDistanceBetween(current, next)
+      }
+    })
 
     const areaInSquareFeet = areaInSquareMeters * 10.7639
+    const perimeterYards = perimeterMeters * 1.09361
 
     return {
-      squareFeet: areaInSquareFeet,
-      squareMeters: areaInSquareMeters
+      area: { squareFeet: Math.max(0, areaInSquareFeet), squareMeters: Math.max(0, areaInSquareMeters) },
+      perimeter: { yards: perimeterYards, meters: perimeterMeters }
+    }
+  }
+
+  const subtractPolygon = (
+    originalPaths: google.maps.LatLngLiteral[] | google.maps.LatLngLiteral[][],
+    cutPaths: google.maps.LatLngLiteral[]
+  ) => {
+    try {
+      // 1. Convert Google Maps Paths to Turf Polygon (GeoJSON)
+      // Note: Google Maps uses {lat, lng}, Turf uses [lng, lat]
+
+      // Helper to convert GMaps path to Ring (closing the loop)
+      const toRing = (path: google.maps.LatLngLiteral[]) => {
+        const ring = path.map(p => [p.lng, p.lat])
+
+        if (ring.length > 0) {
+          // Ensure ring is closed
+          const first = ring[0]
+          const last = ring[ring.length - 1]
+
+          if (first[0] !== last[0] || first[1] !== last[1]) {
+            ring.push(first)
+          }
+        }
+
+        return ring
+      }
+
+      let mainPolyFeature
+
+      // Check if original is simple or complex (has holes)
+      const isSimple = originalPaths.length > 0 && !Array.isArray((originalPaths as any)[0])
+
+      if (isSimple) {
+        // Single ring
+        const ring = toRing(originalPaths as google.maps.LatLngLiteral[])
+
+        mainPolyFeature = turf.polygon([ring])
+      } else {
+        // Multiple rings (Outer + Holes)
+        const rings = (originalPaths as google.maps.LatLngLiteral[][]).map(toRing)
+
+        mainPolyFeature = turf.polygon(rings)
+      }
+
+      // 2. Convert Cut Path to Turf Polygon
+      const cutRing = toRing(cutPaths)
+      const cutPolyFeature = turf.polygon([cutRing])
+
+      // 3. Perform Difference
+      const difference = turf.difference(turf.featureCollection([mainPolyFeature, cutPolyFeature]))
+
+      if (!difference) {
+        toast.error('Cut removed the entire polygon')
+
+        return null
+      }
+
+      // 4. Convert back to Google Maps Paths
+      // Turf might return a Polygon (single shape, maybe with holes) or MultiPolygon (multiple shapes)
+
+      const convertCoordsToGMaps = (coords: any[]) => {
+        return coords.map((c: any) => ({ lat: c[1], lng: c[0] }))
+      }
+
+      if (difference.geometry.type === 'Polygon') {
+        const rings = difference.geometry.coordinates
+
+        // rings[0] is outer, rings[1+] are holes
+        return rings.map(convertCoordsToGMaps)
+      } else if (difference.geometry.type === 'MultiPolygon') {
+        // If the cut split the polygon into two islands, we just take the first one
+        // or we could merge them. For this app, let's take the largest or just Flatten.
+        // Google Maps `paths` prop supports multiple outer rings if passed correctly,
+        // but usually it's best to stick to one Polygon object = one geometry.
+        // We will return the coordinates of the first polygon in the set.
+        const firstPolyRings = difference.geometry.coordinates[0]
+
+        return firstPolyRings.map(convertCoordsToGMaps)
+      }
+
+      return originalPaths
+    } catch (error) {
+      console.error('Subtraction error:', error)
+      toast.error('Failed to apply cut logic')
+
+      return originalPaths
     }
   }
 
   // Handle polygon completion
   const onPolygonComplete = useCallback(
     (polygon: google.maps.Polygon) => {
+      // Get the path drawn by the user
       const paths = polygon.getPath().getArray()
 
       const coordinates = paths.map(latLng => ({
@@ -212,49 +267,129 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
         lng: latLng.lng()
       }))
 
-      const area = calculateArea(coordinates)
+      // If cut tool is active and a polygon is selected
+      if (activeTool === 'cut' && selectedPolygonForCut) {
+        const targetPolygon = polygons.find(p => p.id === selectedPolygonForCut)
 
-      const newPolygon: SavedPolygon = {
-        id: Date.now().toString(),
-        paths: coordinates,
-        color: POLYGON_COLORS[selectedColorIndex],
-        area
+        if (targetPolygon) {
+          try {
+            // Perform subtraction
+            const resultPaths = subtractPolygon(targetPolygon.paths, coordinates)
+
+            if (!resultPaths) {
+              // Subtraction failed or removed everything
+              polygon.setMap(null)
+
+              return
+            }
+
+            const { area, perimeter } = calculateAreaAndPerimeter(resultPaths)
+
+            setPolygons(prev =>
+              prev.map(p =>
+                p.id === selectedPolygonForCut
+                  ? {
+                      ...p,
+                      paths: resultPaths, // Now supports holes
+                      area,
+                      perimeter
+                    }
+                  : p
+              )
+            )
+
+            const removedArea = targetPolygon.area.squareFeet - area.squareFeet
+
+            toast.success(`Cut applied! Removed ${removedArea.toFixed(2)} sq ft`)
+          } catch (error) {
+            toast.error('Failed to apply cut')
+            console.error(error)
+          }
+
+          setSelectedPolygonForCut(null)
+          setActiveTool(null)
+          polygon.setMap(null)
+
+          if (drawingManager) {
+            drawingManager.setDrawingMode(null)
+          }
+        }
+      } else {
+        // Normal polygon creation
+        const { area, perimeter } = calculateAreaAndPerimeter(coordinates)
+
+        const newPolygon: SavedPolygon = {
+          id: Date.now().toString(),
+          paths: coordinates, // Simple array for new polygon
+          color: POLYGON_COLORS[selectedColorIndex],
+          area,
+          perimeter,
+          name: `Area #${polygons.length + 1}`,
+          notes: ''
+        }
+
+        setPolygons(prev => [...prev, newPolygon])
+        toast.success(`Polygon added! Area: ${area.squareFeet.toFixed(2)} sq ft`)
       }
 
-      setPolygons(prev => [...prev, newPolygon])
       polygon.setMap(null)
-      setIsDrawingMode(false)
+      setActiveTool(null)
+
+      if (drawingManager) {
+        drawingManager.setDrawingMode(null)
+      }
+    },
+    [drawingManager, selectedColorIndex, polygons, activeTool, selectedPolygonForCut]
+  )
+
+  const onDrawingManagerLoad = useCallback((manager: google.maps.drawing.DrawingManager) => {
+    setDrawingManager(manager)
+  }, [])
+
+  // Toggle tools
+  const toggleTool = (tool: 'polygon' | 'cut' | 'hand') => {
+    if (activeTool === tool) {
+      setActiveTool(null)
+      setSelectedPolygonForCut(null)
 
       if (drawingManager) {
         drawingManager.setDrawingMode(null)
       }
 
-      toast.success(`Polygon added! Area: ${area.squareFeet.toFixed(2)} sq ft`)
-    },
-    [drawingManager, selectedColorIndex]
-  )
+      setMapDraggable(true)
 
-  // Handle drawing manager load
-  const onDrawingManagerLoad = useCallback((manager: google.maps.drawing.DrawingManager) => {
-    setDrawingManager(manager)
-  }, [])
+      return
+    }
 
-  // Toggle drawing mode
-  const toggleDrawingMode = () => {
-    setIsDrawingMode(!isDrawingMode)
+    setActiveTool(tool)
 
-    if (drawingManager) {
-      drawingManager.setDrawingMode(!isDrawingMode ? google.maps.drawing.OverlayType.POLYGON : null)
-      drawingManager.setOptions({
-        polygonOptions: {
-          fillColor: POLYGON_COLORS[selectedColorIndex].fill,
-          fillOpacity: 0.3,
-          strokeWeight: 2,
-          strokeColor: POLYGON_COLORS[selectedColorIndex].stroke,
-          editable: false,
-          draggable: false
-        }
-      })
+    if (tool === 'polygon') {
+      if (drawingManager) {
+        drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON)
+        drawingManager.setOptions({
+          polygonOptions: {
+            fillColor: POLYGON_COLORS[selectedColorIndex].fill,
+            fillOpacity: 0.3,
+            strokeWeight: 2,
+            strokeColor: POLYGON_COLORS[selectedColorIndex].stroke,
+            editable: false,
+            draggable: false
+          }
+        })
+      }
+
+      setMapDraggable(false)
+    } else if (tool === 'hand') {
+      setMapDraggable(true)
+
+      if (drawingManager) {
+        drawingManager.setDrawingMode(null)
+      }
+
+      setSelectedPolygonForCut(null)
+    } else if (tool === 'cut') {
+      toast.info('Select a polygon from the right panel, then draw the cut area')
+      setMapDraggable(false)
     }
   }
 
@@ -275,7 +410,58 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
     setIsFullscreen(!isFullscreen)
   }
 
-  // Save all polygons
+  // Screen shoot of the map
+  const takeScreenshot = async () => {
+    // Target the DIV container, not the map instance
+    if (!mapContainerRef.current) return
+
+    try {
+      const canvas = await html2canvas(mapContainerRef.current, {
+        useCORS: true, // Crucial for Google Maps tiles
+        allowTaint: true,
+        backgroundColor: null
+      })
+
+      const link = document.createElement('a')
+
+      link.href = canvas.toDataURL('image/png')
+      link.download = `takeoff-${Date.now()}.png`
+      link.click()
+      toast.success('Screenshot downloaded')
+    } catch (error) {
+      console.error('Screenshot error:', error)
+      toast.error('Failed to take screenshot. Note: Maps sometimes block programmatic screenshots.')
+    }
+  }
+
+  // Search location
+  const searchLocation = () => {
+    if (!searchInputRef.current || !isLoaded) return
+    const searchAddress = searchInputRef.current.value
+
+    if (!searchAddress) return
+
+    const geocoder = new google.maps.Geocoder()
+
+    geocoder.geocode({ address: searchAddress }, (results, status) => {
+      if (status === 'OK' && results && results[0]) {
+        const location = results[0].geometry.location
+
+        const coordinates = {
+          lat: location.lat(),
+          lng: location.lng()
+        }
+
+        setMapCenter(coordinates)
+        setMarkerPosition(coordinates)
+        toast.success('Location found')
+      } else {
+        toast.error('Location not found')
+      }
+    })
+  }
+
+  // Save to database (placeholder)
   const savePolygons = async () => {
     if (polygons.length === 0) {
       toast.error('Please draw at least one polygon')
@@ -283,14 +469,46 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
       return
     }
 
-    // TODO: Integrate with your API to save polygons
-    console.log('Saving polygons:', polygons)
-    console.log('Total area:', totalArea)
+    const takeoffData: TakeoffData = {
+      address: address || '',
+      center: mapCenter,
+      zoom: mapZoom,
+      polygons,
+      totalArea
+    }
 
-    toast.success(`Saved ${polygons.length} polygon(s)! Total area: ${totalArea.squareFeet.toFixed(2)} sq ft`)
+    setIsSaving(true)
+
+    try {
+      const response = await EstimateService.updateTakeOffData(estimate.id, takeoffData)
+
+      setIsSaving(false)
+      setIsFullscreen(false)
+      toast.success(response.message || 'Take-off data saved successfully')
+    } catch (error) {
+      setIsSaving(false)
+      toast.error('Failed to save take-off data')
+    }
   }
 
-  // Don't render the card if there's no address
+  // Update the GoogleMap component to listen to zoom changes
+  const onZoomChanged = useCallback(() => {
+    if (mapRef.current) {
+      setMapZoom(mapRef.current.getZoom() || 18)
+    }
+  }, [])
+
+  // Update initial loading to use saved zoom if available
+  useEffect(() => {
+    if (estimate?.take_off_data?.zoom) {
+      setMapZoom(estimate.take_off_data.zoom)
+    }
+
+    if (estimate?.take_off_data?.center) {
+      setMapCenter(estimate.take_off_data.center)
+    }
+  }, [estimate?.take_off_data])
+
   if (!address) {
     return null
   }
@@ -314,28 +532,32 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
             <SpinnerCustom />
           </div>
         ) : (
-          <div className='space-y-4'>
-            {/* Map Container */}
-            <div className='relative rounded-md overflow-hidden'>
+          <div className='flex gap-4' style={{ height: isFullscreen ? 'calc(100vh - 200px)' : '400px' }}>
+            {/* Map Container Wrapper for Screenshot */}
+            <div ref={mapContainerRef} className='flex-1 relative rounded-md overflow-hidden'>
               <GoogleMap
+                onLoad={onMapLoad}
+                onUnmount={onMapUnmount}
+                onZoomChanged={onZoomChanged}
                 mapContainerStyle={{
                   width: '100%',
-                  height: isFullscreen ? 'calc(100vh - 300px)' : '400px'
+                  height: '100%'
                 }}
                 center={mapCenter}
-                zoom={18}
+                zoom={mapZoom}
                 options={{
                   zoomControl: true,
                   streetViewControl: false,
                   mapTypeControl: true,
                   fullscreenControl: false,
-                  styles: nightModeStyles,
-                  mapTypeId: 'satellite'
+                  styles: NIGHT_MODE_STYLES,
+                  mapTypeId: 'satellite',
+                  draggableCursor: activeTool === 'hand' ? 'grab' : 'default',
+                  gestureHandling: mapDraggable ? 'auto' : 'none'
                 }}
               >
                 <Marker position={markerPosition} />
 
-                {/* Drawing Manager */}
                 <DrawingManager
                   onLoad={onDrawingManagerLoad}
                   onPolygonComplete={onPolygonComplete}
@@ -352,15 +574,14 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                   }}
                 />
 
-                {/* Display saved polygons */}
                 {polygons.map(polygon => (
                   <Polygon
                     key={polygon.id}
                     paths={polygon.paths}
                     options={{
                       fillColor: polygon.color.fill,
-                      fillOpacity: 0.3,
-                      strokeWeight: 2,
+                      fillOpacity: hoveredPolygonId === polygon.id ? 0.6 : 0.3,
+                      strokeWeight: hoveredPolygonId === polygon.id ? 3 : 2,
                       strokeColor: polygon.color.stroke,
                       editable: false,
                       draggable: false
@@ -369,30 +590,112 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                 ))}
               </GoogleMap>
 
-              {/* Drawing Controls Overlay */}
-              <div className='absolute top-12 left-2 bg-zinc-900/95 backdrop-blur-sm border border-zinc-800 rounded-lg p-3 space-y-3'>
-                <div className='space-y-2'>
-                  <p className='text-xs text-zinc-400 font-medium'>Drawing Tools</p>
-                  <Button
-                    onClick={toggleDrawingMode}
-                    size='sm'
-                    variant={isDrawingMode ? 'default' : 'outline'}
-                    className='w-full text-xs'
-                  >
-                    {isDrawingMode ? 'Cancel Drawing' : 'Draw Polygon'}
+              {/* Left Toolbar - Added data-html2canvas-ignore to prevent toolbar from appearing in screenshot if desired */}
+              {isFullscreen && (
+                <div
+                  data-html2canvas-ignore='true'
+                  className='absolute top-16 left-2 bg-zinc-900/95 backdrop-blur-sm border border-zinc-800 rounded-lg p-3 space-y-2 flex flex-col'
+                >
+                  {/* Drawing Tools */}
+                  <div className='space-y-1'>
+                    <button
+                      onClick={() => toggleTool('polygon')}
+                      className={`w-10 h-10 flex items-center justify-center rounded border transition-all ${
+                        activeTool === 'polygon'
+                          ? 'bg-blue-600 border-blue-500'
+                          : 'bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
+                      }`}
+                      title='Draw Polygon'
+                    >
+                      <svg className='w-5 h-5 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M12 6v6m0 0v6m0-6h6m0 0h6m-6-6H6m0 0H0'
+                        />
+                      </svg>
+                    </button>
+
+                    <button
+                      onClick={() => toggleTool('cut')}
+                      className={`w-10 h-10 flex items-center justify-center rounded border transition-all ${
+                        activeTool === 'cut'
+                          ? 'bg-red-600 border-red-500'
+                          : 'bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
+                      }`}
+                      title={selectedPolygonForCut ? 'Draw cut area on map' : 'Select a polygon first, then click cut'}
+                    >
+                      <Scissors className='w-5 h-5 text-white' />
+                    </button>
+
+                    <button
+                      onClick={() => toggleTool('hand')}
+                      className={`w-10 h-10 flex items-center justify-center rounded border transition-all ${
+                        activeTool === 'hand'
+                          ? 'bg-green-600 border-green-500'
+                          : 'bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
+                      }`}
+                      title='Hand Tool (Pan)'
+                    >
+                      <Hand className='w-5 h-5 text-white' />
+                    </button>
+                  </div>
+
+                  {/* Divider */}
+                  <div className='border-t border-zinc-700' />
+
+                  {/* Screenshot & Search */}
+                  <div className='space-y-1'>
+                    <button
+                      onClick={takeScreenshot}
+                      className='w-10 h-10 flex items-center justify-center rounded border bg-zinc-800 border-zinc-700 hover:bg-zinc-700 transition-all'
+                      title='Take Screenshot'
+                    >
+                      <Download className='w-5 h-5 text-white' />
+                    </button>
+
+                    <button
+                      onClick={() => searchInputRef.current?.focus()}
+                      className='w-10 h-10 flex items-center justify-center rounded border bg-zinc-800 border-zinc-700 hover:bg-zinc-700 transition-all'
+                      title='Search Location'
+                    >
+                      <Search className='w-5 h-5 text-white' />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Search Input */}
+              {isFullscreen && (
+                <div data-html2canvas-ignore='true' className='absolute top-3 left-48 right-4 flex gap-2'>
+                  <input
+                    ref={searchInputRef}
+                    type='text'
+                    placeholder='Search location...'
+                    onKeyPress={e => e.key === 'Enter' && searchLocation()}
+                    className='flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                  />
+                  <Button onClick={searchLocation} size='lg' className='px-3 text-ms'>
+                    Go
                   </Button>
                 </div>
+              )}
 
-                {/* Color Selector */}
-                <div className='space-y-2'>
+              {/* Color Selector */}
+              {isFullscreen && (
+                <div
+                  data-html2canvas-ignore='true'
+                  className='absolute bottom-8 left-2 bg-zinc-900/95 backdrop-blur-sm border border-zinc-800 rounded-lg p-3 space-y-2'
+                >
                   <p className='text-xs text-zinc-400 font-medium'>Polygon Color</p>
                   <div className='grid grid-cols-4 gap-2'>
                     {POLYGON_COLORS.map((color, index) => (
                       <button
                         key={index}
                         onClick={() => setSelectedColorIndex(index)}
-                        className={`w-8 h-8 rounded border-2 ${
-                          selectedColorIndex === index ? 'border-white' : 'border-zinc-700'
+                        className={`w-8 h-8 rounded border-2 transition-all ${
+                          selectedColorIndex === index ? 'border-white ring-2 ring-white' : 'border-zinc-700'
                         }`}
                         style={{ backgroundColor: color.fill }}
                         title={color.name}
@@ -400,61 +703,156 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                     ))}
                   </div>
                 </div>
+              )}
+            </div>
+
+            {/* Right Sidebar - Measurements Panel */}
+            {isFullscreen && (
+              <div className='w-80 bg-zinc-800 rounded-lg border border-zinc-700 overflow-hidden flex flex-col'>
+                <div className='bg-zinc-900 border-b border-zinc-700 px-4 py-3'>
+                  <h2 className='text-sm font-semibold text-white'>Measurements Panel</h2>
+                </div>
+
+                <div className='flex-1 overflow-y-auto space-y-3 p-4'>
+                  {polygons.length === 0 ? (
+                    <div className='flex items-center justify-center h-full text-zinc-400 text-xs'>
+                      <p>Draw polygons on the map to view measurements</p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Total Area */}
+                      <div className='bg-zinc-900 rounded-lg p-3 border border-zinc-700'>
+                        <p className='text-xs text-zinc-400 mb-2'>Total Area</p>
+                        <div className='space-y-1'>
+                          <p className='text-lg font-semibold text-white'>{totalArea.squareFeet.toFixed(2)} sq ft</p>
+                          <p className='text-xs text-zinc-400'>{totalArea.squareMeters.toFixed(2)} sq m</p>
+                        </div>
+                      </div>
+
+                      {/* Individual Areas */}
+                      <div className='space-y-2'>
+                        {polygons.map((polygon, index) => (
+                          <div
+                            key={polygon.id}
+                            onMouseEnter={() => setHoveredPolygonId(polygon.id)}
+                            onMouseLeave={() => {
+                              setHoveredPolygonId(null)
+
+                              if (activeTool !== 'cut') {
+                                setSelectedPolygonForCut(null)
+                              }
+                            }}
+                            className={`bg-zinc-900 rounded-lg p-3 border-2 cursor-pointer transition-all ${
+                              hoveredPolygonId === polygon.id
+                                ? `border-white ring-2 ring-white/50`
+                                : selectedPolygonForCut === polygon.id
+                                  ? 'border-red-500 ring-2 ring-red-500/50'
+                                  : 'border-zinc-700'
+                            }`}
+                            style={{
+                              borderColor:
+                                hoveredPolygonId === polygon.id
+                                  ? polygon.color.stroke
+                                  : selectedPolygonForCut === polygon.id
+                                    ? '#ef4444'
+                                    : undefined
+                            }}
+                            onClick={() => {
+                              if (activeTool === 'cut') {
+                                setSelectedPolygonForCut(polygon.id)
+
+                                // Only allow cut tool if a polygon is selected
+                                if (drawingManager) {
+                                  drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON)
+                                  drawingManager.setOptions({
+                                    polygonOptions: {
+                                      fillColor: '#ef4444',
+                                      fillOpacity: 0.3,
+                                      strokeWeight: 2,
+                                      strokeColor: '#dc2626',
+                                      editable: false,
+                                      draggable: false
+                                    }
+                                  })
+                                }
+
+                                toast.info(`Selected "${polygon.name}" for cutting. Now draw the cut area.`)
+                              }
+                            }}
+                          >
+                            <div className='flex items-start justify-between mb-2'>
+                              <div className='flex items-center gap-2'>
+                                <div
+                                  className='w-3 h-3 rounded-full border border-zinc-600'
+                                  style={{ backgroundColor: polygon.color.fill }}
+                                />
+                                <p className='text-sm font-semibold text-white'>{polygon.name}</p>
+                              </div>
+                              <Button
+                                onClick={e => {
+                                  e.stopPropagation()
+                                  deletePolygon(polygon.id)
+                                }}
+                                size='sm'
+                                variant='ghost'
+                                className='text-red-400 hover:text-red-300 hover:bg-red-950/50 p-1 h-auto'
+                              >
+                                <Trash2 className='w-3 h-3' />
+                              </Button>
+                            </div>
+
+                            {selectedPolygonForCut === polygon.id && (
+                              <div className='mb-2 p-2 bg-red-950/50 rounded border border-red-700 text-xs text-red-300'>
+                                Selected for cutting. Draw cut area on map.
+                              </div>
+                            )}
+
+                            <div className='space-y-1 text-xs'>
+                              <div className='flex justify-between'>
+                                <span className='text-zinc-400'>Square:</span>
+                                <span className='text-white font-medium'>
+                                  {polygon.area.squareFeet.toFixed(2)} sq ft
+                                </span>
+                              </div>
+                              <div className='flex justify-between'>
+                                <span className='text-zinc-400'>Metric:</span>
+                                <span className='text-white font-medium'>
+                                  {polygon.area.squareMeters.toFixed(2)} sq m
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
 
                 {/* Action Buttons */}
                 {polygons.length > 0 && (
-                  <div className='space-y-2 pt-2 border-t border-zinc-800'>
+                  <div className='border-t border-zinc-700 p-4 space-y-2'>
+                    {/* <Button onClick={exportDataAsJSON} size='sm' variant='outline' className='w-full text-xs'>
+                      <Download className='w-3 h-3 mr-2' />
+                      Export JSON
+                    </Button> */}
+                    <Button
+                      onClick={savePolygons}
+                      size='sm'
+                      className='w-full text-xs flex items-center justify-center gap-4'
+                      disabled={isSaving}
+                    >
+                      {isSaving && (
+                        <div className='relative '>
+                          <SpinnerCustom size='size-4' />
+                        </div>
+                      )}{' '}
+                      Save Areas ({polygons.length})
+                    </Button>
                     <Button onClick={clearAllPolygons} size='sm' variant='outline' className='w-full text-xs'>
                       Clear All
                     </Button>
-                    <Button onClick={savePolygons} size='sm' variant='default' className='w-full text-xs'>
-                      Save Areas ({polygons.length})
-                    </Button>
                   </div>
                 )}
-              </div>
-            </div>
-
-            {/* Polygon List */}
-            {polygons.length > 0 && (
-              <div className='space-y-2'>
-                <div className='flex items-center justify-between'>
-                  <h3 className='text-sm font-medium text-zinc-200'>Selected Areas</h3>
-                  <div className='text-xs text-zinc-400'>
-                    Total: <span className='font-semibold text-white'>{totalArea.squareFeet.toFixed(2)} sq ft</span>
-                  </div>
-                </div>
-                <div className='space-y-2 max-h-40 overflow-y-auto'>
-                  {polygons.map((polygon, index) => (
-                    <div
-                      key={polygon.id}
-                      className='flex items-center justify-between bg-zinc-800 rounded-md p-3 border border-zinc-700'
-                    >
-                      <div className='flex items-center gap-3'>
-                        <div
-                          className='w-4 h-4 rounded border border-zinc-600'
-                          style={{ backgroundColor: polygon.color.fill }}
-                        />
-                        <div>
-                          <p className='text-sm text-zinc-200'>
-                            Area {index + 1} - {polygon.color.name}
-                          </p>
-                          <p className='text-xs text-zinc-400'>
-                            {polygon.area.squareFeet.toFixed(2)} sq ft ({polygon.area.squareMeters.toFixed(2)} sq m)
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        onClick={() => deletePolygon(polygon.id)}
-                        size='sm'
-                        variant='ghost'
-                        className='text-red-400 hover:text-red-300 hover:bg-red-950/50'
-                      >
-                        <Trash2 className='w-4 h-4' />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
               </div>
             )}
           </div>
