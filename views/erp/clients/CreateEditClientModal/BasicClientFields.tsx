@@ -178,12 +178,7 @@ const BasicClientFields: React.FC<BasicClientFieldsProps> = ({
             name='phone'
             control={control}
             rules={{
-              required: 'Main Phone is required',
-              validate: value => {
-                const numStr = String(value).replace(/\D/g, '')
-
-                return numStr.length === 10 || 'Phone number must be 10 digits'
-              }
+              required: 'Main Phone is required'
             }}
             render={({ field }) => <Input {...field} type='tel' placeholder='10 digit phone number' />}
           />
@@ -195,14 +190,6 @@ const BasicClientFields: React.FC<BasicClientFieldsProps> = ({
           <Controller
             name='cell_phone'
             control={control}
-            rules={{
-              validate: value => {
-                if (!value || value === '') return true
-                const numStr = String(value).replace(/\D/g, '')
-
-                return numStr.length === 10 || 'Phone number must be 10 digits'
-              }
-            }}
             render={({ field }) => <Input {...field} type='tel' placeholder='10 digit phone number' />}
           />
           {errors.cell_phone && <p className='text-sm text-red-500'>{errors.cell_phone.message}</p>}
@@ -257,14 +244,6 @@ const BasicClientFields: React.FC<BasicClientFieldsProps> = ({
           <Controller
             name='spouse_phone'
             control={control}
-            rules={{
-              validate: value => {
-                if (!value || value === '') return true
-                const numStr = String(value).replace(/\D/g, '')
-
-                return numStr.length === 10 || 'Phone number must be 10 digits'
-              }
-            }}
             render={({ field }) => <Input {...field} type='tel' placeholder='10 digit phone number' />}
           />
           {errors.spouse_phone && <p className='text-sm text-red-500'>{errors.spouse_phone.message}</p>}

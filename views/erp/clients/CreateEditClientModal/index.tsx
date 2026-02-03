@@ -117,9 +117,9 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
         address_id: clientData?.address?.id || '',
         address_title: clientData?.address?.title || '',
         address_is_default: clientData?.address?.is_default || 0,
-        city_id: clientData?.address?.city_id || '',
-        state_id: clientData?.address?.state_id || '',
-        country_id: clientData?.address?.city?.country_id || '',
+        city_id: clientData?.address?.city_id?.toString() || '',
+        state_id: clientData?.address?.state_id?.toString() || '',
+        country_id: clientData?.address?.city?.country_id?.toString() || '',
         zip_code: clientData?.address?.zip_code || '',
         best_time: clientData?.clientable?.best_time || '',
         spouse_phone: clientData?.clientable?.spouse_phone || '',
@@ -290,7 +290,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
           : `Updating ${type === 'lead' ? 'Lead' : 'Customer'}...`
       }
       actions={dialogActions}
-      disableClose={isLoading}
+      disableClose={true}
     >
       <form id='client-form' onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
         <BasicClientReferenceFields

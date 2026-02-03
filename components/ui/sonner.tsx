@@ -22,7 +22,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       style={
         {
-          '--normal-bg': '#221e20',
+          '--normal-bg': '#4d4d4d',
           '--normal-text': '#ffffff',
           '--normal-border': '#3b3637',
           '--border-radius': '0.625rem'

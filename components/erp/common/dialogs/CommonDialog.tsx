@@ -56,7 +56,7 @@ const CommonDialog = ({
   actions,
   className,
   contentClassName,
-  disableClose = false
+  disableClose = true
 }: CommonDialogProps) => {
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -67,7 +67,7 @@ const CommonDialog = ({
   }, [isLoading])
 
   const handleOpenChange = (newOpen: boolean) => {
-    if (!disableClose) {
+    if (!isLoading) {
       onOpenChange(newOpen)
     }
   }
