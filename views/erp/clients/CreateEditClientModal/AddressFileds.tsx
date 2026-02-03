@@ -28,10 +28,12 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
     watch
   } = methods
 
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-    libraries
-  })
+  // const { isLoaded } = useLoadScript({
+  //   id: 'google-map-script',
+  //   googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+  //   libraries
+  // })
+  const isLoaded = typeof window !== 'undefined' && !!window.google
 
   const [autocomplete, setAutocomplete] = React.useState<google.maps.places.Autocomplete | null>(null)
 
@@ -134,7 +136,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
             setValue('country_id', matchedCountry.id.toString())
 
             // Match and set state
-            if (stateName) {              
+            if (stateName) {
               const matchedState = matchedCountry.states.find(
                 state => state.name.toLowerCase() === stateName.toLowerCase()
               )
@@ -143,7 +145,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
                 setValue('state_id', matchedState.id.toString())
 
                 // Match and set city
-                if (cityName) {                  
+                if (cityName) {
                   const matchedCity = matchedState.cities.find(
                     city => city.name.toLowerCase() === cityName.toLowerCase()
                   )

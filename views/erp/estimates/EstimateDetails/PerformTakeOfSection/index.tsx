@@ -3,15 +3,18 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Estimate, SavedPolygon, TakeoffData } from '@/types'
-import { useLoadScript, GoogleMap, Marker, DrawingManager, Polygon } from '@react-google-maps/api'
+import { useLoadScript, GoogleMap, Marker, DrawingManager, Polygon, Autocomplete } from '@react-google-maps/api'
 import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { toast } from 'sonner'
-import { Trash2, Maximize2, Download, Hand, Search, Scissors } from 'lucide-react'
+import { Trash2, Maximize2, Download, Hand, Search, Scissors, Camera, Pencil } from 'lucide-react'
 import html2canvas from 'html2canvas'
 import * as turf from '@turf/turf' // IMPORT TURF
 import { NIGHT_MODE_STYLES, POLYGON_COLORS } from '@/constants/take-off-data'
 import EstimateService from '@/services/api/estimates/estimates.service'
+import { MeasurementsPanel } from './MeasurementsPanel'
+import { Separator } from '@/components/ui/separator'
+import DrawingTools from './DrawingTools'
 
 const libraries: ('places' | 'drawing' | 'geometry')[] = ['places', 'drawing', 'geometry']
 
@@ -21,10 +24,12 @@ const defaultCenter = {
 }
 
 const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-    libraries
-  })
+  // const { isLoaded } = useLoadScript({
+  //   id: 'google-map-script',
+  //   googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+  //   libraries
+  // })
+  const isLoaded = typeof window !== 'undefined' && !!window.google
 
   const mapRef = useRef<google.maps.Map | null>(null)
 
@@ -32,8 +37,8 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null)
 
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const [mapCenter, setMapCenter] = useState(defaultCenter)
-  const [markerPosition, setMarkerPosition] = useState(defaultCenter)
+  const [mapCenter, setMapCenter] = useState(estimate?.take_off_data?.center || defaultCenter)
+  const [markerPosition, setMarkerPosition] = useState(estimate?.take_off_data?.center || defaultCenter)
   const [isLoadingLocation, setIsLoadingLocation] = useState(true)
   const [activeTool, setActiveTool] = useState<'polygon' | 'cut' | 'hand' | null>(null)
   const [polygons, setPolygons] = useState<SavedPolygon[]>(estimate?.take_off_data?.polygons || [])
@@ -47,6 +52,7 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
 
   // Update the TakeoffData interface usage and add zoom state
   const [mapZoom, setMapZoom] = useState(18)
+  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null)
 
   const address = useMemo(() => {
     return estimate?.location || null
@@ -346,53 +352,6 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
     setDrawingManager(manager)
   }, [])
 
-  // Toggle tools
-  const toggleTool = (tool: 'polygon' | 'cut' | 'hand') => {
-    if (activeTool === tool) {
-      setActiveTool(null)
-      setSelectedPolygonForCut(null)
-
-      if (drawingManager) {
-        drawingManager.setDrawingMode(null)
-      }
-
-      setMapDraggable(true)
-
-      return
-    }
-
-    setActiveTool(tool)
-
-    if (tool === 'polygon') {
-      if (drawingManager) {
-        drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON)
-        drawingManager.setOptions({
-          polygonOptions: {
-            fillColor: POLYGON_COLORS[selectedColorIndex].fill,
-            fillOpacity: 0.3,
-            strokeWeight: 2,
-            strokeColor: POLYGON_COLORS[selectedColorIndex].stroke,
-            editable: false,
-            draggable: false
-          }
-        })
-      }
-
-      setMapDraggable(false)
-    } else if (tool === 'hand') {
-      setMapDraggable(true)
-
-      if (drawingManager) {
-        drawingManager.setDrawingMode(null)
-      }
-
-      setSelectedPolygonForCut(null)
-    } else if (tool === 'cut') {
-      toast.info('Select a polygon from the right panel, then draw the cut area')
-      setMapDraggable(false)
-    }
-  }
-
   // Delete polygon
   const deletePolygon = (id: string) => {
     setPolygons(prev => prev.filter(p => p.id !== id))
@@ -509,12 +468,38 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
     }
   }, [estimate?.take_off_data])
 
+  const onAutocompleteLoad = useCallback((autocompleteInstance: google.maps.places.Autocomplete) => {
+    setAutocomplete(autocompleteInstance)
+  }, [])
+
+  const onPlaceChanged = useCallback(() => {
+    if (autocomplete) {
+      const place = autocomplete.getPlace()
+
+      if (place.formatted_address) {
+        const coordinates = {
+          lat: place.geometry?.location?.lat() || mapCenter.lat,
+          lng: place.geometry?.location?.lng() || mapCenter.lng
+        }
+
+        setMapCenter(coordinates)
+        setMarkerPosition(coordinates)
+
+        if (searchInputRef.current) {
+          searchInputRef.current.value = place.formatted_address
+        }
+
+        toast.success('Location found')
+      }
+    }
+  }, [autocomplete, mapCenter])
+
   if (!address) {
     return null
   }
 
   return (
-    <Card className={`bg-zinc-900 border-zinc-800 ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}>
+    <Card className={`bg-zinc-900 border-zinc-800 ${isFullscreen ? 'fixed inset-4 z-50 flex flex-col' : ''}`}>
       <CardHeader className='flex flex-row items-center justify-between pb-2'>
         <div className='space-y-1'>
           <CardTitle className='text-white text-base'>Location & Take-off</CardTitle>
@@ -526,15 +511,18 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className={isFullscreen ? 'flex-1 overflow-y-auto' : ''}>
         {!isLoaded || isLoadingLocation ? (
           <div className='relative flex items-center justify-center h-[400px] bg-zinc-800 rounded-md'>
             <SpinnerCustom />
           </div>
         ) : (
-          <div className='flex gap-4' style={{ height: isFullscreen ? 'calc(100vh - 200px)' : '400px' }}>
+          <div className={`flex flex-col lg:flex-row gap-4`} style={{ height: isFullscreen ? 'auto' : '400px' }}>
             {/* Map Container Wrapper for Screenshot */}
-            <div ref={mapContainerRef} className='flex-1 relative rounded-md overflow-hidden'>
+            <div
+              ref={mapContainerRef}
+              className={`${isFullscreen ? 'w-full h-[calc(100vh-200px)]' : 'flex-1'} relative rounded-md overflow-hidden`}
+            >
               <GoogleMap
                 onLoad={onMapLoad}
                 onUnmount={onMapUnmount}
@@ -551,7 +539,7 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                   mapTypeControl: true,
                   fullscreenControl: false,
                   styles: NIGHT_MODE_STYLES,
-                  mapTypeId: 'satellite',
+                  mapTypeId: 'hybrid',
                   draggableCursor: activeTool === 'hand' ? 'grab' : 'default',
                   gestureHandling: mapDraggable ? 'auto' : 'none'
                 }}
@@ -565,8 +553,8 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                     drawingControl: false,
                     polygonOptions: {
                       fillColor: POLYGON_COLORS[selectedColorIndex].fill,
-                      fillOpacity: 0.3,
-                      strokeWeight: 2,
+                      fillOpacity: 1,
+                      strokeWeight: 5,
                       strokeColor: POLYGON_COLORS[selectedColorIndex].stroke,
                       editable: false,
                       draggable: false
@@ -594,65 +582,31 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
               {isFullscreen && (
                 <div
                   data-html2canvas-ignore='true'
-                  className='absolute top-16 left-2 bg-zinc-900/95 backdrop-blur-sm border border-zinc-800 rounded-lg p-3 space-y-2 flex flex-col'
+                  className='absolute top-30 lg:top-16 left-2 bg-zinc-900/95 backdrop-blur-sm border border-zinc-800 rounded-lg p-3 lg:space-y-2 flex flex-row lg:flex-col gap-2'
                 >
                   {/* Drawing Tools */}
-                  <div className='space-y-1'>
-                    <button
-                      onClick={() => toggleTool('polygon')}
-                      className={`w-10 h-10 flex items-center justify-center rounded border transition-all ${
-                        activeTool === 'polygon'
-                          ? 'bg-blue-600 border-blue-500'
-                          : 'bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
-                      }`}
-                      title='Draw Polygon'
-                    >
-                      <svg className='w-5 h-5 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M12 6v6m0 0v6m0-6h6m0 0h6m-6-6H6m0 0H0'
-                        />
-                      </svg>
-                    </button>
-
-                    <button
-                      onClick={() => toggleTool('cut')}
-                      className={`w-10 h-10 flex items-center justify-center rounded border transition-all ${
-                        activeTool === 'cut'
-                          ? 'bg-red-600 border-red-500'
-                          : 'bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
-                      }`}
-                      title={selectedPolygonForCut ? 'Draw cut area on map' : 'Select a polygon first, then click cut'}
-                    >
-                      <Scissors className='w-5 h-5 text-white' />
-                    </button>
-
-                    <button
-                      onClick={() => toggleTool('hand')}
-                      className={`w-10 h-10 flex items-center justify-center rounded border transition-all ${
-                        activeTool === 'hand'
-                          ? 'bg-green-600 border-green-500'
-                          : 'bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
-                      }`}
-                      title='Hand Tool (Pan)'
-                    >
-                      <Hand className='w-5 h-5 text-white' />
-                    </button>
-                  </div>
+                  <DrawingTools
+                    activeTool={activeTool}
+                    setActiveTool={setActiveTool}
+                    setSelectedPolygonForCut={setSelectedPolygonForCut}
+                    drawingManager={drawingManager}
+                    setMapDraggable={setMapDraggable}
+                    selectedColorIndex={selectedColorIndex}
+                    selectedPolygonForCut={selectedPolygonForCut}
+                  />
 
                   {/* Divider */}
-                  <div className='border-t border-zinc-700' />
+                  <Separator orientation='horizontal' className='w-full hidden lg:block' />
+                  <Separator orientation='vertical' className='h-10 lg:hidden' />
 
                   {/* Screenshot & Search */}
-                  <div className='space-y-1'>
+                  <div className='lg:space-y-1 flex flex-row lg:flex-col gap-2'>
                     <button
                       onClick={takeScreenshot}
                       className='w-10 h-10 flex items-center justify-center rounded border bg-zinc-800 border-zinc-700 hover:bg-zinc-700 transition-all'
                       title='Take Screenshot'
                     >
-                      <Download className='w-5 h-5 text-white' />
+                      <Camera className='w-5 h-5 text-white' />
                     </button>
 
                     <button
@@ -668,14 +622,29 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
 
               {/* Search Input */}
               {isFullscreen && (
-                <div data-html2canvas-ignore='true' className='absolute top-3 left-48 right-4 flex gap-2'>
-                  <input
-                    ref={searchInputRef}
-                    type='text'
-                    placeholder='Search location...'
-                    onKeyPress={e => e.key === 'Enter' && searchLocation()}
-                    className='flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  />
+                <div
+                  data-html2canvas-ignore='true'
+                  className='absolute top-16 lg:top-2.5 left-2 lg:left-48 right-4 flex gap-2 z-10'
+                >
+                  {isLoaded ? (
+                    <Autocomplete className='w-full h-10' onLoad={onAutocompleteLoad} onPlaceChanged={onPlaceChanged}>
+                      <input
+                        ref={searchInputRef}
+                        type='text'
+                        placeholder='Search location...'
+                        onKeyPress={e => e.key === 'Enter' && searchLocation()}
+                        className='w-full h-full flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                      />
+                    </Autocomplete>
+                  ) : (
+                    <input
+                      ref={searchInputRef}
+                      type='text'
+                      placeholder='Search location...'
+                      disabled
+                      className='w-full flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded text-white text-sm placeholder-zinc-500 opacity-50'
+                    />
+                  )}
                   <Button onClick={searchLocation} size='lg' className='px-3 text-ms'>
                     Go
                   </Button>
@@ -689,7 +658,7 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                   className='absolute bottom-8 left-2 bg-zinc-900/95 backdrop-blur-sm border border-zinc-800 rounded-lg p-3 space-y-2'
                 >
                   <p className='text-xs text-zinc-400 font-medium'>Polygon Color</p>
-                  <div className='grid grid-cols-4 gap-2'>
+                  <div className='grid grid-cols-8 lg:grid-cols-4 gap-2'>
                     {POLYGON_COLORS.map((color, index) => (
                       <button
                         key={index}
@@ -708,152 +677,20 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
 
             {/* Right Sidebar - Measurements Panel */}
             {isFullscreen && (
-              <div className='w-80 bg-zinc-800 rounded-lg border border-zinc-700 overflow-hidden flex flex-col'>
-                <div className='bg-zinc-900 border-b border-zinc-700 px-4 py-3'>
-                  <h2 className='text-sm font-semibold text-white'>Measurements Panel</h2>
-                </div>
-
-                <div className='flex-1 overflow-y-auto space-y-3 p-4'>
-                  {polygons.length === 0 ? (
-                    <div className='flex items-center justify-center h-full text-zinc-400 text-xs'>
-                      <p>Draw polygons on the map to view measurements</p>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Total Area */}
-                      <div className='bg-zinc-900 rounded-lg p-3 border border-zinc-700'>
-                        <p className='text-xs text-zinc-400 mb-2'>Total Area</p>
-                        <div className='space-y-1'>
-                          <p className='text-lg font-semibold text-white'>{totalArea.squareFeet.toFixed(2)} sq ft</p>
-                          <p className='text-xs text-zinc-400'>{totalArea.squareMeters.toFixed(2)} sq m</p>
-                        </div>
-                      </div>
-
-                      {/* Individual Areas */}
-                      <div className='space-y-2'>
-                        {polygons.map((polygon, index) => (
-                          <div
-                            key={polygon.id}
-                            onMouseEnter={() => setHoveredPolygonId(polygon.id)}
-                            onMouseLeave={() => {
-                              setHoveredPolygonId(null)
-
-                              if (activeTool !== 'cut') {
-                                setSelectedPolygonForCut(null)
-                              }
-                            }}
-                            className={`bg-zinc-900 rounded-lg p-3 border-2 cursor-pointer transition-all ${
-                              hoveredPolygonId === polygon.id
-                                ? `border-white ring-2 ring-white/50`
-                                : selectedPolygonForCut === polygon.id
-                                  ? 'border-red-500 ring-2 ring-red-500/50'
-                                  : 'border-zinc-700'
-                            }`}
-                            style={{
-                              borderColor:
-                                hoveredPolygonId === polygon.id
-                                  ? polygon.color.stroke
-                                  : selectedPolygonForCut === polygon.id
-                                    ? '#ef4444'
-                                    : undefined
-                            }}
-                            onClick={() => {
-                              if (activeTool === 'cut') {
-                                setSelectedPolygonForCut(polygon.id)
-
-                                // Only allow cut tool if a polygon is selected
-                                if (drawingManager) {
-                                  drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON)
-                                  drawingManager.setOptions({
-                                    polygonOptions: {
-                                      fillColor: '#ef4444',
-                                      fillOpacity: 0.3,
-                                      strokeWeight: 2,
-                                      strokeColor: '#dc2626',
-                                      editable: false,
-                                      draggable: false
-                                    }
-                                  })
-                                }
-
-                                toast.info(`Selected "${polygon.name}" for cutting. Now draw the cut area.`)
-                              }
-                            }}
-                          >
-                            <div className='flex items-start justify-between mb-2'>
-                              <div className='flex items-center gap-2'>
-                                <div
-                                  className='w-3 h-3 rounded-full border border-zinc-600'
-                                  style={{ backgroundColor: polygon.color.fill }}
-                                />
-                                <p className='text-sm font-semibold text-white'>{polygon.name}</p>
-                              </div>
-                              <Button
-                                onClick={e => {
-                                  e.stopPropagation()
-                                  deletePolygon(polygon.id)
-                                }}
-                                size='sm'
-                                variant='ghost'
-                                className='text-red-400 hover:text-red-300 hover:bg-red-950/50 p-1 h-auto'
-                              >
-                                <Trash2 className='w-3 h-3' />
-                              </Button>
-                            </div>
-
-                            {selectedPolygonForCut === polygon.id && (
-                              <div className='mb-2 p-2 bg-red-950/50 rounded border border-red-700 text-xs text-red-300'>
-                                Selected for cutting. Draw cut area on map.
-                              </div>
-                            )}
-
-                            <div className='space-y-1 text-xs'>
-                              <div className='flex justify-between'>
-                                <span className='text-zinc-400'>Square:</span>
-                                <span className='text-white font-medium'>
-                                  {polygon.area.squareFeet.toFixed(2)} sq ft
-                                </span>
-                              </div>
-                              <div className='flex justify-between'>
-                                <span className='text-zinc-400'>Metric:</span>
-                                <span className='text-white font-medium'>
-                                  {polygon.area.squareMeters.toFixed(2)} sq m
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                {polygons.length > 0 && (
-                  <div className='border-t border-zinc-700 p-4 space-y-2'>
-                    {/* <Button onClick={exportDataAsJSON} size='sm' variant='outline' className='w-full text-xs'>
-                      <Download className='w-3 h-3 mr-2' />
-                      Export JSON
-                    </Button> */}
-                    <Button
-                      onClick={savePolygons}
-                      size='sm'
-                      className='w-full text-xs flex items-center justify-center gap-4'
-                      disabled={isSaving}
-                    >
-                      {isSaving && (
-                        <div className='relative '>
-                          <SpinnerCustom size='size-4' />
-                        </div>
-                      )}{' '}
-                      Save Areas ({polygons.length})
-                    </Button>
-                    <Button onClick={clearAllPolygons} size='sm' variant='outline' className='w-full text-xs'>
-                      Clear All
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <MeasurementsPanel
+                polygons={polygons}
+                totalArea={totalArea}
+                hoveredPolygonId={hoveredPolygonId}
+                selectedPolygonForCut={selectedPolygonForCut}
+                setHoveredPolygonId={setHoveredPolygonId}
+                setSelectedPolygonForCut={setSelectedPolygonForCut}
+                activeTool={activeTool}
+                deletePolygon={deletePolygon}
+                clearAllPolygons={clearAllPolygons}
+                savePolygons={savePolygons}
+                isSaving={isSaving}
+                drawingManager={drawingManager}
+              />
             )}
           </div>
         )}
