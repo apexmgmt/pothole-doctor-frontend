@@ -514,7 +514,7 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
   }
 
   return (
-    <Card className={`bg-zinc-900 border-zinc-800 ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}>
+    <Card className={`bg-zinc-900 border-zinc-800 ${isFullscreen ? 'fixed inset-4 z-50 flex flex-col' : ''}`}>
       <CardHeader className='flex flex-row items-center justify-between pb-2'>
         <div className='space-y-1'>
           <CardTitle className='text-white text-base'>Location & Take-off</CardTitle>
@@ -526,15 +526,18 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className={isFullscreen ? 'flex-1 overflow-y-auto' : ''}>
         {!isLoaded || isLoadingLocation ? (
           <div className='relative flex items-center justify-center h-[400px] bg-zinc-800 rounded-md'>
             <SpinnerCustom />
           </div>
         ) : (
-          <div className='flex gap-4' style={{ height: isFullscreen ? 'calc(100vh - 200px)' : '400px' }}>
+          <div className={`flex flex-col lg:flex-row gap-4`} style={{ height: isFullscreen ? 'auto' : '400px' }}>
             {/* Map Container Wrapper for Screenshot */}
-            <div ref={mapContainerRef} className='flex-1 relative rounded-md overflow-hidden'>
+            <div
+              ref={mapContainerRef}
+              className={`${isFullscreen ? 'w-full h-[calc(100vh-200px)]' : 'flex-1'} relative rounded-md overflow-hidden`}
+            >
               <GoogleMap
                 onLoad={onMapLoad}
                 onUnmount={onMapUnmount}
@@ -708,7 +711,7 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
 
             {/* Right Sidebar - Measurements Panel */}
             {isFullscreen && (
-              <div className='w-80 bg-zinc-800 rounded-lg border border-zinc-700 overflow-hidden flex flex-col'>
+              <div className='w-full lg:w-80 bg-zinc-800 rounded-lg border border-zinc-700 overflow-hidden flex flex-col min-w-92 max-h-[calc(100vh-200px)]'>
                 <div className='bg-zinc-900 border-b border-zinc-700 px-4 py-3'>
                   <h2 className='text-sm font-semibold text-white'>Measurements Panel</h2>
                 </div>
