@@ -70,7 +70,7 @@ const CreateOrEditBusinessLocation = ({
           logo: null,
           website: businessLocationDetails.website || '',
           invoice_prefix: businessLocationDetails.invoice_prefix || '',
-          sales_tax: businessLocationDetails.sales_tax?.toString() || '',
+          sales_tax: businessLocationDetails.sales_tax?.toString() || '0',
           review_link: businessLocationDetails.review_link || '',
           country_id: businessLocationDetails.city?.country_id?.toString() || '',
           state_id: businessLocationDetails.state_id?.toString() || '',
@@ -87,7 +87,7 @@ const CreateOrEditBusinessLocation = ({
           logo: null,
           website: '',
           invoice_prefix: '',
-          sales_tax: '',
+          sales_tax: '0',
           review_link: '',
           country_id: '',
           state_id: '',
@@ -247,7 +247,7 @@ const CreateOrEditBusinessLocation = ({
                   name='name'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Location Name</FormLabel>
+                      <FormLabel>Location Name <span className='text-red-500'>*</span></FormLabel>
                       <FormControl>
                         <Input placeholder='Enter location name' {...field} />
                       </FormControl>
@@ -262,7 +262,7 @@ const CreateOrEditBusinessLocation = ({
                   name='phone'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone</FormLabel>
+                      <FormLabel>Phone <span className='text-red-500'>*</span></FormLabel>
                       <FormControl>
                         <Input placeholder='Enter phone number' {...field} />
                       </FormControl>
@@ -277,7 +277,7 @@ const CreateOrEditBusinessLocation = ({
                   name='email'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email <span className='text-red-500'>*</span></FormLabel>
                       <FormControl>
                         <Input type='email' placeholder='Enter email address' {...field} />
                       </FormControl>
@@ -376,7 +376,7 @@ const CreateOrEditBusinessLocation = ({
                   name='invoice_prefix'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Invoice Prefix</FormLabel>
+                      <FormLabel>Invoice Prefix <span className='text-red-500'>*</span></FormLabel>
                       <FormControl>
                         <Input placeholder='Enter invoice prefix' {...field} />
                       </FormControl>
@@ -423,7 +423,7 @@ const CreateOrEditBusinessLocation = ({
                   name='country_id'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Country</FormLabel>
+                      <FormLabel>Country <span className='text-red-500'>*</span></FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className='w-full'>
@@ -449,7 +449,7 @@ const CreateOrEditBusinessLocation = ({
                   name='state_id'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>State</FormLabel>
+                      <FormLabel>State <span className='text-red-500'>*</span></FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -485,7 +485,7 @@ const CreateOrEditBusinessLocation = ({
                   name='city_id'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>City</FormLabel>
+                      <FormLabel>City <span className='text-red-500'>*</span></FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -521,7 +521,7 @@ const CreateOrEditBusinessLocation = ({
                   name='street_address'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Street Address</FormLabel>
+                      <FormLabel>Street Address <span className='text-red-500'>*</span></FormLabel>
                       <FormControl>
                         <Input placeholder='Enter street address' {...field} />
                       </FormControl>
@@ -539,7 +539,7 @@ const CreateOrEditBusinessLocation = ({
 
                     return (
                       <FormItem>
-                        <FormLabel>ZIP Code</FormLabel>
+                        <FormLabel>ZIP Code <span className='text-red-500'>*</span></FormLabel>
                         <FormControl>
                           <div className='flex gap-2 items-center'>
                             <Input
