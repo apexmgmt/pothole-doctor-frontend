@@ -107,7 +107,7 @@ const LoginActivitySection = () => {
       <div className='space-y-2 text-sm'>
         <div className='flex items-start gap-3'>
           <span className='text-gray w-32'>Last accessed:</span>
-          <Badge variant='default' className='bg-light text-bg'>
+          <Badge variant='default' className='bg-light text-bg capitalize'>
             {getTimeAgo(activity.login_at)}
           </Badge>
         </div>
