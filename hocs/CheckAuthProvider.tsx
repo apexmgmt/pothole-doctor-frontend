@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import { useDispatch, useSelector } from 'react-redux'
+
 import { setRefreshData, setUserData } from '@/lib/features/auth/authSlice'
 import AuthService from '@/services/api/auth.service'
 import { RootState } from '@/lib/store'
@@ -30,22 +32,33 @@ export const CheckAuthProvider = ({ children }: CheckAuthProviderProps) => {
       try {
         // Check if access token exists before making API call
         const accessToken = CookieService.get('access_token')
+
         if (!accessToken) {
-          console.log('CheckAuthProvider: No access token available')
           dispatch(setRefreshData(false))
+
           return
         }
 
-        console.log('CheckAuthProvider: Fetching auth details')
         const response = await AuthService.getAuthDetails()
+
         dispatch(setUserData(response.data?.user))
-        await CookieService.store('user', JSON.stringify(encryptData(response?.data?.user)))
-        await CookieService.store('roles', JSON.stringify(encryptData(response?.data?.roles || [])))
-        await CookieService.store('permissions', JSON.stringify(encryptData(response?.data?.permissions || [])))
-        console.log('CheckAuthProvider: Auth details fetched successfully')
+        await CookieService.store('user', encryptData(response?.data?.user))
+        await CookieService.store('roles', encryptData(response?.data?.roles || []))
+
+        // Split permissions into chunks to avoid cookie size limit
+        const encryptedPermissions = encryptData(response?.data?.permissions || [])
+        const chunkSize = Math.ceil(encryptedPermissions.length / 3)
+
+        const chunk1 = encryptedPermissions.slice(0, chunkSize)
+        const chunk2 = encryptedPermissions.slice(chunkSize, chunkSize * 2)
+        const chunk3 = encryptedPermissions.slice(chunkSize * 2)
+
+        await CookieService.store('permissions_1', chunk1)
+        await CookieService.store('permissions_2', chunk2)
+        await CookieService.store('permissions_3', chunk3)
+
         dispatch(setRefreshData(false))
       } catch (error) {
-        console.error('CheckAuthProvider: Error fetching auth details:', error)
         dispatch(setRefreshData(false))
       }
     }

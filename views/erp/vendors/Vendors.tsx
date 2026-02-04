@@ -1,8 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search, User2Icon } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -12,7 +16,6 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import VendorService from '@/services/api/vendors/vendors.service'
@@ -24,6 +27,7 @@ import VendorDocuments from './documents/VendorDocuments'
 import VendorRebateCredits from './rebate-credits/VendorRebateCredits'
 import VendorPickupAddresses from './pickup-addresses/VendorPickupAddresses'
 import VendorSalesmen from './salesman/VendorSalesmen'
+import { hasPermission } from '@/utils/role-permission'
 
 const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCities, paymentTerms }) => {
   const router = useRouter()
@@ -40,10 +44,18 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [activeTab, setActiveTab] = useState<string>('vendors')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateVendor, setCanCreateVendor] = useState<boolean>(false)
+  const [canEditVendor, setCanEditVendor] = useState<boolean>(false)
+  const [canDeleteVendor, setCanDeleteVendor] = useState<boolean>(false)
+  const [canViewVendor, setCanViewVendor] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    hasPermission('Create Vendor').then(result => setCanCreateVendor(result))
+    hasPermission('Update Vendor').then(result => setCanEditVendor(result))
+    hasPermission('Delete Vendor').then(result => setCanDeleteVendor(result))
+    hasPermission('View Vendor').then(result => setCanViewVendor(result))
   }, [])
 
   // Debounced search update
@@ -52,14 +64,17 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -70,6 +85,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       VendorService.index(filterOptions)
         .then(response => {
@@ -96,6 +112,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const vendorsData = apiResponse?.data
     ? apiResponse.data.map((vendor: Vendor, index: number) => {
         const userable = vendor.userable
+
         return {
           id: vendor.id,
           index: (apiResponse?.from || 1) + index,
@@ -112,6 +129,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const handleOpenCreateModal = () => {
     setModalMode('create')
     setSelectedVendorId(null)
+    setSelectedUserAbleId(null)
     setSelectedVendor(null)
     setIsModalOpen(true)
   }
@@ -119,10 +137,12 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
     setSelectedVendorId(id)
+    setSelectedUserAbleId(null)
 
     // Fetch contact type details
     try {
       const response = await VendorService.show(id)
+
       setSelectedVendor(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -185,17 +205,18 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            // title='Action'
-            buttons={[
-              <EditButton
-                tooltip='Edit Vendor Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton tooltip='Delete Vendor' variant='text' onClick={() => handleDeleteVendor(row.id)} />
-            ]}
-          />
+          {(canEditVendor || canDeleteVendor) && (
+            <ThreeDotButton
+              buttons={[
+                <EditButton
+                  tooltip='Edit Vendor Information'
+                  onClick={() => handleOpenEditModal(row.id)}
+                  variant='text'
+                />,
+                <DeleteButton tooltip='Delete Vendor' variant='text' onClick={() => handleDeleteVendor(row.id)} />
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -211,7 +232,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
 
   const handleDeleteVendor = async (id: string) => {
     try {
-      VendorService.destroy(id)
+      await VendorService.destroy(id)
         .then(response => {
           toast.success('Vendor deleted successfully')
           fetchData()
@@ -227,6 +248,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -251,15 +273,17 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Vendor
-      </Button>
+      {canCreateVendor && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Vendor
+        </Button>
+      )}
     </div>
   )
 
@@ -271,41 +295,45 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
       onClick: () => setActiveTab('vendors'),
       isActive: activeTab === 'vendors'
     },
-    {
-      label: 'Details',
-      icon: DetailsIcon,
-      onClick: () => setActiveTab('details'),
-      isActive: activeTab === 'details',
-      disabled: !selectedVendorId
-    },
-    {
-      label: 'Salesmen',
-      icon: UserIcon,
-      onClick: () => setActiveTab('salesman'),
-      isActive: activeTab === 'salesman',
-      disabled: !selectedVendorId && !selectedUserAbleId
-    },
-    {
-      label: 'Documents',
-      icon: DocumentIcon,
-      onClick: () => setActiveTab('documents'),
-      isActive: activeTab === 'documents',
-      disabled: !selectedVendorId && !selectedUserAbleId
-    },
-    {
-      label: 'Rebate & Credits',
-      icon: DocumentIcon,
-      onClick: () => setActiveTab('rebate-credits'),
-      isActive: activeTab === 'rebate-credits',
-      disabled: !selectedVendorId && !selectedUserAbleId
-    },
-    {
-      label: 'Pickup Addresses',
-      icon: DocumentIcon,
-      onClick: () => setActiveTab('pickup-addresses'),
-      isActive: activeTab === 'pickup-addresses',
-      disabled: !selectedVendorId && !selectedUserAbleId
-    }
+    ...(canViewVendor
+      ? [
+          {
+            label: 'Details',
+            icon: DetailsIcon,
+            onClick: () => setActiveTab('details'),
+            isActive: activeTab === 'details',
+            disabled: !selectedVendorId
+          },
+          {
+            label: 'Salesmen',
+            icon: UserIcon,
+            onClick: () => setActiveTab('salesman'),
+            isActive: activeTab === 'salesman',
+            disabled: !selectedVendorId && !selectedUserAbleId
+          },
+          {
+            label: 'Documents',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('documents'),
+            isActive: activeTab === 'documents',
+            disabled: !selectedVendorId && !selectedUserAbleId
+          },
+          {
+            label: 'Rebate & Credits',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('rebate-credits'),
+            isActive: activeTab === 'rebate-credits',
+            disabled: !selectedVendorId && !selectedUserAbleId
+          },
+          {
+            label: 'Pickup Addresses',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('pickup-addresses'),
+            isActive: activeTab === 'pickup-addresses',
+            disabled: !selectedVendorId && !selectedUserAbleId
+          }
+        ]
+      : [])
   ]
 
   const handleRowSelect = (partner: any) => {
@@ -348,7 +376,10 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
           <VendorRebateCredits vendorId={selectedUserAbleId || ''} />
         )}
         {activeTab === 'pickup-addresses' && selectedVendorId && selectedUserAbleId && (
-          <VendorPickupAddresses countriesWithStatesAndCities={countriesWithStatesAndCities} vendorId={selectedUserAbleId || ''} />
+          <VendorPickupAddresses
+            countriesWithStatesAndCities={countriesWithStatesAndCities}
+            vendorId={selectedUserAbleId || ''}
+          />
         )}
         {activeTab === 'salesman' && selectedVendorId && selectedUserAbleId && (
           <VendorSalesmen vendorId={selectedUserAbleId || ''} />

@@ -1,12 +1,14 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+
+import { toast } from 'sonner'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import VendorService from '@/services/api/vendors/vendors.service'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { Vendor } from '@/types'
-import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface VendorDetailsProps {
@@ -20,8 +22,10 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit }) => {
 
   const fetchVendorDetails = async () => {
     setIsLoading(true)
+
     try {
       const response = await VendorService.show(vendorId)
+
       setVendorData(response.data)
     } catch (error: any) {
       toast.error(error?.message || 'Failed to fetch vendor details')
@@ -68,6 +72,7 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit }) => {
   }
 
   const fullName = vendorData.first_name || 'N/A'
+
   const initials = fullName
     .split(' ')
     .map((name: string) => name.charAt(0))

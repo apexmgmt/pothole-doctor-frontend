@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { Switch } from '@/components/ui/switch'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 import OrganizationService from '@/services/api/organizations.service'
@@ -28,13 +29,16 @@ const OrganizationStatusSwitch: React.FC<OrganizationStatusSwitchProps> = ({
   const handleConfirm = async () => {
     setIsLoading(true)
     const prevChecked = internalChecked
+
     setInternalChecked(!prevChecked)
+
     try {
       await OrganizationService.changeStatus(companyId)
       if (fetchData) fetchData()
     } catch (error) {
       setInternalChecked(prevChecked)
     }
+
     setIsLoading(false)
     setOpen(false)
   }

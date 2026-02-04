@@ -1,23 +1,27 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, PartnerType, ProductCategory } from '@/types'
+import { Column, DataTableApiResponse, ProductCategory } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import ProductCategoryService from '@/services/api/product_categories.service'
 import CreateOrEditProductCategoryModal from './CreateOrEditProductCategoryModal'
+import { hasPermission } from '@/utils/role-permission'
 
 const ProductCategories: React.FC = () => {
   const router = useRouter()
@@ -31,12 +35,17 @@ const ProductCategories: React.FC = () => {
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateCategory, setCanCreateCategory] = useState<boolean>(false)
+  const [canEditCategory, setCanEditCategory] = useState<boolean>(false)
+  const [canDeleteCategory, setCanDeleteCategory] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    hasPermission('Create Category').then(result => setCanCreateCategory(result))
+    hasPermission('Update Category').then(result => setCanEditCategory(result))
+    hasPermission('Delete Category').then(result => setCanDeleteCategory(result))
   }, [])
 
   // Debounced search update
@@ -45,14 +54,17 @@ const ProductCategories: React.FC = () => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -63,6 +75,7 @@ const ProductCategories: React.FC = () => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       ProductCategoryService.index(filterOptions)
         .then(response => {
@@ -110,6 +123,7 @@ const ProductCategories: React.FC = () => {
     // Fetch product category details
     try {
       const response = await ProductCategoryService.show(id)
+
       setSelectedProductCategory(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -148,20 +162,30 @@ const ProductCategories: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit Product Category Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton
-                tooltip='Delete Product Category'
-                variant='text'
-                onClick={() => handleDeleteProductCategory(row.id)}
-              />
-            ]}
-          />
+          {(canEditCategory || canDeleteCategory) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditCategory
+                  ? [
+                      <EditButton
+                        tooltip='Edit Product Category Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteCategory
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Product Category'
+                        variant='text'
+                        onClick={() => handleDeleteProductCategory(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -177,7 +201,7 @@ const ProductCategories: React.FC = () => {
 
   const handleDeleteProductCategory = async (id: string) => {
     try {
-      ProductCategoryService.destroy(id)
+      await ProductCategoryService.destroy(id)
         .then(response => {
           toast.success('Product category deleted successfully')
           fetchData()
@@ -193,6 +217,7 @@ const ProductCategories: React.FC = () => {
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -217,15 +242,17 @@ const ProductCategories: React.FC = () => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Product Category
-      </Button>
+      {canCreateCategory && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Product Category
+        </Button>
+      )}
     </div>
   )
 

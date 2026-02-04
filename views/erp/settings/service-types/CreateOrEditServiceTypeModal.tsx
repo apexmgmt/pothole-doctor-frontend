@@ -1,16 +1,23 @@
 'use client'
 
-import { ServiceType, ServiceTypePayload } from '@/types/service_types.types'
+import { useEffect, useState } from 'react'
+
 import { zodResolver } from '@hookform/resolvers/zod'
+
 import * as z from 'zod'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
+import { ServiceType, ServiceTypePayload } from '@/types'
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
 
@@ -66,6 +73,7 @@ const CreateOrEditServiceTypeModal = ({
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true)
+
     const payload: ServiceTypePayload = {
       name: values.name,
       is_editable: Number(values.is_editable) as 1 | 0,
@@ -75,12 +83,13 @@ const CreateOrEditServiceTypeModal = ({
 
     try {
       if (mode === 'create') {
-        ServiceTypeService.store(payload)
+        await ServiceTypeService.store(payload)
         toast.success('Service type created successfully')
       } else if (mode === 'edit' && serviceTypeId) {
         await ServiceTypeService.update(serviceTypeId, payload)
         toast.success('Service type updated successfully')
       }
+
       onOpenChange(false)
       onSuccess?.()
       form.reset()
@@ -110,14 +119,14 @@ const CreateOrEditServiceTypeModal = ({
       title={mode === 'create' ? 'Create Service Type' : 'Edit Service Type'}
       description={mode === 'create' ? 'Add a new service type' : 'Update service type information'}
       maxWidth='sm'
-      disableClose={form.formState.isSubmitting}
+      disableClose={isLoading}
       actions={
         <div className='flex gap-3'>
           <Button
             type='button'
             variant='outline'
             onClick={onCancel}
-            disabled={form.formState.isSubmitting}
+            disabled={isLoading}
             className='flex-1'
           >
             Cancel
@@ -125,10 +134,10 @@ const CreateOrEditServiceTypeModal = ({
           <Button
             type='submit'
             onClick={form.handleSubmit(onSubmit)}
-            disabled={form.formState.isSubmitting}
+            disabled={isLoading}
             className='flex-1'
           >
-            {form.formState.isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
+            {isLoading ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
           </Button>
         </div>
       }

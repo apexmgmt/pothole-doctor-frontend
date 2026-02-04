@@ -1,5 +1,5 @@
-import ContactIndex from "@/views/frontend/contact";
+import ContactIndex from '@/views/frontend/contact'
 
 export default function ContactPage() {
-  return <ContactIndex />;
+  return <ContactIndex />
 }

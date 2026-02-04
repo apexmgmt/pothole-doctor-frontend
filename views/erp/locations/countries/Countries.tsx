@@ -1,23 +1,28 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse } from '@/types'
+import { Column, DataTableApiResponse, Country } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import CountryService from '@/services/api/locations/country.service'
 import CreateOrEditCountryModal from './CreateOrEditCountryModal'
-import { Country } from '@/types'
+
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { getInitialFilters } from '@/utils/utility'
+import { hasPermission } from '@/utils/role-permission'
 
 const Countries: React.FC = () => {
   const router = useRouter()
@@ -33,26 +38,19 @@ const Countries: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
-  // Initialize filterOptions from URL params
-  const getInitialFilters = () => {
-    const filters: any = {}
-    searchParams.forEach((value, key) => {
-      // Convert numeric values
-      if (key === 'page' || key === 'per_page') {
-        filters[key] = parseInt(value)
-      } else {
-        filters[key] = value
-      }
-    })
+  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateCountry, setCanCreateCountry] = useState<boolean>(false)
+  const [canEditCountry, setCanEditCountry] = useState<boolean>(false)
+  const [canDeleteCountry, setCanDeleteCountry] = useState<boolean>(false)
 
-    return filters
-  }
-
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters())
-
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create Country').then(result => setCanCreateCountry(result))
+    hasPermission('Update Country').then(result => setCanEditCountry(result))
+    hasPermission('Delete Country').then(result => setCanDeleteCountry(result))
   }, [])
 
   // Debounced search update
@@ -61,14 +59,17 @@ const Countries: React.FC = () => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -95,6 +96,7 @@ const Countries: React.FC = () => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       CountryService.index(filterOptions)
         .then(response => {
@@ -141,6 +143,7 @@ const Countries: React.FC = () => {
     // Fetch country details
     try {
       const response = await CountryService.show(id)
+
       setSelectedCountry(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -184,16 +187,30 @@ const Countries: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit Country Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton tooltip='Delete Country' variant='text' onClick={() => handleDeleteCountry(row.id)} />
-            ]}
-          />
+          {(canEditCountry || canDeleteCountry) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditCountry
+                  ? [
+                      <EditButton
+                        tooltip='Edit Country Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteCountry
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Country'
+                        variant='text'
+                        onClick={() => handleDeleteCountry(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -210,22 +227,18 @@ const Countries: React.FC = () => {
 
   const handleDeleteCountry = async (id: string) => {
     try {
-      CountryService.destroy(id)
-        .then(response => {
-          toast.success('Country deleted successfully')
-          fetchData()
-        })
-        .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete country')
-        })
+      await CountryService.destroy(id)
+        toast.success('Country deleted successfully')
+        fetchData()
     } catch (error) {
-      toast.error('Something went wrong while deleting the country!')
+      toast.error('Failed to delete country')
     }
   }
 
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -250,15 +263,17 @@ const Countries: React.FC = () => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Country
-      </Button>
+      {canCreateCountry && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Country
+        </Button>
+      )}
     </div>
   )
 

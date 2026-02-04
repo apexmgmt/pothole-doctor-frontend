@@ -1,15 +1,18 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+
+import { useRouter } from 'next/navigation'
+
 import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import OrganizationService from '@/services/api/organizations.service'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
@@ -54,6 +57,7 @@ const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails })
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true)
+
     try {
       OrganizationService.update(companyDetails.id, data)
         .then(response => {

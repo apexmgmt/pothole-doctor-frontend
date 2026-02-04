@@ -1,11 +1,12 @@
 'use client'
 
 import { UseFormReturn } from 'react-hook-form'
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { MultiSelect } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, MultiSelect } from '@/components/ui/select'
+
 import { Checkbox } from '@/components/ui/checkbox'
 import { ProductCategory, ServiceType, Vendor } from '@/types'
 import { DatePicker } from '@/components/ui/datePicker'
@@ -90,9 +91,13 @@ export function BasicProductFields({
       <FormField
         control={form.control}
         name='service_type_id'
+        rules={{ 
+          required: 'Service type is required',
+          validate: (value) => (value && value.length > 0) || 'At least one service type must be selected'
+         }}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Associated Services</FormLabel>
+            <FormLabel>Associated Services <span className='text-red-500'>*</span></FormLabel>
             <FormControl>
               <MultiSelect
                 options={serviceTypes.map(st => ({
@@ -136,9 +141,10 @@ export function BasicProductFields({
       <FormField
         control={form.control}
         name='sku'
+        rules={{required: 'SKU is required'}}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>SKU</FormLabel>
+            <FormLabel>SKU <span className='text-red-500'>*</span></FormLabel>
             <FormControl>
               <Input placeholder='Enter SKU' {...field} disabled={disabled} />
             </FormControl>
@@ -164,6 +170,7 @@ export function BasicProductFields({
                 onChange={e => {
                   field.onChange(e)
                   const privateName = form.getValues('private_product_name')
+
                   // If private_product_name is empty or same as previous vendor_product_name, update it
                   if (!privateName || privateName === field.value) {
                     form.setValue('private_product_name', e.target.value)
@@ -192,6 +199,7 @@ export function BasicProductFields({
                   onChange={e => {
                     field.onChange(e)
                     const privateStyle = form.getValues('private_style')
+
                     // If private_style is empty or same as previous vendor_style, update it
                     if (!privateStyle || privateStyle === field.value) {
                       form.setValue('private_style', e.target.value)
@@ -219,6 +227,7 @@ export function BasicProductFields({
                   onChange={e => {
                     field.onChange(e)
                     const privateColor = form.getValues('private_color')
+
                     // If private_color is empty or same as previous vendor_color, update it
                     if (!privateColor || privateColor === field.value) {
                       form.setValue('private_color', e.target.value)

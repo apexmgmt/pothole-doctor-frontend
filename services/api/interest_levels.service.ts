@@ -1,6 +1,12 @@
-import { getApiUrl } from '@/utils/utility'
+import { getApiUrl, isTenant } from '@/utils/utility'
 import apiInterceptor from './api.interceptor'
-import { INTEREST_LEVELS, INTEREST_LEVELS_ALL } from '@/constants/api'
+import {
+  API_URL,
+  INTEREST_LEVELS,
+  INTEREST_LEVELS_ALL,
+  INTEREST_LEVELS_ALL_TENANT,
+  INTEREST_LEVELS_TENANT
+} from '@/constants/api'
 import { InterestLevelPayload } from '@/types'
 import { revalidate } from '../app/cache.service'
 
@@ -8,16 +14,21 @@ export default class InterestLevelService {
   /**Interest levels DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
-      const response = await apiInterceptor(apiUrl + INTEREST_LEVELS + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['interest-levels'] } // Cache for 60 seconds
-      })
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? INTEREST_LEVELS_TENANT : INTEREST_LEVELS) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['interest-levels'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch interest levels')
       }
 
@@ -30,8 +41,9 @@ export default class InterestLevelService {
   /** Create Interest Level API */
   static store = async (payload: InterestLevelPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + INTEREST_LEVELS, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? INTEREST_LEVELS_TENANT : INTEREST_LEVELS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -39,6 +51,7 @@ export default class InterestLevelService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create interest level')
       }
 
@@ -53,15 +66,20 @@ export default class InterestLevelService {
   /** Show Interest Level API */
   static show = async (interestLevelId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + INTEREST_LEVELS + interestLevelId, {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: [`interest-levels/${interestLevelId}`] } // Cache for 60 seconds
-      })
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? INTEREST_LEVELS_TENANT : INTEREST_LEVELS) + interestLevelId,
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: [`interest-levels/${interestLevelId}`] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch interest level details')
       }
 
@@ -74,20 +92,27 @@ export default class InterestLevelService {
   /** Update Interest Level API */
   static update = async (interestLevelId: string, payload: InterestLevelPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + INTEREST_LEVELS + interestLevelId, {
-        requiresAuth: true,
-        method: 'PUT',
-        body: JSON.stringify(payload)
-      })
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? INTEREST_LEVELS_TENANT : INTEREST_LEVELS) + interestLevelId,
+        {
+          requiresAuth: true,
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update interest level')
       }
+
       await revalidate('interest-levels')
       await revalidate(`interest-levels/${interestLevelId}`)
       await revalidate('interest-levels-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -97,18 +122,26 @@ export default class InterestLevelService {
   /** Delete Interest Level API */
   static destroy = async (interestLevelId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + INTEREST_LEVELS + interestLevelId, {
-        requiresAuth: true,
-        method: 'DELETE'
-      })
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? INTEREST_LEVELS_TENANT : INTEREST_LEVELS) + interestLevelId,
+        {
+          requiresAuth: true,
+          method: 'DELETE'
+        }
+      )
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete interest level')
       }
+
       await revalidate('interest-levels')
       await revalidate(`interest-levels/${interestLevelId}`)
       await revalidate('interest-levels-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -116,18 +149,25 @@ export default class InterestLevelService {
   }
 
   /** Get All Interest Levels API */
-  static getAllInterestLevels = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + INTEREST_LEVELS_ALL, {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 3600, tags: ['interest-levels-all'] } // Cache for 1 hour
-      })
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? INTEREST_LEVELS_ALL_TENANT : INTEREST_LEVELS_ALL),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 3600, tags: ['interest-levels-all'] } // Cache for 1 hour
+        }
+      )
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch all interest levels')
       }
+
       return await response.json()
     } catch (error) {
       throw error

@@ -1,17 +1,32 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
+
 import Image from 'next/image'
 import Link from 'next/link'
-import { NavigationItem } from '@/types'
 
-import { SettingsIcon, HomeIcon } from '@/public/icons'
-import { Boxes, Building2, LocateIcon, Map, Package, UserLock, Users, Users2, Warehouse } from 'lucide-react'
+import {
+  Boxes,
+  Building2,
+  CalendarCheck,
+  LocateIcon,
+  Map,
+  Package,
+  UserLock,
+  Users,
+  Users2,
+  Warehouse
+} from 'lucide-react'
+
+import { NavigationItem, User } from '@/types'
+import { filterMenuByPermissions } from '@/utils/menu-permissions'
+
+import { SettingsIcon, HomeIcon, EstimateIcon } from '@/public/icons'
 import SidebarFooter from './SidebarFooter'
 import MenuItem from './menu-item'
 
-const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
-  const navigationItems: NavigationItem[] = [
+const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user, permissions }) => {
+  const allNavigationItems: NavigationItem[] = [
     {
       id: 'dashboard',
       label: 'Dashboard',
@@ -19,6 +34,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       href: '/erp',
       hasSubItems: false,
       exactMatch: true
+
+      // No permissions = always visible
     },
     {
       id: 'companies',
@@ -26,7 +43,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       icon: <Building2 className='h-4 w-4' />,
       href: '/erp/companies',
       hasSubItems: false,
-      exactMatch: false
+      exactMatch: false,
+      permissions: ['Manage Company']
     },
     {
       id: 'partners',
@@ -34,7 +52,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       icon: <Building2 className='h-4 w-4' />,
       href: '/erp/contractors',
       hasSubItems: false,
-      exactMatch: false
+      exactMatch: false,
+      permissions: ['Manage Contractor']
     },
     {
       id: 'staffs',
@@ -42,7 +61,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       icon: <Users className='h-4 w-4' />,
       href: '/erp/staffs',
       hasSubItems: false,
-      exactMatch: false
+      exactMatch: false,
+      permissions: ['Manage Staff']
     },
     {
       id: 'roles',
@@ -50,7 +70,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       icon: <UserLock className='h-4 w-4' />,
       href: '/erp/roles',
       hasSubItems: false,
-      exactMatch: false
+      exactMatch: false,
+      permissions: ['Manage Role']
     },
     {
       id: 'vendors',
@@ -58,7 +79,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       icon: <Package className='h-4 w-4' />,
       href: '/erp/vendors',
       hasSubItems: false,
-      exactMatch: false
+      exactMatch: false,
+      permissions: ['Manage Vendor']
     },
     {
       id: 'warehouses',
@@ -66,7 +88,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       icon: <Warehouse className='h-4 w-4' />,
       href: '/erp/warehouses',
       hasSubItems: false,
-      exactMatch: false
+      exactMatch: false,
+      permissions: ['Manage Warehouse']
     },
     {
       id: 'product',
@@ -81,7 +104,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/products',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: true,
+          permissions: ['Manage Product']
         },
         {
           id: 'product-categories',
@@ -89,10 +113,12 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/products/categories',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: true,
+          permissions: ['Manage Category']
         }
       ],
-      exactMatch: false
+      exactMatch: false,
+      permissions: ['Manage Category', 'Manage Product']
     },
     {
       id: 'leads',
@@ -107,7 +133,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/leads',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: true
+          exactMatch: true,
+          permissions: ['Manage Lead']
         },
         {
           id: 'interest-levels',
@@ -115,10 +142,39 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/leads/interest-levels',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: true
+          exactMatch: true,
+          permissions: ['Manage Interest Level']
         }
       ],
-      exactMatch: false
+      exactMatch: false,
+      permissions: ['Manage Lead', 'Manage Interest Level']
+    },
+    {
+      id: 'customers',
+      label: 'Customers',
+      icon: <UserLock className='h-4 w-4' />,
+      href: '/erp/customers',
+      hasSubItems: false,
+      exactMatch: false,
+      permissions: ['Manage Customer']
+    },
+    {
+      id: 'estimates',
+      label: 'Estimates',
+      icon: <EstimateIcon className='h-4 w-4' />,
+      href: '/erp/estimates',
+      hasSubItems: false,
+      exactMatch: false,
+      permissions: ['Manage Estimate']
+    },
+    {
+      id: 'tasks',
+      label: 'Tasks',
+      icon: <CalendarCheck className='h-4 w-4' />,
+      href: '/erp/tasks',
+      hasSubItems: false,
+      exactMatch: false,
+      permissions: ['Manage Task']
     },
     {
       id: 'labor-costs',
@@ -126,7 +182,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
       icon: <UserLock className='h-4 w-4' />,
       href: '/erp/labor-costs',
       hasSubItems: false,
-      exactMatch: false
+      exactMatch: false,
+      permissions: ['Manage Labor Cost']
     },
     {
       id: 'locations',
@@ -141,7 +198,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/locations/countries',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage Country']
         },
         {
           id: 'states',
@@ -149,7 +207,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/locations/states',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage State']
         },
         {
           id: 'cities',
@@ -157,7 +216,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/locations/cities',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage City']
         },
         {
           id: 'businesses',
@@ -165,9 +225,12 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/locations/businesses',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage Location']
         }
-      ]
+      ],
+      exactMatch: false,
+      permissions: ['Manage Country', 'Manage State', 'Manage City', 'Manage Location']
     },
     {
       id: 'settings',
@@ -182,7 +245,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/settings/payment-terms',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage Payment Term']
         },
         {
           id: 'partner-types',
@@ -190,7 +254,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/settings/contractor-types',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage Contractor Type']
         },
         {
           id: 'contact-types',
@@ -198,7 +263,26 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/settings/contact-types',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage Contact Type']
+        },
+        {
+          id: 'estimate-types',
+          label: 'Estimate Types',
+          href: '/erp/settings/estimate-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false,
+          permissions: ['Manage Estimate Type']
+        },
+        {
+          id: 'commissions-types',
+          label: 'Commission Types',
+          href: '/erp/settings/commission-types',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false,
+          permissions: ['Manage Commission']
         },
         {
           id: 'commissions',
@@ -206,7 +290,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/settings/commissions',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage Commission']
         },
         {
           id: 'note-types',
@@ -214,7 +299,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/settings/note-types',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage Note Type']
         },
         {
           id: 'task-types',
@@ -222,7 +308,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/settings/task-types',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage Task Type']
         },
         {
           id: 'email-templates',
@@ -230,7 +317,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/settings/email-templates',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage Message Template']
         },
         {
           id: 'task-reminders',
@@ -238,7 +326,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/settings/task-reminders',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage Task Reminder']
         },
         {
           id: 'uom-units',
@@ -246,7 +335,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/settings/uom-units',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage Unit']
         },
         {
           id: 'measure-units',
@@ -254,7 +344,8 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/settings/measure-units',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage Unit']
         },
         {
           id: 'service-types',
@@ -262,11 +353,28 @@ const Sidebar: React.FC<{ user: Record<string, unknown> }> = ({ user }) => {
           href: '/erp/settings/service-types',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false
+          exactMatch: false,
+          permissions: ['Manage Service Type']
         }
+      ],
+      exactMatch: false,
+      permissions: [
+        'Manage Payment Term',
+        'Manage Contractor Type',
+        'Manage Contact Type',
+        'Manage Estimate Type',
+        'Manage Commission',
+        'Manage Task Type',
+        'Manage Unit',
+        'Manage Message Template',
+        'Manage Task Reminder',
+        'Manage Service Type'
       ]
     }
   ]
+
+  // Filter menu items based on user permissions
+  const navigationItems = useMemo(() => filterMenuByPermissions(allNavigationItems, permissions), [permissions])
 
   return (
     <div className='w-full h-screen bg-bg-2 border-r border-border flex flex-col'>

@@ -1,12 +1,16 @@
 'use client'
 
-import { ProductCategory, ProductCategoryPayload } from '@/types/product_categories.types'
+import { useEffect, useState } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
+import { ProductCategory, ProductCategoryPayload } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import ProductCategoryService from '@/services/api/product_categories.service'
 
@@ -50,6 +54,7 @@ const CreateOrEditProductCategoryModal = ({
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true)
+
     const payload: ProductCategoryPayload = {
       name: values.name,
       type: 'product'
@@ -63,6 +68,7 @@ const CreateOrEditProductCategoryModal = ({
         await ProductCategoryService.update(productCategoryId, payload)
         toast.success('Product category updated successfully')
       }
+
       onOpenChange(false)
       onSuccess?.()
       form.reset()

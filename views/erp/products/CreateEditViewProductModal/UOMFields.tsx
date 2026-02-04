@@ -1,11 +1,13 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import { UseFormReturn } from 'react-hook-form'
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Unit } from '@/types'
-import { useEffect } from 'react'
 
 interface UOMFieldsProps {
   form: UseFormReturn<any>
@@ -20,6 +22,7 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
   useEffect(() => {
     if (isRolledGood === 1) {
       const rollUnit = uomUnits.find(u => u.name.toLowerCase() === 'roll')
+
       if (rollUnit) {
         form.setValue('purchase_uom', rollUnit.name)
       }
@@ -125,7 +128,16 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
             rules={{ required: 'Unit is required' }}
             render={({ field }) => (
               <FormItem>
-                <Select onValueChange={field.onChange} value={field.value} disabled={disabled}>
+                <Select
+                  onValueChange={value => {
+                    // Find the full unit object and pass it
+                    const selectedUnit = uomUnits.find(unit => unit.id === value)
+
+                    field.onChange(selectedUnit)
+                  }}
+                  value={field.value?.id || ''}
+                  disabled={disabled}
+                >
                   <FormControl>
                     <SelectTrigger className='w-full'>
                       <SelectValue placeholder='Select Unit' />
@@ -133,7 +145,7 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
                   </FormControl>
                   <SelectContent>
                     {uomUnits.map(unit => (
-                      <SelectItem key={unit.id} value={unit.id.toString()}>
+                      <SelectItem key={unit.id} value={unit.id}>
                         {unit.name}
                       </SelectItem>
                     ))}

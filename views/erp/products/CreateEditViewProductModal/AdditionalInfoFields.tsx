@@ -1,6 +1,7 @@
 'use client'
 
 import { UseFormReturn } from 'react-hook-form'
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -80,7 +81,12 @@ export function AdditionalInfoFields({ form, disabled = false }: AdditionalInfoF
           <FormItem className='flex flex-row gap-4 items-center'>
             <FormLabel>Product Type</FormLabel>
             <FormControl>
-              <RadioGroup disabled={disabled} onValueChange={field.onChange} value={field.value} className='flex flex-row gap-4'>
+              <RadioGroup
+                disabled={disabled}
+                onValueChange={field.onChange}
+                value={field.value}
+                className='flex flex-row gap-4'
+              >
                 <div className='flex gap-2 items-center'>
                   <RadioGroupItem value='inventory' id='type-inventory' />
                   <Label htmlFor='type-inventory' className='cursor-pointer'>
@@ -99,7 +105,7 @@ export function AdditionalInfoFields({ form, disabled = false }: AdditionalInfoF
           </FormItem>
         )}
       />
-      <div className='col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4'>
+      <div className='col-span-2 grid grid-cols-1 gap-4'>
         {/* Freight Percentage Radio Group */}
         <FormField
           control={form.control}

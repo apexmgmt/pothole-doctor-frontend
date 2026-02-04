@@ -5,6 +5,8 @@ import VendorService from '@/services/api/vendors/vendors.service'
 import { ProductCategory, ServiceType, Unit, Vendor } from '@/types'
 import Products from '@/views/erp/products/Products'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProductsPage() {
   let productCategories: ProductCategory[] = []
   let uomUnits: Unit[] = []
@@ -12,29 +14,33 @@ export default async function ProductsPage() {
   let serviceTypes: ServiceType[] = []
 
   try {
-    const response = await ProductCategoryService.getAllProductCategories()
-    productCategories = response.data || []
+    const response = await ProductCategoryService.getAll()
+
+    productCategories = response.data ?? []
   } catch (error) {
     productCategories = []
   }
 
   try {
-    const response = await UnitService.getAllUnits('uom')
-    uomUnits = response.data || []
+    const response = await UnitService.getAll('uom')
+
+    uomUnits = response.data ?? []
   } catch (error) {
     uomUnits = []
   }
 
   try {
-    const response = await ServiceTypeService.getAllServiceTypes()
-    serviceTypes = response.data || []
+    const response = await ServiceTypeService.getAll()
+
+    serviceTypes = response.data ?? []
   } catch (error) {
     serviceTypes = []
   }
 
   try {
-    const response = await VendorService.getAllVendors()
-    vendors = response.data || []
+    const response = await VendorService.getAll()
+
+    vendors = response.data ?? []
   } catch (error) {
     vendors = []
   }

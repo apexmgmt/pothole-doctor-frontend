@@ -1,8 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -12,7 +16,6 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import PartnerService from '@/services/api/partners/partners.service'
@@ -20,6 +23,7 @@ import CreateOrEditPartnerModal from './CreateOrEditPartnerModal'
 import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
 import PartnerDocuments from './documents/PartnerDocuments'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { hasPermission } from '@/utils/role-permission'
 
 const Partners: React.FC<PartnersProps> = ({
   businessLocations,
@@ -41,10 +45,18 @@ const Partners: React.FC<PartnersProps> = ({
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [activeTab, setActiveTab] = useState<string>('partners')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreatePartner, setCanCreatePartner] = useState<boolean>(false)
+  const [canViewPartner, setCanViewPartner] = useState<boolean>(false)
+  const [canEditPartner, setCanEditPartner] = useState<boolean>(false)
+  const [canDeletePartner, setCanDeletePartner] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    hasPermission('Create Contractor').then(result => setCanCreatePartner(result))
+    hasPermission('View Contractor').then(result => setCanViewPartner(result))
+    hasPermission('Update Contractor').then(result => setCanEditPartner(result))
+    hasPermission('Delete Contractor').then(result => setCanDeletePartner(result))
   }, [])
 
   // Debounced search update
@@ -53,14 +65,17 @@ const Partners: React.FC<PartnersProps> = ({
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -71,6 +86,7 @@ const Partners: React.FC<PartnersProps> = ({
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       PartnerService.index(filterOptions)
         .then(response => {
@@ -97,6 +113,7 @@ const Partners: React.FC<PartnersProps> = ({
   const partnersData = apiResponse?.data
     ? apiResponse.data.map((partner: Partner, index: number) => {
         const userable = partner.userable
+
         return {
           id: partner.id,
           index: (apiResponse?.from || 1) + index,
@@ -147,6 +164,7 @@ const Partners: React.FC<PartnersProps> = ({
     // Fetch contact type details
     try {
       const response = await PartnerService.show(id)
+
       setSelectedPartner(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -227,17 +245,30 @@ const Partners: React.FC<PartnersProps> = ({
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            // title='Action'
-            buttons={[
-              <EditButton
-                tooltip='Edit Partner Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton tooltip='Delete Partner' variant='text' onClick={() => handleDeletePartner(row.id)} />
-            ]}
-          />
+          {(canEditPartner || canDeletePartner) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditPartner
+                  ? [
+                      <EditButton
+                        tooltip='Edit Partner Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeletePartner
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Partner'
+                        variant='text'
+                        onClick={() => handleDeletePartner(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -253,7 +284,7 @@ const Partners: React.FC<PartnersProps> = ({
 
   const handleDeletePartner = async (id: string) => {
     try {
-      PartnerService.destroy(id)
+      await PartnerService.destroy(id)
         .then(response => {
           toast.success('Partner deleted successfully')
           fetchData()
@@ -269,6 +300,7 @@ const Partners: React.FC<PartnersProps> = ({
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -293,15 +325,17 @@ const Partners: React.FC<PartnersProps> = ({
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Contractor
-      </Button>
+      {canCreatePartner && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Contractor
+        </Button>
+      )}
     </div>
   )
 
@@ -313,13 +347,17 @@ const Partners: React.FC<PartnersProps> = ({
       onClick: () => setActiveTab('partners'),
       isActive: activeTab === 'partners'
     },
-    {
-      label: 'Documents',
-      icon: DocumentIcon,
-      onClick: () => setActiveTab('documents'),
-      isActive: activeTab === 'documents',
-      disabled: !selectedPartnerId
-    }
+    ...(canViewPartner
+      ? [
+          {
+            label: 'Documents',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('documents'),
+            isActive: activeTab === 'documents',
+            disabled: !selectedPartnerId
+          }
+        ]
+      : [])
   ]
 
   const handleRowSelect = (partner: any) => {

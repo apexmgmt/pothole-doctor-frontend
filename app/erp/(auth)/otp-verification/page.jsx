@@ -1,9 +1,9 @@
-import React from "react";
+import React from 'react'
 
-import OTPIndex from "@/views/erp/auth/otp";
+import OTPIndex from '@/views/erp/auth/otp'
 
 const OTPPage = () => {
-  return <OTPIndex />;
-};
+  return <OTPIndex />
+}
 
-export default OTPPage;
+export default OTPPage

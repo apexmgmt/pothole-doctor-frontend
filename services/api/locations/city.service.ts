@@ -1,16 +1,17 @@
 import { CityPayload } from '@/types'
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
 import { revalidate } from '../../app/cache.service'
-import { CITIES } from '@/constants/api'
+import { API_URL, CITIES, CITIES_TENANT } from '@/constants/api'
 
 export default class CityService {
-  /**States DataTable API */
+  /**Cities DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
-      const response = await apiInterceptor(apiUrl + CITIES + (queryParams ? `?${queryParams}` : ''), {
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CITIES_TENANT : CITIES) + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['cities'] } // Cache for 60 seconds
@@ -18,6 +19,7 @@ export default class CityService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch cities')
       }
 
@@ -27,11 +29,12 @@ export default class CityService {
     }
   }
 
-  /**Create State API */
+  /**Create City API */
   static store = async (payload: CityPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + CITIES, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CITIES_TENANT : CITIES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -39,6 +42,7 @@ export default class CityService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create state')
       }
 
@@ -51,17 +55,19 @@ export default class CityService {
     }
   }
 
-  static show = async (stateId: string) => {
+  static show = async (cityId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + CITIES + stateId, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CITIES_TENANT : CITIES) + cityId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`cities/${stateId}`] } // Cache for 60 seconds
+        next: { revalidate: 60, tags: [`cities/${cityId}`] } // Cache for 60 seconds
       })
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch city details')
       }
 
@@ -73,8 +79,9 @@ export default class CityService {
 
   static update = async (cityId: string, payload: CityPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + CITIES + cityId, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CITIES_TENANT : CITIES) + cityId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -82,8 +89,10 @@ export default class CityService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update city')
       }
+
       await revalidate('cities')
       await revalidate(`cities/${cityId}`)
       await revalidate('locations')
@@ -96,19 +105,23 @@ export default class CityService {
 
   static destroy = async (cityId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + CITIES + cityId, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? CITIES_TENANT : CITIES) + cityId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete city')
       }
+
       await revalidate('cities')
       await revalidate(`cities/${cityId}`)
       await revalidate('locations')
-      
+
       return await response.json()
     } catch (error) {
       throw error

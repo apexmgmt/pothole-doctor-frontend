@@ -2,7 +2,7 @@
  * Base API URL for backend requests.
  * Uses NEXT_PUBLIC_API_URL from environment variables, or defaults to localhost.
  */
-export const API_URL: string = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+export const API_URL: string = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000') + '/api'
 
 export * from './auth_api'
 export * from './organizations_api'
@@ -17,7 +17,7 @@ export * from './units_api'
 export * from './service_types_api'
 export * from './contact_types_api'
 export * from './note_types_api'
-export * from './commissions_api'
+export * from './commissions/commissions_api'
 export * from './task_types_api'
 export * from './partners_api'
 export * from './companies_api'
@@ -33,5 +33,12 @@ export * from './products_api'
 export * from './interest_levels_api'
 export * from './installation_requests_api'
 export * from './client_sources_api'
-
-export * from './leads_api';
+export * from './leads_api'
+export * from './clients_api'
+export * from './commissions/commission_types_api'
+export * from './tasks_api'
+export * from './estimate_types_api'
+export * from './estimates/estimates_api'
+export * from './estimates/proposals_api'
+export * from './estimates/estimate_notes_api'
+export * from './subdomain_api'

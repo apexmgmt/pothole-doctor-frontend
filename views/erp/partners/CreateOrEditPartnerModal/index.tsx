@@ -1,11 +1,15 @@
 'use client'
 
+import { useEffect, useMemo, useState } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { CreateOrEditPartnerModalProps, PartnerPayload } from '@/types'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useMemo, useState } from 'react'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import PartnerService from '@/services/api/partners/partners.service'
 
@@ -206,6 +210,7 @@ const CreateOrEditPartnerModal = ({
   const availableStates = useMemo(() => {
     if (!selectedCountryId) return []
     const country = countriesWithStatesAndCities.find(c => c.id.toString() === selectedCountryId)
+
     return country?.states || []
   }, [selectedCountryId, countriesWithStatesAndCities])
 
@@ -213,6 +218,7 @@ const CreateOrEditPartnerModal = ({
   const availableCities = useMemo(() => {
     if (!selectedStateId) return []
     const state = availableStates.find(s => s.id.toString() === selectedStateId)
+
     return state?.cities || []
   }, [selectedStateId, availableStates])
 
@@ -220,6 +226,7 @@ const CreateOrEditPartnerModal = ({
   useEffect(() => {
     if (selectedCountryId && form.getValues('state_id')) {
       const stateExists = availableStates.some(s => s.id.toString() === form.getValues('state_id'))
+
       if (!stateExists) {
         form.setValue('state_id', '')
         form.setValue('city_id', '')
@@ -231,6 +238,7 @@ const CreateOrEditPartnerModal = ({
   useEffect(() => {
     if (selectedStateId && form.getValues('city_id')) {
       const cityExists = availableCities.some(c => c.id.toString() === form.getValues('city_id'))
+
       if (!cityExists) {
         form.setValue('city_id', '')
       }

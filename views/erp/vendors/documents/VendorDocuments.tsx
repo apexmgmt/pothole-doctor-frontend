@@ -1,3 +1,15 @@
+import { useEffect, useState } from 'react'
+
+import Image from 'next/image'
+
+import Link from 'next/link'
+
+import { id, se } from 'date-fns/locale'
+
+import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
+
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import CommonTable from '@/components/erp/common/table'
@@ -6,12 +18,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { DocumentIcon } from '@/public/icons'
 import { Column, DataTableApiResponse, Document } from '@/types'
 import { generateFileUrl, getFileType } from '@/utils/utility'
-import { id, se } from 'date-fns/locale'
-import { PlusIcon, Search } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+
 import CreateOrEditDocumentModal from './CreateOrEditDocumentModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import VendorDocumentService from '@/services/api/vendors/vendor-documents.service'
@@ -25,6 +32,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: vendorId })
+
   // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
@@ -36,14 +44,17 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -54,6 +65,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       VendorDocumentService.index(filterOptions)
         .then(response => {
@@ -105,6 +117,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
     // Fetch contact type details
     try {
       const response = await VendorDocumentService.show(id)
+
       setSelectedDocument(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -145,7 +158,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
         <>
           {getFileType(row.full_path) === 'image' ? (
             <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
-              <Image src={row.full_path} alt={row.name} width={100} height={100} className='rounded-md' />
+              <Image src={row.full_path} alt={row.name} width={100} height={100} className='rounded-md' unoptimized />
             </Link>
           ) : getFileType(row.full_path) === 'video' ? (
             <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
@@ -192,7 +205,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
 
   const handleDeleteDocument = async (id: string) => {
     try {
-      VendorDocumentService.destroy(id)
+      await VendorDocumentService.destroy(id)
         .then(response => {
           toast.success('Document deleted successfully')
           fetchData()
@@ -208,6 +221,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -215,7 +229,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <InputGroup>
+        {/* <InputGroup>
           <InputGroupInput
             placeholder='Search...'
             value={searchValue}
@@ -230,7 +244,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
             Clear
           </Button>
-        )}
+        )} */}
       </div>
       <Button
         variant='default'

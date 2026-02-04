@@ -1,5 +1,7 @@
 import React, { useMemo, useState, ChangeEvent, FocusEvent } from 'react'
+
 import { FieldError, UseFormRegisterReturn } from 'react-hook-form'
+
 import { EyeCloseIcon, EyeOpenIcon } from '@/public/icons'
 
 type Option = {
@@ -25,6 +27,7 @@ type FieldProps = {
 
   // select / radio / checkbox
   options?: Option[]
+
   // textarea
   rows?: number
 
@@ -70,14 +73,16 @@ const Field: React.FC<FieldProps> = ({
     if (!register) {
       return { value, onChange, required, disabled, placeholder, onBlur, name }
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     const { ref, ...rest } = register
+
     return { ...rest, required, disabled, placeholder, onBlur, name, inputRef: ref }
   }
 
   const renderTextLike = (resolvedType: string) => {
     if (register) {
       const { ref, ...rest } = register
+
       return (
         <div className='relative'>
           <input
@@ -100,12 +105,13 @@ const Field: React.FC<FieldProps> = ({
               className='absolute right-2 top-1/2 -translate-y-1/2 text-gray hover:text-light-2 cursor-pointer'
               tabIndex={-1}
             >
-              {showPassword ? <EyeCloseIcon/> : <EyeOpenIcon/>}
+              {showPassword ? <EyeCloseIcon /> : <EyeOpenIcon />}
             </button>
           )}
         </div>
       )
     }
+
     return (
       <div className='relative'>
         <input
@@ -128,7 +134,7 @@ const Field: React.FC<FieldProps> = ({
             className='absolute right-2 top-1/2 -translate-y-1/2 text-gray hover:text-light-2 cursor-pointer'
             tabIndex={-1}
           >
-            {showPassword ? <EyeCloseIcon/> : <EyeOpenIcon/>}
+            {showPassword ? <EyeCloseIcon /> : <EyeOpenIcon />}
           </button>
         )}
       </div>
@@ -138,13 +144,14 @@ const Field: React.FC<FieldProps> = ({
   const renderSelect = () => {
     if (register) {
       const { ref, ...rest } = register
+
       return (
         <select
           className={baseFieldClass}
           {...rest}
           required={required}
           disabled={disabled}
-        //   placeholder={placeholder}
+          //   placeholder={placeholder}
           onBlur={onBlur}
           name={name}
           ref={ref}
@@ -157,6 +164,7 @@ const Field: React.FC<FieldProps> = ({
         </select>
       )
     }
+
     return (
       <select
         className={baseFieldClass}
@@ -180,6 +188,7 @@ const Field: React.FC<FieldProps> = ({
   const renderTextarea = () => {
     if (register) {
       const { ref, ...rest } = register
+
       return (
         <textarea
           rows={rows}
@@ -194,6 +203,7 @@ const Field: React.FC<FieldProps> = ({
         />
       )
     }
+
     return (
       <textarea
         rows={rows}
@@ -215,6 +225,7 @@ const Field: React.FC<FieldProps> = ({
     if (type === 'textarea') return renderTextarea()
     if (type === 'select') return renderSelect()
     if (type === 'password') return renderTextLike(showPassword ? 'text' : 'password')
+
     return renderTextLike(type)
   }, [type, showPassword, value, error, options, placeholder, disabled, required, register])
 

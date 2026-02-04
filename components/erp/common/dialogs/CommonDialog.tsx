@@ -56,7 +56,7 @@ const CommonDialog = ({
   actions,
   className,
   contentClassName,
-  disableClose = false
+  disableClose = true
 }: CommonDialogProps) => {
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -67,7 +67,7 @@ const CommonDialog = ({
   }, [isLoading])
 
   const handleOpenChange = (newOpen: boolean) => {
-    if (!disableClose) {
+    if (!isLoading) {
       onOpenChange(newOpen)
     }
   }
@@ -95,7 +95,7 @@ const CommonDialog = ({
         )}
 
         <ScrollArea
-          className={cn('relative max-h-[60vh] p-1', isLoading && 'pointer-events-none opacity-50', contentClassName)}
+          className={cn('relative max-h-[80vh] p-1', isLoading && 'pointer-events-none opacity-50', contentClassName)}
           ref={contentRef}
         >
           {isLoading && (

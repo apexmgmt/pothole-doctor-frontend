@@ -1,4 +1,8 @@
-export const COUNTRIES: string = '/v1/countries/';
-export const STATES: string = '/v1/states/';
-export const CITIES: string = '/v1/cities/';
-export const LOCATIONS_ALL: string = '/v1/locations/';
+export const COUNTRIES: string = '/v1/countries/'
+export const COUNTRIES_TENANT: string = '/v1/tenant/countries/'
+export const STATES: string = '/v1/states/'
+export const STATES_TENANT: string = '/v1/tenant/states/'
+export const CITIES: string = '/v1/cities/'
+export const CITIES_TENANT: string = '/v1/tenant/cities/'
+export const LOCATIONS_ALL: string = '/v1/locations/'
+export const LOCATIONS_ALL_TENANT: string = '/v1/tenant/locations/'

@@ -1,13 +1,17 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+
+import { Loader2 } from 'lucide-react'
+
+import { toast } from 'sonner'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Loader2 } from 'lucide-react'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
 import { BusinessLocation } from '@/types'
-import { toast } from 'sonner'
+
 import { Card } from '@/components/ui/card'
 
 interface BusinessLocationDetailsProps {
@@ -21,9 +25,12 @@ const BusinessLocationDetails: React.FC<BusinessLocationDetailsProps> = ({ busin
 
   const fetchBusinessLocationDetails = async () => {
     setIsLoading(true)
+
     try {
       const response = await BusinessLocationService.show(businessLocationId)
+
       setBusinessLocationData(response.data)
+
       if (fetchData) {
         fetchData()
       }
@@ -58,6 +65,7 @@ const BusinessLocationDetails: React.FC<BusinessLocationDetailsProps> = ({ busin
   }
 
   const locationName = businessLocationData.name || 'N/A'
+
   const initials = locationName
     .split(' ')
     .map((name: string) => name.charAt(0))

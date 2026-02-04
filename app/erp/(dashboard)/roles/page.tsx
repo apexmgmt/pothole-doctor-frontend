@@ -1,10 +1,9 @@
-import Roles from "@/views/erp/roles/Roles"
+import Roles from '@/views/erp/roles/Roles'
+
+export const dynamic = 'force-dynamic'
 
 const RolesPage = () => {
-  return (
-    <Roles />
-  )
+  return <Roles />
 }
 
 export default RolesPage
-

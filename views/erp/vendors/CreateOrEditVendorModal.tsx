@@ -1,5 +1,11 @@
 'use client'
 
+import { useEffect, useState, useMemo } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { VendorPayload, CreateOrEditVendorModalProps, Vendor } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -7,9 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState, useMemo } from 'react'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import VendorService from '@/services/api/vendors/vendors.service'
 import { Separator } from '@/components/ui/separator'
@@ -121,6 +125,7 @@ const CreateOrEditVendorModal = ({
   const availableStates = useMemo(() => {
     if (!selectedCountryId) return []
     const country = countriesWithStatesAndCities.find(c => c.id.toString() === selectedCountryId)
+
     return country?.states || []
   }, [selectedCountryId, countriesWithStatesAndCities])
 
@@ -128,6 +133,7 @@ const CreateOrEditVendorModal = ({
   const availableCities = useMemo(() => {
     if (!selectedStateId) return []
     const state = availableStates.find(s => s.id.toString() === selectedStateId)
+
     return state?.cities || []
   }, [selectedStateId, availableStates])
 
@@ -135,6 +141,7 @@ const CreateOrEditVendorModal = ({
   useEffect(() => {
     if (selectedCountryId && form.getValues('state_id')) {
       const stateExists = availableStates.some(s => s.id.toString() === form.getValues('state_id'))
+
       if (!stateExists) {
         form.setValue('state_id', '')
         form.setValue('city_id', '')
@@ -146,6 +153,7 @@ const CreateOrEditVendorModal = ({
   useEffect(() => {
     if (selectedStateId && form.getValues('city_id')) {
       const cityExists = availableCities.some(c => c.id.toString() === form.getValues('city_id'))
+
       if (!cityExists) {
         form.setValue('city_id', '')
       }
@@ -154,6 +162,7 @@ const CreateOrEditVendorModal = ({
 
   const onSubmit = async (values: VendorFormValues) => {
     setIsLoading(true)
+
     const payload: VendorPayload = {
       first_name: values.first_name,
       last_name: '',

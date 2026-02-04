@@ -1,4 +1,4 @@
-import Staffs from "@/views/erp/staffs/Staffs"
+import Staffs from '@/views/erp/staffs/Staffs'
 
 const StaffsPage = () => {
   return <Staffs />

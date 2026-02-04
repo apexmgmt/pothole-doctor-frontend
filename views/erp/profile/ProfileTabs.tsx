@@ -20,6 +20,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ tabs, activeTab, onTabChange 
       <nav className='space-y-1'>
         {tabs.map(tab => {
           const Icon = tab.icon
+
           return (
             <button
               key={tab.id}

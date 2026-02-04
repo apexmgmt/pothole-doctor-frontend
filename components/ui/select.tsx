@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+
 import * as SelectPrimitive from '@radix-ui/react-select'
 import { ChevronDownIcon, ChevronUpIcon, Check, X, Plus } from 'lucide-react'
 
@@ -169,6 +170,7 @@ function MultiSelect({
 
   const handleSelect = (value: string) => {
     const newSelected = selected.includes(value) ? selected.filter(item => item !== value) : [...selected, value]
+
     onChange(newSelected)
   }
 
@@ -191,6 +193,7 @@ function MultiSelect({
             {selected.length > 0 ? (
               selected.map(value => {
                 const option = options.find(opt => opt.value === value)
+
                 return (
                   <Badge key={value} variant='default' className='mr-1'>
                     {option?.label}
@@ -221,7 +224,11 @@ function MultiSelect({
           <ChevronDownIcon className='h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-full p-0' align='start'>
+      <PopoverContent
+        className={cn('p-0', className)}
+        align='start'
+        style={{ width: 'var(--radix-popover-trigger-width)' }}
+      >
         <Command>
           <CommandInput placeholder='Search...' />
           <CommandList>
@@ -229,11 +236,12 @@ function MultiSelect({
             <CommandGroup>
               {options.map(option => {
                 const isSelected = selected.includes(option.value)
+
                 return (
                   <CommandItem
                     key={option.value}
                     onSelect={() => handleSelect(option.value)}
-                    className={cn('cursor-pointer', isSelected && 'bg-accent/80')}
+                    className={cn('cursor-pointer w-full', isSelected && 'bg-accent/80')}
                   >
                     <div
                       className={cn(
@@ -278,6 +286,7 @@ function CreatableMultiSelect({
 
   const handleSelect = (value: string) => {
     const newSelected = selected.includes(value) ? selected.filter(item => item !== value) : [...selected, value]
+
     onChange(newSelected)
   }
 
@@ -295,6 +304,7 @@ function CreatableMultiSelect({
       if (!selected.includes(trimmedValue)) {
         onChange([...selected, trimmedValue])
       }
+
       setSearchValue('')
     }
   }
@@ -321,6 +331,7 @@ function CreatableMultiSelect({
               selected.map(value => {
                 const option = options.find(opt => opt.value === value)
                 const label = option?.label || value
+
                 return (
                   <Badge key={value} variant='default' className='mr-1'>
                     {label}
@@ -351,7 +362,11 @@ function CreatableMultiSelect({
           <ChevronDownIcon className='h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-full p-0' align='start'>
+      <PopoverContent
+        className={cn('p-0', className)}
+        align='start'
+        style={{ width: 'var(--radix-popover-trigger-width)' }}
+      >
         <Command shouldFilter={false}>
           <CommandInput
             placeholder='Search or type to add...'
@@ -364,6 +379,7 @@ function CreatableMultiSelect({
             <CommandGroup>
               {filteredOptions.map(option => {
                 const isSelected = selected.includes(option.value)
+
                 return (
                   <CommandItem
                     key={option.value}
@@ -461,7 +477,11 @@ function CreatableSelect({
           <ChevronDownIcon className='h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-full p-0' align='start'>
+      <PopoverContent
+        className={cn('p-0', className)}
+        align='start'
+        style={{ width: 'var(--radix-popover-trigger-width)' }}
+      >
         <Command shouldFilter={false}>
           <CommandInput
             placeholder='Search or type to add...'
@@ -504,6 +524,7 @@ function CreatableSelect({
     </Popover>
   )
 }
+
 export {
   Select,
   SelectContent,

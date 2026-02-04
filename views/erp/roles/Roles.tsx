@@ -1,8 +1,14 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
+import Link from 'next/link'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -13,10 +19,10 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import RoleService from '@/services/api/role.service'
-import { toast } from 'sonner'
-import Link from 'next/link'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { getInitialFilters } from '@/utils/utility'
+import { hasPermission } from '@/utils/role-permission'
 
 interface RoleData {
   id: string
@@ -35,27 +41,17 @@ const Roles: React.FC = () => {
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null)
   const [selectedRole, setSelectedRole] = useState<object | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
-
-  // Initialize filterOptions from URL params
-  const getInitialFilters = () => {
-    const filters: any = {}
-    searchParams.forEach((value, key) => {
-      // Convert numeric values
-      if (key === 'page' || key === 'per_page') {
-        filters[key] = parseInt(value)
-      } else {
-        filters[key] = value
-      }
-    })
-
-    return filters
-  }
-
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters())
+  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateRole, setCanCreateRole] = useState<boolean>(false)
+  const [canEditRole, setCanEditRole] = useState<boolean>(false)
+  const [canDeleteRole, setCanDeleteRole] = useState<boolean>(false)
 
   // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    hasPermission('Create Role').then(result => setCanCreateRole(result))
+    hasPermission('Update Role').then(result => setCanEditRole(result))
+    hasPermission('Delete Role').then(result => setCanDeleteRole(result))
   }, [])
 
   // Debounced search update
@@ -64,14 +60,17 @@ const Roles: React.FC = () => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -98,6 +97,7 @@ const Roles: React.FC = () => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       RoleService.index(filterOptions)
         .then(response => {
@@ -125,7 +125,8 @@ const Roles: React.FC = () => {
     ? apiResponse.data.map((role: any, index: number) => ({
         id: role.id,
         index: (apiResponse?.from || 1) + index,
-        name: role.name
+        name: role.name,
+        is_editable: role.is_editable
       }))
     : []
 
@@ -149,12 +150,14 @@ const Roles: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton tooltip='Edit Role Information' link={`/erp/roles/${row.id}/edit`} variant='text' />,
-              <DeleteButton tooltip='Delete Role' variant='text' onClick={() => handleDeleteRole(row.id)} />
-            ]}
-          />
+          {(canEditRole || canDeleteRole) && row.is_editable && (
+            <ThreeDotButton
+              buttons={[
+                canEditRole && <EditButton tooltip='Edit Role Information' link={`/erp/roles/${row.id}/edit`} variant='text' />,
+                canDeleteRole && <DeleteButton tooltip='Delete Role' variant='text' onClick={() => handleDeleteRole(row.id)} />
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -184,8 +187,9 @@ const Roles: React.FC = () => {
 
   const handleDeleteRole = async (id: string) => {
     setSelectedRoleId(null)
+
     try {
-      RoleService.destroy(id)
+      await RoleService.destroy(id)
         .then(response => {
           toast.success('Role deleted successfully')
           fetchData()
@@ -201,6 +205,7 @@ const Roles: React.FC = () => {
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -225,12 +230,14 @@ const Roles: React.FC = () => {
           </Button>
         )}
       </div>
-      <Link href='/erp/roles/create'>
-        <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
-          <PlusIcon className='w-4 h-4' />
-          Add Role
-        </Button>
-      </Link>
+      {canCreateRole && (
+        <Link href='/erp/roles/create'>
+          <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
+            <PlusIcon className='w-4 h-4' />
+            Add Role
+          </Button>
+        </Link>
+      )}
     </div>
   )
 

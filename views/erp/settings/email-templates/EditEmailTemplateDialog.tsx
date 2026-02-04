@@ -1,16 +1,15 @@
 'use client'
 
-import { EmailTemplate, EmailTemplatePayload } from '@/types'
-import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import EmailTemplateService from '@/services/api/settings/email_templates.service'
+
 import { toast } from 'sonner'
+
 import { createEditor, Descendant, Editor, Transforms, Element as SlateElement, BaseEditor, Text } from 'slate'
+
 import { Slate, Editable, withReact, RenderLeafProps, RenderElementProps, ReactEditor } from 'slate-react'
+
 import { withHistory, HistoryEditor } from 'slate-history'
+
 import {
   Bold,
   Italic,
@@ -26,6 +25,13 @@ import {
   Heading2,
   Heading3
 } from 'lucide-react'
+
+import { EmailTemplate, EmailTemplatePayload } from '@/types'
+import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import EmailTemplateService from '@/services/api/settings/email_templates.service'
 
 interface EditEmailTemplateDialogProps {
   open: boolean
@@ -63,9 +69,11 @@ const serialize = (nodes: Descendant[]): string => {
 const serializeNode = (node: any): string => {
   if (Text.isText(node)) {
     let text = node.text
+
     if (node.bold) text = `<strong>${text}</strong>`
     if (node.italic) text = `<em>${text}</em>`
     if (node.underline) text = `<u>${text}</u>`
+
     return text
   }
 
@@ -98,9 +106,11 @@ const deserialize = (html: string): Descendant[] => {
   // Handle plain text (no HTML tags at all)
   if (!html.includes('<') && !html.includes('>')) {
     const lines = html.split('\n').filter(line => line.trim() !== '')
+
     if (lines.length === 0) {
       return [{ type: 'paragraph', children: [{ text: '' }] }]
     }
+
     return lines.map(line => ({
       type: 'paragraph',
       children: [{ text: line }]
@@ -108,6 +118,7 @@ const deserialize = (html: string): Descendant[] => {
   }
 
   const doc = new DOMParser().parseFromString(html, 'text/html')
+
   const nodes = Array.from(doc.body.childNodes)
     .map(node => deserializeNode(node))
     .filter(Boolean) as Descendant[]
@@ -118,10 +129,12 @@ const deserialize = (html: string): Descendant[] => {
 const deserializeNode = (node: Node): any => {
   if (node.nodeType === Node.TEXT_NODE) {
     const text = node.textContent || ''
+
     // Wrap orphan text nodes in paragraphs
     if (text.trim() && node.parentNode?.nodeName === 'BODY') {
       return { type: 'paragraph', children: [{ text }] }
     }
+
     return text.trim() ? { text } : null
   }
 
@@ -134,14 +147,19 @@ const deserializeNode = (node: Node): any => {
   // Handle inline formatting elements
   if (element.nodeName === 'STRONG' || element.nodeName === 'B') {
     const text = element.textContent || ''
+
     return { text, bold: true }
   }
+
   if (element.nodeName === 'EM' || element.nodeName === 'I') {
     const text = element.textContent || ''
+
     return { text, italic: true }
   }
+
   if (element.nodeName === 'U') {
     const text = element.textContent || ''
+
     return { text, underline: true }
   }
 
@@ -185,11 +203,14 @@ const deserializeNode = (node: Node): any => {
       if (children.length === 1 && Text.isText(children[0])) {
         return { type: 'paragraph', children }
       }
+
       // If it contains only text, wrap in paragraph
       const hasOnlyText = children.every((child: any) => Text.isText(child))
+
       if (hasOnlyText) {
         return { type: 'paragraph', children }
       }
+
       return children.length === 1 ? children[0] : { type: 'paragraph', children }
   }
 }
@@ -214,8 +235,10 @@ export default function EditEmailTemplateDialog({
   useEffect(() => {
     if (template && open) {
       setTitle(template.title)
+
       try {
         const parsedValue = deserialize(template.description)
+
         setValue(parsedValue)
         setKey(prev => prev + 1)
       } catch (error) {
@@ -228,6 +251,7 @@ export default function EditEmailTemplateDialog({
 
   const renderElement = useCallback((props: RenderElementProps) => {
     const style = { textAlign: (props.element as any).align }
+
     switch (props.element.type) {
       case 'heading-one':
         return (
@@ -278,21 +302,25 @@ export default function EditEmailTemplateDialog({
 
   const renderLeaf = useCallback((props: RenderLeafProps) => {
     let { children } = props
+
     if (props.leaf.bold) children = <strong>{children}</strong>
     if (props.leaf.italic) children = <em>{children}</em>
     if (props.leaf.underline) children = <u>{children}</u>
+
     return <span {...props.attributes}>{children}</span>
   }, [])
 
   // To:
   const isMarkActive = (editor: Editor, format: keyof Omit<CustomText, 'text'>) => {
     const marks = Editor.marks(editor)
+
     return marks ? marks[format] === true : false
   }
 
   // Also update the toggleMark function signature:
   const toggleMark = (format: keyof Omit<CustomText, 'text'>) => {
     const isActive = isMarkActive(editor, format)
+
     if (isActive) {
       Editor.removeMark(editor, format)
     } else {
@@ -314,6 +342,7 @@ export default function EditEmailTemplateDialog({
     })
 
     let newProperties: Partial<SlateElement>
+
     if (TEXT_ALIGN_TYPES.includes(format)) {
       newProperties = {
         align: isActive ? undefined : format
@@ -328,12 +357,14 @@ export default function EditEmailTemplateDialog({
 
     if (!isActive && isList) {
       const block = { type: format, children: [] } as SlateElement
+
       Transforms.wrapNodes(editor, block)
     }
   }
 
   const isBlockActive = (editor: Editor, format: string, blockType = 'type') => {
     const { selection } = editor
+
     if (!selection) return false
 
     const [match] = Array.from(
@@ -352,6 +383,7 @@ export default function EditEmailTemplateDialog({
     if (!template) return
 
     setIsLoading(true)
+
     try {
       const description = serialize(value)
 
@@ -403,7 +435,7 @@ export default function EditEmailTemplateDialog({
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={isLoading}>
-            Save Changes
+            {isLoading ? 'Saving...' : 'Save Changes'}
           </Button>
         </>
       }

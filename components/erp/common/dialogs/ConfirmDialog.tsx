@@ -1,4 +1,5 @@
 import React from 'react'
+
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -6,10 +7,11 @@ import {
   AlertDialogHeader,
   AlertDialogFooter,
   AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel
+  AlertDialogDescription
 } from '@/components/ui/alert-dialog'
+
+import { Button } from '@/components/ui/button'
+import { SpinnerCustom } from '@/components/ui/spinner'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -19,7 +21,7 @@ interface ConfirmDialogProps {
   message: string
   cancelButtonTitle?: string
   confirmButtonTitle?: string
-  onConfirm: () => void | Promise<void>
+  onConfirm: (e?: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>
   confirmButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>
   loading?: boolean
 }
@@ -44,10 +46,19 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         <AlertDialogDescription>{message}</AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel onClick={() => onOpenChange(false)}>{cancelButtonTitle}</AlertDialogCancel>
-        <AlertDialogAction onClick={onConfirm} disabled={loading} {...confirmButtonProps}>
-          {confirmButtonTitle}
-        </AlertDialogAction>
+        <Button variant='outline' onClick={() => onOpenChange(false)} disabled={loading}>
+          {cancelButtonTitle}
+        </Button>
+        <Button onClick={onConfirm} disabled={loading} {...confirmButtonProps}>
+          <div className='flex items-center justify-center gap-4'>
+            {confirmButtonTitle}
+            {loading && (
+              <div className='relative '>
+                <SpinnerCustom size='size-4' />
+              </div>
+            )}
+          </div>
+        </Button>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>

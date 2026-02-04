@@ -1,8 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -12,12 +16,12 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ContactTypeService from '@/services/api/settings/contact_types.service'
 import CreateOrEditContactTypeModal from './CreateOrEditContactTypeModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { hasPermission } from '@/utils/role-permission'
 
 const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_terms }) => {
   const router = useRouter()
@@ -31,12 +35,20 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [canCreateContactType, setCanCreateContactType] = useState<boolean>(false)
+  const [canEditContactType, setCanEditContactType] = useState<boolean>(false)
+  const [canDeleteContactType, setCanDeleteContactType] = useState<boolean>(false)
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create Contact Type').then(result => setCanCreateContactType(result))
+    hasPermission('Update Contact Type').then(result => setCanEditContactType(result))
+    hasPermission('Delete Contact Type').then(result => setCanDeleteContactType(result))
   }, [])
 
   // Debounced search update
@@ -45,14 +57,17 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -63,6 +78,7 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       ContactTypeService.index(filterOptions)
         .then(response => {
@@ -113,6 +129,7 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
     // Fetch contact type details
     try {
       const response = await ContactTypeService.show(id)
+
       setSelectedContactType(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -169,20 +186,30 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton
-                tooltip='Edit Contact Type Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              <DeleteButton
-                tooltip='Delete Contact Type'
-                variant='text'
-                onClick={() => handleDeleteContactType(row.id)}
-              />
-            ]}
-          />
+          {(canEditContactType || canDeleteContactType) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditContactType
+                  ? [
+                      <EditButton
+                        tooltip='Edit Contact Type Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteContactType
+                  ? [
+                      <DeleteButton
+                        tooltip='Delete Contact Type'
+                        variant='text'
+                        onClick={() => handleDeleteContactType(row.id)}
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -198,7 +225,7 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
 
   const handleDeleteContactType = async (id: string) => {
     try {
-      ContactTypeService.destroy(id)
+      await ContactTypeService.destroy(id)
         .then(response => {
           toast.success('Contact type deleted successfully')
           fetchData()
@@ -214,6 +241,7 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -238,15 +266,17 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Contact Type
-      </Button>
+      {canCreateContactType && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Contact Type
+        </Button>
+      )}
     </div>
   )
 

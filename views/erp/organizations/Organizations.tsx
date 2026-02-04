@@ -1,7 +1,11 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
+import Link from 'next/link'
+
 import { PlusIcon, Search } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
@@ -19,8 +23,8 @@ import OrganizationStatusSwitch from '@/views/erp/organizations/OrganizationStat
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import Link from 'next/link'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { hasPermission } from '@/utils/role-permission'
 
 interface CompanyData {
   id: string
@@ -60,10 +64,14 @@ const Organizations: React.FC = () => {
   const [selectedCompany, setSelectedCompany] = useState<object | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [statusLoading, setStatusLoading] = useState<{ [key: string]: boolean }>({})
+  const [canCreateCompany, setCanCreateCompany] = useState<boolean>(false)
+  const [canViewCompany, setCanViewCompany] = useState<boolean>(false)
+  const [canEditCompany, setCanEditCompany] = useState<boolean>(false)
 
   // Initialize filterOptions from URL params
   const getInitialFilters = () => {
     const filters: any = {}
+
     searchParams.forEach((value, key) => {
       // Convert numeric values
       if (key === 'page' || key === 'per_page') {
@@ -78,9 +86,14 @@ const Organizations: React.FC = () => {
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters())
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // check permissions
+    hasPermission('Create Company').then(result => setCanCreateCompany(result))
+    hasPermission('View Company').then(result => setCanViewCompany(result))
+    hasPermission('Update Company').then(result => setCanEditCompany(result))
   }, [])
 
   // Debounced search update
@@ -89,14 +102,17 @@ const Organizations: React.FC = () => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -123,6 +139,7 @@ const Organizations: React.FC = () => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       OrganizationService.index(filterOptions)
         .then(response => {
@@ -206,6 +223,7 @@ const Organizations: React.FC = () => {
             checked={row.status}
             loading={statusLoading[row.id]}
             companyId={row.id}
+
             // fetchData={fetchData} // pass only if you want to refetch after change
           />
         </div>
@@ -217,11 +235,21 @@ const Organizations: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton tooltip='Edit Company Information' link={`/erp/companies/${row.id}/edit`} variant='text' />
-            ]}
-          />
+          {canEditCompany && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditCompany
+                  ? [
+                      <EditButton
+                        tooltip='Edit Company Information'
+                        link={`/erp/companies/${row.id}/edit`}
+                        variant='text'
+                      />
+                    ]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false
@@ -237,19 +265,22 @@ const Organizations: React.FC = () => {
   const handleRowSelect = (company: any) => {
     setSelectedCompanyId(company?.id || null)
 
-    OrganizationService.show(company?.id)
-      .then(response => {
-        setSelectedCompany(response.data)
-      })
-      .catch(error => {
-        setSelectedCompany(null)
-        console.error('Error fetching company details:', error)
-      })
+    if (canViewCompany) {
+      OrganizationService.show(company?.id)
+        .then(response => {
+          setSelectedCompany(response.data)
+        })
+        .catch(error => {
+          setSelectedCompany(null)
+          console.error('Error fetching company details:', error)
+        })
+    }
   }
 
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -274,12 +305,14 @@ const Organizations: React.FC = () => {
           </Button>
         )}
       </div>
-      <Link href='/erp/companies/create'>
-        <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
-          <PlusIcon className='w-4 h-4' />
-          Add Company
-        </Button>
-      </Link>
+      {canCreateCompany && (
+        <Link href='/erp/companies/create'>
+          <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
+            <PlusIcon className='w-4 h-4' />
+            Add Company
+          </Button>
+        </Link>
+      )}
     </div>
   )
 
@@ -291,25 +324,32 @@ const Organizations: React.FC = () => {
       onClick: () => setActiveTab('companies'),
       isActive: activeTab === 'companies'
     },
-    {
-      label: 'Details',
-      icon: DetailsIcon,
-      onClick: () => setActiveTab('details'),
-      isActive: activeTab === 'details',
-      disabled: !selectedCompanyId
-    }
+    ...(canViewCompany
+      ? [
+          {
+            label: 'Details',
+            icon: DetailsIcon,
+            onClick: () => setActiveTab('details'),
+            isActive: activeTab === 'details',
+            disabled: !selectedCompanyId
+          }
+        ]
+      : [])
   ]
 
   const handleStatusToggle = async (companyId: string) => {
     setStatusLoading(prev => ({ ...prev, [companyId]: true }))
+
     try {
       await OrganizationService.changeStatus(companyId)
+
       // Refetch data after status change
       fetchData()
     } catch (error) {
       // Optionally show error
       console.error('Failed to change status', error)
     }
+
     setStatusLoading(prev => ({ ...prev, [companyId]: false }))
   }
 

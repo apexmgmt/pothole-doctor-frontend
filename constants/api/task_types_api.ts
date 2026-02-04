@@ -14,4 +14,6 @@
  * Data delete method: DELETE /{id}
  */
 export const TASK_TYPES: string = '/v1/task-types/'
+export const TASK_TYPES_TENANT: string = '/v1/tenant/task-types/'
 export const TASK_TYPES_ALL: string = '/v1/get-task-types/'
+export const TASK_TYPES_ALL_TENANT: string = '/v1/tenant/get-task-types/'

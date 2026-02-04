@@ -1,15 +1,17 @@
+import { Info } from 'lucide-react'
+
 import { EmailTemplate } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import EditButton from '@/components/erp/common/buttons/EditButton'
-import { Info } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface EmailTemplateCardProps {
   template: EmailTemplate
+  canEditMessageTemplate?: boolean
   onEdit: (template: EmailTemplate) => void
 }
 
-export default function EmailTemplateCard({ template, onEdit }: EmailTemplateCardProps) {
+export default function EmailTemplateCard({ template, canEditMessageTemplate = true, onEdit }: EmailTemplateCardProps) {
   return (
     <Card>
       <CardHeader>
@@ -35,16 +37,18 @@ export default function EmailTemplateCard({ template, onEdit }: EmailTemplateCar
           className='bg-muted p-4 rounded-md min-h-[100px]'
           dangerouslySetInnerHTML={{ __html: template.description }}
         />
-        <div className='flex justify-center'>
-          <EditButton
-            title='Edit'
-            onClick={() => onEdit(template)}
-            variant='text'
-            buttonSize='default'
-            buttonVariant='outline'
-            tooltip='Edit template'
-          />
-        </div>
+        {canEditMessageTemplate && (
+          <div className='flex justify-center'>
+            <EditButton
+              title='Edit'
+              onClick={() => onEdit(template)}
+              variant='text'
+              buttonSize='default'
+              buttonVariant='outline'
+              tooltip='Edit template'
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   )

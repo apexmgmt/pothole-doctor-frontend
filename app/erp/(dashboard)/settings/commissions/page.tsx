@@ -1,6 +1,9 @@
+import CommissionTypeService from '@/services/api/settings/commission_types.service'
 import CommissionService from '@/services/api/settings/commissions.service'
 import { CommissionBase, CommissionFilter, CommissionType } from '@/types'
 import Commissions from '@/views/erp/settings/commissions/Commissions'
+
+export const dynamic = 'force-dynamic'
 
 export default async function CommissionsPage() {
   let commissionTypes: CommissionType[] = []
@@ -8,7 +11,8 @@ export default async function CommissionsPage() {
   let commissionBases: CommissionBase[] = []
 
   try {
-    const response = await CommissionService.getAllCommissionTypes()
+    const response = await CommissionTypeService.getAll()
+
     commissionTypes = response.data || []
   } catch (error) {
     commissionTypes = []
@@ -16,6 +20,7 @@ export default async function CommissionsPage() {
 
   try {
     const response = await CommissionService.getAllCommissionFilters()
+
     commissionFilters = response.data || []
   } catch (error) {
     commissionFilters = []
@@ -23,6 +28,7 @@ export default async function CommissionsPage() {
 
   try {
     const response = await CommissionService.getAllCommissionBases()
+
     commissionBases = response.data || []
   } catch (error) {
     commissionBases = []

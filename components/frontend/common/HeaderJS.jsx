@@ -1,46 +1,46 @@
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react'
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import Image from "next/image";
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import Image from 'next/image'
 
 export default function Header() {
-  const pathname = usePathname();
-  const [activeLink, setActiveLink] = useState(pathname);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname()
+  const [activeLink, setActiveLink] = useState(pathname)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   // Update activeLink when pathname changes
   useEffect(() => {
-    setActiveLink(pathname);
-  }, [pathname]);
+    setActiveLink(pathname)
+  }, [pathname])
 
   // Hide scrollbar when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden'
     } else {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset'
     }
 
     // Cleanup function to restore scroll when component unmounts
     return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isMobileMenuOpen]);
+      document.body.style.overflow = 'unset'
+    }
+  }, [isMobileMenuOpen])
 
-  const handleLinkClick = (path) => {
-    setActiveLink(path);
-    setIsMobileMenuOpen(false); // Close mobile menu when link is clicked
-  };
+  const handleLinkClick = path => {
+    setActiveLink(path)
+    setIsMobileMenuOpen(false) // Close mobile menu when link is clicked
+  }
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+    setIsMobileMenuOpen(!isMobileMenuOpen)
+  }
 
   return (
-    <header className=" z-50 relative">
+    <header className=' z-50 relative'>
       {/* Top Utility Bar */}
       {/* <div
         className="py-2 z-20 hidden md:block"
@@ -156,42 +156,37 @@ export default function Header() {
       </div> */}
 
       {/* Main Navigation Bar */}
-      <div className="py-2 lg:py-3 bg-[#272727] z-10">
-        <div className="container">
-          <div className="flex items-center justify-between">
-            <Link
-              href="/"
-              className="block h-12 lg:h-[75px] w-auto relative z-10"
-            >
+      <div className='py-2 lg:py-3 bg-[#272727] z-10'>
+        <div className='container'>
+          <div className='flex items-center justify-between'>
+            <Link href='/' className='block h-12 lg:h-[75px] w-auto relative z-10'>
               <Image
                 fill
-                src="/images/header-logo.webp"
-                alt="The Pothole Doctors Logo"
-                className="h-full w-full !relative"
+                src='/images/header-logo.webp'
+                alt='The Pothole Doctors Logo'
+                className='h-full w-full !relative'
               />
               {/* Gradient background with border effect */}
-              <span className="absolute top-2 right-0 lg:right-[-100px] w-screen sm:w-[50vw] h-full -z-10 bg-gradient-to-l from-[#53aa57] from-[29.75%] to-[#dcfaa2] to-[100%] skew-x-[-40deg] scale-y-[1.7] lg:scale-y-[1.5]">
+              <span className='absolute top-2 right-0 lg:right-[-100px] w-screen sm:w-[50vw] h-full -z-10 bg-gradient-to-l from-[#53aa57] from-[29.75%] to-[#dcfaa2] to-[100%] skew-x-[-40deg] scale-y-[1.7] lg:scale-y-[1.5]'>
                 <span
-                  className="absolute top-0 right-0 w-screen sm:w-[50vw] h-full -z-10 pointer-events-none scale-y-90"
+                  className='absolute top-0 right-0 w-screen sm:w-[50vw] h-full -z-10 pointer-events-none scale-y-90'
                   style={{
                     WebkitMaskImage:
-                      "linear-gradient(white, transparent) content-box, linear-gradient(white, transparent)",
-                    WebkitMaskComposite: "xor",
-                    maskImage:
-                      "linear-gradient(white, transparent) content-box, linear-gradient(white, transparent)",
-                    maskComposite: "exclude",
-                    padding: "7px",
-                    boxSizing: "border-box",
+                      'linear-gradient(white, transparent) content-box, linear-gradient(white, transparent)',
+                    WebkitMaskComposite: 'xor',
+                    maskImage: 'linear-gradient(white, transparent) content-box, linear-gradient(white, transparent)',
+                    maskComposite: 'exclude',
+                    padding: '7px',
+                    boxSizing: 'border-box'
                   }}
                 >
                   <span
-                    className="block w-full h-full bg-gradient-to-l from-[#ffffff] from-[29.75%] to-[#e0160f] to-[100%] scale-y-[1.2]"
+                    className='block w-full h-full bg-gradient-to-l from-[#ffffff] from-[29.75%] to-[#e0160f] to-[100%] scale-y-[1.2]'
                     style={{
-                      WebkitMask:
-                        "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-                      WebkitMaskComposite: "xor",
-                      mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-                      maskComposite: "exclude",
+                      WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                      WebkitMaskComposite: 'xor',
+                      mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                      maskComposite: 'exclude'
                     }}
                   />
                 </span>
@@ -199,19 +194,19 @@ export default function Header() {
             </Link>
 
             {/* Desktop Navigation - Hidden on Mobile */}
-            <div className="hidden md:flex items-center gap-8">
+            <div className='hidden md:flex items-center gap-8'>
               <nav>
-                <ul className="flex items-center gap-8">
+                <ul className='flex items-center gap-8'>
                   <li>
                     <Link
-                      href="/"
-                      onClick={() => handleLinkClick("/")}
+                      href='/'
+                      onClick={() => handleLinkClick('/')}
                       className={`text-sm font-medium transition-colors relative py-2
                       before:absolute before:bottom-0 before:left-0 before:w-full before:h-[2px] before:bg-primary before:transition-all before:duration-300 after:absolute after:top-1/2 after:left-1/2 after:w-[225%] after:h-[70px] lg:after:h-[100px] after:bg-white/5 after:skew-x-[-27deg] lg:after:skew-x-[-30deg] after:translate-[-50%]
                       ${
-                        activeLink === "/"
-                          ? "text-primary before:opacity-100 before:scale-x-100"
-                          : "text-white hover:text-primary before:opacity-0 before:scale-x-0 hover:before:opacity-100 hover:before:scale-x-100"
+                        activeLink === '/'
+                          ? 'text-primary before:opacity-100 before:scale-x-100'
+                          : 'text-white hover:text-primary before:opacity-0 before:scale-x-0 hover:before:opacity-100 hover:before:scale-x-100'
                       }`}
                     >
                       HOME
@@ -219,14 +214,14 @@ export default function Header() {
                   </li>
                   <li>
                     <Link
-                      href="/about"
-                      onClick={() => handleLinkClick("/about")}
+                      href='/about'
+                      onClick={() => handleLinkClick('/about')}
                       className={`text-sm font-medium transition-colors relative py-2
                       before:absolute before:bottom-0 before:left-0 before:w-full before:h-[2px] before:bg-primary before:transition-all before:duration-300
                       ${
-                        activeLink === "/about"
-                          ? "text-primary before:opacity-100 before:scale-x-100"
-                          : "text-white hover:text-primary before:opacity-0 before:scale-x-0 hover:before:opacity-100 hover:before:scale-x-100"
+                        activeLink === '/about'
+                          ? 'text-primary before:opacity-100 before:scale-x-100'
+                          : 'text-white hover:text-primary before:opacity-0 before:scale-x-0 hover:before:opacity-100 hover:before:scale-x-100'
                       }`}
                     >
                       ABOUT US
@@ -234,14 +229,14 @@ export default function Header() {
                   </li>
                   <li>
                     <Link
-                      href="/contact"
-                      onClick={() => handleLinkClick("/contact")}
+                      href='/contact'
+                      onClick={() => handleLinkClick('/contact')}
                       className={`text-sm font-medium transition-colors relative py-2
                       before:absolute before:bottom-0 before:left-0 before:w-full before:h-[2px] before:bg-primary before:transition-all before:duration-300
                       ${
-                        activeLink === "/contact"
-                          ? "text-primary before:opacity-100 before:scale-x-100"
-                          : "text-white hover:text-primary before:opacity-0 before:scale-x-0 hover:before:opacity-100 hover:before:scale-x-100"
+                        activeLink === '/contact'
+                          ? 'text-primary before:opacity-100 before:scale-x-100'
+                          : 'text-white hover:text-primary before:opacity-0 before:scale-x-0 hover:before:opacity-100 hover:before:scale-x-100'
                       }`}
                     >
                       CONTACT
@@ -260,22 +255,22 @@ export default function Header() {
             {/* Mobile Menu Button - Visible only on Mobile */}
             <button
               onClick={toggleMobileMenu}
-              className="md:hidden flex flex-col justify-center items-center w-8 h-8 text-white hover:text-primary transition-colors cursor-pointer z-[100]"
-              aria-label="Toggle mobile menu"
+              className='md:hidden flex flex-col justify-center items-center w-8 h-8 text-white hover:text-primary transition-colors cursor-pointer z-[100]'
+              aria-label='Toggle mobile menu'
             >
               <span
                 className={`block w-6 h-0.5 bg-current transition-all duration-300 ${
-                  isMobileMenuOpen ? "rotate-45 translate-y-1.5" : ""
+                  isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''
                 }`}
               ></span>
               <span
                 className={`block w-6 h-0.5 bg-current transition-all duration-300 mt-1 ${
-                  isMobileMenuOpen ? "opacity-0" : ""
+                  isMobileMenuOpen ? 'opacity-0' : ''
                 }`}
               ></span>
               <span
                 className={`block w-6 h-0.5 bg-current transition-all duration-300 mt-1 ${
-                  isMobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""
+                  isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''
                 }`}
               ></span>
             </button>
@@ -284,20 +279,15 @@ export default function Header() {
       </div>
 
       {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={toggleMobileMenu}
-        ></div>
-      )}
+      {isMobileMenuOpen && <div className='fixed inset-0 bg-black/50 z-40 md:hidden' onClick={toggleMobileMenu}></div>}
 
       {/* Mobile Side Drawer */}
       <div
         className={`fixed top-0 right-0 h-full w-80 bg-[#272727] z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
-          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="flex flex-col h-full">
+        <div className='flex flex-col h-full'>
           {/* Mobile Menu Header */}
           {/* <div className="flex items-center justify-between p-6 border-b border-white/10">
             <button
@@ -324,7 +314,7 @@ export default function Header() {
           </div> */}
 
           {/* Mobile Navigation */}
-          <nav className="flex-1 p-6">
+          <nav className='flex-1 p-6'>
             {/* <button
               onClick={toggleMobileMenu}
               className="text-white hover:text-red-500 transition-colors cursor-pointer ml-auto block"
@@ -346,59 +336,43 @@ export default function Header() {
                 />
               </svg>
             </button> */}
-            <ul className="pt-4">
+            <ul className='pt-4'>
               <li>
                 <Link
-                  href="/"
-                  onClick={() => handleLinkClick("/")}
+                  href='/'
+                  onClick={() => handleLinkClick('/')}
                   className={`block text-base font-medium transition-colors py-4 border-b border-white/10
-                  ${
-                    activeLink === "/"
-                      ? "text-primary"
-                      : "text-white hover:text-primary"
-                  }`}
+                  ${activeLink === '/' ? 'text-primary' : 'text-white hover:text-primary'}`}
                 >
                   HOME
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/about"
-                  onClick={() => handleLinkClick("/about")}
+                  href='/about'
+                  onClick={() => handleLinkClick('/about')}
                   className={`block text-base font-medium transition-colors py-4 border-b border-white/10
-                  ${
-                    activeLink === "/about"
-                      ? "text-primary"
-                      : "text-white hover:text-primary"
-                  }`}
+                  ${activeLink === '/about' ? 'text-primary' : 'text-white hover:text-primary'}`}
                 >
                   ABOUT US
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/contact"
-                  onClick={() => handleLinkClick("/contact")}
+                  href='/contact'
+                  onClick={() => handleLinkClick('/contact')}
                   className={`block text-base font-medium transition-colors py-4 border-b border-white/10
-                  ${
-                    activeLink === "/contact"
-                      ? "text-primary"
-                      : "text-white hover:text-primary"
-                  }`}
+                  ${activeLink === '/contact' ? 'text-primary' : 'text-white hover:text-primary'}`}
                 >
                   CONTACT
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/location"
-                  onClick={() => handleLinkClick("/location")}
+                  href='/location'
+                  onClick={() => handleLinkClick('/location')}
                   className={`block text-base font-medium transition-colors py-4 border-b border-white/10
-                  ${
-                    activeLink === "/location"
-                      ? "text-primary"
-                      : "text-white hover:text-primary"
-                  }`}
+                  ${activeLink === '/location' ? 'text-primary' : 'text-white hover:text-primary'}`}
                 >
                   LOCATION
                 </Link>
@@ -407,11 +381,11 @@ export default function Header() {
           </nav>
 
           {/* Mobile Menu Footer with Login Button */}
-          <div className="p-6 border-t border-white/10">
+          <div className='p-6 border-t border-white/10'>
             <Link
-              href="/login"
+              href='/login'
               onClick={() => setIsMobileMenuOpen(false)}
-              className="block w-full text-center py-3 sm:py-4 px-6 text-sm rounded-lg font-semibold tracking-wide text-white bg-primary hover:bg-primary/85 transition-colors"
+              className='block w-full text-center py-3 sm:py-4 px-6 text-sm rounded-lg font-semibold tracking-wide text-white bg-primary hover:bg-primary/85 transition-colors'
             >
               LOG IN
             </Link>
@@ -419,5 +393,5 @@ export default function Header() {
         </div>
       </div>
     </header>
-  );
+  )
 }

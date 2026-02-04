@@ -1,12 +1,16 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { Document, DocumentPayload } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useRef, useState } from 'react'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { generateFileUrl, getFileType } from '@/utils/utility'
 import VendorDocumentService from '@/services/api/vendors/vendor-documents.service'
@@ -47,6 +51,7 @@ const CreateOrEditDocumentModal = ({
   useEffect(() => {
     if (open) {
       form.reset({ file: null })
+
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
@@ -57,6 +62,7 @@ const CreateOrEditDocumentModal = ({
     // Validate file on create
     if (mode === 'create' && !values.file) {
       form.setError('file', { message: 'Please upload a file' })
+
       return
     }
 
@@ -64,6 +70,7 @@ const CreateOrEditDocumentModal = ({
 
     // Create FormData
     const formData = new FormData()
+
     formData.append('vendor_id', vendorId)
 
     if (values.file) {
@@ -84,13 +91,13 @@ const CreateOrEditDocumentModal = ({
         onSuccess?.()
       }
     } catch (error: any) {
-      toast.error(
-        error?.message
-          ? typeof error.message === 'string'
-            ? error.message
-            : 'Failed to save document'
-          : 'Something went wrong!'
-      )
+      if (error?.errors && typeof error.errors === 'object') {
+        Object.values(error.errors).forEach((errMsg: any) => {
+          errMsg?.map((msg: string) => toast.error(msg))
+        })
+      } else {
+        toast.error(error?.message || 'Something went wrong')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -98,9 +105,11 @@ const CreateOrEditDocumentModal = ({
 
   const onCancel = () => {
     form.reset({ file: null })
+
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+
     onOpenChange(false)
   }
 
@@ -145,8 +154,9 @@ const CreateOrEditDocumentModal = ({
               mode === 'create'
                 ? {
                     required: 'File is required',
-                    validate: (value) => {
+                    validate: value => {
                       if (!value) return 'Please select a file'
+
                       return true
                     }
                   }
@@ -162,10 +172,10 @@ const CreateOrEditDocumentModal = ({
                     type='file'
                     accept='*'
                     placeholder='Upload file'
-                    // ref={fileInputRef}
                     {...field}
                     onChange={e => {
                       const file = e.target.files?.[0] || null
+
                       onChange(file)
                     }}
                   />
@@ -174,22 +184,22 @@ const CreateOrEditDocumentModal = ({
                 {mode === 'edit' && documentDetails?.full_path && (
                   <div className='mt-2'>
                     <span className='text-xs text-gray-500'>Current file:&nbsp;</span>
-                    {getFileType(generateFileUrl(documentDetails.full_path)) === 'image' ? (
+                    {getFileType(generateFileUrl(documentDetails.full_path) ?? '') === 'image' ? (
                       <a
-                        href={generateFileUrl(documentDetails.full_path)}
+                        href={generateFileUrl(documentDetails.full_path) ?? ''}
                         target='_blank'
                         rel='noopener noreferrer'
                         className='inline-block'
                       >
                         <img
-                          src={generateFileUrl(documentDetails.full_path)}
+                          src={generateFileUrl(documentDetails.full_path) ?? ''}
                           alt='Current file'
                           className='h-16 rounded'
                         />
                       </a>
                     ) : (
                       <a
-                        href={generateFileUrl(documentDetails.full_path)}
+                        href={generateFileUrl(documentDetails.full_path) ?? ''}
                         target='_blank'
                         rel='noopener noreferrer'
                         className='text-blue-600 underline'

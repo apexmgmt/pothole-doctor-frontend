@@ -1,15 +1,22 @@
 'use client'
 
-import { State, StatePayload, Location } from '@/types'
+import { useEffect, useState } from 'react'
+
 import { zodResolver } from '@hookform/resolvers/zod'
+
 import * as z from 'zod'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
+import { State, StatePayload, Location, Country } from '@/types'
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import StateService from '@/services/api/locations/state.service'
 import LocationService from '@/services/api/locations/location.service'
@@ -20,6 +27,7 @@ interface CreateOrEditStateModalProps {
   onOpenChange: (open: boolean) => void
   stateId?: string
   stateDetails?: State
+  countries: Country[]
   onSuccess?: () => void
 }
 
@@ -36,6 +44,7 @@ const CreateOrEditStateModal = ({
   onOpenChange,
   stateId,
   stateDetails,
+  countries,
   onSuccess
 }: CreateOrEditStateModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -70,7 +79,7 @@ const CreateOrEditStateModal = ({
   // Reset form when stateDetails changes or modal opens
   useEffect(() => {
     if (open) {
-      fetchCountriesWithStateAndCities()
+      // fetchCountriesWithStateAndCities()
       form.reset({
         name: stateDetails?.name || '',
         country_id: stateDetails?.country?.id?.toString() || ''
@@ -128,7 +137,6 @@ const CreateOrEditStateModal = ({
 
   return (
     <CommonDialog
-      isLoading={isLoading}
       loadingMessage='Loading countries...'
       open={open}
       onOpenChange={onOpenChange}
@@ -136,6 +144,7 @@ const CreateOrEditStateModal = ({
       description={mode === 'create' ? 'Add a new state to the system' : 'Update state information'}
       maxWidth='sm'
       disableClose={form.formState.isSubmitting}
+      isLoading={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
           <Button
@@ -173,9 +182,9 @@ const CreateOrEditStateModal = ({
                       <SelectValue placeholder='Select a country' />
                     </SelectTrigger>
                   </FormControl>
-                  {countriesWithStateAndCities.length > 0 && (
+                  {countries.length > 0 && (
                     <SelectContent>
-                      {countriesWithStateAndCities?.map(country => (
+                      {countries?.map(country => (
                         <SelectItem key={country.id} value={country.id.toString()}>
                           {country.name}
                         </SelectItem>

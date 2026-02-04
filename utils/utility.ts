@@ -1,3 +1,50 @@
+import { NextRequest } from 'next/server'
+
+/**
+ * Check if the current request is from a tenant (subdomain or different domain)
+ * @returns Promise<boolean> true if tenant, false if main app
+ */
+export async function isTenant(): Promise<boolean> {
+  const isServer = typeof window === 'undefined'
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+
+  try {
+    // Parse the base app URL
+    const baseUrl = new URL(appBaseUrl)
+    const baseDomain = baseUrl.hostname
+
+    let currentHost = ''
+
+    if (isServer) {
+      // Server-side logic
+      const { headers } = await import('next/headers')
+      const headersList = await headers()
+
+      currentHost = headersList.get('host') || ''
+    } else {
+      // Client-side logic
+      currentHost = window.location.host
+    }
+
+    // Remove port for comparison
+    const currentHostWithoutPort = currentHost.split(':')[0]
+
+    // If current host exactly matches base domain, it's NOT a tenant
+    if (currentHostWithoutPort === baseDomain) {
+      return false
+    }
+
+    // If current host is different from base domain (subdomain or completely different domain)
+    // it's a tenant
+    return true
+  } catch (error) {
+    console.error('Error checking tenant status:', error)
+
+    // If there's an error parsing, assume it's a tenant for safety
+    return true
+  }
+}
+
 /**
  * Generates an API URL with the subdomain (if any) from the current request host.
  *
@@ -13,6 +60,8 @@ export async function getApiUrl(): Promise<string> {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || ''
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || ''
 
+  return apiBaseUrl + '/api'
+
   // Check environment
   const isServer = typeof window === 'undefined'
 
@@ -21,10 +70,12 @@ export async function getApiUrl(): Promise<string> {
     const { headers } = await import('next/headers')
     const headersList = await headers()
     const host = headersList.get('host') || ''
+
     return buildUrl(apiBaseUrl, appBaseUrl, host)
   } else {
     // Client-side logic
     const host = window.location.host
+
     return buildUrl(apiBaseUrl, appBaseUrl, host)
   }
 }
@@ -47,7 +98,9 @@ export function appUrl(subdomain?: string): string {
 
   try {
     const appUrl = new URL(appBaseUrl)
+
     appUrl.hostname = `${subdomain}.${appUrl.hostname}`
+
     return appUrl.toString()
   } catch {
     return appBaseUrl
@@ -72,7 +125,9 @@ function buildUrl(apiBaseUrl: string, appBaseUrl: string, host: string): string 
     if (hostParts.length > baseParts.length) {
       const subdomain = hostParts.slice(0, hostParts.length - baseParts.length).join('.')
       const api = new URL(apiBaseUrl)
+
       api.hostname = `${subdomain}.${api.hostname}`
+
       return api.toString() + 'api'
     }
 
@@ -85,6 +140,7 @@ function buildUrl(apiBaseUrl: string, appBaseUrl: string, host: string): string 
 // Initialize filterOptions from URL params
 export const getInitialFilters = (searchParams: URLSearchParams) => {
   const filters: any = {}
+
   searchParams.forEach((value, key) => {
     // Convert numeric values
     if (key === 'page' || key === 'per_page') {
@@ -114,8 +170,10 @@ export const updateURL = (router: any, filters: any) => {
 }
 
 /**Generate fill url from full path */
-export const generateFileUrl = (fullPath: string) => {
+export const generateFileUrl = (fullPath: string | null | undefined) => {
+  if (!fullPath) return null
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
+
   return apiUrl + fullPath
 }
 
@@ -123,8 +181,10 @@ export const generateFileUrl = (fullPath: string) => {
 export const getFileExtension = (fullPath: string) => {
   if (!fullPath) return 'unknown'
   const ext = fullPath.split('.').pop()?.toLowerCase() || ''
+
   return ext
 }
+
 /** Get file type from full path */
 export const getFileType = (fullPath: string) => {
   const ext = getFileExtension(fullPath)
@@ -145,11 +205,63 @@ export const getFileType = (fullPath: string) => {
     'raw',
     'heif'
   ]
+
   const videoExts = ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm', 'mkv']
   const docExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv', 'rtf']
 
   if (imageExts.includes(ext)) return 'image'
   if (videoExts.includes(ext)) return 'video'
   if (docExts.includes(ext)) return 'document'
+
   return 'other'
 }
+
+/**
+ * Check subdomain and domain information from request
+ * @param req NextRequest
+ * @returns Object with subdomain, domain, isSubdomain, and isApexDomain information
+ */
+export const checkSubdomain = (req: NextRequest) => {
+  const hostname = req.headers.get('host') || req.nextUrl.hostname
+  const isProduction = process.env.NODE_ENV === 'production'
+
+  // Remove port from hostname for domain comparison
+  const hostnameWithoutPort = hostname.split(':')[0]
+  const domainParts = hostnameWithoutPort.split('.')
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+
+  // Extract the apex domain from the app URL (remove protocol and port)
+  const apexDomain = appUrl.replace(/^https?:\/\//, '').split(':')[0]
+
+  let subdomain = ''
+  let domain = hostnameWithoutPort
+  let isSubdomain = false
+  let isApexDomain = hostnameWithoutPort === apexDomain
+
+  if (!isApexDomain) {
+    // Check if this could be a subdomain of the apex domain
+    if (domainParts.length >= 2) {
+      const possibleBaseDomain = domainParts.slice(1).join('.')
+
+      if (possibleBaseDomain === apexDomain && domainParts[0] !== 'www') {
+        // This is a subdomain of the apex domain
+        subdomain = domainParts[0]
+        domain = possibleBaseDomain
+        isSubdomain = true
+      } else {
+        // This is a custom domain (including www.customdomain.com)
+        subdomain = ''
+        domain = hostname
+        isSubdomain = false
+      }
+    } else {
+      // Single part domain (shouldn't happen in practice, but handle it)
+      subdomain = ''
+      domain = hostname
+      isSubdomain = false
+    }
+  }
+
+  return { subdomain, domain, isSubdomain, isApexDomain }
+}
+

@@ -1,8 +1,14 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
+import Link from 'next/link'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -16,10 +22,10 @@ import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import StaffDetails from './StaffDetails'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import Link from 'next/link'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { generateFileUrl, getInitialFilters } from '@/utils/utility'
+import { hasPermission } from '@/utils/role-permission'
 
 const Staffs: React.FC = () => {
   const router = useRouter()
@@ -32,27 +38,19 @@ const Staffs: React.FC = () => {
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null)
   const [selectedStaff, setSelectedStaff] = useState<object | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
+  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateStaff, setCanCreateStaff] = useState<boolean>(false)
+  const [canEditStaff, setCanEditStaff] = useState<boolean>(false)
+  const [canViewStaff, setCanViewStaff] = useState<boolean>(false)
+  const [canDeleteStaff, setCanDeleteStaff] = useState<boolean>(false)
 
-  // Initialize filterOptions from URL params
-  const getInitialFilters = () => {
-    const filters: any = {}
-    searchParams.forEach((value, key) => {
-      // Convert numeric values
-      if (key === 'page' || key === 'per_page') {
-        filters[key] = parseInt(value)
-      } else {
-        filters[key] = value
-      }
-    })
-
-    return filters
-  }
-
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters())
-
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    hasPermission('Create Staff').then(result => setCanCreateStaff(result)) 
+    hasPermission('Update Staff').then(result => setCanEditStaff(result))
+    hasPermission('View Staff').then(result => setCanViewStaff(result))
+    hasPermission('Delete Staff').then(result => setCanDeleteStaff(result))
   }, [])
 
   // Debounced search update
@@ -61,14 +59,17 @@ const Staffs: React.FC = () => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -95,6 +96,7 @@ const Staffs: React.FC = () => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       StaffService.index(filterOptions)
         .then(response => {
@@ -123,10 +125,11 @@ const Staffs: React.FC = () => {
         id: staff.id,
         index: (apiResponse?.from || 1) + index,
         name: `${staff.first_name || ''} ${staff.last_name || ''}`.trim(),
-        profilePicture: staff.userable?.profile_picture || null,
+        profilePicture: generateFileUrl(staff.userable?.profile_picture) || null,
         phone: staff.userable?.phone || 'N/A',
         jobAddress: staff.userable?.address || 'N/A',
-        email: staff.email
+        email: staff.email,
+        guard: staff.guard
       }))
     : []
 
@@ -178,12 +181,18 @@ const Staffs: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton tooltip='Edit Staff Information' link={`/erp/staffs/${row.id}/edit`} variant='text' />,
-              <DeleteButton tooltip='Delete Staff' variant='text' onClick={() => handleDeleteStaff(row.id)} />
-            ]}
-          />
+          {(canEditStaff || canDeleteStaff) && row.guard !== 'admin' && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditStaff
+                  ? [<EditButton tooltip='Edit Staff Information' link={`/erp/staffs/${row.id}/edit`} variant='text' />]
+                  : []),
+                ...(canDeleteStaff
+                  ? [<DeleteButton tooltip='Delete Staff' variant='text' onClick={() => handleDeleteStaff(row.id)} />]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false
@@ -192,7 +201,7 @@ const Staffs: React.FC = () => {
 
   const handleDeleteStaff = async (id: string) => {
     try {
-      StaffService.destroy(id)
+      await StaffService.destroy(id)
         .then(response => {
           toast.success('Staff deleted successfully')
           fetchData()
@@ -211,21 +220,23 @@ const Staffs: React.FC = () => {
   }
 
   const handleRowSelect = (staff: any) => {
-    setSelectedStaffId(staff?.id || null)
-
-    StaffService.show(staff?.id)
-      .then(response => {
-        setSelectedStaff(response.data)
-      })
-      .catch(error => {
-        setSelectedStaff(null)
-        console.error('Error fetching staff details:', error)
-      })
+    if (canCreateStaff) {
+      StaffService.show(staff?.id)
+        .then(response => {
+          setSelectedStaff(response.data)
+          setSelectedStaffId(staff?.id || null)
+        })
+        .catch(error => {
+          setSelectedStaff(null)
+          console.error('Error fetching staff details:', error)
+        })
+    }
   }
 
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -250,12 +261,14 @@ const Staffs: React.FC = () => {
           </Button>
         )}
       </div>
-      <Link href='/erp/staffs/create'>
-        <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
-          <PlusIcon className='w-4 h-4' />
-          Add Staff
-        </Button>
-      </Link>
+      {canCreateStaff && (
+        <Link href='/erp/staffs/create'>
+          <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
+            <PlusIcon className='w-4 h-4' />
+            Add Staff
+          </Button>
+        </Link>
+      )}
     </div>
   )
 
@@ -267,13 +280,17 @@ const Staffs: React.FC = () => {
       onClick: () => setActiveTab('staffs'),
       isActive: activeTab === 'staffs'
     },
-    {
-      label: 'Details',
-      icon: DetailsIcon,
-      onClick: () => setActiveTab('details'),
-      isActive: activeTab === 'details',
-      disabled: !selectedStaffId
-    }
+    ...(canViewStaff
+      ? [
+          {
+            label: 'Details',
+            icon: DetailsIcon,
+            onClick: () => setActiveTab('details'),
+            isActive: activeTab === 'details',
+            disabled: !selectedStaffId
+          }
+        ]
+      : [])
   ]
 
   return (
@@ -301,7 +318,12 @@ const Staffs: React.FC = () => {
       )}
 
       {activeTab === 'details' && (
-        <StaffDetails staffData={selectedStaff} setStaffData={setSelectedStaff} fetchData={fetchData} />
+        <StaffDetails
+          staffData={selectedStaff}
+          setStaffData={setSelectedStaff}
+          fetchData={fetchData}
+          canEditStaff={canEditStaff}
+        />
       )}
     </CommonLayout>
   )

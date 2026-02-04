@@ -1,6 +1,6 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { VENDORS, VENDORS_ALL } from '@/constants/api'
+import { API_URL, VENDORS, VENDORS_ALL, VENDORS_ALL_TENANT, VENDORS_TENANT } from '@/constants/api'
 import { VendorPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
 
@@ -8,9 +8,10 @@ export default class VendorService {
   /** Vendor DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
-      const response = await apiInterceptor(apiUrl + VENDORS + (queryParams ? `?${queryParams}` : ''), {
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? VENDORS_TENANT : VENDORS) + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['vendors'] }
@@ -18,6 +19,7 @@ export default class VendorService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch vendors')
       }
 
@@ -30,8 +32,9 @@ export default class VendorService {
   /** Create Vendor API */
   static store = async (payload: VendorPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + VENDORS, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? VENDORS_TENANT : VENDORS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -39,6 +42,7 @@ export default class VendorService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create vendor')
       }
 
@@ -54,8 +58,9 @@ export default class VendorService {
   /** Show Vendor API */
   static show = async (vendorId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + VENDORS + vendorId, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? VENDORS_TENANT : VENDORS) + vendorId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`vendors/${vendorId}`] }
@@ -63,6 +68,7 @@ export default class VendorService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch vendor details')
       }
 
@@ -75,8 +81,9 @@ export default class VendorService {
   /** Update Vendor API */
   static update = async (vendorId: string, payload: VendorPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + VENDORS + vendorId, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? VENDORS_TENANT : VENDORS) + vendorId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -84,11 +91,14 @@ export default class VendorService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update vendor')
       }
+
       await revalidate('vendors')
       await revalidate(`vendors/${vendorId}`)
       await revalidate('vendors-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -98,15 +108,19 @@ export default class VendorService {
   /** Delete Vendor API */
   static destroy = async (vendorId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + VENDORS + vendorId, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? VENDORS_TENANT : VENDORS) + vendorId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete vendor')
       }
+
       await revalidate('vendors')
       await revalidate(`vendors/${vendorId}`)
       await revalidate('vendors-all')
@@ -120,18 +134,23 @@ export default class VendorService {
   /** Restore Vendor API */
   static restore = async (vendorId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + VENDORS + vendorId + '/restore', {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? VENDORS_TENANT : VENDORS) + vendorId + '/restore', {
         requiresAuth: true,
         method: 'POST'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to restore vendor')
       }
+
       await revalidate('vendors')
       await revalidate(`vendors/${vendorId}`)
       await revalidate('vendors-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -139,10 +158,11 @@ export default class VendorService {
   }
 
   /** Get all vendors api */
-  static getAllVendors = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + VENDORS_ALL, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? VENDORS_ALL_TENANT : VENDORS_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['vendors-all'] } // Cache for 1 hour
@@ -150,6 +170,7 @@ export default class VendorService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch vendors')
       }
 

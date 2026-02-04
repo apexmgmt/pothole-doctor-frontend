@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useMemo, useState } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { useAppSelector, useAppDispatch } from '@/lib/hooks'
 import CookieService from '@/services/app/cookie.service'
 import { decryptData } from '@/utils/encryption'
@@ -16,41 +18,32 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { logoutUserSuccess } from '@/lib/features/auth/authSlice'
 import AuthService from '@/services/api/auth.service'
-
-interface FallbackUser {
-  id?: string
-  name?: string
-  email?: string
-  first_name?: string
-  last_name?: string
-  profile_picture?: string | null
-  userable?: {
-    profile_picture?: string | null
-    [k: string]: unknown
-  }
-  [k: string]: unknown
-}
+import { User } from '@/types'
+import { generateFileUrl } from '@/utils/utility'
 
 interface SidebarFooterProps {
-  user?: FallbackUser
+  user?: User | null
 }
 
 const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const reduxUser = useAppSelector(state => state.auth.user) as FallbackUser | null
+  const reduxUser = useAppSelector(state => state.auth.user) as User | null
   const [open, setOpen] = useState(false)
 
-  const cookieUser: FallbackUser | null = useMemo(() => {
-    if (reduxUser || propUser) return null
+  const cookieUser: User | null = useMemo(() => {
     const raw = CookieService.get('user')
+
     if (!raw) return null
+
     try {
       const decrypted = decryptData(raw)
+
       if (typeof decrypted === 'string') {
-        return JSON.parse(decrypted) as FallbackUser
+        return JSON.parse(decrypted) as User
       }
-      return decrypted as FallbackUser
+
+      return decrypted as User
     } catch {
       return null
     }
@@ -63,7 +56,11 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
   const fullName = effectiveUser.name || [firstName, lastName].filter(Boolean).join(' ') || 'User'
 
   const email = effectiveUser.email || '---'
-  const avatar = effectiveUser.profile_picture || effectiveUser.userable?.profile_picture || '/images/avatar.webp'
+
+  const avatar =
+    generateFileUrl(effectiveUser.profile_picture) ||
+    generateFileUrl(effectiveUser.userable?.profile_picture) ||
+    '/images/avatar.webp'
 
   const initials = fullName
     .split(' ')
@@ -85,16 +82,24 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
         CookieService.delete('refresh_token')
         CookieService.delete('token_type')
         CookieService.delete('user')
+        CookieService.delete('permissions_1')
+        CookieService.delete('permissions_2')
+        CookieService.delete('permissions_3')
+        CookieService.delete('roles')
         dispatch(logoutUserSuccess())
-        router.push('/login')
+        router.push('/erp/login')
       })
       .catch(error => {
         CookieService.delete('access_token')
         CookieService.delete('refresh_token')
         CookieService.delete('token_type')
         CookieService.delete('user')
+        CookieService.delete('permissions_1')
+        CookieService.delete('permissions_2')
+        CookieService.delete('permissions_3')
+        CookieService.delete('roles')
         dispatch(logoutUserSuccess())
-        router.push('/login')
+        router.push('/erp/login')
       })
   }
 
@@ -102,7 +107,7 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
     <div className='border-t border-border p-4 space-y-4'>
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
-          <div className='flex items-center gap-3 p-3 rounded-lg bg-bg/30 cursor-pointer hover:bg-bg/50 transition-colors'>
+          <div className='flex items-center gap-3 p-3 rounded-lg bg-accent/80 cursor-pointer hover:bg-accent/50 transition-colors'>
             <Avatar className='h-10 w-10'>
               <AvatarImage src={avatar} alt={fullName} />
               <AvatarFallback className='bg-border text-light text-xs font-medium'>{initials}</AvatarFallback>

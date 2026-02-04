@@ -1,15 +1,23 @@
 'use client'
 
-import { Country, CountryPayload } from '@/types'
+import { useEffect } from 'react'
+
 import { zodResolver } from '@hookform/resolvers/zod'
+
 import * as z from 'zod'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
+import { Country, CountryPayload } from '@/types'
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
+
 import CountryService from '@/services/api/locations/country.service'
-import { toast } from 'sonner'
-import { useEffect } from 'react'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 
 interface CreateOrEditCountryModalProps {
@@ -112,6 +120,7 @@ const CreateOrEditCountryModal = ({
       description={mode === 'create' ? 'Add a new country to the system' : 'Update country information'}
       maxWidth='sm'
       disableClose={form.formState.isSubmitting}
+      isLoading={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
           <Button

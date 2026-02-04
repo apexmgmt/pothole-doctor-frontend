@@ -1,10 +1,9 @@
 'use client'
 
 import React from 'react'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { appUrl } from '@/utils/utility'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import StaffService from '@/services/api/staff.service'
 
@@ -12,13 +11,15 @@ interface StaffDetailsProps {
   staffData: any
   setStaffData: (options: any) => void
   fetchData?: () => void
+  canEditStaff?: boolean
 }
 
-const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fetchData }) => {
+const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fetchData, canEditStaff }) => {
   const fetchStaffDetails = async () => {
     StaffService.show(staffData?.id)
       .then(response => {
         setStaffData(response.data)
+
         if (fetchData) {
           fetchData()
         }
@@ -37,6 +38,7 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
   }
 
   const fullName = `${staffData.first_name || ''} ${staffData.last_name || ''}`.trim()
+
   const initials = fullName
     .split(' ')
     .map((name: string) => name.charAt(0))
@@ -48,16 +50,18 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
       {/* Header */}
       <div className='flex items-center justify-between'>
         <h3 className='text-xl font-semibold text-light mt-2'>Staff Details</h3>
-        <div className='mt-2'>
-          <EditButton
-            title='Edit'
-            tooltip='Edit Staff Information'
-            link={`/erp/staffs/${staffData.id}/edit`}
-            variant='text'
-            buttonSize='default'
-            buttonVariant='outline'
-          />
-        </div>
+        {canEditStaff && staffData?.guard !== 'admin' && (
+          <div className='mt-2'>
+            <EditButton
+              title='Edit'
+              tooltip='Edit Staff Information'
+              link={`/erp/staffs/${staffData.id}/edit`}
+              variant='text'
+              buttonSize='default'
+              buttonVariant='outline'
+            />
+          </div>
+        )}
       </div>
 
       {/* Profile Section */}
@@ -119,20 +123,22 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
                 <p className='text-light'>N/A</p>
               )}
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Permissions</label>
-              {staffData?.permissions && staffData?.permissions.length > 0 ? (
-                <div className='flex flex-wrap gap-2 mt-1'>
-                  {staffData.permissions.map((permission: any) => (
-                    <Badge key={permission.id} className='px-2 py-1 rounded-md'>
-                      {permission.name}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className='text-light'>N/A</p>
-              )}
-            </div>
+            {staffData?.permissions.length > 0 && (
+              <div>
+                <label className='text-xs text-gray uppercase'>Permissions</label>
+                {staffData?.permissions && staffData?.permissions.length > 0 ? (
+                  <div className='flex flex-wrap gap-2 mt-1'>
+                    {staffData.permissions.map((permission: any) => (
+                      <Badge key={permission.id} className='px-2 py-1 rounded-md'>
+                        {permission.name}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className='text-light'>N/A</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

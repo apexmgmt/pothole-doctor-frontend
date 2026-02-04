@@ -1,17 +1,11 @@
-"use client";
+'use client'
 
-import React from "react";
+import React from 'react'
 
-import EntityDetails from "../../../common/EntityDetails";
+import EntityDetails from '../../../common/EntityDetails'
 
 const CustomerDetails = ({ customerData, onEdit }) => {
-  return (
-    <EntityDetails
-      entityData={customerData}
-      entityType="customer"
-      onEdit={onEdit}
-    />
-  );
-};
+  return <EntityDetails entityData={customerData} entityType='customer' onEdit={onEdit} />
+}
 
-export default CustomerDetails;
+export default CustomerDetails

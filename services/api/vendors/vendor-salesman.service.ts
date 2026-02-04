@@ -1,6 +1,6 @@
-import { getApiUrl } from '@/utils/utility'
+import { getApiUrl, isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { VENDOR_SALESMAN } from '@/constants/api'
+import { API_URL, VENDOR_SALESMAN, VENDOR_SALESMAN_TENANT } from '@/constants/api'
 import { VendorSalesmanPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -8,16 +8,21 @@ export default class VendorSalesmanService {
   /**Vendor Salesman DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
-      const response = await apiInterceptor(apiUrl + VENDOR_SALESMAN + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['vendor-salesman'] } // Cache for 60 seconds
-      })
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? VENDOR_SALESMAN_TENANT : VENDOR_SALESMAN) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['vendor-salesman'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch vendor salesman')
       }
 
@@ -30,8 +35,9 @@ export default class VendorSalesmanService {
   /**Create Vendor Salesman API */
   static store = async (payload: VendorSalesmanPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + VENDOR_SALESMAN, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? VENDOR_SALESMAN_TENANT : VENDOR_SALESMAN), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -39,6 +45,7 @@ export default class VendorSalesmanService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to add vendor salesman')
       }
 
@@ -53,15 +60,20 @@ export default class VendorSalesmanService {
   /** Show Vendor Salesman API */
   static show = async (vendorSalesmanId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + VENDOR_SALESMAN + vendorSalesmanId, {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: [`vendor-salesman/${vendorSalesmanId}`] } // Cache for 60 seconds
-      })
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? VENDOR_SALESMAN_TENANT : VENDOR_SALESMAN) + vendorSalesmanId,
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: [`vendor-salesman/${vendorSalesmanId}`] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch vendor salesman details')
       }
 
@@ -74,20 +86,26 @@ export default class VendorSalesmanService {
   /** Update Vendor Salesman API */
   static update = async (vendorSalesmanId: string, payload: VendorSalesmanPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + VENDOR_SALESMAN + vendorSalesmanId, {
-        requiresAuth: true,
-        method: 'PUT',
-        body: JSON.stringify(payload)
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? VENDOR_SALESMAN_TENANT : VENDOR_SALESMAN) + vendorSalesmanId,
+        {
+          requiresAuth: true,
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update vendor salesman')
       }
+
       await revalidate('vendor-salesman')
       await revalidate(`vendor-salesman/${vendorSalesmanId}`)
+
       return await response.json()
     } catch (error) {
       throw error
@@ -97,17 +115,25 @@ export default class VendorSalesmanService {
   /** Delete Vendor Salesman API */
   static destroy = async (vendorSalesmanId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + VENDOR_SALESMAN + vendorSalesmanId, {
-        requiresAuth: true,
-        method: 'DELETE'
-      })
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? VENDOR_SALESMAN_TENANT : VENDOR_SALESMAN) + vendorSalesmanId,
+        {
+          requiresAuth: true,
+          method: 'DELETE'
+        }
+      )
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete vendor salesman')
       }
+
       await revalidate('vendor-salesman')
       await revalidate(`vendor-salesman/${vendorSalesmanId}`)
+
       return await response.json()
     } catch (error) {
       throw error

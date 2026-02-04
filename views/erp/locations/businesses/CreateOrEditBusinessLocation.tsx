@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -18,6 +20,7 @@ import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { Location, BusinessLocation } from '@/types'
 import { Separator } from '@/components/ui/separator'
+import { generateFileUrl } from '@/utils/utility'
 
 const formSchema = z.object({
   name: z.string().min(1, 'Location name is required'),
@@ -67,7 +70,7 @@ const CreateOrEditBusinessLocation = ({
           logo: null,
           website: businessLocationDetails.website || '',
           invoice_prefix: businessLocationDetails.invoice_prefix || '',
-          sales_tax: businessLocationDetails.sales_tax?.toString() || '',
+          sales_tax: businessLocationDetails.sales_tax?.toString() || '0',
           review_link: businessLocationDetails.review_link || '',
           country_id: businessLocationDetails.city?.country_id?.toString() || '',
           state_id: businessLocationDetails.state_id?.toString() || '',
@@ -84,7 +87,7 @@ const CreateOrEditBusinessLocation = ({
           logo: null,
           website: '',
           invoice_prefix: '',
-          sales_tax: '',
+          sales_tax: '0',
           review_link: '',
           country_id: '',
           state_id: '',
@@ -102,6 +105,7 @@ const CreateOrEditBusinessLocation = ({
   const availableStates = useMemo(() => {
     if (!selectedCountryId) return []
     const selectedCountry = countriesWithStateAndCities.find(country => country.id.toString() === selectedCountryId)
+
     return selectedCountry?.states || []
   }, [selectedCountryId, countriesWithStateAndCities])
 
@@ -109,6 +113,7 @@ const CreateOrEditBusinessLocation = ({
   const availableCities = useMemo(() => {
     if (!selectedStateId) return []
     const selectedState = availableStates.find(state => state.id.toString() === selectedStateId)
+
     return selectedState?.cities || []
   }, [selectedStateId, availableStates])
 
@@ -118,7 +123,7 @@ const CreateOrEditBusinessLocation = ({
 
     // Set logo preview if exists
     if (businessLocationDetails?.logo) {
-      setLogoPreview(businessLocationDetails.logo)
+      setLogoPreview(generateFileUrl(businessLocationDetails.logo))
     }
   }, [mode, businessLocationDetails, dispatch])
 
@@ -148,64 +153,74 @@ const CreateOrEditBusinessLocation = ({
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+
     if (file) {
       form.setValue('logo', file)
 
       // Create preview
       const reader = new FileReader()
+
       reader.onloadend = () => {
         setLogoPreview(reader.result as string)
       }
+
       reader.readAsDataURL(file)
     }
   }
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true)
+
     try {
-      // Create payload object
-      const payload: any = {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        is_branding: data.is_branding ? 1 : 0,
-        invoice_prefix: data.invoice_prefix,
-        street_address: data.street_address,
-        city_id: data.city_id,
-        state_id: data.state_id,
-        zip_code: data.zip_code
-      }
+      const formData = new FormData()
+
+      formData.append('name', data.name)
+      formData.append('email', data.email)
+      formData.append('phone', data.phone)
+      formData.append('is_branding', data.is_branding ? '1' : '0')
+      formData.append('invoice_prefix', data.invoice_prefix)
+      formData.append('street_address', data.street_address)
+      formData.append('city_id', data.city_id)
+      formData.append('state_id', data.state_id)
+      formData.append('zip_code', data.zip_code)
 
       // Add optional fields only if they have values
-      if (data.fax) payload.fax = data.fax
-      if (data.website) payload.website = data.website
-      if (data.review_link) payload.review_link = data.review_link
+      if (data.fax) formData.append('fax', data.fax)
+      if (data.website) formData.append('website', data.website)
+      if (data.review_link) formData.append('review_link', data.review_link)
 
       // Add sales_tax if present
       if (data.sales_tax) {
         const salesTaxNumber = parseFloat(data.sales_tax)
+
         if (!isNaN(salesTaxNumber)) {
-          payload.sales_tax = salesTaxNumber
+          formData.append('sales_tax', salesTaxNumber.toString())
         }
       }
 
       // Add logo if it's a File
       if (data.logo && data.logo instanceof File) {
-        payload.logo = data.logo
+        formData.append('logo', data.logo)
       }
 
       if (mode === 'edit' && businessLocationId) {
-        await BusinessLocationService.update(businessLocationId, payload)
+        await BusinessLocationService.update(businessLocationId, formData)
         toast.success('Business location updated successfully')
       } else {
-        await BusinessLocationService.store(payload)
+        await BusinessLocationService.store(formData)
         toast.success('Business location created successfully')
       }
 
       router.push('/erp/locations/businesses')
     } catch (error: any) {
-      toast.error(error?.message || 'Something went wrong')
-      console.error(error)
+      if(error?.errors && typeof error.errors === 'object') {
+        Object.values(error.errors).forEach((errMsg: any) => {
+          errMsg?.map((msg: string) => toast.error(msg))
+        })
+      } else {
+        toast.error(error?.message || 'Something went wrong')
+      }
+
       setIsLoading(false)
     }
   }
@@ -222,7 +237,7 @@ const CreateOrEditBusinessLocation = ({
             {mode === 'edit' ? 'Edit Business Location' : 'Add New Location'}
           </CardTitle>
         </CardHeader>
-        <CardContent className='max-w-[1024px]'>
+        <CardContent className='max-w-5xl'>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -232,7 +247,7 @@ const CreateOrEditBusinessLocation = ({
                   name='name'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Location Name</FormLabel>
+                      <FormLabel>Location Name <span className='text-red-500'>*</span></FormLabel>
                       <FormControl>
                         <Input placeholder='Enter location name' {...field} />
                       </FormControl>
@@ -247,7 +262,7 @@ const CreateOrEditBusinessLocation = ({
                   name='phone'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone</FormLabel>
+                      <FormLabel>Phone <span className='text-red-500'>*</span></FormLabel>
                       <FormControl>
                         <Input placeholder='Enter phone number' {...field} />
                       </FormControl>
@@ -262,7 +277,7 @@ const CreateOrEditBusinessLocation = ({
                   name='email'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email <span className='text-red-500'>*</span></FormLabel>
                       <FormControl>
                         <Input type='email' placeholder='Enter email address' {...field} />
                       </FormControl>
@@ -361,7 +376,7 @@ const CreateOrEditBusinessLocation = ({
                   name='invoice_prefix'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Invoice Prefix</FormLabel>
+                      <FormLabel>Invoice Prefix <span className='text-red-500'>*</span></FormLabel>
                       <FormControl>
                         <Input placeholder='Enter invoice prefix' {...field} />
                       </FormControl>
@@ -408,7 +423,7 @@ const CreateOrEditBusinessLocation = ({
                   name='country_id'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Country</FormLabel>
+                      <FormLabel>Country <span className='text-red-500'>*</span></FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className='w-full'>
@@ -434,7 +449,7 @@ const CreateOrEditBusinessLocation = ({
                   name='state_id'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>State</FormLabel>
+                      <FormLabel>State <span className='text-red-500'>*</span></FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -470,7 +485,7 @@ const CreateOrEditBusinessLocation = ({
                   name='city_id'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>City</FormLabel>
+                      <FormLabel>City <span className='text-red-500'>*</span></FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -506,7 +521,7 @@ const CreateOrEditBusinessLocation = ({
                   name='street_address'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Street Address</FormLabel>
+                      <FormLabel>Street Address <span className='text-red-500'>*</span></FormLabel>
                       <FormControl>
                         <Input placeholder='Enter street address' {...field} />
                       </FormControl>
@@ -524,7 +539,7 @@ const CreateOrEditBusinessLocation = ({
 
                     return (
                       <FormItem>
-                        <FormLabel>ZIP Code</FormLabel>
+                        <FormLabel>ZIP Code <span className='text-red-500'>*</span></FormLabel>
                         <FormControl>
                           <div className='flex gap-2 items-center'>
                             <Input
@@ -535,6 +550,7 @@ const CreateOrEditBusinessLocation = ({
                               onChange={e => {
                                 const newValue = e.target.value
                                 const newZip = zipExt ? `${newValue}-${zipExt}` : newValue
+
                                 field.onChange(newZip)
                               }}
                             />
@@ -547,6 +563,7 @@ const CreateOrEditBusinessLocation = ({
                               onChange={e => {
                                 const newValue = e.target.value
                                 const newZip = zipMain ? `${zipMain}-${newValue}` : `-${newValue}`
+
                                 field.onChange(newZip)
                               }}
                             />

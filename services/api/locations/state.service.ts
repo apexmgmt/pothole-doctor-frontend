@@ -1,16 +1,17 @@
 import { StatePayload } from '@/types'
-import { getApiUrl } from '@/utils/utility'
+import { getApiUrl, isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { STATES } from '@/constants/api'
+import { API_URL, STATES, STATES_TENANT } from '@/constants/api'
 import { revalidate } from '../../app/cache.service'
 
 export default class StateService {
   /**States DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
-      const response = await apiInterceptor(apiUrl + STATES + (queryParams ? `?${queryParams}` : ''), {
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? STATES_TENANT : STATES) + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['states'] } // Cache for 60 seconds
@@ -18,6 +19,7 @@ export default class StateService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch states')
       }
 
@@ -30,8 +32,9 @@ export default class StateService {
   /**Create State API */
   static store = async (payload: StatePayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + STATES, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? STATES_TENANT : STATES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -39,6 +42,7 @@ export default class StateService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create state')
       }
 
@@ -53,8 +57,9 @@ export default class StateService {
 
   static show = async (stateId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + STATES + stateId, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? STATES_TENANT : STATES) + stateId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`states/${stateId}`] } // Cache for 60 seconds
@@ -62,6 +67,7 @@ export default class StateService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch state details')
       }
 
@@ -73,8 +79,9 @@ export default class StateService {
 
   static update = async (stateId: string, payload: StatePayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + STATES + stateId, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? STATES_TENANT : STATES) + stateId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -82,8 +89,10 @@ export default class StateService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update state')
       }
+
       await revalidate('states')
       await revalidate(`states/${stateId}`)
       await revalidate('locations')
@@ -96,19 +105,23 @@ export default class StateService {
 
   static destroy = async (stateId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + STATES + stateId, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? STATES_TENANT : STATES) + stateId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete state')
       }
+
       await revalidate('states')
       await revalidate(`states/${stateId}`)
       await revalidate('locations')
-      
+
       return await response.json()
     } catch (error) {
       throw error

@@ -16,6 +16,7 @@ interface ApiInterceptorOptions extends RequestInit {
  */
 const storeTokens = (data: any) => {
   if (!data) return
+
   // keep same storage strategy as login
   CookieService.store('access_token', data.access_token, { expires: data.expires_in })
   CookieService.store('refresh_token', data.refresh_token)
@@ -26,6 +27,10 @@ const clearAuthAndRedirect = async () => {
   await CookieService.delete('access_token')
   await CookieService.delete('refresh_token')
   await CookieService.delete('token_type')
+  await CookieService.delete('permissions_1')
+  await CookieService.delete('permissions_2')
+  await CookieService.delete('permissions_3')
+  await CookieService.delete('roles')
   await CookieService.delete('user')
 
   // Client-side redirect only (interceptor runs client-side)
@@ -43,6 +48,7 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
   // Read tokens
   let accessToken = await CookieService.get('access_token')
   let refreshToken = await CookieService.get('refresh_token')
+  let tenant = await CookieService.get('tenant')
 
   // If auth required and access token missing but refresh token exists => try refresh first
   if (requiresAuth && !accessToken && refreshToken && !_isRetry) {
@@ -57,6 +63,7 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
       }
     } else {
       isRefreshing = true
+
       // Import AuthService dynamically to avoid circular dependency
       const { default: AuthService } = await import('@/services/api/auth.service')
 
@@ -66,6 +73,7 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
             storeTokens(refreshed)
             isRefreshing = false
             refreshPromise = null
+
             return refreshed
           } else {
             isRefreshing = false
@@ -82,6 +90,7 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
 
       try {
         const refreshed = await refreshPromise
+
         accessToken = refreshed.access_token
         refreshToken = refreshed.refresh_token
       } catch (err) {
@@ -107,6 +116,10 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
     headers.Authorization = `Bearer ${accessToken}`
   }
 
+  if (tenant) {
+    headers['tenant'] = tenant
+  }
+
   // If sending FormData remove Content-Type to let browser set boundary
   if (fetchOptions.body instanceof FormData) {
     delete headers['Content-Type']
@@ -125,8 +138,10 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
           try {
             await refreshPromise
             const newAccessToken = await CookieService.get('access_token')
+
             if (newAccessToken) {
               const retryHeaders = { ...headers, Authorization: `Bearer ${newAccessToken}` }
+
               response = await fetch(url, { ...fetchOptions, headers: retryHeaders })
               if (response.status !== 401) return response
             }
@@ -135,6 +150,7 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
           }
         } else {
           isRefreshing = true
+
           // Import AuthService dynamically to avoid circular dependency
           const { default: AuthService } = await import('@/services/api/auth.service')
 
@@ -144,6 +160,7 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
                 storeTokens(refreshed)
                 isRefreshing = false
                 refreshPromise = null
+
                 return refreshed
               } else {
                 isRefreshing = false
@@ -160,8 +177,10 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
 
           try {
             const refreshed = await refreshPromise
+
             // Retry request with new token
             const retryHeaders = { ...headers, Authorization: `Bearer ${refreshed.access_token}` }
+
             response = await fetch(url, { ...fetchOptions, headers: retryHeaders })
             if (response.status !== 401) return response
           } catch {

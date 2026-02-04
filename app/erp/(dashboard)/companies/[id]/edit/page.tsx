@@ -6,6 +6,7 @@ const EditOrganizationPage = async ({ params }: { params: { id: string } }) => {
 
   let companyDetails = null
   const response = await OrganizationService.show(id)
+
   if (response && response.data) {
     companyDetails = response.data
   }

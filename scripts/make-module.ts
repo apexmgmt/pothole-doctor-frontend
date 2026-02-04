@@ -1,7 +1,8 @@
 #!/usr/bin/env ts-node
 
-import fs from 'fs-extra'
 import path from 'path'
+
+import fs from 'fs-extra'
 
 // Get the module name from command line arguments
 const moduleName = process.argv[2]
@@ -20,7 +21,7 @@ const paths = {
   view: `views/${kebabPlural}/${pascalPlural}.tsx`,
   constFile: `constants/api/${snakePlural}_api.ts`,
   constIndex: `constants/api/index.ts`,
-  typeFile: `types/${snakePlural}.types.ts`,
+  typeFile: `types/${snakePlural}.d.ts`,
   typeIndex: `types/index.ts`,
   service: `services/api/${snakePlural}.service.ts`
 }
@@ -39,6 +40,7 @@ const viewTemplate = `
     `.trim()
 
 const constTemplate = `export const ${constantPlural}: string = '';`.trim()
+
 const typeTemplate = `
     export interface ${pascal} {
     id: string;
@@ -100,12 +102,15 @@ function normalizeModuleName(name: string) {
   const snake = words.join('_')
   const kebab = words.join('-')
   const constant = words.join('_').toUpperCase()
+
   // Create plural versions
   const pluralize = (str: string) => {
     if (str.endsWith('y')) return str.slice(0, -1) + 'ies'
     if (str.endsWith('s') || str.endsWith('x') || str.endsWith('ch') || str.endsWith('sh')) return str + 'es'
+
     return str + 's'
   }
+
   const lastWord = words[words.length - 1]
   const pluralWords = [...words.slice(0, -1), pluralize(lastWord)]
 

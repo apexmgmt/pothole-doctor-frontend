@@ -1,8 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -12,12 +16,12 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import CreateOrEditServiceTypeModal from './CreateOrEditServiceTypeModal'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { hasPermission } from '@/utils/role-permission'
 
 const ServiceTypes: React.FC = () => {
   const router = useRouter()
@@ -31,12 +35,19 @@ const ServiceTypes: React.FC = () => {
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-
+  const [canCreateServiceType, setCanCreateServiceType] = useState<boolean>(false)
+  const [canEditServiceType, setCanEditServiceType] = useState<boolean>(false)
+  const [canDeleteServiceType, setCanDeleteServiceType] = useState<boolean>(false)
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
 
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create Service Type').then(result => setCanCreateServiceType(result))
+    hasPermission('Update Service Type').then(result => setCanEditServiceType(result))
+    hasPermission('Delete Service Type').then(result => setCanDeleteServiceType(result))
   }, [])
 
   // Debounced search update
@@ -45,14 +56,17 @@ const ServiceTypes: React.FC = () => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -63,6 +77,7 @@ const ServiceTypes: React.FC = () => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       ServiceTypeService.index(filterOptions)
         .then(response => {
@@ -113,6 +128,7 @@ const ServiceTypes: React.FC = () => {
     // Fetch service type details
     try {
       const response = await ServiceTypeService.show(id)
+
       setSelectedServiceType(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -170,22 +186,26 @@ const ServiceTypes: React.FC = () => {
       cell: row => (
         <>
           <div className='flex items-center justify-end gap-2'>
-            <ThreeDotButton
-              buttons={[
-                <EditButton
-                  tooltip='Edit Service Type Information'
-                  onClick={() => handleOpenEditModal(row.id)}
-                  variant='text'
-                />,
-                row.is_editable && (
-                  <DeleteButton
-                    tooltip='Delete Service Type'
-                    variant='text'
-                    onClick={() => handleDeleteServiceType(row.id)}
-                  />
-                )
-              ]}
-            />
+            {(canEditServiceType || (canDeleteServiceType && row.is_editable)) && (
+              <ThreeDotButton
+                buttons={[
+                  canEditServiceType && (
+                    <EditButton
+                      tooltip='Edit Service Type Information'
+                      onClick={() => handleOpenEditModal(row.id)}
+                      variant='text'
+                    />
+                  ),
+                  row.is_editable && canDeleteServiceType && (
+                    <DeleteButton
+                      tooltip='Delete Service Type'
+                      variant='text'
+                      onClick={() => handleDeleteServiceType(row.id)}
+                    />
+                  )
+                ]}
+              />
+            )}
           </div>
         </>
       ),
@@ -202,7 +222,7 @@ const ServiceTypes: React.FC = () => {
 
   const handleDeleteServiceType = async (id: string) => {
     try {
-      ServiceTypeService.destroy(id)
+      await ServiceTypeService.destroy(id)
         .then(response => {
           toast.success('Service type deleted successfully')
           fetchData()
@@ -218,6 +238,7 @@ const ServiceTypes: React.FC = () => {
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -242,15 +263,17 @@ const ServiceTypes: React.FC = () => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add Service Type
-      </Button>
+      {canCreateServiceType && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add Service Type
+        </Button>
+      )}
     </div>
   )
 

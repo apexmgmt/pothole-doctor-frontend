@@ -1,8 +1,5 @@
 const WebsitePage = () => {
-  return (
-    <></>
-  )
+  return <></>
 }
 
 export default WebsitePage
-

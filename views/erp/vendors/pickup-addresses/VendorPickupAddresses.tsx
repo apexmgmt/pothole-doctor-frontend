@@ -1,12 +1,16 @@
+import { useEffect, useState } from 'react'
+
+import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
+
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Column, CountryWithStates, DataTableApiResponse, VendorPickupAddress, VendorRebateCredit } from '@/types'
-import { PlusIcon, Search } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import VendorRebateCreditService from '@/services/api/vendors/vendor-rebate-credits.service'
 import { formatDate } from '@/utils/date'
@@ -28,6 +32,7 @@ const VendorPickupAddresses = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: vendorId })
+
   // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
@@ -39,14 +44,17 @@ const VendorPickupAddresses = ({
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -57,6 +65,7 @@ const VendorPickupAddresses = ({
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       VendorPickupAddressService.index(filterOptions)
         .then(response => {
@@ -113,6 +122,7 @@ const VendorPickupAddresses = ({
     // Fetch contact type details
     try {
       const response = await VendorPickupAddressService.show(id)
+
       setSelectedPickupAddress(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -180,7 +190,7 @@ const VendorPickupAddresses = ({
 
   const handleDeletePickupAddress = async (id: string) => {
     try {
-      VendorPickupAddressService.destroy(id)
+      await VendorPickupAddressService.destroy(id)
         .then(response => {
           toast.success('Pickup Address deleted successfully')
           fetchData()
@@ -196,6 +206,7 @@ const VendorPickupAddresses = ({
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 

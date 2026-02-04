@@ -1,4 +1,4 @@
-import type { ContactFormData } from '@/types/contact.types'
+import type { ContactFormData } from '@/types/contact'
 
 const GOOGLE_APPS_SCRIPT_URL =
   'https://script.google.com/macros/s/AKfycbzyZrL-VJRjkNLU2bYrc0IBpSMGgL-6spTvtuBthQP3a_78Ryq4dh_4XzmbQQRv_cia/exec'
@@ -56,6 +56,7 @@ export default class ContactService {
           projectDescription: formData.projectDescription,
           timeline: formData.timeline,
           hearAboutUs: formData.hearAboutUs
+
           // privacy: formData.privacy,
         })
       })
@@ -63,6 +64,7 @@ export default class ContactService {
       // Check local API response
       if (localApiResponse.ok) {
         const result: LocalApiResponse = await localApiResponse.json()
+
         return {
           success: true,
           message: result.message || 'Form submitted successfully!'
@@ -73,6 +75,7 @@ export default class ContactService {
       }
     } catch (error) {
       console.error('Error submitting form:', error)
+
       return {
         success: false,
         message: 'Failed to submit form. Please try again.'

@@ -1,18 +1,22 @@
 'use client'
 
 import React, { useState } from 'react'
+
+import { useRouter } from 'next/navigation'
+
 import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import AuthService from '@/services/api/auth.service'
 import { ProfileChangePasswordPayload } from '@/types'
-import { toast } from 'sonner'
 import { EyeOpenIcon, EyeCloseIcon } from '@/public/icons'
 import CookieService from '@/services/app/cookie.service'
 import { useAppDispatch } from '@/lib/hooks'
 import { logoutUserSuccess } from '@/lib/features/auth/authSlice'
-import { useRouter } from 'next/navigation'
 
 interface FormValues {
   current_password: string

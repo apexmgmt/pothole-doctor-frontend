@@ -1,6 +1,6 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { NOTE_TYPES, NOTE_TYPES_ALL } from '@/constants/api'
+import { API_URL, NOTE_TYPES, NOTE_TYPES_ALL, NOTE_TYPES_ALL_TENANT, NOTE_TYPES_TENANT } from '@/constants/api'
 import { NoteTypePayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -8,9 +8,10 @@ export default class NoteTypeService {
   /**Note types DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
-      const response = await apiInterceptor(apiUrl + NOTE_TYPES + (queryParams ? `?${queryParams}` : ''), {
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? NOTE_TYPES_TENANT : NOTE_TYPES) + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['note-types'] } // Cache for 60 seconds
@@ -18,6 +19,7 @@ export default class NoteTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch note types')
       }
 
@@ -30,8 +32,9 @@ export default class NoteTypeService {
   /** Create Note Types API */
   static store = async (payload: NoteTypePayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + NOTE_TYPES, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? NOTE_TYPES_TENANT : NOTE_TYPES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -39,6 +42,7 @@ export default class NoteTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to create note types')
       }
 
@@ -53,8 +57,9 @@ export default class NoteTypeService {
   /** Show Note Types API */
   static show = async (noteTypeId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + NOTE_TYPES + noteTypeId, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? NOTE_TYPES_TENANT : NOTE_TYPES) + noteTypeId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`note-types/${noteTypeId}`] } // Cache for 60 seconds
@@ -62,6 +67,7 @@ export default class NoteTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch note types details')
       }
 
@@ -74,8 +80,9 @@ export default class NoteTypeService {
   /** Update Note Types API */
   static update = async (noteTypeId: string, payload: NoteTypePayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + NOTE_TYPES + noteTypeId, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? NOTE_TYPES_TENANT : NOTE_TYPES) + noteTypeId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -83,11 +90,14 @@ export default class NoteTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update note types')
       }
+
       await revalidate('note-types')
       await revalidate(`note-types/${noteTypeId}`)
       await revalidate('note-types-all')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -97,18 +107,23 @@ export default class NoteTypeService {
   /** Delete Note Types API */
   static destroy = async (noteTypeId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + NOTE_TYPES + noteTypeId, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? NOTE_TYPES_TENANT : NOTE_TYPES) + noteTypeId, {
         requiresAuth: true,
         method: 'DELETE'
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete note types')
       }
+
       await revalidate('note-types-all')
       await revalidate(`note-types/${noteTypeId}`)
       await revalidate('note-types')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -116,18 +131,22 @@ export default class NoteTypeService {
   }
 
   /** Get All Note Types API */
-  static getAllNoteTypes = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + NOTE_TYPES_ALL, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? NOTE_TYPES_ALL_TENANT : NOTE_TYPES_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['note-types-all'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch note types list')
       }
+
       return await response.json()
     } catch (error) {
       throw error

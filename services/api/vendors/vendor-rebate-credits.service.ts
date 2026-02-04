@@ -1,6 +1,6 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { VENDOR_REBATE_CREDITS } from '@/constants/api'
+import { API_URL, VENDOR_REBATE_CREDITS, VENDOR_REBATE_CREDITS_TENANT } from '@/constants/api'
 import { VendorRebateCreditPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -8,16 +8,23 @@ export default class VendorRebateCreditService {
   /**Vendor Rebate Credit DataTable API */
   static index = async (filterOptions: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
-      const response = await apiInterceptor(apiUrl + VENDOR_REBATE_CREDITS + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['vendor-rebate-credits'] } // Cache for 60 seconds
-      })
+
+      const response = await apiInterceptor(
+        API_URL +
+          (isTenantApi ? VENDOR_REBATE_CREDITS_TENANT : VENDOR_REBATE_CREDITS) +
+          (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['vendor-rebate-credits'] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch vendor rebate credits')
       }
 
@@ -30,15 +37,20 @@ export default class VendorRebateCreditService {
   /**Create Vendor Rebate Credit API */
   static store = async (payload: VendorRebateCreditPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + VENDOR_REBATE_CREDITS, {
-        requiresAuth: true,
-        method: 'POST',
-        body: JSON.stringify(payload)
-      })
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? VENDOR_REBATE_CREDITS_TENANT : VENDOR_REBATE_CREDITS),
+        {
+          requiresAuth: true,
+          method: 'POST',
+          body: JSON.stringify(payload)
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to add rebate credit')
       }
 
@@ -53,15 +65,20 @@ export default class VendorRebateCreditService {
   /** Show Vendor Rebate Credit API */
   static show = async (vendorRebateCreditId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + VENDOR_REBATE_CREDITS + vendorRebateCreditId, {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: [`vendor-rebate-credits/${vendorRebateCreditId}`] } // Cache for 60 seconds
-      })
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? VENDOR_REBATE_CREDITS_TENANT : VENDOR_REBATE_CREDITS) + vendorRebateCreditId,
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: [`vendor-rebate-credits/${vendorRebateCreditId}`] } // Cache for 60 seconds
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch rebate credit details')
       }
 
@@ -74,20 +91,26 @@ export default class VendorRebateCreditService {
   /** Update Vendor Rebate Credit API */
   static update = async (vendorRebateCreditId: string, payload: VendorRebateCreditPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
+      const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(apiUrl + VENDOR_REBATE_CREDITS + vendorRebateCreditId, {
-        requiresAuth: true,
-        method: 'PUT',
-        body: JSON.stringify(payload)
-      })
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? VENDOR_REBATE_CREDITS_TENANT : VENDOR_REBATE_CREDITS) + vendorRebateCreditId,
+        {
+          requiresAuth: true,
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to update rebate credit')
       }
+
       await revalidate('vendor-rebate-credits')
       await revalidate(`vendor-rebate-credits/${vendorRebateCreditId}`)
+
       return await response.json()
     } catch (error) {
       throw error
@@ -97,17 +120,25 @@ export default class VendorRebateCreditService {
   /** Delete Vendor Rebate Credit API */
   static destroy = async (vendorRebateCreditId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + VENDOR_REBATE_CREDITS + vendorRebateCreditId, {
-        requiresAuth: true,
-        method: 'DELETE'
-      })
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? VENDOR_REBATE_CREDITS_TENANT : VENDOR_REBATE_CREDITS) + vendorRebateCreditId,
+        {
+          requiresAuth: true,
+          method: 'DELETE'
+        }
+      )
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to delete rebate credit')
       }
+
       await revalidate('vendor-rebate-credits')
       await revalidate(`vendor-rebate-credits/${vendorRebateCreditId}`)
+
       return await response.json()
     } catch (error) {
       throw error

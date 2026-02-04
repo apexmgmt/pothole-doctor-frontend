@@ -1,13 +1,14 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { LOCATIONS_ALL } from '@/constants/api'
+import { API_URL, LOCATIONS_ALL, LOCATIONS_ALL_TENANT } from '@/constants/api'
 
 export default class LocationService {
   /**Locations DataTable API */
   static index = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + LOCATIONS_ALL, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? LOCATIONS_ALL_TENANT : LOCATIONS_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['locations'] } // Cache for 60 seconds
@@ -15,6 +16,7 @@ export default class LocationService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch locations')
       }
 

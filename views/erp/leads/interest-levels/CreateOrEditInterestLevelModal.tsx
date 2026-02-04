@@ -1,12 +1,16 @@
 'use client'
 
-import { InterestLevel, InterestLevelPayload } from '@/types/interest_levels.types'
+import { useEffect, useState } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
+import { InterestLevel, InterestLevelPayload } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import InterestLevelService from '@/services/api/interest_levels.service'
 
@@ -53,6 +57,7 @@ const CreateOrEditInterestLevelModal = ({
     }
 
     setIsLoading(true)
+
     try {
       if (mode === 'create') {
         await InterestLevelService.store(payload)

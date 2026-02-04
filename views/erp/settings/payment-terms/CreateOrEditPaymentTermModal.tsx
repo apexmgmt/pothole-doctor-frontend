@@ -1,16 +1,23 @@
 'use client'
 
-import { PaymentTermType, PaymentTerm, PaymentTermPayload } from '@/types'
+import { useEffect, useState } from 'react'
+
 import { zodResolver } from '@hookform/resolvers/zod'
+
 import * as z from 'zod'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
+import { PaymentTermType, PaymentTerm, PaymentTermPayload } from '@/types'
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 
@@ -59,6 +66,7 @@ const CreateOrEditPaymentTermModal = ({
   const getDueTimeLabel = () => {
     if (selectedType === 'day') return 'Due Days'
     if (selectedType === 'month') return 'Day of the Month'
+
     return 'Due Time'
   }
 
@@ -74,6 +82,8 @@ const CreateOrEditPaymentTermModal = ({
   }, [paymentTermDetails, open, form])
 
   const onSubmit = async (values: FormValues) => {
+    setIsLoading(true)
+
     const payload: PaymentTermPayload = {
       name: values.name,
       type: values.type,
@@ -89,12 +99,15 @@ const CreateOrEditPaymentTermModal = ({
             form.reset()
             onOpenChange(false)
             onSuccess?.()
+            setIsLoading(false)
           })
           .catch(error => {
             toast.error(typeof error.message === 'string' ? error.message : 'Failed to create payment term')
+            setIsLoading(false)
           })
       } catch (error) {
         toast.error('Something went wrong while creating the payment term!')
+        setIsLoading(false)
       }
     } else if (mode === 'edit' && paymentTermId) {
       try {
@@ -103,12 +116,15 @@ const CreateOrEditPaymentTermModal = ({
             toast.success('Payment term updated successfully')
             onOpenChange(false)
             onSuccess?.()
+            setIsLoading(false)
           })
           .catch(error => {
             toast.error(typeof error.message === 'string' ? error.message : 'Failed to update payment term')
+            setIsLoading(false)
           })
       } catch (error) {
         toast.error('Something went wrong while updating the payment term!')
+        setIsLoading(false)
       }
     }
   }
@@ -131,14 +147,14 @@ const CreateOrEditPaymentTermModal = ({
       title={mode === 'create' ? 'Create New Payment Term' : 'Edit Payment Term'}
       description={mode === 'create' ? 'Add a new payment term to the system' : 'Update payment term information'}
       maxWidth='xl'
-      disableClose={form.formState.isSubmitting}
+      disableClose={isLoading}
       actions={
         <div className='flex gap-3'>
           <Button
             type='button'
             variant='outline'
             onClick={onCancel}
-            disabled={form.formState.isSubmitting}
+            disabled={isLoading}
             className='flex-1'
           >
             Cancel
@@ -146,7 +162,7 @@ const CreateOrEditPaymentTermModal = ({
           <Button
             type='submit'
             onClick={form.handleSubmit(onSubmit)}
-            disabled={form.formState.isSubmitting}
+            disabled={isLoading}
             className='flex-1'
           >
             {form.formState.isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}

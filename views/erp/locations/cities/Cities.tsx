@@ -1,24 +1,29 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { PlusIcon, Search } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { City, Column, DataTableApiResponse, State } from '@/types'
+import { City, Column, CountryWithStates, DataTableApiResponse, State } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { toast } from 'sonner'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import CreateOrEditCityModal from './CreateOrEditCityModal'
 import CityService from '@/services/api/locations/city.service'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { getInitialFilters } from '@/utils/utility'
+import { hasPermission } from '@/utils/role-permission'
 
-const Cities: React.FC = () => {
+const Cities: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = ({ countriesWithStateAndCities }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -32,26 +37,19 @@ const Cities: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
-  // Initialize filterOptions from URL params
-  const getInitialFilters = () => {
-    const filters: any = {}
-    searchParams.forEach((value, key) => {
-      // Convert numeric values
-      if (key === 'page' || key === 'per_page') {
-        filters[key] = parseInt(value)
-      } else {
-        filters[key] = value
-      }
-    })
+  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [canCreateCity, setCanCreateCity] = useState<boolean>(false)
+  const [canEditCity, setCanEditCity] = useState<boolean>(false)
+  const [canDeleteCity, setCanDeleteCity] = useState<boolean>(false)
 
-    return filters
-  }
-
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters())
-
-  // Set initial search value from filterOptions
+  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // Check permissions
+    hasPermission('Create City').then(result => setCanCreateCity(result))
+    hasPermission('Update City').then(result => setCanEditCity(result))
+    hasPermission('Delete City').then(result => setCanDeleteCity(result))
   }, [])
 
   // Debounced search update
@@ -60,14 +58,17 @@ const Cities: React.FC = () => {
       setFilterOptions((prev: any) => {
         // Remove search if empty, otherwise set it
         const newOptions = { ...prev }
+
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
         } else {
           delete newOptions.search
         }
+
         if (newOptions.page) {
           delete newOptions.page
         }
+
         return newOptions
       })
     }, 500)
@@ -94,6 +95,7 @@ const Cities: React.FC = () => {
   // Fetch data from API
   const fetchData = async () => {
     setIsLoading(true)
+
     try {
       CityService.index(filterOptions)
         .then(response => {
@@ -141,6 +143,7 @@ const Cities: React.FC = () => {
     // Fetch city details
     try {
       const response = await CityService.show(id)
+
       setSelectedCity(response.data)
       setIsModalOpen(true)
     } catch (error) {
@@ -191,12 +194,24 @@ const Cities: React.FC = () => {
       header: 'Action',
       cell: row => (
         <div className='flex items-center justify-center gap-2'>
-          <ThreeDotButton
-            buttons={[
-              <EditButton tooltip='Edit City Information' onClick={() => handleOpenEditModal(row.id)} variant='text' />,
-              <DeleteButton tooltip='Delete City' variant='text' onClick={() => handleDeleteCity(row.id)} />
-            ]}
-          />
+          {(canEditCity || canDeleteCity) && (
+            <ThreeDotButton
+              buttons={[
+                ...(canEditCity
+                  ? [
+                      <EditButton
+                        tooltip='Edit City Information'
+                        onClick={() => handleOpenEditModal(row.id)}
+                        variant='text'
+                      />
+                    ]
+                  : []),
+                ...(canDeleteCity
+                  ? [<DeleteButton tooltip='Delete City' variant='text' onClick={() => handleDeleteCity(row.id)} />]
+                  : [])
+              ]}
+            />
+          )}
         </div>
       ),
       sortable: false,
@@ -213,7 +228,7 @@ const Cities: React.FC = () => {
 
   const handleDeleteCity = async (id: string) => {
     try {
-      CityService.destroy(id)
+      await CityService.destroy(id)
         .then(response => {
           toast.success('City deleted successfully')
           fetchData()
@@ -229,6 +244,7 @@ const Cities: React.FC = () => {
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+
     return filterKeys.length > 0
   }
 
@@ -253,15 +269,17 @@ const Cities: React.FC = () => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        Add City
-      </Button>
+      {canCreateCity && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          Add City
+        </Button>
+      )}
     </div>
   )
 
@@ -295,6 +313,7 @@ const Cities: React.FC = () => {
         cityId={selectedCityId || undefined}
         cityDetails={selectedCity || undefined}
         onSuccess={handleSuccess}
+        countriesWithStateAndCities={countriesWithStateAndCities}
       />
     </>
   )

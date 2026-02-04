@@ -1,14 +1,17 @@
 'use client'
 
+import { useEffect, useState, useMemo } from 'react'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { WarehousePayload, WarehouseFormValues, CreateOrEditWarehouseModalProps } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { MultiSelect } from '@/components/ui/select'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useEffect, useState, useMemo } from 'react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, MultiSelect } from '@/components/ui/select'
+
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import WarehouseService from '@/services/api/warehouses.service'
 import { Separator } from '@/components/ui/separator'
@@ -68,6 +71,7 @@ const CreateOrEditWarehouseModal = ({
   const availableStates = useMemo(() => {
     if (!selectedCountryId) return []
     const country = countriesWithStateAndCities.find(c => c.id.toString() === selectedCountryId)
+
     return country?.states || []
   }, [selectedCountryId, countriesWithStateAndCities])
 
@@ -75,6 +79,7 @@ const CreateOrEditWarehouseModal = ({
   const availableCities = useMemo(() => {
     if (!selectedStateId) return []
     const state = availableStates.find(s => s.id.toString() === selectedStateId)
+
     return state?.cities || []
   }, [selectedStateId, availableStates])
 
@@ -82,6 +87,7 @@ const CreateOrEditWarehouseModal = ({
   useEffect(() => {
     if (selectedCountryId && form.getValues('state_id')) {
       const stateExists = availableStates.some(s => s.id.toString() === form.getValues('state_id'))
+
       if (!stateExists) {
         form.setValue('state_id', '')
         form.setValue('city_id', '')
@@ -93,6 +99,7 @@ const CreateOrEditWarehouseModal = ({
   useEffect(() => {
     if (selectedStateId && form.getValues('city_id')) {
       const cityExists = availableCities.some(c => c.id.toString() === form.getValues('city_id'))
+
       if (!cityExists) {
         form.setValue('city_id', '')
       }
@@ -101,12 +108,13 @@ const CreateOrEditWarehouseModal = ({
 
   const onSubmit = async (values: WarehouseFormValues) => {
     setIsLoading(true)
+
     const payload: WarehousePayload = {
       location_id: values.location_id,
-      title: values.title,
-      email: values.email,
-      phone: values.phone,
-      fax_number: values.fax_number,
+      title: values.title.trim(),
+      email: values.email.trim(),
+      phone: values.phone.trim(),
+      fax_number: values.fax_number.trim(),
       tax_rate: Number(values.tax_rate),
       street: values.street,
       state_id: values.state_id,
@@ -122,11 +130,18 @@ const CreateOrEditWarehouseModal = ({
         await WarehouseService.update(warehouseId, payload)
         toast.success('Warehouse updated successfully')
       }
+
       onOpenChange(false)
       onSuccess?.()
       form.reset()
     } catch (error: any) {
-      toast.error(error?.message || 'Operation failed')
+      if (error?.errors && typeof error.errors === 'object') {
+        Object.values(error.errors).forEach((errMsg: any) => {
+          errMsg?.map((msg: string) => toast.error(msg))
+        })
+      } else {
+        toast.error(error?.message || 'Something went wrong')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -263,9 +278,12 @@ const CreateOrEditWarehouseModal = ({
             <FormField
               control={form.control}
               name='phone'
+              rules={{
+                required: 'Phone number is required'
+              }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone</FormLabel>
+                  <FormLabel>Phone <span className='text-red-500'>*</span></FormLabel>
                   <FormControl>
                     <Input type='tel' placeholder='Enter phone' {...field} />
                   </FormControl>

@@ -3,6 +3,7 @@ export function formatDateTime(timestamp: Date | string | number | null): string
   if (!timestamp) return null
   const date = new Date(timestamp)
   const pad = (n: number) => n.toString().padStart(2, '0')
+
   return (
     date.getFullYear() +
     '-' +

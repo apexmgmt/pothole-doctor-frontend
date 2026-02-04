@@ -1,7 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+
 import { useForm } from 'react-hook-form'
+
+import { toast } from 'sonner'
+
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -9,7 +13,6 @@ import { Button } from '@/components/ui/button'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import AuthService from '@/services/api/auth.service'
 import { ProfileDetailsPayload, User } from '@/types'
-import { toast } from 'sonner'
 import { useAppDispatch } from '@/lib/hooks'
 import { setUserData } from '@/lib/features/auth/authSlice'
 

@@ -1,21 +1,26 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from './api.interceptor'
-import { COMPANIES_ALL } from '@/constants/api'
+import { API_URL, COMPANIES_ALL, COMPANIES_ALL_TENANT } from '@/constants/api'
 
 export default class CompanyService {
   /** Get all companies */
-  static getAllCompanies = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl: string = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + COMPANIES_ALL, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? COMPANIES_ALL_TENANT : COMPANIES_ALL), {
         requiresAuth: true,
-        method: 'GET',
+        method: 'GET'
+
         // next: { revalidate: 3600, tags: ['companies-all'] } // Cache for 1 hour
       })
+
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch companies')
       }
+
       return await response.json()
     } catch (error) {
       throw error

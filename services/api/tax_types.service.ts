@@ -1,12 +1,13 @@
-import { getApiUrl } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import apiInterceptor from './api.interceptor'
-import { TAX_TYPES } from '@/constants/api'
+import { API_URL, TAX_TYPES, TAX_TYPES_TENANT } from '@/constants/api'
 
 export default class TaxTypeService {
-  static getAllTaxTypes = async () => {
+  static getAll = async () => {
     try {
-      const apiUrl = await getApiUrl()
-      const response = await apiInterceptor(apiUrl + TAX_TYPES, {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(API_URL + (isTenantApi ? TAX_TYPES_TENANT : TAX_TYPES), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['tax-types'] } // Cache for 1 hour
@@ -14,6 +15,7 @@ export default class TaxTypeService {
 
       if (!response.ok) {
         const errorData = await response.json()
+
         throw new Error(errorData.message || 'Failed to fetch tax types')
       }
 

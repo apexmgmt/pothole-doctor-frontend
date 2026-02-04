@@ -6,22 +6,26 @@ import SkillService from '@/services/api/skills.service'
 import { BusinessLocation, Company, CountryWithStates, PartnerType, Skill } from '@/types'
 import Partners from '@/views/erp/partners/Partners'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PartnersPage() {
   let businessLocations: BusinessLocation[] = []
   let partnerTypes: PartnerType[] = []
   let countriesWithStatesAndCities: CountryWithStates[] = []
   let companies: Company[] = []
   let skills: Skill[] = []
-  
+
   try {
-    const response = await BusinessLocationService.getAllBusinessLocations()
+    const response = await BusinessLocationService.getAll()
+
     businessLocations = response.data || []
   } catch (error) {
     businessLocations = []
   }
 
   try {
-    const response = await PartnerTypesService.getAllPartnerTypes()
+    const response = await PartnerTypesService.getAll()
+
     partnerTypes = response.data || []
   } catch (error) {
     partnerTypes = []
@@ -29,20 +33,23 @@ export default async function PartnersPage() {
 
   try {
     const response = await LocationService.index()
+
     countriesWithStatesAndCities = response.data || []
   } catch (error) {
     countriesWithStatesAndCities = []
   }
 
   try {
-    const response = await CompanyService.getAllCompanies()
+    const response = await CompanyService.getAll()
+
     companies = response.data || []
   } catch (error) {
     companies = []
   }
 
   try {
-    const response = await SkillService.getAllSkills()
+    const response = await SkillService.getAll()
+
     skills = response.data || []
   } catch (error) {
     skills = []
