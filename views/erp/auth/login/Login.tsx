@@ -103,11 +103,12 @@ const Login: React.FC<{ isTenant: boolean }> = ({ isTenant }) => {
           name='email'
           placeholder='Enter email'
           register={register('email', {
-            required: 'Email is required',
-            pattern: {
-              value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
-              message: 'Invalid email address'
-            }
+            required: 'Email is required'
+
+            // pattern: {
+            //   value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+            //   message: 'Invalid email address'
+            // }
           })}
           error={errors.email}
         />

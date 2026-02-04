@@ -8,6 +8,7 @@ import {
   AUTH_ME_TENANT,
   AUTH_REFRESH_TOKEN,
   AUTH_REFRESH_TOKEN_TENANT,
+  IMPERSONATE,
   PROFILE_CHANGE_PASSWORD,
   PROFILE_CHANGE_PASSWORD_TENANT,
   PROFILE_LAST_ACTIVITY,
@@ -17,7 +18,7 @@ import {
   PROFILE_UPDATE,
   PROFILE_UPDATE_TENANT
 } from '@/constants/api'
-import { getApiUrl, isTenant } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import CookieService from '../app/cookie.service'
 import apiInterceptor from './api.interceptor'
 import { ProfileChangePasswordPayload, ProfileDetailsPayload } from '@/types'
@@ -48,6 +49,25 @@ export default class AuthService {
         const errorData = await response.json()
 
         throw new Error(errorData.message || 'Failed to login')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static impersonate = async (user_id: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + IMPERSONATE + user_id, {
+        requiresAuth: true,
+        method: 'POST'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to impersonate user')
       }
 
       return await response.json()

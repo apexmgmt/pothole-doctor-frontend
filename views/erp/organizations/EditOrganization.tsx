@@ -59,19 +59,21 @@ const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails })
     setIsLoading(true)
 
     try {
-      OrganizationService.update(companyDetails.id, data)
-        .then(response => {
-          setIsLoading(false)
-          toast.success('Company updated successfully')
-          router.push('/erp/companies')
-          reset()
+      const response = await OrganizationService.update(companyDetails.id, data)
+
+      setIsLoading(false)
+      toast.success('Company updated successfully')
+      router.push('/erp/companies')
+      reset()
+    } catch (error: any) {
+      if (error?.errors && typeof error.errors === 'object') {
+        Object.values(error.errors).forEach((errMsg: any) => {
+          errMsg?.map((msg: string) => toast.error(msg))
         })
-        .catch(error => {
-          toast.error('Failed to update company')
-          setIsLoading(false)
-        })
-    } catch (error) {
-      toast.error('Something went wrong!')
+      } else {
+        toast.error(error?.message || 'Something went wrong')
+      }
+
       setIsLoading(false)
     }
   }

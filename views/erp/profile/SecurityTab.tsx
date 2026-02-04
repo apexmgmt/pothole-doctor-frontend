@@ -6,6 +6,7 @@ import ChangePasswordSection from './ChangePasswordSection'
 import LoginActivitySection from './LoginActivitySection'
 
 interface SecurityTabProps {
+  
   // Add any props if needed in the future
 }
 

@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import Link from 'next/link'
 
-import { PlusIcon, Search } from 'lucide-react'
+import { FingerprintIcon, PlusIcon, Search } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -25,6 +25,10 @@ import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { hasPermission } from '@/utils/role-permission'
+import AuthService from '@/services/api/auth.service'
+import { encryptData } from '@/utils/encryption'
+import { appUrl } from '@/utils/utility'
+import { toast } from 'sonner'
 
 interface CompanyData {
   id: string
@@ -176,6 +180,33 @@ const Organizations: React.FC = () => {
       }))
     : []
 
+  const impersonateUser = async (userId: string) => {
+    try {
+      AuthService.impersonate(userId)
+        .then(response => {
+          const authData = {
+            access_token: response?.data.access_token,
+            refresh_token: response?.data.refresh_token,
+            token_type: response?.data.token_type,
+            expires_in: response?.data.expires_in,
+            user: response?.data?.user,
+            roles: response?.data?.roles || [],
+            permissions: response?.data?.permissions || []
+          }
+
+          const encryptedData = encryptData(authData)
+          const redirectUrl = `${appUrl(response.data.domain ?? '')}/erp/redirecting?data=${encodeURIComponent(encryptedData)}`
+
+          window.location.href = redirectUrl
+        })
+        .catch(error => {
+          toast.error(error?.message || 'Failed to impersonate user')
+        })
+    } catch (error) {
+      toast.error('Something went wrong during impersonation!')
+    }
+  }
+
   // Column definitions for CommonTable
   const companyColumns: Column[] = [
     {
@@ -238,15 +269,24 @@ const Organizations: React.FC = () => {
           {canEditCompany && (
             <ThreeDotButton
               buttons={[
-                ...(canEditCompany
-                  ? [
-                      <EditButton
-                        tooltip='Edit Company Information'
-                        link={`/erp/companies/${row.id}/edit`}
-                        variant='text'
-                      />
-                    ]
-                  : [])
+                canEditCompany && (
+                  <EditButton
+                    tooltip='Edit Company Information'
+                    link={`/erp/companies/${row.id}/edit`}
+                    variant='text'
+                  />
+                ),
+                canEditCompany && (
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    type='button'
+                    className={` w-full`}
+                    onClick={() => impersonateUser(row.id)}
+                  >
+                    Impersonate
+                  </Button>
+                )
               ]}
             />
           )}

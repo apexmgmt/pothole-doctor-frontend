@@ -59,10 +59,10 @@ export default function EmailTemplates({ templates: initialTemplates }: { templa
   const groupedTemplates = templates.reduce(
     (acc, template) => {
       if (!acc[template.group]) {
-        acc[template.group] = []
+        acc[template.group.trim()] = []
       }
 
-      acc[template.group].push(template)
+      acc[template.group.trim()].push(template)
 
       return acc
     },
