@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -41,6 +41,7 @@ type FormValues = z.infer<typeof formSchema>
 const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetails }: CreateOrEditRoleProps) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   // Set page title
   useEffect(() => {
@@ -56,6 +57,8 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
   })
 
   const onSubmit = async (values: FormValues) => {
+    setIsLoading(true)
+
     if (mode === 'create') {
       try {
         RoleService.store(values)
@@ -63,12 +66,15 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
             toast.success('Role created successfully')
             form.reset()
             router.push('/erp/roles')
+            setIsLoading(false)
           })
           .catch(error => {
             toast.error(typeof error.message === 'string' ? error.message : 'Failed to create role')
+            setIsLoading(false)
           })
       } catch (error) {
         toast.error('Something went wrong while creating the role!')
+        setIsLoading(false)
       }
     } else if (mode === 'edit' && roleId) {
       try {
@@ -76,12 +82,15 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
           .then(response => {
             toast.success('Role updated successfully')
             router.push('/erp/roles')
+            setIsLoading(false)
           })
           .catch(error => {
             toast.error(typeof error.message === 'string' ? error.message : 'Failed to update role')
+            setIsLoading(false)
           })
       } catch (error) {
         toast.error('Something went wrong while updating the role!')
+        setIsLoading(false)
       }
     }
   }
@@ -171,8 +180,8 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
 
           {/* Submit Buttons */}
           <div className='flex gap-3 pt-4 border-t border-border'>
-            <Button type='submit' disabled={form.formState.isSubmitting} className='flex-1 disabled:opacity-50'>
-              {form.formState.isSubmitting ? 'Saving...' : mode === 'create' ? 'Create Role' : 'Update Role'}
+            <Button type='submit' disabled={form.formState.isSubmitting || isLoading} className='flex-1 disabled:opacity-50'>
+              {isLoading ? 'Saving...' : mode === 'create' ? 'Create Role' : 'Update Role'}
             </Button>
             <Button
               type='button'
