@@ -22,3 +22,5 @@ export const PROFILE_CHANGE_PASSWORD: string = '/v1/change-password' // POST
 export const PROFILE_CHANGE_PASSWORD_TENANT: string = '/v1/tenant/change-password' // POST
 export const PROFILE_LAST_ACTIVITY: string = '/v1/last-activity' // GET
 export const PROFILE_LAST_ACTIVITY_TENANT: string = '/v1/tenant/last-activity' // GET
+
+export const IMPERSONATE: string = '/v1/auth/impersonate/' // POST + {user_id}
