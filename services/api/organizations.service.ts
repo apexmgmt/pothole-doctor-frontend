@@ -43,7 +43,7 @@ export default class OrganizationService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create company')
+        throw errorData
       }
 
       // Revalidate organizations cache tag
@@ -92,7 +92,7 @@ export default class OrganizationService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update company details')
+        throw errorData
       }
 
       // Revalidate organizations cache tag

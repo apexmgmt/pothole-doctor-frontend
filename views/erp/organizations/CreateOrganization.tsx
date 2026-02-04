@@ -57,19 +57,21 @@ const CreateOrganization: React.FC = () => {
     setIsLoading(true)
 
     try {
-      OrganizationService.store(data)
-        .then(response => {
-          setIsLoading(false)
-          toast.success('Company created successfully')
-          router.push('/erp/companies')
-          reset()
+      const response = await OrganizationService.store(data)
+
+      setIsLoading(false)
+      toast.success('Company created successfully')
+      router.push('/erp/companies')
+      reset()
+    } catch (error: any) {
+      if (error?.errors && typeof error.errors === 'object') {
+        Object.values(error.errors).forEach((errMsg: any) => {
+          errMsg?.map((msg: string) => toast.error(msg))
         })
-        .catch(error => {
-          toast.error('Failed to create company')
-          setIsLoading(false)
-        })
-    } catch (error) {
-      toast.error('Something went wrong!')
+      } else {
+        toast.error(error?.message || 'Something went wrong')
+      }
+
       setIsLoading(false)
     }
   }
