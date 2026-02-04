@@ -87,7 +87,7 @@ const ChangePasswordSection = () => {
                     Current Password <span className='text-red-500'>*</span>
                   </FormLabel>
                   <FormControl>
-                    <div className='relative'>
+                    <div className='relative flex items-center'>
                       <Input
                         type={showCurrentPassword ? 'text' : 'password'}
                         placeholder='Enter current password'
@@ -97,7 +97,7 @@ const ChangePasswordSection = () => {
                       <button
                         type='button'
                         onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                        className='absolute right-3 top-1/2 -translate-y-1/2 text-gray hover:text-light transition-colors'
+                        className='absolute right-3 focus:outline-none text-gray hover:text-light transition-colors'
                       >
                         {showCurrentPassword ? (
                           <EyeCloseIcon className='h-4 w-4' />
@@ -133,7 +133,7 @@ const ChangePasswordSection = () => {
                     New Password <span className='text-red-500'>*</span>
                   </FormLabel>
                   <FormControl>
-                    <div className='relative'>
+                    <div className='relative flex items-center'>
                       <Input
                         type={showNewPassword ? 'text' : 'password'}
                         placeholder='Enter new password'
@@ -143,7 +143,7 @@ const ChangePasswordSection = () => {
                       <button
                         type='button'
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        className='absolute right-3 top-1/2 -translate-y-1/2 text-gray hover:text-light transition-colors'
+                        className='absolute right-3 focus:outline-none text-gray hover:text-light transition-colors'
                       >
                         {showNewPassword ? <EyeCloseIcon className='h-4 w-4' /> : <EyeOpenIcon className='h-4 w-4' />}
                       </button>
@@ -168,7 +168,7 @@ const ChangePasswordSection = () => {
                     Confirm Password <span className='text-red-500'>*</span>
                   </FormLabel>
                   <FormControl>
-                    <div className='relative'>
+                    <div className='relative flex items-center'>
                       <Input
                         type={showConfirmPassword ? 'text' : 'password'}
                         placeholder='Confirm new password'
@@ -178,7 +178,7 @@ const ChangePasswordSection = () => {
                       <button
                         type='button'
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className='absolute right-3 top-1/2 -translate-y-1/2 text-gray hover:text-light transition-colors'
+                        className='absolute right-3 focus:outline-none text-gray hover:text-light transition-colors'
                       >
                         {showConfirmPassword ? (
                           <EyeCloseIcon className='h-4 w-4' />
