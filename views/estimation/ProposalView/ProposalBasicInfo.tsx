@@ -1,6 +1,7 @@
+import { Proposal } from "@/types"
 import { formatDate } from "@/utils/date"
 
-const ProposalBasicInfo = () => {
+const ProposalBasicInfo = ({proposal}: {proposal: Proposal}) => {
   return (
     <div className='flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 print:text-black'>
       {/* Company Info */}
@@ -15,8 +16,8 @@ const ProposalBasicInfo = () => {
       {/* Proposal Info */}
       <div className='flex flex-col sm:text-right text-sm'>
         <h6 className='semibold text-2xl'>PROPOSAL</h6>
-        <p>Proposal #12345</p>
-        <p>Date: {formatDate(new Date())}</p>
+        <p>Proposal #{proposal.proposal_number}</p>
+        <p>Date: {formatDate(new Date(proposal.created_at))}</p>
       </div>
     </div>
   )

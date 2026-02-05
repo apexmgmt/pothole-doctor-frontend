@@ -7,17 +7,18 @@ import ProposalScope from './ProposalScope'
 import { Separator } from '@/components/ui/separator'
 import ProposalRevisionModal from './ProposalRevisionModal'
 import { useState } from 'react'
+import { Proposal } from '@/types'
 
-const ProposalView = () => {
+const ProposalView = ({proposal}: {proposal: Proposal}) => {
   const [openRevisionModal, setOpenRevisionModal] = useState<boolean>(false)
 
   return (
     <>
       {/* Proposal Basic Info */}
-      <ProposalBasicInfo />
+      <ProposalBasicInfo proposal={proposal} />
       <Separator className='mt-4' />
       {/* Billing Information */}
-      <BillingInformation />
+      <BillingInformation proposal={proposal} />
       {/* Billing Items */}
       <BillingItems />
       <Separator className='mb-4' />
