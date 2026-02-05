@@ -1,8 +1,6 @@
 import React from 'react'
 
 import { ReactNode } from '@/types'
-import Header from '@/components/frontend/common/Header'
-import Footer from '@/components/frontend/common/Footer'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -15,7 +13,7 @@ const EstimateLayout = ({ children }: ReactNode) => {
         <Link href={'/erp'} className='border-b border-border '>
           <Image src='/images/dashboard/logo.webp' alt='logo' width={145} height={61} className='' />
         </Link>
-        <main className='text-primary-foreground print:text-black mt-4'>{children}</main>
+        <main className='text-primary-foreground print:text-black my-4'>{children}</main>
       </div>
     </div>
   )
