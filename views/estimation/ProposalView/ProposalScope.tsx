@@ -7,7 +7,7 @@ const ProposalScope = () => {
     <div className='flex flex-col gap-8 mb-10'>
       <div className='flex flex-col gap-4'>
         <h3 className='text-lg font-semibold'>Scope of work:</h3>
-        <ul className='list-disc list-outside ml-5 space-y-2 text-primary-foreground/80 text-sm'>
+        <ul className='list-disc list-outside ml-5 space-y-2 text-primary-foreground/80 print:text-black/80 text-sm'>
           <li>Grind the top layer off your concrete</li>
           <li>Degrease and prep the surface</li>
           <li>Perform normal preparation on the floor to fill cracks and imperfections</li>
@@ -18,7 +18,7 @@ const ProposalScope = () => {
 
       <div className='flex flex-col gap-4'>
         <h3 className='text-lg font-semibold'>Notes:</h3>
-        <ul className='list-disc list-outside ml-5 space-y-4 text-primary-foreground/80 text-sm'>
+        <ul className='list-disc list-outside ml-5 space-y-4 text-primary-foreground/80 print:text-black/80 text-sm'>
           <li>
             While we will fill the cracks, concrete moves over time. As a result, we cannot guarantee that future
             movement won't cause stress cracks.
@@ -28,12 +28,12 @@ const ProposalScope = () => {
         </ul>
       </div>
 
-      <div className='flex justify-between items-center mt-4'>
+      <div className='flex flex-col-reverse gap-4 sm:flex-row justify-between sm:items-center mt-4 print:hidden'>
         <Button variant='secondary' className='bg-border/50 hover:bg-border text-white px-6'>
           <Printer className='w-4 h-4 mr-2' />
           Print PDF
         </Button>
-        <div className='flex gap-4'>
+        <div className='flex flex-col sm:flex-row gap-4'>
           <Button variant='destructive'>
             <MessageSquare className='w-4 h-4 mr-2' />
             Review
