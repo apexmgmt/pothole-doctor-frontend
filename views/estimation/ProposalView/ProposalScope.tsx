@@ -29,7 +29,11 @@ const ProposalScope = () => {
       </div>
 
       <div className='flex flex-col-reverse gap-4 sm:flex-row justify-between sm:items-center mt-4 print:hidden'>
-        <Button variant='secondary' className='bg-border/50 hover:bg-border text-white px-6'>
+        <Button
+          variant='secondary'
+          className='bg-border/50 hover:bg-border text-white px-6'
+          onClick={() => window.print()}
+        >
           <Printer className='w-4 h-4 mr-2' />
           Print PDF
         </Button>

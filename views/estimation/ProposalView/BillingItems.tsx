@@ -48,7 +48,7 @@ const BillingItems = () => {
         <ScrollBar orientation='horizontal' />
       </ScrollArea>
 
-      <div className='flex justify-end border-t border-border p-6 bg-card'>
+      <div className='flex justify-end'>
         <div className='w-full sm:max-w-[300px] space-y-4 bg-border print:bg-gray-100 p-4 rounded-md'>
           <div className='flex justify-between text-sm'>
             <span className='text-light/60 print:text-black/80'>Subtotal</span>

@@ -1,3 +1,5 @@
+'use client'
+
 import BillingInformation from './BillingInformation'
 import BillingItems from './BillingItems'
 import ProposalBasicInfo from './ProposalBasicInfo'
