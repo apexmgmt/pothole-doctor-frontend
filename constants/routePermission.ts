@@ -35,12 +35,13 @@ export const PERMISSION_BASED_ROUTES: Record<string, string> = {
   '/erp/products/categories': 'Manage Category',
 
   // Leads routes
-  '/erp/leads': 'Manage Lead', //TODO: Need that permission from backend
+  '/erp/leads': 'Manage Lead',
+
   // Leads Interest Levels routes
-  '/erp/leads/interest-levels': 'Manage Interest Level', //TODO: Need that permission from backend
+  '/erp/leads/interest-levels': 'Manage Interest Level',
 
   // Customers routes
-  '/erp/customers': 'Manage Customer', //TODO: Need that permission from backend
+  '/erp/customers': 'Manage Customer',
 
   // Estimate routes
   '/erp/estimates': 'Manage Estimate',
@@ -65,13 +66,13 @@ export const PERMISSION_BASED_ROUTES: Record<string, string> = {
   '/erp/settings/estimate-types': 'Manage Estimate Type',
   '/erp/settings/commission-types': 'Manage Commission',
   '/erp/settings/commissions': 'Manage Commission',
-  '/erp/settings/note-types': 'Manage Note Type', //TODO: Need that permission from backend
+  '/erp/settings/note-types': 'Manage Note Type',
   '/erp/settings/task-types': 'Manage Task Type',
-  '/erp/settings/email-templates': 'Manage Message Template', //TODO: Need that permission from backend
-  '/erp/settings/task-reminders': 'Manage Task Reminder', //TODO: Need that permission from backend
+  '/erp/settings/email-templates': 'Manage Message Template',
+  '/erp/settings/task-reminders': 'Manage Task Reminder',
   '/erp/settings/uom-units': 'Manage Unit',
   '/erp/settings/measure-units': 'Manage Unit',
-  '/erp/settings/service-types': 'Manage Service Type' //TODO: Need that permission from backend
+  '/erp/settings/service-types': 'Manage Service Type'
 }
 
 /**
