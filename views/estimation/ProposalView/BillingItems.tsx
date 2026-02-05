@@ -21,7 +21,7 @@ const BillingItems = () => {
   const total = 2800.0
 
   return (
-    <div className='my-8 rounded-xl overflow-hidden '>
+    <div className='my-4 rounded-xl overflow-hidden '>
       <ScrollArea className='w-full whitespace-nowrap'>
         <table className='w-full border-collapse min-w-[600px]'>
           <thead className='bg-border/40 print:bg-gray-100 text-light print:text-black'>
@@ -34,11 +34,11 @@ const BillingItems = () => {
           <tbody className='divide-y divide-border print:divide-gray-200'>
             {items.map((item, index) => (
               <tr key={index} className='hover:bg-gray-900 print:bg-white transition-colors'>
-                <td className='px-4 py-8 text-sm text-light print:text-black align-top'>{item.name}</td>
-                <td className='px-4 py-8 text-sm text-light/80 print:text-black/80 align-top max-w-md whitespace-normal'>
+                <td className='px-4 py-4 text-sm text-light print:text-black align-top'>{item.name}</td>
+                <td className='px-4 py-4 text-sm text-light/80 print:text-black/80 align-top max-w-md whitespace-normal'>
                   {item.description}
                 </td>
-                <td className='px-4 py-8 text-sm text-light print:text-black text-right align-top'>
+                <td className='px-4 py-4 text-sm text-light print:text-black text-right align-top'>
                   ${item.amount.toFixed(2)}
                 </td>
               </tr>

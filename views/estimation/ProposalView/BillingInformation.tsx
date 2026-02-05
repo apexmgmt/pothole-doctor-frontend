@@ -1,6 +1,6 @@
 const BillingInformation = () => {
   return (
-    <div className='flex flex-col-reverse gap-4 sm:flex-row sm:justify-between mt-8 text-sm print:text-black'>
+    <div className='flex flex-col-reverse gap-4 sm:flex-row sm:justify-between mt-4 text-sm print:text-black'>
       {/* Bill To */}
       <div className='flex flex-col'>
         <h6 className='font-semibold text-base mb-4'>Bill To</h6>

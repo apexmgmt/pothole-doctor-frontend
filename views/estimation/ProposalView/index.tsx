@@ -16,7 +16,7 @@ const ProposalView = () => {
       <BillingInformation />
       {/* Billing Items */}
       <BillingItems />
-      <Separator className='mb-8' />
+      <Separator className='mb-4' />
       {/* Proposal Scope & Notes */}
       <ProposalScope />
     </>
