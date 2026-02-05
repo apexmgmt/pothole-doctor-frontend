@@ -301,7 +301,7 @@ const CreateOrEditEstimateModal = ({
                 <FormLabel>Event Location</FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange} disabled={!selectedClient}>
-                    <SelectTrigger className='w-full'>
+                    <SelectTrigger className='w-full h-auto text-left whitespace-normal'>
                       <SelectValue placeholder={selectedClient ? 'Select Address' : 'Select Customer first'} />
                     </SelectTrigger>
                     <SelectContent>
@@ -319,7 +319,7 @@ const CreateOrEditEstimateModal = ({
                             .join(', ')
 
                           return (
-                            <SelectItem key={address.id} value={value}>
+                            <SelectItem key={address.id} value={value} >
                               {address.title} - {value}
                             </SelectItem>
                           )
