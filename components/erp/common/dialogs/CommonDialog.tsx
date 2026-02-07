@@ -77,7 +77,7 @@ const CommonDialog = ({
       <DialogContent
         className={cn(maxWidthClasses[maxWidth], className)}
         onInteractOutside={e => {
-          if (disableClose) {
+          if (true) {
             e.preventDefault()
           }
         }}
