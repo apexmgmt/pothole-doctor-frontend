@@ -20,7 +20,7 @@ const ProposalView = ({proposal}: {proposal: Proposal}) => {
       {/* Billing Information */}
       <BillingInformation proposal={proposal} />
       {/* Billing Items */}
-      <BillingItems />
+      <BillingItems proposal={proposal} />
       <Separator className='mb-4' />
       {/* Proposal Scope & Notes */}
       <ProposalScope openRevisionModal={openRevisionModal} setOpenRevisionModal={setOpenRevisionModal} />

@@ -7,7 +7,7 @@ export interface Proposal {
   subtotal: number
   sale_tax: number
   total: number
-  message: string
+  message: string | null
   created_at: string
   updated_at: string
   discount_type: 'percentage' | 'fixed'
@@ -24,6 +24,7 @@ export interface ProposalService {
   material_tax: number
   labor_cost: number
   freight_cost: number
+  freight_charge: number
   expense_cost: number
   sale_tax: number
   total_sale: number

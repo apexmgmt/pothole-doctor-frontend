@@ -8,11 +8,17 @@ export interface Staff {
   email: string
   guard: string
   password?: string
+  userable_id?: string
+  userable_type?: string
   userable?: UserAble
   created_at: string
   updated_at: string
   permissions?: Permission[]
   roles?: Role[]
+  status?: boolean
+  email_verified_at?: string | null
+  deleted_at?: string | null
+  user_type?: string
 }
 
 export interface StaffPayload {

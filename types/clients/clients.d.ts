@@ -10,7 +10,7 @@ import { ClientAddress } from './clients_addresses'
 
 export interface Client {
   id: string
-  company_id: string
+  company_id: string | null
   interest_level_id: string
   clientable_id: string
   clientable_type: string
