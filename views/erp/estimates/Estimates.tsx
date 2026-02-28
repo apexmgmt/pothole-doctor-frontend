@@ -25,6 +25,7 @@ import { formatDate } from '@/utils/date'
 import CreateOrEditEstimateModal from './CreateOrEditEstimateModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
 import { hasPermission } from '@/utils/role-permission'
+import { Description } from '@/components/ui/description'
 
 const Estimates: React.FC<{
   serviceTypes: ServiceType[]
@@ -181,7 +182,7 @@ const Estimates: React.FC<{
     {
       id: 'location',
       header: 'Job Address',
-      cell: (row: Estimate) => <span className='font-medium'>{row.location}</span>,
+      cell: (row: Estimate) => <Description description={row.location} />,
       sortable: true
     },
     {
