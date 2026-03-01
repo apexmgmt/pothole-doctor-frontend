@@ -8,12 +8,13 @@ const BillingInformation = ({ proposal }: { proposal: Proposal }) => {
         <h6 className='font-semibold text-base mb-4'>Customer Information</h6>
         {proposal?.estimate?.client?.company?.name && <p>{proposal?.estimate?.client?.company?.name}</p>}
         <p>{proposal?.estimate?.client?.first_name + ' ' + proposal?.estimate?.client?.last_name}</p>
-        <p className=' wrap-break-word'>{proposal?.estimate?.client?.address?.street_address},
-          {proposal?.estimate?.client?.address?.city?.name +
-            ', ' +
-            proposal?.estimate?.client?.address?.state?.name +
-            ' ' +
-            proposal?.estimate?.client?.address?.zip_code}
+        <p className=' wrap-break-word'>
+          {proposal?.estimate?.client?.address?.street_address},
+          {proposal?.estimate?.client?.address?.city?.name ? proposal?.estimate?.client?.address?.city?.name : ''}
+          {proposal?.estimate?.client?.address?.state?.name
+            ? ', ' + proposal?.estimate?.client?.address?.state?.name
+            : ''}
+          {proposal?.estimate?.client?.address?.zip_code ? ' ' + proposal?.estimate?.client?.address?.zip_code : ''}
         </p>
         <p>{proposal?.estimate?.client?.email}</p>
         <p>{proposal?.estimate?.client?.phone}</p>
@@ -21,9 +22,9 @@ const BillingInformation = ({ proposal }: { proposal: Proposal }) => {
       {/* Service Site */}
       <div className='flex flex-col sm:text-right'>
         <h6 className='font-semibold text-base mb-4'>Service Site</h6>
-        <p>708-D Fairground Rd, Lucasville, OH 45648</p>
-        <p>todd@potholedoctors.com</p>
-        <p>(740) 330-5155</p>
+        <p>{proposal?.estimate?.location}</p>
+        <p>{proposal?.estimate?.client?.email}</p>
+        <p>{proposal?.estimate?.client?.phone}</p>
       </div>
     </div>
   )

@@ -6,30 +6,81 @@ import ProposalBasicInfo from './ProposalBasicInfo'
 import ProposalScope from './ProposalScope'
 import { Separator } from '@/components/ui/separator'
 import ProposalRevisionModal from './ProposalRevisionModal'
-import { useState } from 'react'
-import { Proposal } from '@/types'
+import { useState, useMemo } from 'react'
+import { Proposal, ProposalHistory } from '@/types'
+import { useRouter, useSearchParams } from 'next/navigation'
 
-const ProposalView = ({proposal}: {proposal: Proposal}) => {
+const ProposalView = ({
+  proposal,
+  proposalHistories
+}: {
+  proposal: Proposal
+  proposalHistories: ProposalHistory[]
+}) => {
   const [openRevisionModal, setOpenRevisionModal] = useState<boolean>(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Build ordered items: histories sorted oldest→newest; the last history's proposal_data
+  // IS the current proposal, so no need to append proposal separately.
+  // If no histories, fall back to [proposal] so there is always exactly one step.
+  const items = useMemo(() => {
+    if (proposalHistories.length === 0) return [proposal]
+
+    return proposalHistories.map(h => h.proposal_data)
+  }, [proposalHistories, proposal])
+
+  // Initialise from query param so refreshing restores the same step
+  const rawIndex = parseInt(searchParams.get('h') ?? '', 10)
+  const initialIndex = Math.min(Math.max(isNaN(rawIndex) ? 0 : rawIndex, 0), items.length - 1)
+
+  // State drives instant rendering; query param stays in sync for refresh/sharing
+  const [currentIndex, setCurrentIndex] = useState<number>(initialIndex)
+
+  const isFirst = currentIndex === 0
+  const isLast = currentIndex === items.length - 1
+  const displayProposal = items[currentIndex]
+
+  const navigate = (index: number) => {
+    setCurrentIndex(index)
+
+    // Keep URL in sync without triggering a navigation/re-render from the router
+    const params = new URLSearchParams(searchParams.toString())
+
+    params.set('h', String(index))
+    router.replace(`?${params.toString()}`, { scroll: false })
+  }
+
+  const handlePrev = () => navigate(currentIndex - 1)
+  const handleNext = () => navigate(currentIndex + 1)
 
   return (
     <>
       {/* Proposal Basic Info */}
-      <ProposalBasicInfo proposal={proposal} />
+      <ProposalBasicInfo proposal={displayProposal} />
       <Separator className='mt-4' />
       {/* Billing Information */}
-      <BillingInformation proposal={proposal} />
+      <BillingInformation proposal={displayProposal} />
       {/* Billing Items */}
-      <BillingItems proposal={proposal} />
+      <BillingItems proposal={displayProposal} />
       <Separator className='mb-4' />
       {/* Proposal Scope & Notes */}
-      <ProposalScope openRevisionModal={openRevisionModal} setOpenRevisionModal={setOpenRevisionModal} />
+      <ProposalScope
+        openRevisionModal={openRevisionModal}
+        setOpenRevisionModal={setOpenRevisionModal}
+        isFirst={isFirst}
+        isLast={isLast}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        currentIndex={currentIndex}
+        totalItems={items.length}
+      />
       {/* Proposal Revision Modal */}
       {openRevisionModal && (
         <ProposalRevisionModal
           isOpen={openRevisionModal}
           onOpenChange={setOpenRevisionModal}
-          proposalId='some-proposal-id' // Replace with actual proposal ID
+          proposalId={proposal.id}
           onSuccess={() => {
             // Handle success (e.g., refresh data)
           }}

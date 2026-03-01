@@ -15,6 +15,24 @@ export interface Proposal {
   services?: ProposalService[]
 }
 
+export interface ProposalHistory {
+  id: string
+  proposal_id: string
+  client_id: string
+  sent_by: string
+  email_to: string
+  subject: string
+  message: string
+  proposal_data: Proposal
+  subtotal: number
+  sale_tax: number
+  total: number 
+  sent_at: string
+  viewed_at: string
+  created_at: string
+  updated_at: string
+}
+
 export interface ProposalService {
   id: string
   proposal_id: string

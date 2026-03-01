@@ -1,13 +1,25 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Button } from '@/components/ui/button'
-import { Printer, MessageSquare, Check } from 'lucide-react'
+import { Printer, MessageSquare, Check, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const ProposalScope = ({
   openRevisionModal,
-  setOpenRevisionModal
+  setOpenRevisionModal,
+  isFirst,
+  isLast,
+  onPrev,
+  onNext,
+  currentIndex,
+  totalItems
 }: {
   openRevisionModal: boolean
   setOpenRevisionModal: React.Dispatch<React.SetStateAction<boolean>>
+  isFirst: boolean
+  isLast: boolean
+  onPrev: () => void
+  onNext: () => void
+  currentIndex: number
+  totalItems: number
 }) => {
   return (
     <>
@@ -37,25 +49,56 @@ const ProposalScope = ({
           </ul>
         </div>
 
-        <div className='flex flex-col-reverse gap-4 sm:flex-row justify-between sm:items-center mt-4 print:hidden'>
+        <div className='flex flex-col gap-4 sm:flex-row justify-between sm:items-center mt-4 print:hidden'>
+          {/* Previous button — always reserve space so layout stays stable */}
           <Button
             variant='secondary'
             className='bg-border/50 hover:bg-border text-white px-6'
-            onClick={() => window.print()}
+            onClick={onPrev}
+            disabled={isFirst}
           >
-            <Printer className='w-4 h-4 mr-2' />
-            Print PDF
+            <ChevronLeft className='w-4 h-4 mr-2' />
+            Previous
           </Button>
-          <div className='flex flex-col sm:flex-row gap-4'>
-            <Button variant='destructive' onClick={() => setOpenRevisionModal(true)}>
-              <MessageSquare className='w-4 h-4 mr-2' />
-              Review
+
+          {/* Step indicator */}
+          <span className='text-sm text-primary-foreground/60 text-center'>
+            {totalItems > 1
+              ? isLast
+                ? `Current Proposal (${currentIndex + 1} / ${totalItems})`
+                : `Revision ${currentIndex + 1} of ${totalItems}`
+              : 'Current Proposal'}
+          </span>
+
+          {isLast ? (
+
+            /* Last item (current proposal): show Print, Review, Approve */
+            <div className='flex flex-col sm:flex-row gap-4'>
+              <Button
+                variant='secondary'
+                className='bg-border/50 hover:bg-border text-white px-6'
+                onClick={() => window.print()}
+              >
+                <Printer className='w-4 h-4 mr-2' />
+                Print PDF
+              </Button>
+              <Button variant='destructive' onClick={() => setOpenRevisionModal(true)}>
+                <MessageSquare className='w-4 h-4 mr-2' />
+                Review
+              </Button>
+              <Button variant='primary'>
+                <Check className='w-4 h-4 mr-2' />
+                Approve
+              </Button>
+            </div>
+          ) : (
+
+            /* Non-last item (history revision): show only Next */
+            <Button variant='primary' onClick={onNext}>
+              Next
+              <ChevronRight className='w-4 h-4 ml-2' />
             </Button>
-            <Button variant='primary'>
-              <Check className='w-4 h-4 mr-2' />
-              Approve
-            </Button>
-          </div>
+          )}
         </div>
       </div>
     </>

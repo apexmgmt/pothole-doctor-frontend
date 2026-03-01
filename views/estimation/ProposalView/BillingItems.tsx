@@ -15,10 +15,10 @@ const BillingItems = ({ proposal }: { proposal: Proposal }) => {
               <th className='px-4 py-3 text-right text-sm font-medium'>Amount</th>
             </tr>
           </thead>
-          {(proposal?.services?.length || 0) > 0 && (
+          {proposal?.services && proposal?.services?.length > 0 && (
             <tbody className='divide-y divide-border print:divide-gray-200'>
               {proposal?.services?.map((service, index) => (
-                <>
+                <React.Fragment key={index}>
                   <tr key={index} className='bg-border/20 hover:bg-gray-900 print:bg-gray-50 transition-colors'>
                     <td className='px-4 py-2 text-sm font-semibold text-light  print:text-black align-top' colSpan={3}>
                       {service?.service_type?.name || ''}
@@ -33,11 +33,11 @@ const BillingItems = ({ proposal }: { proposal: Proposal }) => {
                           {item.description}
                         </td>
                         <td className='px-4 py-2 text-sm text-light print:text-black text-right align-top'>
-                          ${item.total_price.toFixed(2)}
+                          ${item.total_price}
                         </td>
                       </tr>
                     ))}
-                </>
+                </React.Fragment>
               ))}
             </tbody>
           )}
@@ -49,16 +49,16 @@ const BillingItems = ({ proposal }: { proposal: Proposal }) => {
         <div className='w-full sm:max-w-[300px] space-y-4 bg-border print:bg-gray-100 p-4 rounded-md'>
           <div className='flex justify-between text-sm'>
             <span className='text-light/60 print:text-black/80'>Subtotal</span>
-            <span className='text-light font-medium print:text-black'>${proposal?.subtotal.toFixed(2)}</span>
+            <span className='text-light font-medium print:text-black'>${proposal?.subtotal}</span>
           </div>
           <div className='flex justify-between text-sm'>
             <span className='text-light/60 print:text-black/80'>Tax (0%)</span>
-            <span className='text-light font-medium print:text-black'>${proposal?.sale_tax.toFixed(2)}</span>
+            <span className='text-light font-medium print:text-black'>${proposal?.sale_tax}</span>
           </div>
           <Separator className='bg-accent' />
           <div className='flex justify-between text-lg font-semibold'>
             <span className='text-light print:text-black'>Total</span>
-            <span className='text-light print:text-black'>${proposal?.total.toFixed(2)}</span>
+            <span className='text-light print:text-black'>${proposal?.total}</span>
           </div>
         </div>
       </div>

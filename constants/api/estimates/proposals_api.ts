@@ -34,5 +34,5 @@ export const SEND_PROPOSAL_EMAIL = (proposal_id: string): string => {return `/v1
  * @returns string api url
  */
 export const VIEW_PROPOSAL = (proposal_hash_id: string, client_hash_id: string, iscus?: 1|0): string => {
-    return `/v1/view-proposal/?pid=${proposal_hash_id}&qcid=${client_hash_id}${iscus ? '&iscus=1' : ''}`
+    return `/v1/tenant/view-proposal/?pid=${proposal_hash_id}&qcid=${client_hash_id}${iscus ? '&iscus=1' : ''}`
 }
