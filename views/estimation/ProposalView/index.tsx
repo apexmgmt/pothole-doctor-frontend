@@ -21,6 +21,10 @@ const ProposalView = ({
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  // Hash IDs from URL — needed for reviewProposal API
+  const proposalHashId = searchParams.get('p_id') ?? ''
+  const clientHashId = searchParams.get('qc_id') ?? ''
+
   // Build ordered items: histories sorted oldest→newest; the last history's proposal_data
   // IS the current proposal, so no need to append proposal separately.
   // If no histories, fall back to [proposal] so there is always exactly one step.
@@ -40,6 +44,11 @@ const ProposalView = ({
   const isFirst = currentIndex === 0
   const isLast = currentIndex === items.length - 1
   const displayProposal = items[currentIndex]
+
+  // Current history entry (undefined when no histories)
+  const currentHistory = proposalHistories[currentIndex] ?? null
+  const hasReview = !!currentHistory?.review
+  const existingReview = currentHistory?.review ?? null
 
   const navigate = (index: number) => {
     setCurrentIndex(index)
@@ -74,15 +83,18 @@ const ProposalView = ({
         onNext={handleNext}
         currentIndex={currentIndex}
         totalItems={items.length}
+        hasReview={hasReview}
+        existingReview={existingReview}
       />
       {/* Proposal Revision Modal */}
       {openRevisionModal && (
         <ProposalRevisionModal
           isOpen={openRevisionModal}
           onOpenChange={setOpenRevisionModal}
-          proposalId={proposal.id}
+          proposalHashId={proposalHashId}
+          clientHashId={clientHashId}
           onSuccess={() => {
-            // Handle success (e.g., refresh data)
+            router.refresh()
           }}
         />
       )}

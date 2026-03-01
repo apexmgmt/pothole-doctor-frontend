@@ -26,9 +26,10 @@ export interface ProposalHistory {
   proposal_data: Proposal
   subtotal: number
   sale_tax: number
-  total: number 
+  total: number
   sent_at: string
   viewed_at: string
+  review: string | null
   created_at: string
   updated_at: string
 }

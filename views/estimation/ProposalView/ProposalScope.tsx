@@ -10,7 +10,9 @@ const ProposalScope = ({
   onPrev,
   onNext,
   currentIndex,
-  totalItems
+  totalItems,
+  hasReview,
+  existingReview
 }: {
   openRevisionModal: boolean
   setOpenRevisionModal: React.Dispatch<React.SetStateAction<boolean>>
@@ -20,6 +22,8 @@ const ProposalScope = ({
   onNext: () => void
   currentIndex: number
   totalItems: number
+  hasReview: boolean
+  existingReview: string | null
 }) => {
   return (
     <>
@@ -49,6 +53,14 @@ const ProposalScope = ({
           </ul>
         </div>
 
+        {/* Existing review banner — shown when this history item already has a review */}
+        {hasReview && existingReview && (
+          <div className='rounded-md border border-yellow-500/40 bg-yellow-500/10 p-4 text-sm print:hidden'>
+            <p className='font-semibold text-yellow-400 mb-1'>Your Revision Request</p>
+            <p className='text-primary-foreground/80 whitespace-pre-wrap'>{existingReview}</p>
+          </div>
+        )}
+
         <div className='flex flex-col gap-4 sm:flex-row justify-between sm:items-center mt-4 print:hidden'>
           {/* Previous button — always reserve space so layout stays stable */}
           <Button
@@ -71,28 +83,39 @@ const ProposalScope = ({
           </span>
 
           {isLast ? (
-
-            /* Last item (current proposal): show Print, Review, Approve */
-            <div className='flex flex-col sm:flex-row gap-4'>
-              <Button
-                variant='secondary'
-                className='bg-border/50 hover:bg-border text-white px-6'
-                onClick={() => window.print()}
-              >
-                <Printer className='w-4 h-4 mr-2' />
-                Print PDF
-              </Button>
-              <Button variant='destructive' onClick={() => setOpenRevisionModal(true)}>
-                <MessageSquare className='w-4 h-4 mr-2' />
-                Review
-              </Button>
-              <Button variant='primary'>
-                <Check className='w-4 h-4 mr-2' />
-                Approve
-              </Button>
-            </div>
+            /* Last item (current proposal): show action buttons only when no review exists */
+            hasReview ? (
+              <div className='flex flex-col sm:flex-row gap-4'>
+                <Button
+                  variant='secondary'
+                  className='bg-border/50 hover:bg-border text-white px-6'
+                  onClick={() => window.print()}
+                >
+                  <Printer className='w-4 h-4 mr-2' />
+                  Print PDF
+                </Button>
+              </div>
+            ) : (
+              <div className='flex flex-col sm:flex-row gap-4'>
+                <Button
+                  variant='secondary'
+                  className='bg-border/50 hover:bg-border text-white px-6'
+                  onClick={() => window.print()}
+                >
+                  <Printer className='w-4 h-4 mr-2' />
+                  Print PDF
+                </Button>
+                <Button variant='destructive' onClick={() => setOpenRevisionModal(true)}>
+                  <MessageSquare className='w-4 h-4 mr-2' />
+                  Review
+                </Button>
+                <Button variant='primary'>
+                  <Check className='w-4 h-4 mr-2' />
+                  Approve
+                </Button>
+              </div>
+            )
           ) : (
-
             /* Non-last item (history revision): show only Next */
             <Button variant='primary' onClick={onNext}>
               Next
