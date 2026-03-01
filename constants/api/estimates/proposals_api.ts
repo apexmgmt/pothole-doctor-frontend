@@ -23,7 +23,7 @@ export const PROPOSALS_ALL_TENANT: string = '/v1/tenant/get-proposals/'
  * @param proposal_id 
  * @returns string api url
  */
-export const SEND_PROPOSAL_EMAIL = (proposal_id: string): string => {return `/v1/proposals/${proposal_id}/email`}
+export const SEND_PROPOSAL_EMAIL = (proposal_id: string): string => {return `/v1/tenant/proposals/${proposal_id}/email`}
 
 /**
  * View proposal api endpoint
