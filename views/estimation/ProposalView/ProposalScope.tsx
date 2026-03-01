@@ -83,6 +83,7 @@ const ProposalScope = ({
           </span>
 
           {isLast ? (
+
             /* Last item (current proposal): show action buttons only when no review exists */
             hasReview ? (
               <div className='flex flex-col sm:flex-row gap-4'>
@@ -116,6 +117,7 @@ const ProposalScope = ({
               </div>
             )
           ) : (
+
             /* Non-last item (history revision): show only Next */
             <Button variant='primary' onClick={onNext}>
               Next
