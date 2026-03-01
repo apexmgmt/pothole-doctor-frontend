@@ -7,7 +7,8 @@ import {
   PROPOSALS_TENANT,
   PROPOSALS_ALL_TENANT,
   SEND_PROPOSAL_EMAIL,
-  VIEW_PROPOSAL
+  VIEW_PROPOSAL,
+  REVIEW_PROPOSAL
 } from '@/constants/api'
 import { ProposalPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
@@ -210,6 +211,33 @@ export default class ProposalService {
         const errorData = await response.json()
 
         throw new Error(errorData.message || 'Failed to view proposal')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Review proposal API for clients to submit their review or feedback on the proposal
+   * @param proposalHashId string
+   * @param clientHashId string
+   * @param review string
+   * @returns The response from the API
+   */
+  static reviewProposal = async (proposalHashId: string, clientHashId: string, review: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + REVIEW_PROPOSAL, {
+        requiresAuth: false,
+        method: 'POST',
+        body: JSON.stringify({ pid: proposalHashId, qcid: clientHashId, review })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to review proposal')
       }
 
       return await response.json()

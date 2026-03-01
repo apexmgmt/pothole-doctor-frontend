@@ -36,3 +36,10 @@ export const SEND_PROPOSAL_EMAIL = (proposal_id: string): string => {return `/v1
 export const VIEW_PROPOSAL = (proposal_hash_id: string, client_hash_id: string, iscus?: 1|0): string => {
     return `/v1/tenant/view-proposal/?pid=${proposal_hash_id}&qcid=${client_hash_id}${iscus ? '&iscus=1' : ''}`
 }
+
+/**
+ * Review proposal api endpoint
+ * @method POST
+ * @param body - {pid, qcid, review}
+ */
+export const REVIEW_PROPOSAL: string = '/v1/tenant/review-proposal/'
