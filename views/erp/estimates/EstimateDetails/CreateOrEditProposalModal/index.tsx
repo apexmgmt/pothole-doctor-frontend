@@ -11,15 +11,15 @@ import {
   Unit,
   Vendor
 } from '@/types'
-import { SettingsIcon, UserIcon } from 'lucide-react'
+import { UserIcon } from 'lucide-react'
 import { useEffect, useState, useRef } from 'react'
 import ClientDetailsCard from './ClientDetailsCard'
 import SalesRepresentativeCard from './SalesRepresentativeCard'
 import DiscountDetailsCard from './DiscountDetailsCard'
 import ProfitDetailsCard from './ProfitDetailsCard'
 import TotalCalculationCard from './TotalCalculationCard'
-import { Select, SelectTrigger, SelectContent, SelectItem } from '@/components/ui/select'
 import ServiceTypeSection from './ServiceTypeSection'
+import AddServiceButton from './AddServiceButton'
 import { Textarea } from '@/components/ui/textarea'
 import ProposalService from '@/services/api/estimates/proposals.service'
 import { toast } from 'sonner'
@@ -336,39 +336,12 @@ const CreateOrEditProposalModal = ({
             </p>
           </div>
           {mode !== 'view' && (
-            <div className='relative'>
-              <Button variant='outline' type='button' onClick={() => setServiceSelectOpen(true)} id='add-service-btn'>
-                <span>
-                  <SettingsIcon className='h-4 w-4 inline-block mr-2' />
-                </span>
-                Add Service
-              </Button>
-              <Select
-                open={serviceSelectOpen}
-                value=''
-                onOpenChange={setServiceSelectOpen}
-                onValueChange={value => {
-                  handleAddServiceType(value)
-                }}
-              >
-                {/* 
-                The SelectTrigger is visually hidden but present for popper positioning.
-                It is absolutely positioned over the button.
-              */}
-                <SelectTrigger
-                  className='absolute top-0 left-0 w-full h-full opacity-0 pointer-events-none'
-                  aria-label='Add Service'
-                  tabIndex={-1}
-                />
-                <SelectContent position='popper' align='end'>
-                  {serviceTypes.map(st => (
-                    <SelectItem key={st.id} value={st.id}>
-                      {st.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <AddServiceButton
+              serviceTypes={serviceTypes}
+              open={serviceSelectOpen}
+              onOpenChange={setServiceSelectOpen}
+              onSelect={handleAddServiceType}
+            />
           )}
         </div>
         <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4'>
