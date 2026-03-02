@@ -13,7 +13,7 @@ export interface Proposal {
   discount_type: 'percentage' | 'fixed'
   estimate?: Estimate
   services?: ProposalService[]
-  status: string
+  status: string | 'new' | 'sent to customer' | 'viewed by customer' | 'converted to invoice' | 'reviewed by customer' | 'void proposal' | 'dead proposal' 
 }
 
 export interface ProposalHistory {

@@ -143,6 +143,29 @@ const ProposalSection = ({
     setIsModalOpen(true)
   }
 
+  // Add this function to map status to badge variant
+  const getStatusBadgeVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' | 'warning' | 'info' | 'success' | 'pending' => {
+    const statusLower = status?.toLowerCase() || ''
+
+    switch (statusLower) {
+      case 'new':
+        return 'secondary'
+      case 'sent to customer':
+        return 'warning'
+      case 'viewed by customer':
+        return 'info'
+      case 'converted to invoice':
+        return 'default'
+      case 'reviewed by customer':
+        return 'success'
+      case 'void proposal':
+      case 'dead proposal':
+        return 'destructive'
+      default:
+        return 'outline'
+    }
+  }
+
   // Add this inside ProposalSection
   const refreshProposals = () => {
     fetchData(1)
@@ -182,7 +205,7 @@ const ProposalSection = ({
                           </h3>
                           <p className='text-zinc-300 text-sm font-medium'>{proposal.estimate?.title}</p>
                         </div>
-                        <Badge className='capitalize' variant={'default'}>
+                        <Badge className='capitalize' variant={getStatusBadgeVariant(proposal.status)}>
                           {proposal.status}
                         </Badge>
                       </div>
