@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { ChevronDown, Mail, MessageSquare } from 'lucide-react'
+import { ChevronDown, FileStack, Mail, MessageSquare } from 'lucide-react'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 import { toast } from 'sonner'
 
@@ -23,7 +23,7 @@ const ProposalActionsDropdown = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant='outline' type='button' disabled={isSending}>
-            {isSending ? 'Saving...' : 'Send Proposal'}
+            Actions
             <ChevronDown className='h-4 w-4 ml-2' />
           </Button>
         </DropdownMenuTrigger>
@@ -35,6 +35,10 @@ const ProposalActionsDropdown = ({
           <DropdownMenuItem onClick={handleSmsProposal}>
             <MessageSquare className='mr-2 h-4 w-4' />
             SMS Proposal to Customer
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleSmsProposal}>
+            <FileStack className='mr-2 h-4 w-4' />
+            View Proposal Versions
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

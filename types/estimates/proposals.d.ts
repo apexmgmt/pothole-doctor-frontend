@@ -1,4 +1,4 @@
-import { Estimate, LaborCost, Product, ServiceType } from '@/types'
+import { Client, Estimate, LaborCost, Product, ServiceType, User } from '@/types'
 export interface Proposal {
   id: string
   proposal_number: number
@@ -13,7 +13,15 @@ export interface Proposal {
   discount_type: 'percentage' | 'fixed'
   estimate?: Estimate
   services?: ProposalService[]
-  status: string
+  status:
+    | string
+    | 'new'
+    | 'sent to customer'
+    | 'viewed by customer'
+    | 'converted to invoice'
+    | 'reviewed by customer'
+    | 'void proposal'
+    | 'dead proposal'
 }
 
 export interface ProposalHistory {
@@ -21,6 +29,8 @@ export interface ProposalHistory {
   proposal_id: string
   client_id: string
   sent_by: string
+  sent_by_user?: User
+  client?: Client
   email_to: string
   subject: string
   message: string
@@ -29,7 +39,7 @@ export interface ProposalHistory {
   sale_tax: number
   total: number
   sent_at: string
-  viewed_at: string
+  viewed_at: string | null
   review: string | null
   created_at: string
   updated_at: string

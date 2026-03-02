@@ -10,6 +10,7 @@ import { SpinnerCustom } from '@/components/ui/spinner'
 import { hasPermission } from '@/utils/role-permission'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
+import { RefreshCw } from 'lucide-react'
 
 type ProposalModalModeType = 'create' | 'edit' | 'view'
 
@@ -143,6 +144,31 @@ const ProposalSection = ({
     setIsModalOpen(true)
   }
 
+  // Add this function to map status to badge variant
+  const getStatusBadgeVariant = (
+    status: string
+  ): 'default' | 'secondary' | 'destructive' | 'outline' | 'warning' | 'info' | 'success' | 'pending' => {
+    const statusLower = status?.toLowerCase() || ''
+
+    switch (statusLower) {
+      case 'new':
+        return 'secondary'
+      case 'sent to customer':
+        return 'warning'
+      case 'viewed by customer':
+        return 'info'
+      case 'converted to invoice':
+        return 'default'
+      case 'reviewed by customer':
+        return 'success'
+      case 'void proposal':
+      case 'dead proposal':
+        return 'destructive'
+      default:
+        return 'outline'
+    }
+  }
+
   // Add this inside ProposalSection
   const refreshProposals = () => {
     fetchData(1)
@@ -152,7 +178,12 @@ const ProposalSection = ({
     <>
       <Card className='bg-zinc-900 border-zinc-800'>
         <CardHeader className='flex flex-row items-center justify-between pb-2'>
-          <CardTitle className='text-white text-base'>Proposals</CardTitle>
+          <CardTitle className='text-white text-base cursor-pointer' onClick={refreshProposals}>
+            Proposals{' '}
+            {/* <span>
+              <RefreshCw className='inline-block cursor-pointer h-4 w-4' onClick={refreshProposals} />
+            </span> */}
+          </CardTitle>
           {canCreateProposal && (
             <Button
               onClick={() => handleOpenProposalModal('create')}
@@ -182,7 +213,7 @@ const ProposalSection = ({
                           </h3>
                           <p className='text-zinc-300 text-sm font-medium'>{proposal.estimate?.title}</p>
                         </div>
-                        <Badge className='capitalize' variant={'default'}>
+                        <Badge className='capitalize' variant={getStatusBadgeVariant(proposal.status)}>
                           {proposal.status}
                         </Badge>
                       </div>
@@ -212,26 +243,25 @@ const ProposalSection = ({
                           <span className='text-zinc-400 text-xs'>Total</span>
                           <p className='text-white font-bold text-lg'>${proposal.total}</p>
                         </div>
-                        {proposal.status !== 'converted to invoice' && (
-                          <div className='flex justify-between gap-2'>
-                            {canViewProposal && (
-                              <ViewButton
-                                title='View'
-                                onClick={() => handleOpenProposalModal('view', proposal)}
-                                variant='icon'
-                                tooltip='View Proposal'
-                              />
-                            )}
-                            {canEditProposal && (
-                              <EditButton
-                                title='Edit'
-                                onClick={() => handleOpenProposalModal('edit', proposal)}
-                                variant='icon'
-                                tooltip='Edit Proposal'
-                              />
-                            )}
-                          </div>
-                        )}
+
+                        <div className='flex justify-between gap-2'>
+                          {canViewProposal && (
+                            <ViewButton
+                              title='View'
+                              onClick={() => handleOpenProposalModal('view', proposal)}
+                              variant='icon'
+                              tooltip='View Proposal'
+                            />
+                          )}
+                          {canEditProposal && proposal.status !== 'converted to invoice' && (
+                            <EditButton
+                              title='Edit'
+                              onClick={() => handleOpenProposalModal('edit', proposal)}
+                              variant='icon'
+                              tooltip='Edit Proposal'
+                            />
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}

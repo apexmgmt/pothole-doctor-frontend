@@ -37,9 +37,15 @@ const ProposalView = ({
     return proposalHistories.map(h => h.proposal_data)
   }, [proposalHistories, proposal])
 
-  // Initialise from query param so refreshing restores the same step
-  const rawIndex = parseInt(searchParams.get('h') ?? '', 10)
-  const initialIndex = Math.min(Math.max(isNaN(rawIndex) ? 0 : rawIndex, 0), items.length - 1)
+  // Initialise from query param (stored as history UUID) so refreshing restores the same step
+  const hParam = searchParams.get('h') ?? ''
+
+  const initialIndex = (() => {
+    if (!hParam || proposalHistories.length === 0) return 0
+    const idx = proposalHistories.findIndex(h => h.id === hParam)
+
+    return idx >= 0 ? idx : 0
+  })()
 
   // State drives instant rendering; query param stays in sync for refresh/sharing
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex)
@@ -71,10 +77,16 @@ const ProposalView = ({
   const navigate = (index: number) => {
     setCurrentIndex(index)
 
-    // Keep URL in sync without triggering a navigation/re-render from the router
+    // Keep URL in sync using history UUID instead of index (more stable across refreshes)
     const params = new URLSearchParams(searchParams.toString())
+    const historyId = proposalHistories[index]?.id
 
-    params.set('h', String(index))
+    if (historyId) {
+      params.set('h', historyId)
+    } else {
+      params.delete('h')
+    }
+
     router.replace(`?${params.toString()}`, { scroll: false })
   }
 

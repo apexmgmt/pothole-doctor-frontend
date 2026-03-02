@@ -9,7 +9,8 @@ import {
   SEND_PROPOSAL_EMAIL,
   VIEW_PROPOSAL,
   REVIEW_PROPOSAL,
-  APPROVE_PROPOSAL
+  APPROVE_PROPOSAL,
+  PROPOSAL_HISTORY
 } from '@/constants/api'
 import { ProposalPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
@@ -247,7 +248,7 @@ export default class ProposalService {
     }
   }
 
-  static approveProposal = async (proposalHashId: string, clientHashId: string)  => {
+  static approveProposal = async (proposalHashId: string, clientHashId: string) => {
     try {
       const response = await apiInterceptor(API_URL + APPROVE_PROPOSAL, {
         requiresAuth: false,
@@ -259,6 +260,37 @@ export default class ProposalService {
         const errorData = await response.json()
 
         throw new Error(errorData.message || 'Failed to approve proposal')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Fetch proposal history API to retrieve the history of a proposal including all revisions, emails sent, and reviews
+   * @param proposalId - The ID of the proposal
+   * @param filterOptions - Optional filters for the history (e.g., pagination, date range)
+   * @returns The response from the API containing an array of proposal history entries
+   * Each entry includes details such as who sent it, when it was sent, when it was viewed, and any reviews provided by the client.
+   */
+  static histories = async (proposalId: string, filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(
+        API_URL + PROPOSAL_HISTORY(proposalId) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to fetch proposal history')
       }
 
       return await response.json()
