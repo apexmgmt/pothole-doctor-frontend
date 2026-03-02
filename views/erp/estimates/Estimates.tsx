@@ -26,6 +26,7 @@ import CreateOrEditEstimateModal from './CreateOrEditEstimateModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
 import { hasPermission } from '@/utils/role-permission'
 import { Description } from '@/components/ui/description'
+import Link from 'next/link'
 
 const Estimates: React.FC<{
   serviceTypes: ServiceType[]
@@ -148,7 +149,11 @@ const Estimates: React.FC<{
     {
       id: 'estimate_number',
       header: 'Estimate#',
-      cell: row => <span className='font-medium'>{row.estimate_number?.toString().padStart(6, '0')}</span>,
+      cell: row => (
+        <Link href={`/erp/estimates/${row.id}`}>
+          <span className='font-medium hover:underline'>{row.estimate_number?.toString().padStart(6, '0')}</span>
+        </Link>
+      ),
       sortable: false
     },
     {
