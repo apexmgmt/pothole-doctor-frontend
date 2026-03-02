@@ -5,7 +5,7 @@ import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import CommonTable from '@/components/erp/common/table'
 import { Column, ProposalHistory } from '@/types'
 import ProposalService from '@/services/api/estimates/proposals.service'
-import { formatDate } from '@/utils/date'
+import { formatDate, formatDateTime } from '@/utils/date'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
@@ -54,6 +54,12 @@ const ProposalHistoryModal = ({
 
   const columns: Column[] = [
     {
+      id: 'sent_at',
+      header: 'Sent At',
+      cell: (row: ProposalHistory) => <div className='flex items-center'>{formatDate(row.sent_at)}</div>,
+      sortable: true
+    },
+    {
       id: 'sent_by',
       header: 'Sent By',
       cell: (row: ProposalHistory) => (
@@ -69,16 +75,17 @@ const ProposalHistoryModal = ({
       ),
       sortable: false
     },
-    {
-      id: 'subject',
-      header: 'Subject',
-      cell: (row: ProposalHistory) => (
-        <span className='max-w-[200px] truncate block' title={row.subject}>
-          {row.subject || '—'}
-        </span>
-      ),
-      sortable: false
-    },
+
+    // {
+    //   id: 'subject',
+    //   header: 'Subject',
+    //   cell: (row: ProposalHistory) => (
+    //     <span className='max-w-[200px] truncate block' title={row.subject}>
+    //       {row.subject || '—'}
+    //     </span>
+    //   ),
+    //   sortable: false
+    // },
     {
       id: 'total',
       header: 'Total',
