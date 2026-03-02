@@ -61,5 +61,5 @@ export const APPROVE_PROPOSAL: string = '/v1/tenant/approve-proposal/'
  * @returns string api url
  */
 export const PROPOSAL_HISTORY = (proposal_id: string): string => {
-  return `/v1/proposals/${proposal_id}/history/`
+  return `/v1/tenant/proposals/${proposal_id}/history/`
 }

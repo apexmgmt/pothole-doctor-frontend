@@ -4,15 +4,19 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ChevronDown, FileStack, Mail, MessageSquare } from 'lucide-react'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 import { toast } from 'sonner'
+import ProposalHistoryModal from './ProposalHistoryModal'
 
 const ProposalActionsDropdown = ({
   onConfirmedEmailSend,
-  isSending
+  isSending,
+  proposalId
 }: {
   onConfirmedEmailSend: () => Promise<void>
   isSending: boolean
+  proposalId?: string | null
 }) => {
   const [confirmEmailOpen, setConfirmEmailOpen] = useState(false)
+  const [historyModalOpen, setHistoryModalOpen] = useState(false)
 
   const handleSmsProposal = () => {
     toast.info('SMS feature coming soon')
@@ -36,7 +40,7 @@ const ProposalActionsDropdown = ({
             <MessageSquare className='mr-2 h-4 w-4' />
             SMS Proposal to Customer
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleSmsProposal}>
+          <DropdownMenuItem onClick={() => setHistoryModalOpen(true)} disabled={!proposalId}>
             <FileStack className='mr-2 h-4 w-4' />
             View Proposal Versions
           </DropdownMenuItem>
@@ -55,6 +59,10 @@ const ProposalActionsDropdown = ({
           setConfirmEmailOpen(false)
         }}
       />
+
+      {proposalId && (
+        <ProposalHistoryModal open={historyModalOpen} onOpenChange={setHistoryModalOpen} proposalId={proposalId} />
+      )}
     </>
   )
 }

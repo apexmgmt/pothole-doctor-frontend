@@ -27,6 +27,8 @@ export interface Proposal {
 export interface ProposalHistory {
   id: string
   proposal_id: string
+  p_id: string
+  qc_id: string
   client_id: string
   sent_by: string
   sent_by_user?: User
