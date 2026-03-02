@@ -1,3 +1,5 @@
+'use client'
+
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,6 +13,7 @@ import { hasPermission } from '@/utils/role-permission'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
 import { RefreshCw } from 'lucide-react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 type ProposalModalModeType = 'create' | 'edit' | 'view'
 
@@ -31,6 +34,11 @@ const ProposalSection = ({
   uomUnits: Unit[]
   vendors: Vendor[]
 }) => {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const hasAutoOpenedRef = useRef(false)
+
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [filterOptions, setFilterOptions] = useState<any>({
@@ -67,6 +75,15 @@ const ProposalSection = ({
     setIsModalOpen(false)
     setSelectedProposalId(null)
     setSelectedProposal(null)
+
+    // Remove modal params from URL
+    const params = new URLSearchParams(searchParams.toString())
+
+    params.delete('p_mode')
+    params.delete('p_id')
+    const qs = params.toString()
+
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
   }
 
   // Fetch data from API
@@ -129,7 +146,7 @@ const ProposalSection = ({
     return () => observer.disconnect()
   }, [isLoading, hasMore, currentPage, fetchData])
 
-  // open proposal modal
+  // open proposal modal and sync state to URL
   const handleOpenProposalModal = (mode: ProposalModalModeType, proposal?: Proposal) => {
     setProposalModalMode(mode)
 
@@ -141,8 +158,53 @@ const ProposalSection = ({
       setSelectedProposal(null)
     }
 
+    // Persist modal state in URL so refresh restores it
+    const params = new URLSearchParams(searchParams.toString())
+
+    params.set('p_mode', mode)
+
+    if (proposal) {
+      params.set('p_id', proposal.id)
+    } else {
+      params.delete('p_id')
+    }
+
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
     setIsModalOpen(true)
   }
+
+  // Auto-open modal from URL params after proposals are first loaded
+  useEffect(() => {
+    if (isLoading || hasAutoOpenedRef.current) return
+
+    const modalMode = searchParams.get('p_mode') as ProposalModalModeType | null
+    const modalProposalId = searchParams.get('p_id')
+
+    if (!modalMode) return
+
+    hasAutoOpenedRef.current = true
+
+    if (modalMode === 'create') {
+      handleOpenProposalModal('create')
+
+      return
+    }
+
+    if (modalProposalId) {
+      const found = proposals.find(p => p.id === modalProposalId)
+
+      if (found) {
+        handleOpenProposalModal(modalMode, found)
+      } else {
+        // Not in current page — fetch individually
+        ProposalService.show(modalProposalId)
+          .then(res => {
+            if (res.data) handleOpenProposalModal(modalMode, res.data)
+          })
+          .catch(() => {})
+      }
+    }
+  }, [isLoading, proposals])
 
   // Add this function to map status to badge variant
   const getStatusBadgeVariant = (
