@@ -191,20 +191,21 @@ const Estimates: React.FC<{
       cell: (row: Estimate) => <span className='font-medium'>{row?.service_type?.name || ''}</span>,
       sortable: true
     },
-    {
-      id: 'status',
-      header: 'Status',
-      cell: row => (
-        <Badge
-          key={row.id}
-          variant={row.status === 'Completed' ? 'default' : row.status === 'In Progress' ? 'secondary' : 'destructive'}
-          className='mr-1 mb-1'
-        >
-          {row.status}
-        </Badge>
-      ),
-      sortable: true
-    },
+
+    // {
+    //   id: 'status',
+    //   header: 'Status',
+    //   cell: row => (
+    //     <Badge
+    //       key={row.id}
+    //       variant={row.status === 'Completed' ? 'default' : row.status === 'In Progress' ? 'secondary' : 'destructive'}
+    //       className='mr-1 mb-1'
+    //     >
+    //       {row.status}
+    //     </Badge>
+    //   ),
+    //   sortable: true
+    // },
     {
       id: 'actions',
       header: 'Action',
