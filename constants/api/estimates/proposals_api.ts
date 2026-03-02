@@ -52,3 +52,14 @@ export const REVIEW_PROPOSAL: string = '/v1/tenant/review-proposal/'
  * @param body - {pid, qcid}
  */
 export const APPROVE_PROPOSAL: string = '/v1/tenant/approve-proposal/'
+
+/**
+ * Get proposal history api endpoint (tenant)
+ * @method GET
+ * @param proposal_id - The ID of the proposal
+ * @description As it is a GET requests, others payload can only be passed as query params
+ * @returns string api url
+ */
+export const PROPOSAL_HISTORY = (proposal_id: string): string => {
+  return `/v1/proposals/${proposal_id}/history/`
+}
