@@ -3,6 +3,7 @@ import React from 'react'
 import { ReactNode } from '@/types'
 import Link from 'next/link'
 import Image from 'next/image'
+import '../erp/erp.styles.css'
 
 // Generate meta data
 

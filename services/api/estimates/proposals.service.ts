@@ -8,7 +8,8 @@ import {
   PROPOSALS_ALL_TENANT,
   SEND_PROPOSAL_EMAIL,
   VIEW_PROPOSAL,
-  REVIEW_PROPOSAL
+  REVIEW_PROPOSAL,
+  APPROVE_PROPOSAL
 } from '@/constants/api'
 import { ProposalPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
@@ -238,6 +239,26 @@ export default class ProposalService {
         const errorData = await response.json()
 
         throw new Error(errorData.message || 'Failed to review proposal')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static approveProposal = async (proposalHashId: string, clientHashId: string)  => {
+    try {
+      const response = await apiInterceptor(API_URL + APPROVE_PROPOSAL, {
+        requiresAuth: false,
+        method: 'POST',
+        body: JSON.stringify({ pid: proposalHashId, qcid: clientHashId })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to approve proposal')
       }
 
       return await response.json()

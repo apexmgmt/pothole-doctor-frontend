@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Printer, MessageSquare, Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 
 const ProposalScope = ({
   openRevisionModal,
@@ -12,7 +13,10 @@ const ProposalScope = ({
   currentIndex,
   totalItems,
   hasReview,
-  existingReview
+  existingReview,
+  isConverted,
+  onApprove,
+  isApproving
 }: {
   openRevisionModal: boolean
   setOpenRevisionModal: React.Dispatch<React.SetStateAction<boolean>>
@@ -24,7 +28,12 @@ const ProposalScope = ({
   totalItems: number
   hasReview: boolean
   existingReview: string | null
+  isConverted: boolean
+  onApprove: () => Promise<void>
+  isApproving: boolean
 }) => {
+  const [confirmApproveOpen, setConfirmApproveOpen] = useState(false)
+
   return (
     <>
       <div className='flex flex-col gap-4 mb-10'>
@@ -85,7 +94,7 @@ const ProposalScope = ({
           {isLast ? (
 
             /* Last item (current proposal): show action buttons only when no review exists */
-            hasReview ? (
+            hasReview || isConverted ? (
               <div className='flex flex-col sm:flex-row gap-4'>
                 <Button
                   variant='secondary'
@@ -110,14 +119,14 @@ const ProposalScope = ({
                   <MessageSquare className='w-4 h-4 mr-2' />
                   Review
                 </Button>
-                <Button variant='primary'>
+                <Button variant='primary' onClick={() => setConfirmApproveOpen(true)} disabled={isApproving}>
                   <Check className='w-4 h-4 mr-2' />
                   Approve
                 </Button>
               </div>
             )
           ) : (
-
+            
             /* Non-last item (history revision): show only Next */
             <Button variant='primary' onClick={onNext}>
               Next
@@ -126,6 +135,19 @@ const ProposalScope = ({
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmApproveOpen}
+        onOpenChange={setConfirmApproveOpen}
+        title='Approve Proposal'
+        message='Are you sure you want to approve this proposal? This will convert the proposal to an invoice and cannot be undone.'
+        confirmButtonTitle='Approve'
+        loading={isApproving}
+        onConfirm={async () => {
+          await onApprove()
+          setConfirmApproveOpen(false)
+        }}
+      />
     </>
   )
 }

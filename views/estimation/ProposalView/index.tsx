@@ -9,6 +9,8 @@ import ProposalRevisionModal from './ProposalRevisionModal'
 import { useState, useMemo } from 'react'
 import { Proposal, ProposalHistory } from '@/types'
 import { useRouter, useSearchParams } from 'next/navigation'
+import ProposalService from '@/services/api/estimates/proposals.service'
+import { toast } from 'sonner'
 
 const ProposalView = ({
   proposal,
@@ -18,6 +20,7 @@ const ProposalView = ({
   proposalHistories: ProposalHistory[]
 }) => {
   const [openRevisionModal, setOpenRevisionModal] = useState<boolean>(false)
+  const [isApproving, setIsApproving] = useState<boolean>(false)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -49,6 +52,21 @@ const ProposalView = ({
   const currentHistory = proposalHistories[currentIndex] ?? null
   const hasReview = !!currentHistory?.review
   const existingReview = currentHistory?.review ?? null
+  const isConverted = proposal?.status === 'converted to invoice'
+
+  const handleApprove = async () => {
+    setIsApproving(true)
+
+    try {
+      await ProposalService.approveProposal(proposalHashId, clientHashId)
+      toast.success('Proposal approved successfully')
+      router.refresh()
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to approve proposal')
+    } finally {
+      setIsApproving(false)
+    }
+  }
 
   const navigate = (index: number) => {
     setCurrentIndex(index)
@@ -85,6 +103,9 @@ const ProposalView = ({
         totalItems={items.length}
         hasReview={hasReview}
         existingReview={existingReview}
+        isConverted={isConverted}
+        onApprove={handleApprove}
+        isApproving={isApproving}
       />
       {/* Proposal Revision Modal */}
       {openRevisionModal && (
