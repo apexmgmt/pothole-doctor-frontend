@@ -13,6 +13,7 @@ export interface Proposal {
   discount_type: 'percentage' | 'fixed'
   estimate?: Estimate
   services?: ProposalService[]
+  status: string
 }
 
 export interface ProposalHistory {

@@ -182,7 +182,9 @@ const ProposalSection = ({
                           </h3>
                           <p className='text-zinc-300 text-sm font-medium'>{proposal.estimate?.title}</p>
                         </div>
-                        <Badge variant={'default'}>{proposal.estimate?.status}</Badge>
+                        <Badge className='capitalize' variant={'default'}>
+                          {proposal.status}
+                        </Badge>
                       </div>
 
                       <div className='space-y-2 mb-3 border-t border-zinc-700 pt-3'>
@@ -210,24 +212,26 @@ const ProposalSection = ({
                           <span className='text-zinc-400 text-xs'>Total</span>
                           <p className='text-white font-bold text-lg'>${proposal.total}</p>
                         </div>
-                        <div className='flex justify-between gap-2'>
-                          {canViewProposal && (
-                            <ViewButton
-                              title='View'
-                              onClick={() => handleOpenProposalModal('view', proposal)}
-                              variant='icon'
-                              tooltip='View Proposal'
-                            />
-                          )}
-                          {canEditProposal && (
-                            <EditButton
-                              title='Edit'
-                              onClick={() => handleOpenProposalModal('edit', proposal)}
-                              variant='icon'
-                              tooltip='Edit Proposal'
-                            />
-                          )}
-                        </div>
+                        {proposal.status !== 'converted to invoice' && (
+                          <div className='flex justify-between gap-2'>
+                            {canViewProposal && (
+                              <ViewButton
+                                title='View'
+                                onClick={() => handleOpenProposalModal('view', proposal)}
+                                variant='icon'
+                                tooltip='View Proposal'
+                              />
+                            )}
+                            {canEditProposal && (
+                              <EditButton
+                                title='Edit'
+                                onClick={() => handleOpenProposalModal('edit', proposal)}
+                                variant='icon'
+                                tooltip='Edit Proposal'
+                              />
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
