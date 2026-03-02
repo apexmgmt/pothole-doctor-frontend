@@ -70,6 +70,16 @@ const ProposalScope = ({
           </div>
         )}
 
+        {/* Converted to invoice status banner */}
+        {isConverted && (
+          <div className='rounded-md border border-green-500/40 bg-green-500/10 p-4 text-sm print:hidden'>
+            <p className='font-semibold text-green-400'>✓ Converted to Invoice</p>
+            <p className='text-primary-foreground/60 mt-1'>
+              This proposal has been approved and converted to an invoice.
+            </p>
+          </div>
+        )}
+
         <div className='flex flex-col gap-4 sm:flex-row justify-between sm:items-center mt-4 print:hidden'>
           {/* Previous button — always reserve space so layout stays stable */}
           <Button
@@ -91,9 +101,8 @@ const ProposalScope = ({
               : 'Current Proposal'}
           </span>
 
+          {/* Last item (current proposal): show action buttons only when no review exists  */}
           {isLast ? (
-
-            /* Last item (current proposal): show action buttons only when no review exists */
             hasReview || isConverted ? (
               <div className='flex flex-col sm:flex-row gap-4'>
                 <Button
@@ -126,12 +135,13 @@ const ProposalScope = ({
               </div>
             )
           ) : (
-            
-            /* Non-last item (history revision): show only Next */
-            <Button variant='primary' onClick={onNext}>
-              Next
-              <ChevronRight className='w-4 h-4 ml-2' />
-            </Button>
+            <>
+              {/* Non-last item (history revision): show only Next  */}
+              <Button variant='primary' onClick={onNext}>
+                Next
+                <ChevronRight className='w-4 h-4 ml-2' />
+              </Button>
+            </>
           )}
         </div>
       </div>
