@@ -10,7 +10,8 @@ import {
   VIEW_PROPOSAL,
   REVIEW_PROPOSAL,
   APPROVE_PROPOSAL,
-  PROPOSAL_HISTORY
+  PROPOSAL_HISTORY,
+  MARK_PROPOSAL_AS_VOID_OR_DEAD
 } from '@/constants/api'
 import { ProposalPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
@@ -292,6 +293,31 @@ export default class ProposalService {
 
         throw new Error(errorData.message || 'Failed to fetch proposal history')
       }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Mark proposal as void or dead API to allow tenants to mark a proposal as void (canceled) or dead (lost) with a reason for better tracking and analytics
+   * @param proposalId - The ID of the proposal to be marked as void or dead
+   * @param status - The status to mark the proposal as, either 'void' or 'dead'
+   * @param reason - The reason for marking the proposal as void or dead, which can help the business understand why proposals are not successful and improve their sales process 
+   * @returns json response
+   */
+  static markAsVoidOrDead = async (proposalId: string, status: 'void' | 'dead', reason: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + MARK_PROPOSAL_AS_VOID_OR_DEAD(proposalId), {
+        requiresAuth: true,
+        method: 'POST',
+        body: JSON.stringify({ status, reason })
+      })
+
+      if (!response.ok) {
+        throw await response.json()
+      } 
 
       return await response.json()
     } catch (error) {

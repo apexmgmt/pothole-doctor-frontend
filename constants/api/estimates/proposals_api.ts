@@ -63,3 +63,13 @@ export const APPROVE_PROPOSAL: string = '/v1/tenant/approve-proposal/'
 export const PROPOSAL_HISTORY = (proposal_id: string): string => {
   return `/v1/tenant/proposals/${proposal_id}/history/`
 }
+
+/**
+ * Mark proposal as void or dead api endpoint (tenant)
+ * @method POST
+ * @param proposal_id string
+ * @returns string /v1/tenant/proposals/:proposal_id/mark-dead-or-void
+ */
+export const MARK_PROPOSAL_AS_VOID_OR_DEAD = (proposal_id: string): string => {
+  return `/v1/tenant/proposals/${proposal_id}/mark-dead-or-void/`
+}
