@@ -73,3 +73,13 @@ export const PROPOSAL_HISTORY = (proposal_id: string): string => {
 export const MARK_PROPOSAL_AS_VOID_OR_DEAD = (proposal_id: string): string => {
   return `/v1/tenant/proposals/${proposal_id}/mark-dead-or-void/`
 }
+
+/**
+ * Reopen a void or dead proposal api endpoint (tenant)
+ * @method POST
+ * @param proposal_id string
+ * @returns string /v1/tenant/proposals/:proposal_id/reopen
+ */
+export const REOPEN_PROPOSAL = (proposal_id: string): string => {
+  return `/v1/tenant/proposals/${proposal_id}/reopen/`
+}

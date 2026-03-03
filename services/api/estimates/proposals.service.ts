@@ -11,7 +11,8 @@ import {
   REVIEW_PROPOSAL,
   APPROVE_PROPOSAL,
   PROPOSAL_HISTORY,
-  MARK_PROPOSAL_AS_VOID_OR_DEAD
+  MARK_PROPOSAL_AS_VOID_OR_DEAD,
+  REOPEN_PROPOSAL
 } from '@/constants/api'
 import { ProposalPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
@@ -318,6 +319,28 @@ export default class ProposalService {
       if (!response.ok) {
         throw await response.json()
       } 
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Reopen a void or dead proposal
+   * @param proposalId - The ID of the proposal to reopen
+   * @returns json response
+   */
+  static reopen = async (proposalId: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + REOPEN_PROPOSAL(proposalId), {
+        requiresAuth: true,
+        method: 'POST'
+      })
+
+      if (!response.ok) {
+        throw await response.json()
+      }
 
       return await response.json()
     } catch (error) {
