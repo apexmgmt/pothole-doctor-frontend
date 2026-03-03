@@ -22,6 +22,8 @@ export interface Proposal {
     | 'reviewed by customer'
     | 'void proposal'
     | 'dead proposal'
+    | 'reopened'
+  reason?: string | null
 }
 
 export interface ProposalHistory {

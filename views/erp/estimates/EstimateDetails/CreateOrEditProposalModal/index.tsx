@@ -62,7 +62,12 @@ const CreateOrEditProposalModal = ({
   const [customMessage, setCustomMessage] = useState('')
   const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>('percentage')
   const [discountValue, setDiscountValue] = useState(0)
+  const [currentProposalStatus, setCurrentProposalStatus] = useState<string | null | undefined>(proposalDetails?.status)
+  const [currentProposalReason, setCurrentProposalReason] = useState<string | null | undefined>((proposalDetails as any)?.reason)
   const customMessageRef = useRef<HTMLTextAreaElement>(null)
+
+  const isVoidOrDead = currentProposalStatus === 'void proposal' || currentProposalStatus === 'dead proposal'
+  const effectiveMode = isVoidOrDead ? ('view' as const) : mode
 
   // Each service type section has an array of line items
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
@@ -313,6 +318,8 @@ const CreateOrEditProposalModal = ({
       setCustomMessage(proposalDetails.message || '')
       setDiscountType(proposalDetails.discount_type)
       setDiscountValue(proposalDetails.discount)
+      setCurrentProposalStatus(proposalDetails.status)
+      setCurrentProposalReason((proposalDetails as any)?.reason ?? null)
     }
   }, [mode, proposalDetails])
 
@@ -337,7 +344,7 @@ const CreateOrEditProposalModal = ({
           <Button type='button' variant='outline' onClick={onCancel} disabled={isLoading} className='flex-1'>
             Cancel
           </Button>
-          {mode !== 'view' && (
+          {effectiveMode !== 'view' && (
             <Button type='submit' onClick={() => onSubmit()} disabled={isLoading} className='flex-1'>
               {isLoading ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
             </Button>
@@ -359,7 +366,7 @@ const CreateOrEditProposalModal = ({
             </p>
           </div>
           <div className='flex items-center gap-2'>
-            {mode !== 'view' && (
+            {effectiveMode !== 'view' && (
               <AddServiceButton
                 serviceTypes={serviceTypes}
                 open={serviceSelectOpen}
@@ -367,7 +374,15 @@ const CreateOrEditProposalModal = ({
                 onSelect={handleAddServiceType}
               />
             )}
-            <ProposalActionsDropdown onConfirmedEmailSend={handleEmailWithSave} isSending={isLoading} proposalId={proposalId} />
+            <ProposalActionsDropdown
+              onConfirmedEmailSend={handleEmailWithSave}
+              isSending={isLoading}
+              proposalId={proposalId}
+              proposalStatus={currentProposalStatus}
+              onStatusChange={setCurrentProposalStatus}
+              onReasonChange={setCurrentProposalReason}
+              onSuccess={onSuccess}
+            />
           </div>
         </div>
         <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4'>
@@ -377,7 +392,7 @@ const CreateOrEditProposalModal = ({
           <SalesRepresentativeCard estimateDetails={estimateDetails} />
           {/* Discount details */}
           <DiscountDetailsCard
-            mode={mode}
+            mode={effectiveMode}
             estimateDetails={estimateDetails}
             discountType={discountType}
             discountValue={discountValue}
@@ -433,7 +448,7 @@ const CreateOrEditProposalModal = ({
           {selectedServiceType.map((item, idx) => (
             <ServiceTypeSection
               key={idx}
-              mode={mode}
+              mode={effectiveMode}
               serviceTypeName={item.name}
               serviceTypeId={item.id}
               onRemove={() => handleRemoveServiceType(idx)}
@@ -467,10 +482,23 @@ const CreateOrEditProposalModal = ({
               placeholder='Enter a custom message for the proposal...'
               ref={customMessageRef}
               defaultValue={proposalDetails?.message || ''}
-              disabled={mode === 'view'}
+              disabled={effectiveMode === 'view'}
             />
           </CardContent>
         </Card>
+        {/* Reason if status is void proposal or dead proposal */}
+        {(currentProposalStatus === 'void proposal' || currentProposalStatus === 'dead proposal') && currentProposalReason && (
+          <Card className='border-red-800 mt-4'>
+            <CardContent className='p-4'>
+              <label htmlFor='reason' className='block text-sm font-medium text-zinc-200 mb-2'>
+                Reason
+              </label>
+              <p id='reason' className='w-full p-3 bg-zinc-800 rounded text-sm text-zinc-200'>
+                {currentProposalReason || 'No reason provided'}
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </>
     </CommonDialog>
   )

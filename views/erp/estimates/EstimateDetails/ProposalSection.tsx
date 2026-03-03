@@ -315,7 +315,7 @@ const ProposalSection = ({
                               tooltip='View Proposal'
                             />
                           )}
-                          {canEditProposal && proposal.status !== 'converted to invoice' && (
+                          {canEditProposal && proposal.status !== 'converted to invoice' && proposal.status !== 'void proposal' && proposal.status !== 'dead proposal' && (
                             <EditButton
                               title='Edit'
                               onClick={() => handleOpenProposalModal('edit', proposal)}
