@@ -1,6 +1,19 @@
 import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { PROPOSALS_ALL, PROPOSALS, API_URL, PROPOSALS_TENANT, PROPOSALS_ALL_TENANT } from '@/constants/api'
+import {
+  PROPOSALS_ALL,
+  PROPOSALS,
+  API_URL,
+  PROPOSALS_TENANT,
+  PROPOSALS_ALL_TENANT,
+  SEND_PROPOSAL_EMAIL,
+  VIEW_PROPOSAL,
+  REVIEW_PROPOSAL,
+  APPROVE_PROPOSAL,
+  PROPOSAL_HISTORY,
+  MARK_PROPOSAL_AS_VOID_OR_DEAD,
+  REOPEN_PROPOSAL
+} from '@/constants/api'
 import { ProposalPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -149,6 +162,184 @@ export default class ProposalService {
         const errorData = await response.json()
 
         throw new Error(errorData.message || 'Failed to fetch proposals')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Send proposal email API
+   * @param proposalId - The ID of the proposal
+   * @param subject - Optional custom subject for the email
+   * @param message - Optional custom message for the email
+   * @returns The response from the API
+   */
+  static sendEmail = async (proposalId: string, subject?: string, message?: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + SEND_PROPOSAL_EMAIL(proposalId), {
+        requiresAuth: true,
+        method: 'POST',
+        body: JSON.stringify({ subject, message })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to send proposal email')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * View proposal API for clients
+   * @param proposalHashId - The hash ID of the proposal
+   * @param clientHashId - The hash ID of the client
+   * @param iscus - Optional flag to indicate if the proposal is for a specific client (1 or 0)
+   * @returns The response from the API containing proposal details
+   */
+  static viewProposal = async (proposalHashId: string, clientHashId: string, iscus?: 1 | 0) => {
+    try {
+      const response = await apiInterceptor(API_URL + VIEW_PROPOSAL(proposalHashId, clientHashId, iscus), {
+        requiresAuth: false,
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to view proposal')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Review proposal API for clients to submit their review or feedback on the proposal
+   * @param proposalHashId string
+   * @param clientHashId string
+   * @param review string
+   * @returns The response from the API
+   */
+  static reviewProposal = async (proposalHashId: string, clientHashId: string, review: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + REVIEW_PROPOSAL, {
+        requiresAuth: false,
+        method: 'POST',
+        body: JSON.stringify({ pid: proposalHashId, qcid: clientHashId, review })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to review proposal')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static approveProposal = async (proposalHashId: string, clientHashId: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + APPROVE_PROPOSAL, {
+        requiresAuth: false,
+        method: 'POST',
+        body: JSON.stringify({ pid: proposalHashId, qcid: clientHashId })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to approve proposal')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Fetch proposal history API to retrieve the history of a proposal including all revisions, emails sent, and reviews
+   * @param proposalId - The ID of the proposal
+   * @param filterOptions - Optional filters for the history (e.g., pagination, date range)
+   * @returns The response from the API containing an array of proposal history entries
+   * Each entry includes details such as who sent it, when it was sent, when it was viewed, and any reviews provided by the client.
+   */
+  static histories = async (proposalId: string, filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(
+        API_URL + PROPOSAL_HISTORY(proposalId) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to fetch proposal history')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Mark proposal as void or dead API to allow tenants to mark a proposal as void (canceled) or dead (lost) with a reason for better tracking and analytics
+   * @param proposalId - The ID of the proposal to be marked as void or dead
+   * @param status - The status to mark the proposal as, either 'void' or 'dead'
+   * @param reason - The reason for marking the proposal as void or dead, which can help the business understand why proposals are not successful and improve their sales process 
+   * @returns json response
+   */
+  static markAsVoidOrDead = async (proposalId: string, status: 'void' | 'dead', reason: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + MARK_PROPOSAL_AS_VOID_OR_DEAD(proposalId), {
+        requiresAuth: true,
+        method: 'POST',
+        body: JSON.stringify({ status, reason })
+      })
+
+      if (!response.ok) {
+        throw await response.json()
+      } 
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Reopen a void or dead proposal
+   * @param proposalId - The ID of the proposal to reopen
+   * @returns json response
+   */
+  static reopen = async (proposalId: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + REOPEN_PROPOSAL(proposalId), {
+        requiresAuth: true,
+        method: 'POST'
+      })
+
+      if (!response.ok) {
+        throw await response.json()
       }
 
       return await response.json()

@@ -11,15 +11,16 @@ import {
   Unit,
   Vendor
 } from '@/types'
-import { SettingsIcon, UserIcon } from 'lucide-react'
+import { UserIcon } from 'lucide-react'
 import { useEffect, useState, useRef } from 'react'
 import ClientDetailsCard from './ClientDetailsCard'
 import SalesRepresentativeCard from './SalesRepresentativeCard'
 import DiscountDetailsCard from './DiscountDetailsCard'
 import ProfitDetailsCard from './ProfitDetailsCard'
 import TotalCalculationCard from './TotalCalculationCard'
-import { Select, SelectTrigger, SelectContent, SelectItem } from '@/components/ui/select'
 import ServiceTypeSection from './ServiceTypeSection'
+import AddServiceButton from './AddServiceButton'
+import ProposalActionsDropdown from './ProposalActionsDropdown'
 import { Textarea } from '@/components/ui/textarea'
 import ProposalService from '@/services/api/estimates/proposals.service'
 import { toast } from 'sonner'
@@ -61,7 +62,12 @@ const CreateOrEditProposalModal = ({
   const [customMessage, setCustomMessage] = useState('')
   const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>('percentage')
   const [discountValue, setDiscountValue] = useState(0)
+  const [currentProposalStatus, setCurrentProposalStatus] = useState<string | null | undefined>(proposalDetails?.status)
+  const [currentProposalReason, setCurrentProposalReason] = useState<string | null | undefined>((proposalDetails as any)?.reason)
   const customMessageRef = useRef<HTMLTextAreaElement>(null)
+
+  const isVoidOrDead = currentProposalStatus === 'void proposal' || currentProposalStatus === 'dead proposal'
+  const effectiveMode = isVoidOrDead ? ('view' as const) : mode
 
   // Each service type section has an array of line items
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
@@ -169,82 +175,104 @@ const CreateOrEditProposalModal = ({
   const onSubmit = async () => {
     setIsLoading(true)
 
-    const payload: ProposalPayload = {
-      estimate_id: estimateId || '',
-      message: customMessageRef.current?.value || '',
-      discount_type: discountType,
-      discount: discountValue,
-      services: serviceTypeLineItems.map((st, index) => {
-        return {
-          service_type_id: selectedServiceType[index].id,
-          items: st.lines.map(line => ({
-            product_id: line.product_id, // Send only ID
-            labor_cost_id: line.labor_cost_id, // Send only ID
-            name: line.name,
-            description: line.description,
-            type: line.type,
-            unit_cost: line.unit_cost,
-            qty: line.qty,
-            unit_name: line.unit_name,
-            total_cost: line.total_cost,
-            margin: line.margin,
-            unit_price: line.unit_price,
-            discount: line.discount,
-            discount_type: line.discount_type,
-            freight_charge: line.freight_charge,
-            is_sale: line.is_sale,
-            tax_type: line.tax_type,
-            tax: line.tax,
-            tax_amount: line.tax_amount,
-            total_price: line.total_price,
-            note: line.note
-          }))
-        }
-      })
+    const payload: ProposalPayload = buildPayload()
+
+    try {
+      await submitProposal(payload)
+      toast.success(mode === 'create' ? 'Proposal created successfully' : 'Proposal updated successfully')
+      resetForm()
+      onOpenChange()
+      onSuccess?.()
+    } catch (error: any) {
+      toast.error(error?.message || `Failed to ${mode === 'create' ? 'create' : 'update'} proposal.`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const buildPayload = (): ProposalPayload => ({
+    estimate_id: estimateId || '',
+    message: customMessageRef.current?.value || '',
+    discount_type: discountType,
+    discount: discountValue,
+    services: serviceTypeLineItems.map((st, index) => ({
+      service_type_id: selectedServiceType[index].id,
+      items: st.lines.map(line => ({
+        product_id: line.product_id,
+        labor_cost_id: line.labor_cost_id,
+        name: line.name,
+        description: line.description,
+        type: line.type,
+        unit_cost: line.unit_cost,
+        qty: line.qty,
+        unit_name: line.unit_name,
+        total_cost: line.total_cost,
+        margin: line.margin,
+        unit_price: line.unit_price,
+        discount: line.discount,
+        discount_type: line.discount_type,
+        freight_charge: line.freight_charge,
+        is_sale: line.is_sale,
+        tax_type: line.tax_type,
+        tax: line.tax,
+        tax_amount: line.tax_amount,
+        total_price: line.total_price,
+        note: line.note
+      }))
+    }))
+  })
+
+  const resetForm = () => {
+    setSelectedServiceType([])
+    setServiceTypeLineItems([])
+    setCustomMessage('')
+    setDiscountType('percentage')
+    setDiscountValue(0)
+    setServiceSelectValue(undefined)
+    setServiceSelectOpen(false)
+  }
+
+  // Submits the proposal and returns the API response. Does NOT touch loading state.
+  const submitProposal = async (payload: ProposalPayload) => {
+    if (mode === 'create') {
+      return ProposalService.store(payload)
     }
 
-    if (mode === 'create') {
-      ProposalService.store(payload)
-        .then(response => {
-          toast.success('Proposal created successfully')
-          onOpenChange()
-          setIsLoading(false)
+    if (mode === 'edit' && proposalId) {
+      return ProposalService.update(proposalId, payload)
+    }
 
-          // Reset the data
-          setSelectedServiceType([])
-          setServiceTypeLineItems([])
-          setCustomMessage('')
-          setDiscountType('percentage')
-          setDiscountValue(0)
-          setServiceSelectValue(undefined)
-          setServiceSelectOpen(false)
-          onSuccess?.()
-        })
-        .catch(error => {
-          toast.error(error.message || 'Failed to create proposal.')
-          setIsLoading(false)
-        })
-    } else if (mode === 'edit' && proposalId) {
-      ProposalService.update(proposalId || '', payload)
-        .then(response => {
-          toast.success('Proposal updated successfully')
-          onOpenChange()
-          setIsLoading(false)
+    throw new Error('Invalid mode or missing proposal ID')
+  }
 
-          // Reset the data
-          setSelectedServiceType([])
-          setServiceTypeLineItems([])
-          setCustomMessage('')
-          setDiscountType('percentage')
-          setDiscountValue(0)
-          setServiceSelectValue(undefined)
-          setServiceSelectOpen(false)
-          onSuccess?.()
-        })
-        .catch(error => {
-          toast.error(error.message || 'Failed to update proposal.')
-          setIsLoading(false)
-        })
+  // Save the proposal first, then send the email.
+  const handleEmailWithSave = async () => {
+    setIsLoading(true)
+
+    try {
+      let savedId = proposalId
+
+      if (mode === 'create' || mode === 'edit') {
+        const response = await submitProposal(buildPayload())
+
+        savedId = response?.data?.id || proposalId
+        toast.success(mode === 'create' ? 'Proposal created successfully' : 'Proposal updated successfully')
+      }
+
+      if (!savedId) throw new Error('Proposal ID not found')
+
+      await ProposalService.sendEmail(savedId)
+      toast.success('Proposal emailed to customer successfully')
+
+      if (mode !== 'view') {
+        resetForm()
+        onOpenChange()
+        onSuccess?.()
+      }
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to save and send proposal.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -290,6 +318,8 @@ const CreateOrEditProposalModal = ({
       setCustomMessage(proposalDetails.message || '')
       setDiscountType(proposalDetails.discount_type)
       setDiscountValue(proposalDetails.discount)
+      setCurrentProposalStatus(proposalDetails.status)
+      setCurrentProposalReason((proposalDetails as any)?.reason ?? null)
     }
   }, [mode, proposalDetails])
 
@@ -314,7 +344,7 @@ const CreateOrEditProposalModal = ({
           <Button type='button' variant='outline' onClick={onCancel} disabled={isLoading} className='flex-1'>
             Cancel
           </Button>
-          {mode !== 'view' && (
+          {effectiveMode !== 'view' && (
             <Button type='submit' onClick={() => onSubmit()} disabled={isLoading} className='flex-1'>
               {isLoading ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
             </Button>
@@ -335,41 +365,25 @@ const CreateOrEditProposalModal = ({
               {estimateDetails?.client?.first_name + ' ' + estimateDetails?.client?.last_name}
             </p>
           </div>
-          {mode !== 'view' && (
-            <div className='relative'>
-              <Button variant='outline' type='button' onClick={() => setServiceSelectOpen(true)} id='add-service-btn'>
-                <span>
-                  <SettingsIcon className='h-4 w-4 inline-block mr-2' />
-                </span>
-                Add Service
-              </Button>
-              <Select
+          <div className='flex items-center gap-2'>
+            {effectiveMode !== 'view' && (
+              <AddServiceButton
+                serviceTypes={serviceTypes}
                 open={serviceSelectOpen}
-                value=''
                 onOpenChange={setServiceSelectOpen}
-                onValueChange={value => {
-                  handleAddServiceType(value)
-                }}
-              >
-                {/* 
-                The SelectTrigger is visually hidden but present for popper positioning.
-                It is absolutely positioned over the button.
-              */}
-                <SelectTrigger
-                  className='absolute top-0 left-0 w-full h-full opacity-0 pointer-events-none'
-                  aria-label='Add Service'
-                  tabIndex={-1}
-                />
-                <SelectContent position='popper' align='end'>
-                  {serviceTypes.map(st => (
-                    <SelectItem key={st.id} value={st.id}>
-                      {st.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+                onSelect={handleAddServiceType}
+              />
+            )}
+            <ProposalActionsDropdown
+              onConfirmedEmailSend={handleEmailWithSave}
+              isSending={isLoading}
+              proposalId={proposalId}
+              proposalStatus={currentProposalStatus}
+              onStatusChange={setCurrentProposalStatus}
+              onReasonChange={setCurrentProposalReason}
+              onSuccess={onSuccess}
+            />
+          </div>
         </div>
         <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4'>
           {/* Client details */}
@@ -378,7 +392,7 @@ const CreateOrEditProposalModal = ({
           <SalesRepresentativeCard estimateDetails={estimateDetails} />
           {/* Discount details */}
           <DiscountDetailsCard
-            mode={mode}
+            mode={effectiveMode}
             estimateDetails={estimateDetails}
             discountType={discountType}
             discountValue={discountValue}
@@ -434,7 +448,7 @@ const CreateOrEditProposalModal = ({
           {selectedServiceType.map((item, idx) => (
             <ServiceTypeSection
               key={idx}
-              mode={mode}
+              mode={effectiveMode}
               serviceTypeName={item.name}
               serviceTypeId={item.id}
               onRemove={() => handleRemoveServiceType(idx)}
@@ -468,10 +482,23 @@ const CreateOrEditProposalModal = ({
               placeholder='Enter a custom message for the proposal...'
               ref={customMessageRef}
               defaultValue={proposalDetails?.message || ''}
-              disabled={mode === 'view'}
+              disabled={effectiveMode === 'view'}
             />
           </CardContent>
         </Card>
+        {/* Reason if status is void proposal or dead proposal */}
+        {(currentProposalStatus === 'void proposal' || currentProposalStatus === 'dead proposal') && currentProposalReason && (
+          <Card className='border-red-800 mt-4'>
+            <CardContent className='p-4'>
+              <label htmlFor='reason' className='block text-sm font-medium text-zinc-200 mb-2'>
+                Reason
+              </label>
+              <p id='reason' className='w-full p-3 bg-zinc-800 rounded text-sm text-zinc-200'>
+                {currentProposalReason || 'No reason provided'}
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </>
     </CommonDialog>
   )

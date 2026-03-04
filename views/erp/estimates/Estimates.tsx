@@ -25,6 +25,8 @@ import { formatDate } from '@/utils/date'
 import CreateOrEditEstimateModal from './CreateOrEditEstimateModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
 import { hasPermission } from '@/utils/role-permission'
+import { Description } from '@/components/ui/description'
+import Link from 'next/link'
 
 const Estimates: React.FC<{
   serviceTypes: ServiceType[]
@@ -147,7 +149,11 @@ const Estimates: React.FC<{
     {
       id: 'estimate_number',
       header: 'Estimate#',
-      cell: row => <span className='font-medium'>{row.estimate_number?.toString().padStart(6, '0')}</span>,
+      cell: row => (
+        <Link href={`/erp/estimates/${row.id}`}>
+          <span className='font-medium hover:underline'>{row.estimate_number?.toString().padStart(6, '0')}</span>
+        </Link>
+      ),
       sortable: false
     },
     {
@@ -181,7 +187,7 @@ const Estimates: React.FC<{
     {
       id: 'location',
       header: 'Job Address',
-      cell: (row: Estimate) => <span className='font-medium'>{row.location}</span>,
+      cell: (row: Estimate) => <Description description={row.location} />,
       sortable: true
     },
     {
@@ -190,20 +196,21 @@ const Estimates: React.FC<{
       cell: (row: Estimate) => <span className='font-medium'>{row?.service_type?.name || ''}</span>,
       sortable: true
     },
-    {
-      id: 'status',
-      header: 'Status',
-      cell: row => (
-        <Badge
-          key={row.id}
-          variant={row.status === 'Completed' ? 'default' : row.status === 'In Progress' ? 'secondary' : 'destructive'}
-          className='mr-1 mb-1'
-        >
-          {row.status}
-        </Badge>
-      ),
-      sortable: true
-    },
+
+    // {
+    //   id: 'status',
+    //   header: 'Status',
+    //   cell: row => (
+    //     <Badge
+    //       key={row.id}
+    //       variant={row.status === 'Completed' ? 'default' : row.status === 'In Progress' ? 'secondary' : 'destructive'}
+    //       className='mr-1 mb-1'
+    //     >
+    //       {row.status}
+    //     </Badge>
+    //   ),
+    //   sortable: true
+    // },
     {
       id: 'actions',
       header: 'Action',

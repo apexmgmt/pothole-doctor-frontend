@@ -24,6 +24,7 @@ import { filterMenuByPermissions } from '@/utils/menu-permissions'
 import { SettingsIcon, HomeIcon, EstimateIcon } from '@/public/icons'
 import SidebarFooter from './SidebarFooter'
 import MenuItem from './menu-item'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user, permissions }) => {
   const allNavigationItems: NavigationItem[] = [
@@ -384,7 +385,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       </Link>
 
       {/* Main Navigation */}
-      <nav className='flex-1 p-4 overflow-y-auto'>
+      <ScrollArea className='flex-1 p-4'>
         <ul className='space-y-1'>
           {navigationItems.map(item => (
             <li key={item.id}>
@@ -392,7 +393,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
             </li>
           ))}
         </ul>
-      </nav>
+      </ScrollArea>
 
       {/* Bottom Section */}
       <SidebarFooter user={user} />

@@ -8,40 +8,37 @@ import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
+import ProposalService from '@/services/api/estimates/proposals.service'
 
 interface ProposalRevisionModalProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  proposalId: string
+  proposalHashId: string
+  clientHashId: string
   onSuccess?: () => void
 }
 
 const ProposalRevisionModal: React.FC<ProposalRevisionModalProps> = ({
   isOpen,
   onOpenChange,
-  proposalId,   
+  proposalHashId,
+  clientHashId,
   onSuccess
 }) => {
-  const form = useForm<{proposal_id: string, comment: string}>({
-    defaultValues: {
-      proposal_id: proposalId,
-      comment: ''
-    }
+  const form = useForm<{ comment: string }>({
+    defaultValues: { comment: '' }
   })
 
   useEffect(() => {
     if (isOpen) {
-      form.reset({
-        proposal_id: proposalId,
-        comment: ''
-      })
+      form.reset({ comment: '' })
     }
   }, [isOpen, form])
 
-  const onSubmit = async (values: {proposal_id: string, comment: string}) => {
+  const onSubmit = async (values: { comment: string }) => {
     try {
-      // Api call to submit the revision request
-    console.log('Submitting proposal revision request:', values)
+      await ProposalService.reviewProposal(proposalHashId, clientHashId, values.comment)
+      toast.success('Revision request sent successfully')
       form.reset()
       onSuccess?.()
       onOpenChange(false)
@@ -51,10 +48,7 @@ const ProposalRevisionModal: React.FC<ProposalRevisionModalProps> = ({
   }
 
   const onCancel = () => {
-    form.reset({
-      proposal_id: proposalId,
-      comment: ''
-    })
+    form.reset({ comment: '' })
     onOpenChange(false)
   }
 

@@ -69,5 +69,5 @@ interface SavedPolygon {
     meters: number
   }
   name: string
-  notes: string
+  notes: string | null
 }

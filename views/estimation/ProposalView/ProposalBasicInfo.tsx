@@ -7,17 +7,17 @@ const ProposalBasicInfo = ({proposal}: {proposal: Proposal}) => {
       {/* Company Info */}
       <div className='flex flex-col text-sm'>
         {/* Company Address */}
-        <p>708-D Fairground Rd, Lucasville, OH 45648</p>
+        <p>{proposal?.estimate?.assign_user?.userable?.address}</p>
         {/* Company Email */}
-        <p>Email: todd@potholedoctors.com</p>
+        <p>Email: {proposal?.estimate?.assign_user?.email}</p>
         {/* Company Phone */}
-        <p>Phone: (740) 330-5155</p>
+        <p>Phone: {proposal?.estimate?.assign_user?.userable?.phone}</p>
       </div>
       {/* Proposal Info */}
       <div className='flex flex-col sm:text-right text-sm'>
         <h6 className='semibold text-2xl'>PROPOSAL</h6>
-        <p>Proposal #{proposal.proposal_number}</p>
-        <p>Date: {formatDate(new Date(proposal.created_at))}</p>
+        <p>Proposal #{String(proposal?.proposal_number).padStart(6, '0')}</p>
+        <p>Date: {formatDate(new Date(proposal?.created_at))}</p>
       </div>
     </div>
   )

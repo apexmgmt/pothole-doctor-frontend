@@ -1,3 +1,5 @@
+'use client'
+
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +12,8 @@ import { SpinnerCustom } from '@/components/ui/spinner'
 import { hasPermission } from '@/utils/role-permission'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
+import { RefreshCw } from 'lucide-react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 type ProposalModalModeType = 'create' | 'edit' | 'view'
 
@@ -30,6 +34,11 @@ const ProposalSection = ({
   uomUnits: Unit[]
   vendors: Vendor[]
 }) => {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const hasAutoOpenedRef = useRef(false)
+
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [filterOptions, setFilterOptions] = useState<any>({
@@ -66,6 +75,15 @@ const ProposalSection = ({
     setIsModalOpen(false)
     setSelectedProposalId(null)
     setSelectedProposal(null)
+
+    // Remove modal params from URL
+    const params = new URLSearchParams(searchParams.toString())
+
+    params.delete('p_mode')
+    params.delete('p_id')
+    const qs = params.toString()
+
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
   }
 
   // Fetch data from API
@@ -128,7 +146,7 @@ const ProposalSection = ({
     return () => observer.disconnect()
   }, [isLoading, hasMore, currentPage, fetchData])
 
-  // open proposal modal
+  // open proposal modal and sync state to URL
   const handleOpenProposalModal = (mode: ProposalModalModeType, proposal?: Proposal) => {
     setProposalModalMode(mode)
 
@@ -140,7 +158,77 @@ const ProposalSection = ({
       setSelectedProposal(null)
     }
 
+    // Persist modal state in URL so refresh restores it
+    const params = new URLSearchParams(searchParams.toString())
+
+    params.set('p_mode', mode)
+
+    if (proposal) {
+      params.set('p_id', proposal.id)
+    } else {
+      params.delete('p_id')
+    }
+
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
     setIsModalOpen(true)
+  }
+
+  // Auto-open modal from URL params after proposals are first loaded
+  useEffect(() => {
+    if (isLoading || hasAutoOpenedRef.current) return
+
+    const modalMode = searchParams.get('p_mode') as ProposalModalModeType | null
+    const modalProposalId = searchParams.get('p_id')
+
+    if (!modalMode) return
+
+    hasAutoOpenedRef.current = true
+
+    if (modalMode === 'create') {
+      handleOpenProposalModal('create')
+
+      return
+    }
+
+    if (modalProposalId) {
+      const found = proposals.find(p => p.id === modalProposalId)
+
+      if (found) {
+        handleOpenProposalModal(modalMode, found)
+      } else {
+        // Not in current page — fetch individually
+        ProposalService.show(modalProposalId)
+          .then(res => {
+            if (res.data) handleOpenProposalModal(modalMode, res.data)
+          })
+          .catch(() => {})
+      }
+    }
+  }, [isLoading, proposals])
+
+  // Add this function to map status to badge variant
+  const getStatusBadgeVariant = (
+    status: string
+  ): 'default' | 'secondary' | 'destructive' | 'outline' | 'warning' | 'info' | 'success' | 'pending' => {
+    const statusLower = status?.toLowerCase() || ''
+
+    switch (statusLower) {
+      case 'new':
+        return 'secondary'
+      case 'sent to customer':
+        return 'warning'
+      case 'viewed by customer':
+        return 'info'
+      case 'converted to invoice':
+        return 'default'
+      case 'reviewed by customer':
+        return 'success'
+      case 'void proposal':
+      case 'dead proposal':
+        return 'destructive'
+      default:
+        return 'outline'
+    }
   }
 
   // Add this inside ProposalSection
@@ -152,7 +240,12 @@ const ProposalSection = ({
     <>
       <Card className='bg-zinc-900 border-zinc-800'>
         <CardHeader className='flex flex-row items-center justify-between pb-2'>
-          <CardTitle className='text-white text-base'>Proposals</CardTitle>
+          <CardTitle className='text-white text-base cursor-pointer' onClick={refreshProposals}>
+            Proposals{' '}
+            {/* <span>
+              <RefreshCw className='inline-block cursor-pointer h-4 w-4' onClick={refreshProposals} />
+            </span> */}
+          </CardTitle>
           {canCreateProposal && (
             <Button
               onClick={() => handleOpenProposalModal('create')}
@@ -182,7 +275,9 @@ const ProposalSection = ({
                           </h3>
                           <p className='text-zinc-300 text-sm font-medium'>{proposal.estimate?.title}</p>
                         </div>
-                        <Badge variant={'default'}>{proposal.estimate?.status}</Badge>
+                        <Badge className='capitalize' variant={getStatusBadgeVariant(proposal.status)}>
+                          {proposal.status}
+                        </Badge>
                       </div>
 
                       <div className='space-y-2 mb-3 border-t border-zinc-700 pt-3'>
@@ -210,6 +305,7 @@ const ProposalSection = ({
                           <span className='text-zinc-400 text-xs'>Total</span>
                           <p className='text-white font-bold text-lg'>${proposal.total}</p>
                         </div>
+
                         <div className='flex justify-between gap-2'>
                           {canViewProposal && (
                             <ViewButton
@@ -219,7 +315,7 @@ const ProposalSection = ({
                               tooltip='View Proposal'
                             />
                           )}
-                          {canEditProposal && (
+                          {canEditProposal && proposal.status !== 'converted to invoice' && proposal.status !== 'void proposal' && proposal.status !== 'dead proposal' && (
                             <EditButton
                               title='Edit'
                               onClick={() => handleOpenProposalModal('edit', proposal)}
