@@ -146,41 +146,41 @@ const EstimateTypes: React.FC = () => {
       cell: row => <span className='font-medium'>{row.name}</span>,
       sortable: true
     },
-    {
-      id: 'actions',
-      header: 'Action',
-      cell: row => (
-        <div className='flex items-center justify-center gap-2'>
-          {(canEditEstimateType || canDeleteEstimateType) && (
-            <ThreeDotButton
-              buttons={[
-                ...(canEditEstimateType
-                  ? [
-                      <EditButton
-                        tooltip='Edit Estimate Type Information'
-                        onClick={() => handleOpenEditModal(row.id, row)}
-                        variant='text'
-                      />
-                    ]
-                  : []),
-                ...(canDeleteEstimateType
-                  ? [
-                      <DeleteButton
-                        tooltip='Delete Estimate Type'
-                        variant='text'
-                        onClick={() => handleDeleteEstimateType(row.id)}
-                      />
-                    ]
-                  : [])
-              ]}
-            />
-          )}
-        </div>
-      ),
-      sortable: false,
-      headerAlign: 'center',
-      size: 30
-    }
+    // {
+    //   id: 'actions',
+    //   header: 'Action',
+    //   cell: row => (
+    //     <div className='flex items-center justify-center gap-2'>
+    //       {(canEditEstimateType || canDeleteEstimateType) && (
+    //         <ThreeDotButton
+    //           buttons={[
+    //             ...(canEditEstimateType
+    //               ? [
+    //                   <EditButton
+    //                     tooltip='Edit Estimate Type Information'
+    //                     onClick={() => handleOpenEditModal(row.id, row)}
+    //                     variant='text'
+    //                   />
+    //                 ]
+    //               : []),
+    //             ...(canDeleteEstimateType
+    //               ? [
+    //                   <DeleteButton
+    //                     tooltip='Delete Estimate Type'
+    //                     variant='text'
+    //                     onClick={() => handleDeleteEstimateType(row.id)}
+    //                   />
+    //                 ]
+    //               : [])
+    //           ]}
+    //         />
+    //       )}
+    //     </div>
+    //   ),
+    //   sortable: false,
+    //   headerAlign: 'center',
+    //   size: 30
+    // }
   ]
 
   const handleClearFilters = () => {
@@ -231,7 +231,7 @@ const EstimateTypes: React.FC = () => {
           </Button>
         )}
       </div>
-      {canCreateEstimateType && (
+      {/* {canCreateEstimateType && (
         <Button
           variant='default'
           size='sm'
@@ -241,7 +241,7 @@ const EstimateTypes: React.FC = () => {
           <PlusIcon className='w-4 h-4' />
           Add Estimate Type
         </Button>
-      )}
+      )} */}
     </div>
   )
 
@@ -268,14 +268,14 @@ const EstimateTypes: React.FC = () => {
         />
       </CommonLayout>
 
-      <CreateOrEditEstimateTypeModal
+      {/* <CreateOrEditEstimateTypeModal
         mode={modalMode}
         open={isModalOpen}
         onOpenChange={handleModalClose}
         estimateTypeId={selectedEstimateTypeId || undefined}
         estimateTypeDetails={selectedEstimateType || undefined}
         onSuccess={handleSuccess}
-      />
+      /> */}
     </>
   )
 }
