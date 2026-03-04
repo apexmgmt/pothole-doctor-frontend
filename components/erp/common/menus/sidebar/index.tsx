@@ -268,15 +268,6 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           permissions: ['Manage Contact Type']
         },
         {
-          id: 'estimate-types',
-          label: 'Estimate Types',
-          href: '/erp/settings/estimate-types',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: false,
-          permissions: ['Manage Estimate Type']
-        },
-        {
           id: 'commissions-types',
           label: 'Commission Types',
           href: '/erp/settings/commission-types',
@@ -363,7 +354,6 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
         'Manage Payment Term',
         'Manage Contractor Type',
         'Manage Contact Type',
-        'Manage Estimate Type',
         'Manage Commission',
         'Manage Task Type',
         'Manage Unit',
