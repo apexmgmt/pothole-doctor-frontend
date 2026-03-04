@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, EstimateType, DataTableApiResponse, Estimate, ServiceType, Client, Staff, PaymentTerm } from '@/types'
+import { Column, EstimateType, DataTableApiResponse, Estimate, ServiceType, Client, Staff, PaymentTerm, BusinessLocation } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -34,7 +34,8 @@ const Estimates: React.FC<{
   clients: Client[]
   staffs: Staff[]
   paymentTerms: PaymentTerm[]
-}> = ({ serviceTypes, estimateTypes, clients, staffs, paymentTerms }) => {
+  businessLocations: BusinessLocation[]
+}> = ({ serviceTypes, estimateTypes, clients, staffs, paymentTerms, businessLocations }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -348,6 +349,7 @@ const Estimates: React.FC<{
         clients={clients}
         staffs={staffs}
         paymentTerms={paymentTerms}
+        businessLocations={businessLocations}
       />
     </>
   )

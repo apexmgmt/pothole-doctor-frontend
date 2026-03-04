@@ -36,7 +36,8 @@ const ServiceTypeSection = ({
   onLinesChange,
   productCategories = [],
   uomUnits = [],
-  vendors = []
+  vendors = [],
+  taxRate = 0
 }: {
   mode: 'create' | 'edit' | 'view'
   serviceTypeId: string
@@ -49,6 +50,7 @@ const ServiceTypeSection = ({
   productCategories: ProductCategory[]
   uomUnits: Unit[]
   vendors: Vendor[]
+  taxRate: number
 }) => {
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
   const [openProductsModal, setOpenProductsModal] = useState(false)
@@ -61,7 +63,7 @@ const ServiceTypeSection = ({
     const unit_price = getDiscountedUnitPrice(line)
     const total_cost = line.unit_cost * line.qty
     const total_price = unit_price * line.qty
-    const tax_amount = line.is_sale ? unit_price * line.qty * 0 : 0 // Example: 0% tax
+    const tax_amount = line.is_sale ? unit_price * line.qty * (taxRate / 100) : 0 // Apply tax rate
 
     return {
       ...line,
@@ -105,7 +107,7 @@ const ServiceTypeSection = ({
 
       const unitPrice = getDiscountedUnitPrice(line)
 
-      return sum + unitPrice * line.qty * 0 // 0% tax as example
+      return sum + unitPrice * line.qty * (taxRate / 100)
     }, 0)
 
   const totalSales = lines.reduce((sum, line) => {
@@ -127,13 +129,13 @@ const ServiceTypeSection = ({
       return sum + unitPrice * line.qty
     }, 0)
 
-  // Calculate material tax for product lines (example: 0% tax)
+  // Calculate material tax for product lines 
   const materialTax = lines
     .filter(line => line.type === 'product' && line.is_sale)
     .reduce((sum, line) => {
       const unitPrice = getDiscountedUnitPrice(line)
 
-      return sum + unitPrice * line.qty * 0.0 // 0% tax as example
+      return sum + unitPrice * line.qty * (taxRate / 100)
     }, 0)
 
   const laborSales = lines

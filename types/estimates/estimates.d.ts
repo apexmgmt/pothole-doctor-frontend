@@ -1,3 +1,4 @@
+import { BusinessLocation } from '../business_location'
 import { Client } from '../clients/clients'
 import { EstimateType } from '../estimate_types'
 import { PaymentTerm } from '../payment_terms'
@@ -13,6 +14,14 @@ export interface Estimate {
   client_id: string
   client?: Client
   estimate_type_id: string
+  interaction?: 'cash_and_pickup' | 'cash_and_delivery' | '' | null
+  pickup_date?: string | null
+  pickup_location_id?: string | null
+  pickup_location?: BusinessLocation | null
+  pickup_notes?: string | null
+  delivery_datetime?: string | null
+  delivery_location?: string | null
+  delivery_notes?: string | null
   estimate_type?: EstimateType
   assign_id: string
   assign_user?: Staff
@@ -23,6 +32,7 @@ export interface Estimate {
   expiration_date: string
   biding_date: string
   take_off_data: TakeoffData | null
+  tax_rate: number
   created_at: string
   updated_at: string
 }
@@ -37,6 +47,16 @@ export interface EstimatePayload {
   location: string
   expiration_date: string
   biding_date: string
+
+  // Material Only fields
+  interaction?: 'cash_and_pickup' | 'cash_and_delivery' | '' | null
+  pickup_date?: string | null
+  pickup_location_id?: string | null
+  pickup_notes?: string | null
+  delivery_datetime?: string | null
+  delivery_location?: string | null
+  delivery_notes?: string | null
+  tax_rate?: number
 }
 
 export interface TakeoffData {

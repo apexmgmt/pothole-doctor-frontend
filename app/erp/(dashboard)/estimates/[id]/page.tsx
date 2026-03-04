@@ -8,7 +8,9 @@ import ServiceTypeService from '@/services/api/settings/service_types.service'
 import UnitService from '@/services/api/settings/units.service'
 import StaffService from '@/services/api/staff.service'
 import VendorService from '@/services/api/vendors/vendors.service'
+import BusinessLocationService from '@/services/api/locations/business_location.service'
 import {
+  BusinessLocation,
   Client,
   Estimate,
   EstimateType,
@@ -37,6 +39,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
   let uomUnits: Unit[] = []
   let vendors: Vendor[] = []
   let estimateNotes: EstimateNote[] = []
+  let businessLocations: BusinessLocation[] = []
 
   try {
     const response = await ServiceTypeService.getAll()
@@ -129,6 +132,14 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
     vendors = []
   }
 
+  try {
+    const response = await BusinessLocationService.getAll()
+
+    businessLocations = response.data || []
+  } catch (error) {
+    businessLocations = []
+  }
+
   return (
     <EstimateDetails
       estimateId={id}
@@ -143,6 +154,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
       productCategories={productCategories}
       uomUnits={uomUnits}
       vendors={vendors}
+      businessLocations={businessLocations}
     />
   )
 }
