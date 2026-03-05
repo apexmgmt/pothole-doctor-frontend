@@ -22,7 +22,7 @@ const paths = {
   constFile: `constants/api/${snakePlural}_api.ts`,
   constIndex: `constants/api/index.ts`,
   typeFile: `types/${snakePlural}.d.ts`,
-  typeIndex: `types/index.ts`,
+  typeIndex: `types/index.d.ts`,
   service: `services/api/${snakePlural}.service.ts`
 }
 
