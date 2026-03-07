@@ -121,7 +121,6 @@ const InvoiceSignature = () => {
         </div>
 
         {/* Print-only image — white bg, black strokes, generated in beforeprint */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img ref={printImgRef} alt='Signature' style={{ display: 'none' }} className='w-72 h-28 ' />
 
         {/* Underline below signature */}
