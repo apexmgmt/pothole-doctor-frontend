@@ -61,7 +61,7 @@ const InvoiceDetailsPage = async ({ searchParams }: { searchParams: any }) => {
     )
   }
 
-  return <InvoiceView invoice={invoice} />
+  return <InvoiceView invoice={invoice} inid={inid ?? ''} icid={icid ?? ''} />
 }
 
 export default InvoiceDetailsPage

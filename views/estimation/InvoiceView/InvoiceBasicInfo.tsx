@@ -3,7 +3,7 @@ import { formatDate } from '@/utils/date'
 
 const InvoiceBasicInfo = ({ invoice }: { invoice: Invoice }) => {
   return (
-    <div className='flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 print:text-black'>
+    <div className='flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 text-black'>
       {/* Company Info */}
       <div className='flex flex-col text-sm'>
         {/* Company Address */}

@@ -111,13 +111,13 @@ const sections = [
 
 const InvoiceCustomerAgreement = () => {
   return (
-    <div className='my-6 text-sm print:text-black'>
+    <div className='my-6 text-sm text-black'>
       <h3 className='text-lg font-semibold mb-4'>Customer Agreement</h3>
       <div className='space-y-4'>
         {sections.map((section, i) => (
           <div key={i}>
-            <h4 className='font-semibold text-sm mb-1 text-primary-foreground print:text-black'>{section.title}</h4>
-            <ul className='list-disc list-outside ml-5 space-y-1 text-primary-foreground/80 print:text-black/80'>
+            <h4 className='font-semibold text-sm mb-1 text-black'>{section.title}</h4>
+            <ul className='list-disc list-outside ml-5 space-y-1 text-[rgba(0,0,0,0.8)]'>
               {section.items.map((item, j) => (
                 <li key={j}>{item}</li>
               ))}

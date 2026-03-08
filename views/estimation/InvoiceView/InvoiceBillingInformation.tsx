@@ -2,7 +2,7 @@ import { Invoice } from '@/types'
 
 const InvoiceBillingInformation = ({ invoice }: { invoice: Invoice }) => {
   return (
-    <div className='flex flex-col-reverse gap-4 sm:flex-row sm:justify-between mt-4 text-sm print:text-black'>
+    <div className='flex flex-col-reverse gap-4 sm:flex-row sm:justify-between mt-4 text-sm text-black'>
       {/* Bill To */}
       <div className='flex flex-col'>
         <h6 className='font-semibold text-base mb-4'>Customer Information</h6>

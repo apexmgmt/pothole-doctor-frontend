@@ -1,4 +1,4 @@
-import { API_URL, INVOICES, VIEW_INVOICE } from '@/constants/api'
+import { API_URL, APPROVE_INVOICE, INVOICES, VIEW_INVOICE } from '@/constants/api'
 import apiInterceptor from './api.interceptor'
 
 export default class InvoiceService {
@@ -56,6 +56,26 @@ export default class InvoiceService {
         const errorData = await response.json()
 
         throw new Error(errorData.message || 'Failed to view invoice')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static approveInvoice = async (invoice_id: string, payload: FormData) => {
+    try {
+      const response = await apiInterceptor(API_URL + APPROVE_INVOICE, {
+        requiresAuth: false,
+        method: 'POST',
+        body: payload
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to approve invoice')
       }
 
       return await response.json()

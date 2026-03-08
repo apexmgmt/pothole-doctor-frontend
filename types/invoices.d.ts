@@ -1,8 +1,8 @@
-import { BusinessLocation } from "./business_location"
-import { Client } from "./clients/clients"
-import { EstimateType } from "./estimate_types"
-import { Estimate, TakeoffData } from "./estimates/estimates"
-import { Proposal, ProposalService } from "./estimates/proposals"
+import { BusinessLocation } from './business_location'
+import { Client } from './clients/clients'
+import { EstimateType } from './estimate_types'
+import { Estimate, TakeoffData } from './estimates/estimates'
+import { Proposal, ProposalService } from './estimates/proposals'
 
 export interface Invoice {
   id: string
@@ -11,12 +11,12 @@ export interface Invoice {
   estimate?: Estimate
   proposal_id: string | null
   proposal?: Proposal
-  invoice_type_id: string 
+  invoice_type_id: string
   invoice_type?: EstimateType
   client_id: string
   client?: Client
-  assign_id: string 
-  created_by: string 
+  assign_id: string
+  created_by: string
   payment_term_id: string
   service_type_id: string
   title: string
@@ -43,6 +43,8 @@ export interface Invoice {
   created_at: string
   updated_at: string
   services?: ProposalService[]
+  payment_method?: string
+  payment_method_data?: Record<string, string> | null
+  is_agreed_terms?: boolean | number | null
+  is_signed?: boolean
 }
-
-
