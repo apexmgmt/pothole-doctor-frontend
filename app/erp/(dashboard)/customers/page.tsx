@@ -89,9 +89,9 @@ export default async function CustomersPage() {
 
   // fetch note types
   try {
-    const response = await NoteTypeService.index()
+    const response = await NoteTypeService.getAll()
 
-    noteTypes = response.data.data || []
+    noteTypes = response.data || []
   } catch (error) {
     noteTypes = []
   }

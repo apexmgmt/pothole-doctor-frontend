@@ -8,6 +8,8 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import CreateOrEditProposalModal from './CreateOrEditProposalModal'
 import ProposalAddTaskModal from './ProposalAddTaskModal'
 import ProposalTasksModal from './ProposalTasksModal'
+import ProposalNotesModal from './ProposalNotesModal'
+import ProposalAddNoteModal from './ProposalAddNoteModal'
 import { Estimate, ProductCategory, ServiceType, Unit, Vendor, Proposal } from '@/types'
 import ProposalService from '@/services/api/estimates/proposals.service'
 import { SpinnerCustom } from '@/components/ui/spinner'
@@ -49,6 +51,14 @@ const ProposalSection = ({
 
   const [isTasksListModalOpen, setIsTasksListModalOpen] = useState(false)
   const [tasksListProposalId, setTasksListProposalId] = useState<string | null>(null)
+
+  const [isNotesListModalOpen, setIsNotesListModalOpen] = useState(false)
+  const [notesListProposalId, setNotesListProposalId] = useState<string | null>(null)
+  const [notesListClientId, setNotesListClientId] = useState<string | null>(null)
+
+  const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false)
+  const [addNoteProposalId, setAddNoteProposalId] = useState<string | null>(null)
+  const [addNoteClientId, setAddNoteClientId] = useState<string | null>(null)
 
   const [filterOptions, setFilterOptions] = useState<any>({
     estimate_id: estimateId,
@@ -377,6 +387,28 @@ const ProposalSection = ({
                                 >
                                   Tasks
                                 </DropdownMenuItem>
+                                {canEditProposal &&
+                                  proposal.status !== 'void proposal' &&
+                                  proposal.status !== 'dead proposal' && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setAddNoteProposalId(proposal.id)
+                                        setAddNoteClientId(proposal.estimate?.client_id ?? null)
+                                        setIsAddNoteModalOpen(true)
+                                      }}
+                                    >
+                                      Add Note
+                                    </DropdownMenuItem>
+                                  )}
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setNotesListProposalId(proposal.id)
+                                    setNotesListClientId(proposal.estimate?.client_id ?? null)
+                                    setIsNotesListModalOpen(true)
+                                  }}
+                                >
+                                  Notes
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           )}
@@ -440,6 +472,39 @@ const ProposalSection = ({
             if (!open) setTasksListProposalId(null)
           }}
           proposalId={tasksListProposalId}
+        />
+      )}
+
+      {addNoteProposalId && (
+        <ProposalAddNoteModal
+          open={isAddNoteModalOpen}
+          onOpenChange={open => {
+            setIsAddNoteModalOpen(open)
+
+            if (!open) {
+              setAddNoteProposalId(null)
+              setAddNoteClientId(null)
+            }
+          }}
+          proposalId={addNoteProposalId}
+          clientId={addNoteClientId ?? undefined}
+          mode='create'
+        />
+      )}
+
+      {notesListProposalId && (
+        <ProposalNotesModal
+          open={isNotesListModalOpen}
+          onOpenChange={open => {
+            setIsNotesListModalOpen(open)
+
+            if (!open) {
+              setNotesListProposalId(null)
+              setNotesListClientId(null)
+            }
+          }}
+          proposalId={notesListProposalId}
+          clientId={notesListClientId ?? undefined}
         />
       )}
     </>
