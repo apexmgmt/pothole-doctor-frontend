@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import CreateOrEditProposalModal from './CreateOrEditProposalModal'
 import ProposalAddTaskModal from './ProposalAddTaskModal'
+import ProposalTasksModal from './ProposalTasksModal'
 import { Estimate, ProductCategory, ServiceType, Unit, Vendor, Proposal } from '@/types'
 import ProposalService from '@/services/api/estimates/proposals.service'
 import { SpinnerCustom } from '@/components/ui/spinner'
@@ -45,6 +46,9 @@ const ProposalSection = ({
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [taskModalProposalId, setTaskModalProposalId] = useState<string | null>(null)
   const [taskModalClientId, setTaskModalClientId] = useState<string | null>(null)
+
+  const [isTasksListModalOpen, setIsTasksListModalOpen] = useState(false)
+  const [tasksListProposalId, setTasksListProposalId] = useState<string | null>(null)
 
   const [filterOptions, setFilterOptions] = useState<any>({
     estimate_id: estimateId,
@@ -365,6 +369,14 @@ const ProposalSection = ({
                                       Add Task
                                     </DropdownMenuItem>
                                   )}
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setTasksListProposalId(proposal.id)
+                                    setIsTasksListModalOpen(true)
+                                  }}
+                                >
+                                  Tasks
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           )}
@@ -417,6 +429,17 @@ const ProposalSection = ({
           }}
           proposalId={taskModalProposalId}
           clientId={taskModalClientId ?? undefined}
+        />
+      )}
+
+      {tasksListProposalId && (
+        <ProposalTasksModal
+          open={isTasksListModalOpen}
+          onOpenChange={open => {
+            setIsTasksListModalOpen(open)
+            if (!open) setTasksListProposalId(null)
+          }}
+          proposalId={tasksListProposalId}
         />
       )}
     </>

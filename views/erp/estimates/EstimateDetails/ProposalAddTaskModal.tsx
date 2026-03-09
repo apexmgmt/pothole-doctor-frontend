@@ -15,10 +15,22 @@ interface ProposalAddTaskModalProps {
   onOpenChange: (open: boolean) => void
   proposalId: string
   clientId?: string
+  mode?: 'create' | 'edit'
+  taskId?: string
+  taskDetails?: any
   onSuccess?: () => void
 }
 
-const ProposalAddTaskModal = ({ open, onOpenChange, proposalId, clientId, onSuccess }: ProposalAddTaskModalProps) => {
+const ProposalAddTaskModal = ({
+  open,
+  onOpenChange,
+  proposalId,
+  clientId,
+  mode = 'create',
+  taskId,
+  taskDetails,
+  onSuccess
+}: ProposalAddTaskModalProps) => {
   const [staffs, setStaffs] = useState<Staff[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [taskTypes, setTaskTypes] = useState<TaskType[]>([])
@@ -65,7 +77,7 @@ const ProposalAddTaskModal = ({ open, onOpenChange, proposalId, clientId, onSucc
       <CommonDialog
         open={open}
         onOpenChange={onOpenChange}
-        title='Add Task'
+        title={mode === 'edit' ? 'Edit Task' : 'Add Task'}
         description='Loading task data...'
         maxWidth='4xl'
       >
@@ -78,10 +90,12 @@ const ProposalAddTaskModal = ({ open, onOpenChange, proposalId, clientId, onSucc
 
   return (
     <CreateOrEditTaskModal
-      mode='create'
+      mode={mode}
       open={open}
       onOpenChange={onOpenChange}
       proposalId={proposalId}
+      taskId={taskId}
+      taskDetails={taskDetails}
       defaultClientId={clientId}
       staffs={staffs}
       clients={clients}

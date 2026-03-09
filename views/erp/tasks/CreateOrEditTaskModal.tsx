@@ -342,8 +342,12 @@ const CreateOrEditTaskModal = ({
       }
     } else if (mode === 'edit' && taskId) {
       try {
-        await TaskService.update(taskId, payload)
-          .then(response => {
+        const updateCall = proposalId
+          ? ProposalTaskService.update(proposalId, taskId, payload)
+          : TaskService.update(taskId, payload)
+
+        await updateCall
+          .then(() => {
             toast.success('Task updated successfully')
             onOpenChange(false)
             onSuccess?.()
