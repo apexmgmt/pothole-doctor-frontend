@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import CreateOrEditProposalModal from './CreateOrEditProposalModal'
+import ProposalAddTaskModal from './ProposalAddTaskModal'
 import { Estimate, ProductCategory, ServiceType, Unit, Vendor, Proposal } from '@/types'
 import ProposalService from '@/services/api/estimates/proposals.service'
 import { SpinnerCustom } from '@/components/ui/spinner'
@@ -41,6 +42,9 @@ const ProposalSection = ({
   const hasAutoOpenedRef = useRef(false)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
+  const [taskModalProposalId, setTaskModalProposalId] = useState<string | null>(null)
+  const [taskModalClientId, setTaskModalClientId] = useState<string | null>(null)
 
   const [filterOptions, setFilterOptions] = useState<any>({
     estimate_id: estimateId,
@@ -348,6 +352,19 @@ const ProposalSection = ({
                                       Email to Customer
                                     </DropdownMenuItem>
                                   )}
+                                {canEditProposal &&
+                                  proposal.status !== 'void proposal' &&
+                                  proposal.status !== 'dead proposal' && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setTaskModalProposalId(proposal.id)
+                                        setTaskModalClientId(proposal.estimate?.client_id ?? null)
+                                        setIsTaskModalOpen(true)
+                                      }}
+                                    >
+                                      Add Task
+                                    </DropdownMenuItem>
+                                  )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           )}
@@ -386,6 +403,22 @@ const ProposalSection = ({
         vendors={vendors}
         onSuccess={refreshProposals}
       />
+
+      {taskModalProposalId && (
+        <ProposalAddTaskModal
+          open={isTaskModalOpen}
+          onOpenChange={open => {
+            setIsTaskModalOpen(open)
+
+            if (!open) {
+              setTaskModalProposalId(null)
+              setTaskModalClientId(null)
+            }
+          }}
+          proposalId={taskModalProposalId}
+          clientId={taskModalClientId ?? undefined}
+        />
+      )}
     </>
   )
 }
