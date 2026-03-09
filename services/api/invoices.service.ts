@@ -1,5 +1,7 @@
-import { API_URL, APPROVE_INVOICE, INVOICES, VIEW_INVOICE } from '@/constants/api'
+import { InvoiceServicePayload } from './../../types/invoices.d'
+import { API_URL, APPROVE_INVOICE, INVOICES, INVOICES_RESTORE, INVOICES_SERVICES, VIEW_INVOICE } from '@/constants/api'
 import apiInterceptor from './api.interceptor'
+import { InvoicePayload } from '@/types'
 
 export default class InvoiceService {
   /**
@@ -31,11 +33,189 @@ export default class InvoiceService {
     }
   }
 
-  static store = async () => {}
-  static show = async () => {}
-  static update = async () => {}
-  static destroy = async () => {}
-  static restore = async (invoice_id: string) => {}
+  /**
+   * Creates a new invoice with the provided payload. (Step 1 like estimate creation)
+   */
+  static store = async (payload: InvoicePayload) => {
+    try {
+      const response = await apiInterceptor(API_URL + INVOICES, {
+        requiresAuth: true,
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Adds a service to an existing invoice.
+   * @param invoiceId The ID of the invoice to which the service will be added.
+   * @param payload The payload containing the service details.
+   * @returns A promise that resolves to the added service data if the request is successful.
+   * @throws An error if the API request fails or returns a non-OK response.
+   */
+  static storeServices = async (invoiceId: string, payload: InvoiceServicePayload) => {
+    try {
+      const response = await apiInterceptor(API_URL + INVOICES_SERVICES(invoiceId), {
+        requiresAuth: true,
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Fetches the details of a specific invoice by its ID.
+   *
+   * @param invoiceId The ID of the invoice to be fetched.
+   * @returns A promise that resolves to the invoice data if the request is successful.
+   * @throws An error if the API request fails or returns a non-OK response.
+   */
+  static show = async (invoiceId: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + INVOICES + invoiceId, {
+        requiresAuth: true,
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to fetch invoice')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Updates an existing invoice with the provided payload.
+   *
+   * @param invoiceId The ID of the invoice to be updated.
+   * @param payload An object containing the updated invoice data.
+   * @returns A promise that resolves to the updated invoice data if the request is successful.
+   * @throws An error if the API request fails or returns a non-OK response.
+   */
+  static update = async (invoiceId: string, payload: InvoicePayload) => {
+    try {
+      const response = await apiInterceptor(API_URL + INVOICES + invoiceId, {
+        requiresAuth: true,
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Updates the services of an existing invoice with the provided payload.
+   *
+   * @param invoiceId The ID of the invoice whose services will be updated.
+   * @param payload An object containing the updated services data.
+   * @returns A promise that resolves to the updated services data if the request is successful.
+   * @throws An error if the API request fails or returns a non-OK response.
+   */
+  static updateServices = async (invoiceId: string, payload: InvoiceServicePayload) => {
+    try {
+      const response = await apiInterceptor(API_URL + INVOICES_SERVICES(invoiceId), {
+        requiresAuth: true,
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Deletes an existing invoice by its ID.
+   *
+   * @param invoiceId The ID of the invoice to be deleted.
+   * @returns A promise that resolves to the deletion response if the request is successful.
+   * @throws An error if the API request fails or returns a non-OK response.
+   */
+  static destroy = async (invoiceId: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + INVOICES + invoiceId, {
+        requiresAuth: true,
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to delete invoice')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Restores a deleted invoice by its ID.
+   *
+   * @param invoiceId The ID of the invoice to be restored.
+   * @returns A promise that resolves to the restored invoice data if the request is successful.
+   * @throws An error if the API request fails or returns a non-OK response.
+   */
+  static restore = async (invoiceId: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + INVOICES_RESTORE(invoiceId), {
+        requiresAuth: true,
+        method: 'PUT'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to restore invoice')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
 
   /**
    * Views an invoice based on the provided invoice hash ID and client hash ID.
