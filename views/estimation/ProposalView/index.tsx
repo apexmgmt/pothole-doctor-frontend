@@ -37,7 +37,7 @@ const ProposalView = ({
     return proposalHistories.map(h => h.proposal_data)
   }, [proposalHistories, proposal])
 
-  // Initialise from query param (stored as history UUID) so refreshing restores the same step
+  // Initialize from query param (stored as history UUID) so refreshing restores the same step
   const hParam = searchParams.get('h') ?? ''
 
   const initialIndex = (() => {
@@ -64,8 +64,15 @@ const ProposalView = ({
     setIsApproving(true)
 
     try {
-      await ProposalService.approveProposal(proposalHashId, clientHashId)
+      const response = await ProposalService.approveProposal(proposalHashId, clientHashId)
+
       toast.success('Proposal approved successfully')
+      const invoicePath = response?.data?.['invoice-path']
+
+      if (invoicePath) {
+        router.push(invoicePath)
+      }
+
       router.refresh()
     } catch (e: any) {
       toast.error(e?.message || 'Failed to approve proposal')

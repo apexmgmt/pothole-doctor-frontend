@@ -6,14 +6,19 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import CreateOrEditProposalModal from './CreateOrEditProposalModal'
+import ProposalAddTaskModal from './ProposalAddTaskModal'
+import ProposalTasksModal from './ProposalTasksModal'
+import ProposalNotesModal from './ProposalNotesModal'
+import ProposalAddNoteModal from './ProposalAddNoteModal'
 import { Estimate, ProductCategory, ServiceType, Unit, Vendor, Proposal } from '@/types'
 import ProposalService from '@/services/api/estimates/proposals.service'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { hasPermission } from '@/utils/role-permission'
-import EditButton from '@/components/erp/common/buttons/EditButton'
-import ViewButton from '@/components/erp/common/buttons/ViewButton'
-import { RefreshCw } from 'lucide-react'
+
+import { Settings } from 'lucide-react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { toast } from 'sonner'
 
 type ProposalModalModeType = 'create' | 'edit' | 'view'
 
@@ -40,6 +45,20 @@ const ProposalSection = ({
   const hasAutoOpenedRef = useRef(false)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
+  const [taskModalProposalId, setTaskModalProposalId] = useState<string | null>(null)
+  const [taskModalClientId, setTaskModalClientId] = useState<string | null>(null)
+
+  const [isTasksListModalOpen, setIsTasksListModalOpen] = useState(false)
+  const [tasksListProposalId, setTasksListProposalId] = useState<string | null>(null)
+
+  const [isNotesListModalOpen, setIsNotesListModalOpen] = useState(false)
+  const [notesListProposalId, setNotesListProposalId] = useState<string | null>(null)
+  const [notesListClientId, setNotesListClientId] = useState<string | null>(null)
+
+  const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false)
+  const [addNoteProposalId, setAddNoteProposalId] = useState<string | null>(null)
+  const [addNoteClientId, setAddNoteClientId] = useState<string | null>(null)
 
   const [filterOptions, setFilterOptions] = useState<any>({
     estimate_id: estimateId,
@@ -236,6 +255,17 @@ const ProposalSection = ({
     fetchData(1)
   }
 
+  // Send proposal email to customer
+  const sendProposalEmail = async (proposalId: string) => {
+    try {
+      await ProposalService.sendEmail(proposalId)
+      refreshProposals()
+      toast.success('Proposal email sent successfully')
+    } catch (error) {
+      toast.error('Failed to send proposal email')
+    }
+  }
+
   return (
     <>
       <Card className='bg-zinc-900 border-zinc-800'>
@@ -307,21 +337,80 @@ const ProposalSection = ({
                         </div>
 
                         <div className='flex justify-between gap-2'>
-                          {canViewProposal && (
-                            <ViewButton
-                              title='View'
-                              onClick={() => handleOpenProposalModal('view', proposal)}
-                              variant='icon'
-                              tooltip='View Proposal'
-                            />
-                          )}
-                          {canEditProposal && proposal.status !== 'converted to invoice' && proposal.status !== 'void proposal' && proposal.status !== 'dead proposal' && (
-                            <EditButton
-                              title='Edit'
-                              onClick={() => handleOpenProposalModal('edit', proposal)}
-                              variant='icon'
-                              tooltip='Edit Proposal'
-                            />
+                          {(canViewProposal || canEditProposal) && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button className='p-1.5 rounded hover:bg-zinc-700 text-zinc-300 hover:text-white transition-colors'>
+                                  <Settings className='h-4 w-4' />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align='end'>
+                                {canViewProposal && (
+                                  <DropdownMenuItem onClick={() => handleOpenProposalModal('view', proposal)}>
+                                    View Proposal
+                                  </DropdownMenuItem>
+                                )}
+                                {canEditProposal &&
+                                  proposal.status !== 'converted to invoice' &&
+                                  proposal.status !== 'void proposal' &&
+                                  proposal.status !== 'dead proposal' && (
+                                    <DropdownMenuItem onClick={() => handleOpenProposalModal('edit', proposal)}>
+                                      Edit Proposal
+                                    </DropdownMenuItem>
+                                  )}
+                                {/* Send email to customer */}
+                                {canEditProposal &&
+                                  proposal.status !== 'void proposal' &&
+                                  proposal.status !== 'dead proposal' && (
+                                    <DropdownMenuItem onClick={() => sendProposalEmail(proposal.id)}>
+                                      Email to Customer
+                                    </DropdownMenuItem>
+                                  )}
+                                {canEditProposal &&
+                                  proposal.status !== 'void proposal' &&
+                                  proposal.status !== 'dead proposal' && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setTaskModalProposalId(proposal.id)
+                                        setTaskModalClientId(proposal.estimate?.client_id ?? null)
+                                        setIsTaskModalOpen(true)
+                                      }}
+                                    >
+                                      Add Task
+                                    </DropdownMenuItem>
+                                  )}
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setTasksListProposalId(proposal.id)
+                                    setIsTasksListModalOpen(true)
+                                  }}
+                                >
+                                  Tasks
+                                </DropdownMenuItem>
+                                {canEditProposal &&
+                                  proposal.status !== 'void proposal' &&
+                                  proposal.status !== 'dead proposal' && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setAddNoteProposalId(proposal.id)
+                                        setAddNoteClientId(proposal.estimate?.client_id ?? null)
+                                        setIsAddNoteModalOpen(true)
+                                      }}
+                                    >
+                                      Add Note
+                                    </DropdownMenuItem>
+                                  )}
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setNotesListProposalId(proposal.id)
+                                    setNotesListClientId(proposal.estimate?.client_id ?? null)
+                                    setIsNotesListModalOpen(true)
+                                  }}
+                                >
+                                  Notes
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           )}
                         </div>
                       </div>
@@ -358,6 +447,66 @@ const ProposalSection = ({
         vendors={vendors}
         onSuccess={refreshProposals}
       />
+
+      {taskModalProposalId && (
+        <ProposalAddTaskModal
+          open={isTaskModalOpen}
+          onOpenChange={open => {
+            setIsTaskModalOpen(open)
+
+            if (!open) {
+              setTaskModalProposalId(null)
+              setTaskModalClientId(null)
+            }
+          }}
+          proposalId={taskModalProposalId}
+          clientId={taskModalClientId ?? undefined}
+        />
+      )}
+
+      {tasksListProposalId && (
+        <ProposalTasksModal
+          open={isTasksListModalOpen}
+          onOpenChange={open => {
+            setIsTasksListModalOpen(open)
+            if (!open) setTasksListProposalId(null)
+          }}
+          proposalId={tasksListProposalId}
+        />
+      )}
+
+      {addNoteProposalId && (
+        <ProposalAddNoteModal
+          open={isAddNoteModalOpen}
+          onOpenChange={open => {
+            setIsAddNoteModalOpen(open)
+
+            if (!open) {
+              setAddNoteProposalId(null)
+              setAddNoteClientId(null)
+            }
+          }}
+          proposalId={addNoteProposalId}
+          clientId={addNoteClientId ?? undefined}
+          mode='create'
+        />
+      )}
+
+      {notesListProposalId && (
+        <ProposalNotesModal
+          open={isNotesListModalOpen}
+          onOpenChange={open => {
+            setIsNotesListModalOpen(open)
+
+            if (!open) {
+              setNotesListProposalId(null)
+              setNotesListClientId(null)
+            }
+          }}
+          proposalId={notesListProposalId}
+          clientId={notesListClientId ?? undefined}
+        />
+      )}
     </>
   )
 }

@@ -22,7 +22,7 @@ const paths = {
   constFile: `constants/api/${snakePlural}_api.ts`,
   constIndex: `constants/api/index.ts`,
   typeFile: `types/${snakePlural}.d.ts`,
-  typeIndex: `types/index.ts`,
+  typeIndex: `types/index.d.ts`,
   service: `services/api/${snakePlural}.service.ts`
 }
 
@@ -77,7 +77,7 @@ console.log(`✅ "${pascal}" API Service created successfully!`)
 fs.appendFileSync(paths.constIndex, `\nexport * from './${snakePlural}_api';`)
 console.log(`✅ "${constant}" API Constants export added successfully!`)
 
-fs.appendFileSync(paths.typeIndex, `\nexport * from './${snakePlural}.types';`)
+fs.appendFileSync(paths.typeIndex, `\nexport * from './${snakePlural}';`)
 console.log(`✅ "${pascal}" Types export added successfully!`)
 console.log(`----------------------------------------------------------------------------`)
 console.log(`✅ Module "${pascal}" created successfully!`)

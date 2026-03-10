@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import TaskService from '@/services/api/tasks.service'
+import ProposalTaskService from '@/services/api/estimates/proposal-tasks.service'
 import { MultiSelect, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TaskDateTimeFields } from './CreateOrEditTaskModal/TaskDateTimeFields'
 import { Textarea } from '@/components/ui/textarea'
@@ -45,6 +46,12 @@ interface CreateOrEditTaskModalProps {
   taskTypes: TaskType[]
   taskReminders: TaskReminder[]
   taskReminderChannels: TaskReminderChannel[]
+
+  /** When provided, task is created under this proposal via ProposalTaskService */
+  proposalId?: string
+
+  /** When provided, pre-selects and locks the customer field */
+  defaultClientId?: string
 }
 
 interface FormValues {
@@ -80,14 +87,16 @@ const CreateOrEditTaskModal = ({
   clients,
   taskTypes,
   taskReminders,
-  taskReminderChannels
+  taskReminderChannels,
+  proposalId,
+  defaultClientId
 }: CreateOrEditTaskModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const form = useForm<FormValues>({
     defaultValues: {
       name: taskDetails?.name || '',
-      client_id: taskDetails?.client_id || '',
+      client_id: taskDetails?.client_id || defaultClientId || '',
       task_type_id: taskDetails?.task_type_id || '',
       employee_ids: taskDetails?.employees?.map(employee => employee.id) || [],
       start_date: taskDetails?.start_date || '',
@@ -113,7 +122,7 @@ const CreateOrEditTaskModal = ({
     if (open) {
       form.reset({
         name: taskDetails?.name || '',
-        client_id: taskDetails?.client_id || '',
+        client_id: taskDetails?.client_id || defaultClientId || '',
         task_type_id: taskDetails?.task_type_id || '',
         employee_ids: taskDetails?.employees?.map(employee => employee.id) || [],
         start_date: taskDetails?.start_date || '',
@@ -314,8 +323,12 @@ const CreateOrEditTaskModal = ({
 
     if (mode === 'create') {
       try {
-        await TaskService.store(payload)
-          .then(response => {
+        const storeCall = proposalId
+          ? ProposalTaskService.store(proposalId, payload)
+          : TaskService.store(payload)
+
+        await storeCall
+          .then(() => {
             toast.success('Task created successfully')
             form.reset()
             onOpenChange(false)
@@ -329,8 +342,12 @@ const CreateOrEditTaskModal = ({
       }
     } else if (mode === 'edit' && taskId) {
       try {
-        await TaskService.update(taskId, payload)
-          .then(response => {
+        const updateCall = proposalId
+          ? ProposalTaskService.update(proposalId, taskId, payload)
+          : TaskService.update(taskId, payload)
+
+        await updateCall
+          .then(() => {
             toast.success('Task updated successfully')
             onOpenChange(false)
             onSuccess?.()
@@ -422,6 +439,7 @@ const CreateOrEditTaskModal = ({
                         // Reset location when customer changes
                         form.setValue('location', '')
                       }}
+                      disabled={!!defaultClientId}
                     >
                       <SelectTrigger className='w-full'>
                         <SelectValue placeholder='Select Customer' />
