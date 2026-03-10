@@ -83,3 +83,25 @@ export const MARK_PROPOSAL_AS_VOID_OR_DEAD = (proposal_id: string): string => {
 export const REOPEN_PROPOSAL = (proposal_id: string): string => {
   return `/v1/tenant/proposals/${proposal_id}/reopen/`
 }
+
+/**
+ * Get proposal tasks api endpoint (tenant)
+ * @method GET, POST, PUT, SHOW, DELETE
+ * @param proposal_id string
+ * @returns string /v1/tenant/proposals/:proposal_id/tasks
+ */
+export const PROPOSAL_TASKS = (proposal_id: string): string => {
+  return `/v1/tenant/proposals/${proposal_id}/tasks/`
+}
+
+/**
+ * Get proposal notes api endpoint (tenant)
+ * @method GET, POST, PUT, SHOW, DELETE
+ * @param proposal_id string
+ * @returns string /v1/tenant/proposals/:proposal_id/notes
+ */
+export const PROPOSAL_NOTES = (proposal_id: string): string => {
+  return `/v1/tenant/proposals/${proposal_id}/notes/`
+}
+
+

@@ -1,18 +1,15 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-
 import { useForm } from 'react-hook-form'
-
 import { toast } from 'sonner'
 
 import {
   BusinessLocation,
   Client,
-  Estimate,
-  EstimatePayload,
   EstimateType,
-  EstimateTypePayload,
+  Invoice,
+  InvoicePayload,
   PaymentTerm,
   ServiceType,
   Staff
@@ -20,108 +17,107 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import EstimateService from '@/services/api/estimates/estimates.service'
+import InvoiceService from '@/services/api/invoices.service'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DatePicker } from '@/components/ui/datePicker'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Textarea } from '@/components/ui/textarea'
 import { DateTimePicker } from '@/components/ui/datetime-picker'
 
-interface CreateOrEditEstimateModalProps {
+interface CreateOrEditInvoiceModalProps {
   mode?: 'create' | 'edit'
   open: boolean
   onOpenChange: (open: boolean) => void
-  estimateId?: string
-  estimateDetails?: Estimate
+  invoiceId?: string
+  invoiceDetails?: Invoice
   onSuccess?: () => void
+  onCreateSuccess?: (invoice: Invoice) => void
+  invoiceTypes: EstimateType[]
   serviceTypes: ServiceType[]
-  estimateTypes: EstimateType[]
   clients: Client[]
   staffs: Staff[]
   paymentTerms: PaymentTerm[]
   businessLocations: BusinessLocation[]
 }
 
-const CreateOrEditEstimateModal = ({
+const CreateOrEditInvoiceModal = ({
   mode = 'create',
   open,
   onOpenChange,
-  estimateId,
-  estimateDetails,
+  invoiceId,
+  invoiceDetails,
   onSuccess,
+  onCreateSuccess,
+  invoiceTypes,
   serviceTypes,
-  estimateTypes,
   clients,
   staffs,
   paymentTerms,
   businessLocations
-}: CreateOrEditEstimateModalProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-
-  const form = useForm<EstimatePayload>({
+}: CreateOrEditInvoiceModalProps) => {
+  const form = useForm<InvoicePayload>({
     defaultValues: {
-      title: estimateDetails?.title || '',
-      service_type_id: estimateDetails?.service_type_id || '',
-      estimate_type_id: estimateDetails?.estimate_type_id || '',
-      client_id: estimateDetails?.client_id || '',
-      assign_id: estimateDetails?.assign_id || '',
-      payment_term_id: estimateDetails?.payment_term_id || '',
-      location: estimateDetails?.location || '',
-      expiration_date: estimateDetails?.expiration_date || '',
-      biding_date: estimateDetails?.biding_date || '',
-      interaction: estimateDetails?.interaction || '',
-      pickup_date: estimateDetails?.pickup_date || '',
-      pickup_location_id: estimateDetails?.pickup_location_id || '',
-      pickup_notes: estimateDetails?.pickup_notes || '',
-      delivery_datetime: estimateDetails?.delivery_datetime || null,
-      delivery_location: estimateDetails?.delivery_location || '',
-      delivery_notes: estimateDetails?.delivery_notes || '',
-      tax_rate: estimateDetails?.tax_rate || 0
+      title: '',
+      service_type_id: '',
+      invoice_type_id: '',
+      client_id: '',
+      assign_id: '',
+      payment_term_id: '',
+      location: '',
+      due_date: '',
+      issue_date: '',
+      interaction: '',
+      pickup_date: '',
+      pickup_location_id: '',
+      pickup_notes: '',
+      delivery_datetime: null,
+      delivery_location: '',
+      delivery_notes: '',
+      tax_rate: 0
     }
   })
 
-  // Reset form when estimateDetails changes or modal opens
   useEffect(() => {
     if (open) {
       form.reset({
-        title: estimateDetails?.title || '',
-        service_type_id: estimateDetails?.service_type_id || '',
-        estimate_type_id: estimateDetails?.estimate_type_id || '',
-        client_id: estimateDetails?.client_id || '',
-        assign_id: estimateDetails?.assign_id || '',
-        payment_term_id: estimateDetails?.payment_term_id || '',
-        location: estimateDetails?.location || '',
-        expiration_date: estimateDetails?.expiration_date || '',
-        biding_date: estimateDetails?.biding_date || '',
-        interaction: estimateDetails?.interaction || '',
-        pickup_date: estimateDetails?.pickup_date || '',
-        pickup_location_id: estimateDetails?.pickup_location_id || '',
-        pickup_notes: estimateDetails?.pickup_notes || '',
-        delivery_datetime: estimateDetails?.delivery_datetime || null,
-        delivery_location: estimateDetails?.delivery_location || '',
-        delivery_notes: estimateDetails?.delivery_notes || '',
-        tax_rate: estimateDetails?.tax_rate || 0
+        title: invoiceDetails?.title || '',
+        service_type_id: invoiceDetails?.service_type_id || '',
+        invoice_type_id: invoiceDetails?.invoice_type_id || '',
+        client_id: invoiceDetails?.client_id || '',
+        assign_id: invoiceDetails?.assign_id || '',
+        payment_term_id: invoiceDetails?.payment_term_id || '',
+        location: invoiceDetails?.delivery_location || '',
+        due_date: invoiceDetails?.due_date || '',
+        issue_date: invoiceDetails?.issue_date || '',
+        interaction:
+          (invoiceDetails?.interaction as '' | 'cash_and_pickup' | 'cash_and_delivery' | null | undefined) || '',
+        pickup_date: invoiceDetails?.pickup_date || '',
+        pickup_location_id: invoiceDetails?.pickup_location_id || '',
+        pickup_notes: invoiceDetails?.pickup_notes || '',
+        delivery_datetime: invoiceDetails?.delivery_datetime || null,
+        delivery_location: invoiceDetails?.delivery_location || '',
+        delivery_notes: invoiceDetails?.delivery_notes || '',
+        tax_rate: invoiceDetails?.tax_rate || 0
       })
     }
-  }, [estimateDetails, open, form])
+  }, [invoiceDetails, open])
 
-  const onSubmit = async (values: EstimatePayload) => {
-    const isMaterialOnlySubmit = estimateTypes.find(t => t.id === values.estimate_type_id)?.name === 'Material Only'
+  const onSubmit = async (values: InvoicePayload) => {
+    const isMaterialOnly = invoiceTypes.find(t => t.id === values.invoice_type_id)?.name === 'Material Only'
 
-    const payload: EstimatePayload = {
+    const payload: InvoicePayload = {
       title: values.title,
       service_type_id: values.service_type_id,
-      estimate_type_id: values.estimate_type_id,
+      invoice_type_id: values.invoice_type_id,
       client_id: values.client_id,
       assign_id: values.assign_id,
       payment_term_id: values.payment_term_id,
       location: values.location,
-      expiration_date: values.expiration_date,
-      biding_date: values.biding_date,
+      due_date: values.due_date,
+      issue_date: values.issue_date,
       tax_rate: values.tax_rate,
-      ...(isMaterialOnlySubmit && {
+      ...(isMaterialOnly && {
         interaction: values.interaction,
         ...(values.interaction === 'cash_and_pickup' && {
           pickup_date: values.pickup_date,
@@ -138,76 +134,58 @@ const CreateOrEditEstimateModal = ({
 
     if (mode === 'create') {
       try {
-        await EstimateService.store(payload)
-          .then(response => {
-            toast.success('Estimate created successfully')
-            form.reset()
-            onOpenChange(false)
-            onSuccess?.()
-          })
-          .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to create estimate')
-          })
-      } catch (error) {
-        toast.error('Something went wrong while creating the estimate!')
+        const response = await InvoiceService.store(payload)
+
+        toast.success('Invoice created successfully')
+        form.reset()
+        onOpenChange(false)
+
+        if (onCreateSuccess && response?.data) {
+          onCreateSuccess(response.data)
+        } else {
+          onSuccess?.()
+        }
+      } catch (error: any) {
+        toast.error(typeof error.message === 'string' ? error.message : 'Failed to create invoice')
       }
-    } else if (mode === 'edit' && estimateId) {
+    } else if (mode === 'edit' && invoiceId) {
       try {
-        await EstimateService.update(estimateId, payload)
-          .then(response => {
-            toast.success('Estimate updated successfully')
-            onOpenChange(false)
-            onSuccess?.()
-          })
-          .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to update estimate')
-          })
-      } catch (error) {
-        toast.error('Something went wrong while updating the estimate!')
+        await InvoiceService.update(invoiceId, payload)
+        toast.success('Invoice updated successfully')
+        form.reset()
+        onOpenChange(false)
+
+        if (onCreateSuccess) {
+          const updatedResponse = await InvoiceService.show(invoiceId)
+
+          onCreateSuccess(updatedResponse.data)
+        } else {
+          onSuccess?.()
+        }
+      } catch (error: any) {
+        toast.error(typeof error.message === 'string' ? error.message : 'Failed to update invoice')
       }
     }
   }
 
   const onCancel = () => {
-    form.reset({
-      title: estimateDetails?.title || '',
-      service_type_id: estimateDetails?.service_type_id || '',
-      estimate_type_id: estimateDetails?.estimate_type_id || '',
-      client_id: estimateDetails?.client_id || '',
-      assign_id: estimateDetails?.assign_id || '',
-      payment_term_id: estimateDetails?.payment_term_id || '',
-      location: estimateDetails?.location || '',
-      expiration_date: estimateDetails?.expiration_date || '',
-      biding_date: estimateDetails?.biding_date || '',
-      interaction: estimateDetails?.interaction || '',
-      pickup_date: estimateDetails?.pickup_date || '',
-      pickup_location_id: estimateDetails?.pickup_location_id || '',
-      pickup_notes: estimateDetails?.pickup_notes || '',
-      delivery_datetime: estimateDetails?.delivery_datetime ?? null,
-      delivery_location: estimateDetails?.delivery_location || '',
-      delivery_notes: estimateDetails?.delivery_notes || '',
-      tax_rate: estimateDetails?.tax_rate || 0
-    })
+    form.reset()
     onOpenChange(false)
   }
 
-  // Memoize addresses for selected client
   const selectedClient = useMemo(
     () => clients.find(c => c.id === form.watch('client_id')),
     [clients, form.watch('client_id')]
   )
 
-  // Check if selected estimate type is "Material Only"
   const isMaterialOnly = useMemo(
-    () => estimateTypes.find(t => t.id === form.watch('estimate_type_id'))?.name === 'Material Only',
-    [estimateTypes, form.watch('estimate_type_id')]
+    () => invoiceTypes.find(t => t.id === form.watch('invoice_type_id'))?.name === 'Material Only',
+    [invoiceTypes, form.watch('invoice_type_id')]
   )
 
   const interactionValue = form.watch('interaction')
-
   const addressOptions = selectedClient?.addresses || []
 
-  // Find default address value (comma separated)
   const defaultAddress = addressOptions.find(addr => addr.is_default === 1)
     ? [
         addressOptions.find(addr => addr.is_default === 1)?.street_address,
@@ -219,7 +197,6 @@ const CreateOrEditEstimateModal = ({
         .join(', ')
     : ''
 
-  // When client changes, set location to default address (comma separated) if available
   useEffect(() => {
     if (defaultAddress) {
       form.setValue('location', defaultAddress)
@@ -231,11 +208,11 @@ const CreateOrEditEstimateModal = ({
   return (
     <CommonDialog
       isLoading={form.formState.isSubmitting}
-      loadingMessage='Loading estimate...'
+      loadingMessage='Saving invoice...'
       open={open}
       onOpenChange={onOpenChange}
-      title={mode === 'create' ? 'Create New Estimate' : 'Edit Estimate'}
-      description={mode === 'create' ? 'Add a new estimate to the system' : 'Update estimate information'}
+      title={mode === 'create' ? 'Create New Invoice' : 'Edit Invoice'}
+      description={mode === 'create' ? 'Add a new invoice to the system' : 'Update invoice information'}
       maxWidth='4xl'
       disableClose={form.formState.isSubmitting}
       actions={
@@ -255,52 +232,51 @@ const CreateOrEditEstimateModal = ({
             disabled={form.formState.isSubmitting}
             className='flex-1'
           >
-            {form.formState.isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
+            {form.formState.isSubmitting
+              ? 'Saving...'
+              : mode === 'create'
+                ? 'Create & Add Services →'
+                : 'Update & Edit Services →'}
           </Button>
         </div>
       }
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='grid grid-cols-2 gap-4'>
-          {/* Estimate Title Field */}
+          {/* Title */}
           <FormField
             control={form.control}
             name='title'
-            rules={{
-              required: 'Estimate title is required',
-              minLength: { value: 2, message: 'Estimate title must be at least 2 characters' }
-            }}
+            rules={{ required: 'Invoice title is required', minLength: { value: 2, message: 'Min 2 characters' } }}
             render={({ field }) => (
               <FormItem className='col-span-2'>
                 <FormLabel>
                   Title <span className='text-red-500'>*</span>
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter estimate title' {...field} />
+                  <Input placeholder='Enter invoice title' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          {/* Estimate type field */}
+          {/* Invoice Type */}
           <FormField
             control={form.control}
-            name='estimate_type_id'
-            rules={{
-              required: 'Estimate type is required'
-            }}
+            name='invoice_type_id'
+            rules={{ required: 'Invoice type is required' }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Estimate Type <span className='text-red-500'>*</span>
+                  Invoice Type <span className='text-red-500'>*</span>
                 </FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Estimate Type' />
+                      <SelectValue placeholder='Select Invoice Type' />
                     </SelectTrigger>
                     <SelectContent>
-                      {estimateTypes.map(type => (
+                      {invoiceTypes.map(type => (
                         <SelectItem key={type.id} value={type.id}>
                           {type.name}
                         </SelectItem>
@@ -312,13 +288,11 @@ const CreateOrEditEstimateModal = ({
               </FormItem>
             )}
           />
-          {/* Client field */}
+          {/* Customer */}
           <FormField
             control={form.control}
             name='client_id'
-            rules={{
-              required: 'Customer is required'
-            }}
+            rules={{ required: 'Customer is required' }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -329,8 +303,6 @@ const CreateOrEditEstimateModal = ({
                     value={field.value}
                     onValueChange={value => {
                       field.onChange(value)
-
-                      // Reset location when customer changes
                       form.setValue('location', '')
                     }}
                   >
@@ -350,7 +322,7 @@ const CreateOrEditEstimateModal = ({
               </FormItem>
             )}
           />
-          {/* Material Only: Interaction field */}
+          {/* Material Only: Interaction */}
           {isMaterialOnly && (
             <FormField
               control={form.control}
@@ -363,11 +335,9 @@ const CreateOrEditEstimateModal = ({
                   </FormLabel>
                   <FormControl>
                     <RadioGroup
-                      value={field.value}
+                      value={field.value ?? ''}
                       onValueChange={value => {
                         field.onChange(value)
-
-                        // Reset sub-fields when switching
                         form.setValue('pickup_date', '')
                         form.setValue('pickup_location_id', '')
                         form.setValue('pickup_notes', '')
@@ -378,14 +348,20 @@ const CreateOrEditEstimateModal = ({
                       className='flex flex-row gap-6'
                     >
                       <div className='flex items-center space-x-2'>
-                        <RadioGroupItem value='cash_and_pickup' id='cash_and_pickup' />
-                        <label htmlFor='cash_and_pickup' className='text-sm font-medium leading-none cursor-pointer'>
+                        <RadioGroupItem value='cash_and_pickup' id='inv_cash_and_pickup' />
+                        <label
+                          htmlFor='inv_cash_and_pickup'
+                          className='text-sm font-medium leading-none cursor-pointer'
+                        >
                           Cash and Pickup
                         </label>
                       </div>
                       <div className='flex items-center space-x-2'>
-                        <RadioGroupItem value='cash_and_delivery' id='cash_and_delivery' />
-                        <label htmlFor='cash_and_delivery' className='text-sm font-medium leading-none cursor-pointer'>
+                        <RadioGroupItem value='cash_and_delivery' id='inv_cash_and_delivery' />
+                        <label
+                          htmlFor='inv_cash_and_delivery'
+                          className='text-sm font-medium leading-none cursor-pointer'
+                        >
                           Cash and Delivery
                         </label>
                       </div>
@@ -396,7 +372,6 @@ const CreateOrEditEstimateModal = ({
               )}
             />
           )}
-
           {/* Cash and Pickup sub-fields */}
           {isMaterialOnly && interactionValue === 'cash_and_pickup' && (
             <>
@@ -412,9 +387,7 @@ const CreateOrEditEstimateModal = ({
                     <FormControl>
                       <DatePicker
                         value={field.value ? new Date(field.value) : null}
-                        onChange={val => {
-                          field.onChange(val ? val.toISOString().slice(0, 10) : '')
-                        }}
+                        onChange={val => field.onChange(val ? val.toISOString().slice(0, 10) : '')}
                         placeholder='Select pickup date'
                       />
                     </FormControl>
@@ -460,15 +433,7 @@ const CreateOrEditEstimateModal = ({
                   <FormItem className='col-span-2'>
                     <FormLabel>Notes</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder='Enter notes...'
-                        rows={3}
-                        name={field.name}
-                        ref={field.ref}
-                        onBlur={field.onBlur}
-                        onChange={field.onChange}
-                        value={field.value ?? ''}
-                      />
+                      <Textarea placeholder='Enter notes...' rows={3} {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -476,7 +441,6 @@ const CreateOrEditEstimateModal = ({
               />
             </>
           )}
-
           {/* Cash and Delivery sub-fields */}
           {isMaterialOnly && interactionValue === 'cash_and_delivery' && (
             <>
@@ -504,7 +468,6 @@ const CreateOrEditEstimateModal = ({
                           } else {
                             const d = new Date(val)
                             const pad = (n: number) => String(n).padStart(2, '0')
-
                             const formatted = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 
                             field.onChange(formatted)
@@ -527,14 +490,7 @@ const CreateOrEditEstimateModal = ({
                       Delivery Location <span className='text-red-500'>*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder='Enter delivery location'
-                        name={field.name}
-                        ref={field.ref}
-                        onBlur={field.onBlur}
-                        onChange={field.onChange}
-                        value={field.value ?? ''}
-                      />
+                      <Input placeholder='Enter delivery location' {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -547,15 +503,7 @@ const CreateOrEditEstimateModal = ({
                   <FormItem className='col-span-2'>
                     <FormLabel>Notes</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder='Enter notes...'
-                        rows={3}
-                        name={field.name}
-                        ref={field.ref}
-                        onBlur={field.onBlur}
-                        onChange={field.onChange}
-                        value={field.value ?? ''}
-                      />
+                      <Textarea placeholder='Enter notes...' rows={3} {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -563,7 +511,7 @@ const CreateOrEditEstimateModal = ({
               />
             </>
           )}
-          {/* Location field (address select) */}
+          {/* Location / Job Address */}
           <FormField
             control={form.control}
             name='location'
@@ -603,22 +551,20 @@ const CreateOrEditEstimateModal = ({
               </FormItem>
             )}
           />
-          {/* Assigned Estimator field */}
+          {/* Assigned Staff */}
           <FormField
             control={form.control}
             name='assign_id'
-            rules={{
-              required: 'Assigned estimator is required'
-            }}
+            rules={{ required: 'Assigned staff is required' }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Assigned Estimator <span className='text-red-500'>*</span>
+                  Assigned To <span className='text-red-500'>*</span>
                 </FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Assigned Estimator' />
+                      <SelectValue placeholder='Select Staff' />
                     </SelectTrigger>
                     <SelectContent>
                       {staffs.map(staff => (
@@ -633,13 +579,11 @@ const CreateOrEditEstimateModal = ({
               </FormItem>
             )}
           />
-          {/* Service type field */}
+          {/* Service Type */}
           <FormField
             control={form.control}
             name='service_type_id'
-            rules={{
-              required: 'Service type is required'
-            }}
+            rules={{ required: 'Service type is required' }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -663,13 +607,11 @@ const CreateOrEditEstimateModal = ({
               </FormItem>
             )}
           />
-          {/* Payment terms field */}
+          {/* Payment Term */}
           <FormField
             control={form.control}
             name='payment_term_id'
-            rules={{
-              required: 'Payment term is required'
-            }}
+            rules={{ required: 'Payment term is required' }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -693,63 +635,57 @@ const CreateOrEditEstimateModal = ({
               </FormItem>
             )}
           />
-          {/* Expiry Date field */}
+          {/* Issue Date */}
           <FormField
             control={form.control}
-            name='expiration_date'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Expiration Date</FormLabel>
-                <FormControl>
-                  <DatePicker
-                    value={field.value ? new Date(field.value) : null}
-                    onChange={val => {
-                      field.onChange(val ? val.toISOString().slice(0, 10) : '')
-                    }}
-                    placeholder='Select expiration date'
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Bidding Date field */}
-          <FormField
-            control={form.control}
-            name='biding_date'
-            rules={{
-              required: 'Bidding date is required'
-            }}
+            name='issue_date'
+            rules={{ required: 'Issue date is required' }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Bidding Date <span className='text-red-500'>*</span>
+                  Issue Date <span className='text-red-500'>*</span>
                 </FormLabel>
                 <FormControl>
                   <DatePicker
                     value={field.value ? new Date(field.value) : null}
-                    onChange={val => {
-                      field.onChange(val ? val.toISOString().slice(0, 10) : '')
-                    }}
-                    placeholder='Select bidding date'
+                    onChange={val => field.onChange(val ? val.toISOString().slice(0, 10) : '')}
+                    placeholder='Select issue date'
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          {/* Tax Rate field */}
+          {/* Due Date */}
+          <FormField
+            control={form.control}
+            name='due_date'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Due Date</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    value={field.value ? new Date(field.value) : null}
+                    onChange={val => field.onChange(val ? val.toISOString().slice(0, 10) : '')}
+                    placeholder='Select due date'
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Tax Rate */}
           <FormField
             control={form.control}
             name='tax_rate'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tax Rate</FormLabel>
+                <FormLabel>Tax Rate (%)</FormLabel>
                 <FormControl>
                   <Input
                     type='number'
                     step='0.01'
-                    placeholder='Enter tax rate'
+                    placeholder='0'
                     {...field}
                     onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                   />
@@ -764,4 +700,4 @@ const CreateOrEditEstimateModal = ({
   )
 }
 
-export default CreateOrEditEstimateModal
+export default CreateOrEditInvoiceModal

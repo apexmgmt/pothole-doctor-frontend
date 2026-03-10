@@ -36,7 +36,9 @@ const ServiceTypeSection = ({
   onLinesChange,
   productCategories = [],
   uomUnits = [],
-  vendors = []
+  vendors = [],
+  taxRate = 0,
+  hideMargin = false
 }: {
   mode: 'create' | 'edit' | 'view'
   serviceTypeId: string
@@ -49,6 +51,8 @@ const ServiceTypeSection = ({
   productCategories: ProductCategory[]
   uomUnits: Unit[]
   vendors: Vendor[]
+  taxRate: number
+  hideMargin?: boolean
 }) => {
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
   const [openProductsModal, setOpenProductsModal] = useState(false)
@@ -61,7 +65,7 @@ const ServiceTypeSection = ({
     const unit_price = getDiscountedUnitPrice(line)
     const total_cost = line.unit_cost * line.qty
     const total_price = unit_price * line.qty
-    const tax_amount = line.is_sale ? unit_price * line.qty * 0 : 0 // Example: 0% tax
+    const tax_amount = line.is_sale ? unit_price * line.qty * (taxRate / 100) : 0 // Apply tax rate
 
     return {
       ...line,
@@ -105,7 +109,7 @@ const ServiceTypeSection = ({
 
       const unitPrice = getDiscountedUnitPrice(line)
 
-      return sum + unitPrice * line.qty * 0 // 0% tax as example
+      return sum + unitPrice * line.qty * (taxRate / 100)
     }, 0)
 
   const totalSales = lines.reduce((sum, line) => {
@@ -127,13 +131,13 @@ const ServiceTypeSection = ({
       return sum + unitPrice * line.qty
     }, 0)
 
-  // Calculate material tax for product lines (example: 0% tax)
+  // Calculate material tax for product lines
   const materialTax = lines
     .filter(line => line.type === 'product' && line.is_sale)
     .reduce((sum, line) => {
       const unitPrice = getDiscountedUnitPrice(line)
 
-      return sum + unitPrice * line.qty * 0.0 // 0% tax as example
+      return sum + unitPrice * line.qty * (taxRate / 100)
     }, 0)
 
   const laborSales = lines
@@ -325,6 +329,7 @@ const ServiceTypeSection = ({
             setOpenProductsModal={setOpenProductsModal}
             setOpenLaborCostModal={setOpenLaborCostModal}
             addLine={addLine}
+            hideMargin={hideMargin}
           />
           {/* Summary Section */}
           <ServiceTypeSummary
@@ -353,7 +358,7 @@ const ServiceTypeSection = ({
                   <th className='px-2 py-1'>Unit Cost</th>
                   <th className='px-2 py-1'>Quantity</th>
                   <th className='px-2 py-1'>Total Cost</th>
-                  <th className='px-2 py-1'>Margin</th>
+                  {!hideMargin && <th className='px-2 py-1'>Margin</th>}
                   <th className='px-2 py-1'>Unit Price</th>
                   <th className='px-2 py-1'>Total Price</th>
                   <th className='px-2 py-1'>Sales Tax</th>
@@ -462,22 +467,24 @@ const ServiceTypeSection = ({
                           <Input value={totalCost.toFixed(2) ?? ''} readOnly className='w-28' />
                         )}
                       </td>
-                      <td className='px-2 py-1 flex items-center gap-1'>
-                        {line.type !== 'deduction' && (
-                          <>
-                            <Input
-                              type='number'
-                              value={line.margin ?? 0}
-                              onChange={e => updateLine(idx, 'margin', parseFloat(e.target.value) || 0)}
-                              className='w-28'
-                              min={0}
-                              max={100}
-                              disabled={mode === 'view'}
-                            />
-                            <span>%</span>
-                          </>
-                        )}
-                      </td>
+                      {!hideMargin && (
+                        <td className='px-2 py-1 flex items-center gap-1'>
+                          {line.type !== 'deduction' && (
+                            <>
+                              <Input
+                                type='number'
+                                value={line.margin ?? 0}
+                                onChange={e => updateLine(idx, 'margin', parseFloat(e.target.value) || 0)}
+                                className='w-28'
+                                min={0}
+                                max={100}
+                                disabled={mode === 'view'}
+                              />
+                              <span>%</span>
+                            </>
+                          )}
+                        </td>
+                      )}
                       <td className='px-2 py-1'>
                         {line.type !== 'deduction' && (
                           <Input value={unitPrice.toFixed(2) ?? ''} readOnly className='w-28' />

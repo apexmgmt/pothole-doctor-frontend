@@ -1,7 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Client, Estimate, EstimateType, PaymentTerm, ServiceType, Staff } from '@/types'
-import { formatDate } from '@/utils/date'
+import { BusinessLocation, Client, Estimate, EstimateType, PaymentTerm, ServiceType, Staff } from '@/types'
+import { formatDate, formatDateTime } from '@/utils/date'
 import CreateOrEditEstimateModal from '../CreateOrEditEstimateModal'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -14,7 +14,8 @@ const EstimateSection = ({
   estimateTypes,
   clients,
   staffs,
-  paymentTerms
+  paymentTerms,
+  businessLocations
 }: {
   estimateId: string
   estimate: Estimate
@@ -23,6 +24,7 @@ const EstimateSection = ({
   clients: Client[]
   staffs: Staff[]
   paymentTerms: PaymentTerm[]
+  businessLocations: BusinessLocation[]
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const router = useRouter()
@@ -64,6 +66,10 @@ const EstimateSection = ({
         <CardContent>
           <div className='flex flex-col gap-2 text-zinc-200 text-sm'>
             <div>
+              <span className='font-semibold text-base text-white'>Estimate number</span>
+              <div>{estimate.estimate_number?.toString().padStart(6, '0') || 'N/A'}</div>
+            </div>
+            <div>
               <span className='font-semibold text-base text-white'>Estimate title</span>
               <div>{estimate.title || ''}</div>
             </div>
@@ -71,10 +77,62 @@ const EstimateSection = ({
               <span className='font-semibold text-base text-white'>Estimate type</span>
               <div>{estimate.estimate_type?.name || 'N/A'}</div>
             </div>
-            <div>
-              <span className='font-semibold text-base text-white'>Estimate number</span>
-              <div>{estimate.estimate_number?.toString().padStart(6, '0') || 'N/A'}</div>
-            </div>
+            {estimate.estimate_type?.name === 'Material Only' && estimate?.interaction && (
+              <>
+                {estimate.interaction === 'cash_and_pickup' ? (
+                  <>
+                    <div>
+                      <span className='font-semibold text-base text-white'>Interaction</span>
+                      <div>Cash and Pickup</div>
+                    </div>
+                    {estimate?.pickup_date && (
+                      <div>
+                        <span className='font-semibold text-base text-white'>Pickup date</span>
+                        <div>{formatDate(estimate.pickup_date)}</div>
+                      </div>
+                    )}
+                    {estimate?.pickup_location && (
+                      <div>
+                        <span className='font-semibold text-base text-white'>Pickup location</span>
+                        <div>{estimate.pickup_location?.name || 'N/A'}</div>
+                      </div>
+                    )}
+                    {estimate?.pickup_notes && (
+                      <div>
+                        <span className='font-semibold text-base text-white'>Pickup notes</span>
+                        <div>{estimate.pickup_notes || 'N/A'}</div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <span className='font-semibold text-base text-white'>Interaction</span>
+                      <div>Cash and Delivery</div>
+                    </div>
+                    {estimate?.delivery_datetime && (
+                      <div>
+                        <span className='font-semibold text-base text-white'>Delivery datetime</span>
+                        <div>{formatDateTime(estimate.delivery_datetime)}</div>
+                      </div>
+                    )}
+                    {estimate?.delivery_location && (
+                      <div>
+                        <span className='font-semibold text-base text-white'>Delivery location</span>
+                        <div>{estimate.delivery_location || 'N/A'}</div>
+                      </div>
+                    )}
+                    {estimate?.delivery_notes && (
+                      <div>
+                        <span className='font-semibold text-base text-white'>Delivery notes</span>
+                        <div>{estimate.delivery_notes || 'N/A'}</div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+
             {estimate.service_type && (
               <div>
                 <span className='font-semibold text-base text-white'>Service type</span>
@@ -119,6 +177,12 @@ const EstimateSection = ({
                 </div>
               </div>
             )}
+            {estimate.tax_rate && (
+              <div>
+                <span className='font-semibold text-base text-white'>Tax Rate</span>
+                <div>{estimate.tax_rate}</div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -134,6 +198,7 @@ const EstimateSection = ({
         clients={clients}
         staffs={staffs}
         paymentTerms={paymentTerms}
+        businessLocations={businessLocations}
       />
     </>
   )

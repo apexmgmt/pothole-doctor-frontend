@@ -1,6 +1,5 @@
 import ClientService from '@/services/api/clients/clients.service'
-import EstimateNoteService from '@/services/api/estimates/estimate-notes.service'
-import EstimateService from '@/services/api/estimates/estimates.service'
+import BusinessLocationService from '@/services/api/locations/business_location.service'
 import ProductCategoryService from '@/services/api/product_categories.service'
 import EstimateTypeService from '@/services/api/settings/estimate_types.service'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
@@ -8,60 +7,54 @@ import ServiceTypeService from '@/services/api/settings/service_types.service'
 import UnitService from '@/services/api/settings/units.service'
 import StaffService from '@/services/api/staff.service'
 import VendorService from '@/services/api/vendors/vendors.service'
-import BusinessLocationService from '@/services/api/locations/business_location.service'
 import {
   BusinessLocation,
   Client,
-  Estimate,
   EstimateType,
   PaymentTerm,
   ProductCategory,
   ServiceType,
   Staff,
   Unit,
-  Vendor,
-  EstimateNote
+  Vendor
 } from '@/types'
-import EstimateDetails from '@/views/erp/estimates/EstimateDetails'
+import WorkOrders from '@/views/erp/work-orders'
 
 export const dynamic = 'force-dynamic'
 
-const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
-  const { id } = await params
-  let estimate: Estimate = {} as Estimate
+export default async function WorkOrdersPage() {
+  let workOrderTypes: EstimateType[] = []
   let serviceTypes: ServiceType[] = []
-  let estimateTypes: EstimateType[] = []
   let clients: Client[] = []
   let staffs: Staff[] = []
   let paymentTerms: PaymentTerm[] = []
+  let businessLocations: BusinessLocation[] = []
   let units: Unit[] = []
   let productCategories: ProductCategory[] = []
   let uomUnits: Unit[] = []
   let vendors: Vendor[] = []
-  let estimateNotes: EstimateNote[] = []
-  let businessLocations: BusinessLocation[] = []
+
+  try {
+    const response = await EstimateTypeService.getAll()
+
+    workOrderTypes = response.data || []
+  } catch {
+    workOrderTypes = []
+  }
 
   try {
     const response = await ServiceTypeService.getAll()
 
     serviceTypes = response.data || []
-  } catch (error) {
+  } catch {
     serviceTypes = []
-  }
-
-  try {
-    const response = await EstimateTypeService.getAll()
-
-    estimateTypes = response.data || []
-  } catch (error) {
-    estimateTypes = []
   }
 
   try {
     const response = await ClientService.getAll('customer')
 
     clients = response.data || []
-  } catch (error) {
+  } catch {
     clients = []
   }
 
@@ -69,7 +62,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
     const response = await StaffService.getAll()
 
     staffs = response.data || []
-  } catch (error) {
+  } catch {
     staffs = []
   }
 
@@ -77,34 +70,23 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
     const response = await PaymentTermsService.getAllPaymentTerms()
 
     paymentTerms = response.data || []
-  } catch (error) {
+  } catch {
     paymentTerms = []
   }
 
-  // fetch estimate details
   try {
-    const response = await EstimateService.show(id)
+    const response = await BusinessLocationService.getAll()
 
-    estimate = response.data
-  } catch (error) {
-    estimate = {} as Estimate
+    businessLocations = response.data || []
+  } catch {
+    businessLocations = []
   }
 
-  // fetch estimate notes
-  try {
-    const response = await EstimateNoteService.index({ estimate_id: id })
-
-    estimateNotes = response.data || []
-  } catch (error) {
-    estimateNotes = []
-  }
-
-  //fetch units
   try {
     const response = await UnitService.getAll()
 
     units = response.data || []
-  } catch (error) {
+  } catch {
     units = []
   }
 
@@ -112,7 +94,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
     const response = await ProductCategoryService.getAll()
 
     productCategories = response.data || []
-  } catch (error) {
+  } catch {
     productCategories = []
   }
 
@@ -120,7 +102,7 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
     const response = await UnitService.getAll('uom')
 
     uomUnits = response.data || []
-  } catch (error) {
+  } catch {
     uomUnits = []
   }
 
@@ -128,35 +110,22 @@ const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
     const response = await VendorService.getAll()
 
     vendors = response.data || []
-  } catch (error) {
+  } catch {
     vendors = []
   }
 
-  try {
-    const response = await BusinessLocationService.getAll()
-
-    businessLocations = response.data || []
-  } catch (error) {
-    businessLocations = []
-  }
-
   return (
-    <EstimateDetails
-      estimateId={id}
-      estimate={estimate}
-      estimateNotes={estimateNotes}
+    <WorkOrders
+      workOrderTypes={workOrderTypes}
       serviceTypes={serviceTypes}
-      estimateTypes={estimateTypes}
       clients={clients}
       staffs={staffs}
       paymentTerms={paymentTerms}
+      businessLocations={businessLocations}
       units={units}
       productCategories={productCategories}
       uomUnits={uomUnits}
       vendors={vendors}
-      businessLocations={businessLocations}
     />
   )
 }
-
-export default EstimateDetailsPage

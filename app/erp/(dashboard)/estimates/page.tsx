@@ -1,9 +1,10 @@
 import ClientService from '@/services/api/clients/clients.service'
+import BusinessLocationService from '@/services/api/locations/business_location.service'
 import EstimateTypeService from '@/services/api/settings/estimate_types.service'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
 import StaffService from '@/services/api/staff.service'
-import { Client, EstimateType, PaymentTerm, ServiceType, Staff } from '@/types'
+import { BusinessLocation, Client, EstimateType, PaymentTerm, ServiceType, Staff } from '@/types'
 import Estimates from '@/views/erp/estimates/Estimates'
 
 export const dynamic = 'force-dynamic'
@@ -14,6 +15,7 @@ export default async function EstimatesPage() {
   let clients: Client[] = []
   let staffs: Staff[] = []
   let paymentTerms: PaymentTerm[] = []
+  let businessLocations: BusinessLocation[] = []
 
   try {
     const response = await ServiceTypeService.getAll()
@@ -55,6 +57,14 @@ export default async function EstimatesPage() {
     paymentTerms = []
   }
 
+  try {
+    const response = await BusinessLocationService.getAll()
+
+    businessLocations = response.data || []
+  } catch (error) {
+    businessLocations = []
+  }
+
   return (
     <Estimates
       serviceTypes={serviceTypes}
@@ -62,6 +72,7 @@ export default async function EstimatesPage() {
       clients={clients}
       staffs={staffs}
       paymentTerms={paymentTerms}
+      businessLocations={businessLocations}
     />
   )
 }

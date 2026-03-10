@@ -335,3 +335,15 @@
     @apply bg-background text-foreground;
   }
 } */
+
+@media print {
+  input,
+  textarea,
+  select {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color: black !important;
+    border-color: rgba(0, 0, 0, 0.4) !important;
+    background: transparent !important;
+  }
+}

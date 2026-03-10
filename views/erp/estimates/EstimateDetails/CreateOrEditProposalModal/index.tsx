@@ -63,11 +63,16 @@ const CreateOrEditProposalModal = ({
   const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>('percentage')
   const [discountValue, setDiscountValue] = useState(0)
   const [currentProposalStatus, setCurrentProposalStatus] = useState<string | null | undefined>(proposalDetails?.status)
-  const [currentProposalReason, setCurrentProposalReason] = useState<string | null | undefined>((proposalDetails as any)?.reason)
+
+  const [currentProposalReason, setCurrentProposalReason] = useState<string | null | undefined>(
+    (proposalDetails as any)?.reason
+  )
+
   const customMessageRef = useRef<HTMLTextAreaElement>(null)
 
   const isVoidOrDead = currentProposalStatus === 'void proposal' || currentProposalStatus === 'dead proposal'
   const effectiveMode = isVoidOrDead ? ('view' as const) : mode
+  const taxRate = estimateDetails?.tax_rate ?? 0
 
   // Each service type section has an array of line items
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
@@ -143,10 +148,10 @@ const CreateOrEditProposalModal = ({
       const unitPrice = getDiscountedUnitPrice(line)
 
       if (line.type === 'deduction') {
-        return sum - unitPrice * line.qty * 0.0 // 0% tax as example
+        return sum - unitPrice * line.qty * (taxRate / 100)
       }
 
-      return sum + unitPrice * line.qty * 0.0 // 0% tax as example
+      return sum + unitPrice * line.qty * (taxRate / 100)
     }, 0)
 
   const total = totalSales + salesTax
@@ -197,28 +202,32 @@ const CreateOrEditProposalModal = ({
     discount: discountValue,
     services: serviceTypeLineItems.map((st, index) => ({
       service_type_id: selectedServiceType[index].id,
-      items: st.lines.map(line => ({
-        product_id: line.product_id,
-        labor_cost_id: line.labor_cost_id,
-        name: line.name,
-        description: line.description,
-        type: line.type,
-        unit_cost: line.unit_cost,
-        qty: line.qty,
-        unit_name: line.unit_name,
-        total_cost: line.total_cost,
-        margin: line.margin,
-        unit_price: line.unit_price,
-        discount: line.discount,
-        discount_type: line.discount_type,
-        freight_charge: line.freight_charge,
-        is_sale: line.is_sale,
-        tax_type: line.tax_type,
-        tax: line.tax,
-        tax_amount: line.tax_amount,
-        total_price: line.total_price,
-        note: line.note
-      }))
+      items: st.lines.map(line => {
+        const computedTaxAmount = line.is_sale ? getDiscountedUnitPrice(line) * line.qty * (taxRate / 100) : 0
+
+        return {
+          product_id: line.product_id,
+          labor_cost_id: line.labor_cost_id,
+          name: line.name,
+          description: line.description,
+          type: line.type,
+          unit_cost: line.unit_cost,
+          qty: line.qty,
+          unit_name: line.unit_name,
+          total_cost: line.total_cost,
+          margin: line.margin,
+          unit_price: line.unit_price,
+          discount: line.discount,
+          discount_type: line.discount_type,
+          freight_charge: line.freight_charge,
+          is_sale: line.is_sale,
+          tax_type: line.tax_type,
+          tax: taxRate,
+          tax_amount: computedTaxAmount,
+          total_price: line.total_price,
+          note: line.note
+        }
+      })
     }))
   })
 
@@ -467,6 +476,7 @@ const CreateOrEditProposalModal = ({
               productCategories={productCategories}
               uomUnits={uomUnits}
               vendors={vendors}
+              taxRate={taxRate}
             />
           ))}
         </div>
@@ -487,18 +497,19 @@ const CreateOrEditProposalModal = ({
           </CardContent>
         </Card>
         {/* Reason if status is void proposal or dead proposal */}
-        {(currentProposalStatus === 'void proposal' || currentProposalStatus === 'dead proposal') && currentProposalReason && (
-          <Card className='border-red-800 mt-4'>
-            <CardContent className='p-4'>
-              <label htmlFor='reason' className='block text-sm font-medium text-zinc-200 mb-2'>
-                Reason
-              </label>
-              <p id='reason' className='w-full p-3 bg-zinc-800 rounded text-sm text-zinc-200'>
-                {currentProposalReason || 'No reason provided'}
-              </p>
-            </CardContent>
-          </Card>
-        )}
+        {(currentProposalStatus === 'void proposal' || currentProposalStatus === 'dead proposal') &&
+          currentProposalReason && (
+            <Card className='border-red-800 mt-4'>
+              <CardContent className='p-4'>
+                <label htmlFor='reason' className='block text-sm font-medium text-zinc-200 mb-2'>
+                  Reason
+                </label>
+                <p id='reason' className='w-full p-3 bg-zinc-800 rounded text-sm text-zinc-200'>
+                  {currentProposalReason || 'No reason provided'}
+                </p>
+              </CardContent>
+            </Card>
+          )}
       </>
     </CommonDialog>
   )

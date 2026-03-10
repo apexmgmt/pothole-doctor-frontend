@@ -24,6 +24,7 @@ import { formatDate } from '@/utils/date'
 import { Badge } from '@/components/ui/badge'
 import CreateOrEditTaskModal from './CreateOrEditTaskModal'
 import { hasPermission } from '@/utils/role-permission'
+import { Description } from '@/components/ui/description'
 
 const Tasks: React.FC<{
   staffs: Staff[]
@@ -244,7 +245,7 @@ const Tasks: React.FC<{
     {
       id: 'location',
       header: 'Event Location',
-      cell: (row: Task) => <span className='font-medium'>{row?.location || ''}</span>,
+      cell: (row: Task) => <Description description={row.location} />,
       sortable: true
     },
     {
