@@ -178,6 +178,15 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       permissions: ['Manage Estimate']
     },
     {
+      id: 'work-orders',
+      label: 'Work Orders',
+      icon: <EstimateIcon className='h-4 w-4' />,
+      href: '/erp/work-orders',
+      hasSubItems: false,
+      exactMatch: false,
+      permissions: ['Manage Estimate']
+    },
+    {
       id: 'tasks',
       label: 'Tasks',
       icon: <CalendarCheck className='h-4 w-4' />,
