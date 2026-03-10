@@ -14,6 +14,7 @@ interface ServiceTypeActionsProps {
   setOpenProductsModal: (open: boolean) => void
   setOpenLaborCostModal: (open: boolean) => void
   addLine: (type: ProposalServiceItemPayload['type']) => void
+  hideMargin?: boolean
 }
 
 const ServiceTypeActions = ({
@@ -25,10 +26,11 @@ const ServiceTypeActions = ({
   onLinesChange,
   setOpenProductsModal,
   setOpenLaborCostModal,
-  addLine
+  addLine,
+  hideMargin = false
 }: ServiceTypeActionsProps) => (
   <div className='flex items-center gap-2 bg-zinc-800 p-3 rounded-md'>
-    {mode !== 'view' && (
+    {mode !== 'view' && !hideMargin && (
       <div className='flex items-center gap-2 flex-1'>
         <span className='text-sm font-medium text-zinc-300'>% Margin:</span>
         <Input
@@ -62,7 +64,7 @@ const ServiceTypeActions = ({
 
     {/* Action Buttons */}
     {mode !== 'view' && (
-      <div className='flex items-center gap-1'>
+      <div className='flex items-center gap-1 ml-auto'>
         <Button
           onClick={() => setOpenProductsModal(true)}
           variant='ghost'

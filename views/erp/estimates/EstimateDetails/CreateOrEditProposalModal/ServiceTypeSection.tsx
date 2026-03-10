@@ -37,7 +37,8 @@ const ServiceTypeSection = ({
   productCategories = [],
   uomUnits = [],
   vendors = [],
-  taxRate = 0
+  taxRate = 0,
+  hideMargin = false
 }: {
   mode: 'create' | 'edit' | 'view'
   serviceTypeId: string
@@ -51,6 +52,7 @@ const ServiceTypeSection = ({
   uomUnits: Unit[]
   vendors: Vendor[]
   taxRate: number
+  hideMargin?: boolean
 }) => {
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
   const [openProductsModal, setOpenProductsModal] = useState(false)
@@ -129,7 +131,7 @@ const ServiceTypeSection = ({
       return sum + unitPrice * line.qty
     }, 0)
 
-  // Calculate material tax for product lines 
+  // Calculate material tax for product lines
   const materialTax = lines
     .filter(line => line.type === 'product' && line.is_sale)
     .reduce((sum, line) => {
@@ -327,6 +329,7 @@ const ServiceTypeSection = ({
             setOpenProductsModal={setOpenProductsModal}
             setOpenLaborCostModal={setOpenLaborCostModal}
             addLine={addLine}
+            hideMargin={hideMargin}
           />
           {/* Summary Section */}
           <ServiceTypeSummary
@@ -355,7 +358,7 @@ const ServiceTypeSection = ({
                   <th className='px-2 py-1'>Unit Cost</th>
                   <th className='px-2 py-1'>Quantity</th>
                   <th className='px-2 py-1'>Total Cost</th>
-                  <th className='px-2 py-1'>Margin</th>
+                  {!hideMargin && <th className='px-2 py-1'>Margin</th>}
                   <th className='px-2 py-1'>Unit Price</th>
                   <th className='px-2 py-1'>Total Price</th>
                   <th className='px-2 py-1'>Sales Tax</th>
@@ -464,22 +467,24 @@ const ServiceTypeSection = ({
                           <Input value={totalCost.toFixed(2) ?? ''} readOnly className='w-28' />
                         )}
                       </td>
-                      <td className='px-2 py-1 flex items-center gap-1'>
-                        {line.type !== 'deduction' && (
-                          <>
-                            <Input
-                              type='number'
-                              value={line.margin ?? 0}
-                              onChange={e => updateLine(idx, 'margin', parseFloat(e.target.value) || 0)}
-                              className='w-28'
-                              min={0}
-                              max={100}
-                              disabled={mode === 'view'}
-                            />
-                            <span>%</span>
-                          </>
-                        )}
-                      </td>
+                      {!hideMargin && (
+                        <td className='px-2 py-1 flex items-center gap-1'>
+                          {line.type !== 'deduction' && (
+                            <>
+                              <Input
+                                type='number'
+                                value={line.margin ?? 0}
+                                onChange={e => updateLine(idx, 'margin', parseFloat(e.target.value) || 0)}
+                                className='w-28'
+                                min={0}
+                                max={100}
+                                disabled={mode === 'view'}
+                              />
+                              <span>%</span>
+                            </>
+                          )}
+                        </td>
+                      )}
                       <td className='px-2 py-1'>
                         {line.type !== 'deduction' && (
                           <Input value={unitPrice.toFixed(2) ?? ''} readOnly className='w-28' />

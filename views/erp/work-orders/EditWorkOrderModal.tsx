@@ -8,8 +8,8 @@ import {
   BusinessLocation,
   Client,
   EstimateType,
-  Invoice,
-  InvoicePayload,
+  WorkOrder,
+  WorkOrderPayload,
   PaymentTerm,
   ServiceType,
   Staff
@@ -18,22 +18,21 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import InvoiceService from '@/services/api/invoices.service'
+import WorkOrderService from '@/services/api/work_orders.service'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DatePicker } from '@/components/ui/datePicker'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Textarea } from '@/components/ui/textarea'
 import { DateTimePicker } from '@/components/ui/datetime-picker'
 
-interface CreateOrEditInvoiceModalProps {
-  mode?: 'create' | 'edit'
+interface EditWorkOrderModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  invoiceId?: string
-  invoiceDetails?: Invoice
+  workOrderId?: string
+  workOrderDetails?: WorkOrder
   onSuccess?: () => void
-  onCreateSuccess?: (invoice: Invoice) => void
-  invoiceTypes: EstimateType[]
+  onEditSuccess?: (workOrder: WorkOrder) => void
+  workOrderTypes: EstimateType[]
   serviceTypes: ServiceType[]
   clients: Client[]
   staffs: Staff[]
@@ -41,26 +40,25 @@ interface CreateOrEditInvoiceModalProps {
   businessLocations: BusinessLocation[]
 }
 
-const CreateOrEditInvoiceModal = ({
-  mode = 'create',
+const EditWorkOrderModal = ({
   open,
   onOpenChange,
-  invoiceId,
-  invoiceDetails,
+  workOrderId,
+  workOrderDetails,
   onSuccess,
-  onCreateSuccess,
-  invoiceTypes,
+  onEditSuccess,
+  workOrderTypes,
   serviceTypes,
   clients,
   staffs,
   paymentTerms,
   businessLocations
-}: CreateOrEditInvoiceModalProps) => {
-  const form = useForm<InvoicePayload>({
+}: EditWorkOrderModalProps) => {
+  const form = useForm<WorkOrderPayload>({
     defaultValues: {
       title: '',
       service_type_id: '',
-      invoice_type_id: '',
+      work_order_type_id: '',
       client_id: '',
       assign_id: '',
       payment_term_id: '',
@@ -81,35 +79,37 @@ const CreateOrEditInvoiceModal = ({
   useEffect(() => {
     if (open) {
       form.reset({
-        title: invoiceDetails?.title || '',
-        service_type_id: invoiceDetails?.service_type_id || '',
-        invoice_type_id: invoiceDetails?.invoice_type_id || '',
-        client_id: invoiceDetails?.client_id || '',
-        assign_id: invoiceDetails?.assign_id || '',
-        payment_term_id: invoiceDetails?.payment_term_id || '',
-        location: invoiceDetails?.delivery_location || '',
-        due_date: invoiceDetails?.due_date || '',
-        issue_date: invoiceDetails?.issue_date || '',
+        title: workOrderDetails?.title || '',
+        service_type_id: workOrderDetails?.service_type_id || '',
+        work_order_type_id: workOrderDetails?.work_order_type_id || '',
+        client_id: workOrderDetails?.client_id || '',
+        assign_id: workOrderDetails?.assign_id || '',
+        payment_term_id: workOrderDetails?.payment_term_id || '',
+        location: workOrderDetails?.delivery_location || '',
+        due_date: workOrderDetails?.due_date || '',
+        issue_date: workOrderDetails?.issue_date || '',
         interaction:
-          (invoiceDetails?.interaction as '' | 'cash_and_pickup' | 'cash_and_delivery' | null | undefined) || '',
-        pickup_date: invoiceDetails?.pickup_date || '',
-        pickup_location_id: invoiceDetails?.pickup_location_id || '',
-        pickup_notes: invoiceDetails?.pickup_notes || '',
-        delivery_datetime: invoiceDetails?.delivery_datetime || null,
-        delivery_location: invoiceDetails?.delivery_location || '',
-        delivery_notes: invoiceDetails?.delivery_notes || '',
-        tax_rate: invoiceDetails?.tax_rate || 0
+          (workOrderDetails?.interaction as '' | 'cash_and_pickup' | 'cash_and_delivery' | null | undefined) || '',
+        pickup_date: workOrderDetails?.pickup_date || '',
+        pickup_location_id: workOrderDetails?.pickup_location_id || '',
+        pickup_notes: workOrderDetails?.pickup_notes || '',
+        delivery_datetime: workOrderDetails?.delivery_datetime || null,
+        delivery_location: workOrderDetails?.delivery_location || '',
+        delivery_notes: workOrderDetails?.delivery_notes || '',
+        tax_rate: workOrderDetails?.tax_rate || 0
       })
     }
-  }, [invoiceDetails, open])
+  }, [workOrderDetails, open])
 
-  const onSubmit = async (values: InvoicePayload) => {
-    const isMaterialOnly = invoiceTypes.find(t => t.id === values.invoice_type_id)?.name === 'Material Only'
+  const onSubmit = async (values: WorkOrderPayload) => {
+    if (!workOrderId) return
 
-    const payload: InvoicePayload = {
+    const isMaterialOnly = workOrderTypes.find(t => t.id === values.work_order_type_id)?.name === 'Material Only'
+
+    const payload: WorkOrderPayload = {
       title: values.title,
       service_type_id: values.service_type_id,
-      invoice_type_id: values.invoice_type_id,
+      work_order_type_id: values.work_order_type_id,
       client_id: values.client_id,
       assign_id: values.assign_id,
       payment_term_id: values.payment_term_id,
@@ -132,39 +132,21 @@ const CreateOrEditInvoiceModal = ({
       })
     }
 
-    if (mode === 'create') {
-      try {
-        const response = await InvoiceService.store(payload)
+    try {
+      await WorkOrderService.update(workOrderId, payload)
+      toast.success('Work order updated successfully')
+      form.reset()
+      onOpenChange(false)
 
-        toast.success('Invoice created successfully')
-        form.reset()
-        onOpenChange(false)
+      if (onEditSuccess) {
+        const updatedResponse = await WorkOrderService.show(workOrderId)
 
-        if (onCreateSuccess && response?.data) {
-          onCreateSuccess(response.data)
-        } else {
-          onSuccess?.()
-        }
-      } catch (error: any) {
-        toast.error(typeof error.message === 'string' ? error.message : 'Failed to create invoice')
+        onEditSuccess(updatedResponse.data)
+      } else {
+        onSuccess?.()
       }
-    } else if (mode === 'edit' && invoiceId) {
-      try {
-        await InvoiceService.update(invoiceId, payload)
-        toast.success('Invoice updated successfully')
-        form.reset()
-        onOpenChange(false)
-
-        if (onCreateSuccess) {
-          const updatedResponse = await InvoiceService.show(invoiceId)
-
-          onCreateSuccess(updatedResponse.data)
-        } else {
-          onSuccess?.()
-        }
-      } catch (error: any) {
-        toast.error(typeof error.message === 'string' ? error.message : 'Failed to update invoice')
-      }
+    } catch (error: any) {
+      toast.error(typeof error.message === 'string' ? error.message : 'Failed to update work order')
     }
   }
 
@@ -179,8 +161,8 @@ const CreateOrEditInvoiceModal = ({
   )
 
   const isMaterialOnly = useMemo(
-    () => invoiceTypes.find(t => t.id === form.watch('invoice_type_id'))?.name === 'Material Only',
-    [invoiceTypes, form.watch('invoice_type_id')]
+    () => workOrderTypes.find(t => t.id === form.watch('work_order_type_id'))?.name === 'Material Only',
+    [workOrderTypes, form.watch('work_order_type_id')]
   )
 
   const interactionValue = form.watch('interaction')
@@ -208,11 +190,11 @@ const CreateOrEditInvoiceModal = ({
   return (
     <CommonDialog
       isLoading={form.formState.isSubmitting}
-      loadingMessage='Saving invoice...'
+      loadingMessage='Saving work order...'
       open={open}
       onOpenChange={onOpenChange}
-      title={mode === 'create' ? 'Create New Invoice' : 'Edit Invoice'}
-      description={mode === 'create' ? 'Add a new invoice to the system' : 'Update invoice information'}
+      title='Edit Work Order'
+      description='Update work order information'
       maxWidth='4xl'
       disableClose={form.formState.isSubmitting}
       actions={
@@ -232,11 +214,7 @@ const CreateOrEditInvoiceModal = ({
             disabled={form.formState.isSubmitting}
             className='flex-1'
           >
-            {form.formState.isSubmitting
-              ? 'Saving...'
-              : mode === 'create'
-                ? 'Create & Add Services →'
-                : 'Update & Edit Services →'}
+            {form.formState.isSubmitting ? 'Saving...' : 'Update & Edit Services →'}
           </Button>
         </div>
       }
@@ -247,36 +225,36 @@ const CreateOrEditInvoiceModal = ({
           <FormField
             control={form.control}
             name='title'
-            rules={{ required: 'Invoice title is required', minLength: { value: 2, message: 'Min 2 characters' } }}
+            rules={{ required: 'Work order title is required', minLength: { value: 2, message: 'Min 2 characters' } }}
             render={({ field }) => (
               <FormItem className='col-span-2'>
                 <FormLabel>
                   Title <span className='text-red-500'>*</span>
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter invoice title' {...field} />
+                  <Input placeholder='Enter work order title' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          {/* Invoice Type */}
+          {/* Work Order Type */}
           <FormField
             control={form.control}
-            name='invoice_type_id'
-            rules={{ required: 'Invoice type is required' }}
+            name='work_order_type_id'
+            rules={{ required: 'Work order type is required' }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Invoice Type <span className='text-red-500'>*</span>
+                  Work Order Type <span className='text-red-500'>*</span>
                 </FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Invoice Type' />
+                      <SelectValue placeholder='Select Work Order Type' />
                     </SelectTrigger>
                     <SelectContent>
-                      {invoiceTypes.map(type => (
+                      {workOrderTypes.map(type => (
                         <SelectItem key={type.id} value={type.id}>
                           {type.name}
                         </SelectItem>
@@ -348,18 +326,15 @@ const CreateOrEditInvoiceModal = ({
                       className='flex flex-row gap-6'
                     >
                       <div className='flex items-center space-x-2'>
-                        <RadioGroupItem value='cash_and_pickup' id='inv_cash_and_pickup' />
-                        <label
-                          htmlFor='inv_cash_and_pickup'
-                          className='text-sm font-medium leading-none cursor-pointer'
-                        >
+                        <RadioGroupItem value='cash_and_pickup' id='wo_cash_and_pickup' />
+                        <label htmlFor='wo_cash_and_pickup' className='text-sm font-medium leading-none cursor-pointer'>
                           Cash and Pickup
                         </label>
                       </div>
                       <div className='flex items-center space-x-2'>
-                        <RadioGroupItem value='cash_and_delivery' id='inv_cash_and_delivery' />
+                        <RadioGroupItem value='cash_and_delivery' id='wo_cash_and_delivery' />
                         <label
-                          htmlFor='inv_cash_and_delivery'
+                          htmlFor='wo_cash_and_delivery'
                           className='text-sm font-medium leading-none cursor-pointer'
                         >
                           Cash and Delivery
@@ -700,4 +675,4 @@ const CreateOrEditInvoiceModal = ({
   )
 }
 
-export default CreateOrEditInvoiceModal
+export default EditWorkOrderModal

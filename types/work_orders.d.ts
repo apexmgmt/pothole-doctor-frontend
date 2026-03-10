@@ -60,8 +60,8 @@ export interface WorkOrderPayload {
   payment_term_id: string
   title: string
   location: string
-  expiration_date: string
-  biding_date: string
+  issue_date: string
+  due_date: string
 
   // Material Only fields
   interaction?: 'cash_and_pickup' | 'cash_and_delivery' | '' | null

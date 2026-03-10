@@ -37,7 +37,7 @@ const ProposalView = ({
     return proposalHistories.map(h => h.proposal_data)
   }, [proposalHistories, proposal])
 
-  // Initialise from query param (stored as history UUID) so refreshing restores the same step
+  // Initialize from query param (stored as history UUID) so refreshing restores the same step
   const hParam = searchParams.get('h') ?? ''
 
   const initialIndex = (() => {
