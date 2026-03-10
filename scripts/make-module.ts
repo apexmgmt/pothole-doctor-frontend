@@ -77,7 +77,7 @@ console.log(`✅ "${pascal}" API Service created successfully!`)
 fs.appendFileSync(paths.constIndex, `\nexport * from './${snakePlural}_api';`)
 console.log(`✅ "${constant}" API Constants export added successfully!`)
 
-fs.appendFileSync(paths.typeIndex, `\nexport * from './${snakePlural}.types';`)
+fs.appendFileSync(paths.typeIndex, `\nexport * from './${snakePlural}';`)
 console.log(`✅ "${pascal}" Types export added successfully!`)
 console.log(`----------------------------------------------------------------------------`)
 console.log(`✅ Module "${pascal}" created successfully!`)
