@@ -58,8 +58,23 @@ const ServiceTypeSection = ({
   const [openProductsModal, setOpenProductsModal] = useState(false)
   const [totalSqft, setTotalSqft] = useState('0')
   const [margin, setMargin] = useState('0')
-  const [editingValues, setEditingValues] = useState<{ [key: number]: string }>({})
+  const [editingValues, setEditingValues] = useState<{ [key: string]: string }>({})
   const timeoutRefs = useRef<{ [key: number]: NodeJS.Timeout }>({})
+
+  const getEditValue = (idx: number, field: string, fallback: string) =>
+    editingValues[`${idx}-${field}`] !== undefined ? editingValues[`${idx}-${field}`] : fallback
+
+  const setEditValue = (idx: number, field: string, value: string) =>
+    setEditingValues(prev => ({ ...prev, [`${idx}-${field}`]: value }))
+
+  const clearEditValue = (idx: number, field: string) =>
+    setEditingValues(prev => {
+      const next = { ...prev }
+
+      delete next[`${idx}-${field}`]
+
+      return next
+    })
 
   const recalculateLine = (line: ProposalServiceItemPayload): ProposalServiceItemPayload => {
     const unit_price = getDiscountedUnitPrice(line)
@@ -381,8 +396,12 @@ const ServiceTypeSection = ({
                             <MessageSquareIcon className='h-4 w-4 text-zinc-400' />
 
                             <Input
-                              value={line.description}
-                              onChange={e => updateLine(idx, 'description', e.target.value)}
+                              value={getEditValue(idx, 'description', line.description ?? '')}
+                              onChange={e => setEditValue(idx, 'description', e.target.value)}
+                              onBlur={e => {
+                                updateLine(idx, 'description', e.target.value)
+                                clearEditValue(idx, 'description')
+                              }}
                               className='w-full bg-muted'
                               placeholder='Comment'
                               disabled={mode === 'view'}
@@ -421,8 +440,12 @@ const ServiceTypeSection = ({
                           {line.type === 'invoice' && <GridIcon className='h-4 w-4 text-zinc-400' />}
                           {line.type === 'deduction' && <Minus className='h-4 w-4 text-red-500' />}
                           <Input
-                            value={line.name ?? ''}
-                            onChange={e => updateLine(idx, 'name', e.target.value)}
+                            value={getEditValue(idx, 'name', line.name ?? '')}
+                            onChange={e => setEditValue(idx, 'name', e.target.value)}
+                            onBlur={e => {
+                              updateLine(idx, 'name', e.target.value)
+                              clearEditValue(idx, 'name')
+                            }}
                             className={cn('w-full', line.type === 'deduction' && 'text-red-500')}
                             placeholder='Item Name'
                             disabled={mode === 'view'}
@@ -431,8 +454,12 @@ const ServiceTypeSection = ({
                       </td>
                       <td className='px-2 py-1'>
                         <Input
-                          value={line.description ?? ''}
-                          onChange={e => updateLine(idx, 'description', e.target.value)}
+                          value={getEditValue(idx, 'description', line.description ?? '')}
+                          onChange={e => setEditValue(idx, 'description', e.target.value)}
+                          onBlur={e => {
+                            updateLine(idx, 'description', e.target.value)
+                            clearEditValue(idx, 'description')
+                          }}
                           className='w-full text-red-500'
                           placeholder='Empty'
                           disabled={mode === 'view'}
@@ -442,8 +469,12 @@ const ServiceTypeSection = ({
                         {line.type !== 'deduction' && (
                           <Input
                             type='number'
-                            value={line.unit_cost ?? 1}
-                            onChange={e => updateLine(idx, 'unit_cost', parseFloat(e.target.value) || 0)}
+                            value={getEditValue(idx, 'unit_cost', String(line.unit_cost ?? 0))}
+                            onChange={e => setEditValue(idx, 'unit_cost', e.target.value)}
+                            onBlur={e => {
+                              updateLine(idx, 'unit_cost', parseFloat(e.target.value) || 0)
+                              clearEditValue(idx, 'unit_cost')
+                            }}
                             className='w-28'
                             min={0}
                             disabled={mode === 'view'}
@@ -454,8 +485,12 @@ const ServiceTypeSection = ({
                         {line.type !== 'deduction' && (
                           <Input
                             type='number'
-                            value={line.qty ?? 1}
-                            onChange={e => updateLine(idx, 'qty', parseFloat(e.target.value) || 0)}
+                            value={getEditValue(idx, 'qty', String(line.qty ?? 1))}
+                            onChange={e => setEditValue(idx, 'qty', e.target.value)}
+                            onBlur={e => {
+                              updateLine(idx, 'qty', parseFloat(e.target.value) || 0)
+                              clearEditValue(idx, 'qty')
+                            }}
                             className='w-28 bg-yellow-200 text-black'
                             min={0}
                             disabled={mode === 'view'}
@@ -473,8 +508,12 @@ const ServiceTypeSection = ({
                             <>
                               <Input
                                 type='number'
-                                value={line.margin ?? 0}
-                                onChange={e => updateLine(idx, 'margin', parseFloat(e.target.value) || 0)}
+                                value={getEditValue(idx, 'margin', String(line.margin ?? 0))}
+                                onChange={e => setEditValue(idx, 'margin', e.target.value)}
+                                onBlur={e => {
+                                  updateLine(idx, 'margin', parseFloat(e.target.value) || 0)
+                                  clearEditValue(idx, 'margin')
+                                }}
                                 className='w-28'
                                 min={0}
                                 max={100}
@@ -496,29 +535,16 @@ const ServiceTypeSection = ({
                             disabled={mode === 'view'}
                             type='number'
                             min={0}
-                            value={
-                              editingValues[idx] !== undefined
-                                ? editingValues[idx]
-                                : (Number(line.total_price)?.toFixed(2) ?? '')
-                            }
-                            onChange={e => setEditingValues({ ...editingValues, [idx]: e.target.value })}
+                            value={getEditValue(idx, 'total_price', Number(line.total_price)?.toFixed(2) ?? '')}
+                            onChange={e => setEditValue(idx, 'total_price', e.target.value)}
                             onBlur={e => {
-                              // Update the array when user leaves the field
                               updateLine(idx, 'total_price', parseFloat(e.target.value) || 0)
-
-                              // Clear the local state
-                              setEditingValues(prev => {
-                                const newState = { ...prev }
-
-                                delete newState[idx]
-
-                                return newState
-                              })
+                              clearEditValue(idx, 'total_price')
                             }}
                             className='w-28'
                           />
                         ) : (
-                          <Input value={Number(line.total_price)?.toFixed(2) ?? ''} readOnly className='w-28' />
+                          <Input value={totalPrice.toFixed(2)} readOnly className='w-28' />
                         )}
                       </td>
                       <td className='px-2 py-1 text-center'>

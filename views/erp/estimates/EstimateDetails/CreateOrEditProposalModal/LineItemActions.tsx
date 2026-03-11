@@ -73,23 +73,26 @@ const LineItemActions = ({ line, idx, mode, updateLine, removeLine }: LineItemAc
             <Input
               disabled={mode === 'view'}
               type='number'
-              value={line.discount ?? 0}
+              value={parseFloat((line.discount ?? 0).toFixed(2))}
               onChange={e => {
                 const value = parseFloat(e.target.value) || 0
                 const discountType = line.discount_type ?? 'percentage'
+                const baseUnitPrice =
+                  (line as any).margin >= 100 ? 0 : line.unit_cost / (1 - (line as any).margin / 100)
+                const lineTotal = baseUnitPrice * line.qty
 
                 if (discountType === 'percentage' && (value < 0 || value > 100)) return
-                if (discountType === 'fixed' && value > line.unit_cost) return
+                if (discountType === 'fixed' && value > lineTotal) return
 
                 updateLine(idx, 'discount', value)
               }}
-              placeholder={line.discount_type === 'fixed' ? 'Amount' : '0-100'}
+              placeholder={line.discount_type === 'fixed' ? 'Total amount' : '0-100'}
               min={0}
               max={line.discount_type === 'percentage' ? 100 : undefined}
               step={line.discount_type === 'percentage' ? 1 : 0.01}
             />
             <div className='text-xs text-zinc-400'>
-              {line.discount_type === 'fixed' ? `Discount can't greater than the unit cost` : 'Enter 0-100%'}
+              {line.discount_type === 'fixed' ? `Total discount off this line` : 'Enter 0-100%'}
             </div>
           </div>
         </DropdownMenuContent>
