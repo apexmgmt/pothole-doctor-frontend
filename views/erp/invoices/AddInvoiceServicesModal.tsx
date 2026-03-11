@@ -9,15 +9,22 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import {
+  BusinessLocation,
+  Client,
+  EstimateType,
   Invoice,
   InvoiceServicePayload,
+  PaymentTerm,
   ProductCategory,
   ProposalServiceItemPayload,
   ServiceType,
+  Staff,
   Unit,
   Vendor
 } from '@/types'
-import InvoiceService from '@/services/api/invoices.service'
+import CreateOrEditInvoiceModal from './CreateOrEditInvoiceModal'
+import InvoiceService from '@/services/api/invoices/invoices.service'
+import InvoiceActionsButton from './InvoiceActionsButton'
 import ServiceTypeSection from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ServiceTypeSection'
 import AddServiceButton from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/AddServiceButton'
 import TotalCalculationCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/TotalCalculationCard'
@@ -35,6 +42,11 @@ const AddInvoiceServicesModal = ({
   productCategories = [],
   uomUnits = [],
   vendors = [],
+  invoiceTypes = [],
+  clients = [],
+  staffs = [],
+  paymentTerms = [],
+  businessLocations = [],
   onSuccess
 }: {
   open: boolean
@@ -45,9 +57,23 @@ const AddInvoiceServicesModal = ({
   productCategories: ProductCategory[]
   uomUnits: Unit[]
   vendors: Vendor[]
+  invoiceTypes?: EstimateType[]
+  clients?: Client[]
+  staffs?: Staff[]
+  paymentTerms?: PaymentTerm[]
+  businessLocations?: BusinessLocation[]
   onSuccess?: () => void
 }) => {
   const [isLoading, setIsLoading] = useState(false)
+  const [isMarkingAsSigned, setIsMarkingAsSigned] = useState(false)
+  const [isInvoiceDetailsOpen, setIsInvoiceDetailsOpen] = useState(false)
+  const [currentInvoice, setCurrentInvoice] = useState<Invoice>(invoice)
+  const [activeTab, setActiveTab] = useState<'services' | 'documents'>('services')
+
+  // Keep currentInvoice in sync if the prop changes (e.g. after an edit)
+  useEffect(() => {
+    setCurrentInvoice(invoice)
+  }, [invoice])
 
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
 
@@ -95,12 +121,11 @@ const AddInvoiceServicesModal = ({
 
   const totalDiscount = allLines.reduce((sum, line) => {
     if (line.type === 'comment' || line.type === 'deduction') return sum
-    const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
-    const discount = line.discount ?? 0
-    const dType = line.discount_type ?? 'percentage'
-    const discountAmount = dType === 'fixed' ? discount * line.qty : (baseUnitPrice * discount) / 100
 
-    return sum + discountAmount
+    const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
+    const discountedUnitPrice = getDiscountedUnitPrice(line)
+
+    return sum + (baseUnitPrice - discountedUnitPrice) * line.qty
   }, 0)
 
   const handleAddServiceType = (serviceTypeId: string) => {
@@ -160,25 +185,48 @@ const AddInvoiceServicesModal = ({
     )
 
     if (type === 'fixed') {
-      const maxUnitCost = Math.max(...allProductAndLaborLines.map(line => line.unit_cost), 0)
+      const grandBaseTotal = allProductAndLaborLines.reduce((sum, line) => {
+        const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
 
-      if (value > maxUnitCost) {
+        return sum + baseUnitPrice * line.qty
+      }, 0)
+
+      if (value > grandBaseTotal) {
         toast.error(
-          `Fixed discount ($${value.toFixed(2)}) cannot exceed the maximum unit cost ($${maxUnitCost.toFixed(2)})`
+          `Fixed discount ($${value.toFixed(2)}) cannot exceed the grand total ($${grandBaseTotal.toFixed(2)})`
         )
 
         return
       }
-    }
 
-    setServiceTypeLineItems(prev =>
-      prev.map(st => ({
-        ...st,
-        lines: st.lines.map(line =>
-          line.type === 'product' || line.type === 'labor' ? { ...line, discount: value, discount_type: type } : line
-        )
-      }))
-    )
+      // Proportional fixed discount: (line_base_total / grand_base_total) * total_discount
+      setServiceTypeLineItems(prev =>
+        prev.map(st => ({
+          ...st,
+          lines: st.lines.map(line => {
+            if (line.type !== 'product' && line.type !== 'labor') return line
+
+            const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
+            const lineBaseTotal = baseUnitPrice * line.qty
+            const proportionalDiscount = grandBaseTotal > 0 ? (lineBaseTotal / grandBaseTotal) * value : 0
+
+            return { ...line, discount: proportionalDiscount, discount_type: 'fixed' as const }
+          })
+        }))
+      )
+    } else {
+      // Percentage: same rate on every applicable line
+      setServiceTypeLineItems(prev =>
+        prev.map(st => ({
+          ...st,
+          lines: st.lines.map(line =>
+            line.type === 'product' || line.type === 'labor'
+              ? { ...line, discount: value, discount_type: 'percentage' as const }
+              : line
+          )
+        }))
+      )
+    }
 
     setDiscountType(type)
     setDiscountValue(value)
@@ -226,6 +274,21 @@ const AddInvoiceServicesModal = ({
     resetForm()
     onOpenChange(false)
     onSuccess?.()
+  }
+
+  const handleMarkAsSigned = async () => {
+    setIsMarkingAsSigned(true)
+
+    try {
+      const response = await InvoiceService.markSigned(currentInvoice.id)
+
+      setCurrentInvoice(response.data || { ...currentInvoice, status: 'invoice signed' })
+      toast.success('Invoice marked as signed successfully')
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to mark invoice as signed')
+    } finally {
+      setIsMarkingAsSigned(false)
+    }
   }
 
   // Populate from existing invoice services when editing
@@ -286,11 +349,13 @@ const AddInvoiceServicesModal = ({
       actions={
         <div className='flex gap-3'>
           <Button type='button' variant='outline' onClick={onCancel} disabled={isLoading} className='flex-1'>
-            {isEditMode ? 'Cancel' : 'Skip & Close'}
+            Cancel
           </Button>
-          <Button type='button' onClick={onSubmit} disabled={isLoading} className='flex-1'>
-            {isLoading ? 'Saving...' : isEditMode ? 'Update Services' : 'Save Services'}
-          </Button>
+          {activeTab === 'services' && (
+            <Button type='button' onClick={onSubmit} disabled={isLoading} className='flex-1'>
+              {isLoading ? 'Saving...' : isEditMode ? 'Update Services' : 'Save Services'}
+            </Button>
+          )}
         </div>
       }
     >
@@ -308,12 +373,20 @@ const AddInvoiceServicesModal = ({
               {clientName || '—'}
             </p>
           </div>
-          <AddServiceButton
-            serviceTypes={serviceTypes}
-            open={serviceSelectOpen}
-            onOpenChange={setServiceSelectOpen}
-            onSelect={handleAddServiceType}
-          />
+          <div className='flex gap-2'>
+            <InvoiceActionsButton
+              invoice={currentInvoice}
+              isMarkingAsSigned={isMarkingAsSigned}
+              onViewEditDetails={() => setIsInvoiceDetailsOpen(true)}
+              onMarkAsSigned={handleMarkAsSigned}
+            />
+            <AddServiceButton
+              serviceTypes={serviceTypes}
+              open={serviceSelectOpen}
+              onOpenChange={setServiceSelectOpen}
+              onSelect={handleAddServiceType}
+            />
+          </div>
         </div>
 
         {/* Detail Cards */}
@@ -383,6 +456,23 @@ const AddInvoiceServicesModal = ({
           </CardContent>
         </Card>
       </>
+      <CreateOrEditInvoiceModal
+        mode='edit'
+        open={isInvoiceDetailsOpen}
+        onOpenChange={open => setIsInvoiceDetailsOpen(open)}
+        invoiceId={currentInvoice?.id}
+        invoiceDetails={currentInvoice}
+        invoiceTypes={invoiceTypes}
+        serviceTypes={serviceTypes}
+        clients={clients}
+        staffs={staffs}
+        paymentTerms={paymentTerms}
+        businessLocations={businessLocations}
+        onSuccess={() => {
+          setIsInvoiceDetailsOpen(false)
+          onSuccess?.()
+        }}
+      />
     </CommonDialog>
   )
 }

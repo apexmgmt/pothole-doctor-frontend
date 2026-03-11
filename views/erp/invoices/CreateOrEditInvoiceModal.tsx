@@ -18,7 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import InvoiceService from '@/services/api/invoices.service'
+import InvoiceService from '@/services/api/invoices/invoices.service'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DatePicker } from '@/components/ui/datePicker'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -154,14 +154,7 @@ const CreateOrEditInvoiceModal = ({
         toast.success('Invoice updated successfully')
         form.reset()
         onOpenChange(false)
-
-        if (onCreateSuccess) {
-          const updatedResponse = await InvoiceService.show(invoiceId)
-
-          onCreateSuccess(updatedResponse.data)
-        } else {
-          onSuccess?.()
-        }
+        onSuccess?.()
       } catch (error: any) {
         toast.error(typeof error.message === 'string' ? error.message : 'Failed to update invoice')
       }

@@ -31,7 +31,6 @@ interface EditWorkOrderModalProps {
   workOrderId?: string
   workOrderDetails?: WorkOrder
   onSuccess?: () => void
-  onEditSuccess?: (workOrder: WorkOrder) => void
   workOrderTypes: EstimateType[]
   serviceTypes: ServiceType[]
   clients: Client[]
@@ -46,7 +45,6 @@ const EditWorkOrderModal = ({
   workOrderId,
   workOrderDetails,
   onSuccess,
-  onEditSuccess,
   workOrderTypes,
   serviceTypes,
   clients,
@@ -137,14 +135,7 @@ const EditWorkOrderModal = ({
       toast.success('Work order updated successfully')
       form.reset()
       onOpenChange(false)
-
-      if (onEditSuccess) {
-        const updatedResponse = await WorkOrderService.show(workOrderId)
-
-        onEditSuccess(updatedResponse.data)
-      } else {
-        onSuccess?.()
-      }
+      onSuccess?.()
     } catch (error: any) {
       toast.error(typeof error.message === 'string' ? error.message : 'Failed to update work order')
     }

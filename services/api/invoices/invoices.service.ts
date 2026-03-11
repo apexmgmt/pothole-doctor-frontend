@@ -1,6 +1,14 @@
-import { InvoiceServicePayload } from './../../types/invoices.d'
-import { API_URL, APPROVE_INVOICE, INVOICES, INVOICES_RESTORE, INVOICES_SERVICES, VIEW_INVOICE } from '@/constants/api'
-import apiInterceptor from './api.interceptor'
+import { InvoiceServicePayload } from '@/types/invoices'
+import {
+  API_URL,
+  APPROVE_INVOICE,
+  INVOICES,
+  INVOICES_MARKED_SIGNED,
+  INVOICES_RESTORE,
+  INVOICES_SERVICES,
+  VIEW_INVOICE
+} from '@/constants/api'
+import apiInterceptor from '../api.interceptor'
 import { InvoicePayload } from '@/types'
 
 export default class InvoiceService {
@@ -256,6 +264,32 @@ export default class InvoiceService {
         const errorData = await response.json()
 
         throw new Error(errorData.message || 'Failed to approve invoice')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Marks an invoice as signed based on the provided invoice ID.
+   *
+   * @param invoiceId The ID of the invoice to be marked as signed.
+   * @returns A promise that resolves to the updated invoice data if the request is successful.
+   * @throws An error if the API request fails or returns a non-OK response.
+   */
+  static markSigned = async (invoiceId: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + INVOICES_MARKED_SIGNED(invoiceId), {
+        requiresAuth: true,
+        method: 'POST'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to mark invoice as signed')
       }
 
       return await response.json()

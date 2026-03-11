@@ -158,23 +158,12 @@ const CreateOrEditProposalModal = ({
 
   // Calculate total discount amount
   const totalDiscount = allLines.reduce((sum, line) => {
-    if (line.type === 'comment' || line.type === 'deduction') {
-      return sum
-    }
+    if (line.type === 'comment' || line.type === 'deduction') return sum
 
     const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
-    const discount = line.discount ?? 0
-    const discountType = line.discount_type ?? 'percentage'
+    const discountedUnitPrice = getDiscountedUnitPrice(line)
 
-    let discountAmount = 0
-
-    if (discountType === 'fixed') {
-      discountAmount = discount * line.qty
-    } else {
-      discountAmount = (baseUnitPrice * discount) / 100
-    }
-
-    return sum + discountAmount
+    return sum + (baseUnitPrice - discountedUnitPrice) * line.qty
   }, 0)
 
   const onSubmit = async () => {
@@ -407,35 +396,54 @@ const CreateOrEditProposalModal = ({
             discountValue={discountValue}
             totalDiscount={totalDiscount}
             onApplyDiscount={(type, value) => {
-              // Validate and apply discount to all product and labor-cost lines
               const allProductAndLaborLines = serviceTypeLineItems.flatMap(st =>
                 st.lines.filter(line => line.type === 'product' || line.type === 'labor')
               )
 
-              // For fixed discount, check if it's less than all unit costs
               if (type === 'fixed') {
-                const maxUnitCost = Math.max(...allProductAndLaborLines.map(line => line.unit_cost))
+                // Grand total of base prices across all applicable lines
+                const grandBaseTotal = allProductAndLaborLines.reduce((sum, line) => {
+                  const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
 
-                if (value > maxUnitCost) {
+                  return sum + baseUnitPrice * line.qty
+                }, 0)
+
+                if (value > grandBaseTotal) {
                   toast.error(
-                    `Fixed discount ($${value.toFixed(2)}) cannot exceed the maximum unit cost ($${maxUnitCost.toFixed(2)})`
+                    `Fixed discount ($${value.toFixed(2)}) cannot exceed the grand total ($${grandBaseTotal.toFixed(2)})`
                   )
 
                   return
                 }
-              }
 
-              // Apply discount to all service type line items
-              setServiceTypeLineItems(prev =>
-                prev.map(st => ({
-                  ...st,
-                  lines: st.lines.map(line =>
-                    line.type === 'product' || line.type === 'labor'
-                      ? { ...line, discount: value, discount_type: type }
-                      : line
-                  )
-                }))
-              )
+                // Proportional fixed discount per line: (line_base_total / grand_base_total) * total_discount
+                setServiceTypeLineItems(prev =>
+                  prev.map(st => ({
+                    ...st,
+                    lines: st.lines.map(line => {
+                      if (line.type !== 'product' && line.type !== 'labor') return line
+
+                      const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
+                      const lineBaseTotal = baseUnitPrice * line.qty
+                      const proportionalDiscount = grandBaseTotal > 0 ? (lineBaseTotal / grandBaseTotal) * value : 0
+
+                      return { ...line, discount: proportionalDiscount, discount_type: 'fixed' as const }
+                    })
+                  }))
+                )
+              } else {
+                // Percentage: set the same percentage on every applicable line
+                setServiceTypeLineItems(prev =>
+                  prev.map(st => ({
+                    ...st,
+                    lines: st.lines.map(line =>
+                      line.type === 'product' || line.type === 'labor'
+                        ? { ...line, discount: value, discount_type: 'percentage' as const }
+                        : line
+                    )
+                  }))
+                )
+              }
 
               setDiscountType(type)
               setDiscountValue(value)

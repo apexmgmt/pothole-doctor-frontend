@@ -167,6 +167,8 @@ const ProposalSection = ({
 
   // open proposal modal and sync state to URL
   const handleOpenProposalModal = (mode: ProposalModalModeType, proposal?: Proposal) => {
+    // Mark as opened so the auto-open effect never re-triggers on this lifecycle
+    hasAutoOpenedRef.current = true
     setProposalModalMode(mode)
 
     if (proposal) {
