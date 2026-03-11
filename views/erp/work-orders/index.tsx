@@ -69,12 +69,12 @@ const WorkOrders: React.FC<{
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
 
-  // Step 1: edit work order info
+  // Step 1: edit work order info (opened from services modal)
   const [isWorkOrderModalOpen, setIsWorkOrderModalOpen] = useState<boolean>(false)
   const [selectedWorkOrderId, setSelectedWorkOrderId] = useState<string | null>(null)
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null)
 
-  // Step 2: edit services (opens after step 1 update)
+  // Edit services modal (opened directly from the list)
   const [isServicesModalOpen, setIsServicesModalOpen] = useState<boolean>(false)
   const [servicesWorkOrder, setServicesWorkOrder] = useState<WorkOrder | null>(null)
 
@@ -134,13 +134,11 @@ const WorkOrders: React.FC<{
   }, [filterOptions])
 
   const handleOpenEditModal = async (id: string) => {
-    setSelectedWorkOrderId(id)
-
     try {
       const response = await WorkOrderService.show(id)
 
-      setSelectedWorkOrder(response.data)
-      setIsWorkOrderModalOpen(true)
+      setServicesWorkOrder(response.data)
+      setIsServicesModalOpen(true)
     } catch {
       toast.error('Failed to fetch work order details')
     }
@@ -150,12 +148,6 @@ const WorkOrders: React.FC<{
     setIsWorkOrderModalOpen(false)
     setSelectedWorkOrderId(null)
     setSelectedWorkOrder(null)
-  }
-
-  // Called after step 1 update — auto-open step 2
-  const handleEditSuccess = (workOrder: WorkOrder) => {
-    setServicesWorkOrder(workOrder)
-    setIsServicesModalOpen(true)
   }
 
   const handleServicesClose = () => {
@@ -374,7 +366,7 @@ const WorkOrders: React.FC<{
         />
       </CommonLayout>
 
-      {/* Step 1: Edit Work Order info */}
+      {/* Edit Work Order info — opened from inside EditWorkOrderServicesModal */}
       <EditWorkOrderModal
         open={isWorkOrderModalOpen}
         onOpenChange={handleWorkOrderClose}
@@ -387,14 +379,13 @@ const WorkOrders: React.FC<{
         paymentTerms={paymentTerms}
         businessLocations={businessLocations}
         onSuccess={fetchData}
-        onEditSuccess={handleEditSuccess}
       />
 
-      {/* Step 2: Edit Services — locked total, profit adjusts */}
+      {/* Edit Services — opened directly from the list */}
       {servicesWorkOrder && (
         <EditWorkOrderServicesModal
           open={isServicesModalOpen}
-          onOpenChange={open => {
+          onOpenChange={(open: boolean) => {
             if (!open) handleServicesClose()
           }}
           workOrder={servicesWorkOrder}
@@ -403,7 +394,12 @@ const WorkOrders: React.FC<{
           productCategories={productCategories}
           uomUnits={uomUnits}
           vendors={vendors}
-          onSuccess={handleServicesClose}
+          workOrderTypes={workOrderTypes}
+          clients={clients}
+          staffs={staffs}
+          paymentTerms={paymentTerms}
+          businessLocations={businessLocations}
+          onSuccess={() => fetchData()}
         />
       )}
     </>
