@@ -32,6 +32,7 @@ import {
 import { formatDate } from '@/utils/date'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
+import { DocumentIcon, UserIcon } from '@/public/icons'
 import InvoiceService from '@/services/api/invoices/invoices.service'
 
 import CreateOrEditInvoiceModal from './CreateOrEditInvoiceModal'
@@ -40,6 +41,7 @@ import InvoiceTasksModal from './InvoiceTasksModal'
 import InvoiceAddTaskModal from './InvoiceAddTaskModal'
 import InvoiceNotesModal from './InvoiceNotesModal'
 import InvoiceAddNoteModal from './InvoiceAddNoteModal'
+import InvoiceDocuments from './documents/InvoiceDocuments'
 
 const Invoices: React.FC<{
   invoiceTypes: EstimateType[]
@@ -72,6 +74,8 @@ const Invoices: React.FC<{
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [activeTab, setActiveTab] = useState<string>('invoices')
+  const [selectedInvoiceForTab, setSelectedInvoiceForTab] = useState<Invoice | null>(null)
 
   // Step 1: create/edit invoice
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState<boolean>(false)
@@ -432,7 +436,25 @@ const Invoices: React.FC<{
 
   return (
     <>
-      <CommonLayout title='Invoices' noTabs={true}>
+      <CommonLayout
+        title='Invoices'
+        buttons={[
+          {
+            label: 'Invoices',
+            icon: UserIcon,
+            onClick: () => setActiveTab('invoices'),
+            isActive: activeTab === 'invoices'
+          },
+          {
+            label: 'Documents',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('documents'),
+            isActive: activeTab === 'documents',
+            disabled: !selectedInvoiceForTab
+          }
+        ]}
+      >
+        {activeTab === 'invoices' && (
         <CommonTable
           data={{
             data: (apiResponse?.data as Invoice[]) || [],
@@ -450,7 +472,14 @@ const Invoices: React.FC<{
           pagination={true}
           isLoading={isLoading}
           emptyMessage='No invoices found'
+          handleRowSelect={(row: Invoice) => {
+            setSelectedInvoiceForTab(row)
+          }}
         />
+        )}
+        {activeTab === 'documents' && selectedInvoiceForTab && (
+          <InvoiceDocuments invoiceId={selectedInvoiceForTab.id} />
+        )}
       </CommonLayout>
 
       {/* Step 1: Create / Edit Invoice */}

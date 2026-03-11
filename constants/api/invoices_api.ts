@@ -41,6 +41,18 @@ export const INVOICES_MARKED_SIGNED = (invoiceId: string): string => {
 }
 
 /**
+ * This contains the API endpoint to get all invoice documents for a specific invoice.
+ * @param invoiceId string (uuid)
+ * @method GET - To get data table of invoice documents for a specific invoice
+ * @method POST - To upload a new invoice document for a specific invoice
+ * @method GET - To get a specific invoice document for a specific invoice (document_id should be passed as query param)
+ * @method PUT - To update a specific invoice document for a specific invoice (document_id should be passed as query param)
+ * @method DELETE - To delete a specific invoice document for a specific invoice (document_id should be passed as query param)
+ * @returns
+ */
+export const INVOICES_DOCUMENTS: string = '/v1/tenant/invoice-documents'
+
+/**
  * This contains the API endpoint to get all invoice documents.
  * @method GET - To get data table of invoice documents
  * @method POST - To upload a new invoice document

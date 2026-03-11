@@ -68,6 +68,7 @@ const AddInvoiceServicesModal = ({
   const [isMarkingAsSigned, setIsMarkingAsSigned] = useState(false)
   const [isInvoiceDetailsOpen, setIsInvoiceDetailsOpen] = useState(false)
   const [currentInvoice, setCurrentInvoice] = useState<Invoice>(invoice)
+  const [activeTab, setActiveTab] = useState<'services' | 'documents'>('services')
 
   // Keep currentInvoice in sync if the prop changes (e.g. after an edit)
   useEffect(() => {
@@ -348,11 +349,13 @@ const AddInvoiceServicesModal = ({
       actions={
         <div className='flex gap-3'>
           <Button type='button' variant='outline' onClick={onCancel} disabled={isLoading} className='flex-1'>
-            {isEditMode ? 'Cancel' : 'Cancel'}
+            Cancel
           </Button>
-          <Button type='button' onClick={onSubmit} disabled={isLoading} className='flex-1'>
-            {isLoading ? 'Saving...' : isEditMode ? 'Update Services' : 'Save Services'}
-          </Button>
+          {activeTab === 'services' && (
+            <Button type='button' onClick={onSubmit} disabled={isLoading} className='flex-1'>
+              {isLoading ? 'Saving...' : isEditMode ? 'Update Services' : 'Save Services'}
+            </Button>
+          )}
         </div>
       }
     >
