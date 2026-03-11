@@ -12,9 +12,6 @@ import {
   Boxes,
   Minus,
   Box,
-  Truck,
-  BadgeDollarSign,
-  ClipboardPlus,
   Trash2
 } from 'lucide-react'
 import { useState, useRef } from 'react'
@@ -22,12 +19,11 @@ import LaborCostsModal from '@/views/erp/labor-costs/LaborCostsModal'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import ProductsModal from '@/views/erp/products/ProductsModal'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
-import { Textarea } from '@/components/ui/textarea'
 import { getDiscountedUnitPrice } from '@/utils/business-calculation'
 import ServiceTypeSummary from './ServiceTypeSummary'
 import ServiceTypeActions from './ServiceTypeActions'
+import LineItemActions from './LineItemActions'
 
 const ServiceTypeSection = ({
   mode,
@@ -398,7 +394,7 @@ const ServiceTypeSection = ({
                         <td className='px-2 py-1 flex justify-end gap-1'>
                           {mode !== 'view' && (
                             <Button size='icon' variant='ghost' onClick={() => removeLine(idx)}>
-                              🗑️
+                              <Trash2 className='h-4 w-4 text-red-400' />
                             </Button>
                           )}
                         </td>
@@ -534,120 +530,13 @@ const ServiceTypeSection = ({
                           />
                         )}
                       </td>
-                      <td className='px-2 py-1 flex gap-1 justify-end'>
-                        {/* Freight charge dropdown */}
-                        {line.type === 'product' && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button size='icon' variant='ghost' title='Freight Charge'>
-                                <Truck className='h-4 w-4 text-zinc-400' />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align='end' className='w-64 p-3'>
-                              <div className='space-y-2'>
-                                <label className='text-sm font-medium text-zinc-300'>Freight Charge</label>
-                                <Input
-                                  type='number'
-                                  value={line.freight_charge ?? 0}
-                                  onChange={e => updateLine(idx, 'freight_charge', parseFloat(e.target.value) || 0)}
-                                  placeholder='0.00'
-                                  min={0}
-                                  step={0.01}
-                                  className='w-full'
-                                  disabled={mode === 'view'}
-                                />
-                                <div className='text-xs text-zinc-400'>Enter freight charge</div>
-                              </div>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
-                        {/* Discount button dropdown */}
-                        {line.type !== 'expense' && line.type !== 'deduction' && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button size='icon' variant='ghost' title='Discount'>
-                                <BadgeDollarSign className='h-4 w-4 text-zinc-400' />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align='end' className='w-64 p-3'>
-                              <div className='space-y-2'>
-                                <div className='flex gap-2'>
-                                  <Button
-                                    variant={line.discount_type === 'percentage' ? 'default' : 'outline'}
-                                    size='sm'
-                                    onClick={() => updateLine(idx, 'discount_type', 'percentage')}
-                                    className='flex-1'
-                                  >
-                                    %
-                                  </Button>
-                                  <Button
-                                    variant={line.discount_type === 'fixed' ? 'default' : 'outline'}
-                                    size='sm'
-                                    onClick={() => updateLine(idx, 'discount_type', 'fixed')}
-                                    className='flex-1'
-                                  >
-                                    $
-                                  </Button>
-                                </div>
-                                <Input
-                                  disabled={mode === 'view'}
-                                  type='number'
-                                  value={line.discount ?? 0}
-                                  onChange={e => {
-                                    const value = parseFloat(e.target.value) || 0
-                                    const discountType = line.discount_type ?? 'percentage'
-
-                                    // Validation
-                                    if (discountType === 'percentage' && (value < 0 || value > 100)) {
-                                      return
-                                    }
-
-                                    if (discountType === 'fixed' && value > line.unit_cost) {
-                                      return
-                                    }
-
-                                    updateLine(idx, 'discount', value)
-                                  }}
-                                  placeholder={line.discount_type === 'fixed' ? 'Amount' : '0-100'}
-                                  min={0}
-                                  max={line.discount_type === 'percentage' ? 100 : undefined}
-                                  step={line.discount_type === 'percentage' ? 1 : 0.01}
-                                />
-                                <div className='text-xs text-zinc-400'>
-                                  {line.discount_type === 'fixed'
-                                    ? `Discount can't greater than the unit cost`
-                                    : 'Enter 0-100%'}
-                                </div>
-                              </div>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
-
-                        {/* Note Button with Dropdown */}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button size='icon' variant='ghost' title='Note'>
-                              <ClipboardPlus className='h-4 w-4 text-zinc-400' />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align='end' className='w-64 p-2'>
-                            <Textarea
-                              disabled={mode === 'view'}
-                              value={line.note || ''}
-                              onChange={e => updateLine(idx, 'note', e.target.value)}
-                              placeholder='Add note...'
-                              className='min-h-20'
-                            />
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        {/* Delete Button */}
-                        {mode !== 'view' && (
-                          <Button size='icon' variant='ghost' onClick={() => removeLine(idx)} title='Delete'>
-                            <Trash2 className='h-4 w-4 text-red-400' />
-                          </Button>
-                        )}
-                      </td>
+                      <LineItemActions
+                        line={line}
+                        idx={idx}
+                        mode={mode}
+                        updateLine={updateLine}
+                        removeLine={removeLine}
+                      />
                       <td className='hidden'>
                         <input type='hidden' value={line.type || ''} readOnly />
                       </td>
