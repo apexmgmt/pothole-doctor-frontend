@@ -14,7 +14,8 @@ import {
   Box,
   Truck,
   BadgeDollarSign,
-  ClipboardPlus
+  ClipboardPlus,
+  Trash2
 } from 'lucide-react'
 import { useState, useRef } from 'react'
 import LaborCostsModal from '@/views/erp/labor-costs/LaborCostsModal'
@@ -643,7 +644,7 @@ const ServiceTypeSection = ({
                         {/* Delete Button */}
                         {mode !== 'view' && (
                           <Button size='icon' variant='ghost' onClick={() => removeLine(idx)} title='Delete'>
-                            🗑️
+                            <Trash2 className='h-4 w-4 text-red-400' />
                           </Button>
                         )}
                       </td>
