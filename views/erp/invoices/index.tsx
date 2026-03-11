@@ -36,6 +36,10 @@ import InvoiceService from '@/services/api/invoices/invoices.service'
 
 import CreateOrEditInvoiceModal from './CreateOrEditInvoiceModal'
 import AddInvoiceServicesModal from './AddInvoiceServicesModal'
+import InvoiceTasksModal from './InvoiceTasksModal'
+import InvoiceAddTaskModal from './InvoiceAddTaskModal'
+import InvoiceNotesModal from './InvoiceNotesModal'
+import InvoiceAddNoteModal from './InvoiceAddNoteModal'
 
 const Invoices: React.FC<{
   invoiceTypes: EstimateType[]
@@ -78,6 +82,24 @@ const Invoices: React.FC<{
   // Step 2: add/edit services (opens after both create and edit)
   const [isServicesModalOpen, setIsServicesModalOpen] = useState<boolean>(false)
   const [servicesInvoice, setServicesInvoice] = useState<Invoice | null>(null)
+
+  // Tasks modal
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
+  const [taskModalInvoiceId, setTaskModalInvoiceId] = useState<string | null>(null)
+  const [taskModalClientId, setTaskModalClientId] = useState<string | null>(null)
+
+  const [isTasksListModalOpen, setIsTasksListModalOpen] = useState(false)
+  const [tasksListInvoiceId, setTasksListInvoiceId] = useState<string | null>(null)
+  const [tasksListClientId, setTasksListClientId] = useState<string | null>(null)
+
+  // Notes modal
+  const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false)
+  const [addNoteInvoiceId, setAddNoteInvoiceId] = useState<string | null>(null)
+  const [addNoteClientId, setAddNoteClientId] = useState<string | null>(null)
+
+  const [isNotesListModalOpen, setIsNotesListModalOpen] = useState(false)
+  const [notesListInvoiceId, setNotesListInvoiceId] = useState<string | null>(null)
+  const [notesListClientId, setNotesListClientId] = useState<string | null>(null)
 
   // Permissions
   const [canCreateInvoice, setCanCreateInvoice] = useState<boolean>(false)
@@ -288,6 +310,54 @@ const Invoices: React.FC<{
                 >
                   View/Print Invoice
                 </Button>,
+                <Button
+                  key='add-task'
+                  className='w-full'
+                  variant='ghost'
+                  onClick={() => {
+                    setTaskModalInvoiceId(row.id)
+                    setTaskModalClientId(row.client_id ?? null)
+                    setIsTaskModalOpen(true)
+                  }}
+                >
+                  Add Task
+                </Button>,
+                <Button
+                  key='view-tasks'
+                  className='w-full'
+                  variant='ghost'
+                  onClick={() => {
+                    setTasksListInvoiceId(row.id)
+                    setTasksListClientId(row.client_id ?? null)
+                    setIsTasksListModalOpen(true)
+                  }}
+                >
+                  View Tasks
+                </Button>,
+                <Button
+                  key='add-note'
+                  className='w-full'
+                  variant='ghost'
+                  onClick={() => {
+                    setAddNoteInvoiceId(row.id)
+                    setAddNoteClientId(row.client_id ?? null)
+                    setIsAddNoteModalOpen(true)
+                  }}
+                >
+                  Add Note
+                </Button>,
+                <Button
+                  key='view-notes'
+                  className='w-full'
+                  variant='ghost'
+                  onClick={() => {
+                    setNotesListInvoiceId(row.id)
+                    setNotesListClientId(row.client_id ?? null)
+                    setIsNotesListModalOpen(true)
+                  }}
+                >
+                  View Notes
+                </Button>,
                 canEditInvoice && (
                   <EditButton
                     key='edit'
@@ -399,6 +469,72 @@ const Invoices: React.FC<{
         onSuccess={fetchData}
         onCreateSuccess={handleCreateSuccess}
       />
+
+      {taskModalInvoiceId && (
+        <InvoiceAddTaskModal
+          open={isTaskModalOpen}
+          onOpenChange={open => {
+            setIsTaskModalOpen(open)
+
+            if (!open) {
+              setTaskModalInvoiceId(null)
+              setTaskModalClientId(null)
+            }
+          }}
+          invoiceId={taskModalInvoiceId}
+          clientId={taskModalClientId ?? undefined}
+          mode='create'
+        />
+      )}
+
+      {tasksListInvoiceId && (
+        <InvoiceTasksModal
+          open={isTasksListModalOpen}
+          onOpenChange={open => {
+            setIsTasksListModalOpen(open)
+
+            if (!open) {
+              setTasksListInvoiceId(null)
+              setTasksListClientId(null)
+            }
+          }}
+          invoiceId={tasksListInvoiceId}
+          clientId={tasksListClientId ?? undefined}
+        />
+      )}
+
+      {addNoteInvoiceId && (
+        <InvoiceAddNoteModal
+          open={isAddNoteModalOpen}
+          onOpenChange={open => {
+            setIsAddNoteModalOpen(open)
+
+            if (!open) {
+              setAddNoteInvoiceId(null)
+              setAddNoteClientId(null)
+            }
+          }}
+          invoiceId={addNoteInvoiceId}
+          clientId={addNoteClientId ?? undefined}
+          mode='create'
+        />
+      )}
+
+      {notesListInvoiceId && (
+        <InvoiceNotesModal
+          open={isNotesListModalOpen}
+          onOpenChange={open => {
+            setIsNotesListModalOpen(open)
+
+            if (!open) {
+              setNotesListInvoiceId(null)
+              setNotesListClientId(null)
+            }
+          }}
+          invoiceId={notesListInvoiceId}
+          clientId={notesListClientId ?? undefined}
+        />
+      )}
 
       {/* Step 2: Add / Edit Services (opens after create or edit) */}
       {servicesInvoice && (

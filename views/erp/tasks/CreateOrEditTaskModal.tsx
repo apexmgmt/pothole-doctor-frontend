@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import TaskService from '@/services/api/tasks.service'
 import ProposalTaskService from '@/services/api/estimates/proposal-tasks.service'
+import InvoiceTaskService from '@/services/api/invoices/invoice-tasks.service'
 import { MultiSelect, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TaskDateTimeFields } from './CreateOrEditTaskModal/TaskDateTimeFields'
 import { Textarea } from '@/components/ui/textarea'
@@ -49,6 +50,9 @@ interface CreateOrEditTaskModalProps {
 
   /** When provided, task is created under this proposal via ProposalTaskService */
   proposalId?: string
+
+  /** When provided, task is created under this invoice via InvoiceTaskService */
+  invoiceId?: string
 
   /** When provided, pre-selects and locks the customer field */
   defaultClientId?: string
@@ -89,6 +93,7 @@ const CreateOrEditTaskModal = ({
   taskReminders,
   taskReminderChannels,
   proposalId,
+  invoiceId,
   defaultClientId
 }: CreateOrEditTaskModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -325,7 +330,9 @@ const CreateOrEditTaskModal = ({
       try {
         const storeCall = proposalId
           ? ProposalTaskService.store(proposalId, payload)
-          : TaskService.store(payload)
+          : invoiceId
+            ? InvoiceTaskService.store(invoiceId, payload)
+            : TaskService.store(payload)
 
         await storeCall
           .then(() => {
@@ -344,7 +351,9 @@ const CreateOrEditTaskModal = ({
       try {
         const updateCall = proposalId
           ? ProposalTaskService.update(proposalId, taskId, payload)
-          : TaskService.update(taskId, payload)
+          : invoiceId
+            ? InvoiceTaskService.update(invoiceId, taskId, payload)
+            : TaskService.update(taskId, payload)
 
         await updateCall
           .then(() => {
