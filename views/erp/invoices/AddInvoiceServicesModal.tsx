@@ -354,12 +354,7 @@ const AddInvoiceServicesModal = ({
             </p>
           </div>
           <div className='flex gap-2'>
-            <Button
-              type='button'
-              variant='outline'
-              size='sm'
-              onClick={() => setIsInvoiceDetailsOpen(true)}
-            >
+            <Button type='button' variant='outline' size='default' onClick={() => setIsInvoiceDetailsOpen(true)}>
               View/Edit Invoice Details
             </Button>
             <AddServiceButton
