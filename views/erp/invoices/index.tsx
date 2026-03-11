@@ -215,7 +215,7 @@ const Invoices: React.FC<{
       id: 'invoice_number',
       header: 'Invoice #',
       cell: (row: Invoice) => (
-        <span className='font-medium'>{row.invoice_number?.toString().padStart(6, '0') || 'N/A'}</span>
+        <span className='font-medium hover:underline cursor-pointer' onClick={() => handleOpenEditModal(row.id)}>{row.invoice_number?.toString().padStart(6, '0') || 'N/A'}</span>
       ),
       sortable: false
     },
