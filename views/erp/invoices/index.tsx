@@ -32,7 +32,7 @@ import {
 import { formatDate } from '@/utils/date'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
-import InvoiceService from '@/services/api/invoices.service'
+import InvoiceService from '@/services/api/invoices/invoices.service'
 
 import CreateOrEditInvoiceModal from './CreateOrEditInvoiceModal'
 import AddInvoiceServicesModal from './AddInvoiceServicesModal'

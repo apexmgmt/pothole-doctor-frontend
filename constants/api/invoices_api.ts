@@ -14,7 +14,7 @@ export const INVOICES: string = '/v1/tenant/invoices/'
  * @param invoiceId string (uuid)
  * @method POST - To add a service to an invoice
  * @method PUT - To update a service in an invoice
- * @returns 
+ * @returns
  */
 export const INVOICES_SERVICES = (invoiceId: string): string => {
   return `/v1/tenant/invoices/${invoiceId}/services/`
@@ -24,7 +24,7 @@ export const INVOICES_SERVICES = (invoiceId: string): string => {
  * This contains the API endpoint to restore a deleted invoice.
  * @param invoiceId string (uuid)
  * @method PUT - To restore a deleted invoice
- * @returns 
+ * @returns
  */
 export const INVOICES_RESTORE = (invoiceId: string): string => {
   return `/v1/tenant/invoices/${invoiceId}/restore/`
@@ -37,7 +37,7 @@ export const INVOICES_RESTORE = (invoiceId: string): string => {
  * @method GET - To get a specific invoice document (document_id should be passed as query param)
  * @method PUT - To update a specific invoice document (document_id should be passed as query param)
  * @method DELETE - To delete a specific invoice document (document_id should be passed as query param)
- * @returns 
+ * @returns
  */
 export const INVOICE_DOCUMENTS: string = '/v1/tenant/invoice-documents/'
 
@@ -47,7 +47,7 @@ export const INVOICE_DOCUMENTS: string = '/v1/tenant/invoice-documents/'
  * @param icid string (client hash id)
  */
 export const VIEW_INVOICE = (inid: string, icid: string): string => {
-    return `/v1/tenant/view-invoice/?inid=${inid}&icid=${icid}`
+  return `/v1/tenant/view-invoice/?inid=${inid}&icid=${icid}`
 }
 
 /**
@@ -56,3 +56,23 @@ export const VIEW_INVOICE = (inid: string, icid: string): string => {
  * @param invoice_id string (uuid)
  */
 export const APPROVE_INVOICE: string = '/v1/tenant/approve-invoice/'
+
+/**
+ * Get invoice tasks api endpoint (tenant)
+ * @method GET, POST, PUT, SHOW, DELETE
+ * @param invoice_id string
+ * @returns string /v1/tenant/invoices/:invoice_id/tasks
+ */
+export const INVOICE_TASKS = (invoice_id: string): string => {
+  return `/v1/tenant/invoices/${invoice_id}/tasks/`
+}
+
+/**
+ * Get invoice notes api endpoint (tenant)
+ * @method GET, POST, PUT, SHOW, DELETE
+ * @param invoice_id string
+ * @returns string /v1/tenant/invoices/:invoice_id/notes
+ */
+export const INVOICE_NOTES = (invoice_id: string): string => {
+  return `/v1/tenant/invoices/${invoice_id}/notes/`
+}

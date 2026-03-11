@@ -1,6 +1,6 @@
-import { InvoiceServicePayload } from './../../types/invoices.d'
+import { InvoiceServicePayload } from '@/types/invoices'
 import { API_URL, APPROVE_INVOICE, INVOICES, INVOICES_RESTORE, INVOICES_SERVICES, VIEW_INVOICE } from '@/constants/api'
-import apiInterceptor from './api.interceptor'
+import apiInterceptor from '../api.interceptor'
 import { InvoicePayload } from '@/types'
 
 export default class InvoiceService {

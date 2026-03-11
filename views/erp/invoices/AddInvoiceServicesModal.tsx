@@ -23,7 +23,7 @@ import {
   Vendor
 } from '@/types'
 import CreateOrEditInvoiceModal from './CreateOrEditInvoiceModal'
-import InvoiceService from '@/services/api/invoices.service'
+import InvoiceService from '@/services/api/invoices/invoices.service'
 import ServiceTypeSection from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ServiceTypeSection'
 import AddServiceButton from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/AddServiceButton'
 import TotalCalculationCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/TotalCalculationCard'
