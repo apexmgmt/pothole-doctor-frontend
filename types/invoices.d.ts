@@ -5,6 +5,7 @@ import { Estimate, TakeoffData } from './estimates/estimates'
 import { Proposal, ProposalService } from './estimates/proposals'
 import { LaborCost } from './labor_costs'
 import { Product } from './products'
+import { User } from './user'
 
 export interface Invoice {
   id: string
@@ -111,4 +112,22 @@ export interface InvoiceServiceItemPayload {
   tax_amount: number
   total_price?: number
   note: string
+}
+
+export interface InvoiceJobImage {
+  id: string
+  imageable_id: string
+  imageable_type: string
+  type: 'before' | 'after'
+  full_path: string
+  name: string
+  uploaded_by: string | User | null
+  created_at: string
+  updated_at: string
+}
+
+export interface InvoiceJobImagePayload {
+  invoice_id: string
+  image: File
+  type: 'before' | 'after'
 }

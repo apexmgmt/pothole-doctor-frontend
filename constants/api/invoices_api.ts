@@ -98,3 +98,13 @@ export const INVOICE_TASKS = (invoice_id: string): string => {
 export const INVOICE_NOTES = (invoice_id: string): string => {
   return `/v1/tenant/invoices/${invoice_id}/notes/`
 }
+
+/**
+ * This contains the API endpoint to get all invoice job images for a specific invoice.
+ * @param invoiceId string (uuid)
+ * @method GET - To get data table of invoice job images for a specific invoice
+ * @method POST - To upload a new invoice job image for a specific invoice
+ * @method DELETE - To delete a specific invoice job image for a specific invoice (image_id should be passed as query param)
+ * @returns
+ */
+export const INVOICE_JOB_IMAGES: string = '/v1/tenant/invoice-job-images/'
