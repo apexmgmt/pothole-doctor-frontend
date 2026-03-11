@@ -1,15 +1,15 @@
-'use client';
+'use client'
 
-import * as React from 'react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import * as React from 'react'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 interface DescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {
-  description: string;
-  isTable?: boolean;
-  length?: number;
-  isShowMore?: boolean;
-  lines?: number;
+  description: string
+  isTable?: boolean
+  length?: number
+  isShowMore?: boolean
+  lines?: number
 }
 
 export function Description({
@@ -21,13 +21,13 @@ export function Description({
   className,
   ...props
 }: DescriptionProps) {
-  const [isExpanded, setIsExpanded] = React.useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(false)
 
   const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
-  };
+    setIsExpanded(!isExpanded)
+  }
 
-  const shouldShowMore = isShowMore && description.length > length;
+  const shouldShowMore = isShowMore && description && description.length > length
 
   return (
     <div className={cn('flex flex-col gap-1', className)}>
@@ -41,21 +41,21 @@ export function Description({
         style={{
           display: isExpanded ? 'block' : '-webkit-box',
           WebkitBoxOrient: 'vertical',
-          WebkitLineClamp: isExpanded ? 'unset' : lines,
+          WebkitLineClamp: isExpanded ? 'unset' : lines
         }}
       >
         {description}
       </p>
       {shouldShowMore && (
         <Button
-          variant="link"
-          size="sm"
-          className="h-auto p-0 w-fit justify-start text-primary hover:no-underline"
+          variant='link'
+          size='sm'
+          className='h-auto p-0 w-fit justify-start text-primary hover:no-underline'
           onClick={toggleExpand}
         >
           {isExpanded ? 'Show Less' : 'Show More'}
         </Button>
       )}
     </div>
-  );
+  )
 }
