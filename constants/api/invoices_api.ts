@@ -31,6 +31,16 @@ export const INVOICES_RESTORE = (invoiceId: string): string => {
 }
 
 /**
+ * This contains the API endpoint to mark an invoice as signed.
+ * @param invoiceId string (uuid)
+ * @method POST - To mark an invoice as signed
+ * @returns
+ */
+export const INVOICES_MARKED_SIGNED = (invoiceId: string): string => {
+  return `/v1/tenant/invoices/${invoiceId}/mark-signed/`
+}
+
+/**
  * This contains the API endpoint to get all invoice documents.
  * @method GET - To get data table of invoice documents
  * @method POST - To upload a new invoice document

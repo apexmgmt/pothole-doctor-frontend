@@ -24,6 +24,7 @@ import {
 } from '@/types'
 import CreateOrEditInvoiceModal from './CreateOrEditInvoiceModal'
 import InvoiceService from '@/services/api/invoices/invoices.service'
+import InvoiceActionsButton from './InvoiceActionsButton'
 import ServiceTypeSection from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ServiceTypeSection'
 import AddServiceButton from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/AddServiceButton'
 import TotalCalculationCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/TotalCalculationCard'
@@ -64,6 +65,7 @@ const AddInvoiceServicesModal = ({
   onSuccess?: () => void
 }) => {
   const [isLoading, setIsLoading] = useState(false)
+  const [isMarkingAsSigned, setIsMarkingAsSigned] = useState(false)
   const [isInvoiceDetailsOpen, setIsInvoiceDetailsOpen] = useState(false)
   const [currentInvoice, setCurrentInvoice] = useState<Invoice>(invoice)
 
@@ -273,6 +275,21 @@ const AddInvoiceServicesModal = ({
     onSuccess?.()
   }
 
+  const handleMarkAsSigned = async () => {
+    setIsMarkingAsSigned(true)
+
+    try {
+      const response = await InvoiceService.markSigned(currentInvoice.id)
+
+      setCurrentInvoice(response.data || { ...currentInvoice, status: 'invoice signed' })
+      toast.success('Invoice marked as signed successfully')
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to mark invoice as signed')
+    } finally {
+      setIsMarkingAsSigned(false)
+    }
+  }
+
   // Populate from existing invoice services when editing
   useEffect(() => {
     if (open && invoice?.services && invoice.services.length > 0) {
@@ -354,9 +371,12 @@ const AddInvoiceServicesModal = ({
             </p>
           </div>
           <div className='flex gap-2'>
-            <Button type='button' variant='outline' size='default' onClick={() => setIsInvoiceDetailsOpen(true)}>
-              View/Edit Invoice Details
-            </Button>
+            <InvoiceActionsButton
+              invoice={currentInvoice}
+              isMarkingAsSigned={isMarkingAsSigned}
+              onViewEditDetails={() => setIsInvoiceDetailsOpen(true)}
+              onMarkAsSigned={handleMarkAsSigned}
+            />
             <AddServiceButton
               serviceTypes={serviceTypes}
               open={serviceSelectOpen}
