@@ -11,7 +11,10 @@ import {
   Wrench,
   Boxes,
   Minus,
-  Box
+  Box,
+  Truck,
+  BadgeDollarSign,
+  ClipboardPlus
 } from 'lucide-react'
 import { useState, useRef } from 'react'
 import LaborCostsModal from '@/views/erp/labor-costs/LaborCostsModal'
@@ -536,7 +539,7 @@ const ServiceTypeSection = ({
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button size='icon' variant='ghost' title='Freight Charge'>
-                                🚚
+                                <Truck className='h-4 w-4 text-zinc-400' />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align='end' className='w-64 p-3'>
@@ -562,7 +565,7 @@ const ServiceTypeSection = ({
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button size='icon' variant='ghost' title='Discount'>
-                                💰
+                                <BadgeDollarSign className='h-4 w-4 text-zinc-400' />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align='end' className='w-64 p-3'>
@@ -623,7 +626,7 @@ const ServiceTypeSection = ({
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button size='icon' variant='ghost' title='Note'>
-                              📝
+                              <ClipboardPlus className='h-4 w-4 text-zinc-400' />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align='end' className='w-64 p-2'>
