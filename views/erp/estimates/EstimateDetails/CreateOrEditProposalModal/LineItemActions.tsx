@@ -73,7 +73,7 @@ const LineItemActions = ({ line, idx, mode, updateLine, removeLine }: LineItemAc
             <Input
               disabled={mode === 'view'}
               type='number'
-              value={parseFloat((line.discount ?? 0).toFixed(2))}
+              value={Number(Number(line.discount ?? 0).toFixed(2))}
               onChange={e => {
                 const value = parseFloat(e.target.value) || 0
                 const discountType = line.discount_type ?? 'percentage'
