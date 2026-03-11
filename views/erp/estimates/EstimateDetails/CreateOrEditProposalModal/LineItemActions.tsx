@@ -77,8 +77,10 @@ const LineItemActions = ({ line, idx, mode, updateLine, removeLine }: LineItemAc
               onChange={e => {
                 const value = parseFloat(e.target.value) || 0
                 const discountType = line.discount_type ?? 'percentage'
+
                 const baseUnitPrice =
                   (line as any).margin >= 100 ? 0 : line.unit_cost / (1 - (line as any).margin / 100)
+
                 const lineTotal = baseUnitPrice * line.qty
 
                 if (discountType === 'percentage' && (value < 0 || value > 100)) return
