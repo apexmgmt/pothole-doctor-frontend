@@ -9,14 +9,20 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import {
+  BusinessLocation,
+  Client,
+  EstimateType,
   Invoice,
   InvoiceServicePayload,
+  PaymentTerm,
   ProductCategory,
   ProposalServiceItemPayload,
   ServiceType,
+  Staff,
   Unit,
   Vendor
 } from '@/types'
+import CreateOrEditInvoiceModal from './CreateOrEditInvoiceModal'
 import InvoiceService from '@/services/api/invoices.service'
 import ServiceTypeSection from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ServiceTypeSection'
 import AddServiceButton from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/AddServiceButton'
@@ -35,6 +41,11 @@ const AddInvoiceServicesModal = ({
   productCategories = [],
   uomUnits = [],
   vendors = [],
+  invoiceTypes = [],
+  clients = [],
+  staffs = [],
+  paymentTerms = [],
+  businessLocations = [],
   onSuccess
 }: {
   open: boolean
@@ -45,9 +56,21 @@ const AddInvoiceServicesModal = ({
   productCategories: ProductCategory[]
   uomUnits: Unit[]
   vendors: Vendor[]
+  invoiceTypes?: EstimateType[]
+  clients?: Client[]
+  staffs?: Staff[]
+  paymentTerms?: PaymentTerm[]
+  businessLocations?: BusinessLocation[]
   onSuccess?: () => void
 }) => {
   const [isLoading, setIsLoading] = useState(false)
+  const [isInvoiceDetailsOpen, setIsInvoiceDetailsOpen] = useState(false)
+  const [currentInvoice, setCurrentInvoice] = useState<Invoice>(invoice)
+
+  // Keep currentInvoice in sync if the prop changes (e.g. after an edit)
+  useEffect(() => {
+    setCurrentInvoice(invoice)
+  }, [invoice])
 
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
 
@@ -308,7 +331,7 @@ const AddInvoiceServicesModal = ({
       actions={
         <div className='flex gap-3'>
           <Button type='button' variant='outline' onClick={onCancel} disabled={isLoading} className='flex-1'>
-            {isEditMode ? 'Cancel' : 'Skip & Close'}
+            {isEditMode ? 'Cancel' : 'Cancel'}
           </Button>
           <Button type='button' onClick={onSubmit} disabled={isLoading} className='flex-1'>
             {isLoading ? 'Saving...' : isEditMode ? 'Update Services' : 'Save Services'}
@@ -330,12 +353,22 @@ const AddInvoiceServicesModal = ({
               {clientName || '—'}
             </p>
           </div>
-          <AddServiceButton
-            serviceTypes={serviceTypes}
-            open={serviceSelectOpen}
-            onOpenChange={setServiceSelectOpen}
-            onSelect={handleAddServiceType}
-          />
+          <div className='flex gap-2'>
+            <Button
+              type='button'
+              variant='outline'
+              size='sm'
+              onClick={() => setIsInvoiceDetailsOpen(true)}
+            >
+              View/Edit Invoice Details
+            </Button>
+            <AddServiceButton
+              serviceTypes={serviceTypes}
+              open={serviceSelectOpen}
+              onOpenChange={setServiceSelectOpen}
+              onSelect={handleAddServiceType}
+            />
+          </div>
         </div>
 
         {/* Detail Cards */}
@@ -405,6 +438,23 @@ const AddInvoiceServicesModal = ({
           </CardContent>
         </Card>
       </>
+      <CreateOrEditInvoiceModal
+        mode='edit'
+        open={isInvoiceDetailsOpen}
+        onOpenChange={open => setIsInvoiceDetailsOpen(open)}
+        invoiceId={currentInvoice?.id}
+        invoiceDetails={currentInvoice}
+        invoiceTypes={invoiceTypes}
+        serviceTypes={serviceTypes}
+        clients={clients}
+        staffs={staffs}
+        paymentTerms={paymentTerms}
+        businessLocations={businessLocations}
+        onSuccess={() => {
+          setIsInvoiceDetailsOpen(false)
+          onSuccess?.()
+        }}
+      />
     </CommonDialog>
   )
 }

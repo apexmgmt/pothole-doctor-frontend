@@ -144,14 +144,11 @@ const Invoices: React.FC<{
   }
 
   const handleOpenEditModal = async (id: string) => {
-    setInvoiceModalMode('edit')
-    setSelectedInvoiceId(id)
-
     try {
       const response = await InvoiceService.show(id)
 
-      setSelectedInvoice(response.data)
-      setIsInvoiceModalOpen(true)
+      setServicesInvoice(response.data)
+      setIsServicesModalOpen(true)
     } catch {
       toast.error('Failed to fetch invoice details')
     }
@@ -411,6 +408,11 @@ const Invoices: React.FC<{
           productCategories={productCategories}
           uomUnits={uomUnits}
           vendors={vendors}
+          invoiceTypes={invoiceTypes}
+          clients={clients}
+          staffs={staffs}
+          paymentTerms={paymentTerms}
+          businessLocations={businessLocations}
           onSuccess={handleServicesClose}
         />
       )}

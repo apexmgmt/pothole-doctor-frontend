@@ -154,14 +154,7 @@ const CreateOrEditInvoiceModal = ({
         toast.success('Invoice updated successfully')
         form.reset()
         onOpenChange(false)
-
-        if (onCreateSuccess) {
-          const updatedResponse = await InvoiceService.show(invoiceId)
-
-          onCreateSuccess(updatedResponse.data)
-        } else {
-          onSuccess?.()
-        }
+        onSuccess?.()
       } catch (error: any) {
         toast.error(typeof error.message === 'string' ? error.message : 'Failed to update invoice')
       }
