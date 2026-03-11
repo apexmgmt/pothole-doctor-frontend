@@ -215,7 +215,9 @@ const Invoices: React.FC<{
       id: 'invoice_number',
       header: 'Invoice #',
       cell: (row: Invoice) => (
-        <span className='font-medium hover:underline cursor-pointer' onClick={() => handleOpenEditModal(row.id)}>{row.invoice_number?.toString().padStart(6, '0') || 'N/A'}</span>
+        <span className='font-medium hover:underline cursor-pointer' onClick={() => handleOpenEditModal(row.id)}>
+          {row.invoice_number?.toString().padStart(6, '0') || 'N/A'}
+        </span>
       ),
       sortable: false
     },
@@ -279,26 +281,29 @@ const Invoices: React.FC<{
           {(canEditInvoice || canDeleteInvoice) && (
             <ThreeDotButton
               buttons={[
-                ...(canEditInvoice
-                  ? [
-                      <EditButton
-                        key='edit'
-                        tooltip='Edit Invoice'
-                        onClick={() => handleOpenEditModal(row.id)}
-                        variant='text'
-                      />
-                    ]
-                  : []),
-                ...(canDeleteInvoice
-                  ? [
-                      <DeleteButton
-                        key='delete'
-                        tooltip='Delete Invoice'
-                        variant='text'
-                        onClick={() => handleDeleteInvoice(row.id)}
-                      />
-                    ]
-                  : [])
+                <Button
+                  className='w-full'
+                  onClick={() => window.open(`/invoice?inid=${row.inid}&icid=${row.icid}`, '_blank')}
+                  variant='ghost'
+                >
+                  View/Print Invoice
+                </Button>,
+                canEditInvoice && (
+                  <EditButton
+                    key='edit'
+                    tooltip='Edit Invoice'
+                    onClick={() => handleOpenEditModal(row.id)}
+                    variant='text'
+                  />
+                ),
+                canDeleteInvoice && (
+                  <DeleteButton
+                    key='delete'
+                    tooltip='Delete Invoice'
+                    variant='text'
+                    onClick={() => handleDeleteInvoice(row.id)}
+                  />
+                )
               ]}
             />
           )}

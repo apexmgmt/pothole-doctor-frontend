@@ -8,6 +8,8 @@ import { Product } from './products'
 
 export interface Invoice {
   id: string
+  inid: string
+  icid: string
   invoice_number: number
   estimate_id: string | null
   estimate?: Estimate
