@@ -204,7 +204,7 @@ const WorkOrders: React.FC<{
       id: 'work_order_number',
       header: 'WO #',
       cell: (row: WorkOrder) => (
-        <span className='font-medium'>{row.work_order_number?.toString().padStart(6, '0') || 'N/A'}</span>
+        <span className='font-medium hover:underline' onClick={() => handleOpenEditModal(row.id)}>{row.work_order_number?.toString().padStart(6, '0') || 'N/A'}</span>
       ),
       sortable: false
     },
