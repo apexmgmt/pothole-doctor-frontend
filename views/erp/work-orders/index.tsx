@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search } from 'lucide-react'
+import { DocumentIcon, UserIcon } from '@/public/icons'
 import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
@@ -36,6 +37,7 @@ import WorkOrderService from '@/services/api/work-orders/work_orders.service'
 
 import EditWorkOrderModal from './EditWorkOrderModal'
 import EditWorkOrderServicesModal from './EditWorkOrderServicesModal'
+import WorkOrderDocuments from './documents/WorkOrderDocuments'
 
 const WorkOrders: React.FC<{
   workOrderTypes: EstimateType[]
@@ -68,6 +70,8 @@ const WorkOrders: React.FC<{
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const [activeTab, setActiveTab] = useState<string>('work-orders')
+  const [selectedWorkOrderForTab, setSelectedWorkOrderForTab] = useState<WorkOrder | null>(null)
 
   // Step 1: edit work order info (opened from services modal)
   const [isWorkOrderModalOpen, setIsWorkOrderModalOpen] = useState<boolean>(false)
@@ -345,25 +349,50 @@ const WorkOrders: React.FC<{
 
   return (
     <>
-      <CommonLayout title='Work Orders' noTabs={true}>
-        <CommonTable
-          data={{
-            data: (apiResponse?.data as WorkOrder[]) || [],
-            per_page: apiResponse?.per_page || 10,
-            total: apiResponse?.total || 0,
-            from: apiResponse?.from || 1,
-            to: apiResponse?.to || 10,
-            current_page: apiResponse?.current_page || 1,
-            last_page: apiResponse?.last_page || 1
-          }}
-          columns={columns}
-          customFilters={customFilters}
-          setFilterOptions={setFilterOptions}
-          showFilters={true}
-          pagination={true}
-          isLoading={isLoading}
-          emptyMessage='No work orders found'
-        />
+      <CommonLayout
+        title='Work Orders'
+        buttons={[
+          {
+            label: 'Work Orders',
+            icon: UserIcon,
+            onClick: () => setActiveTab('work-orders'),
+            isActive: activeTab === 'work-orders'
+          },
+          {
+            label: 'Documents',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('documents'),
+            isActive: activeTab === 'documents',
+            disabled: !selectedWorkOrderForTab
+          }
+        ]}
+      >
+        {activeTab === 'work-orders' && (
+          <CommonTable
+            data={{
+              data: (apiResponse?.data as WorkOrder[]) || [],
+              per_page: apiResponse?.per_page || 10,
+              total: apiResponse?.total || 0,
+              from: apiResponse?.from || 1,
+              to: apiResponse?.to || 10,
+              current_page: apiResponse?.current_page || 1,
+              last_page: apiResponse?.last_page || 1
+            }}
+            columns={columns}
+            customFilters={customFilters}
+            setFilterOptions={setFilterOptions}
+            showFilters={true}
+            pagination={true}
+            isLoading={isLoading}
+            emptyMessage='No work orders found'
+            handleRowSelect={(row: WorkOrder) => {
+              setSelectedWorkOrderForTab(row)
+            }}
+          />
+        )}
+        {activeTab === 'documents' && selectedWorkOrderForTab && (
+          <WorkOrderDocuments workOrderId={selectedWorkOrderForTab.id} />
+        )}
       </CommonLayout>
 
       {/* Edit Work Order info — opened from inside EditWorkOrderServicesModal */}
