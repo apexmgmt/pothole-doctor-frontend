@@ -7,6 +7,9 @@ export interface Proposal {
   subtotal: number
   sale_tax: number
   total: number
+  is_down_payment_materials: boolean
+  down_payment_amount: number
+  down_payment_percentage: number
   message: string | null
   created_at: string
   updated_at: string
@@ -105,6 +108,9 @@ export interface ProposalPayload {
   discount_type: 'percentage' | 'fixed'
   discount: number
   message: string
+  is_down_payment_materials?: boolean
+  down_payment_amount?: number
+  down_payment_percentage?: number
   services: ProposalServicePayload[]
 }
 

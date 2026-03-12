@@ -1,5 +1,5 @@
 import { API_URL, WORK_ORDERS, WORK_ORDERS_RESTORE, WORK_ORDERS_SERVICES } from '@/constants/api'
-import apiInterceptor from './api.interceptor'
+import apiInterceptor from '../api.interceptor'
 import { WorkOrderPayload, WorkOrderServicePayload } from '@/types'
 
 export default class WorkOrderService {
