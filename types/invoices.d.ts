@@ -52,6 +52,9 @@ export interface Invoice {
   payment_method_data?: Record<string, string> | null
   is_agreed_terms?: boolean | number | null
   is_signed?: boolean
+  is_down_payment_materials: boolean
+  down_payment_amount: number
+  down_payment_percentage: number
 }
 
 export interface InvoicePayload {
