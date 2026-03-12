@@ -21,6 +21,7 @@ import TotalCalculationCard from './TotalCalculationCard'
 import ServiceTypeSection from './ServiceTypeSection'
 import AddServiceButton from './AddServiceButton'
 import ProposalActionsDropdown from './ProposalActionsDropdown'
+import PaymentSettingModal from './PaymentSettingModal'
 import { Textarea } from '@/components/ui/textarea'
 import ProposalService from '@/services/api/estimates/proposals.service'
 import { toast } from 'sonner'
@@ -67,6 +68,12 @@ const CreateOrEditProposalModal = ({
   const [currentProposalReason, setCurrentProposalReason] = useState<string | null | undefined>(
     (proposalDetails as any)?.reason
   )
+
+  // Payment settings
+  const [isPaymentSettingOpen, setIsPaymentSettingOpen] = useState(false)
+  const [isDownPaymentMaterials, setIsDownPaymentMaterials] = useState(proposalDetails?.is_down_payment_materials ?? false)
+  const [downPaymentAmount, setDownPaymentAmount] = useState(proposalDetails?.down_payment_amount ?? 0)
+  const [downPaymentPercent, setDownPaymentPercent] = useState(proposalDetails?.down_payment_percentage ?? 0)
 
   const customMessageRef = useRef<HTMLTextAreaElement>(null)
 
@@ -156,6 +163,11 @@ const CreateOrEditProposalModal = ({
 
   const total = totalSales + salesTax
 
+  // Material (product) line items total for down payment calculation
+  const materialTotal = allLines
+    .filter(line => line.type === 'product')
+    .reduce((sum, line) => sum + (line.total_price ?? 0), 0)
+
   // Calculate total discount amount
   const totalDiscount = allLines.reduce((sum, line) => {
     if (line.type === 'comment' || line.type === 'deduction') return sum
@@ -189,6 +201,9 @@ const CreateOrEditProposalModal = ({
     message: customMessageRef.current?.value || '',
     discount_type: discountType,
     discount: discountValue,
+    is_down_payment_materials: isDownPaymentMaterials,
+    down_payment_amount: downPaymentAmount,
+    down_payment_percentage: downPaymentPercent,
     services: serviceTypeLineItems.map((st, index) => ({
       service_type_id: selectedServiceType[index].id,
       items: st.lines.map(line => {
@@ -228,6 +243,9 @@ const CreateOrEditProposalModal = ({
     setDiscountValue(0)
     setServiceSelectValue(undefined)
     setServiceSelectOpen(false)
+    setIsDownPaymentMaterials(false)
+    setDownPaymentAmount(0)
+    setDownPaymentPercent(0)
   }
 
   // Submits the proposal and returns the API response. Does NOT touch loading state.
@@ -318,6 +336,9 @@ const CreateOrEditProposalModal = ({
       setDiscountValue(proposalDetails.discount)
       setCurrentProposalStatus(proposalDetails.status)
       setCurrentProposalReason((proposalDetails as any)?.reason ?? null)
+      setIsDownPaymentMaterials(proposalDetails.is_down_payment_materials ?? false)
+      setDownPaymentAmount(proposalDetails.down_payment_amount ?? 0)
+      setDownPaymentPercent(proposalDetails.down_payment_percentage ?? 0)
     }
   }, [mode, proposalDetails])
 
@@ -364,6 +385,11 @@ const CreateOrEditProposalModal = ({
             </p>
           </div>
           <div className='flex items-center gap-2'>
+            {downPaymentAmount > 0 && (
+              <span className='text-sm font-semibold text-zinc-200 border border-zinc-600 rounded px-3 py-1'>
+                Down Payment: ${Number(downPaymentAmount ?? 0).toFixed(2)}
+              </span>
+            )}
             {effectiveMode !== 'view' && (
               <AddServiceButton
                 serviceTypes={serviceTypes}
@@ -380,6 +406,7 @@ const CreateOrEditProposalModal = ({
               onStatusChange={setCurrentProposalStatus}
               onReasonChange={setCurrentProposalReason}
               onSuccess={onSuccess}
+              onPaymentSettingClick={() => setIsPaymentSettingOpen(true)}
             />
           </div>
         </div>
@@ -504,6 +531,23 @@ const CreateOrEditProposalModal = ({
             />
           </CardContent>
         </Card>
+        <PaymentSettingModal
+          open={isPaymentSettingOpen}
+          onOpenChange={setIsPaymentSettingOpen}
+          total={total}
+          materialTotal={materialTotal}
+          initialValues={{
+            isDownPaymentMaterials: isDownPaymentMaterials,
+            downPaymentAmount: downPaymentAmount,
+            downPaymentPercent: downPaymentPercent
+          }}
+          onSave={({ isDownPaymentMaterials: m, downPaymentAmount: a, downPaymentPercent: p }) => {
+            setIsDownPaymentMaterials(m)
+            setDownPaymentAmount(a)
+            setDownPaymentPercent(p)
+          }}
+        />
+
         {/* Reason if status is void proposal or dead proposal */}
         {(currentProposalStatus === 'void proposal' || currentProposalStatus === 'dead proposal') &&
           currentProposalReason && (

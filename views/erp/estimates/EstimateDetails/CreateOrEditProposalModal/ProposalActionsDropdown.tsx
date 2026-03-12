@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { ChevronDown, FileStack, Mail, MessageSquare, Ban, Skull, RotateCcw } from 'lucide-react'
+import { ChevronDown, FileStack, Mail, MessageSquare, Ban, Skull, RotateCcw, Check } from 'lucide-react'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 import { toast } from 'sonner'
 import ProposalHistoryModal from './ProposalHistoryModal'
@@ -15,7 +15,8 @@ const ProposalActionsDropdown = ({
   proposalStatus,
   onStatusChange,
   onReasonChange,
-  onSuccess
+  onSuccess,
+  onPaymentSettingClick
 }: {
   onConfirmedEmailSend: () => Promise<void>
   isSending: boolean
@@ -24,6 +25,7 @@ const ProposalActionsDropdown = ({
   onStatusChange?: (status: string) => void
   onReasonChange?: (reason: string | null) => void
   onSuccess?: () => void
+  onPaymentSettingClick?: () => void
 }) => {
   const [confirmEmailOpen, setConfirmEmailOpen] = useState(false)
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
@@ -81,6 +83,12 @@ const ProposalActionsDropdown = ({
             <FileStack className='mr-2 h-4 w-4' />
             View Proposal Versions
           </DropdownMenuItem>
+          {proposalId && (
+            <DropdownMenuItem onClick={onPaymentSettingClick}>
+              <Check className='mr-2 h-4 w-4' />
+              Payment Setting
+            </DropdownMenuItem>
+          )}
 
           {!isConvertedToInvoice && proposalId && (
             <>
