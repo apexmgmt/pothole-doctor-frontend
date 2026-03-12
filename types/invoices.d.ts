@@ -121,7 +121,7 @@ export interface InvoiceJobImage {
   type: 'before' | 'after'
   full_path: string
   name: string
-  uploaded_by: string | User | null
+  uploaded_by: User | null
   created_at: string
   updated_at: string
 }

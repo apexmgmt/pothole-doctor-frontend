@@ -61,7 +61,7 @@ const CommonLayout: React.FC<CommonLayoutProps> = ({
                   } ${button.disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                 >
                   {button.icon &&
-                    (typeof button.icon === 'function'
+                    (typeof button.icon === 'function' || (typeof button.icon === 'object' && !React.isValidElement(button.icon))
                       ? React.createElement(button.icon, { className: 'w-4 h-4' })
                       : button.icon)}
                   <span className='text-sm font-medium'>{button.label}</span>

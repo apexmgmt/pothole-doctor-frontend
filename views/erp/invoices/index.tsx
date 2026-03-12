@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { PlusIcon, Search } from 'lucide-react'
+import { ImageIcon, PlusIcon, Search } from 'lucide-react'
 import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
@@ -42,6 +42,7 @@ import InvoiceAddTaskModal from './InvoiceAddTaskModal'
 import InvoiceNotesModal from './InvoiceNotesModal'
 import InvoiceAddNoteModal from './InvoiceAddNoteModal'
 import InvoiceDocuments from './documents/InvoiceDocuments'
+import InvoiceJobImages from './job-images/InvoiceJobImages'
 
 const Invoices: React.FC<{
   invoiceTypes: EstimateType[]
@@ -451,34 +452,54 @@ const Invoices: React.FC<{
             onClick: () => setActiveTab('documents'),
             isActive: activeTab === 'documents',
             disabled: !selectedInvoiceForTab
+          },
+          {
+            label: 'Job Before Image',
+            icon: ImageIcon,
+            onClick: () => setActiveTab('job-before-image'),
+            isActive: activeTab === 'job-before-image',
+            disabled: !selectedInvoiceForTab
+          },
+          {
+            label: 'Job After Image',
+            icon: ImageIcon,
+            onClick: () => setActiveTab('job-after-image'),
+            isActive: activeTab === 'job-after-image',
+            disabled: !selectedInvoiceForTab
           }
         ]}
       >
         {activeTab === 'invoices' && (
-        <CommonTable
-          data={{
-            data: (apiResponse?.data as Invoice[]) || [],
-            per_page: apiResponse?.per_page || 10,
-            total: apiResponse?.total || 0,
-            from: apiResponse?.from || 1,
-            to: apiResponse?.to || 10,
-            current_page: apiResponse?.current_page || 1,
-            last_page: apiResponse?.last_page || 1
-          }}
-          columns={columns}
-          customFilters={customFilters}
-          setFilterOptions={setFilterOptions}
-          showFilters={true}
-          pagination={true}
-          isLoading={isLoading}
-          emptyMessage='No invoices found'
-          handleRowSelect={(row: Invoice) => {
-            setSelectedInvoiceForTab(row)
-          }}
-        />
+          <CommonTable
+            data={{
+              data: (apiResponse?.data as Invoice[]) || [],
+              per_page: apiResponse?.per_page || 10,
+              total: apiResponse?.total || 0,
+              from: apiResponse?.from || 1,
+              to: apiResponse?.to || 10,
+              current_page: apiResponse?.current_page || 1,
+              last_page: apiResponse?.last_page || 1
+            }}
+            columns={columns}
+            customFilters={customFilters}
+            setFilterOptions={setFilterOptions}
+            showFilters={true}
+            pagination={true}
+            isLoading={isLoading}
+            emptyMessage='No invoices found'
+            handleRowSelect={(row: Invoice) => {
+              setSelectedInvoiceForTab(row)
+            }}
+          />
         )}
         {activeTab === 'documents' && selectedInvoiceForTab && (
           <InvoiceDocuments invoiceId={selectedInvoiceForTab.id} />
+        )}
+        {activeTab === 'job-before-image' && selectedInvoiceForTab && (
+          <InvoiceJobImages invoiceId={selectedInvoiceForTab.id} type='before' />
+        )}
+        {activeTab === 'job-after-image' && selectedInvoiceForTab && (
+          <InvoiceJobImages invoiceId={selectedInvoiceForTab.id} type='after' />
         )}
       </CommonLayout>
 
