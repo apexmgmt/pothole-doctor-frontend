@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import React, { useState, useEffect, useRef } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { ImageIcon, Search } from 'lucide-react'
 import { DocumentIcon, UserIcon } from '@/public/icons'
 import { toast } from 'sonner'
@@ -66,11 +66,21 @@ const WorkOrders: React.FC<{
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const hasAutoOpenedRef = useRef(false)
 
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+
+  const [filterOptions, setFilterOptions] = useState<any>(() => {
+    const f = getInitialFilters(searchParams)
+
+    delete f['wo_id']
+
+    return f
+  })
+
   const [activeTab, setActiveTab] = useState<string>('work-orders')
   const [selectedWorkOrderForTab, setSelectedWorkOrderForTab] = useState<WorkOrder | null>(null)
 
@@ -138,16 +148,35 @@ const WorkOrders: React.FC<{
     dispatch(setPageTitle('Manage Work Orders'))
   }, [filterOptions])
 
-  const handleOpenEditModal = async (id: string) => {
+  // Auto-open services modal when wo_id is present in URL (e.g. page refresh or deep link)
+  useEffect(() => {
+    if (isLoading || hasAutoOpenedRef.current) return
+
+    const woId = searchParams.get('wo_id')
+
+    if (!woId) return
+
+    hasAutoOpenedRef.current = true
+    handleOpenServicesModal(woId)
+  }, [isLoading])
+
+  const handleOpenServicesModal = async (id: string) => {
     try {
       const response = await WorkOrderService.show(id)
 
       setServicesWorkOrder(response.data)
       setIsServicesModalOpen(true)
+
+      const params = new URLSearchParams(searchParams.toString())
+
+      params.set('wo_id', id)
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
     } catch {
       toast.error('Failed to fetch work order details')
     }
   }
+
+  const handleOpenEditModal = (id: string) => handleOpenServicesModal(id)
 
   const handleWorkOrderClose = () => {
     setIsWorkOrderModalOpen(false)
@@ -159,6 +188,14 @@ const WorkOrders: React.FC<{
     setIsServicesModalOpen(false)
     setServicesWorkOrder(null)
     fetchData()
+
+    const params = new URLSearchParams(searchParams.toString())
+
+    params.delete('wo_id')
+
+    const qs = params.toString()
+
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
   }
 
   const handleDeleteWorkOrder = async (id: string) => {
@@ -204,7 +241,9 @@ const WorkOrders: React.FC<{
       id: 'work_order_number',
       header: 'WO #',
       cell: (row: WorkOrder) => (
-        <span className='font-medium hover:underline' onClick={() => handleOpenEditModal(row.id)}>{row.work_order_number?.toString().padStart(6, '0') || 'N/A'}</span>
+        <span className='font-medium hover:underline' onClick={() => handleOpenEditModal(row.id)}>
+          {row.work_order_number?.toString().padStart(6, '0') || 'N/A'}
+        </span>
       ),
       sortable: false
     },
@@ -283,26 +322,46 @@ const WorkOrders: React.FC<{
           {(canEditWorkOrder || canDeleteWorkOrder) && (
             <ThreeDotButton
               buttons={[
-                ...(canEditWorkOrder
-                  ? [
-                      <EditButton
-                        key='edit'
-                        tooltip='Edit Work Order'
-                        onClick={() => handleOpenEditModal(row.id)}
-                        variant='text'
-                      />
-                    ]
-                  : []),
-                ...(canDeleteWorkOrder
-                  ? [
-                      <DeleteButton
-                        key='delete'
-                        tooltip='Delete Work Order'
-                        variant='text'
-                        onClick={() => handleDeleteWorkOrder(row.id)}
-                      />
-                    ]
-                  : [])
+                canEditWorkOrder && (
+                  <EditButton
+                    key='edit'
+                    tooltip='Edit Work Order'
+                    onClick={() => handleOpenEditModal(row.id)}
+                    variant='text'
+                  />
+                ),
+                canDeleteWorkOrder && (
+                  <DeleteButton
+                    key='delete'
+                    tooltip='Delete Work Order'
+                    variant='text'
+                    onClick={() => handleDeleteWorkOrder(row.id)}
+                  />
+                ),
+                row.estimate_id && row.proposal_id && (
+                  <Button
+                    key='view-estimate'
+                    className='w-full'
+                    variant='ghost'
+                    onClick={() =>
+                      window.open(`/erp/estimates/${row.estimate_id}?p_id=${row.proposal_id}&p_mode=view`, '_blank')
+                    }
+                  >
+                    View Original Proposal
+                  </Button>
+                ),
+                row.invoice_id && (
+                  <Button
+                    key='view-invoice'
+                    className='w-full'
+                    variant='ghost'
+                    onClick={() =>
+                      window.open(`/erp/invoices?inv_id=${row.invoice_id}`, '_blank')
+                    }
+                  >
+                    View Invoice
+                  </Button>
+                )
               ]}
             />
           )}

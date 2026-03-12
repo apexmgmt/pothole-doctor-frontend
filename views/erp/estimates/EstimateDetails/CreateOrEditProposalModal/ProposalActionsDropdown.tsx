@@ -1,6 +1,12 @@
 import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 import { ChevronDown, FileStack, Mail, MessageSquare, Ban, Skull, RotateCcw, Check } from 'lucide-react'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 import { toast } from 'sonner'
@@ -16,7 +22,8 @@ const ProposalActionsDropdown = ({
   onStatusChange,
   onReasonChange,
   onSuccess,
-  onPaymentSettingClick
+  onPaymentSettingClick,
+  mode = 'create'
 }: {
   onConfirmedEmailSend: () => Promise<void>
   isSending: boolean
@@ -26,6 +33,7 @@ const ProposalActionsDropdown = ({
   onReasonChange?: (reason: string | null) => void
   onSuccess?: () => void
   onPaymentSettingClick?: () => void
+  mode: 'create' | 'edit' | 'view'
 }) => {
   const [confirmEmailOpen, setConfirmEmailOpen] = useState(false)
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
@@ -83,7 +91,7 @@ const ProposalActionsDropdown = ({
             <FileStack className='mr-2 h-4 w-4' />
             View Proposal Versions
           </DropdownMenuItem>
-          {proposalId && (
+          {proposalId && mode === 'view' && (
             <DropdownMenuItem onClick={onPaymentSettingClick}>
               <Check className='mr-2 h-4 w-4' />
               Payment Setting

@@ -407,6 +407,7 @@ const CreateOrEditProposalModal = ({
               onReasonChange={setCurrentProposalReason}
               onSuccess={onSuccess}
               onPaymentSettingClick={() => setIsPaymentSettingOpen(true)}
+              mode={mode}
             />
           </div>
         </div>
