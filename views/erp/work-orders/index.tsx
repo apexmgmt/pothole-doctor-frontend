@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Search } from 'lucide-react'
+import { ImageIcon, Search } from 'lucide-react'
 import { DocumentIcon, UserIcon } from '@/public/icons'
 import { toast } from 'sonner'
 
@@ -38,6 +38,7 @@ import WorkOrderService from '@/services/api/work-orders/work_orders.service'
 import EditWorkOrderModal from './EditWorkOrderModal'
 import EditWorkOrderServicesModal from './EditWorkOrderServicesModal'
 import WorkOrderDocuments from './documents/WorkOrderDocuments'
+import InvoiceJobImages from '../invoices/job-images/InvoiceJobImages'
 
 const WorkOrders: React.FC<{
   workOrderTypes: EstimateType[]
@@ -364,6 +365,20 @@ const WorkOrders: React.FC<{
             onClick: () => setActiveTab('documents'),
             isActive: activeTab === 'documents',
             disabled: !selectedWorkOrderForTab
+          },
+          {
+            label: 'Job Before Image',
+            icon: ImageIcon,
+            onClick: () => setActiveTab('job-before-image'),
+            isActive: activeTab === 'job-before-image',
+            disabled: !selectedWorkOrderForTab?.invoice_id
+          },
+          {
+            label: 'Job After Image',
+            icon: ImageIcon,
+            onClick: () => setActiveTab('job-after-image'),
+            isActive: activeTab === 'job-after-image',
+            disabled: !selectedWorkOrderForTab?.invoice_id
           }
         ]}
       >
@@ -392,6 +407,12 @@ const WorkOrders: React.FC<{
         )}
         {activeTab === 'documents' && selectedWorkOrderForTab && (
           <WorkOrderDocuments workOrderId={selectedWorkOrderForTab.id} />
+        )}
+        {activeTab === 'job-before-image' && selectedWorkOrderForTab?.invoice_id && (
+          <InvoiceJobImages invoiceId={selectedWorkOrderForTab.invoice_id} type='before' />
+        )}
+        {activeTab === 'job-after-image' && selectedWorkOrderForTab?.invoice_id && (
+          <InvoiceJobImages invoiceId={selectedWorkOrderForTab.invoice_id} type='after' />
         )}
       </CommonLayout>
 

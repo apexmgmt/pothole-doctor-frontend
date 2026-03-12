@@ -45,6 +45,7 @@ export interface WorkOrder {
   deleted_at: string | null
   created_at: string
   updated_at: string
+  invoice_id: string | null
   services?: ProposalService[]
   payment_method?: string
   payment_method_data?: Record<string, string> | null
