@@ -32,7 +32,7 @@ import {
 import { formatDate } from '@/utils/date'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
-import WorkOrderService from '@/services/api/work_orders.service'
+import WorkOrderService from '@/services/api/work-orders/work_orders.service'
 
 import EditWorkOrderModal from './EditWorkOrderModal'
 import EditWorkOrderServicesModal from './EditWorkOrderServicesModal'
