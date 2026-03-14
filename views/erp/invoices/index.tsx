@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { PlusIcon, Search } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { ImageIcon, PlusIcon, Search } from 'lucide-react'
 import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
@@ -32,10 +32,17 @@ import {
 import { formatDate } from '@/utils/date'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
-import InvoiceService from '@/services/api/invoices.service'
+import { DocumentIcon, UserIcon } from '@/public/icons'
+import InvoiceService from '@/services/api/invoices/invoices.service'
 
 import CreateOrEditInvoiceModal from './CreateOrEditInvoiceModal'
 import AddInvoiceServicesModal from './AddInvoiceServicesModal'
+import InvoiceTasksModal from './InvoiceTasksModal'
+import InvoiceAddTaskModal from './InvoiceAddTaskModal'
+import InvoiceNotesModal from './InvoiceNotesModal'
+import InvoiceAddNoteModal from './InvoiceAddNoteModal'
+import InvoiceDocuments from './documents/InvoiceDocuments'
+import InvoiceJobImages from './job-images/InvoiceJobImages'
 
 const Invoices: React.FC<{
   invoiceTypes: EstimateType[]
@@ -63,11 +70,23 @@ const Invoices: React.FC<{
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const hasAutoOpenedRef = useRef(false)
 
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+
+  const [filterOptions, setFilterOptions] = useState<any>(() => {
+    const f = getInitialFilters(searchParams)
+
+    delete f['inv_id']
+
+    return f
+  })
+
+  const [activeTab, setActiveTab] = useState<string>('invoices')
+  const [selectedInvoiceForTab, setSelectedInvoiceForTab] = useState<Invoice | null>(null)
 
   // Step 1: create/edit invoice
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState<boolean>(false)
@@ -78,6 +97,24 @@ const Invoices: React.FC<{
   // Step 2: add/edit services (opens after both create and edit)
   const [isServicesModalOpen, setIsServicesModalOpen] = useState<boolean>(false)
   const [servicesInvoice, setServicesInvoice] = useState<Invoice | null>(null)
+
+  // Tasks modal
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
+  const [taskModalInvoiceId, setTaskModalInvoiceId] = useState<string | null>(null)
+  const [taskModalClientId, setTaskModalClientId] = useState<string | null>(null)
+
+  const [isTasksListModalOpen, setIsTasksListModalOpen] = useState(false)
+  const [tasksListInvoiceId, setTasksListInvoiceId] = useState<string | null>(null)
+  const [tasksListClientId, setTasksListClientId] = useState<string | null>(null)
+
+  // Notes modal
+  const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false)
+  const [addNoteInvoiceId, setAddNoteInvoiceId] = useState<string | null>(null)
+  const [addNoteClientId, setAddNoteClientId] = useState<string | null>(null)
+
+  const [isNotesListModalOpen, setIsNotesListModalOpen] = useState(false)
+  const [notesListInvoiceId, setNotesListInvoiceId] = useState<string | null>(null)
+  const [notesListClientId, setNotesListClientId] = useState<string | null>(null)
 
   // Permissions
   const [canCreateInvoice, setCanCreateInvoice] = useState<boolean>(false)
@@ -136,6 +173,18 @@ const Invoices: React.FC<{
     dispatch(setPageTitle('Manage Invoices'))
   }, [filterOptions])
 
+  // Auto-open services modal when inv_id is present in URL (e.g. page refresh or deep link)
+  useEffect(() => {
+    if (isLoading || hasAutoOpenedRef.current) return
+
+    const invId = searchParams.get('inv_id')
+
+    if (!invId) return
+
+    hasAutoOpenedRef.current = true
+    handleOpenServicesModal(invId)
+  }, [isLoading])
+
   const handleOpenCreateModal = () => {
     setInvoiceModalMode('create')
     setSelectedInvoiceId(null)
@@ -143,19 +192,23 @@ const Invoices: React.FC<{
     setIsInvoiceModalOpen(true)
   }
 
-  const handleOpenEditModal = async (id: string) => {
-    setInvoiceModalMode('edit')
-    setSelectedInvoiceId(id)
-
+  const handleOpenServicesModal = async (id: string) => {
     try {
       const response = await InvoiceService.show(id)
 
-      setSelectedInvoice(response.data)
-      setIsInvoiceModalOpen(true)
+      setServicesInvoice(response.data)
+      setIsServicesModalOpen(true)
+
+      const params = new URLSearchParams(searchParams.toString())
+
+      params.set('inv_id', id)
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
     } catch {
       toast.error('Failed to fetch invoice details')
     }
   }
+
+  const handleOpenEditModal = (id: string) => handleOpenServicesModal(id)
 
   const handleInvoiceClose = () => {
     setIsInvoiceModalOpen(false)
@@ -173,6 +226,14 @@ const Invoices: React.FC<{
     setIsServicesModalOpen(false)
     setServicesInvoice(null)
     fetchData()
+
+    const params = new URLSearchParams(searchParams.toString())
+
+    params.delete('inv_id')
+
+    const qs = params.toString()
+
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
   }
 
   const handleDeleteInvoice = async (id: string) => {
@@ -218,7 +279,9 @@ const Invoices: React.FC<{
       id: 'invoice_number',
       header: 'Invoice #',
       cell: (row: Invoice) => (
-        <span className='font-medium'>{row.invoice_number?.toString().padStart(6, '0') || 'N/A'}</span>
+        <span className='font-medium hover:underline cursor-pointer' onClick={() => handleOpenEditModal(row.id)}>
+          {row.invoice_number?.toString().padStart(6, '0') || 'N/A'}
+        </span>
       ),
       sortable: false
     },
@@ -282,26 +345,87 @@ const Invoices: React.FC<{
           {(canEditInvoice || canDeleteInvoice) && (
             <ThreeDotButton
               buttons={[
-                ...(canEditInvoice
-                  ? [
-                      <EditButton
-                        key='edit'
-                        tooltip='Edit Invoice'
-                        onClick={() => handleOpenEditModal(row.id)}
-                        variant='text'
-                      />
-                    ]
-                  : []),
-                ...(canDeleteInvoice
-                  ? [
-                      <DeleteButton
-                        key='delete'
-                        tooltip='Delete Invoice'
-                        variant='text'
-                        onClick={() => handleDeleteInvoice(row.id)}
-                      />
-                    ]
-                  : [])
+                <Button
+                  className='w-full'
+                  onClick={() => window.open(`/invoice?inid=${row.inid}&icid=${row.icid}`, '_blank')}
+                  variant='ghost'
+                >
+                  View/Print Invoice
+                </Button>,
+                <Button
+                  key='add-task'
+                  className='w-full'
+                  variant='ghost'
+                  onClick={() => {
+                    setTaskModalInvoiceId(row.id)
+                    setTaskModalClientId(row.client_id ?? null)
+                    setIsTaskModalOpen(true)
+                  }}
+                >
+                  Add Task
+                </Button>,
+                <Button
+                  key='view-tasks'
+                  className='w-full'
+                  variant='ghost'
+                  onClick={() => {
+                    setTasksListInvoiceId(row.id)
+                    setTasksListClientId(row.client_id ?? null)
+                    setIsTasksListModalOpen(true)
+                  }}
+                >
+                  View Tasks
+                </Button>,
+                <Button
+                  key='add-note'
+                  className='w-full'
+                  variant='ghost'
+                  onClick={() => {
+                    setAddNoteInvoiceId(row.id)
+                    setAddNoteClientId(row.client_id ?? null)
+                    setIsAddNoteModalOpen(true)
+                  }}
+                >
+                  Add Note
+                </Button>,
+                <Button
+                  key='view-notes'
+                  className='w-full'
+                  variant='ghost'
+                  onClick={() => {
+                    setNotesListInvoiceId(row.id)
+                    setNotesListClientId(row.client_id ?? null)
+                    setIsNotesListModalOpen(true)
+                  }}
+                >
+                  View Notes
+                </Button>,
+                canEditInvoice && (
+                  <EditButton
+                    key='edit'
+                    tooltip='Edit Invoice'
+                    onClick={() => handleOpenEditModal(row.id)}
+                    variant='text'
+                  />
+                ),
+                canDeleteInvoice && (
+                  <DeleteButton
+                    key='delete'
+                    tooltip='Delete Invoice'
+                    variant='text'
+                    onClick={() => handleDeleteInvoice(row.id)}
+                  />
+                ),
+                row.estimate_id && row.proposal_id && (
+                  <Button
+                    key='view-estimate'
+                    className='w-full'
+                    variant='ghost'
+                    onClick={() => window.open(`/erp/estimates/${row.estimate_id}?p_id=${row.proposal_id}&p_mode=view`, '_blank')}
+                  >
+                    View Original Proposal
+                  </Button>
+                )
               ]}
             />
           )}
@@ -360,25 +484,70 @@ const Invoices: React.FC<{
 
   return (
     <>
-      <CommonLayout title='Invoices' noTabs={true}>
-        <CommonTable
-          data={{
-            data: (apiResponse?.data as Invoice[]) || [],
-            per_page: apiResponse?.per_page || 10,
-            total: apiResponse?.total || 0,
-            from: apiResponse?.from || 1,
-            to: apiResponse?.to || 10,
-            current_page: apiResponse?.current_page || 1,
-            last_page: apiResponse?.last_page || 1
-          }}
-          columns={columns}
-          customFilters={customFilters}
-          setFilterOptions={setFilterOptions}
-          showFilters={true}
-          pagination={true}
-          isLoading={isLoading}
-          emptyMessage='No invoices found'
-        />
+      <CommonLayout
+        title='Invoices'
+        buttons={[
+          {
+            label: 'Invoices',
+            icon: UserIcon,
+            onClick: () => setActiveTab('invoices'),
+            isActive: activeTab === 'invoices'
+          },
+          {
+            label: 'Documents',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('documents'),
+            isActive: activeTab === 'documents',
+            disabled: !selectedInvoiceForTab
+          },
+          {
+            label: 'Job Before Image',
+            icon: ImageIcon,
+            onClick: () => setActiveTab('job-before-image'),
+            isActive: activeTab === 'job-before-image',
+            disabled: !selectedInvoiceForTab
+          },
+          {
+            label: 'Job After Image',
+            icon: ImageIcon,
+            onClick: () => setActiveTab('job-after-image'),
+            isActive: activeTab === 'job-after-image',
+            disabled: !selectedInvoiceForTab
+          }
+        ]}
+      >
+        {activeTab === 'invoices' && (
+          <CommonTable
+            data={{
+              data: (apiResponse?.data as Invoice[]) || [],
+              per_page: apiResponse?.per_page || 10,
+              total: apiResponse?.total || 0,
+              from: apiResponse?.from || 1,
+              to: apiResponse?.to || 10,
+              current_page: apiResponse?.current_page || 1,
+              last_page: apiResponse?.last_page || 1
+            }}
+            columns={columns}
+            customFilters={customFilters}
+            setFilterOptions={setFilterOptions}
+            showFilters={true}
+            pagination={true}
+            isLoading={isLoading}
+            emptyMessage='No invoices found'
+            handleRowSelect={(row: Invoice) => {
+              setSelectedInvoiceForTab(row)
+            }}
+          />
+        )}
+        {activeTab === 'documents' && selectedInvoiceForTab && (
+          <InvoiceDocuments invoiceId={selectedInvoiceForTab.id} />
+        )}
+        {activeTab === 'job-before-image' && selectedInvoiceForTab && (
+          <InvoiceJobImages invoiceId={selectedInvoiceForTab.id} type='before' />
+        )}
+        {activeTab === 'job-after-image' && selectedInvoiceForTab && (
+          <InvoiceJobImages invoiceId={selectedInvoiceForTab.id} type='after' />
+        )}
       </CommonLayout>
 
       {/* Step 1: Create / Edit Invoice */}
@@ -398,6 +567,72 @@ const Invoices: React.FC<{
         onCreateSuccess={handleCreateSuccess}
       />
 
+      {taskModalInvoiceId && (
+        <InvoiceAddTaskModal
+          open={isTaskModalOpen}
+          onOpenChange={open => {
+            setIsTaskModalOpen(open)
+
+            if (!open) {
+              setTaskModalInvoiceId(null)
+              setTaskModalClientId(null)
+            }
+          }}
+          invoiceId={taskModalInvoiceId}
+          clientId={taskModalClientId ?? undefined}
+          mode='create'
+        />
+      )}
+
+      {tasksListInvoiceId && (
+        <InvoiceTasksModal
+          open={isTasksListModalOpen}
+          onOpenChange={open => {
+            setIsTasksListModalOpen(open)
+
+            if (!open) {
+              setTasksListInvoiceId(null)
+              setTasksListClientId(null)
+            }
+          }}
+          invoiceId={tasksListInvoiceId}
+          clientId={tasksListClientId ?? undefined}
+        />
+      )}
+
+      {addNoteInvoiceId && (
+        <InvoiceAddNoteModal
+          open={isAddNoteModalOpen}
+          onOpenChange={open => {
+            setIsAddNoteModalOpen(open)
+
+            if (!open) {
+              setAddNoteInvoiceId(null)
+              setAddNoteClientId(null)
+            }
+          }}
+          invoiceId={addNoteInvoiceId}
+          clientId={addNoteClientId ?? undefined}
+          mode='create'
+        />
+      )}
+
+      {notesListInvoiceId && (
+        <InvoiceNotesModal
+          open={isNotesListModalOpen}
+          onOpenChange={open => {
+            setIsNotesListModalOpen(open)
+
+            if (!open) {
+              setNotesListInvoiceId(null)
+              setNotesListClientId(null)
+            }
+          }}
+          invoiceId={notesListInvoiceId}
+          clientId={notesListClientId ?? undefined}
+        />
+      )}
+
       {/* Step 2: Add / Edit Services (opens after create or edit) */}
       {servicesInvoice && (
         <AddInvoiceServicesModal
@@ -411,6 +646,11 @@ const Invoices: React.FC<{
           productCategories={productCategories}
           uomUnits={uomUnits}
           vendors={vendors}
+          invoiceTypes={invoiceTypes}
+          clients={clients}
+          staffs={staffs}
+          paymentTerms={paymentTerms}
+          businessLocations={businessLocations}
           onSuccess={handleServicesClose}
         />
       )}

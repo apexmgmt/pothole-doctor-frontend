@@ -21,6 +21,7 @@ import TotalCalculationCard from './TotalCalculationCard'
 import ServiceTypeSection from './ServiceTypeSection'
 import AddServiceButton from './AddServiceButton'
 import ProposalActionsDropdown from './ProposalActionsDropdown'
+import PaymentSettingModal from './PaymentSettingModal'
 import { Textarea } from '@/components/ui/textarea'
 import ProposalService from '@/services/api/estimates/proposals.service'
 import { toast } from 'sonner'
@@ -67,6 +68,12 @@ const CreateOrEditProposalModal = ({
   const [currentProposalReason, setCurrentProposalReason] = useState<string | null | undefined>(
     (proposalDetails as any)?.reason
   )
+
+  // Payment settings
+  const [isPaymentSettingOpen, setIsPaymentSettingOpen] = useState(false)
+  const [isDownPaymentMaterials, setIsDownPaymentMaterials] = useState(proposalDetails?.is_down_payment_materials ?? false)
+  const [downPaymentAmount, setDownPaymentAmount] = useState(proposalDetails?.down_payment_amount ?? 0)
+  const [downPaymentPercent, setDownPaymentPercent] = useState(proposalDetails?.down_payment_percentage ?? 0)
 
   const customMessageRef = useRef<HTMLTextAreaElement>(null)
 
@@ -156,25 +163,19 @@ const CreateOrEditProposalModal = ({
 
   const total = totalSales + salesTax
 
+  // Material (product) line items total for down payment calculation
+  const materialTotal = allLines
+    .filter(line => line.type === 'product')
+    .reduce((sum, line) => sum + (line.total_price ?? 0), 0)
+
   // Calculate total discount amount
   const totalDiscount = allLines.reduce((sum, line) => {
-    if (line.type === 'comment' || line.type === 'deduction') {
-      return sum
-    }
+    if (line.type === 'comment' || line.type === 'deduction') return sum
 
     const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
-    const discount = line.discount ?? 0
-    const discountType = line.discount_type ?? 'percentage'
+    const discountedUnitPrice = getDiscountedUnitPrice(line)
 
-    let discountAmount = 0
-
-    if (discountType === 'fixed') {
-      discountAmount = discount * line.qty
-    } else {
-      discountAmount = (baseUnitPrice * discount) / 100
-    }
-
-    return sum + discountAmount
+    return sum + (baseUnitPrice - discountedUnitPrice) * line.qty
   }, 0)
 
   const onSubmit = async () => {
@@ -200,6 +201,9 @@ const CreateOrEditProposalModal = ({
     message: customMessageRef.current?.value || '',
     discount_type: discountType,
     discount: discountValue,
+    is_down_payment_materials: isDownPaymentMaterials,
+    down_payment_amount: downPaymentAmount,
+    down_payment_percentage: downPaymentPercent,
     services: serviceTypeLineItems.map((st, index) => ({
       service_type_id: selectedServiceType[index].id,
       items: st.lines.map(line => {
@@ -239,6 +243,9 @@ const CreateOrEditProposalModal = ({
     setDiscountValue(0)
     setServiceSelectValue(undefined)
     setServiceSelectOpen(false)
+    setIsDownPaymentMaterials(false)
+    setDownPaymentAmount(0)
+    setDownPaymentPercent(0)
   }
 
   // Submits the proposal and returns the API response. Does NOT touch loading state.
@@ -329,6 +336,9 @@ const CreateOrEditProposalModal = ({
       setDiscountValue(proposalDetails.discount)
       setCurrentProposalStatus(proposalDetails.status)
       setCurrentProposalReason((proposalDetails as any)?.reason ?? null)
+      setIsDownPaymentMaterials(proposalDetails.is_down_payment_materials ?? false)
+      setDownPaymentAmount(proposalDetails.down_payment_amount ?? 0)
+      setDownPaymentPercent(proposalDetails.down_payment_percentage ?? 0)
     }
   }, [mode, proposalDetails])
 
@@ -375,6 +385,11 @@ const CreateOrEditProposalModal = ({
             </p>
           </div>
           <div className='flex items-center gap-2'>
+            {downPaymentAmount > 0 && (
+              <span className='text-sm font-semibold text-zinc-200 border border-zinc-600 rounded px-3 py-1'>
+                Down Payment: ${Number(downPaymentAmount ?? 0).toFixed(2)}
+              </span>
+            )}
             {effectiveMode !== 'view' && (
               <AddServiceButton
                 serviceTypes={serviceTypes}
@@ -391,6 +406,8 @@ const CreateOrEditProposalModal = ({
               onStatusChange={setCurrentProposalStatus}
               onReasonChange={setCurrentProposalReason}
               onSuccess={onSuccess}
+              onPaymentSettingClick={() => setIsPaymentSettingOpen(true)}
+              mode={mode}
             />
           </div>
         </div>
@@ -407,35 +424,54 @@ const CreateOrEditProposalModal = ({
             discountValue={discountValue}
             totalDiscount={totalDiscount}
             onApplyDiscount={(type, value) => {
-              // Validate and apply discount to all product and labor-cost lines
               const allProductAndLaborLines = serviceTypeLineItems.flatMap(st =>
                 st.lines.filter(line => line.type === 'product' || line.type === 'labor')
               )
 
-              // For fixed discount, check if it's less than all unit costs
               if (type === 'fixed') {
-                const maxUnitCost = Math.max(...allProductAndLaborLines.map(line => line.unit_cost))
+                // Grand total of base prices across all applicable lines
+                const grandBaseTotal = allProductAndLaborLines.reduce((sum, line) => {
+                  const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
 
-                if (value > maxUnitCost) {
+                  return sum + baseUnitPrice * line.qty
+                }, 0)
+
+                if (value > grandBaseTotal) {
                   toast.error(
-                    `Fixed discount ($${value.toFixed(2)}) cannot exceed the maximum unit cost ($${maxUnitCost.toFixed(2)})`
+                    `Fixed discount ($${value.toFixed(2)}) cannot exceed the grand total ($${grandBaseTotal.toFixed(2)})`
                   )
 
                   return
                 }
-              }
 
-              // Apply discount to all service type line items
-              setServiceTypeLineItems(prev =>
-                prev.map(st => ({
-                  ...st,
-                  lines: st.lines.map(line =>
-                    line.type === 'product' || line.type === 'labor'
-                      ? { ...line, discount: value, discount_type: type }
-                      : line
-                  )
-                }))
-              )
+                // Proportional fixed discount per line: (line_base_total / grand_base_total) * total_discount
+                setServiceTypeLineItems(prev =>
+                  prev.map(st => ({
+                    ...st,
+                    lines: st.lines.map(line => {
+                      if (line.type !== 'product' && line.type !== 'labor') return line
+
+                      const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
+                      const lineBaseTotal = baseUnitPrice * line.qty
+                      const proportionalDiscount = grandBaseTotal > 0 ? (lineBaseTotal / grandBaseTotal) * value : 0
+
+                      return { ...line, discount: proportionalDiscount, discount_type: 'fixed' as const }
+                    })
+                  }))
+                )
+              } else {
+                // Percentage: set the same percentage on every applicable line
+                setServiceTypeLineItems(prev =>
+                  prev.map(st => ({
+                    ...st,
+                    lines: st.lines.map(line =>
+                      line.type === 'product' || line.type === 'labor'
+                        ? { ...line, discount: value, discount_type: 'percentage' as const }
+                        : line
+                    )
+                  }))
+                )
+              }
 
               setDiscountType(type)
               setDiscountValue(value)
@@ -496,6 +532,23 @@ const CreateOrEditProposalModal = ({
             />
           </CardContent>
         </Card>
+        <PaymentSettingModal
+          open={isPaymentSettingOpen}
+          onOpenChange={setIsPaymentSettingOpen}
+          total={total}
+          materialTotal={materialTotal}
+          initialValues={{
+            isDownPaymentMaterials: isDownPaymentMaterials,
+            downPaymentAmount: downPaymentAmount,
+            downPaymentPercent: downPaymentPercent
+          }}
+          onSave={({ isDownPaymentMaterials: m, downPaymentAmount: a, downPaymentPercent: p }) => {
+            setIsDownPaymentMaterials(m)
+            setDownPaymentAmount(a)
+            setDownPaymentPercent(p)
+          }}
+        />
+
         {/* Reason if status is void proposal or dead proposal */}
         {(currentProposalStatus === 'void proposal' || currentProposalStatus === 'dead proposal') &&
           currentProposalReason && (

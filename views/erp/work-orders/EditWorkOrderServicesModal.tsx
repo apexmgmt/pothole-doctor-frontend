@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { UserIcon } from 'lucide-react'
+import { UserIcon, ChevronDownIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
@@ -15,9 +15,16 @@ import {
   Unit,
   Vendor,
   WorkOrder,
-  WorkOrderServicePayload
+  WorkOrderServicePayload,
+  EstimateType,
+  Client,
+  Staff,
+  PaymentTerm,
+  BusinessLocation
 } from '@/types'
-import WorkOrderService from '@/services/api/work_orders.service'
+import WorkOrderService from '@/services/api/work-orders/work_orders.service'
+import EditWorkOrderModal from './EditWorkOrderModal'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import ServiceTypeSection from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ServiceTypeSection'
 import AddServiceButton from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/AddServiceButton'
 import ClientDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ClientDetailsCard'
@@ -33,6 +40,11 @@ const EditWorkOrderServicesModal = ({
   productCategories = [],
   uomUnits = [],
   vendors = [],
+  workOrderTypes = [],
+  clients = [],
+  staffs = [],
+  paymentTerms = [],
+  businessLocations = [],
   onSuccess
 }: {
   open: boolean
@@ -43,9 +55,21 @@ const EditWorkOrderServicesModal = ({
   productCategories: ProductCategory[]
   uomUnits: Unit[]
   vendors: Vendor[]
+  workOrderTypes?: EstimateType[]
+  clients?: Client[]
+  staffs?: Staff[]
+  paymentTerms?: PaymentTerm[]
+  businessLocations?: BusinessLocation[]
   onSuccess?: () => void
 }) => {
   const [isLoading, setIsLoading] = useState(false)
+  const [isWorkOrderDetailsOpen, setIsWorkOrderDetailsOpen] = useState(false)
+  const [currentWorkOrder, setCurrentWorkOrder] = useState<WorkOrder>(workOrder)
+
+  // Keep currentWorkOrder in sync when the prop changes
+  useEffect(() => {
+    setCurrentWorkOrder(workOrder)
+  }, [workOrder])
 
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
 
@@ -269,12 +293,27 @@ const EditWorkOrderServicesModal = ({
               {clientName || '—'}
             </p>
           </div>
-          <AddServiceButton
-            serviceTypes={serviceTypes}
-            open={serviceSelectOpen}
-            onOpenChange={setServiceSelectOpen}
-            onSelect={handleAddServiceType}
-          />
+          <div className='flex gap-2'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type='button' variant='outline' size='default'>
+                  Work Order Actions
+                  <ChevronDownIcon className='h-4 w-4 ml-2' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end'>
+                <DropdownMenuItem onClick={() => setIsWorkOrderDetailsOpen(true)}>
+                  View/Edit Work Order Details
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <AddServiceButton
+              serviceTypes={serviceTypes}
+              open={serviceSelectOpen}
+              onOpenChange={setServiceSelectOpen}
+              onSelect={handleAddServiceType}
+            />
+          </div>
         </div>
 
         {/* Detail Cards */}
@@ -347,6 +386,22 @@ const EditWorkOrderServicesModal = ({
           </CardContent>
         </Card>
       </>
+      <EditWorkOrderModal
+        open={isWorkOrderDetailsOpen}
+        onOpenChange={(open: boolean) => setIsWorkOrderDetailsOpen(open)}
+        workOrderId={currentWorkOrder?.id}
+        workOrderDetails={currentWorkOrder}
+        workOrderTypes={workOrderTypes}
+        serviceTypes={serviceTypes}
+        clients={clients}
+        staffs={staffs}
+        paymentTerms={paymentTerms}
+        businessLocations={businessLocations}
+        onSuccess={() => {
+          setIsWorkOrderDetailsOpen(false)
+          onSuccess?.()
+        }}
+      />
     </CommonDialog>
   )
 }

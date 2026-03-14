@@ -1,4 +1,4 @@
-import InvoiceService from '@/services/api/invoices.service'
+import InvoiceService from '@/services/api/invoices/invoices.service'
 import { Invoice } from '@/types'
 import InvoiceView from '@/views/estimation/InvoiceView'
 import { Metadata } from 'next'

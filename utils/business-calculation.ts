@@ -6,7 +6,11 @@ export const getDiscountedUnitPrice = (line: ProposalServiceItemPayload) => {
   const discountType = line.discount_type ?? 'percentage'
 
   if (discountType === 'fixed') {
-    return Math.max(0, baseUnitPrice - discount)
+    // discount is a total amount applied across the whole line (not per unit)
+    const baseTotal = baseUnitPrice * line.qty
+    const discountedTotal = Math.max(0, baseTotal - discount)
+
+    return line.qty > 0 ? discountedTotal / line.qty : 0
   } else {
     return baseUnitPrice * (1 - discount / 100)
   }

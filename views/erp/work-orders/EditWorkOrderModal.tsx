@@ -18,7 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import WorkOrderService from '@/services/api/work_orders.service'
+import WorkOrderService from '@/services/api/work-orders/work_orders.service'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DatePicker } from '@/components/ui/datePicker'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -31,7 +31,6 @@ interface EditWorkOrderModalProps {
   workOrderId?: string
   workOrderDetails?: WorkOrder
   onSuccess?: () => void
-  onEditSuccess?: (workOrder: WorkOrder) => void
   workOrderTypes: EstimateType[]
   serviceTypes: ServiceType[]
   clients: Client[]
@@ -46,7 +45,6 @@ const EditWorkOrderModal = ({
   workOrderId,
   workOrderDetails,
   onSuccess,
-  onEditSuccess,
   workOrderTypes,
   serviceTypes,
   clients,
@@ -137,14 +135,7 @@ const EditWorkOrderModal = ({
       toast.success('Work order updated successfully')
       form.reset()
       onOpenChange(false)
-
-      if (onEditSuccess) {
-        const updatedResponse = await WorkOrderService.show(workOrderId)
-
-        onEditSuccess(updatedResponse.data)
-      } else {
-        onSuccess?.()
-      }
+      onSuccess?.()
     } catch (error: any) {
       toast.error(typeof error.message === 'string' ? error.message : 'Failed to update work order')
     }
