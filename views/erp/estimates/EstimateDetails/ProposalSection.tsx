@@ -292,7 +292,11 @@ const ProposalSection = ({
         <CardContent className='relative'>
           <ScrollArea className={`w-full rounded-md ${proposals.length === 0 ? 'h-32' : 'h-[80vh]'}`}>
             <div className='space-y-4'>
-              {proposals.length === 0 && !isLoading ? (
+              {proposals.length === 0 && !isLoading && !canManageProposal ? (
+                <div className='flex items-center justify-center h-32 bg-zinc-800 rounded-md'>
+                  <span className='text-zinc-400 text-sm'>You don't have permission to see proposals</span>
+                </div>
+              ) : proposals.length === 0 && !isLoading ? (
                 <div className='flex items-center justify-center h-32 bg-zinc-800 rounded-md'>
                   <span className='text-zinc-400 text-sm'>No Proposals</span>
                 </div>

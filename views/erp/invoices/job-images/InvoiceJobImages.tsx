@@ -14,9 +14,10 @@ import { generateFileUrl } from '@/utils/utility'
 interface InvoiceJobImagesProps {
   invoiceId: string
   type: 'before' | 'after'
+  canEditInvoice?: boolean
 }
 
-const InvoiceJobImages = ({ invoiceId, type }: InvoiceJobImagesProps) => {
+const InvoiceJobImages = ({ invoiceId, type, canEditInvoice = false }: InvoiceJobImagesProps) => {
   const [images, setImages] = useState<InvoiceJobImage[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [isUploading, setIsUploading] = useState<boolean>(false)
@@ -87,17 +88,21 @@ const InvoiceJobImages = ({ invoiceId, type }: InvoiceJobImagesProps) => {
   return (
     <div className='p-4'>
       <div className='flex items-center justify-end mb-4'>
-        <input type='file' accept='image/*' ref={fileInputRef} className='hidden' onChange={handleFileChange} />
-        <Button
-          variant='default'
-          size='sm'
-          className='bg-light text-bg hover:bg-light/90'
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading}
-        >
-          <PlusIcon className='w-4 h-4' />
-          {isUploading ? 'Uploading...' : 'Upload Image'}
-        </Button>
+        {canEditInvoice && (
+          <>
+            <input type='file' accept='image/*' ref={fileInputRef} className='hidden' onChange={handleFileChange} />
+            <Button
+              variant='default'
+              size='sm'
+              className='bg-light text-bg hover:bg-light/90'
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+            >
+              <PlusIcon className='w-4 h-4' />
+              {isUploading ? 'Uploading...' : 'Upload Image'}
+            </Button>
+          </>
+        )}
       </div>
 
       {isLoading ? (
@@ -126,12 +131,14 @@ const InvoiceJobImages = ({ invoiceId, type }: InvoiceJobImagesProps) => {
                   </a>
                 )}
                 <div className='absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity'>
-                  <DeleteButton
-                    tooltip='Delete Image'
-                    variant='icon'
-                    buttonVariant='destructive'
-                    onClick={() => handleDelete(image.id)}
-                  />
+                  {canEditInvoice && (
+                    <DeleteButton
+                      tooltip='Delete Image'
+                      variant='icon'
+                      buttonVariant='destructive'
+                      onClick={() => handleDelete(image.id)}
+                    />
+                  )}
                 </div>
                 <div className='px-2 py-1 text-xs text-muted-foreground truncate'>{image.name}</div>
                 <div className='px-2 py-1 text-xs text-muted-foreground truncate'>

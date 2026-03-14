@@ -94,13 +94,23 @@ const WorkOrders: React.FC<{
   const [servicesWorkOrder, setServicesWorkOrder] = useState<WorkOrder | null>(null)
 
   // Permissions
+  const [canManageEstimate, setCanManageEstimate] = useState<boolean>(false)
+  const [canManageProposal, setCanManageProposal] = useState<boolean>(false)
+  const [canEditProposal, setCanEditProposal] = useState<boolean>(false)
+  const [canManageInvoice, setCanManageInvoice] = useState<boolean>(false)
+  const [canEditInvoice, setCanEditInvoice] = useState<boolean>(false)
   const [canEditWorkOrder, setCanEditWorkOrder] = useState<boolean>(false)
   const [canDeleteWorkOrder, setCanDeleteWorkOrder] = useState<boolean>(false)
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Update Estimate').then(result => setCanEditWorkOrder(result))
-    hasPermission('Delete Estimate').then(result => setCanDeleteWorkOrder(result))
+    hasPermission('Manage Estimate').then(result => setCanManageEstimate(result))
+    hasPermission('Manage Proposal').then(result => setCanManageProposal(result))
+    hasPermission('Update Proposal').then(result => setCanEditProposal(result))
+    hasPermission('Manage Invoice').then(result => setCanManageInvoice(result))
+    hasPermission('Update Invoice').then(result => setCanEditInvoice(result))
+    hasPermission('Update Work Order').then(result => setCanEditWorkOrder(result))
+    hasPermission('Delete Work Order').then(result => setCanDeleteWorkOrder(result))
   }, [])
 
   useEffect(() => {
@@ -338,7 +348,7 @@ const WorkOrders: React.FC<{
                     onClick={() => handleDeleteWorkOrder(row.id)}
                   />
                 ),
-                row.estimate_id && row.proposal_id && (
+                row.estimate_id && row.proposal_id && canManageEstimate && canManageProposal && canEditProposal && (
                   <Button
                     key='view-estimate'
                     className='w-full'
@@ -350,14 +360,12 @@ const WorkOrders: React.FC<{
                     View Original Proposal
                   </Button>
                 ),
-                row.invoice_id && (
+                row.invoice_id && canManageInvoice && canEditInvoice && (
                   <Button
                     key='view-invoice'
                     className='w-full'
                     variant='ghost'
-                    onClick={() =>
-                      window.open(`/erp/invoices?inv_id=${row.invoice_id}`, '_blank')
-                    }
+                    onClick={() => window.open(`/erp/invoices?inv_id=${row.invoice_id}`, '_blank')}
                   >
                     View Invoice
                   </Button>
@@ -425,20 +433,24 @@ const WorkOrders: React.FC<{
             isActive: activeTab === 'documents',
             disabled: !selectedWorkOrderForTab
           },
-          {
-            label: 'Job Before Image',
-            icon: ImageIcon,
-            onClick: () => setActiveTab('job-before-image'),
-            isActive: activeTab === 'job-before-image',
-            disabled: !selectedWorkOrderForTab?.invoice_id
-          },
-          {
-            label: 'Job After Image',
-            icon: ImageIcon,
-            onClick: () => setActiveTab('job-after-image'),
-            isActive: activeTab === 'job-after-image',
-            disabled: !selectedWorkOrderForTab?.invoice_id
-          }
+          ...(canManageInvoice
+            ? [
+                {
+                  label: 'Job Before Image',
+                  icon: ImageIcon,
+                  onClick: () => setActiveTab('job-before-image'),
+                  isActive: activeTab === 'job-before-image',
+                  disabled: !selectedWorkOrderForTab?.invoice_id
+                },
+                {
+                  label: 'Job After Image',
+                  icon: ImageIcon,
+                  onClick: () => setActiveTab('job-after-image'),
+                  isActive: activeTab === 'job-after-image',
+                  disabled: !selectedWorkOrderForTab?.invoice_id
+                }
+              ]
+            : [])
         ]}
       >
         {activeTab === 'work-orders' && (

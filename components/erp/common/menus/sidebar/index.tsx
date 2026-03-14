@@ -175,7 +175,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       href: '/erp/invoices',
       hasSubItems: false,
       exactMatch: false,
-      permissions: ['Manage Estimate']
+      permissions: ['Manage Invoice']
     },
     {
       id: 'work-orders',
@@ -184,7 +184,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       href: '/erp/work-orders',
       hasSubItems: false,
       exactMatch: false,
-      permissions: ['Manage Estimate']
+      permissions: ['Manage Work Order']
     },
     {
       id: 'tasks',
