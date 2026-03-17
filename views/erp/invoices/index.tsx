@@ -123,9 +123,9 @@ const Invoices: React.FC<{
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Create Estimate').then(result => setCanCreateInvoice(result))
-    hasPermission('Update Estimate').then(result => setCanEditInvoice(result))
-    hasPermission('Delete Estimate').then(result => setCanDeleteInvoice(result))
+    hasPermission('Create Invoice').then(result => setCanCreateInvoice(result))
+    hasPermission('Update Invoice').then(result => setCanEditInvoice(result))
+    hasPermission('Delete Invoice').then(result => setCanDeleteInvoice(result))
   }, [])
 
   useEffect(() => {
@@ -352,18 +352,20 @@ const Invoices: React.FC<{
                 >
                   View/Print Invoice
                 </Button>,
-                <Button
-                  key='add-task'
-                  className='w-full'
-                  variant='ghost'
-                  onClick={() => {
-                    setTaskModalInvoiceId(row.id)
-                    setTaskModalClientId(row.client_id ?? null)
-                    setIsTaskModalOpen(true)
-                  }}
-                >
-                  Add Task
-                </Button>,
+                canEditInvoice && (
+                  <Button
+                    key='add-task'
+                    className='w-full'
+                    variant='ghost'
+                    onClick={() => {
+                      setTaskModalInvoiceId(row.id)
+                      setTaskModalClientId(row.client_id ?? null)
+                      setIsTaskModalOpen(true)
+                    }}
+                  >
+                    Add Task
+                  </Button>
+                ),
                 <Button
                   key='view-tasks'
                   className='w-full'
@@ -376,18 +378,20 @@ const Invoices: React.FC<{
                 >
                   View Tasks
                 </Button>,
-                <Button
-                  key='add-note'
-                  className='w-full'
-                  variant='ghost'
-                  onClick={() => {
-                    setAddNoteInvoiceId(row.id)
-                    setAddNoteClientId(row.client_id ?? null)
-                    setIsAddNoteModalOpen(true)
-                  }}
-                >
-                  Add Note
-                </Button>,
+                canEditInvoice && (
+                  <Button
+                    key='add-note'
+                    className='w-full'
+                    variant='ghost'
+                    onClick={() => {
+                      setAddNoteInvoiceId(row.id)
+                      setAddNoteClientId(row.client_id ?? null)
+                      setIsAddNoteModalOpen(true)
+                    }}
+                  >
+                    Add Note
+                  </Button>
+                ),
                 <Button
                   key='view-notes'
                   className='w-full'
@@ -421,7 +425,9 @@ const Invoices: React.FC<{
                     key='view-estimate'
                     className='w-full'
                     variant='ghost'
-                    onClick={() => window.open(`/erp/estimates/${row.estimate_id}?p_id=${row.proposal_id}&p_mode=view`, '_blank')}
+                    onClick={() =>
+                      window.open(`/erp/estimates/${row.estimate_id}?p_id=${row.proposal_id}&p_mode=view`, '_blank')
+                    }
                   >
                     View Original Proposal
                   </Button>
@@ -543,10 +549,10 @@ const Invoices: React.FC<{
           <InvoiceDocuments invoiceId={selectedInvoiceForTab.id} />
         )}
         {activeTab === 'job-before-image' && selectedInvoiceForTab && (
-          <InvoiceJobImages invoiceId={selectedInvoiceForTab.id} type='before' />
+          <InvoiceJobImages invoiceId={selectedInvoiceForTab.id} type='before' canEditInvoice={canEditInvoice} />
         )}
         {activeTab === 'job-after-image' && selectedInvoiceForTab && (
-          <InvoiceJobImages invoiceId={selectedInvoiceForTab.id} type='after' />
+          <InvoiceJobImages invoiceId={selectedInvoiceForTab.id} type='after' canEditInvoice={canEditInvoice} />
         )}
       </CommonLayout>
 
