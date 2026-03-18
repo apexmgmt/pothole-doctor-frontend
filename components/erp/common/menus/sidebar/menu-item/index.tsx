@@ -65,7 +65,7 @@ const MenuItem: React.FC<{
       </button>
 
       {isExpanded && (
-        <ul className={`relative space-y-1 mt-1 ${level > 0 ? 'ml-5' : 'ml-9'}`}>
+        <ul className={`relative space-y-1 mt-1 ${level > 0 ? 'ml-5' : 'ml-8'}`}>
           {item.subItems.map((subItem, idx) => (
             <li key={subItem.id}>
               <MenuItem
@@ -78,7 +78,7 @@ const MenuItem: React.FC<{
           ))}
 
           <span
-            className={`absolute bottom-[43px] w-0 h-[calc(100%-32px)] border-l border-[#4d4d4d] ${level > 0 ? 'left-0' : '-left-4'}`}
+            className={`absolute bottom-10 w-0 h-[calc(100%-30px)] border-l border-border ${level > 0 ? '-left-1' : '-left-3'}`}
           />
         </ul>
       )}
