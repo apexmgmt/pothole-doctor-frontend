@@ -195,6 +195,7 @@ export async function proxy(req: NextRequest) {
       redirectRes.cookies.delete('permissions_1')
       redirectRes.cookies.delete('permissions_2')
       redirectRes.cookies.delete('permissions_3')
+      redirectRes.cookies.delete('permissions_4')
       redirectRes.cookies.delete('roles')
 
       return redirectRes

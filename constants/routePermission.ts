@@ -60,6 +60,8 @@ export const PERMISSION_BASED_ROUTES: Record<string, string> = {
   '/erp/states': 'Manage State',
   '/erp/cities': 'Manage City',
   '/erp/locations/businesses': 'Manage Location',
+  '/erp/locations/businesses/create': 'Create Location',
+  '/erp/locations/businesses/[id]/edit': 'Update Location',
 
   // Settings routes
   '/erp/settings/payment-terms': 'Manage Payment Term',
