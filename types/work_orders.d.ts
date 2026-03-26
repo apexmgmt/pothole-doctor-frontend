@@ -1,3 +1,4 @@
+import { Model } from '.'
 import { BusinessLocation } from './business_location'
 import { Client } from './clients/clients'
 import { EstimateType } from './estimate_types'
@@ -6,8 +7,7 @@ import { Proposal, ProposalService } from './estimates/proposals'
 import { LaborCost } from './labor_costs'
 import { Product } from './products'
 
-export interface WorkOrder {
-  id: string
+export interface WorkOrder extends Model{
   work_order_number: number
   estimate_id: string | null
   estimate?: Estimate
@@ -43,8 +43,6 @@ export interface WorkOrder {
   reason: string | null
   take_off_data: TakeoffData | null
   deleted_at: string | null
-  created_at: string
-  updated_at: string
   invoice_id: string | null
   services?: ProposalService[]
   payment_method?: string

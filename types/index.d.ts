@@ -1,3 +1,12 @@
+/**
+ * Base model interface that all other models will extend. It includes common fields like id, created_at, and updated_at.
+ */
+export interface Model {
+  id: string
+  created_at: string
+  updated_at: string
+}
+
 export * from './react_node'
 export * from './contact'
 export * from './table'
@@ -39,4 +48,5 @@ export * from './estimates/estimates'
 export * from './estimates/proposals'
 export * from './estimates/estimate_notes'
 export * from './invoices'
-export * from './work_orders';
+export * from './work_orders'
+export * from './completion_certificates'
