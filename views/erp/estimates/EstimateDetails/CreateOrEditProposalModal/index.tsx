@@ -71,7 +71,11 @@ const CreateOrEditProposalModal = ({
 
   // Payment settings
   const [isPaymentSettingOpen, setIsPaymentSettingOpen] = useState(false)
-  const [isDownPaymentMaterials, setIsDownPaymentMaterials] = useState(proposalDetails?.is_down_payment_materials ?? false)
+
+  const [isDownPaymentMaterials, setIsDownPaymentMaterials] = useState(
+    proposalDetails?.is_down_payment_materials ?? false
+  )
+
   const [downPaymentAmount, setDownPaymentAmount] = useState(proposalDetails?.down_payment_amount ?? 0)
   const [downPaymentPercent, setDownPaymentPercent] = useState(proposalDetails?.down_payment_percentage ?? 0)
 
@@ -102,7 +106,14 @@ const CreateOrEditProposalModal = ({
     const found = serviceTypes.find(st => st.id === serviceTypeId)
 
     if (found) {
-      setSelectedServiceType(prev => [...prev, { id: found.id, name: found.name }])
+      const alreadyExists = selectedServiceType.some(st => st.id === found.id)
+
+      if (!alreadyExists) {
+        setSelectedServiceType(prev => [...prev, { id: found.id, name: found.name }])
+      }
+
+      // If it already exists, do nothing — the dropdown item is disabled anyway,
+      // but this guard prevents duplicates if called programmatically.
     }
 
     setServiceSelectOpen(false)
@@ -393,6 +404,7 @@ const CreateOrEditProposalModal = ({
             {effectiveMode !== 'view' && (
               <AddServiceButton
                 serviceTypes={serviceTypes}
+                selectedServiceTypeIds={selectedServiceType.map(st => st.id)}
                 open={serviceSelectOpen}
                 onOpenChange={setServiceSelectOpen}
                 onSelect={handleAddServiceType}

@@ -132,7 +132,11 @@ const AddInvoiceServicesModal = ({
     const found = serviceTypes.find(st => st.id === serviceTypeId)
 
     if (found) {
-      setSelectedServiceType(prev => [...prev, { id: found.id, name: found.name }])
+      const alreadyExists = selectedServiceType.some(st => st.id === found.id)
+
+      if (!alreadyExists) {
+        setSelectedServiceType(prev => [...prev, { id: found.id, name: found.name }])
+      }
     }
 
     setServiceSelectOpen(false)
@@ -382,6 +386,7 @@ const AddInvoiceServicesModal = ({
             />
             <AddServiceButton
               serviceTypes={serviceTypes}
+              selectedServiceTypeIds={selectedServiceType.map(st => st.id)}
               open={serviceSelectOpen}
               onOpenChange={setServiceSelectOpen}
               onSelect={handleAddServiceType}
