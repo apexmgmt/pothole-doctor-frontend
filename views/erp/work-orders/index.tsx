@@ -128,6 +128,17 @@ const WorkOrders: React.FC<{
           delete newOptions.page
         }
 
+        // Avoid triggering a re-fetch when nothing actually changed
+        const prevKeys = Object.keys(prev)
+        const newKeys = Object.keys(newOptions)
+
+        if (
+          prevKeys.length === newKeys.length &&
+          newKeys.every(k => prev[k] === newOptions[k])
+        ) {
+          return prev
+        }
+
         return newOptions
       })
     }, 500)
@@ -207,7 +218,6 @@ const WorkOrders: React.FC<{
     const qs = params.toString()
 
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
-    fetchData()
   }
 
   const handleDeleteWorkOrder = async (id: string) => {
