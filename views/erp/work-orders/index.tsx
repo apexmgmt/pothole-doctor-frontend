@@ -171,6 +171,8 @@ const WorkOrders: React.FC<{
   }, [isLoading])
 
   const handleOpenServicesModal = async (id: string) => {
+    hasAutoOpenedRef.current = true
+
     try {
       const response = await WorkOrderService.show(id)
 
@@ -197,7 +199,6 @@ const WorkOrders: React.FC<{
   const handleServicesClose = () => {
     setIsServicesModalOpen(false)
     setServicesWorkOrder(null)
-    fetchData()
 
     const params = new URLSearchParams(searchParams.toString())
 
@@ -206,6 +207,7 @@ const WorkOrders: React.FC<{
     const qs = params.toString()
 
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+    fetchData()
   }
 
   const handleDeleteWorkOrder = async (id: string) => {
