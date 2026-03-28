@@ -22,6 +22,7 @@ export interface Invoice {
   client?: Client
   assign_id: string
   created_by: string
+  location: string | null
   payment_term_id: string
   service_type_id: string
   title: string

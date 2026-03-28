@@ -37,6 +37,7 @@ import WorkOrderService from '@/services/api/work-orders/work_orders.service'
 
 import EditWorkOrderModal from './EditWorkOrderModal'
 import EditWorkOrderServicesModal from './EditWorkOrderServicesModal'
+import CompletionCertificatesModal from './CompletionCertificatesModal'
 import WorkOrderDocuments from './documents/WorkOrderDocuments'
 import InvoiceJobImages from '../invoices/job-images/InvoiceJobImages'
 
@@ -93,6 +94,10 @@ const WorkOrders: React.FC<{
   const [isServicesModalOpen, setIsServicesModalOpen] = useState<boolean>(false)
   const [servicesWorkOrder, setServicesWorkOrder] = useState<WorkOrder | null>(null)
 
+  // Completion certificates modal
+  const [isCertModalOpen, setIsCertModalOpen] = useState<boolean>(false)
+  const [certModalWorkOrder, setCertModalWorkOrder] = useState<WorkOrder | null>(null)
+
   // Permissions
   const [canManageEstimate, setCanManageEstimate] = useState<boolean>(false)
   const [canManageProposal, setCanManageProposal] = useState<boolean>(false)
@@ -132,10 +137,7 @@ const WorkOrders: React.FC<{
         const prevKeys = Object.keys(prev)
         const newKeys = Object.keys(newOptions)
 
-        if (
-          prevKeys.length === newKeys.length &&
-          newKeys.every(k => prev[k] === newOptions[k])
-        ) {
+        if (prevKeys.length === newKeys.length && newKeys.every(k => prev[k] === newOptions[k])) {
           return prev
         }
 
@@ -303,16 +305,7 @@ const WorkOrders: React.FC<{
       cell: (row: WorkOrder) => <span className='font-medium'>{formatDate(row.due_date || '') || '—'}</span>,
       sortable: true
     },
-    {
-      id: 'status',
-      header: 'Status',
-      cell: (row: WorkOrder) => (
-        <Badge variant={getStatusVariant(row.status)} className='capitalize'>
-          {row.status || '—'}
-        </Badge>
-      ),
-      sortable: true
-    },
+
     {
       id: 'total',
       header: 'Total',
@@ -332,6 +325,53 @@ const WorkOrders: React.FC<{
           <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
             ${Number(profit).toFixed(2)}
           </span>
+        )
+      },
+      sortable: true
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      cell: (row: WorkOrder) => (
+        <Badge variant={getStatusVariant(row.status)} className='capitalize'>
+          {row.status || '—'}
+        </Badge>
+      ),
+      sortable: true
+    },
+    {
+      id: 'completion_certificates',
+      header: 'Completion Certificate Signed',
+      cell: (row: WorkOrder) => {
+        const certs = row.completion_certificates
+
+        if (certs && certs.length > 0) {
+          const completed = certs.filter(c => c.is_completed).length
+          const total = certs.length
+          const allDone = completed === total
+
+          const pct = Math.round((completed / total) * 100)
+
+          return (
+            <div className='w-28 h-5 rounded bg-muted overflow-hidden relative'>
+              <div
+                className={`h-full transition-all ${allDone ? 'bg-green-500' : 'bg-blue-400'}`}
+                style={{ width: `${pct}%` }}
+              />
+              <span className='absolute inset-0 flex items-center justify-center text-xs font-medium text-white mix-blend-difference'>
+                {pct}%
+              </span>
+            </div>
+          )
+        }
+
+        return (
+          <div className='w-28 h-5 rounded bg-muted overflow-hidden relative'>
+            <div className={`h-full transition-all bg-blue-400`} style={{ width: `0%` }} />
+            <span className='absolute inset-0 flex items-center justify-center text-xs font-medium text-white mix-blend-difference'>
+              0%
+            </span>
+          </div>
         )
       },
       sortable: true
@@ -380,6 +420,19 @@ const WorkOrders: React.FC<{
                     onClick={() => window.open(`/erp/invoices?inv_id=${row.invoice_id}`, '_blank')}
                   >
                     View Invoice
+                  </Button>
+                ),
+                row.completion_certificates && row.completion_certificates.length > 0 && (
+                  <Button
+                    key='view-certs'
+                    className='w-full'
+                    variant='ghost'
+                    onClick={() => {
+                      setCertModalWorkOrder(row)
+                      setIsCertModalOpen(true)
+                    }}
+                  >
+                    Completion Certificates
                   </Button>
                 )
               ]}
@@ -513,6 +566,21 @@ const WorkOrders: React.FC<{
         businessLocations={businessLocations}
         onSuccess={fetchData}
       />
+
+      {/* Completion Certificates */}
+      {certModalWorkOrder && (
+        <CompletionCertificatesModal
+          open={isCertModalOpen}
+          onOpenChange={(open: boolean) => {
+            if (!open) {
+              setIsCertModalOpen(false)
+              setCertModalWorkOrder(null)
+            }
+          }}
+          workOrderNumber={certModalWorkOrder.work_order_number}
+          certificates={certModalWorkOrder.completion_certificates ?? []}
+        />
+      )}
 
       {/* Edit Services — opened directly from the list */}
       {servicesWorkOrder && (

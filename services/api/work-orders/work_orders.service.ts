@@ -1,4 +1,11 @@
-import { API_URL, WORK_ORDERS, WORK_ORDERS_RESTORE, WORK_ORDERS_SERVICES } from '@/constants/api'
+import {
+  API_URL,
+  COMPLETE_WORK_ORDER,
+  VIEW_WORK_ORDER,
+  WORK_ORDERS,
+  WORK_ORDERS_RESTORE,
+  WORK_ORDERS_SERVICES
+} from '@/constants/api'
 import apiInterceptor from '../api.interceptor'
 import { WorkOrderPayload, WorkOrderServicePayload } from '@/types'
 
@@ -208,6 +215,58 @@ export default class WorkOrderService {
         const errorData = await response.json()
 
         throw new Error(errorData.message || 'Failed to restore work order')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * View work order details for completion certificate
+   * @param wo_id The ID of the work order to be viewed.
+   * @param st_id The ID of the service type associated with the work order.
+   * @returns A promise {status: 'success' | 'error, data: {work_order: WorkOrder, service: Service, completion_certificate: CompletionCertificate} | null}
+   * @throws An error if the API request fails or returns a non-OK response.
+   */
+  static viewWorkOrder = async (wo_id: string, st_id: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + VIEW_WORK_ORDER(wo_id, st_id), {
+        requiresAuth: false,
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to view work order')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Submits a completion certificate for a work order with a signed PDF.
+   * @param payload FormData containing wo_id, st_id, file (signed PDF), and is_completed flag.
+   * @returns A promise resolving to the updated completion certificate data.
+   * @throws An error if the API request fails or returns a non-OK response.
+   */
+  static completeWorkOrder = async (payload: FormData) => {
+    try {
+      const response = await apiInterceptor(API_URL + COMPLETE_WORK_ORDER, {
+        requiresAuth: false,
+        method: 'POST',
+        body: payload
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to submit completion certificate')
       }
 
       return await response.json()

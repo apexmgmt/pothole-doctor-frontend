@@ -1,4 +1,4 @@
-import { Model } from '.'
+import { CompletionCertificate, Invoice, Model, User } from '.'
 import { BusinessLocation } from './business_location'
 import { Client } from './clients/clients'
 import { EstimateType } from './estimate_types'
@@ -7,18 +7,23 @@ import { Proposal, ProposalService } from './estimates/proposals'
 import { LaborCost } from './labor_costs'
 import { Product } from './products'
 
-export interface WorkOrder extends Model{
+export interface WorkOrder extends Model {
   work_order_number: number
+  invoice_id: string
+  invoice?: Invoice
   estimate_id: string | null
   estimate?: Estimate
   proposal_id: string | null
   proposal?: Proposal
   work_order_type_id: string
   work_order_type?: EstimateType
+  completion_certificates?: CompletionCertificate[]
   client_id: string
   client?: Client
   assign_id: string
+  assign_user?: User
   created_by: string
+  location: string | null
   payment_term_id: string
   service_type_id: string
   title: string
@@ -49,6 +54,7 @@ export interface WorkOrder extends Model{
   payment_method_data?: Record<string, string> | null
   is_agreed_terms?: boolean | number | null
   is_signed?: boolean
+  location: string | null
 }
 
 export interface WorkOrderPayload {
