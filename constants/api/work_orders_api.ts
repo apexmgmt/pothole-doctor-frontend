@@ -54,6 +54,6 @@ export const VIEW_WORK_ORDER = (wo_id: string, sg_id: string, st_id: string): st
 /**
  * This contains the API endpoint to complete a work order (public api).
  * @method POST - To submit a completion certificate with signature PDF
- * @returns string = /v1/tenant/complete-work-order/
+ * @returns string = /v1/tenant/complete-work-order-service/
  */
-export const COMPLETE_WORK_ORDER: string = '/v1/tenant/complete-work-order/'
+export const COMPLETE_WORK_ORDER: string = '/v1/tenant/complete-work-order-service/'

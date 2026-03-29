@@ -11,10 +11,11 @@ interface Props {
   onSignedChange: (signed: boolean) => void
   readOnly?: boolean
   date?: string
+  initialSignature?: string | null
 }
 
 const CertificateSignature = forwardRef<CertificateSignatureHandle, Props>(
-  ({ onSignedChange, readOnly = false, date }, ref) => {
+  ({ onSignedChange, readOnly = false, date, initialSignature }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const padRef = useRef<SignaturePad | null>(null)
     const [isEmpty, setIsEmpty] = useState(true)
@@ -106,21 +107,35 @@ const CertificateSignature = forwardRef<CertificateSignatureHandle, Props>(
           {/* Signature canvas */}
           <div className='space-y-1'>
             <div className='relative w-72'>
-              {ready && isEmpty && !readOnly && (
-                <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                  <span className='text-[#9ca3af] italic text-sm'>Click here to sign.</span>
-                </div>
+              {readOnly && initialSignature ? (
+                <img
+                  src={
+                    initialSignature.startsWith('data:')
+                      ? initialSignature
+                      : `data:image/png;base64,${initialSignature}`
+                  }
+                  alt='Signature'
+                  className='w-72 h-28 rounded object-contain bg-white'
+                />
+              ) : (
+                <>
+                  {ready && isEmpty && !readOnly && (
+                    <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
+                      <span className='text-[#9ca3af] italic text-sm'>Click here to sign.</span>
+                    </div>
+                  )}
+                  {readOnly && isEmpty && (
+                    <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
+                      <span className='text-[#9ca3af] italic text-sm'>No signature provided.</span>
+                    </div>
+                  )}
+                  <canvas
+                    ref={canvasRef}
+                    style={{ touchAction: 'none', backgroundColor: 'white' }}
+                    className={`w-72 h-28 rounded ${readOnly ? 'pointer-events-none opacity-70 cursor-default' : 'cursor-crosshair'}`}
+                  />
+                </>
               )}
-              {readOnly && isEmpty && (
-                <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                  <span className='text-[#9ca3af] italic text-sm'>Signature on file.</span>
-                </div>
-              )}
-              <canvas
-                ref={canvasRef}
-                style={{ touchAction: 'none', backgroundColor: 'white' }}
-                className={`w-72 h-28 rounded ${readOnly ? 'pointer-events-none opacity-70 cursor-default' : 'cursor-crosshair'}`}
-              />
             </div>
             <div className='border-b border-[rgba(0,0,0,0.4)] w-72' />
             <p className='text-sm font-medium'>Signature</p>

@@ -50,8 +50,6 @@ const CompletionCertificatePage = async ({ searchParams }: { searchParams: any }
   try {
     const response = await WorkOrderService.viewWorkOrder(wo_id, sg_id, st_id)
 
-    console.log('response', response)
-
     workOrder = response?.data?.work_order ?? null
     service = response?.data?.service ?? null
     completionCertificate = response?.data?.completion_certificate ?? null
@@ -76,6 +74,7 @@ const CompletionCertificatePage = async ({ searchParams }: { searchParams: any }
       completionCertificate={completionCertificate}
       wo_id={wo_id ?? ''}
       st_id={st_id ?? ''}
+      sg_id={sg_id ?? ''}
     />
   )
 }

@@ -7,7 +7,7 @@ import {
   WORK_ORDERS_SERVICES
 } from '@/constants/api'
 import apiInterceptor from '../api.interceptor'
-import { WorkOrderPayload, WorkOrderServicePayload } from '@/types'
+import { CompletionCertificatePayload, WorkOrderPayload, WorkOrderServicePayload } from '@/types'
 
 export default class WorkOrderService {
   /**
@@ -252,16 +252,16 @@ export default class WorkOrderService {
 
   /**
    * Submits a completion certificate for a work order with a signed PDF.
-   * @param payload FormData containing wo_id, st_id, file (signed PDF), and is_completed flag.
+   * @param payload CompletionCertificatePayload containing wo_id, st_id, file (signed PDF), and is_completed flag.
    * @returns A promise resolving to the updated completion certificate data.
    * @throws An error if the API request fails or returns a non-OK response.
    */
-  static completeWorkOrder = async (payload: FormData) => {
+  static completeWorkOrder = async (payload: CompletionCertificatePayload) => {
     try {
       const response = await apiInterceptor(API_URL + COMPLETE_WORK_ORDER, {
         requiresAuth: false,
         method: 'POST',
-        body: payload
+        body: JSON.stringify(payload)
       })
 
       if (!response.ok) {
