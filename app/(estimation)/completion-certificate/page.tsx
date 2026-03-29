@@ -6,10 +6,10 @@ import { Metadata } from 'next'
 export const dynamic = 'force-dynamic'
 
 export const generateMetadata = async ({ searchParams }: { searchParams: any }): Promise<Metadata> => {
-  const { wo_id, st_id } = await searchParams
+  const { wo_id, sg_id, st_id } = await searchParams
 
   try {
-    const response = await WorkOrderService.viewWorkOrder(wo_id, st_id)
+    const response = await WorkOrderService.viewWorkOrder(wo_id, sg_id, st_id)
     const workOrder: WorkOrder | null = response?.data?.work_order ?? null
 
     if (!workOrder) {
@@ -41,14 +41,14 @@ export const generateMetadata = async ({ searchParams }: { searchParams: any }):
 }
 
 const CompletionCertificatePage = async ({ searchParams }: { searchParams: any }) => {
-  const { wo_id, st_id } = await searchParams
+  const { wo_id, sg_id, st_id } = await searchParams
 
   let workOrder: WorkOrder | null = null
   let service: ProposalService | null = null
   let completionCertificate: CompletionCertificate | null = null
 
   try {
-    const response = await WorkOrderService.viewWorkOrder(wo_id, st_id)
+    const response = await WorkOrderService.viewWorkOrder(wo_id, sg_id, st_id)
 
     console.log('response', response)
 

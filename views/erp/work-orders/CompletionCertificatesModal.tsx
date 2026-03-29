@@ -45,7 +45,7 @@ const CompletionCertificatesModal = ({
             {certificates.map((cert, idx) => (
               <Link
                 key={cert.id ?? idx}
-                href={`/completion-certificate?wo_id=${cert?.wo_id}&st_id=${cert?.st_id}`}
+                href={`/completion-certificate?wo_id=${cert?.wo_id}&sg_id=${cert?.sg_id}&st_id=${cert?.st_id}`}
                 target='_blank'
                 rel='noopener noreferrer'
                 className='block'

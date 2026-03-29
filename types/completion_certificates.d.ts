@@ -8,5 +8,6 @@ export interface CompletionCertificate extends Model {
   service_type_name: string
   signature: string
   st_id?: string
+  sg_id?: string
   wo_id?: string
 }

@@ -226,13 +226,14 @@ export default class WorkOrderService {
   /**
    * View work order details for completion certificate
    * @param wo_id The ID of the work order to be viewed.
+   * @param sg_id The ID of the service group associated with the work order.
    * @param st_id The ID of the service type associated with the work order.
    * @returns A promise {status: 'success' | 'error, data: {work_order: WorkOrder, service: Service, completion_certificate: CompletionCertificate} | null}
    * @throws An error if the API request fails or returns a non-OK response.
    */
-  static viewWorkOrder = async (wo_id: string, st_id: string) => {
+  static viewWorkOrder = async (wo_id: string, sg_id: string, st_id: string) => {
     try {
-      const response = await apiInterceptor(API_URL + VIEW_WORK_ORDER(wo_id, st_id), {
+      const response = await apiInterceptor(API_URL + VIEW_WORK_ORDER(wo_id, sg_id, st_id), {
         requiresAuth: false,
         method: 'GET'
       })

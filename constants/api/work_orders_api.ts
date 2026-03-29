@@ -42,12 +42,13 @@ export const WORK_ORDER_DOCUMENTS: string = '/v1/tenant/work-order-documents/'
 /**
  * This contains the API endpoint to view a specific work order.
  * @param wo_id string
+ * @param sg_id string
  * @param st_id string
- * @method GET - To view a specific work order with given wo_id and st_id as query params (public api)
- * @returns string = /v1/tenant/view-work-order?wo_id=?&st_id=?
+ * @method GET - To view a specific work order with given wo_id, sg_id, and st_id as query params (public api)
+ * @returns string = /v1/tenant/view-work-order?wo_id=?&sg_id=?&st_id=?
  */
-export const VIEW_WORK_ORDER = (wo_id: string, st_id: string): string => {
-  return `/v1/tenant/view-work-order?wo_id=${wo_id}&st_id=${st_id}`
+export const VIEW_WORK_ORDER = (wo_id: string, sg_id: string, st_id: string): string => {
+  return `/v1/tenant/view-work-order?wo_id=${wo_id}&sg_id=${sg_id}&st_id=${st_id}`
 }
 
 /**
