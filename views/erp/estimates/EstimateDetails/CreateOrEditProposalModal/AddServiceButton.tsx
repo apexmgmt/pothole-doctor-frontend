@@ -46,9 +46,8 @@ const AddServiceButton = ({
             const isAlreadyAdded = selectedServiceTypeIds.includes(st.id)
 
             return (
-              <SelectItem key={st.id} value={st.id} disabled={isAlreadyAdded}
-                className={isAlreadyAdded ? 'opacity-40 cursor-not-allowed' : ''}>
-                {st.name}{isAlreadyAdded ? ' (already added)' : ''}
+              <SelectItem key={st.id} value={st.id}>
+                {st.name}
               </SelectItem>
             )
           })}

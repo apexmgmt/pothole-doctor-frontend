@@ -87,7 +87,7 @@ const CreateOrEditProposalModal = ({
 
   // Each service type section has an array of line items
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
-    { serviceTypeName: string; serviceTypeId: string; lines: ProposalServiceItemPayload[] }[]
+    { serviceTypeName: string; serviceTypeId: string; groupId: string | null; lines: ProposalServiceItemPayload[] }[]
   >([])
 
   const onCancel = () => {
@@ -106,14 +106,11 @@ const CreateOrEditProposalModal = ({
     const found = serviceTypes.find(st => st.id === serviceTypeId)
 
     if (found) {
-      const alreadyExists = selectedServiceType.some(st => st.id === found.id)
-
-      if (!alreadyExists) {
-        setSelectedServiceType(prev => [...prev, { id: found.id, name: found.name }])
-      }
-
-      // If it already exists, do nothing — the dropdown item is disabled anyway,
-      // but this guard prevents duplicates if called programmatically.
+      setSelectedServiceType(prev => [...prev, { id: found.id, name: found.name }])
+      setServiceTypeLineItems(prev => [
+        ...prev,
+        { serviceTypeName: found.name, serviceTypeId: found.id, groupId: null, lines: [] }
+      ])
     }
 
     setServiceSelectOpen(false)
@@ -121,6 +118,7 @@ const CreateOrEditProposalModal = ({
 
   const handleRemoveServiceType = (index: number) => {
     setSelectedServiceType(prev => prev.filter((_, i) => i !== index))
+    setServiceTypeLineItems(prev => prev.filter((_, i) => i !== index))
   }
 
   const allLines = serviceTypeLineItems.flatMap(st => st.lines)
@@ -217,10 +215,12 @@ const CreateOrEditProposalModal = ({
     down_payment_percentage: downPaymentPercent,
     services: serviceTypeLineItems.map((st, index) => ({
       service_type_id: selectedServiceType[index].id,
+      group_id: st.groupId ?? null,
       items: st.lines.map(line => {
         const computedTaxAmount = line.is_sale ? getDiscountedUnitPrice(line) * line.qty * (taxRate / 100) : 0
 
         return {
+          item_id: line.item_id ?? null,
           product_id: line.product_id,
           labor_cost_id: line.labor_cost_id,
           name: line.name,
@@ -317,7 +317,9 @@ const CreateOrEditProposalModal = ({
       const newServiceTypeLineItems = (proposalDetails.services || []).map(service => ({
         serviceTypeName: service.service_type?.name || '',
         serviceTypeId: service.service_type_id,
+        groupId: service.id,
         lines: (service.items || []).map(item => ({
+          item_id: item.id,
           product_id: item.product_id,
           labor_cost_id: item.labor_cost_id,
           name: item.name,

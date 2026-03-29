@@ -194,7 +194,8 @@ const ServiceTypeSection = ({
         is_sale: 0,
         tax_amount: 0,
         tax_type: 'percentage',
-        note: ''
+        note: '',
+        item_id: null
       })
     )
 
@@ -222,7 +223,8 @@ const ServiceTypeSection = ({
         tax_type: 'percentage',
         tax: 0,
         tax_amount: 0,
-        note: ''
+        note: '',
+        item_id: null
       })
     )
 
@@ -247,7 +249,8 @@ const ServiceTypeSection = ({
       tax_type: 'percentage',
       tax: 0,
       tax_amount: 0,
-      note: ''
+      note: '',
+      item_id: null
     }
 
     // For comment, qty/unit_cost/margin/unit are not needed
