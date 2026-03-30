@@ -18,6 +18,7 @@ import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
+import { formatDateTime } from '@/utils/date'
 import PartnerService from '@/services/api/partners/partners.service'
 import CreateOrEditPartnerModal from './CreateOrEditPartnerModal'
 import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
@@ -126,26 +127,8 @@ const Partners: React.FC<PartnersProps> = ({
             userable?.skills && userable.skills.length > 0
               ? userable.skills.map(skill => skill.name).join(', ')
               : 'N/A',
-          insurance_expiration: userable?.insurance_expiration
-            ? new Date(userable.insurance_expiration).toLocaleString('en-US', {
-                month: '2-digit',
-                day: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-              })
-            : '',
-          w9_expiration: userable?.w9_expiration
-            ? new Date(userable.w9_expiration).toLocaleString('en-US', {
-                month: '2-digit',
-                day: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-              })
-            : ''
+          insurance_expiration: formatDateTime(userable?.insurance_expiration ?? null),
+          w9_expiration: formatDateTime(userable?.w9_expiration ?? null)
         }
       })
     : []
