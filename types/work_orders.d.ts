@@ -1,3 +1,4 @@
+import { CompletionCertificate, Invoice, Model, User } from '.'
 import { BusinessLocation } from './business_location'
 import { Client } from './clients/clients'
 import { EstimateType } from './estimate_types'
@@ -6,19 +7,23 @@ import { Proposal, ProposalService } from './estimates/proposals'
 import { LaborCost } from './labor_costs'
 import { Product } from './products'
 
-export interface WorkOrder {
-  id: string
+export interface WorkOrder extends Model {
   work_order_number: number
+  invoice_id: string
+  invoice?: Invoice
   estimate_id: string | null
   estimate?: Estimate
   proposal_id: string | null
   proposal?: Proposal
   work_order_type_id: string
   work_order_type?: EstimateType
+  completion_certificates?: CompletionCertificate[]
   client_id: string
   client?: Client
   assign_id: string
+  assign_user?: User
   created_by: string
+  location: string | null
   payment_term_id: string
   service_type_id: string
   title: string
@@ -43,14 +48,13 @@ export interface WorkOrder {
   reason: string | null
   take_off_data: TakeoffData | null
   deleted_at: string | null
-  created_at: string
-  updated_at: string
   invoice_id: string | null
   services?: ProposalService[]
   payment_method?: string
   payment_method_data?: Record<string, string> | null
   is_agreed_terms?: boolean | number | null
   is_signed?: boolean
+  location: string | null
 }
 
 export interface WorkOrderPayload {
@@ -85,10 +89,12 @@ export interface WorkOrderServicePayload {
 
 export interface ServicePayload {
   service_type_id: string
+  group_id: string | null
   items: WorkOrderServiceItemPayload[]
 }
 
 export interface WorkOrderServiceItemPayload {
+  item_id?: string | null
   product_id?: string
   product?: Product
   labor_cost_id?: string

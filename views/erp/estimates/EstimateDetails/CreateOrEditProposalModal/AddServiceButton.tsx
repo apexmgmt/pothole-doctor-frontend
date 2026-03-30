@@ -5,11 +5,13 @@ import { SettingsIcon } from 'lucide-react'
 
 const AddServiceButton = ({
   serviceTypes,
+  selectedServiceTypeIds = [],
   open,
   onOpenChange,
   onSelect
 }: {
   serviceTypes: ServiceType[]
+  selectedServiceTypeIds?: string[]
   open: boolean
   onOpenChange: (open: boolean) => void
   onSelect: (serviceTypeId: string) => void
@@ -40,11 +42,15 @@ const AddServiceButton = ({
           tabIndex={-1}
         />
         <SelectContent position='popper' align='end'>
-          {serviceTypes.map(st => (
-            <SelectItem key={st.id} value={st.id}>
-              {st.name}
-            </SelectItem>
-          ))}
+          {serviceTypes.map(st => {
+            const isAlreadyAdded = selectedServiceTypeIds.includes(st.id)
+
+            return (
+              <SelectItem key={st.id} value={st.id}>
+                {st.name}
+              </SelectItem>
+            )
+          })}
         </SelectContent>
       </Select>
     </div>

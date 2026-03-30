@@ -193,6 +193,8 @@ const Invoices: React.FC<{
   }
 
   const handleOpenServicesModal = async (id: string) => {
+    hasAutoOpenedRef.current = true
+
     try {
       const response = await InvoiceService.show(id)
 
@@ -225,7 +227,6 @@ const Invoices: React.FC<{
   const handleServicesClose = () => {
     setIsServicesModalOpen(false)
     setServicesInvoice(null)
-    fetchData()
 
     const params = new URLSearchParams(searchParams.toString())
 
@@ -234,6 +235,7 @@ const Invoices: React.FC<{
     const qs = params.toString()
 
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+    fetchData()
   }
 
   const handleDeleteInvoice = async (id: string) => {

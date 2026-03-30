@@ -76,7 +76,7 @@ const EditWorkOrderServicesModal = ({
   const [selectedServiceType, setSelectedServiceType] = useState<{ id: string; name: string }[]>([])
 
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
-    { serviceTypeName: string; serviceTypeId: string; lines: ProposalServiceItemPayload[] }[]
+    { serviceTypeName: string; serviceTypeId: string; groupId: string | null; lines: ProposalServiceItemPayload[] }[]
   >([])
 
   const customMessageRef = useRef<HTMLTextAreaElement>(null)
@@ -134,6 +134,10 @@ const EditWorkOrderServicesModal = ({
 
     if (found) {
       setSelectedServiceType(prev => [...prev, { id: found.id, name: found.name }])
+      setServiceTypeLineItems(prev => [
+        ...prev,
+        { serviceTypeName: found.name, serviceTypeId: found.id, groupId: null, lines: [] }
+      ])
     }
 
     setServiceSelectOpen(false)
@@ -151,7 +155,9 @@ const EditWorkOrderServicesModal = ({
     discount: 0,
     services: serviceTypeLineItems.map((st, index) => ({
       service_type_id: selectedServiceType[index]?.id || st.serviceTypeId,
+      group_id: st.groupId ?? null,
       items: st.lines.map(line => ({
+        item_id: line.item_id ?? null,
         product_id: line.product_id,
         labor_cost_id: line.labor_cost_id,
         name: line.name,
@@ -230,7 +236,9 @@ const EditWorkOrderServicesModal = ({
       const newServiceTypeLineItems = workOrder.services.map(service => ({
         serviceTypeName: service.service_type?.name || '',
         serviceTypeId: service.service_type_id,
+        groupId: service.id,
         lines: (service.items || []).map(item => ({
+          item_id: item.id,
           product_id: item.product_id,
           labor_cost_id: item.labor_cost_id,
           name: item.name,
@@ -309,6 +317,7 @@ const EditWorkOrderServicesModal = ({
             </DropdownMenu>
             <AddServiceButton
               serviceTypes={serviceTypes}
+              selectedServiceTypeIds={selectedServiceType.map(st => st.id)}
               open={serviceSelectOpen}
               onOpenChange={setServiceSelectOpen}
               onSelect={handleAddServiceType}
@@ -356,7 +365,7 @@ const EditWorkOrderServicesModal = ({
                 setServiceTypeLineItems(prev => {
                   const copy = [...prev]
 
-                  copy[idx] = { serviceTypeName: item.name, serviceTypeId: item.id, lines }
+                  copy[idx] = { serviceTypeName: item.name, serviceTypeId: item.id, groupId: serviceTypeLineItems[idx]?.groupId ?? null, lines }
 
                   return copy
                 })

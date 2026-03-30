@@ -26,7 +26,7 @@ const BillingItems = ({ proposal }: { proposal: Proposal }) => {
                   </tr>
                   {service?.items?.length > 0 &&
                     service?.items?.map((item, itemIndex) => (
-                      <tr key={index + '-' + itemIndex} className='hover:bg-gray-900 print:bg-white transition-colors'>
+                      <tr key={index + '-' + itemIndex} className='hover:bg-gray-100 print:bg-white transition-colors'>
                         <td className='px-4 py-2 text-sm text-light  print:text-black align-top'>{item?.name || ''}</td>
 
                         <td className='px-4 py-2 text-sm text-light/80 print:text-black/80 align-top max-w-md whitespace-normal'>

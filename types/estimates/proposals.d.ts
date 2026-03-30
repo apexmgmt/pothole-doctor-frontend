@@ -116,10 +116,12 @@ export interface ProposalPayload {
 
 export interface ProposalServicePayload {
   service_type_id: string
+  group_id: string | null
   items: ProposalServiceItemPayload[]
 }
 
 export interface ProposalServiceItemPayload {
+  item_id: string | null
   product_id?: string
   product?: Product
   labor_cost_id?: string
