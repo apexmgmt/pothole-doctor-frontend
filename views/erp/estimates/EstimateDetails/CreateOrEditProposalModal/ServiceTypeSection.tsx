@@ -38,7 +38,8 @@ const ServiceTypeSection = ({
   uomUnits = [],
   vendors = [],
   taxRate = 0,
-  hideMargin = false
+  hideMargin = false,
+  allowedLineTypes
 }: {
   mode: 'create' | 'edit' | 'view'
   serviceTypeId: string
@@ -53,6 +54,7 @@ const ServiceTypeSection = ({
   vendors: Vendor[]
   taxRate: number
   hideMargin?: boolean
+  allowedLineTypes?: ProposalServiceItemPayload['type'][]
 }) => {
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
   const [openProductsModal, setOpenProductsModal] = useState(false)
@@ -348,6 +350,7 @@ const ServiceTypeSection = ({
             setOpenLaborCostModal={setOpenLaborCostModal}
             addLine={addLine}
             hideMargin={hideMargin}
+            allowedLineTypes={allowedLineTypes}
           />
           {/* Summary Section */}
           <ServiceTypeSummary

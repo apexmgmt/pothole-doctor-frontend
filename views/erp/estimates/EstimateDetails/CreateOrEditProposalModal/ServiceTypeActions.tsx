@@ -15,6 +15,7 @@ interface ServiceTypeActionsProps {
   setOpenLaborCostModal: (open: boolean) => void
   addLine: (type: ProposalServiceItemPayload['type']) => void
   hideMargin?: boolean
+  allowedLineTypes?: ProposalServiceItemPayload['type'][]
 }
 
 const ServiceTypeActions = ({
@@ -27,8 +28,13 @@ const ServiceTypeActions = ({
   setOpenProductsModal,
   setOpenLaborCostModal,
   addLine,
-  hideMargin = false
-}: ServiceTypeActionsProps) => (
+  hideMargin = false,
+  allowedLineTypes
+}: ServiceTypeActionsProps) => {
+  const isAllowed = (type: ProposalServiceItemPayload['type']) =>
+    !allowedLineTypes || allowedLineTypes.includes(type)
+
+  return (
   <div className='flex items-center gap-2 bg-zinc-800 p-3 rounded-md'>
     {mode !== 'view' && !hideMargin && (
       <div className='flex items-center gap-2 flex-1'>
@@ -87,30 +93,43 @@ const ServiceTypeActions = ({
               <Button variant='outline'>Add Line Item</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
-              <DropdownMenuItem onClick={() => addLine('invoice')}>
-                <GridIcon className='mr-2 h-4 w-4' /> Add Quote/Invoice Line Item
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => addLine('product')}>
-                <Boxes className='mr-2 h-4 w-4' /> Add Material Line Item
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => addLine('labor')}>
-                <Wrench className='mr-2 h-4 w-4' /> Add Labor Line Item
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => addLine('expense')}>
-                <ClipboardIcon className='mr-2 h-4 w-4' /> Add Expense Line Item
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => addLine('comment')}>
-                <MessageSquareIcon className='mr-2 h-4 w-4' /> Add Comment Line Item
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => addLine('deduction')}>
-                <Minus className='mr-2 h-4 w-4' /> Add Deduction Line Item
-              </DropdownMenuItem>
+              {isAllowed('invoice') && (
+                <DropdownMenuItem onClick={() => addLine('invoice')}>
+                  <GridIcon className='mr-2 h-4 w-4' /> Add Quote/Invoice Line Item
+                </DropdownMenuItem>
+              )}
+              {isAllowed('product') && (
+                <DropdownMenuItem onClick={() => addLine('product')}>
+                  <Boxes className='mr-2 h-4 w-4' /> Add Material Line Item
+                </DropdownMenuItem>
+              )}
+              {isAllowed('labor') && (
+                <DropdownMenuItem onClick={() => addLine('labor')}>
+                  <Wrench className='mr-2 h-4 w-4' /> Add Labor Line Item
+                </DropdownMenuItem>
+              )}
+              {isAllowed('expense') && (
+                <DropdownMenuItem onClick={() => addLine('expense')}>
+                  <ClipboardIcon className='mr-2 h-4 w-4' /> Add Expense Line Item
+                </DropdownMenuItem>
+              )}
+              {isAllowed('comment') && (
+                <DropdownMenuItem onClick={() => addLine('comment')}>
+                  <MessageSquareIcon className='mr-2 h-4 w-4' /> Add Comment Line Item
+                </DropdownMenuItem>
+              )}
+              {isAllowed('deduction') && (
+                <DropdownMenuItem onClick={() => addLine('deduction')}>
+                  <Minus className='mr-2 h-4 w-4' /> Add Deduction Line Item
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </Button>
       </div>
     )}
   </div>
-)
+  )
+}
 
 export default ServiceTypeActions
