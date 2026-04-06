@@ -1,4 +1,4 @@
-import ProductCategoryService from '@/services/api/product_categories.service'
+import ProductCategoryService from '@/services/api/products/product_categories.service'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
 import UnitService from '@/services/api/settings/units.service'
 import VendorService from '@/services/api/vendors/vendors.service'
