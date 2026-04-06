@@ -1,10 +1,10 @@
+import { Model } from '.'
 import { ProductCategory } from './product_categories'
 import { ServiceType } from './service_types'
 import { Unit } from './units'
 import { Vendor } from './vendors'
 
-export interface Product {
-  id: string
+export interface Product extends Model {
   category_id: string
   vendor_id: string
   name: string
@@ -41,9 +41,20 @@ export interface Product {
   is_discontinued_product: number | 0 | 1
   comments: string
   status: number | 1 | 0
-  created_at: string
-  updated_at: string
   deleted_at: string | null
+
+  // Stock & Quantities
+  remaining_stock: number | null
+  on_hand_stock: number | null
+  allocated_stock: number | null
+  prepared_stock: number | null
+  available_stock: number | null
+  picked_up_stock: number | null
+  required_stock: number | null
+  shortage_stock: number | null
+  work_order_cost: number | null
+  work_order_cost_id: string | null
+  location_notes: string | null
   category?: ProductCategory
   service_types?: ServiceType[]
   vendor?: Vendor
