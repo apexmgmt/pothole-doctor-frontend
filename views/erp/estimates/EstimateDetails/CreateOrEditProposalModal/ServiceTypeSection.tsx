@@ -215,7 +215,7 @@ const ServiceTypeSection = ({
         type: 'product',
         unit_cost: product.product_cost,
         qty: 1,
-        unit_name: product.selling_info?.unit?.name || '',
+        unit_name: product.selling_unit?.name ?? product.selling_uom?.name ?? '',
         margin: product.margin,
         unit_price: 0,
         discount: 0,
