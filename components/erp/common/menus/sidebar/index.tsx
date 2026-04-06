@@ -12,6 +12,7 @@ import {
   LocateIcon,
   Map,
   Package,
+  TruckIcon,
   UserLock,
   Users,
   Users2,
@@ -365,7 +366,17 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           hasSubItems: false,
           exactMatch: false,
           permissions: ['Manage Service Type']
+        },
+        {
+          id: 'couriers',
+          label: 'Couriers',
+          href: '/erp/couriers',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false,
+          permissions: ['Manage Courier']
         }
+
       ],
       exactMatch: false,
       permissions: [
