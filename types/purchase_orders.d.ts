@@ -42,3 +42,8 @@ export interface InventoryPayload {
   comments: null | string
   dye_lot: null | string
 }
+
+export interface InventoryAdjustPayload {
+  quantity: number
+  reason: string
+}
