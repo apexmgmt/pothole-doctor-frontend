@@ -20,15 +20,21 @@ export interface Product {
   collection: string
   dropped_date: string
   description: string
-  purchase_uom: string
-  uom_info: UomInfo
-  coverage_per_uom: CoveragePerUom
+  purchase_uom_id: string
+  unit_per_pallet: number
+  piece_per_uom: number
+  weight_per_uom: number
+  coverage_per_unit_id: string
+  coverage_per_rate: number
+  purchase_to_selling_conversion_rate: number
+  selling_unit_id: string
+  selling_price: number
   product_cost: number
   margin: number
-  selling_info: SellingInfo
+  freight_amount?: number
   minimum_qty: number
   round_up_quantity: number
-  type: string | 'inventory' | 'non-inventory'
+  type: string | 'inventory' | 'non_inventory'
   is_notify: number | 0 | 1
   visible: number | 0 | 1
   is_freight_percentage: number | 0 | 1
@@ -42,6 +48,12 @@ export interface Product {
   service_types?: ServiceType[]
   vendor?: Vendor
   galleries?: ProductGallery[]
+  purchase_uom?: Unit
+  purchase_unit?: Unit
+  selling_uom?: Unit
+  selling_unit?: Unit
+  coverage_uom?: Unit
+  coverage_unit?: Unit
 }
 
 export interface SellingInfo {
@@ -68,19 +80,25 @@ export interface ProductPayload {
   collection: string
   dropped_date: string
   description: string
-  purchase_uom: string
-  uom_info: UomInfo
-  coverage_per_uom: CoveragePerUom
+  purchase_uom_id: string
+  unit_per_pallet: number
+  piece_per_uom: number
+  weight_per_uom: number
+  coverage_per_unit_id: string
+  coverage_per_rate: number
+  purchase_to_selling_conversion_rate: number
+  selling_unit_id: string
+  selling_price: number
   product_cost: number
   margin: string
-  selling_info: SellingInfo
   minimum_qty: number
   round_up_quantity: number
-  type: string | 'inventory' | 'no-inventory'
+  type: string | 'inventory' | 'non_inventory'
   is_notify: number | 0 | 1
   visible: number | 0 | 1
   is_freight_percentage: number | 0 | 1
   is_discontinued_product: number | 0 | 1
+  freight_amount?: number
   comments: string
   status: number | 1 | 0
   sku: string
@@ -88,9 +106,9 @@ export interface ProductPayload {
 }
 
 export interface UomInfo {
-  carton_per_pallet: number
-  piece_per_carton: number
-  lb: number
+  unit_per_pallet: number
+  piece_per_uom: number
+  weight_per_uom: number
 }
 
 export interface ProductsProps {

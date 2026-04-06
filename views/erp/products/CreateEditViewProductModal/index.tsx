@@ -44,22 +44,18 @@ interface FormValues {
   collection: string
   dropped_date: string
   description: string
-  purchase_uom: string
-  uom_info: {
-    carton_per_pallet: number
-    piece_per_carton: number
-    lb: number
-  }
-  coverage_per_uom: {
-    value: number
-    unit: Unit
-  }
+  purchase_uom_id: string
+  unit_per_pallet: number
+  piece_per_uom: number
+  weight_per_uom: number
+  coverage_per_unit_id: string
+  coverage_per_rate: number
+  purchase_to_selling_conversion_rate: number
+  selling_unit_id: string
+  selling_price: number
   product_cost: number
   margin: string
-  selling_info: {
-    value: number
-    unit: Unit
-  }
+  freight_amount: number
   minimum_qty: number
   round_up_quantity: number
   type: string
@@ -104,22 +100,18 @@ const CreateEditViewProductModal = ({
       collection: '',
       dropped_date: '',
       description: '',
-      purchase_uom: '',
-      uom_info: {
-        carton_per_pallet: 0,
-        piece_per_carton: 0,
-        lb: 0
-      },
-      coverage_per_uom: {
-        value: 0,
-        unit: undefined
-      },
+      purchase_uom_id: '',
+      unit_per_pallet: 0,
+      piece_per_uom: 0,
+      weight_per_uom: 0,
+      coverage_per_unit_id: '',
+      coverage_per_rate: 0,
+      purchase_to_selling_conversion_rate: 0,
+      selling_unit_id: '',
+      selling_price: 0,
       product_cost: 0,
       margin: '0',
-      selling_info: {
-        value: 0,
-        unit: undefined
-      },
+      freight_amount: 0,
       minimum_qty: 0,
       round_up_quantity: 0,
       type: 'inventory',
@@ -165,22 +157,18 @@ const CreateEditViewProductModal = ({
         collection: productDetails.collection ?? '',
         dropped_date: productDetails.dropped_date ?? '',
         description: productDetails.description ?? '',
-        purchase_uom: productDetails.purchase_uom ?? '',
-        uom_info: {
-          carton_per_pallet: productDetails.uom_info?.carton_per_pallet ?? 0,
-          piece_per_carton: productDetails.uom_info?.piece_per_carton ?? 0,
-          lb: productDetails.uom_info?.lb ?? 0
-        },
-        coverage_per_uom: {
-          value: productDetails.coverage_per_uom?.value ?? 0,
-          unit: productDetails.coverage_per_uom?.unit ?? undefined
-        },
+        purchase_uom_id: productDetails.purchase_uom_id?.toString() ?? '',
+        unit_per_pallet: productDetails.unit_per_pallet ?? 0,
+        piece_per_uom: productDetails.piece_per_uom ?? 0,
+        weight_per_uom: productDetails.weight_per_uom ?? 0,
+        coverage_per_unit_id: productDetails.coverage_per_unit_id?.toString() ?? '',
+        coverage_per_rate: productDetails.coverage_per_rate ?? 0,
+        purchase_to_selling_conversion_rate: productDetails.purchase_to_selling_conversion_rate ?? 0,
+        selling_unit_id: productDetails.selling_unit_id?.toString() ?? '',
+        selling_price: productDetails.selling_price ?? 0,
         product_cost: productDetails.product_cost ?? 0,
         margin: productDetails.margin?.toString() ?? '0',
-        selling_info: {
-          value: productDetails.selling_info?.value ?? 0,
-          unit: productDetails.selling_info?.unit ?? undefined
-        },
+        freight_amount: productDetails.freight_amount ?? 0,
         minimum_qty: productDetails.minimum_qty ?? 0,
         round_up_quantity: productDetails.round_up_quantity ?? 0,
         type: productDetails.type ?? 'inventory',
@@ -212,22 +200,18 @@ const CreateEditViewProductModal = ({
         collection: '',
         dropped_date: '',
         description: '',
-        purchase_uom: '',
-        uom_info: {
-          carton_per_pallet: 0,
-          piece_per_carton: 0,
-          lb: 0
-        },
-        coverage_per_uom: {
-          value: 0,
-          unit: undefined
-        },
+        purchase_uom_id: '',
+        unit_per_pallet: 0,
+        piece_per_uom: 0,
+        weight_per_uom: 0,
+        coverage_per_unit_id: '',
+        coverage_per_rate: 0,
+        purchase_to_selling_conversion_rate: 0,
+        selling_unit_id: '',
+        selling_price: 0,
         product_cost: 0,
         margin: '0',
-        selling_info: {
-          value: 0,
-          unit: undefined
-        },
+        freight_amount: 0,
         minimum_qty: 0,
         round_up_quantity: 0,
         type: 'inventory',
@@ -260,18 +244,18 @@ const CreateEditViewProductModal = ({
       collection: values.collection,
       dropped_date: values.dropped_date,
       description: values.description,
-      purchase_uom: values.purchase_uom,
-      uom_info: values.uom_info,
-      coverage_per_uom: {
-        value: values.coverage_per_uom.value,
-        unit: values.coverage_per_uom.unit
-      },
+      purchase_uom_id: values.purchase_uom_id,
+      unit_per_pallet: values.unit_per_pallet,
+      piece_per_uom: values.piece_per_uom,
+      weight_per_uom: values.weight_per_uom,
+      coverage_per_unit_id: values.coverage_per_unit_id,
+      coverage_per_rate: values.coverage_per_rate,
+      purchase_to_selling_conversion_rate: values.purchase_to_selling_conversion_rate,
+      selling_unit_id: values.selling_unit_id,
+      selling_price: values.selling_price,
       product_cost: values.product_cost,
       margin: values.margin,
-      selling_info: {
-        value: values.selling_info.value,
-        unit: values.selling_info.unit
-      },
+      freight_amount: values.freight_amount,
       minimum_qty: values.minimum_qty,
       round_up_quantity: values.round_up_quantity,
       type: values.type,
