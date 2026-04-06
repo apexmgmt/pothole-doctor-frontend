@@ -80,7 +80,7 @@ const AddInvoiceServicesModal = ({
   const [selectedServiceType, setSelectedServiceType] = useState<{ id: string; name: string }[]>([])
 
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
-    { serviceTypeName: string; serviceTypeId: string; lines: ProposalServiceItemPayload[] }[]
+    { serviceTypeName: string; serviceTypeId: string; groupId: string | null; lines: ProposalServiceItemPayload[] }[]
   >([])
 
   const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>('percentage')
@@ -133,6 +133,10 @@ const AddInvoiceServicesModal = ({
 
     if (found) {
       setSelectedServiceType(prev => [...prev, { id: found.id, name: found.name }])
+      setServiceTypeLineItems(prev => [
+        ...prev,
+        { serviceTypeName: found.name, serviceTypeId: found.id, groupId: null, lines: [] }
+      ])
     }
 
     setServiceSelectOpen(false)
@@ -150,10 +154,12 @@ const AddInvoiceServicesModal = ({
     discount: discountValue,
     services: serviceTypeLineItems.map((st, index) => ({
       service_type_id: selectedServiceType[index]?.id || st.serviceTypeId,
+      group_id: st.groupId ?? null,
       items: st.lines.map(line => {
         const computedTaxAmount = line.is_sale ? getDiscountedUnitPrice(line) * line.qty * (taxRate / 100) : 0
 
         return {
+          item_id: line.item_id ?? null,
           product_id: line.product_id,
           labor_cost_id: line.labor_cost_id,
           name: line.name,
@@ -304,7 +310,9 @@ const AddInvoiceServicesModal = ({
       const newServiceTypeLineItems = invoice.services.map(service => ({
         serviceTypeName: service.service_type?.name || '',
         serviceTypeId: service.service_type_id,
+        groupId: service.id,
         lines: (service.items || []).map(item => ({
+          item_id: item.id,
           product_id: item.product_id,
           labor_cost_id: item.labor_cost_id,
           name: item.name,
@@ -382,6 +390,7 @@ const AddInvoiceServicesModal = ({
             />
             <AddServiceButton
               serviceTypes={serviceTypes}
+              selectedServiceTypeIds={selectedServiceType.map(st => st.id)}
               open={serviceSelectOpen}
               onOpenChange={setServiceSelectOpen}
               onSelect={handleAddServiceType}
@@ -427,7 +436,7 @@ const AddInvoiceServicesModal = ({
                 setServiceTypeLineItems(prev => {
                   const copy = [...prev]
 
-                  copy[idx] = { serviceTypeName: item.name, serviceTypeId: item.id, lines }
+                  copy[idx] = { serviceTypeName: item.name, serviceTypeId: item.id, groupId: serviceTypeLineItems[idx]?.groupId ?? null, lines }
 
                   return copy
                 })

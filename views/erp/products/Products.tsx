@@ -265,17 +265,13 @@ const Products: React.FC<ProductsProps> = ({
     {
       id: 'coverage',
       header: 'Coverage',
-      cell: (row: Product) => (
-        <span className='font-medium'>
-          {row.coverage_per_uom.value} {row.coverage_per_uom.unit.name}
-        </span>
-      ),
+      cell: (row: Product) => <span className='font-medium'>{row.coverage_per_rate} ({row.coverage_unit?.name})</span>,
       sortable: false
     },
     {
       id: 'product_price',
       header: 'Product Price',
-      cell: (row: Product) => <span className='font-medium'>{row.product_cost}</span>,
+      cell: (row: Product) => <span className='font-medium'>{row.product_cost} ({row.selling_unit?.name})</span>,
       sortable: false
     },
     {

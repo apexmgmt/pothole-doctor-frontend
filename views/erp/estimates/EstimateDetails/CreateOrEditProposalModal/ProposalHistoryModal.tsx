@@ -5,7 +5,7 @@ import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import CommonTable from '@/components/erp/common/table'
 import { Column, ProposalHistory } from '@/types'
 import ProposalService from '@/services/api/estimates/proposals.service'
-import { formatDate, formatDateTime } from '@/utils/date'
+import { formatDate } from '@/utils/date'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 

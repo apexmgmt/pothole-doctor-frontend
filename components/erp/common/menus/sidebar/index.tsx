@@ -12,6 +12,7 @@ import {
   LocateIcon,
   Map,
   Package,
+  TruckIcon,
   UserLock,
   Users,
   Users2,
@@ -46,80 +47,6 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       hasSubItems: false,
       exactMatch: false,
       permissions: ['Manage Company']
-    },
-    {
-      id: 'partners',
-      label: 'Contractors',
-      icon: <Building2 className='h-4 w-4' />,
-      href: '/erp/contractors',
-      hasSubItems: false,
-      exactMatch: false,
-      permissions: ['Manage Contractor']
-    },
-    {
-      id: 'staffs',
-      label: 'Staffs',
-      icon: <Users className='h-4 w-4' />,
-      href: '/erp/staffs',
-      hasSubItems: false,
-      exactMatch: false,
-      permissions: ['Manage Staff']
-    },
-    {
-      id: 'roles',
-      label: 'Roles',
-      icon: <UserLock className='h-4 w-4' />,
-      href: '/erp/roles',
-      hasSubItems: false,
-      exactMatch: false,
-      permissions: ['Manage Role']
-    },
-    {
-      id: 'vendors',
-      label: 'Vendors',
-      icon: <Package className='h-4 w-4' />,
-      href: '/erp/vendors',
-      hasSubItems: false,
-      exactMatch: false,
-      permissions: ['Manage Vendor']
-    },
-    {
-      id: 'warehouses',
-      label: 'Warehouses',
-      icon: <Warehouse className='h-4 w-4' />,
-      href: '/erp/warehouses',
-      hasSubItems: false,
-      exactMatch: false,
-      permissions: ['Manage Warehouse']
-    },
-    {
-      id: 'product',
-      label: 'Products',
-      icon: <Boxes className='h-4 w-4' />,
-      href: '/erp/products',
-      hasSubItems: true,
-      subItems: [
-        {
-          id: 'products',
-          label: 'Products',
-          href: '/erp/products',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Product']
-        },
-        {
-          id: 'product-categories',
-          label: 'Categories',
-          href: '/erp/products/categories',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Category']
-        }
-      ],
-      exactMatch: false,
-      permissions: ['Manage Category', 'Manage Product']
     },
     {
       id: 'leads',
@@ -160,6 +87,15 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       permissions: ['Manage Customer']
     },
     {
+      id: 'tasks',
+      label: 'Tasks',
+      icon: <CalendarCheck className='h-4 w-4' />,
+      href: '/erp/tasks',
+      hasSubItems: false,
+      exactMatch: false,
+      permissions: ['Manage Task']
+    },
+    {
       id: 'estimates',
       label: 'Estimates',
       icon: <EstimateIcon className='h-4 w-4' />,
@@ -187,69 +123,42 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       permissions: ['Manage Work Order']
     },
     {
-      id: 'tasks',
-      label: 'Tasks',
-      icon: <CalendarCheck className='h-4 w-4' />,
-      href: '/erp/tasks',
-      hasSubItems: false,
-      exactMatch: false,
-      permissions: ['Manage Task']
-    },
-    {
-      id: 'labor-costs',
-      label: 'Labor Costs',
-      icon: <UserLock className='h-4 w-4' />,
-      href: '/erp/labor-costs',
-      hasSubItems: false,
-      exactMatch: false,
-      permissions: ['Manage Labor Cost']
-    },
-    {
-      id: 'locations',
-      label: 'Locations',
-      icon: <Map className='h-4 w-4' />,
-      href: '/erp/locations',
+      id: 'product',
+      label: 'Products',
+      icon: <Boxes className='h-4 w-4' />,
+      href: '/erp/products',
       hasSubItems: true,
       subItems: [
         {
-          id: 'countries',
-          label: 'Countries',
-          href: '/erp/locations/countries',
+          id: 'products',
+          label: 'Products',
+          href: '/erp/products',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false,
-          permissions: ['Manage Country']
+          exactMatch: true,
+          permissions: ['Manage Product']
         },
         {
-          id: 'states',
-          label: 'States',
-          href: '/erp/locations/states',
+          id: 'product-stock',
+          label: 'Product Stock',
+          href: '/erp/products/stock',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false,
-          permissions: ['Manage State']
+          exactMatch: true,
+          permissions: ['Manage Product']
         },
         {
-          id: 'cities',
-          label: 'Cities',
-          href: '/erp/locations/cities',
+          id: 'product-categories',
+          label: 'Categories',
+          href: '/erp/products/categories',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
-          exactMatch: false,
-          permissions: ['Manage City']
-        },
-        {
-          id: 'businesses',
-          label: 'Business Locations',
-          href: '/erp/locations/businesses',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: false,
-          permissions: ['Manage Location']
+          exactMatch: true,
+          permissions: ['Manage Category']
         }
       ],
       exactMatch: false,
-      permissions: ['Manage Country', 'Manage State', 'Manage City', 'Manage Location']
+      permissions: ['Manage Category', 'Manage Product']
     },
     {
       id: 'settings',
@@ -258,6 +167,107 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       href: '/settings',
       hasSubItems: true,
       subItems: [
+        {
+          id: 'locations',
+          label: 'Locations',
+          icon: <Map className='h-4 w-4' />,
+          href: '/erp/locations',
+          hasSubItems: true,
+          subItems: [
+            {
+              id: 'countries',
+              label: 'Countries',
+              href: '/erp/locations/countries',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: false,
+              permissions: ['Manage Country']
+            },
+            {
+              id: 'states',
+              label: 'States',
+              href: '/erp/locations/states',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: false,
+              permissions: ['Manage State']
+            },
+            {
+              id: 'cities',
+              label: 'Cities',
+              href: '/erp/locations/cities',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: false,
+              permissions: ['Manage City']
+            },
+            {
+              id: 'businesses',
+              label: 'Business Locations',
+              href: '/erp/locations/businesses',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: false,
+              permissions: ['Manage Location']
+            }
+          ],
+          exactMatch: false,
+          permissions: ['Manage Country', 'Manage State', 'Manage City', 'Manage Location']
+        },
+        {
+          id: 'staffs',
+          label: 'System Users',
+          icon: <Users className='h-4 w-4' />,
+          href: '/erp/staffs',
+          hasSubItems: false,
+          exactMatch: false,
+          permissions: ['Manage Staff']
+        },
+        {
+          id: 'roles',
+          label: 'Roles',
+          icon: <UserLock className='h-4 w-4' />,
+          href: '/erp/roles',
+          hasSubItems: false,
+          exactMatch: false,
+          permissions: ['Manage Role']
+        },
+        {
+          id: 'partners',
+          label: 'Contractors',
+          icon: <Building2 className='h-4 w-4' />,
+          href: '/erp/contractors',
+          hasSubItems: false,
+          exactMatch: false,
+          permissions: ['Manage Contractor']
+        },
+        {
+          id: 'labor-costs',
+          label: 'Labor Costs',
+          icon: <UserLock className='h-4 w-4' />,
+          href: '/erp/labor-costs',
+          hasSubItems: false,
+          exactMatch: false,
+          permissions: ['Manage Labor Cost']
+        },
+        {
+          id: 'vendors',
+          label: 'Vendors',
+          icon: <Package className='h-4 w-4' />,
+          href: '/erp/vendors',
+          hasSubItems: false,
+          exactMatch: false,
+          permissions: ['Manage Vendor']
+        },
+        {
+          id: 'warehouses',
+          label: 'Warehouses',
+          icon: <Warehouse className='h-4 w-4' />,
+          href: '/erp/warehouses',
+          hasSubItems: false,
+          exactMatch: false,
+          permissions: ['Manage Warehouse']
+        },
         {
           id: 'payment-terms',
           label: 'Payment Terms',
@@ -365,10 +375,26 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           hasSubItems: false,
           exactMatch: false,
           permissions: ['Manage Service Type']
+        },
+        {
+          id: 'couriers',
+          label: 'Couriers',
+          href: '/erp/couriers',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: false,
+          permissions: ['Manage Courier']
         }
+
       ],
       exactMatch: false,
       permissions: [
+        'Manage Country',
+        'Manage State',
+        'Manage City',
+        'Manage Location',
+        'Manage Vendor',
+        'Manage Warehouse',
         'Manage Payment Term',
         'Manage Contractor Type',
         'Manage Contact Type',

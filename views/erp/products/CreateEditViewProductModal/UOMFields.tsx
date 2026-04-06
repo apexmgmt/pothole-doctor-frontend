@@ -24,7 +24,7 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
       const rollUnit = uomUnits.find(u => u.name.toLowerCase() === 'roll')
 
       if (rollUnit) {
-        form.setValue('purchase_uom', rollUnit.name)
+        form.setValue('purchase_uom_id', rollUnit.id)
       }
     }
   }, [isRolledGood, uomUnits, form])
@@ -34,7 +34,7 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
       {/* Purchase UOM Field */}
       <FormField
         control={form.control}
-        name='purchase_uom'
+        name='purchase_uom_id'
         rules={{ required: 'Purchase UOM is required' }}
         render={({ field }) => (
           <FormItem>
@@ -49,7 +49,7 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
               </FormControl>
               <SelectContent>
                 {uomUnits.map(unit => (
-                  <SelectItem key={unit.id} value={unit.name}>
+                  <SelectItem key={unit.id} value={unit.id}>
                     {unit.name}
                   </SelectItem>
                 ))}
@@ -66,7 +66,7 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
         <div className='grid grid-cols-3 gap-2'>
           <FormField
             control={form.control}
-            name='uom_info.carton_per_pallet'
+            name='unit_per_pallet'
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -78,7 +78,7 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
           />
           <FormField
             control={form.control}
-            name='uom_info.piece_per_carton'
+            name='piece_per_uom'
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -90,11 +90,11 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
           />
           <FormField
             control={form.control}
-            name='uom_info.lb'
+            name='weight_per_uom'
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input type='number' placeholder='lb' {...field} disabled={disabled} />
+                  <Input type='number' placeholder='weight_per_uom' {...field} disabled={disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -111,7 +111,7 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
         <div className='grid grid-cols-2 gap-2'>
           <FormField
             control={form.control}
-            name='coverage_per_uom.value'
+            name='coverage_per_rate'
             rules={{ required: 'Coverage value is required', min: { value: 0, message: 'Must be at least 0' } }}
             render={({ field }) => (
               <FormItem>
@@ -124,20 +124,11 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
           />
           <FormField
             control={form.control}
-            name='coverage_per_uom.unit'
+            name='coverage_per_unit_id'
             rules={{ required: 'Unit is required' }}
             render={({ field }) => (
               <FormItem>
-                <Select
-                  onValueChange={value => {
-                    // Find the full unit object and pass it
-                    const selectedUnit = uomUnits.find(unit => unit.id === value)
-
-                    field.onChange(selectedUnit)
-                  }}
-                  value={field.value?.id || ''}
-                  disabled={disabled}
-                >
+                <Select onValueChange={field.onChange} value={field.value || ''} disabled={disabled}>
                   <FormControl>
                     <SelectTrigger className='w-full'>
                       <SelectValue placeholder='Select Unit' />

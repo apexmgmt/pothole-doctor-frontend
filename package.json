@@ -14,7 +14,8 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx}\"",
     "stylelint": "stylelint \"**/*.{css,scss,js,jsx,ts,tsx}\"",
     "stylelint:fix": "stylelint \"**/*.{css,scss,js,jsx,ts,tsx}\" --fix",
-    "make:module": "ts-node scripts/make-module.ts"
+    "make:module": "ts-node --project scripts/tsconfig.json scripts/make-module.ts",
+    "make:type": "ts-node --project scripts/tsconfig.json scripts/make-type.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

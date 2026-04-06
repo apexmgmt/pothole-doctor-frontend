@@ -38,3 +38,22 @@ export const WORK_ORDERS_RESTORE = (workOrderId: string): string => {
  * @returns
  */
 export const WORK_ORDER_DOCUMENTS: string = '/v1/tenant/work-order-documents/'
+
+/**
+ * This contains the API endpoint to view a specific work order.
+ * @param wo_id string
+ * @param sg_id string
+ * @param st_id string
+ * @method GET - To view a specific work order with given wo_id, sg_id, and st_id as query params (public api)
+ * @returns string = /v1/tenant/view-work-order?wo_id=?&sg_id=?&st_id=?
+ */
+export const VIEW_WORK_ORDER = (wo_id: string, sg_id: string, st_id: string): string => {
+  return `/v1/tenant/view-work-order?wo_id=${wo_id}&sg_id=${sg_id}&st_id=${st_id}`
+}
+
+/**
+ * This contains the API endpoint to complete a work order (public api).
+ * @method POST - To submit a completion certificate with signature PDF
+ * @returns string = /v1/tenant/complete-work-order-service/
+ */
+export const COMPLETE_WORK_ORDER: string = '/v1/tenant/complete-work-order-service/'

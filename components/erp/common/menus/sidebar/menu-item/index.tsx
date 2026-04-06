@@ -52,20 +52,20 @@ const MenuItem: React.FC<{
     <div key={item.id}>
       <button
         onClick={() => toggleSection(item.id)}
-        className={`relative w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors ${
+        className={`relative w-full flex items-center justify-between px-3 py-1 rounded-lg text-left transition-colors ${
           isActive ? 'bg-accent/40 text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
         }`}
         type='button'
       >
         <div className='flex items-center gap-3'>
           <TreeConnector level={level} resolvedIcon={resolvedIcon} />
-          <span className='font-medium'>{item.label}</span>
+          <span className='font-normal'>{item.label}</span>
         </div>
         {isExpanded ? <ArrowUpIcon /> : <ArrowDownIcon />}
       </button>
 
       {isExpanded && (
-        <ul className={`relative space-y-1 mt-1 ${level > 0 ? 'ml-5' : 'ml-9'}`}>
+        <ul className={`relative space-y-1 mt-1 ${level > 0 ? 'ml-5' : 'ml-8'}`}>
           {item.subItems.map((subItem, idx) => (
             <li key={subItem.id}>
               <MenuItem
@@ -78,7 +78,7 @@ const MenuItem: React.FC<{
           ))}
 
           <span
-            className={`absolute bottom-[43px] w-0 h-[calc(100%-32px)] border-l border-[#4d4d4d] ${level > 0 ? 'left-0' : '-left-4'}`}
+            className={`absolute bottom-10 w-0 h-[calc(100%-30px)] border-l border-border ${level > 0 ? '-left-1' : '-left-3'}`}
           />
         </ul>
       )}
@@ -87,12 +87,12 @@ const MenuItem: React.FC<{
     <Link
       key={item.id}
       href={item.href}
-      className={`relative flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+      className={`relative flex items-center gap-3 px-3 py-1 rounded-lg transition-colors ${
         isActive ? 'bg-accent text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
       }`}
     >
       <TreeConnector isLastItem={isLastItem} level={level} resolvedIcon={resolvedIcon} />
-      <span className='font-medium'>{item.label}</span>
+      <span className='font-normal'>{item.label}</span>
     </Link>
   )
 }
