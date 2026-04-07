@@ -81,10 +81,13 @@ const ProductStock: React.FC<ProductsProps> = ({
   }
 
   useEffect(() => {
-    fetchData()
+    if (activeTab === 'stock') {
+      fetchData()
+    }
+
     updateURL(router, filterOptions)
     dispatch(setPageTitle('Inventory Product Stock'))
-  }, [filterOptions])
+  }, [filterOptions, activeTab])
 
   const handleCategoryChange = (value: string) => {
     setFilterOptions((prev: any) => {
