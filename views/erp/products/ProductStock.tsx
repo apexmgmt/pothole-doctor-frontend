@@ -12,14 +12,16 @@ import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, Product, ProductsProps } from '@/types'
+import { PurchaseOrder } from '@/types/purchase_orders'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ProductService from '@/services/api/products/products.service'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
-import { PackageIcon, WarehouseIcon } from 'lucide-react'
+import { PackageIcon, WarehouseIcon, SlidersHorizontalIcon } from 'lucide-react'
 import ProductInventorySection from './ProductInventorySection'
+import InventoryAdjustmentSection from './InventoryAdjustmentSection'
 
 const ProductStock: React.FC<ProductsProps> = ({
   productCategories,
@@ -38,7 +40,8 @@ const ProductStock: React.FC<ProductsProps> = ({
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [activeTab, setActiveTab] = useState<'stock' | 'inventory'>('stock')
+  const [selectedInventory, setSelectedInventory] = useState<PurchaseOrder | null>(null)
+  const [activeTab, setActiveTab] = useState<'stock' | 'inventory' | 'adjustment'>('stock')
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
@@ -339,16 +342,32 @@ const ProductStock: React.FC<ProductsProps> = ({
     {
       label: 'Stock',
       icon: <PackageIcon className='w-4 h-4' />,
-      onClick: () => setActiveTab('stock'),
+      onClick: () => {
+        setActiveTab('stock')
+        setSelectedInventory(null)
+        setSelectedProduct(null)
+      },
       isActive: activeTab === 'stock',
       disabled: false
     },
     {
       label: 'Inventory',
       icon: <WarehouseIcon className='w-4 h-4' />,
-      onClick: () => selectedProduct && setActiveTab('inventory'),
+      onClick: () => {
+        if (selectedProduct) {
+          setSelectedInventory(null)
+          setActiveTab('inventory')
+        }
+      },
       isActive: activeTab === 'inventory',
       disabled: !selectedProduct
+    },
+    {
+      label: `Adjustment${selectedInventory ? ` (PO-${selectedInventory.purchase_order_number})` : ''}`,
+      icon: <SlidersHorizontalIcon className='w-4 h-4' />,
+      onClick: () => selectedInventory && setActiveTab('adjustment'),
+      isActive: activeTab === 'adjustment',
+      disabled: !selectedInventory
     }
   ]
 
@@ -372,7 +391,10 @@ const ProductStock: React.FC<ProductsProps> = ({
           pagination={true}
           isLoading={isLoading}
           emptyMessage='No products found'
-          handleRowSelect={(row: Product) => setSelectedProduct(row)}
+          handleRowSelect={(row: Product) => {
+            setSelectedProduct(row)
+            setSelectedInventory(null)
+          }}
         />
       )}
 
@@ -381,7 +403,14 @@ const ProductStock: React.FC<ProductsProps> = ({
           product={selectedProduct}
           warehouses={warehouses}
           businessLocations={businessLocations}
+          onInventorySelect={row => {
+            setSelectedInventory(row)
+          }}
         />
+      )}
+
+      {activeTab === 'adjustment' && selectedInventory && selectedProduct && (
+        <InventoryAdjustmentSection inventory={selectedInventory} product={selectedProduct} />
       )}
     </CommonLayout>
   )

@@ -96,3 +96,13 @@ export interface InventoryAdjustPayload {
   quantity: number
   reason: string
 }
+
+export interface InventoryAdjustment extends Model {
+  purchase_order_id: string
+  purchase_product_id: string
+  previous_quantity: number
+  adjustment_quantity: number
+  new_quantity: number
+  reason: string
+  adjusted_by: string | User
+}

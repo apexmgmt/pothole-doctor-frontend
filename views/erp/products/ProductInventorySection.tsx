@@ -22,12 +22,14 @@ interface ProductInventorySectionProps {
   product: Product
   warehouses?: Warehouse[]
   businessLocations?: BusinessLocation[]
+  onInventorySelect?: (row: PurchaseOrder) => void
 }
 
 const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
   product,
   warehouses = [],
-  businessLocations = []
+  businessLocations = [],
+  onInventorySelect
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
@@ -200,6 +202,7 @@ const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
         pagination={true}
         isLoading={isLoading}
         emptyMessage='No inventory records found'
+        handleRowSelect={(row: PurchaseOrder) => onInventorySelect?.(row)}
       />
 
       <CreateOrEditInventoryModal
