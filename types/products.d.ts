@@ -130,6 +130,8 @@ export interface ProductsProps {
   isFromModal?: boolean
   selectedRows?: Product[]
   setSelectedRows?: React.Dispatch<React.SetStateAction<Product[]>>
+  warehouses?: Warehouse[]
+  businessLocations?: BusinessLocation[]
 }
 
 export interface ProductGallery {

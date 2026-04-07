@@ -19,8 +19,16 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import ProductService from '@/services/api/products/products.service'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { PackageIcon, WarehouseIcon } from 'lucide-react'
+import ProductInventorySection from './ProductInventorySection'
 
-const ProductStock: React.FC<ProductsProps> = ({ productCategories, uomUnits, vendors, serviceTypes }) => {
+const ProductStock: React.FC<ProductsProps> = ({
+  productCategories,
+  uomUnits = [],
+  vendors = [],
+  serviceTypes = [],
+  warehouses = [],
+  businessLocations = []
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -61,7 +69,7 @@ const ProductStock: React.FC<ProductsProps> = ({ productCategories, uomUnits, ve
   const fetchData = async () => {
     setIsLoading(true)
 
-    ProductService.index(filterOptions)
+    ProductService.index({ ...filterOptions, type: 'inventory' })
       .then(response => {
         setApiResponse(response.data)
         setIsLoading(false)
@@ -75,7 +83,7 @@ const ProductStock: React.FC<ProductsProps> = ({ productCategories, uomUnits, ve
   useEffect(() => {
     fetchData()
     updateURL(router, filterOptions)
-    dispatch(setPageTitle('Product Stock'))
+    dispatch(setPageTitle('Inventory Product Stock'))
   }, [filterOptions])
 
   const handleCategoryChange = (value: string) => {
@@ -365,7 +373,13 @@ const ProductStock: React.FC<ProductsProps> = ({ productCategories, uomUnits, ve
         />
       )}
 
-      {activeTab === 'inventory' && selectedProduct && <div className='p-4 space-y-4'></div>}
+      {activeTab === 'inventory' && selectedProduct && (
+        <ProductInventorySection
+          product={selectedProduct}
+          warehouses={warehouses}
+          businessLocations={businessLocations}
+        />
+      )}
     </CommonLayout>
   )
 }

@@ -13,3 +13,5 @@
  */
 export const WAREHOUSES: string = '/v1/warehouses/'
 export const WAREHOUSES_TENANT: string = '/v1/tenant/warehouses/'
+export const WAREHOUSES_ALL: string = '/v1/get-warehouses'
+export const WAREHOUSES_ALL_TENANT: string = '/v1/tenant/get-warehouses'
