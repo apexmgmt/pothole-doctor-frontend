@@ -12,3 +12,4 @@
  * Data delete method: DELETE /{id}
  */
 export const COURIERS: string = '/v1/tenant/couriers/'
+export const COURIERS_ALL: string = '/v1/tenant/get-couriers'
