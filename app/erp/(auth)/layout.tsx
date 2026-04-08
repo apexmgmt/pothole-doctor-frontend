@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 
 import Image from 'next/image'
 
-const layout = ({ children }) => {
+const layout = ({ children }: { children: ReactNode }) => {
   return (
     <>
       <div className='min-h-screen flex items-center justify-center px-4 py-10 bg-bg-2 relative'>
