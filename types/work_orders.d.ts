@@ -1,11 +1,18 @@
-import { CompletionCertificate, Invoice, Model, User } from '.'
-import { BusinessLocation } from './business_location'
-import { Client } from './clients/clients'
-import { EstimateType } from './estimate_types'
-import { Estimate, TakeoffData } from './estimates/estimates'
-import { Proposal, ProposalService } from './estimates/proposals'
-import { LaborCost } from './labor_costs'
-import { Product } from './products'
+import {
+  CompletionCertificate,
+  Invoice,
+  Model,
+  User,
+  BusinessLocation,
+  Client,
+  EstimateType,
+  Estimate,
+  TakeoffData,
+  Proposal,
+  ProposalService,
+  LaborCost,
+  Product
+} from '.'
 
 export interface WorkOrder extends Model {
   work_order_number: number

@@ -1,5 +1,4 @@
-import { BusinessLocation } from './business_location'
-import { City, CountryWithStates, State } from './location'
+import { City, CountryWithStates, State, BusinessLocation} from '.'
 
 export interface Warehouse {
   id: string

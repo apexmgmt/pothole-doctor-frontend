@@ -1,8 +1,4 @@
-import { Model } from '.'
-import { ProductCategory } from './product_categories'
-import { ServiceType } from './service_types'
-import { Unit } from './units'
-import { Vendor } from './vendors'
+import { Model, ProductCategory, ServiceType, Unit, Vendor } from '..'
 
 export interface Product extends Model {
   category_id: string

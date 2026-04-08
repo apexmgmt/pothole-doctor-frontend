@@ -11,8 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import { Product } from '@/types'
-import { PurchaseOrder } from '@/types/purchase_orders'
+import { Product, PurchaseOrder } from '@/types'
 import InventoryService from '@/services/api/products/inventories.service'
 
 interface FormValues {

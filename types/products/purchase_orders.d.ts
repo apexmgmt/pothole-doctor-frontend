@@ -1,4 +1,4 @@
-import { BusinessLocation, Courier, Model, Product, Unit, User, Vendor, Warehouse } from '.'
+import { BusinessLocation, Courier, Model, Product, Unit, User, Vendor, Warehouse } from '..'
 
 export interface PurchaseOrder extends Model {
   purchase_order_active: boolean
@@ -62,7 +62,7 @@ export interface PurchaseOrderProduct extends Model {
 
 export interface PurchaseProductReceipt extends Model {
   purchase_product_id: string
-  received_quantity: number 
+  received_quantity: number
   received_date: string
   warehouse_type: 'warehouse' | 'location'
   warehouse_id: string

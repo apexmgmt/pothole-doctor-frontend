@@ -8,8 +8,7 @@ import { toast } from 'sonner'
 
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse, Product } from '@/types'
-import { InventoryAdjustment, PurchaseOrder } from '@/types/purchase_orders'
+import { Column, DataTableApiResponse, Product, InventoryAdjustment, PurchaseOrder } from '@/types'
 import InventoryService from '@/services/api/products/inventories.service'
 import AdjustInventoryModal from './AdjustInventoryModal'
 

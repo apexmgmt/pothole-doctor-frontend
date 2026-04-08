@@ -1,5 +1,5 @@
 import { BusinessLocation } from '../business_location'
-import { ClientSource } from '../client_sources'
+import { ClientSource } from './client_sources'
 import { Company } from '../companies'
 import { ContactType } from '../contact_types'
 import { InterestLevel } from '../interest_levels'

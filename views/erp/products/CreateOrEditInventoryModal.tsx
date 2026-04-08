@@ -13,9 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Product } from '@/types'
-import { InventoryPayload, PurchaseOrder } from '@/types/purchase_orders'
-import { Warehouse } from '@/types/warehouses'
-import { BusinessLocation } from '@/types/business_location'
+import { InventoryPayload, PurchaseOrder } from '@/types/products/purchase_orders'
+import { Warehouse, BusinessLocation } from '@/types'
 import InventoryService from '@/services/api/products/inventories.service'
 import { getCostPrice, getMargin, getSellPrice } from '@/utils/business-calculation'
 
