@@ -17,7 +17,7 @@ export interface PurchaseOrder extends Model {
   actual_departure_date: string | null
   actual_arrival_date: string | null
   actual_shipping_cost: number | null
-  status: 'new' | 'pending' | 'moved_to_inventory' | 'received' | 'partial_received'
+  status: 'new' | 'ordered' | 'pending' | 'moved_to_inventory' | 'received' | 'partial_received'
   lot_number: string
   added_date: string
   added_by_id: string
@@ -70,6 +70,33 @@ export interface PurchaseProductReceipt extends Model {
   stock_area_id: string | null
   stock_section_id: string | null
   dye_lot: string | null
+}
+
+export interface PurchaseOrderPayload {
+  vendor_id: string
+  status: 'new' | 'pending' | 'ordered' | 'moved_to_inventory' | 'received' | 'partial_received'
+  courier_id: string
+  warehouse_type: 'warehouse' | 'location'
+  warehouse_id: string
+  est_departure_date: string
+  est_arrival_date: string
+  est_shipping_cost: number
+  payment_due: null | 'on_arrival' | 'paid'
+  tax: number
+  final_cost: number
+  comments: null | string
+  reference_number: string
+  products: PurchaseProductPayload[]
+}
+
+export interface PurchaseProductPayload {
+  product_id: string
+  vendor_id: string
+  company_cost: number
+  quantity: number
+  work_order_cost: number
+  margin: number
+  customer_price: number
 }
 
 export interface InventoryPayload {
