@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import ProductCategoryService from '@/services/api/product_categories.service'
+import ProductCategoryService from '@/services/api/products/product_categories.service'
 
 interface CreateOrEditProductCategoryModalProps {
   mode?: 'create' | 'edit'

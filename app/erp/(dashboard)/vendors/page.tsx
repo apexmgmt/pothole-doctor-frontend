@@ -7,33 +7,16 @@ import Vendors from '@/views/erp/vendors/Vendors'
 export const dynamic = 'force-dynamic'
 
 export default async function VendorsPage() {
-  let taxTypes: TaxType[] = []
-  let countriesWithStatesAndCities: CountryWithStates[] = []
-  let paymentTerms: PaymentTerm[] = []
+  const [taxTypesRes, locationsRes, paymentTermsRes] = await Promise.allSettled([
+    TaxTypeService.getAll(),
+    LocationService.index(),
+    PaymentTermsService.getAllPaymentTerms()
+  ])
 
-  try {
-    const response = await TaxTypeService.getAll()
-
-    taxTypes = response.data || []
-  } catch (error) {
-    taxTypes = []
-  }
-
-  try {
-    const response = await LocationService.index()
-
-    countriesWithStatesAndCities = response.data || []
-  } catch (error) {
-    countriesWithStatesAndCities = []
-  }
-
-  try {
-    const response = await PaymentTermsService.getAllPaymentTerms()
-
-    paymentTerms = response.data || []
-  } catch (error) {
-    paymentTerms = []
-  }
+  const taxTypes: TaxType[] = taxTypesRes.status === 'fulfilled' ? taxTypesRes.value.data || [] : []
+  const countriesWithStatesAndCities: CountryWithStates[] =
+    locationsRes.status === 'fulfilled' ? locationsRes.value.data || [] : []
+  const paymentTerms: PaymentTerm[] = paymentTermsRes.status === 'fulfilled' ? paymentTermsRes.value.data || [] : []
 
   return (
     <Vendors

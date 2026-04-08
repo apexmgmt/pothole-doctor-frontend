@@ -5,35 +5,16 @@ import CreateOrEditStaff from '@/views/erp/staffs/CreateOrEditStaff'
 
 const StaffEditPage = async ({ params }: { params: { id: string } }) => {
   const { id } = await params
-  let permissions = {}
 
-  try {
-    const response = await PermissionService.index()
+  const [permissionsRes, rolesRes, staffDetailsRes] = await Promise.allSettled([
+    PermissionService.index(),
+    RoleService.getAll(),
+    StaffService.show(id)
+  ])
 
-    permissions = response.data || {}
-  } catch (error) {
-    permissions = {}
-  }
-
-  let roles = []
-
-  try {
-    const response = await RoleService.getAll()
-
-    roles = response?.data || []
-  } catch (error) {
-    roles = []
-  }
-
-  let staffDetails = null
-
-  try {
-    const response = await StaffService.show(id)
-
-    staffDetails = response.data || null
-  } catch (error) {
-    staffDetails = null
-  }
+  const permissions = permissionsRes.status === 'fulfilled' ? permissionsRes.value.data || {} : {}
+  const roles = rolesRes.status === 'fulfilled' ? rolesRes.value?.data || [] : []
+  const staffDetails = staffDetailsRes.status === 'fulfilled' ? staffDetailsRes.value.data || null : null
 
   return <CreateOrEditStaff mode='edit' permissions={permissions} roles={roles} staffId={id} staffData={staffDetails} />
 }

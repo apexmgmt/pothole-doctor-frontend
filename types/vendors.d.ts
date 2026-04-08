@@ -1,6 +1,4 @@
-import { City, CountryWithStates, State } from './location'
-import { PaymentTerm } from './payment_terms'
-import { TaxType } from './tax_types'
+import { City, CountryWithStates, State, PaymentTerm, TaxType } from '.'
 
 export interface VendorsProps {
   taxTypes: TaxType[]

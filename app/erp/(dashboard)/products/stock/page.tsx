@@ -1,49 +1,35 @@
-import ProductCategoryService from '@/services/api/product_categories.service'
+import BusinessLocationService from '@/services/api/locations/business_location.service'
+import ProductCategoryService from '@/services/api/products/product_categories.service'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
 import UnitService from '@/services/api/settings/units.service'
 import VendorService from '@/services/api/vendors/vendors.service'
-import { ProductCategory, ServiceType, Unit, Vendor } from '@/types'
+import WarehouseService from '@/services/api/warehouses.service'
+import { BusinessLocation, ProductCategory, ServiceType, Unit, Vendor, Warehouse } from '@/types'
 import ProductStock from '@/views/erp/products/ProductStock'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ProductStockPage() {
-  let productCategories: ProductCategory[] = []
-  let uomUnits: Unit[] = []
-  let vendors: Vendor[] = []
-  let serviceTypes: ServiceType[] = []
+  const [productCategoriesRes, uomUnitsRes, serviceTypesRes, vendorsRes, warehousesRes, businessLocationsRes] =
+    await Promise.allSettled([
+      ProductCategoryService.getAll(),
+      UnitService.getAll('uom'),
+      ServiceTypeService.getAll(),
+      VendorService.getAll(),
+      WarehouseService.getAll(),
+      BusinessLocationService.getAll()
+    ])
 
-  try {
-    const response = await ProductCategoryService.getAll()
+  const productCategories: ProductCategory[] =
+    productCategoriesRes.status === 'fulfilled' ? (productCategoriesRes.value.data ?? []) : []
 
-    productCategories = response.data ?? []
-  } catch (error) {
-    productCategories = []
-  }
+  const uomUnits: Unit[] = uomUnitsRes.status === 'fulfilled' ? (uomUnitsRes.value.data ?? []) : []
+  const serviceTypes: ServiceType[] = serviceTypesRes.status === 'fulfilled' ? (serviceTypesRes.value.data ?? []) : []
+  const vendors: Vendor[] = vendorsRes.status === 'fulfilled' ? (vendorsRes.value.data ?? []) : []
+  const warehouses: Warehouse[] = warehousesRes.status === 'fulfilled' ? (warehousesRes.value.data ?? []) : []
 
-  try {
-    const response = await UnitService.getAll('uom')
-
-    uomUnits = response.data ?? []
-  } catch (error) {
-    uomUnits = []
-  }
-
-  try {
-    const response = await ServiceTypeService.getAll()
-
-    serviceTypes = response.data ?? []
-  } catch (error) {
-    serviceTypes = []
-  }
-
-  try {
-    const response = await VendorService.getAll()
-
-    vendors = response.data ?? []
-  } catch (error) {
-    vendors = []
-  }
+  const businessLocations: BusinessLocation[] =
+    businessLocationsRes.status === 'fulfilled' ? (businessLocationsRes.value.data ?? []) : []
 
   return (
     <ProductStock
@@ -51,6 +37,8 @@ export default async function ProductStockPage() {
       uomUnits={uomUnits}
       vendors={vendors}
       serviceTypes={serviceTypes}
+      warehouses={warehouses}
+      businessLocations={businessLocations}
     />
   )
 }

@@ -1,4 +1,4 @@
-import { City, State } from './location'
+import { City, State } from '.'
 
 export interface BusinessLocation {
   id: string

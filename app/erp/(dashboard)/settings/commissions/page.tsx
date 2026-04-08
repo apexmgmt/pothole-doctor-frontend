@@ -6,33 +6,20 @@ import Commissions from '@/views/erp/settings/commissions/Commissions'
 export const dynamic = 'force-dynamic'
 
 export default async function CommissionsPage() {
-  let commissionTypes: CommissionType[] = []
-  let commissionFilters: CommissionFilter[] = []
-  let commissionBases: CommissionBase[] = []
+  const [commissionTypesRes, commissionFiltersRes, commissionBasesRes] = await Promise.allSettled([
+    CommissionTypeService.getAll(),
+    CommissionService.getAllCommissionFilters(),
+    CommissionService.getAllCommissionBases()
+  ])
 
-  try {
-    const response = await CommissionTypeService.getAll()
+  const commissionTypes: CommissionType[] =
+    commissionTypesRes.status === 'fulfilled' ? commissionTypesRes.value.data || [] : []
 
-    commissionTypes = response.data || []
-  } catch (error) {
-    commissionTypes = []
-  }
+  const commissionFilters: CommissionFilter[] =
+    commissionFiltersRes.status === 'fulfilled' ? commissionFiltersRes.value.data || [] : []
 
-  try {
-    const response = await CommissionService.getAllCommissionFilters()
-
-    commissionFilters = response.data || []
-  } catch (error) {
-    commissionFilters = []
-  }
-
-  try {
-    const response = await CommissionService.getAllCommissionBases()
-
-    commissionBases = response.data || []
-  } catch (error) {
-    commissionBases = []
-  }
+  const commissionBases: CommissionBase[] =
+    commissionBasesRes.status === 'fulfilled' ? commissionBasesRes.value.data || [] : []
 
   return (
     <Commissions

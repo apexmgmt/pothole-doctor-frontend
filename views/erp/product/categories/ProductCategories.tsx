@@ -19,7 +19,7 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import ProductCategoryService from '@/services/api/product_categories.service'
+import ProductCategoryService from '@/services/api/products/product_categories.service'
 import CreateOrEditProductCategoryModal from './CreateOrEditProductCategoryModal'
 import { hasPermission } from '@/utils/role-permission'
 

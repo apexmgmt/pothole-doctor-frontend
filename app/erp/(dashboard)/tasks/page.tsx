@@ -8,56 +8,20 @@ import Tasks from '@/views/erp/tasks/Tasks'
 export const dynamic = 'force-dynamic'
 
 export default async function TasksPage() {
-  let staffs: Staff[] = []
-  let clients: Client[] = []
-  let taskTypes: TaskType[] = []
-  let taskReminders: TaskReminder[] = []
-  let taskReminderChannels: TaskReminderChannel[] = []
+  const [staffsRes, clientsRes, taskTypesRes, taskRemindersRes, taskReminderChannelsRes] = await Promise.allSettled([
+    StaffService.getAll(),
+    ClientService.getAll('customer'),
+    TaskTypeService.getAll(),
+    TaskReminderService.index(),
+    TaskReminderService.getReminderChannels()
+  ])
 
-  // fetch staffs
-  try {
-    const response = await StaffService.getAll()
-
-    staffs = response.data || []
-  } catch (error) {
-    staffs = []
-  }
-
-  // fetch clients type=customer
-  try {
-    const response = await ClientService.getAll('customer')
-
-    clients = response.data || []
-  } catch (error) {
-    clients = []
-  }
-
-  // fetch task types
-  try {
-    const response = await TaskTypeService.getAll()
-
-    taskTypes = response.data || []
-  } catch (error) {
-    taskTypes = []
-  }
-
-  // fetch task reminders
-  try {
-    const response = await TaskReminderService.index()
-
-    taskReminders = response.data || []
-  } catch (error) {
-    taskReminders = []
-  }
-
-  // fetch task reminder channels
-  try {
-    const response = await TaskReminderService.getReminderChannels()
-
-    taskReminderChannels = response.data || []
-  } catch (error) {
-    taskReminderChannels = []
-  }
+  const staffs: Staff[] = staffsRes.status === 'fulfilled' ? staffsRes.value.data || [] : []
+  const clients: Client[] = clientsRes.status === 'fulfilled' ? clientsRes.value.data || [] : []
+  const taskTypes: TaskType[] = taskTypesRes.status === 'fulfilled' ? taskTypesRes.value.data || [] : []
+  const taskReminders: TaskReminder[] = taskRemindersRes.status === 'fulfilled' ? taskRemindersRes.value.data || [] : []
+  const taskReminderChannels: TaskReminderChannel[] =
+    taskReminderChannelsRes.status === 'fulfilled' ? taskReminderChannelsRes.value.data || [] : []
 
   return (
     <Tasks

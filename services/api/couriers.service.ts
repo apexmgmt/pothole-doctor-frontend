@@ -1,5 +1,5 @@
 import apiInterceptor from './api.interceptor'
-import { API_URL, COURIERS } from '@/constants/api'
+import { API_URL, COURIERS, COURIERS_ALL } from '@/constants/api'
 import { CourierPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -43,6 +43,7 @@ export default class CourierService {
       }
 
       await revalidate('couriers')
+      await revalidate('couriers-all')
 
       return await response.json()
     } catch (error) {
@@ -87,6 +88,7 @@ export default class CourierService {
       }
 
       await revalidate('couriers')
+      await revalidate('couriers-all')
       await revalidate(`couriers/${courierId}`)
 
       return await response.json()
@@ -110,7 +112,28 @@ export default class CourierService {
       }
 
       await revalidate('couriers')
+      await revalidate('couriers-all')
       await revalidate(`couriers/${courierId}`)
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static getAll = async () => {
+    try {
+      const response = await apiInterceptor(API_URL + COURIERS_ALL, {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 60, tags: ['couriers-all'] }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to fetch couriers')
+      }
 
       return await response.json()
     } catch (error) {

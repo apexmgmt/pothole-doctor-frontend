@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from './api.interceptor'
+import apiInterceptor from '../api.interceptor'
 import {
   API_URL,
   PRODUCT_CATEGORIES,
@@ -8,7 +8,7 @@ import {
   PRODUCT_CATEGORIES_TENANT
 } from '@/constants/api'
 import { ProductCategoryPayload } from '@/types'
-import { revalidate } from '../app/cache.service'
+import { revalidate } from '../../app/cache.service'
 
 export default class ProductCategoryService {
   /**Product Category DataTable API */

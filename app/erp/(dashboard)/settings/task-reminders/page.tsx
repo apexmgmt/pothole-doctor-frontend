@@ -6,33 +6,17 @@ import TaskReminders from '@/views/erp/settings/task-reminders/TaskReminders'
 export const dynamic = 'force-dynamic'
 
 export default async function TaskRemindersPage() {
-  let taskReminders: TaskReminder[] = []
-  let taskTypes: TaskType[] = []
-  let reminderChannels: TaskReminderChannel[] = []
+  const [taskRemindersRes, taskTypesRes, reminderChannelsRes] = await Promise.allSettled([
+    TaskReminderService.index(),
+    TaskTypeService.getAll(),
+    TaskReminderService.getReminderChannels()
+  ])
 
-  try {
-    const response = await TaskReminderService.index()
+  const taskReminders: TaskReminder[] = taskRemindersRes.status === 'fulfilled' ? taskRemindersRes.value.data || [] : []
+  const taskTypes: TaskType[] = taskTypesRes.status === 'fulfilled' ? taskTypesRes.value.data || [] : []
 
-    taskReminders = response.data || []
-  } catch (error) {
-    taskReminders = []
-  }
-
-  try {
-    const response = await TaskTypeService.getAll()
-
-    taskTypes = response.data || []
-  } catch (error) {
-    taskTypes = []
-  }
-
-  try {
-    const response = await TaskReminderService.getReminderChannels()
-
-    reminderChannels = response.data || []
-  } catch (error) {
-    reminderChannels = []
-  }
+  const reminderChannels: TaskReminderChannel[] =
+    reminderChannelsRes.status === 'fulfilled' ? reminderChannelsRes.value.data || [] : []
 
   return <TaskReminders taskReminders={taskReminders} taskTypes={taskTypes} reminderChannels={reminderChannels} />
 }

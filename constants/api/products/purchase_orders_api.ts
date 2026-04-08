@@ -1,15 +1,10 @@
 /**
- * API endpoint for Couriers
+ * Purchase Orders API Endpoints
  *
  * Data table operation method: GET
- *
  * Data create method: POST
- *
  * Data update method: PUT /{id}
- *
  * Data retrieve method: GET /{id}
- *
  * Data delete method: DELETE /{id}
  */
-export const COURIERS: string = '/v1/tenant/couriers/'
-export const COURIERS_ALL: string = '/v1/tenant/get-couriers'
+export const PURCHASE_ORDERS: string = '/v1/tenant/purchase_orders/';

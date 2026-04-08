@@ -1,4 +1,4 @@
-import { Permission, Role } from './role_permission'
+import { Permission, Role } from '.'
 
 export interface UserAble {
   id: string
