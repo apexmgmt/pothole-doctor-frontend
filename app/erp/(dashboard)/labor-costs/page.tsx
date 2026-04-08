@@ -6,24 +6,10 @@ import LaborCosts from '@/views/erp/labor-costs/LaborCosts'
 export const dynamic = 'force-dynamic'
 
 export default async function LaborCostsPage() {
-  let serviceTypes: ServiceType[] = []
-  let units: Unit[] = []
+  const [serviceTypesRes, unitsRes] = await Promise.allSettled([ServiceTypeService.getAll(), UnitService.getAll()])
 
-  try {
-    const response = await ServiceTypeService.getAll()
-
-    serviceTypes = response.data || []
-  } catch (error) {
-    serviceTypes = []
-  }
-
-  try {
-    const response = await UnitService.getAll()
-
-    units = response.data || []
-  } catch (error) {
-    units = []
-  }
+  const serviceTypes: ServiceType[] = serviceTypesRes.status === 'fulfilled' ? serviceTypesRes.value.data || [] : []
+  const units: Unit[] = unitsRes.status === 'fulfilled' ? unitsRes.value.data || [] : []
 
   return <LaborCosts serviceTypes={serviceTypes} units={units} />
 }

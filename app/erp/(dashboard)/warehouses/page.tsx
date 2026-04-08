@@ -6,24 +6,16 @@ import Warehouses from '@/views/erp/warehouses/Warehouses'
 export const dynamic = 'force-dynamic'
 
 export default async function WarehousesPage() {
-  let businessLocations: BusinessLocation[] = []
-  let countriesWithStateAndCities: CountryWithStates[] = []
+  const [businessLocationsRes, locationsRes] = await Promise.allSettled([
+    BusinessLocationService.getAll(),
+    LocationService.index()
+  ])
 
-  try {
-    const response = await BusinessLocationService.getAll()
+  const businessLocations: BusinessLocation[] =
+    businessLocationsRes.status === 'fulfilled' ? (businessLocationsRes.value?.data ?? []) : []
 
-    businessLocations = response?.data ?? []
-  } catch (error) {
-    businessLocations = []
-  }
-
-  try {
-    const response = await LocationService.index()
-
-    countriesWithStateAndCities = response.data ?? []
-  } catch (error) {
-    countriesWithStateAndCities = []
-  }
+  const countriesWithStateAndCities: CountryWithStates[] =
+    locationsRes.status === 'fulfilled' ? (locationsRes.value.data ?? []) : []
 
   return <Warehouses businessLocations={businessLocations} countriesWithStateAndCities={countriesWithStateAndCities} />
 }

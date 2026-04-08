@@ -5,25 +5,10 @@ import CreateOrEditStaff from '@/views/erp/staffs/CreateOrEditStaff'
 export const dynamic = 'force-dynamic'
 
 const CreateStaffPage = async () => {
-  let permissions = {}
+  const [permissionsRes, rolesRes] = await Promise.allSettled([PermissionService.index(), RoleService.getAll()])
 
-  try {
-    const response = await PermissionService.index()
-
-    permissions = response.data || {}
-  } catch (error) {
-    permissions = {}
-  }
-
-  let roles = []
-
-  try {
-    const response = await RoleService.getAll()
-
-    roles = response?.data || []
-  } catch (error) {
-    roles = []
-  }
+  const permissions = permissionsRes.status === 'fulfilled' ? permissionsRes.value.data || {} : {}
+  const roles = rolesRes.status === 'fulfilled' ? rolesRes.value?.data || [] : []
 
   return <CreateOrEditStaff mode='create' permissions={permissions} roles={roles} />
 }

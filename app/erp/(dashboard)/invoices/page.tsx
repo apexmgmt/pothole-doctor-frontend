@@ -23,96 +23,46 @@ import Invoices from '@/views/erp/invoices'
 export const dynamic = 'force-dynamic'
 
 export default async function InvoicesPage() {
-  let invoiceTypes: EstimateType[] = []
-  let serviceTypes: ServiceType[] = []
-  let clients: Client[] = []
-  let staffs: Staff[] = []
-  let paymentTerms: PaymentTerm[] = []
-  let businessLocations: BusinessLocation[] = []
-  let units: Unit[] = []
-  let productCategories: ProductCategory[] = []
-  let uomUnits: Unit[] = []
-  let vendors: Vendor[] = []
+  const [
+    invoiceTypesRes,
+    serviceTypesRes,
+    clientsRes,
+    staffsRes,
+    paymentTermsRes,
+    businessLocationsRes,
+    unitsRes,
+    productCategoriesRes,
+    uomUnitsRes,
+    vendorsRes
+  ] = await Promise.allSettled([
+    EstimateTypeService.getAll(),
+    ServiceTypeService.getAll(),
+    ClientService.getAll('customer'),
+    StaffService.getAll(),
+    PaymentTermsService.getAllPaymentTerms(),
+    BusinessLocationService.getAll(),
+    UnitService.getAll(),
+    ProductCategoryService.getAll(),
+    UnitService.getAll('uom'),
+    VendorService.getAll()
+  ])
 
-  try {
-    const response = await EstimateTypeService.getAll()
+  const invoiceTypes: EstimateType[] = invoiceTypesRes.status === 'fulfilled' ? invoiceTypesRes.value.data || [] : []
+  const serviceTypes: ServiceType[] = serviceTypesRes.status === 'fulfilled' ? serviceTypesRes.value.data || [] : []
+  const clients: Client[] = clientsRes.status === 'fulfilled' ? clientsRes.value.data || [] : []
+  const staffs: Staff[] = staffsRes.status === 'fulfilled' ? staffsRes.value.data || [] : []
+  const paymentTerms: PaymentTerm[] = paymentTermsRes.status === 'fulfilled' ? paymentTermsRes.value.data || [] : []
 
-    invoiceTypes = response.data || []
-  } catch {
-    invoiceTypes = []
-  }
+  const businessLocations: BusinessLocation[] =
+    businessLocationsRes.status === 'fulfilled' ? businessLocationsRes.value.data || [] : []
 
-  try {
-    const response = await ServiceTypeService.getAll()
+  const units: Unit[] = unitsRes.status === 'fulfilled' ? unitsRes.value.data || [] : []
 
-    serviceTypes = response.data || []
-  } catch {
-    serviceTypes = []
-  }
+  const productCategories: ProductCategory[] =
+    productCategoriesRes.status === 'fulfilled' ? productCategoriesRes.value.data || [] : []
 
-  try {
-    const response = await ClientService.getAll('customer')
-
-    clients = response.data || []
-  } catch {
-    clients = []
-  }
-
-  try {
-    const response = await StaffService.getAll()
-
-    staffs = response.data || []
-  } catch {
-    staffs = []
-  }
-
-  try {
-    const response = await PaymentTermsService.getAllPaymentTerms()
-
-    paymentTerms = response.data || []
-  } catch {
-    paymentTerms = []
-  }
-
-  try {
-    const response = await BusinessLocationService.getAll()
-
-    businessLocations = response.data || []
-  } catch {
-    businessLocations = []
-  }
-
-  try {
-    const response = await UnitService.getAll()
-
-    units = response.data || []
-  } catch {
-    units = []
-  }
-
-  try {
-    const response = await ProductCategoryService.getAll()
-
-    productCategories = response.data || []
-  } catch {
-    productCategories = []
-  }
-
-  try {
-    const response = await UnitService.getAll('uom')
-
-    uomUnits = response.data || []
-  } catch {
-    uomUnits = []
-  }
-
-  try {
-    const response = await VendorService.getAll()
-
-    vendors = response.data || []
-  } catch {
-    vendors = []
-  }
+  const uomUnits: Unit[] = uomUnitsRes.status === 'fulfilled' ? uomUnitsRes.value.data || [] : []
+  const vendors: Vendor[] = vendorsRes.status === 'fulfilled' ? vendorsRes.value.data || [] : []
 
   return (
     <Invoices

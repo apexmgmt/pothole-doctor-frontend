@@ -28,117 +28,52 @@ export const dynamic = 'force-dynamic'
 
 const EstimateDetailsPage = async ({ params }: { params: { id: string } }) => {
   const { id } = await params
-  let estimate: Estimate = {} as Estimate
-  let serviceTypes: ServiceType[] = []
-  let estimateTypes: EstimateType[] = []
-  let clients: Client[] = []
-  let staffs: Staff[] = []
-  let paymentTerms: PaymentTerm[] = []
-  let units: Unit[] = []
-  let productCategories: ProductCategory[] = []
-  let uomUnits: Unit[] = []
-  let vendors: Vendor[] = []
-  let estimateNotes: EstimateNote[] = []
-  let businessLocations: BusinessLocation[] = []
 
-  try {
-    const response = await ServiceTypeService.getAll()
+  const [
+    serviceTypesRes,
+    estimateTypesRes,
+    clientsRes,
+    staffsRes,
+    paymentTermsRes,
+    estimateRes,
+    estimateNotesRes,
+    unitsRes,
+    productCategoriesRes,
+    uomUnitsRes,
+    vendorsRes,
+    businessLocationsRes
+  ] = await Promise.allSettled([
+    ServiceTypeService.getAll(),
+    EstimateTypeService.getAll(),
+    ClientService.getAll('customer'),
+    StaffService.getAll(),
+    PaymentTermsService.getAllPaymentTerms(),
+    EstimateService.show(id),
+    EstimateNoteService.index({ estimate_id: id }),
+    UnitService.getAll(),
+    ProductCategoryService.getAll(),
+    UnitService.getAll('uom'),
+    VendorService.getAll(),
+    BusinessLocationService.getAll()
+  ])
 
-    serviceTypes = response.data || []
-  } catch (error) {
-    serviceTypes = []
-  }
+  const serviceTypes: ServiceType[] = serviceTypesRes.status === 'fulfilled' ? serviceTypesRes.value.data || [] : []
+  const estimateTypes: EstimateType[] = estimateTypesRes.status === 'fulfilled' ? estimateTypesRes.value.data || [] : []
+  const clients: Client[] = clientsRes.status === 'fulfilled' ? clientsRes.value.data || [] : []
+  const staffs: Staff[] = staffsRes.status === 'fulfilled' ? staffsRes.value.data || [] : []
+  const paymentTerms: PaymentTerm[] = paymentTermsRes.status === 'fulfilled' ? paymentTermsRes.value.data || [] : []
+  const estimate: Estimate = estimateRes.status === 'fulfilled' ? estimateRes.value.data || {} : ({} as Estimate)
+  const estimateNotes: EstimateNote[] = estimateNotesRes.status === 'fulfilled' ? estimateNotesRes.value.data || [] : []
+  const units: Unit[] = unitsRes.status === 'fulfilled' ? unitsRes.value.data || [] : []
 
-  try {
-    const response = await EstimateTypeService.getAll()
+  const productCategories: ProductCategory[] =
+    productCategoriesRes.status === 'fulfilled' ? productCategoriesRes.value.data || [] : []
 
-    estimateTypes = response.data || []
-  } catch (error) {
-    estimateTypes = []
-  }
+  const uomUnits: Unit[] = uomUnitsRes.status === 'fulfilled' ? uomUnitsRes.value.data || [] : []
+  const vendors: Vendor[] = vendorsRes.status === 'fulfilled' ? vendorsRes.value.data || [] : []
 
-  try {
-    const response = await ClientService.getAll('customer')
-
-    clients = response.data || []
-  } catch (error) {
-    clients = []
-  }
-
-  try {
-    const response = await StaffService.getAll()
-
-    staffs = response.data || []
-  } catch (error) {
-    staffs = []
-  }
-
-  try {
-    const response = await PaymentTermsService.getAllPaymentTerms()
-
-    paymentTerms = response.data || []
-  } catch (error) {
-    paymentTerms = []
-  }
-
-  // fetch estimate details
-  try {
-    const response = await EstimateService.show(id)
-
-    estimate = response.data
-  } catch (error) {
-    estimate = {} as Estimate
-  }
-
-  // fetch estimate notes
-  try {
-    const response = await EstimateNoteService.index({ estimate_id: id })
-
-    estimateNotes = response.data || []
-  } catch (error) {
-    estimateNotes = []
-  }
-
-  //fetch units
-  try {
-    const response = await UnitService.getAll()
-
-    units = response.data || []
-  } catch (error) {
-    units = []
-  }
-
-  try {
-    const response = await ProductCategoryService.getAll()
-
-    productCategories = response.data || []
-  } catch (error) {
-    productCategories = []
-  }
-
-  try {
-    const response = await UnitService.getAll('uom')
-
-    uomUnits = response.data || []
-  } catch (error) {
-    uomUnits = []
-  }
-
-  try {
-    const response = await VendorService.getAll()
-
-    vendors = response.data || []
-  } catch (error) {
-    vendors = []
-  }
-
-  try {
-    const response = await BusinessLocationService.getAll()
-
-    businessLocations = response.data || []
-  } catch (error) {
-    businessLocations = []
-  }
+  const businessLocations: BusinessLocation[] =
+    businessLocationsRes.status === 'fulfilled' ? businessLocationsRes.value.data || [] : []
 
   return (
     <EstimateDetails

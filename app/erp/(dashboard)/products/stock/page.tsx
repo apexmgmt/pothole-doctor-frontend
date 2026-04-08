@@ -10,60 +10,26 @@ import ProductStock from '@/views/erp/products/ProductStock'
 export const dynamic = 'force-dynamic'
 
 export default async function ProductStockPage() {
-  let productCategories: ProductCategory[] = []
-  let uomUnits: Unit[] = []
-  let vendors: Vendor[] = []
-  let serviceTypes: ServiceType[] = []
-  let warehouses: Warehouse[] = []
-  let businessLocations: BusinessLocation[] = []
+  const [productCategoriesRes, uomUnitsRes, serviceTypesRes, vendorsRes, warehousesRes, businessLocationsRes] =
+    await Promise.allSettled([
+      ProductCategoryService.getAll(),
+      UnitService.getAll('uom'),
+      ServiceTypeService.getAll(),
+      VendorService.getAll(),
+      WarehouseService.getAll(),
+      BusinessLocationService.getAll()
+    ])
 
-  try {
-    const response = await ProductCategoryService.getAll()
+  const productCategories: ProductCategory[] =
+    productCategoriesRes.status === 'fulfilled' ? (productCategoriesRes.value.data ?? []) : []
 
-    productCategories = response.data ?? []
-  } catch (error) {
-    productCategories = []
-  }
+  const uomUnits: Unit[] = uomUnitsRes.status === 'fulfilled' ? (uomUnitsRes.value.data ?? []) : []
+  const serviceTypes: ServiceType[] = serviceTypesRes.status === 'fulfilled' ? (serviceTypesRes.value.data ?? []) : []
+  const vendors: Vendor[] = vendorsRes.status === 'fulfilled' ? (vendorsRes.value.data ?? []) : []
+  const warehouses: Warehouse[] = warehousesRes.status === 'fulfilled' ? (warehousesRes.value.data ?? []) : []
 
-  try {
-    const response = await UnitService.getAll('uom')
-
-    uomUnits = response.data ?? []
-  } catch (error) {
-    uomUnits = []
-  }
-
-  try {
-    const response = await ServiceTypeService.getAll()
-
-    serviceTypes = response.data ?? []
-  } catch (error) {
-    serviceTypes = []
-  }
-
-  try {
-    const response = await VendorService.getAll()
-
-    vendors = response.data ?? []
-  } catch (error) {
-    vendors = []
-  }
-
-  try {
-    const response = await WarehouseService.getAll()
-
-    warehouses = response.data ?? []
-  } catch (error) {
-    warehouses = []
-  }
-
-  try {
-    const response = await BusinessLocationService.getAll()
-
-    businessLocations = response.data ?? []
-  } catch (error) {
-    businessLocations = []
-  }
+  const businessLocations: BusinessLocation[] =
+    businessLocationsRes.status === 'fulfilled' ? (businessLocationsRes.value.data ?? []) : []
 
   return (
     <ProductStock

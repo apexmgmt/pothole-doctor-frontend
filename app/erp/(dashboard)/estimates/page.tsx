@@ -10,60 +10,24 @@ import Estimates from '@/views/erp/estimates/Estimates'
 export const dynamic = 'force-dynamic'
 
 export default async function EstimatesPage() {
-  let serviceTypes: ServiceType[] = []
-  let estimateTypes: EstimateType[] = []
-  let clients: Client[] = []
-  let staffs: Staff[] = []
-  let paymentTerms: PaymentTerm[] = []
-  let businessLocations: BusinessLocation[] = []
+  const [serviceTypesRes, estimateTypesRes, clientsRes, staffsRes, paymentTermsRes, businessLocationsRes] =
+    await Promise.allSettled([
+      ServiceTypeService.getAll(),
+      EstimateTypeService.getAll(),
+      ClientService.getAll('customer'),
+      StaffService.getAll(),
+      PaymentTermsService.getAllPaymentTerms(),
+      BusinessLocationService.getAll()
+    ])
 
-  try {
-    const response = await ServiceTypeService.getAll()
+  const serviceTypes: ServiceType[] = serviceTypesRes.status === 'fulfilled' ? serviceTypesRes.value.data || [] : []
+  const estimateTypes: EstimateType[] = estimateTypesRes.status === 'fulfilled' ? estimateTypesRes.value.data || [] : []
+  const clients: Client[] = clientsRes.status === 'fulfilled' ? clientsRes.value.data || [] : []
+  const staffs: Staff[] = staffsRes.status === 'fulfilled' ? staffsRes.value.data || [] : []
+  const paymentTerms: PaymentTerm[] = paymentTermsRes.status === 'fulfilled' ? paymentTermsRes.value.data || [] : []
 
-    serviceTypes = response.data || []
-  } catch (error) {
-    serviceTypes = []
-  }
-
-  try {
-    const response = await EstimateTypeService.getAll()
-
-    estimateTypes = response.data || []
-  } catch (error) {
-    estimateTypes = []
-  }
-
-  try {
-    const response = await ClientService.getAll('customer')
-
-    clients = response.data || []
-  } catch (error) {
-    clients = []
-  }
-
-  try {
-    const response = await StaffService.getAll()
-
-    staffs = response.data || []
-  } catch (error) {
-    staffs = []
-  }
-
-  try {
-    const response = await PaymentTermsService.getAllPaymentTerms()
-
-    paymentTerms = response.data || []
-  } catch (error) {
-    paymentTerms = []
-  }
-
-  try {
-    const response = await BusinessLocationService.getAll()
-
-    businessLocations = response.data || []
-  } catch (error) {
-    businessLocations = []
-  }
+  const businessLocations: BusinessLocation[] =
+    businessLocationsRes.status === 'fulfilled' ? businessLocationsRes.value.data || [] : []
 
   return (
     <Estimates

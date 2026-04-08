@@ -23,96 +23,45 @@ import Clients from '@/views/erp/clients/Clients'
 export const dynamic = 'force-dynamic'
 
 export default async function LeadsPage() {
-  let interestLevels: InterestLevel[] = []
-  let companies: Company[] = []
-  let staffs: Staff[] = []
-  let clientSources: ClientSource[] = []
-  let serviceTypes: ServiceType[] = []
-  let businessLocations: BusinessLocation[] = []
-  let noteTypes: NoteType[] = []
-  let countriesWithStatesAndCities: CountryWithStates[] = []
-  let contactTypes: ContactType[] = []
+  const [
+    interestLevelsRes,
+    companiesRes,
+    staffsRes,
+    clientSourcesRes,
+    serviceTypesRes,
+    businessLocationsRes,
+    noteTypesRes,
+    locationsRes,
+    contactTypesRes
+  ] = await Promise.allSettled([
+    InterestLevelService.getAll(),
+    CompanyService.getAll(),
+    StaffService.getAll(),
+    ClientSourceService.getAll(),
+    ServiceTypeService.getAll(),
+    BusinessLocationService.getAll(),
+    NoteTypeService.index(),
+    LocationService.index(),
+    ContactTypeService.getAll()
+  ])
 
-  // fetch interest levels
-  try {
-    const response = await InterestLevelService.getAll()
+  const interestLevels: InterestLevel[] =
+    interestLevelsRes.status === 'fulfilled' ? interestLevelsRes.value.data || [] : []
 
-    interestLevels = response.data || []
-  } catch (error) {
-    interestLevels = []
-  }
+  const companies: Company[] = companiesRes.status === 'fulfilled' ? companiesRes.value.data || [] : []
+  const staffs: Staff[] = staffsRes.status === 'fulfilled' ? staffsRes.value.data || [] : []
+  const clientSources: ClientSource[] = clientSourcesRes.status === 'fulfilled' ? clientSourcesRes.value.data || [] : []
+  const serviceTypes: ServiceType[] = serviceTypesRes.status === 'fulfilled' ? serviceTypesRes.value.data || [] : []
 
-  // fetch client sources
-  try {
-    const response = await CompanyService.getAll()
+  const businessLocations: BusinessLocation[] =
+    businessLocationsRes.status === 'fulfilled' ? businessLocationsRes.value.data || [] : []
 
-    companies = response.data || []
-  } catch (error) {
-    companies = []
-  }
+  const noteTypes: NoteType[] = noteTypesRes.status === 'fulfilled' ? noteTypesRes.value.data.data || [] : []
 
-  // fetch companies
-  try {
-    const response = await StaffService.getAll()
+  const countriesWithStatesAndCities: CountryWithStates[] =
+    locationsRes.status === 'fulfilled' ? locationsRes.value.data || [] : []
 
-    staffs = response.data || []
-  } catch (error) {
-    staffs = []
-  }
-
-  // fetch client sources
-  try {
-    const response = await ClientSourceService.getAll()
-
-    clientSources = response.data || []
-  } catch (error) {
-    clientSources = []
-  }
-
-  // fetch service types
-  try {
-    const response = await ServiceTypeService.getAll()
-
-    serviceTypes = response.data || []
-  } catch (error) {
-    serviceTypes = []
-  }
-
-  // fetch business locations
-  try {
-    const response = await BusinessLocationService.getAll()
-
-    businessLocations = response.data || []
-  } catch (error) {
-    businessLocations = []
-  }
-
-  // fetch note types
-  try {
-    const response = await NoteTypeService.index()
-
-    noteTypes = response.data.data || []
-  } catch (error) {
-    noteTypes = []
-  }
-
-  // fetch countries with states and cities
-  try {
-    const response = await LocationService.index()
-
-    countriesWithStatesAndCities = response.data || []
-  } catch (error) {
-    countriesWithStatesAndCities = []
-  }
-
-  // fetch contact types
-  try {
-    const response = await ContactTypeService.getAll()
-
-    contactTypes = response.data || []
-  } catch (error) {
-    contactTypes = []
-  }
+  const contactTypes: ContactType[] = contactTypesRes.status === 'fulfilled' ? contactTypesRes.value.data || [] : []
 
   return (
     <Clients
