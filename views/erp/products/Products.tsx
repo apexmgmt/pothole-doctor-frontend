@@ -33,7 +33,10 @@ const Products: React.FC<ProductsProps> = ({
   vendors,
   isFromModal = false,
   selectedRows,
-  setSelectedRows
+  setSelectedRows,
+  selected_vendor_id = null,
+  hideTitle = false,
+  hideActionButton = false
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -90,7 +93,7 @@ const Products: React.FC<ProductsProps> = ({
     setIsLoading(true)
 
     try {
-      ProductService.index(filterOptions)
+      ProductService.index({ ...filterOptions, ...(selected_vendor_id ? { vendor_id: selected_vendor_id } : {}) })
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
@@ -111,7 +114,7 @@ const Products: React.FC<ProductsProps> = ({
 
     // show the page title only if not from modal
     if (!isFromModal) dispatch(setPageTitle('Manage Products'))
-  }, [filterOptions])
+  }, [filterOptions, selected_vendor_id])
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
@@ -176,7 +179,7 @@ const Products: React.FC<ProductsProps> = ({
 
   // Column definitions for CommonTable
   const columns: Column[] = [
-    ...(isFromModal
+    ...((isFromModal
       ? [
           {
             id: 'select',
@@ -216,7 +219,7 @@ const Products: React.FC<ProductsProps> = ({
             sortable: false,
             size: 16
           }
-        ]),
+        ]) as Column[]),
 
     {
       id: 'vendor',
@@ -265,16 +268,24 @@ const Products: React.FC<ProductsProps> = ({
     {
       id: 'coverage',
       header: 'Coverage',
-      cell: (row: Product) => <span className='font-medium'>{row.coverage_per_rate} ({row.coverage_unit?.name})</span>,
+      cell: (row: Product) => (
+        <span className='font-medium'>
+          {row.coverage_per_rate} ({row.coverage_unit?.name})
+        </span>
+      ),
       sortable: false
     },
     {
       id: 'product_price',
       header: 'Product Price',
-      cell: (row: Product) => <span className='font-medium'>{row.product_cost} ({row.selling_unit?.name})</span>,
+      cell: (row: Product) => (
+        <span className='font-medium'>
+          {Number(row?.selling_price ?? 0).toFixed(2)}/{row.selling_unit?.name}
+        </span>
+      ),
       sortable: false
     },
-    {
+    ...(!hideActionButton ? ([{
       id: 'actions',
       header: 'Action',
       cell: (row: Product) => (
@@ -317,7 +328,7 @@ const Products: React.FC<ProductsProps> = ({
       sortable: false,
       headerAlign: 'center',
       size: 30
-    }
+    }]) as Column[] : [])
   ]
 
   const handleClearFilters = () => {
@@ -426,7 +437,7 @@ const Products: React.FC<ProductsProps> = ({
           </Button>
         )}
       </div>
-      {canCreateProduct && (
+      {canCreateProduct && !hideActionButton &&  (
         <Button
           variant='default'
           size='sm'
@@ -442,27 +453,49 @@ const Products: React.FC<ProductsProps> = ({
 
   return (
     <>
-      <CommonLayout title='Products' noTabs={true}>
-        <CommonTable
-          data={{
-            data: (apiResponse?.data as Product[]) || [],
-            per_page: apiResponse?.per_page || 10,
-            total: apiResponse?.total || 0,
-            from: apiResponse?.from || 1,
-            to: apiResponse?.to || 10,
-            current_page: apiResponse?.current_page || 1,
-            last_page: apiResponse?.last_page || 1
-          }}
-          columns={columns}
-          customFilters={customFilters}
-          setFilterOptions={setFilterOptions}
-          showFilters={true}
-          pagination={true}
-          isLoading={isLoading}
-          emptyMessage='No product found'
-        />
-      </CommonLayout>
-
+      {hideTitle ? (
+        <div className='p-6'>
+          <CommonTable
+            data={{
+              data: (apiResponse?.data as Product[]) || [],
+              per_page: apiResponse?.per_page || 10,
+              total: apiResponse?.total || 0,
+              from: apiResponse?.from || 1,
+              to: apiResponse?.to || 10,
+              current_page: apiResponse?.current_page || 1,
+              last_page: apiResponse?.last_page || 1
+            }}
+            columns={columns}
+            customFilters={customFilters}
+            setFilterOptions={setFilterOptions}
+            showFilters={true}
+            pagination={true}
+            isLoading={isLoading}
+            emptyMessage='No product found'
+          />
+        </div>
+      ) : (
+        <CommonLayout title='Products' noTabs={true}>
+          <CommonTable
+            data={{
+              data: (apiResponse?.data as Product[]) || [],
+              per_page: apiResponse?.per_page || 10,
+              total: apiResponse?.total || 0,
+              from: apiResponse?.from || 1,
+              to: apiResponse?.to || 10,
+              current_page: apiResponse?.current_page || 1,
+              last_page: apiResponse?.last_page || 1
+            }}
+            columns={columns}
+            customFilters={customFilters}
+            setFilterOptions={setFilterOptions}
+            showFilters={true}
+            pagination={true}
+            isLoading={isLoading}
+            emptyMessage='No product found'
+          />
+        </CommonLayout>
+      )}
       <CreateEditViewProductModal
         mode={modalMode}
         open={isModalOpen}

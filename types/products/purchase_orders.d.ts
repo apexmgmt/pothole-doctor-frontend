@@ -82,7 +82,7 @@ export interface PurchaseOrderPayload {
   est_arrival_date: string
   est_shipping_cost: number
   payment_due: null | 'on_arrival' | 'paid'
-  tax: number
+  tax_amount: number
   final_cost: number
   comments: null | string
   reference_number: string
