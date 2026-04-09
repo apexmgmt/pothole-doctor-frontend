@@ -21,6 +21,7 @@ export interface FormValues {
   warehouse_type: 'warehouse' | 'location'
   warehouse_id: string
   payment_due: '' | 'on_arrival' | 'paid'
+  status: 'new' | 'pending' | 'ordered'
   tax_amount: number | string
   comments: string
 }

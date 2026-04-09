@@ -62,6 +62,7 @@ const CreateOrEditPurchaseOrderModal = ({
       warehouse_type: 'warehouse',
       warehouse_id: '',
       payment_due: '',
+      status: 'new',
       tax_amount: '',
       comments: ''
     }
@@ -115,6 +116,7 @@ const CreateOrEditPurchaseOrderModal = ({
             warehouse_type: po.warehouse_type ?? 'warehouse',
             warehouse_id: po.warehouse_id ?? '',
             payment_due: ((po as any).payment_due ?? '') as FormValues['payment_due'],
+            status: ((po as any).status ?? 'pending') as FormValues['status'],
             tax_amount: (po as any).tax_amount ?? '',
             comments: po.comments ?? ''
           })
@@ -236,7 +238,7 @@ const CreateOrEditPurchaseOrderModal = ({
 
     const payload: PurchaseOrderPayload = {
       vendor_id: values.vendor_id,
-      status: 'new',
+      status: values.status,
       courier_id: values.courier_id,
       warehouse_type: values.warehouse_type,
       warehouse_id: values.warehouse_id,

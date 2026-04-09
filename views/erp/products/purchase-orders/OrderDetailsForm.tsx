@@ -24,6 +24,30 @@ const OrderDetailsForm = ({ form, couriers, warehouses, businessLocations, wareh
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
         <FormField
           control={form.control}
+          name='status'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Status
+              </FormLabel>
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder='Select Status' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='pending'>Pending</SelectItem>
+                    <SelectItem value='ordered'>Ordered</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name='courier_id'
           render={({ field }) => (
             <FormItem>
