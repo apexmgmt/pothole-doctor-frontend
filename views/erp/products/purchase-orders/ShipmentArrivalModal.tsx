@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { format } from 'date-fns'
+import { FileDown } from 'lucide-react'
 import { toast } from 'sonner'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
@@ -32,6 +33,7 @@ interface ShipmentArrivalModalProps {
   purchaseOrderId: string
   warehouses: Warehouse[]
   businessLocations: BusinessLocation[]
+  viewOnly?: boolean
 }
 
 // ─── Utilities ─────────────────────────────────────────────────────────────────
@@ -98,10 +100,12 @@ const ShipmentArrivalModal = ({
   onSuccess,
   purchaseOrderId,
   warehouses,
-  businessLocations
+  businessLocations,
+  viewOnly = false
 }: ShipmentArrivalModalProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPDFGenerating, setIsPDFGenerating] = useState(false)
   const [submittingAs, setSubmittingAs] = useState<'received' | 'moved_to_inventory' | null>(null)
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrder | null>(null)
 
@@ -355,31 +359,86 @@ const ShipmentArrivalModal = ({
     }
   }
 
+  // ─── PDF Download ──────────────────────────────────────────────────────────
+
+  const handleDownloadPDF = async () => {
+    if (!purchaseOrder) return
+
+    setIsPDFGenerating(true)
+
+    try {
+      const { pdf } = await import('@react-pdf/renderer')
+      const { default: ShipmentPDFDocument } = await import('./ShipmentPDFDocument')
+
+      const blob = await pdf(
+        <ShipmentPDFDocument
+          purchaseOrder={purchaseOrder}
+          form={form}
+          incorrectFlags={incorrectFlags}
+          products={products}
+          totalProductCost={totalProductCost}
+          shippingCost={shippingCost}
+          taxAmount={taxAmount}
+          otherCosts={otherCosts}
+          actualFinalCost={actualFinalCost}
+          warehouses={warehouses}
+          businessLocations={businessLocations}
+        />
+      ).toBlob()
+
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      a.download = `PO-${purchaseOrder.purchase_order_number?.toString().padStart(6, '0') ?? 'shipment'}-shipment.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      toast.error('Failed to generate PDF')
+    } finally {
+      setIsPDFGenerating(false)
+    }
+  }
+
   // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
     <CommonDialog
       open={open}
       onOpenChange={onOpenChange}
-      title='View Shipment Arrived Information'
+      title={viewOnly ? 'Shipment Details' : 'View Shipment Arrived Information'}
       maxWidth='full'
-      isLoading={isLoading || isSubmitting}
-      loadingMessage={isSubmitting ? 'Processing...' : 'Loading purchase order...'}
-      disableClose={isSubmitting}
+      isLoading={isLoading || isSubmitting || isPDFGenerating}
+      loadingMessage={
+        isPDFGenerating ? 'Generating PDF...' : isSubmitting ? 'Processing...' : 'Loading purchase order...'
+      }
+      disableClose={isSubmitting || isPDFGenerating}
       actions={
-        <div className='flex items-center justify-between w-full'>
-          <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          <div className='flex gap-3'>
-            <Button type='button' variant='outline' onClick={() => handleSubmit('received')} disabled={isSubmitting}>
-              {submittingAs === 'received' ? 'Processing...' : 'Mark Received'}
+        viewOnly ? (
+          <div className='flex items-center justify-between w-full'>
+            <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
+              Close
             </Button>
-            <Button type='button' onClick={() => handleSubmit('moved_to_inventory')} disabled={isSubmitting}>
-              {submittingAs === 'moved_to_inventory' ? 'Processing...' : 'Mark Received & Move to Inventory'}
+            <Button type='button' onClick={handleDownloadPDF} disabled={isPDFGenerating || !purchaseOrder}>
+              <FileDown className='w-4 h-4 mr-2' />
+              {isPDFGenerating ? 'Generating...' : 'Download PDF'}
             </Button>
           </div>
-        </div>
+        ) : (
+          <div className='flex items-center justify-between w-full'>
+            <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <div className='flex gap-3'>
+              <Button type='button' variant='outline' onClick={() => handleSubmit('received')} disabled={isSubmitting}>
+                {submittingAs === 'received' ? 'Processing...' : 'Mark Received'}
+              </Button>
+              <Button type='button' onClick={() => handleSubmit('moved_to_inventory')} disabled={isSubmitting}>
+                {submittingAs === 'moved_to_inventory' ? 'Processing...' : 'Mark Received & Move to Inventory'}
+              </Button>
+            </div>
+          </div>
+        )
       }
     >
       <div className='space-y-6 pb-2'>
@@ -389,6 +448,7 @@ const ShipmentArrivalModal = ({
           incorrectFlags={incorrectFlags}
           onFormChange={setFormField}
           onToggleIncorrect={toggleIncorrect}
+          viewOnly={viewOnly}
         />
 
         {products.map(p => (
@@ -404,6 +464,7 @@ const ShipmentArrivalModal = ({
             onAddReceipt={addReceipt}
             onRemoveReceipt={removeReceipt}
             onUpdateReceipt={updateReceipt}
+            viewOnly={viewOnly}
           />
         ))}
 
@@ -415,6 +476,7 @@ const ShipmentArrivalModal = ({
           actualFinalCost={actualFinalCost}
           onTaxChange={v => setFormField('tax_amount', v)}
           onOtherCostsChange={v => setFormField('other_costs', v)}
+          viewOnly={viewOnly}
         />
       </div>
     </CommonDialog>

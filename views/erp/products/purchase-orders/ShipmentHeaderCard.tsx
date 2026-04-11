@@ -21,6 +21,7 @@ interface ShipmentHeaderCardProps {
   incorrectFlags: IncorrectFlags
   onFormChange: <K extends keyof ShipmentFormState>(key: K, value: ShipmentFormState[K]) => void
   onToggleIncorrect: (flag: keyof IncorrectFlags) => void
+  viewOnly?: boolean
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -40,7 +41,8 @@ const ShipmentHeaderCard = ({
   form,
   incorrectFlags,
   onFormChange,
-  onToggleIncorrect
+  onToggleIncorrect,
+  viewOnly = false
 }: ShipmentHeaderCardProps) => {
   const renderWarehouseName = () => {
     if (!purchaseOrder) return '—'
@@ -105,10 +107,12 @@ const ShipmentHeaderCard = ({
             <div className='flex-1'>
               <ReadOnlyField value={formatDate(purchaseOrder?.est_departure_date ?? '')} />
             </div>
-            <div className='flex items-center gap-1.5'>
-              <Switch checked={incorrectFlags.departure} onCheckedChange={() => onToggleIncorrect('departure')} />
-              <span className='text-xs text-muted-foreground'>Incorrect</span>
-            </div>
+            {!viewOnly && (
+              <div className='flex items-center gap-1.5'>
+                <Switch checked={incorrectFlags.departure} onCheckedChange={() => onToggleIncorrect('departure')} />
+                <span className='text-xs text-muted-foreground'>Incorrect</span>
+              </div>
+            )}
           </div>
 
           <div className='flex items-center gap-2'>
@@ -116,10 +120,12 @@ const ShipmentHeaderCard = ({
             <div className='flex-1'>
               <ReadOnlyField value={formatDate(purchaseOrder?.est_arrival_date ?? '')} />
             </div>
-            <div className='flex items-center gap-1.5'>
-              <Switch checked={incorrectFlags.arrival} onCheckedChange={() => onToggleIncorrect('arrival')} />
-              <span className='text-xs text-muted-foreground'>Incorrect</span>
-            </div>
+            {!viewOnly && (
+              <div className='flex items-center gap-1.5'>
+                <Switch checked={incorrectFlags.arrival} onCheckedChange={() => onToggleIncorrect('arrival')} />
+                <span className='text-xs text-muted-foreground'>Incorrect</span>
+              </div>
+            )}
           </div>
 
           <div className='flex items-center gap-2'>
@@ -129,10 +135,12 @@ const ShipmentHeaderCard = ({
                 value={purchaseOrder?.est_shipping_cost != null ? String(purchaseOrder.est_shipping_cost) : undefined}
               />
             </div>
-            <div className='flex items-center gap-1.5'>
-              <Switch checked={incorrectFlags.shipping} onCheckedChange={() => onToggleIncorrect('shipping')} />
-              <span className='text-xs text-muted-foreground'>Incorrect</span>
-            </div>
+            {!viewOnly && (
+              <div className='flex items-center gap-1.5'>
+                <Switch checked={incorrectFlags.shipping} onCheckedChange={() => onToggleIncorrect('shipping')} />
+                <span className='text-xs text-muted-foreground'>Incorrect</span>
+              </div>
+            )}
           </div>
 
           <div className='space-y-1 pt-1'>
@@ -143,45 +151,58 @@ const ShipmentHeaderCard = ({
               value={form.comments}
               onChange={e => onFormChange('comments', e.target.value)}
               className='resize-none'
+              disabled={viewOnly}
             />
           </div>
         </div>
 
-        {/* Right: Actual fields — shown only when the corresponding Incorrect switch is on */}
+        {/* Right: Actual fields */}
         <div className='space-y-3'>
           {incorrectFlags.departure && (
             <div className='space-y-1'>
               <Label className='text-xs text-muted-foreground'>Actual Departure</Label>
-              <DatePicker
-                value={form.actual_departure_date}
-                onChange={v => onFormChange('actual_departure_date', v)}
-                placeholder='Actual Departure'
-              />
+              {viewOnly ? (
+                <ReadOnlyField value={form.actual_departure_date ? formatDate(form.actual_departure_date) : '—'} />
+              ) : (
+                <DatePicker
+                  value={form.actual_departure_date}
+                  onChange={v => onFormChange('actual_departure_date', v)}
+                  placeholder='Actual Departure'
+                />
+              )}
             </div>
           )}
           {incorrectFlags.arrival && (
             <div className='space-y-1'>
               <Label className='text-xs text-muted-foreground'>Actual Arrival</Label>
-              <DatePicker
-                value={form.actual_arrival_date}
-                onChange={v => onFormChange('actual_arrival_date', v)}
-                placeholder='Actual Arrival'
-              />
+              {viewOnly ? (
+                <ReadOnlyField value={form.actual_arrival_date ? formatDate(form.actual_arrival_date) : '—'} />
+              ) : (
+                <DatePicker
+                  value={form.actual_arrival_date}
+                  onChange={v => onFormChange('actual_arrival_date', v)}
+                  placeholder='Actual Arrival'
+                />
+              )}
             </div>
           )}
           {incorrectFlags.shipping && (
             <div className='space-y-1'>
               <Label className='text-xs text-muted-foreground'>
-                Shipping Cost <span className='text-destructive'>*</span>
+                Shipping Cost {!viewOnly && <span className='text-destructive'>*</span>}
               </Label>
-              <Input
-                type='number'
-                min={0}
-                step='any'
-                placeholder='0'
-                value={form.actual_shipping_cost}
-                onChange={e => onFormChange('actual_shipping_cost', e.target.value)}
-              />
+              {viewOnly ? (
+                <ReadOnlyField value={form.actual_shipping_cost !== '' ? form.actual_shipping_cost : '—'} />
+              ) : (
+                <Input
+                  type='number'
+                  min={0}
+                  step='any'
+                  placeholder='0'
+                  value={form.actual_shipping_cost}
+                  onChange={e => onFormChange('actual_shipping_cost', e.target.value)}
+                />
+              )}
             </div>
           )}
         </div>

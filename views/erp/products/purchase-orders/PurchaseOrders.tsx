@@ -65,6 +65,7 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
   const [selectedPurchaseOrderId, setSelectedPurchaseOrderId] = useState<string | undefined>(undefined)
   const [isShipmentModalOpen, setIsShipmentModalOpen] = useState<boolean>(false)
   const [shipmentPurchaseOrderId, setShipmentPurchaseOrderId] = useState<string | undefined>(undefined)
+  const [isShipmentViewOnly, setIsShipmentViewOnly] = useState<boolean>(false)
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
@@ -291,10 +292,28 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
       cell: (row: PurchaseOrder) => {
         const isEditable = row.status === 'new' || row.status === 'pending'
         const canReceive = row.status !== 'received' && row.status !== 'moved_to_inventory'
+        const canViewShipment = row.status === 'moved_to_inventory'
 
-        if (!isEditable && !canReceive) return null
+        if (!isEditable && !canReceive && !canViewShipment) return null
 
         const buttons: React.ReactNode[] = []
+
+        if (canViewShipment) {
+          buttons.push(
+            <button
+              key='view-shipment'
+              type='button'
+              className='w-full text-left text-sm px-2 py-1 hover:text-primary transition-colors'
+              onClick={() => {
+                setShipmentPurchaseOrderId(row.id)
+                setIsShipmentViewOnly(true)
+                setIsShipmentModalOpen(true)
+              }}
+            >
+              View Shipment
+            </button>
+          )
+        }
 
         if (canReceive) {
           buttons.push(
@@ -304,6 +323,7 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
               className='w-full text-left text-sm px-2 py-1 hover:text-primary transition-colors'
               onClick={() => {
                 setShipmentPurchaseOrderId(row.id)
+                setIsShipmentViewOnly(false)
                 setIsShipmentModalOpen(true)
               }}
             >
@@ -413,6 +433,7 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
           purchaseOrderId={shipmentPurchaseOrderId}
           warehouses={warehouses}
           businessLocations={businessLocations}
+          viewOnly={isShipmentViewOnly}
         />
       )}
       <CommonLayout title='Purchase Orders' noTabs>

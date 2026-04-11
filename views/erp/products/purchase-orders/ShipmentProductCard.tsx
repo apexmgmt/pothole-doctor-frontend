@@ -23,6 +23,7 @@ interface ShipmentProductCardProps {
   onAddReceipt: (id: string) => void
   onRemoveReceipt: (id: string, index: number) => void
   onUpdateReceipt: (id: string, index: number, updates: Partial<ReceiptRowState>) => void
+  viewOnly?: boolean
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
@@ -37,7 +38,8 @@ const ShipmentProductCard = ({
   onMarginChange,
   onAddReceipt,
   onRemoveReceipt,
-  onUpdateReceipt
+  onUpdateReceipt,
+  viewOnly = false
 }: ShipmentProductCardProps) => {
   const totalCoverage =
     p.coverage_per_rate != null ? Number((p.ordered_quantity * p.coverage_per_rate).toFixed(2)) : null
@@ -99,6 +101,7 @@ const ShipmentProductCard = ({
                     value={p.company_cost}
                     onChange={e => onCompanyCostChange(p.id, Number(e.target.value))}
                     className='h-7 text-xs w-24'
+                    disabled={viewOnly}
                   />
                   <span className='text-xs text-muted-foreground whitespace-nowrap'>{p.purchase_unit_name}</span>
                 </div>
@@ -114,6 +117,7 @@ const ShipmentProductCard = ({
                     value={p.work_order_cost}
                     onChange={e => onWorkOrderCostChange(p.id, Number(e.target.value))}
                     className='h-7 text-xs w-24'
+                    disabled={viewOnly}
                   />
                   <span className='text-xs text-muted-foreground whitespace-nowrap'>{p.purchase_unit_name}</span>
                 </div>
@@ -131,6 +135,7 @@ const ShipmentProductCard = ({
                       value={p.customer_price}
                       onChange={e => onCustomerPriceChange(p.id, Number(e.target.value))}
                       className='h-7 text-xs w-24'
+                      disabled={viewOnly}
                     />
                     <span className='text-xs text-muted-foreground whitespace-nowrap'>{p.selling_unit_name}</span>
                   </div>
@@ -151,6 +156,7 @@ const ShipmentProductCard = ({
                       value={p.margin}
                       onChange={e => onMarginChange(p.id, Number(e.target.value))}
                       className='h-7 text-xs w-24'
+                      disabled={viewOnly}
                     />
                     <span className='text-xs text-muted-foreground'>%</span>
                   </div>
@@ -192,14 +198,16 @@ const ShipmentProductCard = ({
                   Dye Lot
                 </th>
                 <th className='px-2 py-2 w-8'>
-                  <button
-                    type='button'
-                    title='Add receipt row'
-                    onClick={() => onAddReceipt(p.id)}
-                    className='flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors'
-                  >
-                    <PlusIcon className='w-3 h-3' />
-                  </button>
+                  {!viewOnly && (
+                    <button
+                      type='button'
+                      title='Add receipt row'
+                      onClick={() => onAddReceipt(p.id)}
+                      className='flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors'
+                    >
+                      <PlusIcon className='w-3 h-3' />
+                    </button>
+                  )}
                 </th>
               </tr>
             </thead>
@@ -218,7 +226,7 @@ const ShipmentProductCard = ({
                         min={0}
                         step='any'
                         value={r.received_quantity}
-                        disabled={locked}
+                        disabled={locked || viewOnly}
                         onChange={e => onUpdateReceipt(p.id, rIdx, { received_quantity: Number(e.target.value) })}
                         className=' w-20'
                       />
@@ -228,7 +236,7 @@ const ShipmentProductCard = ({
                         value={r.received_date}
                         onChange={v => onUpdateReceipt(p.id, rIdx, { received_date: v })}
                         placeholder='Date'
-                        disabled={locked}
+                        disabled={locked || viewOnly}
                         className=''
                       />
                     </td>
@@ -241,7 +249,7 @@ const ShipmentProductCard = ({
                             warehouse_id: ''
                           })
                         }
-                        disabled={locked}
+                        disabled={locked || viewOnly}
                       >
                         <SelectTrigger className='w-full'>
                           <SelectValue />
@@ -256,7 +264,7 @@ const ShipmentProductCard = ({
                       <Select
                         value={r.warehouse_id}
                         onValueChange={v => onUpdateReceipt(p.id, rIdx, { warehouse_id: v })}
-                        disabled={locked}
+                        disabled={locked || viewOnly}
                       >
                         <SelectTrigger className='w-full'>
                           <SelectValue placeholder='Select' />
@@ -297,14 +305,14 @@ const ShipmentProductCard = ({
                     <td className='px-2 py-2'>
                       <Input
                         value={r.dye_lot}
-                        disabled={locked}
+                        disabled={locked || viewOnly}
                         onChange={e => onUpdateReceipt(p.id, rIdx, { dye_lot: e.target.value })}
                         placeholder='Dye Lot'
                         className=''
                       />
                     </td>
                     <td className='px-2 py-2 text-center'>
-                      {!locked && (
+                      {!locked && !viewOnly && (
                         <button
                           type='button'
                           title='Remove receipt'

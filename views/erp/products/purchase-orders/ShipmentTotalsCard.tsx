@@ -13,6 +13,7 @@ interface ShipmentTotalsCardProps {
   actualFinalCost: number
   onTaxChange: (value: string) => void
   onOtherCostsChange: (value: string) => void
+  viewOnly?: boolean
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
@@ -24,7 +25,8 @@ const ShipmentTotalsCard = ({
   otherCosts,
   actualFinalCost,
   onTaxChange,
-  onOtherCostsChange
+  onOtherCostsChange,
+  viewOnly = false
 }: ShipmentTotalsCardProps) => (
   <div className='flex justify-end'>
     <Card className='w-72 p-4 space-y-2 text-sm'>
@@ -38,27 +40,35 @@ const ShipmentTotalsCard = ({
       </div>
       <div className='flex justify-between items-center'>
         <span className='text-muted-foreground'>Tax:</span>
-        <Input
-          type='number'
-          min={0}
-          step='any'
-          placeholder='0.00'
-          value={taxAmount}
-          onChange={e => onTaxChange(e.target.value)}
-          className='h-7 text-xs w-24 text-right'
-        />
+        {viewOnly ? (
+          <span className='font-medium'>${Number(taxAmount || 0).toFixed(2)}</span>
+        ) : (
+          <Input
+            type='number'
+            min={0}
+            step='any'
+            placeholder='0.00'
+            value={taxAmount}
+            onChange={e => onTaxChange(e.target.value)}
+            className='h-7 text-xs w-24 text-right'
+          />
+        )}
       </div>
       <div className='flex justify-between items-center'>
         <span className='text-muted-foreground'>Other Cost:</span>
-        <Input
-          type='number'
-          min={0}
-          step='any'
-          placeholder='0.00'
-          value={otherCosts}
-          onChange={e => onOtherCostsChange(e.target.value)}
-          className='h-7 text-xs w-24 text-right'
-        />
+        {viewOnly ? (
+          <span className='font-medium'>${Number(otherCosts || 0).toFixed(2)}</span>
+        ) : (
+          <Input
+            type='number'
+            min={0}
+            step='any'
+            placeholder='0.00'
+            value={otherCosts}
+            onChange={e => onOtherCostsChange(e.target.value)}
+            className='h-7 text-xs w-24 text-right'
+          />
+        )}
       </div>
       <div className='flex justify-between border-t border-border pt-2 font-semibold'>
         <span>Actual Final Cost:</span>
