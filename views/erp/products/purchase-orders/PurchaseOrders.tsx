@@ -16,6 +16,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import ShipmentArrivalModal from './ShipmentArrivalModal'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import {
@@ -62,6 +63,8 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedPurchaseOrderId, setSelectedPurchaseOrderId] = useState<string | undefined>(undefined)
+  const [isShipmentModalOpen, setIsShipmentModalOpen] = useState<boolean>(false)
+  const [shipmentPurchaseOrderId, setShipmentPurchaseOrderId] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
@@ -287,31 +290,52 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
       header: 'Action',
       cell: (row: PurchaseOrder) => {
         const isEditable = row.status === 'new' || row.status === 'pending'
+        const canReceive = row.status !== 'received' && row.status !== 'moved_to_inventory'
 
-        if (!isEditable) return null
+        if (!isEditable && !canReceive) return null
+
+        const buttons: React.ReactNode[] = []
+
+        if (canReceive) {
+          buttons.push(
+            <button
+              key='shipment'
+              type='button'
+              className='w-full text-left text-sm px-2 py-1 hover:text-primary transition-colors'
+              onClick={() => {
+                setShipmentPurchaseOrderId(row.id)
+                setIsShipmentModalOpen(true)
+              }}
+            >
+              Shipment Arrival
+            </button>
+          )
+        }
+
+        if (isEditable) {
+          buttons.push(
+            <EditButton
+              key='edit'
+              tooltip='Edit Purchase Order'
+              onClick={() => {
+                setModalMode('edit')
+                setSelectedPurchaseOrderId(row.id)
+                setIsModalOpen(true)
+              }}
+              variant='text'
+            />,
+            <DeleteButton
+              key='delete'
+              tooltip='Delete Purchase Order'
+              variant='text'
+              onClick={() => handleDelete(row.id)}
+            />
+          )
+        }
 
         return (
           <div className='flex items-center justify-center gap-2'>
-            <ThreeDotButton
-              buttons={[
-                <EditButton
-                  key='edit'
-                  tooltip='Edit Purchase Order'
-                  onClick={() => {
-                    setModalMode('edit')
-                    setSelectedPurchaseOrderId(row.id)
-                    setIsModalOpen(true)
-                  }}
-                  variant='text'
-                />,
-                <DeleteButton
-                  key='delete'
-                  tooltip='Delete Purchase Order'
-                  variant='text'
-                  onClick={() => handleDelete(row.id)}
-                />
-              ]}
-            />
+            <ThreeDotButton buttons={buttons} />
           </div>
         )
       },
@@ -381,6 +405,16 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
         productCategories={productCategories}
         serviceTypes={serviceTypes}
       />
+      {shipmentPurchaseOrderId && (
+        <ShipmentArrivalModal
+          open={isShipmentModalOpen}
+          onOpenChange={setIsShipmentModalOpen}
+          onSuccess={fetchData}
+          purchaseOrderId={shipmentPurchaseOrderId}
+          warehouses={warehouses}
+          businessLocations={businessLocations}
+        />
+      )}
       <CommonLayout title='Purchase Orders' noTabs>
         <CommonTable
           data={{

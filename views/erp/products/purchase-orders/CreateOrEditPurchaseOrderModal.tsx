@@ -233,7 +233,7 @@ const CreateOrEditPurchaseOrderModal = ({
       quantity: p.quantity,
       work_order_cost: p.work_order_cost,
       margin: p.margin,
-      customer_price: p.customer_price
+      customer_price: p.p
     }))
 
     const payload: PurchaseOrderPayload = {
