@@ -128,6 +128,9 @@ export interface ProductsProps {
   setSelectedRows?: React.Dispatch<React.SetStateAction<Product[]>>
   warehouses?: Warehouse[]
   businessLocations?: BusinessLocation[]
+  selected_vendor_id?: string | null
+  hideTitle?: boolean
+  hideActionButton?: boolean
 }
 
 export interface ProductGallery {

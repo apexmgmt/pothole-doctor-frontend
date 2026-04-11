@@ -148,6 +148,15 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           permissions: ['Manage Product']
         },
         {
+          id: 'product-purchase-order',
+          label: 'Purchase Orders',
+          href: '/erp/products/purchase-orders',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Product']
+        },
+        {
           id: 'product-categories',
           label: 'Categories',
           href: '/erp/products/categories',

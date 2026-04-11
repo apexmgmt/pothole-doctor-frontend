@@ -1,4 +1,4 @@
-import { BusinessLocation, Courier, Model, Product, Unit, User, Vendor, Warehouse } from '..'
+import { BusinessLocation, Courier, Document, Model, Product, Unit, User, Vendor, Warehouse } from '..'
 
 export interface PurchaseOrder extends Model {
   purchase_order_active: boolean
@@ -27,6 +27,7 @@ export interface PurchaseOrder extends Model {
   total_weight: number
   comments: string
   purchase_products: PurchaseOrderProduct[]
+  documents?: Document[]
 }
 
 export interface PurchaseOrderProduct extends Model {
@@ -70,6 +71,7 @@ export interface PurchaseProductReceipt extends Model {
   stock_area_id: string | null
   stock_section_id: string | null
   dye_lot: string | null
+  is_moved_to_inventory: boolean
 }
 
 export interface PurchaseOrderPayload {
@@ -82,7 +84,7 @@ export interface PurchaseOrderPayload {
   est_arrival_date: string
   est_shipping_cost: number
   payment_due: null | 'on_arrival' | 'paid'
-  tax: number
+  tax_amount: number
   final_cost: number
   comments: null | string
   reference_number: string
@@ -132,4 +134,36 @@ export interface InventoryAdjustment extends Model {
   new_quantity: number
   reason: string
   adjusted_by: string | User
+}
+
+export interface PurchaseOrderShipmentPayload {
+  actual_departure_date: string | null
+  actual_arrival_date: string | null
+  actual_shipping_cost: number | null
+  comments: string | null
+  tax_amount: number | null
+  other_costs: number | null
+  purchase_products: ShipmentProductPayload[]
+  status: 'received' | 'moved_to_inventory'
+}
+
+export interface ShipmentProductPayload {
+  id: string
+  company_cost: number
+  work_order_cost: number
+  customer_price: number 
+  margin: number
+  purchase_product_receipts: ShipmentProductReceiptPayload[]
+}
+
+export interface ShipmentProductReceiptPayload {
+  id: string | null
+  quantity: number
+  received_date: string
+  warehouse_type: 'warehouse' | 'location'
+  warehouse_id: string
+  stock_area_id?: string | null
+  stock_section_id?: string | null
+  dye_lot?: string | null
+  comments?: string | null
 }

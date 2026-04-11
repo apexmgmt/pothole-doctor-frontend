@@ -1,5 +1,5 @@
-import { API_URL, PURCHASE_ORDERS } from '@/constants/api'
-import { PurchaseOrderPayload } from '@/types'
+import { API_URL, PURCHASE_ORDERS, PURCHASE_ORDERS_SHIPMENT } from '@/constants/api'
+import { PurchaseOrderPayload, PurchaseOrderShipmentPayload } from '@/types'
 import apiInterceptor from '../api.interceptor'
 import { revalidate } from '../../app/cache.service'
 
@@ -110,6 +110,34 @@ export default class PurchaseOrderService {
         const errorData = await response.json()
 
         throw new Error(errorData.message || 'Failed to delete purchase order')
+      }
+
+      await revalidate('purchase-orders')
+      await revalidate(`purchase-orders/${purchaseOrderId}`)
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Create Shipment for Purchase Order API
+   * This will create a shipment for the given purchase order and update the purchase order status to 'ordered'
+   * It will also update the inventory for the products in the purchase order for moved to inventory
+   */
+  static shipment = async (purchaseOrderId: string, payload: PurchaseOrderShipmentPayload) => {
+    try {
+      const response = await apiInterceptor(API_URL + PURCHASE_ORDERS_SHIPMENT(purchaseOrderId), {
+        requiresAuth: true,
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
       }
 
       await revalidate('purchase-orders')
