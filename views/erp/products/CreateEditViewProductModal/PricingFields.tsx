@@ -8,6 +8,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Unit } from '@/types'
+import { getMargin, getSellPrice } from '@/utils/business-calculation'
 
 interface PricingFieldsProps {
   form: UseFormReturn<any>
@@ -18,14 +19,40 @@ interface PricingFieldsProps {
 export function PricingFields({ form, uomUnits, disabled = false }: PricingFieldsProps) {
   const purchaseUomId = form.watch('purchase_uom_id')
   const coveragePerUnitId = form.watch('coverage_per_unit_id')
+  const coveragePerRate = form.watch('coverage_per_rate')
+  const sellingUnitId = form.watch('selling_unit_id')
 
   const purchaseUnit = uomUnits.find(u => u.id === purchaseUomId) ?? null
   const coverageUnit = uomUnits.find(u => u.id === coveragePerUnitId) ?? null
 
   const prevPurchaseUomId = useRef<string>(purchaseUomId)
+  const isMounted = useRef(false)
+
+  /**
+   * Selling by coverage unit means:
+   *   selling_unit = coverage_unit  AND  coverage_unit ≠ purchase_unit
+   *
+   * In this case the "cost per selling unit" is:
+   *   product_cost / coverage_per_rate
+   *
+   * Otherwise (selling_unit = purchase_unit) cost per selling unit is just product_cost.
+   */
+  const isSellingByCoverage =
+    !!sellingUnitId && !!coveragePerUnitId && sellingUnitId === coveragePerUnitId && sellingUnitId !== purchaseUomId
+
+  /** Returns cost per selling unit, adjusting for coverage rate when necessary. */
+  const effectiveCost = (productCost: number): number => {
+    const rate = Number(coveragePerRate)
+
+    if (isSellingByCoverage && rate > 0) {
+      return productCost / rate
+    }
+
+    return productCost
+  }
 
   // Auto-default selling_unit_id to purchase_uom_id.
-  // If purchase unit changes and selling was tracking the old purchase unit, follow the change.
+  // If purchase unit changes and selling was still tracking the old purchase unit, follow it.
   useEffect(() => {
     const currentSelling = form.getValues('selling_unit_id')
     const prevId = prevPurchaseUomId.current
@@ -36,6 +63,29 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
 
     prevPurchaseUomId.current = purchaseUomId
   }, [purchaseUomId, form])
+
+  // Recalculate selling_price whenever coverage rate, selling unit, or coverage unit changes.
+  // Skipped on the first render so we don't overwrite loaded edit-mode values.
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true
+
+      return
+    }
+
+    const cost = Number(form.getValues('product_cost'))
+    const margin = Number(form.getValues('margin'))
+    const rate = Number(coveragePerRate)
+
+    const isCovSell =
+      !!sellingUnitId && !!coveragePerUnitId && sellingUnitId === coveragePerUnitId && sellingUnitId !== purchaseUomId
+
+    const ec = isCovSell && rate > 0 ? cost / rate : cost
+
+    if (cost > 0) {
+      form.setValue('selling_price', getSellPrice(ec, margin), { shouldDirty: true })
+    }
+  }, [coveragePerRate, sellingUnitId, coveragePerUnitId])
 
   // Build the two selectable options.
   // Deduplicate when purchase and coverage resolve to the same unit.
@@ -71,7 +121,22 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
               Product Cost <span className='text-red-500'>*</span>
             </FormLabel>
             <FormControl>
-              <Input type='number' step='0.01' placeholder='Enter product cost' {...field} disabled={disabled} />
+              <Input
+                type='number'
+                step='0.01'
+                placeholder='Enter product cost'
+                {...field}
+                disabled={disabled}
+                onChange={e => {
+                  field.onChange(e)
+                  const newCost = Number(e.target.value)
+                  const currentMargin = Number(form.getValues('margin'))
+
+                  form.setValue('selling_price', getSellPrice(effectiveCost(newCost), currentMargin), {
+                    shouldDirty: true
+                  })
+                }}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -94,6 +159,15 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
                 placeholder='Enter margin'
                 {...field}
                 disabled={disabled}
+                onChange={e => {
+                  field.onChange(e)
+                  const newMargin = Number(e.target.value)
+                  const currentCost = Number(form.getValues('product_cost'))
+
+                  form.setValue('selling_price', getSellPrice(effectiveCost(currentCost), newMargin), {
+                    shouldDirty: true
+                  })
+                }}
               />
             </FormControl>
             <FormMessage />
@@ -114,7 +188,21 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input type='number' step='0.01' placeholder='Enter price' {...field} disabled={disabled} />
+                  <Input
+                    type='number'
+                    step='0.01'
+                    placeholder='Enter price'
+                    {...field}
+                    disabled={disabled}
+                    onChange={e => {
+                      field.onChange(e)
+                      const newSellingPrice = Number(e.target.value)
+                      const currentCost = Number(form.getValues('product_cost'))
+                      const newMargin = getMargin(effectiveCost(currentCost), newSellingPrice)
+
+                      form.setValue('margin', newMargin.toFixed(4), { shouldDirty: true })
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -145,28 +233,6 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
           />
         </div>
       </div>
-
-      {/* Purchase to Selling Conversion Rate */}
-      <FormField
-        control={form.control}
-        name='purchase_to_selling_conversion_rate'
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Purchase to Selling Conversion Rate</FormLabel>
-            <FormControl>
-              <Input
-                type='number'
-                step='0.0001'
-                min={0}
-                placeholder='Enter conversion rate'
-                {...field}
-                disabled={disabled}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
 
       {/* Freight Amount */}
       <FormField
