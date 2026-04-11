@@ -1,5 +1,9 @@
 'use client'
 
+import { useRef } from 'react'
+
+import { ExternalLink, FileText, ImageIcon, Paperclip, Trash2, UploadCloud } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { DatePicker } from '@/components/ui/datePicker'
@@ -7,9 +11,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import { BusinessLocation, Courier, Warehouse } from '@/types'
+import { BusinessLocation, Courier, Document, Warehouse } from '@/types'
 import { PurchaseOrder } from '@/types/products/purchase_orders'
 import { formatDate } from '@/utils/date'
+import { generateFileUrl, getFileType } from '@/utils/utility'
 
 import { IncorrectFlags, ShipmentFormState } from './shipment-arrival.types'
 
@@ -22,6 +27,10 @@ interface ShipmentHeaderCardProps {
   onFormChange: <K extends keyof ShipmentFormState>(key: K, value: ShipmentFormState[K]) => void
   onToggleIncorrect: (flag: keyof IncorrectFlags) => void
   viewOnly?: boolean
+  documents?: Document[]
+  isUploadingDoc?: boolean
+  onUploadDoc?: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onDeleteDoc?: (id: string) => void
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -42,8 +51,14 @@ const ShipmentHeaderCard = ({
   incorrectFlags,
   onFormChange,
   onToggleIncorrect,
-  viewOnly = false
+  viewOnly = false,
+  documents = [],
+  isUploadingDoc = false,
+  onUploadDoc,
+  onDeleteDoc
 }: ShipmentHeaderCardProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const renderWarehouseName = () => {
     if (!purchaseOrder) return '—'
     if (purchaseOrder.warehouse_type === 'warehouse') return (purchaseOrder.warehouse as Warehouse)?.title ?? '—'
@@ -206,6 +221,83 @@ const ShipmentHeaderCard = ({
             </div>
           )}
         </div>
+      </div>
+
+      {/* ─── Documents ─────────────────────────────────────────────────── */}
+      <div className='rounded-md border border-border overflow-hidden mt-1'>
+        <div className='flex items-center justify-between px-4 py-2 bg-border/10 border-b border-border'>
+          <div className='flex items-center gap-2'>
+            <Paperclip className='w-3.5 h-3.5 text-muted-foreground' />
+            <span className='text-xs font-medium'>Attachments</span>
+            {documents.length > 0 && <span className='text-xs text-muted-foreground'>({documents.length})</span>}
+          </div>
+          {!viewOnly && (
+            <>
+              <input
+                ref={fileInputRef}
+                type='file'
+                accept='*'
+                className='hidden'
+                onChange={e => {
+                  onUploadDoc?.(e)
+                  if (fileInputRef.current) fileInputRef.current.value = ''
+                }}
+              />
+              <button
+                type='button'
+                disabled={isUploadingDoc}
+                onClick={() => fileInputRef.current?.click()}
+                className='flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors disabled:opacity-50'
+              >
+                <UploadCloud className='w-3.5 h-3.5' />
+                {isUploadingDoc ? 'Uploading...' : 'Upload File'}
+              </button>
+            </>
+          )}
+        </div>
+
+        {documents.length === 0 ? (
+          <div className='px-4 py-5 text-center text-xs text-muted-foreground'>No documents attached.</div>
+        ) : (
+          <ul className='divide-y divide-border'>
+            {documents.map(doc => {
+              const url = generateFileUrl(doc.full_path) ?? '#'
+              const type = getFileType(doc.full_path)
+
+              return (
+                <li key={doc.id} className='flex items-center gap-3 px-4 py-2 hover:bg-border/10 transition-colors'>
+                  {type === 'image' ? (
+                    <ImageIcon className='w-3.5 h-3.5 text-sky-500 shrink-0' />
+                  ) : (
+                    <FileText className='w-3.5 h-3.5 text-amber-500 shrink-0' />
+                  )}
+                  <span className='flex-1 text-xs truncate' title={doc.name}>
+                    {doc.name}
+                  </span>
+                  <a
+                    href={url}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-muted-foreground hover:text-primary transition-colors'
+                    title='Open file'
+                  >
+                    <ExternalLink className='w-3.5 h-3.5' />
+                  </a>
+                  {!viewOnly && (
+                    <button
+                      type='button'
+                      onClick={() => onDeleteDoc?.(doc.id)}
+                      className='text-muted-foreground hover:text-destructive transition-colors'
+                      title='Delete document'
+                    >
+                      <Trash2 className='w-3.5 h-3.5' />
+                    </button>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        )}
       </div>
     </Card>
   )

@@ -19,6 +19,9 @@ import {
 } from '@/types/products/purchase_orders'
 import { getMargin, getSellPrice } from '@/utils/business-calculation'
 
+import PurchaseOrderDocumentService from '@/services/api/products/purchase-order-documents.service'
+import { Document } from '@/types'
+
 import ShipmentHeaderCard from './ShipmentHeaderCard'
 import ShipmentProductCard from './ShipmentProductCard'
 import ShipmentTotalsCard from './ShipmentTotalsCard'
@@ -106,8 +109,10 @@ const ShipmentArrivalModal = ({
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isPDFGenerating, setIsPDFGenerating] = useState(false)
+  const [isUploadingDoc, setIsUploadingDoc] = useState(false)
   const [submittingAs, setSubmittingAs] = useState<'received' | 'moved_to_inventory' | null>(null)
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrder | null>(null)
+  const [documents, setDocuments] = useState<Document[]>([])
 
   const [form, setForm] = useState<ShipmentFormState>({
     actual_departure_date: null,
@@ -159,6 +164,8 @@ const ShipmentArrivalModal = ({
         setProducts(
           (po.purchase_products ?? []).map(pp => mapProductToState(pp, defaultWarehouseType, defaultWarehouseId))
         )
+
+        setDocuments(po.documents ?? [])
       })
       .catch(() => toast.error('Failed to load purchase order details'))
       .finally(() => setIsLoading(false))
@@ -359,6 +366,43 @@ const ShipmentArrivalModal = ({
     }
   }
 
+  // ─── Document helpers ──────────────────────────────────────────────────────
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+
+    if (!file) return
+
+    setIsUploadingDoc(true)
+
+    try {
+      const formData = new FormData()
+
+      formData.append('purchase_order_id', purchaseOrderId)
+      formData.append('file', file)
+
+      const response = await PurchaseOrderDocumentService.store(formData)
+      const newDoc = response.data as Document
+
+      setDocuments(prev => [...prev, newDoc])
+      toast.success('Document uploaded successfully')
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to upload document')
+    } finally {
+      setIsUploadingDoc(false)
+    }
+  }
+
+  const handleDeleteDoc = async (docId: string) => {
+    try {
+      await PurchaseOrderDocumentService.destroy(docId)
+      setDocuments(prev => prev.filter(d => d.id !== docId))
+      toast.success('Document deleted')
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to delete document')
+    }
+  }
+
   // ─── PDF Download ──────────────────────────────────────────────────────────
 
   const handleDownloadPDF = async () => {
@@ -449,6 +493,10 @@ const ShipmentArrivalModal = ({
           onFormChange={setFormField}
           onToggleIncorrect={toggleIncorrect}
           viewOnly={viewOnly}
+          documents={documents}
+          isUploadingDoc={isUploadingDoc}
+          onUploadDoc={handleFileSelect}
+          onDeleteDoc={handleDeleteDoc}
         />
 
         {products.map(p => (

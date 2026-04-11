@@ -1,4 +1,4 @@
-import { BusinessLocation, Courier, Model, Product, Unit, User, Vendor, Warehouse } from '..'
+import { BusinessLocation, Courier, Document, Model, Product, Unit, User, Vendor, Warehouse } from '..'
 
 export interface PurchaseOrder extends Model {
   purchase_order_active: boolean
@@ -27,6 +27,7 @@ export interface PurchaseOrder extends Model {
   total_weight: number
   comments: string
   purchase_products: PurchaseOrderProduct[]
+  documents?: Document[]
 }
 
 export interface PurchaseOrderProduct extends Model {
