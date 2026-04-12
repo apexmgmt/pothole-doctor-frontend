@@ -74,7 +74,7 @@ export function AdditionalInfoFields({ form, disabled = false }: AdditionalInfoF
         />
       </div>
       {/* Type Radio Group */}
-      <FormField
+      {/* <FormField
         control={form.control}
         name='type'
         render={({ field }) => (
@@ -104,7 +104,7 @@ export function AdditionalInfoFields({ form, disabled = false }: AdditionalInfoF
             <FormMessage />
           </FormItem>
         )}
-      />
+      /> */}
       <div className='col-span-2 grid grid-cols-1 gap-4'>
         {/* Freight Percentage Radio Group */}
         <FormField
