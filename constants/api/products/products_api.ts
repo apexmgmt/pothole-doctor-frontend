@@ -14,9 +14,13 @@
  * Data restore method: POST /{id}/restore
  */
 export const PRODUCTS: string = '/v1/products/'
+export const NON_INVENTORY_PRODUCTS: string = '/v1/non-inventory-products/'
 export const PRODUCTS_TENANT: string = '/v1/tenant/products/'
+export const NON_INVENTORY_PRODUCTS_TENANT: string = '/v1/tenant/non-inventory-products/'
 export const PRODUCTS_ALL: string = '/v1/get-products/'
 export const PRODUCTS_ALL_TENANT: string = '/v1/tenant/get-products/'
+export const NON_INVENTORY_PRODUCTS_ALL: string = '/v1/get-non-inventory-products/'
+export const NON_INVENTORY_PRODUCTS_ALL_TENANT: string = '/v1/tenant/get-non-inventory-products/'
 
 /**
  * API endpoint for product galleries
