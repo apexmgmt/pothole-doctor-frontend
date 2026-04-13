@@ -2,10 +2,12 @@ import { InvoiceServicePayload } from '@/types/invoices'
 import {
   API_URL,
   APPROVE_INVOICE,
+  INVOICE_HISTORIES,
   INVOICES,
   INVOICES_MARKED_SIGNED,
   INVOICES_RESTORE,
   INVOICES_SERVICES,
+  SEND_INVOICE_EMAIL,
   VIEW_INVOICE
 } from '@/constants/api'
 import apiInterceptor from '../api.interceptor'
@@ -290,6 +292,64 @@ export default class InvoiceService {
         const errorData = await response.json()
 
         throw new Error(errorData.message || 'Failed to mark invoice as signed')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Send invoice email API
+   * @param invoiceId - The ID of the invoice
+   * @param subject - Optional custom subject for the email
+   * @param message - Optional custom message for the email
+   * @returns The response from the API
+   */
+  static sendEmail = async (invoiceId: string, subject?: string, message?: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + SEND_INVOICE_EMAIL(invoiceId), {
+        requiresAuth: true,
+        method: 'POST',
+        body: JSON.stringify({ subject, message })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to send invoice email')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Fetch invoice history API to retrieve the history of an invoice including all revisions, emails sent, and reviews
+   * @param invoiceId - The ID of the invoice
+   * @param filterOptions - Optional filters for the history (e.g., pagination, date range)
+   * @returns The response from the API containing an array of invoice history entries
+   * Each entry includes details such as who sent it, when it was sent, when it was viewed, and any reviews provided by the client.
+   */
+  static histories = async (invoiceId: string, filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(
+        API_URL + INVOICE_HISTORIES(invoiceId) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to fetch invoice history')
       }
 
       return await response.json()
