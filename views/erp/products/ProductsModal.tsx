@@ -11,7 +11,8 @@ const ProductsModal = ({
   vendors = [],
   serviceTypes = [],
   uomUnits = [],
-  onSelect
+  onSelect,
+  selected_vendor_id = null
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -20,6 +21,7 @@ const ProductsModal = ({
   vendors: Vendor[]
   serviceTypes: ServiceType[]
   onSelect?: (value: Product[]) => void
+  selected_vendor_id?: string | null
 }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [selectedRows, setSelectedRows] = useState<Product[]>([])
@@ -67,6 +69,7 @@ const ProductsModal = ({
           isFromModal={true}
           selectedRows={selectedRows}
           setSelectedRows={setSelectedRows}
+          selected_vendor_id={selected_vendor_id}
         />
       </>
     </CommonDialog>

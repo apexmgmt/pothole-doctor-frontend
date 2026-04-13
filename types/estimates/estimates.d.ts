@@ -1,6 +1,6 @@
 import { BusinessLocation } from '../business_location'
 import { Client } from '../clients/clients'
-import { EstimateType } from '../estimate_types'
+import { EstimateType } from './estimate_types'
 import { PaymentTerm } from '../payment_terms'
 import { ServiceType } from '../service_types'
 import { Staff } from '../staff'

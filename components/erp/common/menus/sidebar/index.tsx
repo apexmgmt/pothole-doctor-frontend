@@ -123,8 +123,8 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       permissions: ['Manage Work Order']
     },
     {
-      id: 'product',
-      label: 'Products',
+      id: 'inventory-products',
+      label: 'Inventory Products',
       icon: <Boxes className='h-4 w-4' />,
       href: '/erp/products',
       hasSubItems: true,
@@ -148,6 +148,15 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           permissions: ['Manage Product']
         },
         {
+          id: 'product-purchase-order',
+          label: 'Purchase Orders',
+          href: '/erp/products/purchase-orders',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Product']
+        },
+        {
           id: 'product-categories',
           label: 'Categories',
           href: '/erp/products/categories',
@@ -159,6 +168,26 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       ],
       exactMatch: false,
       permissions: ['Manage Category', 'Manage Product']
+    },
+    {
+      id: 'non-inventory-products',
+      label: 'Non-Inventory Products',
+      icon: <Boxes className='h-4 w-4' />,
+      href: '/erp/non-inventory-products',
+      hasSubItems: true,
+      subItems: [
+        {
+          id: 'products',
+          label: 'Products',
+          href: '/erp/non-inventory-products',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Product']
+        },
+      ],
+      exactMatch: false,
+      permissions: ['Manage Product']
     },
     {
       id: 'settings',

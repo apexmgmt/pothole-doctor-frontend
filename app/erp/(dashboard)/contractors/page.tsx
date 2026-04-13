@@ -9,51 +9,24 @@ import Partners from '@/views/erp/partners/Partners'
 export const dynamic = 'force-dynamic'
 
 export default async function PartnersPage() {
-  let businessLocations: BusinessLocation[] = []
-  let partnerTypes: PartnerType[] = []
-  let countriesWithStatesAndCities: CountryWithStates[] = []
-  let companies: Company[] = []
-  let skills: Skill[] = []
+  const [businessLocationsRes, partnerTypesRes, locationsRes, companiesRes, skillsRes] = await Promise.allSettled([
+    BusinessLocationService.getAll(),
+    PartnerTypesService.getAll(),
+    LocationService.index(),
+    CompanyService.getAll(),
+    SkillService.getAll()
+  ])
 
-  try {
-    const response = await BusinessLocationService.getAll()
+  const businessLocations: BusinessLocation[] =
+    businessLocationsRes.status === 'fulfilled' ? businessLocationsRes.value.data || [] : []
 
-    businessLocations = response.data || []
-  } catch (error) {
-    businessLocations = []
-  }
+  const partnerTypes: PartnerType[] = partnerTypesRes.status === 'fulfilled' ? partnerTypesRes.value.data || [] : []
 
-  try {
-    const response = await PartnerTypesService.getAll()
+  const countriesWithStatesAndCities: CountryWithStates[] =
+    locationsRes.status === 'fulfilled' ? locationsRes.value.data || [] : []
 
-    partnerTypes = response.data || []
-  } catch (error) {
-    partnerTypes = []
-  }
-
-  try {
-    const response = await LocationService.index()
-
-    countriesWithStatesAndCities = response.data || []
-  } catch (error) {
-    countriesWithStatesAndCities = []
-  }
-
-  try {
-    const response = await CompanyService.getAll()
-
-    companies = response.data || []
-  } catch (error) {
-    companies = []
-  }
-
-  try {
-    const response = await SkillService.getAll()
-
-    skills = response.data || []
-  } catch (error) {
-    skills = []
-  }
+  const companies: Company[] = companiesRes.status === 'fulfilled' ? companiesRes.value.data || [] : []
+  const skills: Skill[] = skillsRes.status === 'fulfilled' ? skillsRes.value.data || [] : []
 
   return (
     <Partners

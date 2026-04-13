@@ -1,5 +1,4 @@
-import { ServiceType } from './service_types'
-import { Unit } from './units'
+import { ServiceType, Unit } from '.'
 
 export interface LaborCostsProps {
   serviceTypes: ServiceType[]

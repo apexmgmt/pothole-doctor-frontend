@@ -30,6 +30,11 @@ export const PERMISSION_BASED_ROUTES: Record<string, string> = {
 
   // Products routes
   '/erp/products': 'Manage Product',
+  '/erp/products/stocks': 'Manage Product',
+  '/erp/products/purchase-orders': 'Manage Product',
+
+  // Non-Inventory Products routes
+  '/erp/non-inventory-products': 'Manage Product',
 
   // Product Categories routes
   '/erp/products/categories': 'Manage Category',

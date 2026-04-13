@@ -5,27 +5,10 @@ import CreateOrEditRole from '@/views/erp/roles/CreateOrEditRole'
 const EditRolePage = async ({ params }: { params: { id: string } }) => {
   const { id } = await params
 
-  // Fetch permissions
-  let permissions = {}
+  const [permissionsRes, roleDetailsRes] = await Promise.allSettled([PermissionService.index(), RoleService.show(id)])
 
-  try {
-    const response = await PermissionService.index()
-
-    permissions = response.data || {}
-  } catch (error) {
-    permissions = {}
-  }
-
-  // Fetch role details
-  let roleDetails = {}
-
-  try {
-    const response = await RoleService.show(id)
-
-    roleDetails = response.data || {}
-  } catch (error) {
-    roleDetails = {}
-  }
+  const permissions = permissionsRes.status === 'fulfilled' ? permissionsRes.value.data || {} : {}
+  const roleDetails = roleDetailsRes.status === 'fulfilled' ? roleDetailsRes.value.data || {} : {}
 
   return <CreateOrEditRole mode='edit' permissions={permissions} roleId={id} roleDetails={roleDetails} />
 }
