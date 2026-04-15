@@ -141,7 +141,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
         {
           id: 'product-stock',
           label: 'Product Stock',
-          href: '/erp/products/stocks',
+          href: '/erp/products/stock',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
           exactMatch: true,
