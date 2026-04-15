@@ -1,5 +1,5 @@
 import InvoiceService from '@/services/api/invoices/invoices.service'
-import { Invoice } from '@/types'
+import { Invoice, InvoiceHistory } from '@/types'
 import InvoiceView from '@/views/estimation/InvoiceView'
 import { Metadata } from 'next'
 export const dynamic = 'force-dynamic'
@@ -42,14 +42,17 @@ export const generateMetadata = async ({ searchParams }: { searchParams: any }):
 const InvoiceDetailsPage = async ({ searchParams }: { searchParams: any }) => {
   const { inid, icid } = await searchParams
   let invoice: Invoice | null = null
+  let histories: InvoiceHistory[] = []
 
   try {
     const response = await InvoiceService.viewInvoice(inid, icid)
 
     invoice = response?.data?.invoice ?? null
+    histories = response?.data?.histories ?? []
   } catch (error) {
     console.log('Error fetching invoice details', error)
     invoice = null
+    histories = []
   }
 
   if (!invoice) {
@@ -61,7 +64,7 @@ const InvoiceDetailsPage = async ({ searchParams }: { searchParams: any }) => {
     )
   }
 
-  return <InvoiceView invoice={invoice} inid={inid ?? ''} icid={icid ?? ''} />
+  return <InvoiceView invoice={invoice} inid={inid ?? ''} icid={icid ?? ''} histories={histories} />
 }
 
 export default InvoiceDetailsPage

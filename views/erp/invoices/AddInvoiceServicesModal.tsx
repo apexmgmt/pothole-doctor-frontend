@@ -66,6 +66,7 @@ const AddInvoiceServicesModal = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isMarkingAsSigned, setIsMarkingAsSigned] = useState(false)
+  const [isSendingEmail, setIsSendingEmail] = useState(false)
   const [isInvoiceDetailsOpen, setIsInvoiceDetailsOpen] = useState(false)
   const [currentInvoice, setCurrentInvoice] = useState<Invoice>(invoice)
   const [activeTab, setActiveTab] = useState<'services' | 'documents'>('services')
@@ -297,6 +298,32 @@ const AddInvoiceServicesModal = ({
     }
   }
 
+  const handleEmailWithSave = async () => {
+    setIsSendingEmail(true)
+
+    try {
+      // Save services first (same logic as onSubmit) if there are selected service types
+      if (selectedServiceType.length > 0) {
+        const hasExistingServices = invoice?.services && invoice.services.length > 0
+
+        if (hasExistingServices) {
+          await InvoiceService.updateServices(invoice.id, buildPayload())
+        } else {
+          await InvoiceService.storeServices(invoice.id, buildPayload())
+        }
+      }
+
+      // Then send the email
+      await InvoiceService.sendEmail(currentInvoice.id)
+      toast.success('Invoice email sent to customer successfully')
+      onSuccess?.()
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to send invoice email')
+    } finally {
+      setIsSendingEmail(false)
+    }
+  }
+
   // Populate from existing invoice services when editing
   useEffect(() => {
     if (open && invoice?.services && invoice.services.length > 0) {
@@ -385,8 +412,10 @@ const AddInvoiceServicesModal = ({
             <InvoiceActionsButton
               invoice={currentInvoice}
               isMarkingAsSigned={isMarkingAsSigned}
+              isSendingEmail={isSendingEmail}
               onViewEditDetails={() => setIsInvoiceDetailsOpen(true)}
               onMarkAsSigned={handleMarkAsSigned}
+              onConfirmedEmailSend={handleEmailWithSave}
             />
             <AddServiceButton
               serviceTypes={serviceTypes}
@@ -436,7 +465,12 @@ const AddInvoiceServicesModal = ({
                 setServiceTypeLineItems(prev => {
                   const copy = [...prev]
 
-                  copy[idx] = { serviceTypeName: item.name, serviceTypeId: item.id, groupId: serviceTypeLineItems[idx]?.groupId ?? null, lines }
+                  copy[idx] = {
+                    serviceTypeName: item.name,
+                    serviceTypeId: item.id,
+                    groupId: serviceTypeLineItems[idx]?.groupId ?? null,
+                    lines
+                  }
 
                   return copy
                 })

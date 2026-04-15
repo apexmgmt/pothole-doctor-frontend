@@ -8,11 +8,11 @@ import {
   ProposalService,
   LaborCost,
   Product,
-  User
+  User,
+  Model
 } from '.'
 
-export interface Invoice {
-  id: string
+export interface Invoice extends Model {
   inid: string
   icid: string
   invoice_number: number
@@ -50,8 +50,6 @@ export interface Invoice {
   reason: string | null
   take_off_data: TakeoffData | null
   deleted_at: string | null
-  created_at: string
-  updated_at: string
   services?: ProposalService[]
   payment_method?: string
   payment_method_data?: Record<string, string> | null
@@ -124,20 +122,33 @@ export interface InvoiceServiceItemPayload {
   note: string
 }
 
-export interface InvoiceJobImage {
-  id: string
+export interface InvoiceJobImage extends Model {
   imageable_id: string
   imageable_type: string
   type: 'before' | 'after'
   full_path: string
   name: string
   uploaded_by: User | null
-  created_at: string
-  updated_at: string
 }
 
 export interface InvoiceJobImagePayload {
   invoice_id: string
   image: File
   type: 'before' | 'after'
+}
+
+export interface InvoiceHistory extends Model {
+  invoice_id: string
+  client_id: string
+  sent_by: string
+  email_to: string
+  subject: string
+  message: string
+  invoice_data: Invoice
+  subtotal: number
+  sale_tax: number
+  total: number 
+  type: 'created_from_proposal' | 'email_sent'
+  sent_at: string
+  viewed_at: string | null
 }
