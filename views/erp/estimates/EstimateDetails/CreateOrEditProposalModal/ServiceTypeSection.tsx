@@ -40,6 +40,7 @@ const ServiceTypeSection = ({
   vendors = [],
   taxRate = 0,
   hideMargin = false,
+  showVendor = false,
   allowedLineTypes
 }: {
   mode: 'create' | 'edit' | 'view'
@@ -55,6 +56,7 @@ const ServiceTypeSection = ({
   vendors: Vendor[]
   taxRate: number
   hideMargin?: boolean
+  showVendor?: boolean
   allowedLineTypes?: ProposalServiceItemPayload['type'][]
 }) => {
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
@@ -219,6 +221,7 @@ const ServiceTypeSection = ({
         qty: 1,
         unit_id: product.selling_unit_id ?? '',
         unit_name: product.selling_unit?.name ?? product.selling_uom?.name ?? '',
+        vendor_id: product.vendor_id ?? '',
         margin: product.margin,
         unit_price: 0,
         discount: 0,
@@ -396,6 +399,7 @@ const ServiceTypeSection = ({
                   <th className='px-2 py-1'>#</th>
                   <th className='px-2 py-1'>Item Name</th>
                   <th className='px-2 py-1'>Description</th>
+                  {showVendor && <th className='px-2 py-1'>Vendor</th>}
                   <th className='px-2 py-1'>Unit Cost</th>
                   <th className='px-2 py-1'>Quantity</th>
                   <th className='px-2 py-1'>Total Cost</th>
@@ -417,7 +421,7 @@ const ServiceTypeSection = ({
                     return (
                       <tr key={idx} className={cn('border-b border-zinc-800 bg-muted align-top')}>
                         <td className='px-2 py-1'>{idx + 1}.</td>
-                        <td colSpan={7} className='px-2 py-1 pr-8'>
+                        <td colSpan={showVendor ? 8 : 7} className='px-2 py-1 pr-8'>
                           <div className='flex items-center gap-2'>
                             <MessageSquareIcon className='h-4 w-4 text-zinc-400' />
 
@@ -491,6 +495,28 @@ const ServiceTypeSection = ({
                           disabled={mode === 'view'}
                         />
                       </td>
+                      {showVendor && (
+                        <td className='px-2 py-1'>
+                          {line.type === 'product' && (
+                            <Select
+                              value={line.vendor_id ?? line.product?.vendor_id ?? ''}
+                              onValueChange={val => updateLine(idx, 'vendor_id', val)}
+                              disabled={mode === 'view' || !!line.product_id}
+                            >
+                              <SelectTrigger className='w-36 text-xs'>
+                                <SelectValue placeholder='Vendor' />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {vendors.map(vendor => (
+                                  <SelectItem key={vendor.id} value={vendor.id}>
+                                    {[vendor.first_name, vendor.last_name].filter(Boolean).join(' ')}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </td>
+                      )}
                       <td className='px-2 py-1'>
                         {line.type !== 'deduction' && (
                           <Input

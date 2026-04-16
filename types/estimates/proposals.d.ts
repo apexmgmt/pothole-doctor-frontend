@@ -92,6 +92,7 @@ export interface ProposalServiceItem {
   unit_price: number
   unit_name: string | null
   unit_id: string | null
+  vendor_id?: string | null
   total_price: number
   discount: number
   tax: number
@@ -134,6 +135,7 @@ export interface ProposalServiceItemPayload {
   qty: number
   unit_name: string
   unit_id?: string
+  vendor_id?: string
   total_cost?: number
   margin: number
   unit_price: number

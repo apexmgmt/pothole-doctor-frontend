@@ -139,6 +139,7 @@ const EditWorkOrderServicesView = ({
             qty: item.qty,
             unit_name: item.unit_name || '',
             unit_id: item.unit_id ?? '',
+            vendor_id: item.vendor_id ?? '',
             total_cost: item.total_cost,
             margin: item.margin,
             unit_price: item.unit_price,
@@ -187,6 +188,7 @@ const EditWorkOrderServicesView = ({
       items: st.lines.map(line => ({
         item_id: line.item_id ?? null,
         product_id: line.product_id,
+        vendor_id: line.vendor_id,
         labor_cost_id: line.labor_cost_id,
         name: line.name,
         description: line.description,
@@ -348,6 +350,7 @@ const EditWorkOrderServicesView = ({
             vendors={vendors}
             taxRate={taxRate}
             hideMargin={true}
+            showVendor={true}
             allowedLineTypes={['product', 'labor']}
           />
         ))}
