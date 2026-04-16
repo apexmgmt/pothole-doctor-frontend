@@ -47,3 +47,5 @@ export * from './work_orders_api'
 export * from './couriers_api'
 export * from './products/purchase_orders_api'
 export * from './products/inventories_api'
+
+export * from './products/material_jobs_api';
