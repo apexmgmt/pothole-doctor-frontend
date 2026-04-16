@@ -302,7 +302,7 @@ const EditWorkOrderServicesModal = ({
             </p>
           </div>
           <div className='flex gap-2'>
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button type='button' variant='outline' size='default'>
                   Work Order Actions
@@ -365,7 +365,12 @@ const EditWorkOrderServicesModal = ({
                 setServiceTypeLineItems(prev => {
                   const copy = [...prev]
 
-                  copy[idx] = { serviceTypeName: item.name, serviceTypeId: item.id, groupId: serviceTypeLineItems[idx]?.groupId ?? null, lines }
+                  copy[idx] = {
+                    serviceTypeName: item.name,
+                    serviceTypeId: item.id,
+                    groupId: serviceTypeLineItems[idx]?.groupId ?? null,
+                    lines
+                  }
 
                   return copy
                 })
