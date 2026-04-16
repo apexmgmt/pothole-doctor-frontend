@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import React, { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ImageIcon, Search } from 'lucide-react'
 import { DocumentIcon, UserIcon } from '@/public/icons'
 import { toast } from 'sonner'
@@ -36,7 +36,6 @@ import { hasPermission } from '@/utils/role-permission'
 import WorkOrderService from '@/services/api/work-orders/work_orders.service'
 
 import EditWorkOrderModal from './EditWorkOrderModal'
-import EditWorkOrderServicesModal from './EditWorkOrderServicesModal'
 import CompletionCertificatesModal from './CompletionCertificatesModal'
 import WorkOrderDocuments from './documents/WorkOrderDocuments'
 import InvoiceJobImages from '../invoices/job-images/InvoiceJobImages'
@@ -67,8 +66,6 @@ const WorkOrders: React.FC<{
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
-  const pathname = usePathname()
-  const hasAutoOpenedRef = useRef(false)
 
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -85,14 +82,10 @@ const WorkOrders: React.FC<{
   const [activeTab, setActiveTab] = useState<string>('work-orders')
   const [selectedWorkOrderForTab, setSelectedWorkOrderForTab] = useState<WorkOrder | null>(null)
 
-  // Step 1: edit work order info (opened from services modal)
+  // Edit work order info modal (standalone)
   const [isWorkOrderModalOpen, setIsWorkOrderModalOpen] = useState<boolean>(false)
   const [selectedWorkOrderId, setSelectedWorkOrderId] = useState<string | null>(null)
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null)
-
-  // Edit services modal (opened directly from the list)
-  const [isServicesModalOpen, setIsServicesModalOpen] = useState<boolean>(false)
-  const [servicesWorkOrder, setServicesWorkOrder] = useState<WorkOrder | null>(null)
 
   // Completion certificates modal
   const [isCertModalOpen, setIsCertModalOpen] = useState<boolean>(false)
@@ -171,55 +164,14 @@ const WorkOrders: React.FC<{
     dispatch(setPageTitle('Manage Work Orders'))
   }, [filterOptions])
 
-  // Auto-open services modal when wo_id is present in URL (e.g. page refresh or deep link)
-  useEffect(() => {
-    if (isLoading || hasAutoOpenedRef.current) return
-
-    const woId = searchParams.get('wo_id')
-
-    if (!woId) return
-
-    hasAutoOpenedRef.current = true
-    handleOpenServicesModal(woId)
-  }, [isLoading])
-
-  const handleOpenServicesModal = async (id: string) => {
-    hasAutoOpenedRef.current = true
-
-    try {
-      const response = await WorkOrderService.show(id)
-
-      setServicesWorkOrder(response.data)
-      setIsServicesModalOpen(true)
-
-      const params = new URLSearchParams(searchParams.toString())
-
-      params.set('wo_id', id)
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
-    } catch {
-      toast.error('Failed to fetch work order details')
-    }
+  const handleOpenEditModal = (id: string) => {
+    router.push(`/erp/work-orders/${id}`)
   }
-
-  const handleOpenEditModal = (id: string) => handleOpenServicesModal(id)
 
   const handleWorkOrderClose = () => {
     setIsWorkOrderModalOpen(false)
     setSelectedWorkOrderId(null)
     setSelectedWorkOrder(null)
-  }
-
-  const handleServicesClose = () => {
-    setIsServicesModalOpen(false)
-    setServicesWorkOrder(null)
-
-    const params = new URLSearchParams(searchParams.toString())
-
-    params.delete('wo_id')
-
-    const qs = params.toString()
-
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
   }
 
   const handleDeleteWorkOrder = async (id: string) => {
@@ -552,7 +504,7 @@ const WorkOrders: React.FC<{
         )}
       </CommonLayout>
 
-      {/* Edit Work Order info — opened from inside EditWorkOrderServicesModal */}
+      {/* Edit Work Order info modal */}
       <EditWorkOrderModal
         open={isWorkOrderModalOpen}
         onOpenChange={handleWorkOrderClose}
@@ -579,28 +531,6 @@ const WorkOrders: React.FC<{
           }}
           workOrderNumber={certModalWorkOrder.work_order_number}
           certificates={certModalWorkOrder.completion_certificates ?? []}
-        />
-      )}
-
-      {/* Edit Services — opened directly from the list */}
-      {servicesWorkOrder && (
-        <EditWorkOrderServicesModal
-          open={isServicesModalOpen}
-          onOpenChange={(open: boolean) => {
-            if (!open) handleServicesClose()
-          }}
-          workOrder={servicesWorkOrder}
-          serviceTypes={serviceTypes}
-          units={units}
-          productCategories={productCategories}
-          uomUnits={uomUnits}
-          vendors={vendors}
-          workOrderTypes={workOrderTypes}
-          clients={clients}
-          staffs={staffs}
-          paymentTerms={paymentTerms}
-          businessLocations={businessLocations}
-          onSuccess={() => fetchData()}
         />
       )}
     </>
