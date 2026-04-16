@@ -71,4 +71,27 @@ export default class MaterialJobService {
       throw error
     }
   }
+
+  /** Delete Material Job Action API (Latest First)*/
+  static destroyAction = async (materialJobId: string, actionId: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + MATERIAL_JOBS_ACTIONS(materialJobId) + `/${actionId}`, {
+        requiresAuth: true,
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to delete material job action')
+      }
+
+      await revalidate('material-jobs')
+      await revalidate(`material-jobs/${materialJobId}`)
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
 }

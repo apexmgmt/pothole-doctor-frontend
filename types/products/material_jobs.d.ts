@@ -1,4 +1,4 @@
-import { Client, Company, Model, Product, ServiceType, Staff, Unit, Vendor, WorkOrder } from '..'
+import { Client, Company, Model, Product, ServiceType, Staff, Unit, Vendor, Warehouse, WorkOrder } from '..'
 
 export interface MaterialJob extends Model {
   job_type: 'inventory' | 'non_inventory'
@@ -58,6 +58,7 @@ export interface MaterialJobAction extends Model {
   action_status: string
   action_date: string
   employee_id: string
+  employee?: Staff
   vendor_id: string
   product_type: 'inventory' | 'non_inventory'
   quantity: number

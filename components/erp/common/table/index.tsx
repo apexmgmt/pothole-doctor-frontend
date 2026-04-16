@@ -2,7 +2,7 @@
 
 import React, { useMemo, ReactNode, useState } from 'react'
 
-import { ArrowDown, ArrowUp } from 'lucide-react'
+import { ArrowDown, ArrowUp, ChevronRight, ChevronDown } from 'lucide-react'
 
 import { SpinnerCustom } from '@/components/ui/spinner'
 import Pagination from './Pagination'
@@ -43,6 +43,12 @@ interface CommonTableProps {
   emptyMessage?: string
   handleRowSelect?: (row: any) => void
   rowKey?: string
+  expandableRow?: {
+    render: (row: any) => ReactNode
+    isExpanded: (row: any) => boolean
+    onToggle: (row: any) => void
+    canExpand?: (row: any) => boolean
+  }
 }
 
 /**
@@ -73,7 +79,8 @@ const CommonTable: React.FC<CommonTableProps> = ({
   className = '',
   emptyMessage = 'No data available',
   handleRowSelect,
-  rowKey = 'id'
+  rowKey = 'id',
+  expandableRow
 }) => {
   const [selectedRowId, setSelectedRowId] = useState<string | number | null>(null)
   const [sortBy, setSortBy] = useState<string | null>(null)
@@ -219,6 +226,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
           <table className='w-full'>
             <thead className='bg-border/40'>
               <tr>
+                {expandableRow && <th className='w-8 px-2 py-3 rounded-l-lg' />}
                 {columns.map((column, index) => {
                   const canSort = column.sortable !== false && column.enableSorting !== false
                   const headerFlexAlign = getFlexAlignmentClass(column?.headerAlign)
@@ -230,7 +238,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
                       style={columnWidth}
                       className={`px-4 py-3 text-light text-sm font-medium whitespace-nowrap ${
                         canSort ? 'cursor-pointer select-none hover:text-light/80' : ''
-                      } ${index === 0 ? 'rounded-l-lg' : ''} ${index === columns.length - 1 ? 'rounded-r-lg' : ''}`}
+                      } ${index === 0 && !expandableRow ? 'rounded-l-lg' : ''} ${index === columns.length - 1 ? 'rounded-r-lg' : ''}`}
                       onClick={() => handleSorting(column.id, canSort)}
                     >
                       <div className={`flex items-center gap-2 ${headerFlexAlign}`}>
@@ -249,41 +257,74 @@ const CommonTable: React.FC<CommonTableProps> = ({
                   const rowId = row[rowKey]
                   const isSelected = selectedRowId === rowId
 
+                  const isExpanded = expandableRow?.isExpanded(row) ?? false
+
                   return (
-                    <tr
-                      key={rowIndex}
-                      onClick={() => handleRowClick(row)}
-                      className={`transition-colors cursor-pointer ${
-                        isSelected ? 'bg-gray-800 hover:bg-gray-900' : 'hover:bg-gray-900'
-                      } ${rowIndex + 1 === tableData.length ? '' : 'border-b border-border'}`}
-                    >
-                      {columns.map(column => {
-                        const columnWidth = getColumnWidth(column?.size)
-
-                        return (
+                    <React.Fragment key={rowIndex}>
+                      <tr
+                        onClick={() => handleRowClick(row)}
+                        className={`transition-colors cursor-pointer ${
+                          isSelected ? 'bg-gray-800 hover:bg-gray-900' : 'hover:bg-gray-900'
+                        } ${!isExpanded && rowIndex + 1 === tableData.length ? '' : 'border-b border-border'}`}
+                      >
+                        {expandableRow && (
                           <td
-                            key={column.id}
-                            style={columnWidth}
-                            className={`px-4 py-3 text-light text-sm whitespace-nowrap`}
+                            className='px-2 py-3 text-center'
                             onClick={e => {
-                              // Stop propagation if clicked element is a button, link, or inside one
-                              const target = e.target as HTMLElement
+                              e.stopPropagation()
 
-                              if (
-                                target.closest('button') ||
-                                target.closest('a') ||
-                                target.tagName === 'BUTTON' ||
-                                target.tagName === 'A'
-                              ) {
-                                e.stopPropagation()
+                              if (expandableRow.canExpand ? expandableRow.canExpand(row) : true) {
+                                expandableRow.onToggle(row)
                               }
                             }}
                           >
-                            {column.cell(row, rowIndex)}
+                            {(expandableRow.canExpand ? expandableRow.canExpand(row) : true) &&
+                              (isExpanded ? (
+                                <ChevronDown className='h-4 w-4 text-zinc-400 hover:text-white transition-colors' />
+                              ) : (
+                                <ChevronRight className='h-4 w-4 text-zinc-400 hover:text-white transition-colors' />
+                              ))}
                           </td>
-                        )
-                      })}
-                    </tr>
+                        )}
+                        {columns.map(column => {
+                          const columnWidth = getColumnWidth(column?.size)
+
+                          return (
+                            <td
+                              key={column.id}
+                              style={columnWidth}
+                              className={`px-4 py-3 text-light text-sm whitespace-nowrap`}
+                              onClick={e => {
+                                // Stop propagation if clicked element is a button, link, or inside one
+                                const target = e.target as HTMLElement
+
+                                if (
+                                  target.closest('button') ||
+                                  target.closest('a') ||
+                                  target.tagName === 'BUTTON' ||
+                                  target.tagName === 'A'
+                                ) {
+                                  e.stopPropagation()
+                                }
+                              }}
+                            >
+                              {column.cell(row, rowIndex)}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                      {expandableRow && isExpanded && (
+                        <tr
+                          className={`border-b border-border bg-zinc-950 ${
+                            rowIndex + 1 === tableData.length ? '' : ''
+                          }`}
+                        >
+                          <td colSpan={columns.length + 1} className='px-6 py-3'>
+                            {expandableRow.render(row)}
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   )
                 })
               ) : (
