@@ -132,6 +132,7 @@ export interface ProposalServiceItemPayload {
   unit_cost: number
   qty: number
   unit_name: string
+  unit_id?: string
   total_cost?: number
   margin: number
   unit_price: number
