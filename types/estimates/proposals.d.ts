@@ -91,6 +91,7 @@ export interface ProposalServiceItem {
   margin: number
   unit_price: number
   unit_name: string | null
+  unit_id: string | null
   total_price: number
   discount: number
   tax: number

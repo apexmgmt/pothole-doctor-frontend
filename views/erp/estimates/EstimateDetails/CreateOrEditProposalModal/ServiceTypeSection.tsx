@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge'
 import ProductsModal from '@/views/erp/products/ProductsModal'
 import { cn } from '@/lib/utils'
 import { getDiscountedUnitPrice } from '@/utils/business-calculation'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import ServiceTypeSummary from './ServiceTypeSummary'
 import ServiceTypeActions from './ServiceTypeActions'
 import LineItemActions from './LineItemActions'
@@ -188,6 +189,7 @@ const ServiceTypeSection = ({
         unit_cost: lc.cost,
         qty: 1,
         margin: lc.margin,
+        unit_id: lc.unit_id ?? '',
         unit_name: lc?.unit?.name || '',
         unit_price: 0,
         discount: 0,
@@ -215,6 +217,7 @@ const ServiceTypeSection = ({
         type: 'product',
         unit_cost: product.product_cost,
         qty: 1,
+        unit_id: product.selling_unit_id ?? '',
         unit_name: product.selling_unit?.name ?? product.selling_uom?.name ?? '',
         margin: product.margin,
         unit_price: 0,
@@ -278,6 +281,23 @@ const ServiceTypeSection = ({
     }
 
     onLinesChange([...lines, newLine])
+  }
+
+  // Update multiple fields on a line at once
+  const updateLineFields = (idx: number, fields: Partial<ProposalServiceItemPayload>) => {
+    const updated = lines.map((line, i) => {
+      if (i === idx) {
+        const updatedLine = { ...line, ...fields }
+
+        if (line.type === 'deduction') return updatedLine
+
+        return recalculateLine(updatedLine)
+      }
+
+      return line
+    })
+
+    onLinesChange(updated)
   }
 
   // Update a line
@@ -395,7 +415,7 @@ const ServiceTypeSection = ({
                   if (line.type === 'comment') {
                     // Only show description for comment lines
                     return (
-                      <tr key={idx} className={cn('border-b border-zinc-800 bg-muted')}>
+                      <tr key={idx} className={cn('border-b border-zinc-800 bg-muted align-top')}>
                         <td className='px-2 py-1'>{idx + 1}.</td>
                         <td colSpan={7} className='px-2 py-1 pr-8'>
                           <div className='flex items-center gap-2'>
@@ -434,9 +454,9 @@ const ServiceTypeSection = ({
                   return (
                     <tr
                       key={idx}
-                      className={cn('border-b border-zinc-800', line.type === 'deduction' && 'text-red-500')}
+                      className={cn('border-b border-zinc-800 align-top', line.type === 'deduction' && 'text-red-500')}
                     >
-                      <td className='px-2 py-1'>{idx + 1}.</td>
+                      <td className='px-2 py-3'>{idx + 1}.</td>
                       <td className='px-2 py-1'>
                         <div className='flex items-center gap-2'>
                           {line.type === 'product' && line.product_id && <Boxes className='h-4 w-4 text-zinc-400' />}
@@ -489,18 +509,50 @@ const ServiceTypeSection = ({
                       </td>
                       <td className='px-2 py-1'>
                         {line.type !== 'deduction' && (
-                          <Input
-                            type='number'
-                            value={getEditValue(idx, 'qty', String(line.qty ?? 1))}
-                            onChange={e => setEditValue(idx, 'qty', e.target.value)}
-                            onBlur={e => {
-                              updateLine(idx, 'qty', parseFloat(e.target.value) || 0)
-                              clearEditValue(idx, 'qty')
-                            }}
-                            className='w-28 bg-yellow-200 text-black'
-                            min={0}
-                            disabled={mode === 'view'}
-                          />
+                          <div className='flex flex-col gap-1'>
+                            <Input
+                              type='number'
+                              value={getEditValue(idx, 'qty', String(line.qty ?? 1))}
+                              onChange={e => setEditValue(idx, 'qty', e.target.value)}
+                              onBlur={e => {
+                                updateLine(idx, 'qty', parseFloat(e.target.value) || 0)
+                                clearEditValue(idx, 'qty')
+                              }}
+                              className='w-28 bg-yellow-200 text-black'
+                              min={0}
+                              disabled={mode === 'view'}
+                            />
+                            {(line.type === 'product' || line.type === 'labor') &&
+                              (line.product_id || line.labor_cost_id ? (
+                                <span
+                                  className='text-xs text-zinc-400 px-1 truncate w-28'
+                                  title={line.unit_name || '—'}
+                                >
+                                  {line.unit_name || '—'}
+                                </span>
+                              ) : (
+                                <Select
+                                  value={line.unit_id ?? ''}
+                                  onValueChange={val => {
+                                    const unit = units.find(u => u.id === val)
+
+                                    updateLineFields(idx, { unit_id: val, unit_name: unit?.name ?? '' })
+                                  }}
+                                  disabled={mode === 'view'}
+                                >
+                                  <SelectTrigger className='w-28 h-7 text-xs'>
+                                    <SelectValue placeholder='Unit' />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {units.map(unit => (
+                                      <SelectItem key={unit.id} value={unit.id}>
+                                        {unit.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ))}
+                          </div>
                         )}
                       </td>
                       <td className='px-2 py-1'>
@@ -509,7 +561,7 @@ const ServiceTypeSection = ({
                         )}
                       </td>
                       {!hideMargin && (
-                        <td className='px-2 py-1 flex items-center gap-1'>
+                        <td className='px-2 py-1 flex items-start gap-1'>
                           {line.type !== 'deduction' && (
                             <>
                               <Input
@@ -553,7 +605,7 @@ const ServiceTypeSection = ({
                           <Input value={totalPrice.toFixed(2)} readOnly className='w-28' />
                         )}
                       </td>
-                      <td className='px-2 py-1 text-center'>
+                      <td className='px-2 py-3.5 text-center'>
                         {line.type !== 'deduction' && (
                           <Checkbox
                             disabled={mode === 'view'}
