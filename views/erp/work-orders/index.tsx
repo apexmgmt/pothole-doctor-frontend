@@ -358,7 +358,7 @@ const WorkOrders: React.FC<{
                     className='w-full'
                     variant='ghost'
                     onClick={() =>
-                      window.open(`/erp/estimates/${row.estimate_id}?p_id=${row.proposal_id}&p_mode=view`, '_blank')
+                      window.open(`/erp/estimates/${row.estimate_id}/proposals/${row.proposal_id}?mode=view`, '_blank')
                     }
                   >
                     View Original Proposal
