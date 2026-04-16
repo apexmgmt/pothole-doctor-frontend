@@ -369,7 +369,7 @@ const WorkOrders: React.FC<{
                     key='view-invoice'
                     className='w-full'
                     variant='ghost'
-                    onClick={() => window.open(`/erp/invoices?inv_id=${row.invoice_id}`, '_blank')}
+                    onClick={() => window.open(`/erp/invoices/${row.invoice_id}`, '_blank')}
                   >
                     View Invoice
                   </Button>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Invoice } from '@/types'
-import { ChevronDownIcon, Eye, Mail } from 'lucide-react'
+import { Check, ChevronDownIcon, Eye, Mail } from 'lucide-react'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 
 const InvoiceActionsButton = ({
@@ -42,6 +42,7 @@ const InvoiceActionsButton = ({
           </DropdownMenuItem>
           {invoice.status?.toLowerCase() === 'new' && (
             <DropdownMenuItem onClick={onMarkAsSigned} disabled={isMarkingAsSigned}>
+              <Check className='mr-2 h-4 w-4' />
               {isMarkingAsSigned ? 'Marking...' : 'Mark Invoice as Signed'}
             </DropdownMenuItem>
           )}
