@@ -540,7 +540,7 @@ const ServiceTypeSection = ({
                                   }}
                                   disabled={mode === 'view'}
                                 >
-                                  <SelectTrigger className='w-28 h-7 text-xs'>
+                                  <SelectTrigger className='w-28 h-6! text-xs'>
                                     <SelectValue placeholder='Unit' />
                                   </SelectTrigger>
                                   <SelectContent>
