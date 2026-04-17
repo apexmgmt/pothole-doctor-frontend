@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useState, useEffect, useRef, useCallback } from 'react'
-import CreateOrEditProposalModal from './CreateOrEditProposalModal'
 import ProposalAddTaskModal from './ProposalAddTaskModal'
 import ProposalTasksModal from './ProposalTasksModal'
 import ProposalNotesModal from './ProposalNotesModal'
@@ -16,11 +15,9 @@ import { SpinnerCustom } from '@/components/ui/spinner'
 import { hasPermission } from '@/utils/role-permission'
 
 import { Settings } from 'lucide-react'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
-
-type ProposalModalModeType = 'create' | 'edit' | 'view'
 
 const ProposalSection = ({
   estimateId,
@@ -40,11 +37,7 @@ const ProposalSection = ({
   vendors: Vendor[]
 }) => {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
-  const hasAutoOpenedRef = useRef(false)
 
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [taskModalProposalId, setTaskModalProposalId] = useState<string | null>(null)
   const [taskModalClientId, setTaskModalClientId] = useState<string | null>(null)
@@ -67,9 +60,6 @@ const ProposalSection = ({
   })
 
   const [proposals, setProposals] = useState<Proposal[]>([])
-  const [proposalModalMode, setProposalModalMode] = useState<ProposalModalModeType>('create')
-  const [selectedProposalId, setSelectedProposalId] = useState<string | null>(null)
-  const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
@@ -89,21 +79,6 @@ const ProposalSection = ({
     hasPermission('Update Proposal').then(result => setCanEditProposal(result))
     hasPermission('Delete Proposal').then(result => setCanDeleteProposal(result))
   }, [])
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false)
-    setSelectedProposalId(null)
-    setSelectedProposal(null)
-
-    // Remove modal params from URL
-    const params = new URLSearchParams(searchParams.toString())
-
-    params.delete('p_mode')
-    params.delete('p_id')
-    const qs = params.toString()
-
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
-  }
 
   // Fetch data from API
   const fetchData = useCallback(
@@ -165,68 +140,6 @@ const ProposalSection = ({
     return () => observer.disconnect()
   }, [isLoading, hasMore, currentPage, fetchData])
 
-  // open proposal modal and sync state to URL
-  const handleOpenProposalModal = (mode: ProposalModalModeType, proposal?: Proposal) => {
-    // Mark as opened so the auto-open effect never re-triggers on this lifecycle
-    hasAutoOpenedRef.current = true
-    setProposalModalMode(mode)
-
-    if (proposal) {
-      setSelectedProposalId(proposal.id)
-      setSelectedProposal(proposal)
-    } else {
-      setSelectedProposalId(null)
-      setSelectedProposal(null)
-    }
-
-    // Persist modal state in URL so refresh restores it
-    const params = new URLSearchParams(searchParams.toString())
-
-    params.set('p_mode', mode)
-
-    if (proposal) {
-      params.set('p_id', proposal.id)
-    } else {
-      params.delete('p_id')
-    }
-
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
-    setIsModalOpen(true)
-  }
-
-  // Auto-open modal from URL params after proposals are first loaded
-  useEffect(() => {
-    if (isLoading || hasAutoOpenedRef.current) return
-
-    const modalMode = searchParams.get('p_mode') as ProposalModalModeType | null
-    const modalProposalId = searchParams.get('p_id')
-
-    if (!modalMode) return
-
-    hasAutoOpenedRef.current = true
-
-    if (modalMode === 'create') {
-      handleOpenProposalModal('create')
-
-      return
-    }
-
-    if (modalProposalId) {
-      const found = proposals.find(p => p.id === modalProposalId)
-
-      if (found) {
-        handleOpenProposalModal(modalMode, found)
-      } else {
-        // Not in current page — fetch individually
-        ProposalService.show(modalProposalId)
-          .then(res => {
-            if (res.data) handleOpenProposalModal(modalMode, res.data)
-          })
-          .catch(() => {})
-      }
-    }
-  }, [isLoading, proposals])
-
   // Add this function to map status to badge variant
   const getStatusBadgeVariant = (
     status: string
@@ -280,7 +193,7 @@ const ProposalSection = ({
           </CardTitle>
           {canCreateProposal && (
             <Button
-              onClick={() => handleOpenProposalModal('create')}
+              onClick={() => router.push(`/erp/estimates/${estimateId}/proposals/create`)}
               size='sm'
               variant='outline'
               className='text-xs px-3 py-1 bg-white text-black'
@@ -352,7 +265,11 @@ const ProposalSection = ({
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align='end'>
                                 {canViewProposal && (
-                                  <DropdownMenuItem onClick={() => handleOpenProposalModal('view', proposal)}>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      router.push(`/erp/estimates/${estimateId}/proposals/${proposal.id}?mode=view`)
+                                    }
+                                  >
                                     View Proposal
                                   </DropdownMenuItem>
                                 )}
@@ -360,7 +277,11 @@ const ProposalSection = ({
                                   proposal.status !== 'converted to invoice' &&
                                   proposal.status !== 'void proposal' &&
                                   proposal.status !== 'dead proposal' && (
-                                    <DropdownMenuItem onClick={() => handleOpenProposalModal('edit', proposal)}>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        router.push(`/erp/estimates/${estimateId}/proposals/${proposal.id}`)
+                                      }
+                                    >
                                       Edit Proposal
                                     </DropdownMenuItem>
                                   )}
@@ -437,22 +358,6 @@ const ProposalSection = ({
           </ScrollArea>
         </CardContent>
       </Card>
-
-      <CreateOrEditProposalModal
-        open={isModalOpen}
-        onOpenChange={handleCloseModal}
-        mode={proposalModalMode}
-        proposalId={selectedProposalId}
-        proposalDetails={selectedProposal}
-        estimateId={estimateId}
-        estimateDetails={estimateDetails}
-        serviceTypes={serviceTypes}
-        units={units}
-        productCategories={productCategories}
-        uomUnits={uomUnits}
-        vendors={vendors}
-        onSuccess={refreshProposals}
-      />
 
       {taskModalProposalId && (
         <ProposalAddTaskModal

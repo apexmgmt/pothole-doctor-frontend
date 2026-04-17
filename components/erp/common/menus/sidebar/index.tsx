@@ -123,6 +123,15 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       permissions: ['Manage Work Order']
     },
     {
+      id: 'material-jobs',
+      label: 'Material Jobs',
+      icon: <EstimateIcon className='h-4 w-4' />,
+      href: '/erp/material-jobs',
+      hasSubItems: false,
+      exactMatch: false,
+      permissions: ['Manage Work Order']
+    },
+    {
       id: 'inventory-products',
       label: 'Inventory Products',
       icon: <Boxes className='h-4 w-4' />,
@@ -157,6 +166,15 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           permissions: ['Manage Product']
         },
         {
+          id: 'inventory-jobs',
+          label: 'Inventory Jobs',
+          href: '/erp/products/inventory-jobs',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Work Order']
+        },
+        {
           id: 'product-categories',
           label: 'Categories',
           href: '/erp/products/categories',
@@ -164,10 +182,10 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           hasSubItems: false,
           exactMatch: true,
           permissions: ['Manage Category']
-        }
+        },
       ],
       exactMatch: false,
-      permissions: ['Manage Category', 'Manage Product']
+      permissions: ['Manage Category', 'Manage Product', 'Manage Work Order']
     },
     {
       id: 'non-inventory-products',

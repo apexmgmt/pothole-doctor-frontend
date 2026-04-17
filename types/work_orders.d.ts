@@ -103,6 +103,10 @@ export interface ServicePayload {
 export interface WorkOrderServiceItemPayload {
   item_id?: string | null
   product_id?: string
+  vendor_id?: string
+  sku?: string
+  color?: string
+  style?: string
   product?: Product
   labor_cost_id?: string
   labor_cost?: LaborCost
@@ -115,6 +119,7 @@ export interface WorkOrderServiceItemPayload {
   total_cost?: number
   margin: number
   unit_price: number
+  unit_id?: string
   discount: number // percentage or fixed amount
   discount_type?: 'percentage' | 'fixed'
   freight_charge?: number
