@@ -57,7 +57,7 @@ interface FormValues {
   margin: string
   freight_amount: number
   minimum_qty: number
-  round_up_quantity: number
+  round_up_quantity: boolean
   type: string
   is_notify: number
   visible: number
@@ -113,7 +113,7 @@ const CreateEditViewProductModal = ({
       margin: '0',
       freight_amount: 0,
       minimum_qty: 0,
-      round_up_quantity: 0,
+      round_up_quantity: false,
       type: 'inventory',
       is_notify: 0,
       visible: 1,
@@ -170,7 +170,7 @@ const CreateEditViewProductModal = ({
         margin: productDetails.margin?.toString() ?? '0',
         freight_amount: productDetails.freight_amount ?? 0,
         minimum_qty: productDetails.minimum_qty ?? 0,
-        round_up_quantity: productDetails.round_up_quantity ?? 0,
+        round_up_quantity: !!productDetails.round_up_quantity,
         type: productDetails.type ?? 'inventory',
         is_notify: productDetails.is_notify ?? 0,
         visible: productDetails.visible ?? 1,
@@ -213,8 +213,7 @@ const CreateEditViewProductModal = ({
         margin: '0',
         freight_amount: 0,
         minimum_qty: 0,
-        round_up_quantity: 0,
-        type: 'inventory',
+        round_up_quantity: false,
         is_notify: 0,
         visible: 1,
         is_freight_percentage: 0,
@@ -257,7 +256,7 @@ const CreateEditViewProductModal = ({
       margin: values.margin,
       freight_amount: values.freight_amount,
       minimum_qty: values.minimum_qty,
-      round_up_quantity: values.round_up_quantity,
+      round_up_quantity: values.round_up_quantity ? 1 : 0,
       type: values.type,
       is_notify: values.is_notify,
       visible: values.visible,

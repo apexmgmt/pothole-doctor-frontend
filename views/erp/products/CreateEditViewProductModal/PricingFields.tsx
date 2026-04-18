@@ -7,6 +7,8 @@ import { UseFormReturn } from 'react-hook-form'
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { Unit } from '@/types'
 import { getMargin, getSellPrice } from '@/utils/business-calculation'
 
@@ -260,11 +262,17 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
         <FormField
           control={form.control}
           name='minimum_qty'
+          rules={{
+            required: 'Minimum quantity is required',
+            min: { value: 1, message: 'Must be greater than 0' }
+          }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Minimum Quantity</FormLabel>
+              <FormLabel>
+                Minimum Quantity <span className='text-red-500'>*</span>
+              </FormLabel>
               <FormControl>
-                <Input type='number' step='0.01' placeholder='Enter minimum quantity' {...field} disabled={disabled} />
+                <Input type='number' step='1' min={1} placeholder='Enter minimum quantity' {...field} disabled={disabled} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -276,11 +284,18 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
           control={form.control}
           name='round_up_quantity'
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Round up Quantity</FormLabel>
+            <FormItem className='flex flex-row items-center gap-2 mt-6'>
               <FormControl>
-                <Input type='number' step='0.01' placeholder='Enter round up quantity' {...field} disabled={disabled} />
+                <Checkbox
+                  checked={!!field.value}
+                  onCheckedChange={checked => field.onChange(!!checked)}
+                  id='round_up_quantity'
+                  disabled={disabled}
+                />
               </FormControl>
+              <Label htmlFor='round_up_quantity' className='cursor-pointer'>
+                Round up Quantity
+              </Label>
               <FormMessage />
             </FormItem>
           )}
