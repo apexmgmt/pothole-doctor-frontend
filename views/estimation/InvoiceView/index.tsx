@@ -72,7 +72,9 @@ const InvoiceView = ({
   const items = useMemo(() => {
     if (reversedHistories.length === 0) return [invoice]
 
-    return reversedHistories.map(h => h.invoice_data)
+    // Use the live invoice as the last (current) entry so all fields are present.
+    // History snapshots (invoice_data) may be partial; the live invoice prop is authoritative.
+    return [...reversedHistories.map(h => h.invoice_data), invoice]
   }, [reversedHistories, invoice])
 
   // Default to latest version (last index); restore from URL param when available
