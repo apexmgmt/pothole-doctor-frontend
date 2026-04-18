@@ -29,7 +29,7 @@ export interface Product extends Model {
   margin: number
   freight_amount?: number
   minimum_qty: number
-  round_up_quantity: number
+  round_up_quantity: boolean
   type: string | 'inventory' | 'non_inventory'
   is_notify: number | 0 | 1
   visible: number | 0 | 1
@@ -99,7 +99,7 @@ export interface ProductPayload {
   product_cost: number
   margin: string
   minimum_qty: number
-  round_up_quantity: number
+  round_up_quantity: number | 0 | 1
   type: string | 'inventory' | 'non_inventory'
   is_notify: number | 0 | 1
   visible: number | 0 | 1

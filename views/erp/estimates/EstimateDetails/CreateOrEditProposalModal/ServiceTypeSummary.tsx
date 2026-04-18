@@ -13,6 +13,7 @@ interface ServiceTypeSummaryProps {
   laborSales: number
   profitAmount: number
   profitPercent: number
+  simpleSummary?: boolean
 }
 
 const ServiceTypeSummary = ({
@@ -27,8 +28,37 @@ const ServiceTypeSummary = ({
   totalSales,
   laborSales,
   profitAmount,
-  profitPercent
-}: ServiceTypeSummaryProps) => (
+  profitPercent,
+  simpleSummary = false
+}: ServiceTypeSummaryProps) => {
+  if (simpleSummary) {
+    return (
+      <div className='grid grid-cols-2 gap-4 text-sm bg-zinc-800 p-3 rounded-md'>
+        <div className='space-y-1'>
+          <div className='flex justify-between'>
+            <span className='text-zinc-400'>Material Cost:</span>
+            <span className='text-white font-medium'>${materialCost.toFixed(2)}</span>
+          </div>
+          <div className='flex justify-between'>
+            <span className='text-zinc-400'>Labor Cost:</span>
+            <span className='text-white font-medium'>${laborCost.toFixed(2)}</span>
+          </div>
+        </div>
+        <div className='space-y-1'>
+          <div className='flex justify-between'>
+            <span className='text-zinc-400'>Freight:</span>
+            <span className='text-white font-medium'>${Number(totalFreight).toFixed(2)}</span>
+          </div>
+          <div className='flex justify-between'>
+            <span className='text-zinc-400'>Sales Tax:</span>
+            <span className='text-white font-medium'>${salesTax.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
   <div className='grid grid-cols-3 gap-4 text-sm bg-zinc-800 p-3 rounded-md'>
     <div className='space-y-1'>
       <div className='flex justify-between'>
@@ -90,6 +120,7 @@ const ServiceTypeSummary = ({
       </div>
     </div>
   </div>
-)
+  )
+}
 
 export default ServiceTypeSummary
