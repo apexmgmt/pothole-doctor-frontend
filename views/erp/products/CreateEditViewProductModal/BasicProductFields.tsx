@@ -91,13 +91,9 @@ export function BasicProductFields({
       <FormField
         control={form.control}
         name='service_type_id'
-        rules={{ 
-          required: 'Service type is required',
-          validate: (value) => (value && value.length > 0) || 'At least one service type must be selected'
-         }}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Associated Services <span className='text-red-500'>*</span></FormLabel>
+            <FormLabel>Associated Services</FormLabel>
             <FormControl>
               <MultiSelect
                 options={serviceTypes.map(st => ({
@@ -141,10 +137,12 @@ export function BasicProductFields({
       <FormField
         control={form.control}
         name='sku'
-        rules={{required: 'SKU is required'}}
+        rules={{ required: 'SKU is required' }}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>SKU <span className='text-red-500'>*</span></FormLabel>
+            <FormLabel>
+              SKU <span className='text-red-500'>*</span>
+            </FormLabel>
             <FormControl>
               <Input placeholder='Enter SKU' {...field} disabled={disabled} />
             </FormControl>

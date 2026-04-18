@@ -98,6 +98,20 @@ const ServiceTypeSection = ({
     }
   }
 
+  const clampProductQty = (qty: number, line: ProposalServiceItemPayload): number => {
+    if (!line.product_id || !line.product) return qty
+
+    const minQty = Number(line.product.minimum_qty ?? 0)
+    const roundUp = !!line.product.round_up_quantity
+    let adjusted = qty
+
+    if (roundUp) adjusted = Math.ceil(adjusted)
+
+    if (minQty > 0) adjusted = Math.ceil(adjusted / minQty) * minQty
+
+    return adjusted
+  }
+
   // Calculate summary values from lines
   // Calculate material cost for product lines
   const materialCost = lines
@@ -191,7 +205,7 @@ const ServiceTypeSection = ({
         type: 'labor',
         unit_cost: lc.cost,
         qty: 1,
-        margin: lc.margin,
+        margin: hideMargin ? 0 : lc.margin,
         unit_id: lc.unit_id ?? '',
         unit_name: lc?.unit?.name || '',
         unit_price: 0,
@@ -223,7 +237,7 @@ const ServiceTypeSection = ({
         unit_id: product.selling_unit_id ?? '',
         unit_name: product.selling_unit?.name ?? product.selling_uom?.name ?? '',
         vendor_id: product.vendor_id ?? '',
-        margin: product.margin,
+        margin: hideMargin ? 0 : product.margin,
         unit_price: 0,
         discount: 0,
         discount_type: 'percentage',
@@ -390,6 +404,7 @@ const ServiceTypeSection = ({
             laborSales={laborSales}
             profitAmount={profitAmount}
             profitPercent={profitPercent}
+            simpleSummary={hideMargin}
           />
 
           {/* Line Items Table */}
@@ -546,7 +561,10 @@ const ServiceTypeSection = ({
                                 value={getEditValue(idx, 'qty', String(line.qty ?? 1))}
                                 onChange={e => setEditValue(idx, 'qty', e.target.value)}
                                 onBlur={e => {
-                                  updateLine(idx, 'qty', parseFloat(e.target.value) || 0)
+                                  const raw = parseFloat(e.target.value) || 0
+                                  const clamped = clampProductQty(raw, line)
+
+                                  updateLine(idx, 'qty', clamped)
                                   clearEditValue(idx, 'qty')
                                 }}
                                 className='w-28 bg-yellow-200 text-black'
