@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { UserIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ChevronLeftIcon, UserIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
-import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
@@ -33,10 +33,8 @@ import DiscountDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrE
 import ProfitDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ProfitDetailsCard'
 import { getDiscountedUnitPrice } from '@/utils/business-calculation'
 
-const AddInvoiceServicesModal = ({
-  open,
-  onOpenChange,
-  invoice,
+const AddInvoiceServicesView = ({
+  invoice: initialInvoice,
   serviceTypes = [],
   units = [],
   productCategories = [],
@@ -46,11 +44,8 @@ const AddInvoiceServicesModal = ({
   clients = [],
   staffs = [],
   paymentTerms = [],
-  businessLocations = [],
-  onSuccess
+  businessLocations = []
 }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
   invoice: Invoice
   serviceTypes: ServiceType[]
   units: Unit[]
@@ -62,22 +57,16 @@ const AddInvoiceServicesModal = ({
   staffs?: Staff[]
   paymentTerms?: PaymentTerm[]
   businessLocations?: BusinessLocation[]
-  onSuccess?: () => void
 }) => {
+  const router = useRouter()
+
   const [isLoading, setIsLoading] = useState(false)
   const [isMarkingAsSigned, setIsMarkingAsSigned] = useState(false)
   const [isSendingEmail, setIsSendingEmail] = useState(false)
   const [isInvoiceDetailsOpen, setIsInvoiceDetailsOpen] = useState(false)
-  const [currentInvoice, setCurrentInvoice] = useState<Invoice>(invoice)
-  const [activeTab, setActiveTab] = useState<'services' | 'documents'>('services')
-
-  // Keep currentInvoice in sync if the prop changes (e.g. after an edit)
-  useEffect(() => {
-    setCurrentInvoice(invoice)
-  }, [invoice])
+  const [currentInvoice, setCurrentInvoice] = useState<Invoice>(initialInvoice)
 
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
-
   const [selectedServiceType, setSelectedServiceType] = useState<{ id: string; name: string }[]>([])
 
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
@@ -88,7 +77,7 @@ const AddInvoiceServicesModal = ({
   const [discountValue, setDiscountValue] = useState(0)
   const customMessageRef = useRef<HTMLTextAreaElement>(null)
 
-  const taxRate = invoice?.tax_rate ?? 0
+  const taxRate = currentInvoice?.tax_rate ?? 0
 
   const allLines = serviceTypeLineItems.flatMap(st => st.lines)
 
@@ -122,12 +111,54 @@ const AddInvoiceServicesModal = ({
 
   const totalDiscount = allLines.reduce((sum, line) => {
     if (line.type === 'comment' || line.type === 'deduction') return sum
-
     const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
     const discountedUnitPrice = getDiscountedUnitPrice(line)
 
     return sum + (baseUnitPrice - discountedUnitPrice) * line.qty
   }, 0)
+
+  // Populate from existing invoice services on mount
+  useEffect(() => {
+    if (currentInvoice?.services && currentInvoice.services.length > 0) {
+      setSelectedServiceType(
+        currentInvoice.services.map(service => ({
+          id: service.service_type_id,
+          name: service.service_type?.name || ''
+        }))
+      )
+      setServiceTypeLineItems(
+        currentInvoice.services.map(service => ({
+          serviceTypeName: service.service_type?.name || '',
+          serviceTypeId: service.service_type_id,
+          groupId: service.id,
+          lines: (service.items || []).map(item => ({
+            item_id: item.id,
+            product_id: item.product_id,
+            labor_cost_id: item.labor_cost_id,
+            name: item.name,
+            description: item.description,
+            type: item.type,
+            unit_cost: item.unit_cost,
+            qty: item.qty,
+            unit_name: item.unit_name || '',
+            unit_id: item.unit_id ?? '',
+            total_cost: item.total_cost,
+            margin: item.margin,
+            unit_price: item.unit_price,
+            discount: item.discount,
+            discount_type: item.discount_type,
+            freight_charge: item.freight_charge,
+            is_sale: item.is_sale,
+            tax_type: item.tax_type,
+            tax: item.tax,
+            tax_amount: item.tax_amount,
+            total_price: item.total_price,
+            note: item.note || ''
+          }))
+        }))
+      )
+    }
+  }, [])
 
   const handleAddServiceType = (serviceTypeId: string) => {
     const found = serviceTypes.find(st => st.id === serviceTypeId)
@@ -149,7 +180,7 @@ const AddInvoiceServicesModal = ({
   }
 
   const buildPayload = (): InvoiceServicePayload => ({
-    estimate_id: invoice.id,
+    estimate_id: currentInvoice.id,
     message: customMessageRef.current?.value || '',
     discount_type: discountType,
     discount: discountValue,
@@ -169,6 +200,7 @@ const AddInvoiceServicesModal = ({
           unit_cost: line.unit_cost,
           qty: line.qty,
           unit_name: line.unit_name,
+          unit_id: line.unit_id,
           total_cost: line.total_cost,
           margin: line.margin,
           unit_price: line.unit_price,
@@ -206,13 +238,11 @@ const AddInvoiceServicesModal = ({
         return
       }
 
-      // Proportional fixed discount: (line_base_total / grand_base_total) * total_discount
       setServiceTypeLineItems(prev =>
         prev.map(st => ({
           ...st,
           lines: st.lines.map(line => {
             if (line.type !== 'product' && line.type !== 'labor') return line
-
             const baseUnitPrice = line.margin >= 100 ? 0 : line.unit_cost / (1 - line.margin / 100)
             const lineBaseTotal = baseUnitPrice * line.qty
             const proportionalDiscount = grandBaseTotal > 0 ? (lineBaseTotal / grandBaseTotal) * value : 0
@@ -222,7 +252,6 @@ const AddInvoiceServicesModal = ({
         }))
       )
     } else {
-      // Percentage: same rate on every applicable line
       setServiceTypeLineItems(prev =>
         prev.map(st => ({
           ...st,
@@ -240,14 +269,6 @@ const AddInvoiceServicesModal = ({
     toast.success(`Discount applied: ${type === 'percentage' ? `${value}%` : `$${value.toFixed(2)}`}`)
   }
 
-  const resetForm = () => {
-    setSelectedServiceType([])
-    setServiceTypeLineItems([])
-    setServiceSelectOpen(false)
-    setDiscountType('percentage')
-    setDiscountValue(0)
-  }
-
   const onSubmit = async () => {
     if (selectedServiceType.length === 0) {
       toast.error('Please add at least one service type')
@@ -258,29 +279,21 @@ const AddInvoiceServicesModal = ({
     setIsLoading(true)
 
     try {
-      const hasExistingServices = invoice?.services && invoice.services.length > 0
+      const hasExistingServices = currentInvoice?.services && currentInvoice.services.length > 0
 
       if (hasExistingServices) {
-        await InvoiceService.updateServices(invoice.id, buildPayload())
+        await InvoiceService.updateServices(currentInvoice.id, buildPayload())
       } else {
-        await InvoiceService.storeServices(invoice.id, buildPayload())
+        await InvoiceService.storeServices(currentInvoice.id, buildPayload())
       }
 
       toast.success('Invoice services saved successfully')
-      resetForm()
-      onOpenChange(false)
-      onSuccess?.()
+      router.push('/erp/invoices')
     } catch (error: any) {
       toast.error(error?.message || 'Failed to save invoice services')
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const onCancel = () => {
-    resetForm()
-    onOpenChange(false)
-    onSuccess?.()
   }
 
   const handleMarkAsSigned = async () => {
@@ -302,21 +315,18 @@ const AddInvoiceServicesModal = ({
     setIsSendingEmail(true)
 
     try {
-      // Save services first (same logic as onSubmit) if there are selected service types
       if (selectedServiceType.length > 0) {
-        const hasExistingServices = invoice?.services && invoice.services.length > 0
+        const hasExistingServices = currentInvoice?.services && currentInvoice.services.length > 0
 
         if (hasExistingServices) {
-          await InvoiceService.updateServices(invoice.id, buildPayload())
+          await InvoiceService.updateServices(currentInvoice.id, buildPayload())
         } else {
-          await InvoiceService.storeServices(invoice.id, buildPayload())
+          await InvoiceService.storeServices(currentInvoice.id, buildPayload())
         }
       }
 
-      // Then send the email
       await InvoiceService.sendEmail(currentInvoice.id)
       toast.success('Invoice email sent to customer successfully')
-      onSuccess?.()
     } catch (error: any) {
       toast.error(error?.message || 'Failed to send invoice email')
     } finally {
@@ -324,181 +334,142 @@ const AddInvoiceServicesModal = ({
     }
   }
 
-  // Populate from existing invoice services when editing
-  useEffect(() => {
-    if (open && invoice?.services && invoice.services.length > 0) {
-      const newSelectedServiceType = invoice.services.map(service => ({
-        id: service.service_type_id,
-        name: service.service_type?.name || ''
-      }))
+  const clientName = [currentInvoice?.client?.first_name, currentInvoice?.client?.last_name].filter(Boolean).join(' ')
 
-      setSelectedServiceType(newSelectedServiceType)
-
-      const newServiceTypeLineItems = invoice.services.map(service => ({
-        serviceTypeName: service.service_type?.name || '',
-        serviceTypeId: service.service_type_id,
-        groupId: service.id,
-        lines: (service.items || []).map(item => ({
-          item_id: item.id,
-          product_id: item.product_id,
-          labor_cost_id: item.labor_cost_id,
-          name: item.name,
-          description: item.description,
-          type: item.type,
-          unit_cost: item.unit_cost,
-          qty: item.qty,
-          unit_name: item.unit_name || '',
-          total_cost: item.total_cost,
-          margin: item.margin,
-          unit_price: item.unit_price,
-          discount: item.discount,
-          discount_type: item.discount_type,
-          freight_charge: item.freight_charge,
-          is_sale: item.is_sale,
-          tax_type: item.tax_type,
-          tax: item.tax,
-          tax_amount: item.tax_amount,
-          total_price: item.total_price,
-          note: item.note || ''
-        }))
-      }))
-
-      setServiceTypeLineItems(newServiceTypeLineItems)
-    }
-  }, [open, invoice])
-
-  const clientName = [invoice?.client?.first_name, invoice?.client?.last_name].filter(Boolean).join(' ')
-
-  const isEditMode = !!(invoice?.services && invoice.services.length > 0)
+  const isEditMode = !!(currentInvoice?.services && currentInvoice.services.length > 0)
 
   return (
-    <CommonDialog
-      isLoading={isLoading}
-      loadingMessage='Saving invoice services...'
-      open={open}
-      onOpenChange={onCancel}
-      title={isEditMode ? 'Edit Invoice Services' : 'Add Invoice Services'}
-      description={isEditMode ? 'Update service line items for this invoice' : 'Add service line items to this invoice'}
-      maxWidth='full'
-      disableClose={isLoading}
-      actions={
-        <div className='flex gap-3'>
-          <Button type='button' variant='outline' onClick={onCancel} disabled={isLoading} className='flex-1'>
+    <div className='space-y-4'>
+      {/* Page Header */}
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center gap-3'>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            onClick={() => router.push('/erp/invoices')}
+            disabled={isLoading}
+          >
+            <ChevronLeftIcon className='h-4 w-4 mr-1' />
+            Back
+          </Button>
+          <div>
+            <h1 className='text-xl font-bold'>
+              Invoice #{currentInvoice?.invoice_number?.toString().padStart(6, '0') || 'N/A'}
+            </h1>
+            <p className='text-sm text-zinc-400'>{isEditMode ? 'Edit Invoice Services' : 'Add Invoice Services'}</p>
+          </div>
+        </div>
+        <div className='flex items-center gap-2'>
+          <p className='text-sm font-semibold text-zinc-200'>
+            <UserIcon className='h-4 w-4 inline-block mr-2' />
+            {clientName || '—'}
+          </p>
+        </div>
+      </div>
+
+      {/* Action Bar */}
+      <div className='flex justify-between items-center'>
+        <div className='flex gap-2'>
+          <InvoiceActionsButton
+            invoice={currentInvoice}
+            isMarkingAsSigned={isMarkingAsSigned}
+            isSendingEmail={isSendingEmail}
+            onViewEditDetails={() => setIsInvoiceDetailsOpen(true)}
+            onMarkAsSigned={handleMarkAsSigned}
+            onConfirmedEmailSend={handleEmailWithSave}
+          />
+          <AddServiceButton
+            serviceTypes={serviceTypes}
+            selectedServiceTypeIds={selectedServiceType.map(st => st.id)}
+            open={serviceSelectOpen}
+            onOpenChange={setServiceSelectOpen}
+            onSelect={handleAddServiceType}
+          />
+        </div>
+        <div className='flex gap-2'>
+          <Button type='button' variant='outline' onClick={() => router.push('/erp/invoices')} disabled={isLoading}>
             Cancel
           </Button>
-          {activeTab === 'services' && (
-            <Button type='button' onClick={onSubmit} disabled={isLoading} className='flex-1'>
-              {isLoading ? 'Saving...' : isEditMode ? 'Update Services' : 'Save Services'}
-            </Button>
-          )}
+          <Button type='button' onClick={onSubmit} disabled={isLoading}>
+            {isLoading ? 'Saving...' : isEditMode ? 'Update Services' : 'Save Services'}
+          </Button>
         </div>
-      }
-    >
-      <>
-        {/* Header */}
-        <div className='flex justify-between mb-4'>
-          <div className='flex gap-4 items-center'>
-            <p className='text-lg font-bold'>
-              Invoice #{invoice?.invoice_number?.toString().padStart(6, '0') || 'N/A'}
-            </p>
-            <p className='text-sm font-semibold text-zinc-200'>
-              <span>
-                <UserIcon className='h-4 w-4 inline-block mr-2' />
-              </span>
-              {clientName || '—'}
-            </p>
-          </div>
-          <div className='flex gap-2'>
-            <InvoiceActionsButton
-              invoice={currentInvoice}
-              isMarkingAsSigned={isMarkingAsSigned}
-              isSendingEmail={isSendingEmail}
-              onViewEditDetails={() => setIsInvoiceDetailsOpen(true)}
-              onMarkAsSigned={handleMarkAsSigned}
-              onConfirmedEmailSend={handleEmailWithSave}
-            />
-            <AddServiceButton
-              serviceTypes={serviceTypes}
-              selectedServiceTypeIds={selectedServiceType.map(st => st.id)}
-              open={serviceSelectOpen}
-              onOpenChange={setServiceSelectOpen}
-              onSelect={handleAddServiceType}
-            />
-          </div>
-        </div>
+      </div>
 
-        {/* Detail Cards */}
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4'>
-          <ClientDetailsCard estimateDetails={invoice as any} />
-          <DiscountDetailsCard
+      {/* Detail Cards */}
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+        <ClientDetailsCard estimateDetails={currentInvoice as any} />
+        <DiscountDetailsCard
+          mode='create'
+          estimateDetails={currentInvoice as any}
+          discountType={discountType}
+          discountValue={discountValue}
+          totalDiscount={totalDiscount}
+          onApplyDiscount={handleApplyDiscount}
+        />
+        <ProfitDetailsCard profitPercent={profitPercent} profitAmount={profitAmount} totalProfit={profitAmount} />
+        <TotalCalculationCard subtotal={totalSales} salesTax={salesTax} total={total} />
+      </div>
+
+      {/* Service Type Sections */}
+      <div className='space-y-4'>
+        {selectedServiceType.length === 0 && (
+          <div className='flex items-center justify-center h-32 bg-zinc-800 rounded-md border border-zinc-700 border-dashed'>
+            <p className='text-zinc-400 text-sm'>
+              No services added yet. Click <strong>Add Service</strong> to get started.
+            </p>
+          </div>
+        )}
+        {selectedServiceType.map((item, idx) => (
+          <ServiceTypeSection
+            key={idx}
             mode='create'
-            estimateDetails={invoice as any}
-            discountType={discountType}
-            discountValue={discountValue}
-            totalDiscount={totalDiscount}
-            onApplyDiscount={handleApplyDiscount}
+            serviceTypeName={item.name}
+            serviceTypeId={item.id}
+            onRemove={() => handleRemoveServiceType(idx)}
+            serviceTypes={serviceTypes}
+            units={units}
+            lines={serviceTypeLineItems[idx]?.lines || []}
+            onLinesChange={lines => {
+              setServiceTypeLineItems(prev => {
+                const copy = [...prev]
+
+                copy[idx] = {
+                  serviceTypeName: item.name,
+                  serviceTypeId: item.id,
+                  groupId: serviceTypeLineItems[idx]?.groupId ?? null,
+                  lines
+                }
+
+                return copy
+              })
+            }}
+            productCategories={productCategories}
+            uomUnits={uomUnits}
+            vendors={vendors}
+            taxRate={taxRate}
           />
-          <ProfitDetailsCard profitPercent={profitPercent} profitAmount={profitAmount} totalProfit={profitAmount} />
-          <TotalCalculationCard subtotal={totalSales} salesTax={salesTax} total={total} />
-        </div>
+        ))}
+      </div>
 
-        {/* Service Type Sections */}
-        <div className='space-y-4'>
-          {selectedServiceType.length === 0 && (
-            <div className='flex items-center justify-center h-32 bg-zinc-800 rounded-md border border-zinc-700 border-dashed'>
-              <p className='text-zinc-400 text-sm'>
-                No services added yet. Click <strong>Add Service</strong> to get started.
-              </p>
-            </div>
-          )}
-          {selectedServiceType.map((item, idx) => (
-            <ServiceTypeSection
-              key={idx}
-              mode='create'
-              serviceTypeName={item.name}
-              serviceTypeId={item.id}
-              onRemove={() => handleRemoveServiceType(idx)}
-              serviceTypes={serviceTypes}
-              units={units}
-              lines={serviceTypeLineItems[idx]?.lines || []}
-              onLinesChange={lines => {
-                setServiceTypeLineItems(prev => {
-                  const copy = [...prev]
+      {/* Custom Message */}
+      <Card className='bg-zinc-900 border-zinc-800'>
+        <CardContent className='p-4'>
+          <label htmlFor='inv-custom-message' className='block text-sm font-medium text-zinc-200 mb-2'>
+            Message / Notes
+          </label>
+          <Textarea
+            id='inv-custom-message'
+            className='w-full'
+            placeholder='Enter a message or notes for this invoice...'
+            ref={customMessageRef}
+            defaultValue={currentInvoice?.message || ''}
+          />
+        </CardContent>
+      </Card>
 
-                  copy[idx] = {
-                    serviceTypeName: item.name,
-                    serviceTypeId: item.id,
-                    groupId: serviceTypeLineItems[idx]?.groupId ?? null,
-                    lines
-                  }
-
-                  return copy
-                })
-              }}
-              productCategories={productCategories}
-              uomUnits={uomUnits}
-              vendors={vendors}
-              taxRate={taxRate}
-            />
-          ))}
-        </div>
-
-        {/* Custom Message */}
-        <Card className='bg-zinc-900 border-zinc-800 mt-4'>
-          <CardContent className='p-4'>
-            <label htmlFor='inv-custom-message' className='block text-sm font-medium text-zinc-200 mb-2'>
-              Message / Notes
-            </label>
-            <Textarea
-              id='inv-custom-message'
-              className='w-full'
-              placeholder='Enter a message or notes for this invoice...'
-              ref={customMessageRef}
-              defaultValue={invoice?.message || ''}
-            />
-          </CardContent>
-        </Card>
-      </>
+      {/* Edit Invoice Details Modal */}
       <CreateOrEditInvoiceModal
         mode='edit'
         open={isInvoiceDetailsOpen}
@@ -511,13 +482,10 @@ const AddInvoiceServicesModal = ({
         staffs={staffs}
         paymentTerms={paymentTerms}
         businessLocations={businessLocations}
-        onSuccess={() => {
-          setIsInvoiceDetailsOpen(false)
-          onSuccess?.()
-        }}
+        onSuccess={() => setIsInvoiceDetailsOpen(false)}
       />
-    </CommonDialog>
+    </div>
   )
 }
 
-export default AddInvoiceServicesModal
+export default AddInvoiceServicesView

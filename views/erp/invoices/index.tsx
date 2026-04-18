@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import React, { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ImageIcon, PlusIcon, Search } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -36,7 +36,6 @@ import { DocumentIcon, UserIcon } from '@/public/icons'
 import InvoiceService from '@/services/api/invoices/invoices.service'
 
 import CreateOrEditInvoiceModal from './CreateOrEditInvoiceModal'
-import AddInvoiceServicesModal from './AddInvoiceServicesModal'
 import InvoiceTasksModal from './InvoiceTasksModal'
 import InvoiceAddTaskModal from './InvoiceAddTaskModal'
 import InvoiceNotesModal from './InvoiceNotesModal'
@@ -70,8 +69,6 @@ const Invoices: React.FC<{
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
-  const pathname = usePathname()
-  const hasAutoOpenedRef = useRef(false)
 
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -93,10 +90,6 @@ const Invoices: React.FC<{
   const [invoiceModalMode, setInvoiceModalMode] = useState<'create' | 'edit'>('create')
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null)
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
-
-  // Step 2: add/edit services (opens after both create and edit)
-  const [isServicesModalOpen, setIsServicesModalOpen] = useState<boolean>(false)
-  const [servicesInvoice, setServicesInvoice] = useState<Invoice | null>(null)
 
   // Tasks modal
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
@@ -173,18 +166,6 @@ const Invoices: React.FC<{
     dispatch(setPageTitle('Manage Invoices'))
   }, [filterOptions])
 
-  // Auto-open services modal when inv_id is present in URL (e.g. page refresh or deep link)
-  useEffect(() => {
-    if (isLoading || hasAutoOpenedRef.current) return
-
-    const invId = searchParams.get('inv_id')
-
-    if (!invId) return
-
-    hasAutoOpenedRef.current = true
-    handleOpenServicesModal(invId)
-  }, [isLoading])
-
   const handleOpenCreateModal = () => {
     setInvoiceModalMode('create')
     setSelectedInvoiceId(null)
@@ -192,25 +173,9 @@ const Invoices: React.FC<{
     setIsInvoiceModalOpen(true)
   }
 
-  const handleOpenServicesModal = async (id: string) => {
-    hasAutoOpenedRef.current = true
-
-    try {
-      const response = await InvoiceService.show(id)
-
-      setServicesInvoice(response.data)
-      setIsServicesModalOpen(true)
-
-      const params = new URLSearchParams(searchParams.toString())
-
-      params.set('inv_id', id)
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
-    } catch {
-      toast.error('Failed to fetch invoice details')
-    }
+  const handleOpenEditModal = (id: string) => {
+    router.push(`/erp/invoices/${id}`)
   }
-
-  const handleOpenEditModal = (id: string) => handleOpenServicesModal(id)
 
   const handleInvoiceClose = () => {
     setIsInvoiceModalOpen(false)
@@ -218,24 +183,9 @@ const Invoices: React.FC<{
     setSelectedInvoice(null)
   }
 
-  // Called after step 1 (create or edit) — auto-open step 2
+  // Called after step 1 (create) — navigate to services page
   const handleCreateSuccess = (invoice: Invoice) => {
-    setServicesInvoice(invoice)
-    setIsServicesModalOpen(true)
-  }
-
-  const handleServicesClose = () => {
-    setIsServicesModalOpen(false)
-    setServicesInvoice(null)
-
-    const params = new URLSearchParams(searchParams.toString())
-
-    params.delete('inv_id')
-
-    const qs = params.toString()
-
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
-    fetchData()
+    router.push(`/erp/invoices/${invoice.id}`)
   }
 
   const handleDeleteInvoice = async (id: string) => {
@@ -428,7 +378,7 @@ const Invoices: React.FC<{
                     className='w-full'
                     variant='ghost'
                     onClick={() =>
-                      window.open(`/erp/estimates/${row.estimate_id}?p_id=${row.proposal_id}&p_mode=view`, '_blank')
+                      window.open(`/erp/estimates/${row.estimate_id}/proposals/${row.proposal_id}?mode=view`, '_blank')
                     }
                   >
                     View Original Proposal
@@ -638,28 +588,6 @@ const Invoices: React.FC<{
           }}
           invoiceId={notesListInvoiceId}
           clientId={notesListClientId ?? undefined}
-        />
-      )}
-
-      {/* Step 2: Add / Edit Services (opens after create or edit) */}
-      {servicesInvoice && (
-        <AddInvoiceServicesModal
-          open={isServicesModalOpen}
-          onOpenChange={open => {
-            if (!open) handleServicesClose()
-          }}
-          invoice={servicesInvoice}
-          serviceTypes={serviceTypes}
-          units={units}
-          productCategories={productCategories}
-          uomUnits={uomUnits}
-          vendors={vendors}
-          invoiceTypes={invoiceTypes}
-          clients={clients}
-          staffs={staffs}
-          paymentTerms={paymentTerms}
-          businessLocations={businessLocations}
-          onSuccess={handleServicesClose}
         />
       )}
     </>

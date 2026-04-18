@@ -108,3 +108,17 @@ export const INVOICE_NOTES = (invoice_id: string): string => {
  * @returns
  */
 export const INVOICE_JOB_IMAGES: string = '/v1/tenant/invoice-job-images/'
+
+/**
+ * This contains the API endpoint to get invoice histories for a specific invoice in data-table format.
+ * @param invoiceId string (uuid)
+ * @method GET - To get data table of invoice histories for a specific invoice
+ * @returns
+ */
+export const INVOICE_HISTORIES = (invoiceId: string): string => {
+  return `/v1/tenant/invoices/${invoiceId}/histories/`
+}
+
+export const SEND_INVOICE_EMAIL = (invoiceId: string): string => {
+  return `/v1/tenant/invoices/${invoiceId}/email/`
+}

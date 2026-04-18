@@ -1,9 +1,10 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useMemo } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { Separator } from '@/components/ui/separator'
-import { Invoice } from '@/types'
+import { Invoice, InvoiceHistory } from '@/types'
 import InvoiceService from '@/services/api/invoices/invoices.service'
 import InvoiceActions from './InvoiceActions'
 import InvoiceBasicInfo from './InvoiceBasicInfo'
@@ -50,18 +51,85 @@ const PAYMENT_METHOD_MAP: Record<string, string> = {
   check: 'Check'
 }
 
-const InvoiceView = ({ invoice, inid, icid }: { invoice: Invoice; inid: string; icid: string }) => {
-  const [isSigned, setIsSigned] = useState(invoice?.is_signed ?? false)
-  const [isAgreed, setIsAgreed] = useState(invoice?.is_signed ?? false)
+const InvoiceView = ({
+  invoice,
+  inid,
+  icid,
+  histories
+}: {
+  invoice: Invoice
+  inid: string
+  icid: string
+  histories: InvoiceHistory[]
+}) => {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Backend sends histories in descending order (newest first); reverse to oldest→newest
+  // so index 0 = oldest version and last index = current (newest).
+  const reversedHistories = useMemo(() => [...histories].reverse(), [histories])
+
+  const items = useMemo(() => {
+    if (reversedHistories.length === 0) return [invoice]
+
+    return reversedHistories.map(h => h.invoice_data)
+  }, [reversedHistories, invoice])
+
+  // Default to latest version (last index); restore from URL param when available
+  const hParam = searchParams.get('h') ?? ''
+
+  const initialIndex = (() => {
+    if (hParam && reversedHistories.length > 0) {
+      const idx = reversedHistories.findIndex(h => h.id === hParam)
+
+      return idx >= 0 ? idx : items.length - 1
+    }
+
+    return items.length - 1
+  })()
+
+  const [currentIndex, setCurrentIndex] = useState<number>(initialIndex)
+
+  const isFirst = currentIndex === 0
+  const isLast = currentIndex === items.length - 1
+  const displayInvoice = items[currentIndex]
+
+  // Always derive signed state and status from the last (newest) history when any history exists
+  const lastHistoryInvoice =
+    reversedHistories.length > 0 ? reversedHistories[reversedHistories.length - 1].invoice_data : invoice
+
+  const lastIsSigned = lastHistoryInvoice.is_signed ?? false
+
+  const [isSigned, setIsSigned] = useState(lastIsSigned)
+  const [isAgreed, setIsAgreed] = useState(lastIsSigned)
   const [hasPayment, setHasPayment] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [invoiceStatus, setInvoiceStatus] = useState(invoice.status)
+  const [invoiceStatus, setInvoiceStatus] = useState(lastHistoryInvoice.status ?? invoice.status)
 
   const signatureRef = useRef<InvoiceSignatureHandle>(null)
   const paymentRef = useRef<InvoicePaymentMethodHandle>(null)
 
   const canSubmit = isSigned && isAgreed && hasPayment
-  const canShowSubmit = invoiceStatus === 'new' || invoiceStatus === 'sent to customer'
+
+  // Show the submit/signature flow only when on the latest version and not yet signed
+  const canShowSubmit = isLast && !lastIsSigned && (invoiceStatus === 'new' || invoiceStatus === 'sent to customer')
+
+  const navigate = (index: number) => {
+    setCurrentIndex(index)
+    const params = new URLSearchParams(searchParams.toString())
+    const historyId = reversedHistories[index]?.id
+
+    if (historyId) {
+      params.set('h', historyId)
+    } else {
+      params.delete('h')
+    }
+
+    router.replace(`?${params.toString()}`, { scroll: false })
+  }
+
+  const handlePrev = () => navigate(currentIndex - 1)
+  const handleNext = () => navigate(currentIndex + 1)
 
   const generatePdfBlob = async (): Promise<Blob> => {
     // ── 1. Collect data from component refs ──────────────────────────────────
@@ -137,13 +205,13 @@ const InvoiceView = ({ invoice, inid, icid }: { invoice: Invoice; inid: string; 
   return (
     <div>
       <div>
-        {/* Invoice Basic Info */}
-        <InvoiceBasicInfo invoice={invoice} />
+        {/* Invoice Basic Info — uses displayInvoice so history versions render correctly */}
+        <InvoiceBasicInfo invoice={displayInvoice} />
         <Separator className='mt-4 bg-[#e5e7eb]' />
         {/* Billing Information */}
-        <InvoiceBillingInformation invoice={invoice} />
+        <InvoiceBillingInformation invoice={displayInvoice} />
         {/* Billing Items */}
-        <InvoiceBillingItems invoice={invoice} />
+        <InvoiceBillingItems invoice={displayInvoice} />
         <Separator className='mb-4 bg-[#e5e7eb]' />
         {/* Customer Agreement */}
         <InvoiceCustomerAgreement />
@@ -151,20 +219,20 @@ const InvoiceView = ({ invoice, inid, icid }: { invoice: Invoice; inid: string; 
         {/* Payment Method */}
         <InvoicePaymentMethod
           ref={paymentRef}
-          total={invoice.total}
+          total={displayInvoice.total}
           onMethodChange={m => setHasPayment(!!m)}
           readOnly={!canShowSubmit}
           initialMethod={invoice.payment_method ?? null}
           initialData={invoice.payment_method_data ?? null}
         />
         <Separator className='mb-4 bg-[#e5e7eb]' />
-        {/* Signature */}
+        {/* Signature — only interactive on the latest unsigned version */}
         <InvoiceSignature
           ref={signatureRef}
           onSignedChange={setIsSigned}
           onAgreedChange={setIsAgreed}
           readOnly={!canShowSubmit}
-          initialAgreed={!!invoice?.is_signed}
+          initialAgreed={!!lastIsSigned}
         />
       </div>
       <Separator className='mb-4' />
@@ -174,6 +242,12 @@ const InvoiceView = ({ invoice, inid, icid }: { invoice: Invoice; inid: string; 
           isSubmitting={isSubmitting}
           showSubmit={canShowSubmit}
           onSubmit={handleSubmit}
+          isFirst={isFirst}
+          isLast={isLast}
+          onPrev={handlePrev}
+          onNext={handleNext}
+          currentIndex={currentIndex}
+          totalItems={items.length}
         />
       </div>
     </div>
