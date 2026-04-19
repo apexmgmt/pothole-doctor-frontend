@@ -47,8 +47,15 @@ const MaterialJobActionsRow = ({ actions, onActionsChange }: MaterialJobActionsR
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // Latest action is first in the array (newest first)
-  const latestAction = actions[0]
+  // Sort ascending so oldest shows first and newest (latest) shows last
+  const sortedActions = [...actions].sort((a, b) => {
+    const dateA = a.action_date ? new Date(a.action_date).getTime() : 0
+    const dateB = b.action_date ? new Date(b.action_date).getTime() : 0
+
+    return dateA - dateB
+  })
+
+  const latestAction = sortedActions[sortedActions.length - 1]
 
   const handleDelete = async () => {
     if (!latestAction) return
@@ -58,7 +65,7 @@ const MaterialJobActionsRow = ({ actions, onActionsChange }: MaterialJobActionsR
     try {
       await MaterialJobService.destroyAction(latestAction.material_job_id, latestAction.id)
       toast.success('Action deleted')
-      onActionsChange(actions.slice(1))
+      onActionsChange(actions.filter(a => a.id !== latestAction.id))
     } catch {
       toast.error('Failed to delete action')
     } finally {
@@ -72,7 +79,7 @@ const MaterialJobActionsRow = ({ actions, onActionsChange }: MaterialJobActionsR
       <tr className='bg-zinc-950 border-b border-zinc-800'>
         <td colSpan={15} className='p-2'>
           <div className='flex flex-wrap items-center gap-1'>
-            {actions.map((action, aIdx) => {
+            {sortedActions.map((action, aIdx) => {
               const initials = action.employee
                 ? `${action.employee.first_name?.[0] ?? ''}${action.employee.last_name?.[0] ?? ''}`.toUpperCase()
                 : ''
@@ -87,7 +94,7 @@ const MaterialJobActionsRow = ({ actions, onActionsChange }: MaterialJobActionsR
                   })
                 : ''
 
-              const isLatest = aIdx === 0
+              const isLatest = aIdx === sortedActions.length - 1
 
               return (
                 <div key={action.id} className='flex items-center gap-0.5'>
