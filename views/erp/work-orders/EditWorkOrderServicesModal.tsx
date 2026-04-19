@@ -380,7 +380,7 @@ const EditWorkOrderServicesModal = ({
               vendors={vendors}
               taxRate={taxRate}
               hideMargin={true}
-              allowedLineTypes={['product', 'labor']}
+              allowedLineTypes={['product', 'labor', 'expense']}
             />
           ))}
         </div>

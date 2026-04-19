@@ -354,7 +354,7 @@ const EditWorkOrderServicesView = ({
             hideMargin={true}
             showVendor={true}
             showPurchaseQty={true}
-            allowedLineTypes={['product', 'labor']}
+            allowedLineTypes={['product', 'labor', 'expense']}
           />
         ))}
       </div>
