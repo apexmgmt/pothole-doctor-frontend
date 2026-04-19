@@ -123,7 +123,7 @@ export const useServiceTypeLines = ({ lines, onLinesChange, taxRate, hideMargin 
         description: product.description,
         type: 'product',
         unit_cost: product.product_cost,
-        qty: 1,
+        qty: product.minimum_qty || 1,
         unit_id: product.selling_unit_id ?? '',
         unit_name: product.selling_unit?.name ?? product.selling_uom?.name ?? '',
         vendor_id: product.vendor_id ?? '',

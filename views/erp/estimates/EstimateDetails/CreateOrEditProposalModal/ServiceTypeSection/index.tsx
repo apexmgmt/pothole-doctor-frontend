@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { LaborCost, Product, ProductCategory, ProposalServiceItemPayload, ServiceType, Unit, Vendor } from '@/types'
 import LaborCostsModal from '@/views/erp/labor-costs/LaborCostsModal'
 import ProductsModal from '@/views/erp/products/ProductsModal'
+import NonInventoryProductsModal from '@/views/erp/products/NonInventoryProductsModal'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 import ServiceTypeSummary from './ServiceTypeSummary'
@@ -53,6 +54,7 @@ const ServiceTypeSection = ({
 }) => {
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
   const [openProductsModal, setOpenProductsModal] = useState(false)
+  const [openNonInventoryProductsModal, setOpenNonInventoryProductsModal] = useState(false)
   const [margin, setMargin] = useState('0')
 
   const { getEditValue, setEditValue, clearEditValue } = useLineEditing()
@@ -100,6 +102,7 @@ const ServiceTypeSection = ({
             recalculateLine={recalculateLine}
             onLinesChange={onLinesChange}
             setOpenProductsModal={setOpenProductsModal}
+            setOpenNonInventoryProductsModal={setOpenNonInventoryProductsModal}
             setOpenLaborCostModal={setOpenLaborCostModal}
             addLine={addLine}
             hideMargin={hideMargin}
@@ -182,6 +185,15 @@ const ServiceTypeSection = ({
       <ProductsModal
         open={openProductsModal}
         onOpenChange={setOpenProductsModal}
+        serviceTypes={serviceTypes}
+        productCategories={productCategories}
+        uomUnits={uomUnits}
+        vendors={vendors}
+        onSelect={(products: Product[]) => onProductSelect(products)}
+      />
+      <NonInventoryProductsModal
+        open={openNonInventoryProductsModal}
+        onOpenChange={setOpenNonInventoryProductsModal}
         serviceTypes={serviceTypes}
         productCategories={productCategories}
         uomUnits={uomUnits}
