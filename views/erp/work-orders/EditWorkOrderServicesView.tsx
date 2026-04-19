@@ -140,6 +140,7 @@ const EditWorkOrderServicesView = ({
             unit_name: item.unit_name || '',
             unit_id: item.unit_id ?? '',
             vendor_id: item.vendor_id ?? '',
+            product: item.product,
             total_cost: item.total_cost,
             margin: item.margin,
             unit_price: item.unit_price,
@@ -151,7 +152,8 @@ const EditWorkOrderServicesView = ({
             tax: item.tax,
             tax_amount: item.tax_amount,
             total_price: item.total_price,
-            note: item.note || ''
+            note: item.note || '',
+            material_job_actions: item.material_job_actions
           }))
         }))
       )
@@ -351,6 +353,7 @@ const EditWorkOrderServicesView = ({
             taxRate={taxRate}
             hideMargin={true}
             showVendor={true}
+            showPurchaseQty={true}
             allowedLineTypes={['product', 'labor']}
           />
         ))}

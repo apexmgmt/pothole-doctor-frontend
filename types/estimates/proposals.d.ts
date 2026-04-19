@@ -137,4 +137,5 @@ export interface ProposalServiceItemPayload {
   tax_amount: number
   total_price?: number
   note: string
+  material_job_actions?: MaterialJobAction[]
 }

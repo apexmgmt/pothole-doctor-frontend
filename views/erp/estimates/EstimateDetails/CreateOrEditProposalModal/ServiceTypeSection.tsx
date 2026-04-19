@@ -14,7 +14,7 @@ import {
   Box,
   Trash2
 } from 'lucide-react'
-import { useState, useRef } from 'react'
+import { useState, useRef, Fragment } from 'react'
 import LaborCostsModal from '@/views/erp/labor-costs/LaborCostsModal'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import ServiceTypeSummary from './ServiceTypeSummary'
 import ServiceTypeActions from './ServiceTypeActions'
 import LineItemActions from './LineItemActions'
+import MaterialJobActionsRow from './MaterialJobActionsRow'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 const ServiceTypeSection = ({
@@ -42,6 +43,7 @@ const ServiceTypeSection = ({
   taxRate = 0,
   hideMargin = false,
   showVendor = false,
+  showPurchaseQty = false,
   allowedLineTypes
 }: {
   mode: 'create' | 'edit' | 'view'
@@ -58,6 +60,7 @@ const ServiceTypeSection = ({
   taxRate: number
   hideMargin?: boolean
   showVendor?: boolean
+  showPurchaseQty?: boolean
   allowedLineTypes?: ProposalServiceItemPayload['type'][]
 }) => {
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
@@ -432,6 +435,8 @@ const ServiceTypeSection = ({
                     const totalCost = line.unit_cost * line.qty
                     const unitPrice = getDiscountedUnitPrice(line)
                     const totalPrice = unitPrice * line.qty
+                    const hasActions = (line.material_job_actions?.length ?? 0) > 0
+                    const isLocked = mode === 'view' || hasActions
 
                     if (line.type === 'comment') {
                       // Only show description for comment lines
@@ -451,14 +456,14 @@ const ServiceTypeSection = ({
                                 }}
                                 className='w-full bg-muted'
                                 placeholder='Comment'
-                                disabled={mode === 'view'}
+                                disabled={isLocked}
                               />
                             </div>
                           </td>
                           <td></td>
                           <td></td>
                           <td className='px-2 py-1 flex justify-end gap-1'>
-                            {mode !== 'view' && (
+                            {!isLocked && (
                               <Button size='icon' variant='ghost' onClick={() => removeLine(idx)}>
                                 <Trash2 className='h-4 w-4 text-red-400' />
                               </Button>
@@ -473,8 +478,8 @@ const ServiceTypeSection = ({
 
                     // Normal rendering for other line types
                     return (
+                      <Fragment key={idx}>
                       <tr
-                        key={idx}
                         className={cn(
                           'border-b border-zinc-800 align-top',
                           line.type === 'deduction' && 'text-red-500'
@@ -498,7 +503,7 @@ const ServiceTypeSection = ({
                               }}
                               className={cn('w-full min-w-32', line.type === 'deduction' && 'text-red-500')}
                               placeholder='Item Name'
-                              disabled={mode === 'view'}
+                              disabled={isLocked}
                             />
                           </div>
                         </td>
@@ -512,16 +517,16 @@ const ServiceTypeSection = ({
                             }}
                             className='w-full min-w-32 text-red-500'
                             placeholder='Empty'
-                            disabled={mode === 'view'}
+                            disabled={isLocked}
                           />
                         </td>
                         {showVendor && (
                           <td className='px-2 py-1'>
                             {line.type === 'product' && (
                               <Select
-                                value={line.vendor_id ?? line.product?.vendor_id ?? ''}
+                                value={line.vendor_id || line.product?.vendor_id || ''}
                                 onValueChange={val => updateLine(idx, 'vendor_id', val)}
-                                disabled={mode === 'view' || !!line.product_id}
+                                disabled={isLocked || !!line.product_id}
                               >
                                 <SelectTrigger className='w-36 text-xs'>
                                   <SelectValue placeholder='Vendor' />
@@ -549,7 +554,7 @@ const ServiceTypeSection = ({
                               }}
                               className='w-28'
                               min={0}
-                              disabled={mode === 'view'}
+                              disabled={isLocked}
                             />
                           )}
                         </td>
@@ -569,15 +574,21 @@ const ServiceTypeSection = ({
                                 }}
                                 className='w-28 bg-yellow-200 text-black'
                                 min={0}
-                                disabled={mode === 'view'}
+                                disabled={isLocked}
                               />
+                              
                               {(line.type === 'product' || line.type === 'labor') &&
                                 (line.product_id || line.labor_cost_id ? (
                                   <span
                                     className='text-xs text-zinc-400 px-1 truncate w-28'
                                     title={line.unit_name || '—'}
                                   >
-                                    {line.unit_name || '—'}
+                                    {line.unit_name || '—'}{showPurchaseQty && line.product_id && !!line.product?.coverage_per_rate && (
+                                <span className='text-xs text-blue-400 px-1 truncate w-28'>
+                                  {(line.qty / line.product.coverage_per_rate).toFixed(2)}{' '}
+                                  {line.product.purchase_uom?.name ?? line.product.purchase_unit?.name ?? ''}
+                                </span>
+                              )}
                                   </span>
                                 ) : (
                                   <Select
@@ -587,7 +598,7 @@ const ServiceTypeSection = ({
 
                                       updateLineFields(idx, { unit_id: val, unit_name: unit?.name ?? '' })
                                     }}
-                                    disabled={mode === 'view'}
+                                    disabled={isLocked}
                                   >
                                     <SelectTrigger className='w-28 h-6! text-xs'>
                                       <SelectValue placeholder='Unit' />
@@ -600,7 +611,7 @@ const ServiceTypeSection = ({
                                       ))}
                                     </SelectContent>
                                   </Select>
-                                ))}
+                                ))} 
                             </div>
                           )}
                         </td>
@@ -624,7 +635,7 @@ const ServiceTypeSection = ({
                                   className='w-28'
                                   min={0}
                                   max={100}
-                                  disabled={mode === 'view'}
+                                  disabled={isLocked}
                                 />
                                 <span>%</span>
                               </>
@@ -639,7 +650,7 @@ const ServiceTypeSection = ({
                         <td className='px-2 py-1'>
                           {line.type === 'deduction' ? (
                             <Input
-                              disabled={mode === 'view'}
+                              disabled={isLocked}
                               type='number'
                               min={0}
                               value={getEditValue(idx, 'total_price', Number(line.total_price)?.toFixed(2) ?? '')}
@@ -657,7 +668,7 @@ const ServiceTypeSection = ({
                         <td className='px-2 py-3.5 text-center'>
                           {line.type !== 'deduction' && (
                             <Checkbox
-                              disabled={mode === 'view'}
+                              disabled={isLocked}
                               checked={line.is_sale === 1 ? true : false}
                               onCheckedChange={checked => updateLine(idx, 'is_sale', !!checked ? 1 : 0)}
                             />
@@ -667,6 +678,7 @@ const ServiceTypeSection = ({
                           line={line}
                           idx={idx}
                           mode={mode}
+                          locked={hasActions}
                           updateLine={updateLine}
                           removeLine={removeLine}
                         />
@@ -674,6 +686,13 @@ const ServiceTypeSection = ({
                           <input type='hidden' value={line.type || ''} readOnly />
                         </td>
                       </tr>
+                      {hasActions && (
+                        <MaterialJobActionsRow
+                          actions={line.material_job_actions ?? []}
+                          onActionsChange={updated => updateLine(idx, 'material_job_actions', updated)}
+                        />
+                      )}
+                      </Fragment>
                     )
                   })}
                 </tbody>
