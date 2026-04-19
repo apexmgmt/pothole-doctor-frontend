@@ -1,6 +1,7 @@
 import {
   CompletionCertificate,
   Invoice,
+  MaterialJobAction,
   Model,
   User,
   BusinessLocation,
@@ -129,4 +130,5 @@ export interface WorkOrderServiceItemPayload {
   tax_amount: number
   total_price?: number
   note: string
+  material_job_actions?: MaterialJobAction[]
 }

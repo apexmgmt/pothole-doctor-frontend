@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Boxes, Wrench, GridIcon, ClipboardIcon, MessageSquareIcon, Minus } from 'lucide-react'
+import { Boxes, Wrench, GridIcon, ClipboardIcon, MessageSquareIcon, Minus, Box } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { ProposalServiceItemPayload } from '@/types'
 
@@ -12,6 +12,7 @@ interface ServiceTypeActionsProps {
   recalculateLine: (line: any) => any
   onLinesChange: (lines: any[]) => void
   setOpenProductsModal: (open: boolean) => void
+  setOpenNonInventoryProductsModal: (open: boolean) => void
   setOpenLaborCostModal: (open: boolean) => void
   addLine: (type: ProposalServiceItemPayload['type']) => void
   hideMargin?: boolean
@@ -26,6 +27,7 @@ const ServiceTypeActions = ({
   recalculateLine,
   onLinesChange,
   setOpenProductsModal,
+  setOpenNonInventoryProductsModal,
   setOpenLaborCostModal,
   addLine,
   hideMargin = false,
@@ -71,14 +73,21 @@ const ServiceTypeActions = ({
     {/* Action Buttons */}
     {mode !== 'view' && (
       <div className='flex items-center gap-1 ml-auto'>
-        <Button
-          onClick={() => setOpenProductsModal(true)}
-          variant='ghost'
-          size='sm'
-          className='h-8 w-8 p-0 text-zinc-400'
-        >
-          <Boxes className='h-4 w-4' />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant='ghost' size='sm' className='h-8 w-8 p-0 text-zinc-400' title='Add products'>
+              <Boxes className='h-4 w-4' />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='start'>
+            <DropdownMenuItem onClick={() => setOpenProductsModal(true)}>
+              <Boxes className='mr-2 h-4 w-4' /> Inventory Products
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setOpenNonInventoryProductsModal(true)}>
+              <Box className='mr-2 h-4 w-4' /> Non-Inventory Products
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button
           onClick={() => setOpenLaborCostModal(true)}
           variant='ghost'

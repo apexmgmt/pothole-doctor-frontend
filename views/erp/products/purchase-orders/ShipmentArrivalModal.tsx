@@ -50,7 +50,7 @@ const buildEmptyReceipt = (
   received_date: new Date(),
   warehouse_type: defaultWarehouseType,
   warehouse_id: defaultWarehouseId,
-  stock_area_id: '',
+  stock_area: '',
   stock_section_id: '',
   dye_lot: '',
   is_moved_to_inventory: false
@@ -68,7 +68,7 @@ const mapProductToState = (
         received_date: r.received_date ? new Date(r.received_date) : new Date(),
         warehouse_type: r.warehouse_type,
         warehouse_id: r.warehouse_id,
-        stock_area_id: r.stock_area_id ?? '',
+        stock_area: r.stock_area ?? '',
         stock_section_id: r.stock_section_id ?? '',
         dye_lot: r.dye_lot ?? '',
         is_moved_to_inventory: r.is_moved_to_inventory
@@ -309,7 +309,7 @@ const ShipmentArrivalModal = ({
           received_date: r.received_date ? format(r.received_date, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
           warehouse_type: r.warehouse_type,
           warehouse_id: r.warehouse_id,
-          stock_area_id: r.stock_area_id || null,
+          stock_area: r.stock_area || null,
           stock_section_id: r.stock_section_id || null,
           dye_lot: r.dye_lot || null
         }))

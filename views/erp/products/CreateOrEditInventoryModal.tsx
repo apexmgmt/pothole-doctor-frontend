@@ -21,7 +21,7 @@ import { getCostPrice, getMargin, getSellPrice } from '@/utils/business-calculat
 interface FormValues {
   warehouse_type: 'warehouse' | 'location'
   warehouse_id: string
-  stock_area_id: string
+  stock_area: string
   stock_section_id: string
   quantity: number
   company_cost: number
@@ -69,7 +69,7 @@ const CreateOrEditInventoryModal = ({
     defaultValues: {
       warehouse_type: 'warehouse',
       warehouse_id: '',
-      stock_area_id: '',
+      stock_area: '',
       stock_section_id: '',
       quantity: 0,
       company_cost: product.product_cost ?? 0,
@@ -91,7 +91,7 @@ const CreateOrEditInventoryModal = ({
       form.reset({
         warehouse_type: (inventoryDetails?.warehouse_type as 'warehouse' | 'location') || 'warehouse',
         warehouse_id: inventoryDetails?.warehouse_id || '',
-        stock_area_id: purchaseProduct?.purchase_product_receipts?.[0]?.stock_area_id || '',
+        stock_area: purchaseProduct?.purchase_product_receipts?.[0]?.stock_area || '',
         stock_section_id: purchaseProduct?.purchase_product_receipts?.[0]?.stock_section_id || '',
         quantity: purchaseProduct?.quantity ?? 0,
         company_cost: product.product_cost ?? 0,
@@ -122,7 +122,7 @@ const CreateOrEditInventoryModal = ({
       company_cost: Number(values.company_cost),
       warehouse_type: values.warehouse_type,
       warehouse_id: values.warehouse_id || null,
-      stock_area_id: values.stock_area_id || null,
+      stock_area: values.stock_area || null,
       stock_section_id: values.stock_section_id || null,
       quantity: Number(values.quantity),
       work_order_cost: Number(values.work_order_cost),
@@ -491,7 +491,7 @@ const CreateOrEditInventoryModal = ({
 
                   <FormField
                     control={form.control}
-                    name='stock_area_id'
+                    name='stock_area'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Stock Area</FormLabel>

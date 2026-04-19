@@ -1,6 +1,5 @@
-import { Client, Estimate, LaborCost, Product, ServiceType, User } from '@/types'
-export interface Proposal {
-  id: string
+import { Client, Estimate, LaborCost, MaterialJobAction, Model, Product, ServiceType, User } from '@/types'
+export interface Proposal extends Model {
   proposal_number: number
   estimate_id: string
   discount: number
@@ -11,8 +10,6 @@ export interface Proposal {
   down_payment_amount: number
   down_payment_percentage: number
   message: string | null
-  created_at: string
-  updated_at: string
   discount_type: 'percentage' | 'fixed'
   estimate?: Estimate
   services?: ProposalService[]
@@ -29,8 +26,7 @@ export interface Proposal {
   reason?: string | null
 }
 
-export interface ProposalHistory {
-  id: string
+export interface ProposalHistory extends Model {
   proposal_id: string
   p_id: string
   qc_id: string
@@ -48,12 +44,9 @@ export interface ProposalHistory {
   sent_at: string
   viewed_at: string | null
   review: string | null
-  created_at: string
-  updated_at: string
 }
 
-export interface ProposalService {
-  id: string
+export interface ProposalService extends Model {
   proposal_id: string
   proposal_estimate_id: string
   service_type_id: string
@@ -68,18 +61,15 @@ export interface ProposalService {
   material_sale: number
   labor_sale: number
   profit: number
-  created_at: string
-  updated_at: string
   items: ProposalServiceItem[]
   service_type?: ServiceType
 }
 
-export interface ProposalServiceItem {
+export interface ProposalServiceItem extends Model {
   product_id?: string
   product?: Product
   labor_cost_id?: string
   labor_cost?: LaborCost
-  id: string
   proposal_service_id: string
   service_type_id: string
   name: string
@@ -100,10 +90,9 @@ export interface ProposalServiceItem {
   tax_type: 'percentage' | 'fixed'
   note: string | null
   is_sale: number | 1 | 0
-  created_at: string
-  updated_at: string
   tax_amount: number
   freight_charge: number
+  material_job_actions?: MaterialJobAction[]
 }
 export interface ProposalPayload {
   estimate_id: string
@@ -148,4 +137,5 @@ export interface ProposalServiceItemPayload {
   tax_amount: number
   total_price?: number
   note: string
+  material_job_actions?: MaterialJobAction[]
 }
