@@ -25,16 +25,16 @@ import {
 import { formatDate } from '@/utils/date'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import MaterialJobService from '@/services/api/products/material-jobs.service'
-import AddInventoryJobActionModal from './AddInventoryJobActionModal'
+import AddNonInventoryJobActionModal from './AddNonInventoryJobActionModal'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 
-interface InventoryJobsProps {
+interface NonInventoryJobsProps {
   staffs: Staff[]
   warehouses: Warehouse[]
   businessLocations: BusinessLocation[]
 }
 
-const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, businessLocations }) => {
+const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses, businessLocations }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -56,7 +56,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    dispatch(setPageTitle('Inventory Jobs'))
+    dispatch(setPageTitle('Non-Inventory Jobs'))
   }, [])
 
   useEffect(() => {
@@ -92,7 +92,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
     setIsLoading(true)
 
     try {
-      MaterialJobService.index({...filterOptions, job_type: 'inventory'})
+      MaterialJobService.index({ ...filterOptions, job_type: 'non_inventory' })
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)
@@ -164,8 +164,18 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
 
   const columns: Column[] = [
     {
+      id: 'order_status',
+      header: 'Order Status',
+      cell: (row: MaterialJob) => (
+        <Badge variant={getStatusVariant(row.order_status)} className='capitalize whitespace-nowrap'>
+          {row.order_status?.replace(/_/g, ' ') || '—'}
+        </Badge>
+      ),
+      sortable: true
+    },
+    {
       id: 'status',
-      header: 'Status',
+      header: 'Action Status',
       cell: (row: MaterialJob) => (
         <Badge variant={getStatusVariant(row.status)} className='capitalize whitespace-nowrap'>
           {row.status?.replace(/_/g, ' ') || '—'}
@@ -254,9 +264,15 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
       sortable: false
     },
     {
-      id: 'allocated_quantity',
-      header: 'Allocated Qty',
-      cell: (row: MaterialJob) => <span>{row.allocated_quantity ?? '—'}</span>,
+      id: 'quantity',
+      header: 'Quantity',
+      cell: (row: MaterialJob) => <span>{row.quantity ?? '—'}</span>,
+      sortable: true
+    },
+    {
+      id: 'received_quantity',
+      header: 'Received Qty',
+      cell: (row: MaterialJob) => <span>{row.received_quantity ?? '—'}</span>,
       sortable: true
     },
     {
@@ -266,30 +282,26 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
       sortable: true
     },
     {
-      id: 'on_hand_quantity',
-      header: 'On-Hand Qty',
-      cell: (row: MaterialJob) => <span>{row.on_hand_quantity ?? '—'}</span>,
-      sortable: true
-    },
-    {
-      id: 'created_at',
-      header: 'Created Date',
-      cell: (row: MaterialJob) => <span className='whitespace-nowrap'>{formatDate(row.created_at || '') || '—'}</span>,
-      sortable: true
-    },
-    {
-      id: 'scheduled_date',
-      header: 'Scheduled Date',
+      id: 'shipped_date',
+      header: 'Ship Date',
       cell: (row: MaterialJob) => (
-        <span className='whitespace-nowrap'>{formatDate(row.scheduled_date || '') || '—'}</span>
+        <span className='whitespace-nowrap'>{formatDate(row.shipped_date || '') || '—'}</span>
       ),
       sortable: true
     },
     {
-      id: 'total_material_cost',
-      header: 'Total Material',
+      id: 'available_date',
+      header: 'Avail. Date',
       cell: (row: MaterialJob) => (
-        <span>${row.total_material_cost != null ? Number(row.total_material_cost).toFixed(2) : '0.00'}</span>
+        <span className='whitespace-nowrap'>{formatDate(row.available_date || '') || '—'}</span>
+      ),
+      sortable: true
+    },
+    {
+      id: 'scheduled_date',
+      header: 'Schedule Date',
+      cell: (row: MaterialJob) => (
+        <span className='whitespace-nowrap'>{formatDate(row.scheduled_date || '') || '—'}</span>
       ),
       sortable: true
     },
@@ -380,14 +392,12 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
   }
 
   const handleClearFilters = () => {
-    setFilterOptions({ job_type: 'inventory' })
+    setFilterOptions({})
     setSearchValue('')
   }
 
   const hasActiveFilters = () => {
-    const filterKeys = Object.keys(filterOptions).filter(
-      key => key !== 'page' && key !== 'per_page' && key !== 'job_type'
-    )
+    const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
     return filterKeys.length > 0
   }
@@ -417,7 +427,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
 
   return (
     <>
-      <CommonLayout title='Inventory Jobs' buttons={[]}>
+      <CommonLayout title='Non-Inventory Jobs' buttons={[]}>
         <CommonTable
           data={apiResponse ?? undefined}
           columns={columns}
@@ -432,7 +442,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
           }}
         />
       </CommonLayout>
-      <AddInventoryJobActionModal
+      <AddNonInventoryJobActionModal
         open={openActionModal}
         onOpenChange={setOpenActionModal}
         materialJob={selectedJob}
@@ -471,4 +481,4 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
   )
 }
 
-export default InventoryJobs
+export default NonInventoryJobs

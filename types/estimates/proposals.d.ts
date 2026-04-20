@@ -82,6 +82,7 @@ export interface ProposalServiceItem extends Model {
   unit_price: number
   unit_name: string | null
   unit_id: string | null
+  unit?: Unit
   vendor_id?: string | null
   total_price: number
   discount: number
