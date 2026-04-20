@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useForm } from 'react-hook-form'
 
@@ -8,6 +8,8 @@ import { toast } from 'sonner'
 import { format } from 'date-fns'
 
 import { BusinessLocation, MaterialJob, MaterialJobActionPayload, Staff, Warehouse } from '@/types'
+import { VendorPickupAddress } from '@/types/vendors'
+import { ClientAddress } from '@/types/clients/clients_addresses'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -16,6 +18,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { DatePicker } from '@/components/ui/datePicker'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import MaterialJobService from '@/services/api/products/material-jobs.service'
+import VendorPickupAddressService from '@/services/api/vendors/vendor-pickup-addresses.service'
+import ClientAddressService from '@/services/api/clients/client-addresses.service'
 
 interface AddNonInventoryJobActionModalProps {
   open: boolean
@@ -32,17 +36,24 @@ interface FormValues {
   action_date: Date | null
   employee_id: string
   quantity: number | string
-  warehouse_type: 'warehouse' | 'location'
+  warehouse_type: 'warehouse' | 'location' | 'vendor_address' | 'job_site'
   warehouse_id: string
-  stock_area: string
-  stock_section: string
   location_notes: string
 }
 
 const ACTION_STATUS_OPTIONS = [
-  { value: 'allocated', label: 'Allocated' },
+  { value: 'shipped_from_vendor', label: 'Shipped From Vendor' },
+  { value: 'received', label: 'Received' },
   { value: 'prepared', label: 'Prepared' },
-  { value: 'picked_up', label: 'Picked Up' }
+  { value: 'picked_up', label: 'Picked Up' },
+  { value: 'shipped', label: 'Shipped' }
+]
+
+const LOCATION_TYPE_OPTIONS = [
+  { value: 'warehouse', label: 'Warehouse' },
+  { value: 'location', label: 'Location' },
+  { value: 'vendor_address', label: 'Vendor Address' },
+  { value: 'job_site', label: 'Job Site' }
 ]
 
 const AddNonInventoryJobActionModal = ({
@@ -59,6 +70,10 @@ const AddNonInventoryJobActionModal = ({
 
   const maxQuantity = materialJob?.quantity ?? 0
 
+  const [vendorAddresses, setVendorAddresses] = useState<VendorPickupAddress[]>([])
+  const [clientAddresses, setClientAddresses] = useState<ClientAddress[]>([])
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(false)
+
   const form = useForm<FormValues>({
     defaultValues: {
       action_status: '',
@@ -67,8 +82,6 @@ const AddNonInventoryJobActionModal = ({
       quantity: materialJob?.quantity ?? '',
       warehouse_type: 'warehouse',
       warehouse_id: '',
-      stock_area: '',
-      stock_section: '',
       location_notes: ''
     }
   })
@@ -84,16 +97,40 @@ const AddNonInventoryJobActionModal = ({
         quantity: materialJob?.quantity ?? '',
         warehouse_type: 'warehouse',
         warehouse_id: '',
-        stock_area: '',
-        stock_section: '',
         location_notes: ''
       })
+      setVendorAddresses([])
+      setClientAddresses([])
     }
   }, [open, materialJob])
 
   useEffect(() => {
     form.setValue('warehouse_id', '')
-  }, [warehouseType])
+
+    if (!open || !materialJob) return
+
+    if (warehouseType === 'vendor_address' && materialJob.vendor_id) {
+      setIsLoadingAddresses(true)
+      VendorPickupAddressService.index({ vendor_id: materialJob.vendor_id })
+        .then(res => {
+          const d = res.data
+
+          setVendorAddresses(Array.isArray(d) ? d : (d?.data ?? []))
+        })
+        .catch(() => toast.error('Failed to load vendor addresses'))
+        .finally(() => setIsLoadingAddresses(false))
+    } else if (warehouseType === 'job_site' && materialJob.client_id) {
+      setIsLoadingAddresses(true)
+      ClientAddressService.index({ client_id: materialJob.client_id })
+        .then(res => {
+          const d = res.data
+
+          setClientAddresses(Array.isArray(d) ? d : (d?.data ?? []))
+        })
+        .catch(() => toast.error('Failed to load customer addresses'))
+        .finally(() => setIsLoadingAddresses(false))
+    }
+  }, [warehouseType, open, materialJob])
 
   const onSubmit = async (values: FormValues) => {
     if (!materialJob) return
@@ -106,8 +143,6 @@ const AddNonInventoryJobActionModal = ({
       vendor_id: materialJob.vendor_id ?? '',
       warehouse_type: values.warehouse_type,
       warehouse_id: values.warehouse_id,
-      stock_area: values.stock_area || undefined,
-      stock_section: values.stock_section || undefined,
       location_notes: values.location_notes || undefined
     }
 
@@ -138,6 +173,61 @@ const AddNonInventoryJobActionModal = ({
       <span className='text-sm font-medium rounded-md px-3 py-2 bg-muted min-h-9'>{value ?? '—'}</span>
     </div>
   )
+
+  const getLocationLabel = () => {
+    switch (warehouseType) {
+      case 'warehouse':
+        return 'Warehouse'
+      case 'location':
+        return 'Location'
+      case 'vendor_address':
+        return 'Vendor Address'
+      case 'job_site':
+        return 'Job Site Address'
+    }
+  }
+
+  const getLocationPlaceholder = () => {
+    switch (warehouseType) {
+      case 'warehouse':
+        return 'Select warehouse'
+      case 'location':
+        return 'Select location'
+      case 'vendor_address':
+        return isLoadingAddresses ? 'Loading...' : 'Select vendor address'
+      case 'job_site':
+        return isLoadingAddresses ? 'Loading...' : 'Select job site address'
+    }
+  }
+
+  const renderLocationOptions = () => {
+    switch (warehouseType) {
+      case 'warehouse':
+        return warehouses.map(w => (
+          <SelectItem key={w.id} value={w.id}>
+            {w.title}
+          </SelectItem>
+        ))
+      case 'location':
+        return businessLocations.map(bl => (
+          <SelectItem key={bl.id} value={bl.id}>
+            {bl.name}
+          </SelectItem>
+        ))
+      case 'vendor_address':
+        return vendorAddresses.map(addr => (
+          <SelectItem key={addr.id} value={addr.id}>
+            {addr.title} {addr.street_address ? `— ${addr.street_address}` : ''}
+          </SelectItem>
+        ))
+      case 'job_site':
+        return clientAddresses.map(addr => (
+          <SelectItem key={addr.id} value={addr.id}>
+            {addr.title} {addr.street_address ? `— ${addr.street_address}` : ''}
+          </SelectItem>
+        ))
+    }
+  }
 
   return (
     <CommonDialog
@@ -295,25 +385,28 @@ const AddNonInventoryJobActionModal = ({
                 )}
               />
 
-              {/* Warehouse Type */}
+              {/* Location Type */}
               <FormField
                 control={form.control}
                 name='warehouse_type'
-                rules={{ required: 'Warehouse type is required' }}
+                rules={{ required: 'Location type is required' }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Warehouse Type <span className='text-destructive'>*</span>
+                      Location Type <span className='text-destructive'>*</span>
                     </FormLabel>
                     <Select value={field.value} onValueChange={field.onChange} disabled={form.formState.isSubmitting}>
                       <FormControl>
                         <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select type' />
+                          <SelectValue placeholder='Select location type' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value='warehouse'>Warehouse</SelectItem>
-                        <SelectItem value='location'>Location</SelectItem>
+                        {LOCATION_TYPE_OPTIONS.map(opt => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -321,38 +414,27 @@ const AddNonInventoryJobActionModal = ({
                 )}
               />
 
-              {/* Warehouse / Location */}
+              {/* Dynamic Location Dropdown */}
               <FormField
                 control={form.control}
                 name='warehouse_id'
-                rules={{ required: 'Warehouse is required' }}
+                rules={{ required: `${getLocationLabel()} is required` }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      {warehouseType === 'warehouse' ? 'Warehouse' : 'Location'}{' '}
-                      <span className='text-destructive'>*</span>
+                      {getLocationLabel()} <span className='text-destructive'>*</span>
                     </FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange} disabled={form.formState.isSubmitting}>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={form.formState.isSubmitting || isLoadingAddresses}
+                    >
                       <FormControl>
                         <SelectTrigger className='w-full'>
-                          <SelectValue
-                            placeholder={warehouseType === 'warehouse' ? 'Select warehouse' : 'Select location'}
-                          />
+                          <SelectValue placeholder={getLocationPlaceholder()} />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        {warehouseType === 'warehouse'
-                          ? warehouses.map(w => (
-                              <SelectItem key={w.id} value={w.id}>
-                                {w.title}
-                              </SelectItem>
-                            ))
-                          : businessLocations.map(bl => (
-                              <SelectItem key={bl.id} value={bl.id}>
-                                {bl.name}
-                              </SelectItem>
-                            ))}
-                      </SelectContent>
+                      <SelectContent>{renderLocationOptions()}</SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
@@ -361,37 +443,6 @@ const AddNonInventoryJobActionModal = ({
 
               {/* Max Quantity (read-only) */}
               {displayField(`Max Quantity to Prepare`, `${maxQuantity} ${purchaseUnit}`)}
-
-              {/* Stock Area & Stock Section */}
-              <div className='grid grid-cols-2 gap-4'>
-                <FormField
-                  control={form.control}
-                  name='stock_area'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Stock Area</FormLabel>
-                      <FormControl>
-                        <Input placeholder='Stock area' {...field} disabled={form.formState.isSubmitting} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='stock_section'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Stock Section</FormLabel>
-                      <FormControl>
-                        <Input placeholder='Stock section' {...field} disabled={form.formState.isSubmitting} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
             </div>
           </div>
         </form>

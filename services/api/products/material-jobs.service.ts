@@ -1,6 +1,6 @@
 import apiInterceptor from '../api.interceptor'
 import { API_URL, MATERIAL_JOBS, MATERIAL_JOBS_ACTIONS } from '@/constants/api'
-import { MaterialJobActionPayload } from '@/types'
+import { MaterialJobActionPayload, MaterialJobUpdatePayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
 
 export default class MaterialJobService {
@@ -41,6 +41,30 @@ export default class MaterialJobService {
 
         throw new Error(errorData.message || 'Failed to fetch material job details')
       }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /** Update Material Job API */
+  static update = async (materialJobId: string, payload: MaterialJobUpdatePayload) => {
+    try {
+      const response = await apiInterceptor(API_URL + MATERIAL_JOBS + materialJobId + '/non-inventory', {
+        requiresAuth: true,
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      await revalidate('material-jobs')
+      await revalidate(`material-jobs/${materialJobId}`)
 
       return await response.json()
     } catch (error) {

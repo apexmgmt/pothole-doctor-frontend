@@ -190,12 +190,8 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
     {
       id: 'job_type',
       header: 'Job Type',
-      cell: (row: MaterialJob) => (
-        <Badge variant='secondary' className='capitalize whitespace-nowrap'>
-          {row.job_type?.replace(/_/g, ' ') || '—'}
-        </Badge>
-      ),
-      sortable: true
+      cell: (row: MaterialJob) => <span>{row.service_type?.name || '—'}</span>,
+      sortable: false
     },
     {
       id: 'sale_representative',

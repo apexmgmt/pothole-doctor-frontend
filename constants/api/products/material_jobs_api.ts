@@ -2,6 +2,7 @@
  * Material Jobs API endpoints
  * @method GET - for data table api endpoint
  * @method GET - /materialJobId - for showing details of a material job
+ * @method PUT - /materialJobId - for order a non inventory material job
  */
 export const MATERIAL_JOBS: string = '/v1/tenant/material-jobs/'
 

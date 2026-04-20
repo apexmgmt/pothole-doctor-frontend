@@ -1,4 +1,17 @@
-import { Client, Company, Model, Product, ServiceType, Staff, Unit, Vendor, Warehouse, WorkOrder } from '..'
+import ProposalService from '@/services/api/estimates/proposals.service'
+import {
+  Client,
+  Company,
+  Model,
+  Product,
+  ProposalServiceItem,
+  ServiceType,
+  Staff,
+  Unit,
+  Vendor,
+  Warehouse,
+  WorkOrder
+} from '..'
 
 export interface MaterialJob extends Model {
   job_type: 'inventory' | 'non_inventory'
@@ -12,14 +25,13 @@ export interface MaterialJob extends Model {
     | 'partially_received'
     | 'shipped'
     | 'shipped_from_vendor'
-  order_status: 'new'
-  ordered
-  back_ordered
-  pending
-  cancelled
-  completed
+  order_status: 'new' | 'ordered' | 'back_ordered' | 'pending' | 'cancelled' | 'completed'
   work_order_id: string
   work_order?: WorkOrder
+  service_group_id: string
+  service_group?: ProposalService
+  service_item_id: string
+  service_item?: ProposalServiceItem
   order_number: string
   service_type_id: string
   service_type?: ServiceType
@@ -85,9 +97,29 @@ export interface MaterialJobActionPayload {
   action_date: string
   employee_id: string
   vendor_id: string
-  warehouse_type: 'warehouse' | 'location'
+  warehouse_type: 'warehouse' | 'location' | 'vendor_address' | 'job_site'
   warehouse_id: string
   stock_area?: string
   stock_section?: string
   location_notes?: string
+}
+
+export interface MaterialJobUpdatePayload {
+  order_status?: string
+  order_number?: string
+  estimated_received_date?: string
+  shipped_date?: string
+  po_create_date?: string
+  shipped_to?: 'vendor_address' | 'location' | 'warehouse' | 'job_site'
+  shipped_to_location_id?: string
+  freight_cost?: number
+  tax_amount?: number
+  discount_amount?: number
+  vendor_invoice_total?: number
+  adjustment_amount?: number
+  is_reconciled?: boolean
+  bill_date?: string
+  payment_term_id?: string
+  due_date?: string
+  comments?: string
 }

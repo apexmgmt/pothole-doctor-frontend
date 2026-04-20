@@ -164,8 +164,18 @@ const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses,
 
   const columns: Column[] = [
     {
+      id: 'order_status',
+      header: 'Order Status',
+      cell: (row: MaterialJob) => (
+        <Badge variant={getStatusVariant(row.order_status)} className='capitalize whitespace-nowrap'>
+          {row.order_status?.replace(/_/g, ' ') || '—'}
+        </Badge>
+      ),
+      sortable: true
+    },
+    {
       id: 'status',
-      header: 'Status',
+      header: 'Action Status',
       cell: (row: MaterialJob) => (
         <Badge variant={getStatusVariant(row.status)} className='capitalize whitespace-nowrap'>
           {row.status?.replace(/_/g, ' ') || '—'}
@@ -190,12 +200,8 @@ const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses,
     {
       id: 'job_type',
       header: 'Job Type',
-      cell: (row: MaterialJob) => (
-        <Badge variant='secondary' className='capitalize whitespace-nowrap'>
-          {row.job_type?.replace(/_/g, ' ') || '—'}
-        </Badge>
-      ),
-      sortable: true
+      cell: (row: MaterialJob) => <span>{row.service_type?.name || '—'}</span>,
+      sortable: false
     },
     {
       id: 'sale_representative',
@@ -258,9 +264,15 @@ const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses,
       sortable: false
     },
     {
-      id: 'allocated_quantity',
-      header: 'Allocated Qty',
-      cell: (row: MaterialJob) => <span>{row.allocated_quantity ?? '—'}</span>,
+      id: 'quantity',
+      header: 'Quantity',
+      cell: (row: MaterialJob) => <span>{row.quantity ?? '—'}</span>,
+      sortable: true
+    },
+    {
+      id: 'received_quantity',
+      header: 'Received Qty',
+      cell: (row: MaterialJob) => <span>{row.received_quantity ?? '—'}</span>,
       sortable: true
     },
     {
@@ -270,30 +282,26 @@ const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses,
       sortable: true
     },
     {
-      id: 'on_hand_quantity',
-      header: 'On-Hand Qty',
-      cell: (row: MaterialJob) => <span>{row.on_hand_quantity ?? '—'}</span>,
-      sortable: true
-    },
-    {
-      id: 'created_at',
-      header: 'Created Date',
-      cell: (row: MaterialJob) => <span className='whitespace-nowrap'>{formatDate(row.created_at || '') || '—'}</span>,
-      sortable: true
-    },
-    {
-      id: 'scheduled_date',
-      header: 'Scheduled Date',
+      id: 'shipped_date',
+      header: 'Ship Date',
       cell: (row: MaterialJob) => (
-        <span className='whitespace-nowrap'>{formatDate(row.scheduled_date || '') || '—'}</span>
+        <span className='whitespace-nowrap'>{formatDate(row.shipped_date || '') || '—'}</span>
       ),
       sortable: true
     },
     {
-      id: 'total_material_cost',
-      header: 'Total Material',
+      id: 'available_date',
+      header: 'Avail. Date',
       cell: (row: MaterialJob) => (
-        <span>${row.total_material_cost != null ? Number(row.total_material_cost).toFixed(2) : '0.00'}</span>
+        <span className='whitespace-nowrap'>{formatDate(row.available_date || '') || '—'}</span>
+      ),
+      sortable: true
+    },
+    {
+      id: 'scheduled_date',
+      header: 'Schedule Date',
+      cell: (row: MaterialJob) => (
+        <span className='whitespace-nowrap'>{formatDate(row.scheduled_date || '') || '—'}</span>
       ),
       sortable: true
     },
