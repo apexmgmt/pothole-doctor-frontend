@@ -23,6 +23,7 @@ import NonInventoryProductService from '@/services/api/products/non-inventory-pr
 import CreateEditViewNonInventoryProductModal from './CreateEditViewNonInventoryProductModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
 import { hasPermission } from '@/utils/role-permission'
 
 const NonInventoryProducts: React.FC<ProductsProps> = ({
@@ -30,6 +31,9 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
   uomUnits,
   serviceTypes,
   vendors,
+  isFromModal = false,
+  selectedRows,
+  setSelectedRows,
   hideTitle = false,
   hideActionButton = false
 }) => {
@@ -193,6 +197,32 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
   }
 
   const columns: Column[] = [
+    ...((isFromModal
+      ? [
+          {
+            id: 'select',
+            header: '',
+            cell: (row: Product) => (
+              <Checkbox
+                checked={selectedRows?.some((r: Product) => r.id === row.id)}
+                onCheckedChange={checked => {
+                  setSelectedRows?.((prev: Product[]) => {
+                    if (checked) {
+                      if (!prev.some(r => r.id === row.id)) return [...prev, row]
+
+                      return prev
+                    } else {
+                      return prev.filter(r => r.id !== row.id)
+                    }
+                  })
+                }}
+              />
+            ),
+            sortable: false,
+            size: 16
+          }
+        ]
+      : []) as Column[]),
     {
       id: 'index',
       header: '#',

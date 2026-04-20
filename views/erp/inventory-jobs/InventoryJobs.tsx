@@ -44,8 +44,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
   const [searchValue, setSearchValue] = useState<string>('')
 
   const [filterOptions, setFilterOptions] = useState<any>(() => ({
-    ...getInitialFilters(searchParams),
-    job_type: 'inventory'
+    ...getInitialFilters(searchParams)
   }))
 
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
@@ -63,7 +62,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
   useEffect(() => {
     const timer = setTimeout(() => {
       setFilterOptions((prev: any) => {
-        const newOptions = { ...prev, job_type: 'inventory' }
+        const newOptions = { ...prev }
 
         if (searchValue && searchValue.trim() !== '') {
           newOptions.search = searchValue
@@ -93,7 +92,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
     setIsLoading(true)
 
     try {
-      MaterialJobService.index(filterOptions)
+      MaterialJobService.index({...filterOptions, job_type: 'inventory'})
         .then(response => {
           setApiResponse(response.data)
           setIsLoading(false)

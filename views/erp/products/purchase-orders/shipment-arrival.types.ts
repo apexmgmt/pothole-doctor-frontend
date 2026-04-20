@@ -10,7 +10,7 @@ export interface ReceiptRowState {
   received_date: Date | null
   warehouse_type: 'warehouse' | 'location'
   warehouse_id: string
-  stock_area_id: string
+  stock_area: string
   stock_section_id: string
   dye_lot: string
   is_moved_to_inventory: boolean
