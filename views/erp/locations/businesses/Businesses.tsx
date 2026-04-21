@@ -22,6 +22,7 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
 import { DetailsIcon, InvoiceIcon, LocationIcon, UserIcon } from '@/public/icons'
 import BusinessLocationDetails from './BusinessLocationDetails'
+import BusinessLocationClients from './BusinessLocationClients'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
@@ -310,9 +311,16 @@ const BusinessLocations: React.FC = () => {
       : []),
     {
       label: 'Customers',
-      icon: DetailsIcon,
+      icon: UserIcon,
       onClick: () => setActiveTab('customers'),
       isActive: activeTab === 'customers',
+      disabled: !selectedBusinessLocationId
+    },
+    {
+      label: 'Leads',
+      icon: UserIcon,
+      onClick: () => setActiveTab('leads'),
+      isActive: activeTab === 'leads',
       disabled: !selectedBusinessLocationId
     },
     ...(canManageEstimate
@@ -373,6 +381,14 @@ const BusinessLocations: React.FC = () => {
 
         {activeTab === 'details' && selectedBusinessLocationId && (
           <BusinessLocationDetails businessLocationId={selectedBusinessLocationId} fetchData={fetchData} />
+        )}
+
+        {activeTab === 'customers' && selectedBusinessLocationId && (
+          <BusinessLocationClients locationId={selectedBusinessLocationId} type='customer' />
+        )}
+
+        {activeTab === 'leads' && selectedBusinessLocationId && (
+          <BusinessLocationClients locationId={selectedBusinessLocationId} type='lead' />
         )}
       </CommonLayout>
     </>
