@@ -271,13 +271,13 @@ const ProductStock: React.FC<ProductsProps> = ({
     {
       id: 'required_stock',
       header: 'Required',
-      cell: (row: Product) => <span className='font-medium'>{row.required_stock ?? 0}</span>,
+      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.required_stock ?? 0)}</span>,
       sortable: false
     },
     {
       id: 'shortage_stock',
       header: 'Shortage',
-      cell: (row: Product) => <span className='font-medium'>{row.shortage_stock ?? 0}</span>,
+      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.shortage_stock ?? 0)}</span>,
       sortable: false
     },
     {
