@@ -237,7 +237,7 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
       </div>
 
       {/* Freight Amount */}
-      <FormField
+      {/* <FormField
         control={form.control}
         name='freight_amount'
         render={({ field }) => (
@@ -256,7 +256,7 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
             <FormMessage />
           </FormItem>
         )}
-      />
+      /> */}
       <div className='grid grid-cols-2 gap-4'>
         {/* Minimum Quantity Field */}
         <FormField
