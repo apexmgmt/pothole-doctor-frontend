@@ -406,7 +406,7 @@ const BusinessLocationClients: React.FC<{
           last_page: apiResponse?.last_page || 1
         }}
         columns={columns}
-        customFilters={customFilters}
+        customFilters={<></>}
         setFilterOptions={setFilterOptions}
         showFilters={true}
         pagination={true}

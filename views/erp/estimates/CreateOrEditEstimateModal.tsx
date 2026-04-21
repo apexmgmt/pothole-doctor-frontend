@@ -68,7 +68,8 @@ const CreateOrEditEstimateModal = ({
       client_id: estimateDetails?.client_id || '',
       assign_id: estimateDetails?.assign_id || '',
       payment_term_id: estimateDetails?.payment_term_id || '',
-      location: estimateDetails?.location || '',
+      address_id: estimateDetails?.address_id || '',
+      location_id: estimateDetails?.location_id || '',
       expiration_date: estimateDetails?.expiration_date || '',
       biding_date: estimateDetails?.biding_date || '',
       interaction: estimateDetails?.interaction || '',
@@ -92,7 +93,8 @@ const CreateOrEditEstimateModal = ({
         client_id: estimateDetails?.client_id || '',
         assign_id: estimateDetails?.assign_id || '',
         payment_term_id: estimateDetails?.payment_term_id || '',
-        location: estimateDetails?.location || '',
+        address_id: estimateDetails?.address_id || '',
+        location_id: estimateDetails?.location_id || '',
         expiration_date: estimateDetails?.expiration_date || '',
         biding_date: estimateDetails?.biding_date || '',
         interaction: estimateDetails?.interaction || '',
@@ -117,7 +119,8 @@ const CreateOrEditEstimateModal = ({
       client_id: values.client_id,
       assign_id: values.assign_id,
       payment_term_id: values.payment_term_id,
-      location: values.location,
+      address_id: values.address_id,
+      location_id: values.location_id,
       expiration_date: values.expiration_date,
       biding_date: values.biding_date,
       tax_rate: values.tax_rate,
@@ -129,7 +132,15 @@ const CreateOrEditEstimateModal = ({
           pickup_notes: values.pickup_notes
         }),
         ...(values.interaction === 'cash_and_delivery' && {
-          delivery_datetime: values.delivery_datetime,
+          delivery_datetime: (() => {
+            const raw = values.delivery_datetime
+
+            if (!raw) return null
+            const d = typeof raw === 'number' ? new Date(raw) : new Date((raw as string).replace(' ', 'T'))
+            const pad = (n: number) => String(n).padStart(2, '0')
+
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+          })(),
           delivery_location: values.delivery_location,
           delivery_notes: values.delivery_notes
         })
@@ -176,7 +187,8 @@ const CreateOrEditEstimateModal = ({
       client_id: estimateDetails?.client_id || '',
       assign_id: estimateDetails?.assign_id || '',
       payment_term_id: estimateDetails?.payment_term_id || '',
-      location: estimateDetails?.location || '',
+      address_id: estimateDetails?.address_id || '',
+      location_id: estimateDetails?.location_id || '',
       expiration_date: estimateDetails?.expiration_date || '',
       biding_date: estimateDetails?.biding_date || '',
       interaction: estimateDetails?.interaction || '',
@@ -207,25 +219,13 @@ const CreateOrEditEstimateModal = ({
 
   const addressOptions = selectedClient?.addresses || []
 
-  // Find default address value (comma separated)
-  const defaultAddress = addressOptions.find(addr => addr.is_default === 1)
-    ? [
-        addressOptions.find(addr => addr.is_default === 1)?.street_address,
-        addressOptions.find(addr => addr.is_default === 1)?.city?.name,
-        addressOptions.find(addr => addr.is_default === 1)?.state?.name,
-        addressOptions.find(addr => addr.is_default === 1)?.zip_code
-      ]
-        .filter(Boolean)
-        .join(', ')
-    : ''
+  // Find default address ID and auto-set when client changes
+  const defaultAddressId = addressOptions.find(addr => addr.is_default === 1)?.id ?? ''
 
-  // When client changes, set location to default address (comma separated) if available
+  // When client changes, auto-select default address and client's business location
   useEffect(() => {
-    if (defaultAddress) {
-      form.setValue('location', defaultAddress)
-    } else {
-      form.setValue('location', '')
-    }
+    form.setValue('address_id', defaultAddressId)
+    form.setValue('location_id', selectedClient?.location_id ?? '')
   }, [form.watch('client_id')])
 
   return (
@@ -330,8 +330,9 @@ const CreateOrEditEstimateModal = ({
                     onValueChange={value => {
                       field.onChange(value)
 
-                      // Reset location when customer changes
-                      form.setValue('location', '')
+                      // Reset address and location when customer changes (useEffect will auto-set defaults)
+                      form.setValue('address_id', '')
+                      form.setValue('location_id', '')
                     }}
                   >
                     <SelectTrigger className='w-full'>
@@ -564,14 +565,44 @@ const CreateOrEditEstimateModal = ({
             </>
           )}
           {/* Location field (address select) */}
+          {/* Business Location */}
           <FormField
             control={form.control}
-            name='location'
+            name='location_id'
+            render={({ field }) => (
+              <FormItem className='col-span-2'>
+                <FormLabel>Business Location</FormLabel>
+                <FormControl>
+                  <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                    <SelectTrigger className='w-full'>
+                      <SelectValue placeholder='Select Business Location' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {businessLocations.length === 0 ? (
+                        <div className='px-3 py-2 text-muted-foreground text-sm'>No locations found</div>
+                      ) : (
+                        businessLocations.map(loc => (
+                          <SelectItem key={loc.id} value={loc.id}>
+                            {loc.name}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Event Location (Client Address) */}
+          <FormField
+            control={form.control}
+            name='address_id'
             render={({ field }) => (
               <FormItem className='col-span-2'>
                 <FormLabel>Event Location</FormLabel>
                 <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange} disabled={!selectedClient}>
+                  <Select value={field.value ?? ''} onValueChange={field.onChange} disabled={!selectedClient}>
                     <SelectTrigger className='w-full h-auto text-left whitespace-normal'>
                       <SelectValue placeholder={selectedClient ? 'Select Address' : 'Select Customer first'} />
                     </SelectTrigger>
@@ -580,7 +611,7 @@ const CreateOrEditEstimateModal = ({
                         <div className='px-3 py-2 text-muted-foreground text-sm'>No addresses found</div>
                       ) : (
                         addressOptions.map(address => {
-                          const value = [
+                          const label = [
                             address.street_address,
                             address.city?.name,
                             address.state?.name,
@@ -590,8 +621,8 @@ const CreateOrEditEstimateModal = ({
                             .join(', ')
 
                           return (
-                            <SelectItem key={address.id} value={value}>
-                              {address.title} - {value}
+                            <SelectItem key={address.id} value={address.id}>
+                              {address.title} - {label}
                             </SelectItem>
                           )
                         })

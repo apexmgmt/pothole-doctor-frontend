@@ -20,7 +20,12 @@ const InvoiceBillingInformation = ({ invoice }: { invoice: Invoice }) => {
       {/* Service Site */}
       <div className='flex flex-col sm:text-right'>
         <h6 className='font-semibold text-base mb-4'>Service Site</h6>
-        <p>{invoice?.estimate?.location}</p>
+        <p>
+          {invoice?.address?.street_address}
+          {invoice?.address?.city?.name ? ', ' + invoice.address.city.name : ''}
+          {invoice?.address?.state?.name ? ', ' + invoice.address.state.name : ''}
+          {invoice?.address?.zip_code ? ' ' + invoice.address.zip_code : ''}
+        </p>
         <p>{invoice?.client?.email}</p>
         <p>{invoice?.client?.phone}</p>
       </div>

@@ -57,7 +57,10 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null)
 
   const address = useMemo(() => {
-    return estimate?.location || null
+    return estimate?.address
+      ? `${estimate?.address?.street_address}, ${estimate.address?.city?.name}, ${estimate.address?.state?.name} ${estimate.address?.zip_code}` ||
+          null
+      : null
   }, [estimate])
 
   const totalArea = useMemo(() => {
