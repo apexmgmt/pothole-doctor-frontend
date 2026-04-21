@@ -15,7 +15,7 @@ import { Column, DataTableApiResponse, Product, ProductsProps, PurchaseOrder } f
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters, mathRoundFixed, updateURL } from '@/utils/utility'
 import ProductService from '@/services/api/products/products.service'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { PackageIcon, WarehouseIcon, SlidersHorizontalIcon } from 'lucide-react'
@@ -183,31 +183,31 @@ const ProductStock: React.FC<ProductsProps> = ({
     {
       id: 'on_hand_stock',
       header: 'On Hand',
-      cell: (row: Product) => <span className='font-medium'>{row.on_hand_stock ?? 0}</span>,
+      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.on_hand_stock ?? 0)}</span>,
       sortable: false
     },
     {
       id: 'allocated_stock',
       header: 'Allocated',
-      cell: (row: Product) => <span className='font-medium'>{row.allocated_stock ?? 0}</span>,
+      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.allocated_stock ?? 0)}</span>,
       sortable: false
     },
     {
       id: 'prepared_stock',
       header: 'Prepared',
-      cell: (row: Product) => <span className='font-medium'>{row.prepared_stock ?? 0}</span>,
+      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.prepared_stock ?? 0)}</span>,
       sortable: false
     },
     {
       id: 'available_stock',
       header: 'Available',
-      cell: (row: Product) => <span className='font-medium'>{row.available_stock ?? 0}</span>,
+      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.available_stock ?? 0)}</span>,
       sortable: false
     },
     {
       id: 'picked_up_stock',
       header: 'Picked Up',
-      cell: (row: Product) => <span className='font-medium'>{row.picked_up_stock ?? 0}</span>,
+      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.picked_up_stock ?? 0)}</span>,
       sortable: false
     },
     {

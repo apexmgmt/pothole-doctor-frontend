@@ -265,3 +265,14 @@ export const checkSubdomain = (req: NextRequest) => {
   return { subdomain, domain, isSubdomain, isApexDomain }
 }
 
+/**
+ * Round a number to a specified number of decimal places using standard rounding rules
+ * @param value number
+ * @param decimal number default 4
+ * @returns number
+ */
+export const mathRoundFixed = (value: number, decimal: number = 4): number => {
+  const factor = Math.pow(10, decimal)
+
+  return Math.round((value + Number.EPSILON) * factor) / factor
+}
