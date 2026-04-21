@@ -1,22 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
-import { zodResolver } from '@hookform/resolvers/zod'
-
-import * as z from 'zod'
+import { useEffect } from 'react'
 
 import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
-import { PaymentTermPayload, PartnerType, PartnerTypePayload, Unit, UnitPayload } from '@/types'
+import { Unit, UnitPayload } from '@/types'
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Label } from '@/components/ui/label'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import UnitService from '@/services/api/settings/units.service'
@@ -31,12 +25,10 @@ interface CreateOrEditUnitModalProps {
   onSuccess?: () => void
 }
 
-const formSchema = z.object({
-  name: z.string().min(2, { message: 'Unit name must be at least 2 characters' }),
-  group: z.string()
-})
-
-type FormValues = z.infer<typeof formSchema>
+type UnitFormValues = {
+  name: string
+  group: string
+}
 
 const CreateOrEditUnitModal = ({
   group,
@@ -47,11 +39,10 @@ const CreateOrEditUnitModal = ({
   unitDetails,
   onSuccess
 }: CreateOrEditUnitModalProps) => {
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<UnitFormValues>({
     defaultValues: {
       name: unitDetails?.name || '',
-      group: group
+      group: group || ''
     }
   })
 
@@ -60,12 +51,28 @@ const CreateOrEditUnitModal = ({
     if (open) {
       form.reset({
         name: unitDetails?.name || '',
-        group: group
+        group: group || ''
       })
     }
   }, [unitDetails, open, form])
 
-  const onSubmit = async (values: FormValues) => {
+  const handleApiError = (error: any, fallbackMessage: string) => {
+    if (error?.errors && typeof error.errors === 'object') {
+      Object.entries(error.errors).forEach(([field, messages]) => {
+        const msg = Array.isArray(messages) ? messages[0] : String(messages)
+
+        form.setError(field as keyof UnitFormValues, { type: 'server', message: msg })
+      })
+
+      if (error.message) {
+        toast.error(error.message)
+      }
+    } else {
+      toast.error(typeof error.message === 'string' ? error.message : fallbackMessage)
+    }
+  }
+
+  const onSubmit = async (values: UnitFormValues) => {
     const payload: UnitPayload = {
       name: values.name,
       group: group || ''
@@ -74,30 +81,26 @@ const CreateOrEditUnitModal = ({
     if (mode === 'create') {
       try {
         await UnitService.store(payload)
-          .then(response => {
+          .then(() => {
             toast.success('Unit created successfully')
             form.reset()
             onOpenChange(false)
             onSuccess?.()
           })
-          .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to create unit')
-          })
-      } catch (error) {
+          .catch(error => handleApiError(error, 'Failed to create unit'))
+      } catch {
         toast.error('Something went wrong while creating the unit!')
       }
     } else if (mode === 'edit' && unitId) {
       try {
         await UnitService.update(unitId, payload)
-          .then(response => {
+          .then(() => {
             toast.success('Unit updated successfully')
             onOpenChange(false)
             onSuccess?.()
           })
-          .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to update unit')
-          })
-      } catch (error) {
+          .catch(error => handleApiError(error, 'Failed to update unit'))
+      } catch {
         toast.error('Something went wrong while updating the unit!')
       }
     }
@@ -106,7 +109,7 @@ const CreateOrEditUnitModal = ({
   const onCancel = () => {
     form.reset({
       name: unitDetails?.name || '',
-      group: group
+      group: group || ''
     })
     onOpenChange(false)
   }
@@ -145,10 +148,13 @@ const CreateOrEditUnitModal = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          {/* Unit Name Field */}
           <FormField
             control={form.control}
             name='name'
+            rules={{
+              required: 'Unit name is required',
+              minLength: { value: 2, message: 'Unit name must be at least 2 characters' }
+            }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -161,31 +167,6 @@ const CreateOrEditUnitModal = ({
               </FormItem>
             )}
           />
-          {/* Group Field */}
-          {/* <FormField
-            control={form.control}
-            name='group'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Group <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <RadioGroup onValueChange={field.onChange} value={field.value} className='flex gap-4'>
-                    <FormItem className='flex items-center gap-2'>
-                      <RadioGroupItem value='uom' id='group-uom' />
-                      <Label htmlFor='group-uom'>UOM</Label>
-                    </FormItem>
-                    <FormItem className='flex items-center gap-2'>
-                      <RadioGroupItem value='measure' id='group-measure' />
-                      <Label htmlFor='group-measure'>Measure</Label>
-                    </FormItem>
-                  </RadioGroup>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
         </form>
       </Form>
     </CommonDialog>
