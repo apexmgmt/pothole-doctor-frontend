@@ -44,6 +44,7 @@ import ClientEmails from './emails/ClientEmails'
 import ClientNotes from './notes/ClientNotes'
 import ClientContacts from './contacts/ClientContacts'
 import ClientAddresses from './addresses/ClientAddresses'
+import ClientTasks from './tasks/ClientTasks'
 import { hasPermission } from '@/utils/role-permission'
 
 const Clients: React.FC<{
@@ -51,6 +52,7 @@ const Clients: React.FC<{
   interestLevels: InterestLevel[]
   companies: Company[]
   staffs: Staff[]
+  clients?: Client[]
   clientSources: ClientSource[]
   serviceTypes: ServiceType[]
   businessLocations: BusinessLocation[]
@@ -62,6 +64,7 @@ const Clients: React.FC<{
   interestLevels,
   companies,
   staffs,
+  clients = [],
   clientSources,
   serviceTypes,
   businessLocations,
@@ -526,7 +529,18 @@ const Clients: React.FC<{
       onClick: () => setActiveTab('addresses'),
       isActive: activeTab === 'addresses',
       disabled: !selectedClientId
-    }
+    },
+    ...(type === 'customer'
+      ? [
+          {
+            label: 'Tasks',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('tasks'),
+            isActive: activeTab === 'tasks',
+            disabled: !selectedClientId
+          }
+        ]
+      : [])
   ]
 
   return (
@@ -572,6 +586,7 @@ const Clients: React.FC<{
           countriesWithStatesAndCities={countriesWithStatesAndCities}
         />
       )}
+      {activeTab === 'tasks' && selectedClientId && type === 'customer' && <ClientTasks clientId={selectedClientId} />}
       <CreateEditClientModal
         type={type}
         isOpen={isModalOpen}
