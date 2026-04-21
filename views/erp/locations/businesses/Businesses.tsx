@@ -26,6 +26,7 @@ import BusinessLocationClients from './BusinessLocationClients'
 import BusinessLocationEstimates from './BusinessLocationEstimates'
 import BusinessLocationInvoices from './BusinessLocationInvoices'
 import BusinessLocationWarehouses from './BusinessLocationWarehouses'
+import BusinessLocationEmployees from './BusinessLocationEmployees'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
@@ -384,6 +385,10 @@ const BusinessLocations: React.FC = () => {
 
         {activeTab === 'details' && selectedBusinessLocationId && (
           <BusinessLocationDetails businessLocationId={selectedBusinessLocationId} fetchData={fetchData} />
+        )}
+
+        {activeTab === 'employees' && selectedBusinessLocationId && (
+          <BusinessLocationEmployees locationId={selectedBusinessLocationId} />
         )}
 
         {activeTab === 'customers' && selectedBusinessLocationId && (
