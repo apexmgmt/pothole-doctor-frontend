@@ -39,6 +39,7 @@ interface CreateOrEditInvoiceModalProps {
   staffs: Staff[]
   paymentTerms: PaymentTerm[]
   businessLocations: BusinessLocation[]
+  defaultClientId?: string
 }
 
 const CreateOrEditInvoiceModal = ({
@@ -54,7 +55,8 @@ const CreateOrEditInvoiceModal = ({
   clients,
   staffs,
   paymentTerms,
-  businessLocations
+  businessLocations,
+  defaultClientId
 }: CreateOrEditInvoiceModalProps) => {
   const form = useForm<InvoicePayload>({
     defaultValues: {
@@ -85,7 +87,7 @@ const CreateOrEditInvoiceModal = ({
         title: invoiceDetails?.title || '',
         service_type_id: invoiceDetails?.service_type_id || '',
         invoice_type_id: invoiceDetails?.invoice_type_id || '',
-        client_id: invoiceDetails?.client_id || '',
+        client_id: invoiceDetails?.client_id || defaultClientId || '',
         assign_id: invoiceDetails?.assign_id || '',
         payment_term_id: invoiceDetails?.payment_term_id || '',
         address_id: invoiceDetails?.address_id || '',

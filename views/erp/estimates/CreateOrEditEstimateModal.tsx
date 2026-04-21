@@ -42,6 +42,7 @@ interface CreateOrEditEstimateModalProps {
   staffs: Staff[]
   paymentTerms: PaymentTerm[]
   businessLocations: BusinessLocation[]
+  defaultClientId?: string
 }
 
 const CreateOrEditEstimateModal = ({
@@ -56,7 +57,8 @@ const CreateOrEditEstimateModal = ({
   clients,
   staffs,
   paymentTerms,
-  businessLocations
+  businessLocations,
+  defaultClientId
 }: CreateOrEditEstimateModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -90,7 +92,7 @@ const CreateOrEditEstimateModal = ({
         title: estimateDetails?.title || '',
         service_type_id: estimateDetails?.service_type_id || '',
         estimate_type_id: estimateDetails?.estimate_type_id || '',
-        client_id: estimateDetails?.client_id || '',
+        client_id: estimateDetails?.client_id || defaultClientId || '',
         assign_id: estimateDetails?.assign_id || '',
         payment_term_id: estimateDetails?.payment_term_id || '',
         address_id: estimateDetails?.address_id || '',
