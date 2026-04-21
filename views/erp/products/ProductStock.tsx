@@ -219,13 +219,13 @@ const ProductStock: React.FC<ProductsProps> = ({
 
         const coverageQty =
           row.available_stock != null && row.coverage_per_rate != null
-            ? Number((row.available_stock * row.coverage_per_rate).toFixed(2))
+            ? mathRoundFixed(row.available_stock * row.coverage_per_rate)
             : null
 
         return (
           <div className='flex flex-col leading-tight'>
             <span className='font-medium'>
-              {row.remaining_stock != null ? Number(row.remaining_stock).toFixed(2) : '0.00'}{' '}
+              {row.remaining_stock != null ? mathRoundFixed(row.remaining_stock) : '0'}{' '}
               {purchaseUnitName && <span className='text-muted-foreground text-xs'>({purchaseUnitName})</span>}
             </span>
             {coverageQty != null && (

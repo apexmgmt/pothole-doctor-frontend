@@ -274,5 +274,5 @@ export const checkSubdomain = (req: NextRequest) => {
 export const mathRoundFixed = (value: number, decimal: number = 4): number => {
   const factor = Math.pow(10, decimal)
 
-  return Math.round((value + Number.EPSILON) * factor) / factor
+  return Math.round((Number(value) + Number.EPSILON) * factor) / factor
 }
