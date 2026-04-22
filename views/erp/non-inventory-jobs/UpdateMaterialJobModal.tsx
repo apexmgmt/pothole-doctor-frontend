@@ -47,6 +47,7 @@ interface FormValues {
   freight_cost: string
   tax_amount: string
   discount_amount: string
+  total_amount: string
   vendor_invoice_total: string
   adjustment_amount: string
 }
@@ -65,6 +66,72 @@ const SHIP_TO_OPTIONS = [
   { value: 'warehouse', label: 'Warehouse' },
   { value: 'job_site', label: 'Job Site' }
 ]
+
+/**
+ * Calculates billing information based on service item data
+ * Uses: unit_cost, qty, freight_charge, tax_amount, tax_type, discount, discount_type
+ */
+const calculateBillingInfo = (materialJob: MaterialJob | null) => {
+  if (!materialJob?.service_item) {
+    return {
+      baseCost: 0,
+      freightCost: 0,
+      taxAmount: 0,
+      discountAmount: 0,
+      vendorInvoiceTotal: 0
+    }
+  }
+
+  const { service_item, quantity } = materialJob
+
+  // Ensure all values are numbers
+  const unitCost = Number(service_item.unit_cost) || 0
+  const qty = Number(quantity) || 1
+  const freightCharge = Number(service_item.freight_charge) || 0
+
+  // Base cost = unit_cost * quantity
+  const baseCost = unitCost * qty
+
+  // Freight cost
+  const freightCost = freightCharge
+
+  // Tax calculation
+  let taxAmount = 0
+
+  if (service_item.tax_type === 'percentage' && service_item.tax && service_item.is_sale) {
+    const taxRate = Number(service_item.tax) || 0
+
+    // Tax as percentage of (base cost + freight)
+    taxAmount = (baseCost + freightCost) * (taxRate / 100)
+  } else if (service_item.tax_type === 'fixed') {
+    // Tax as fixed amount
+    taxAmount = Number(service_item.tax_amount) || 0
+  }
+
+  // Discount calculation
+  let discountAmount = 0
+
+  if (service_item.discount_type === 'percentage' && service_item.discount) {
+    const discountRate = Number(service_item.discount) || 0
+
+    // Discount as percentage of base cost
+    discountAmount = baseCost * (discountRate / 100)
+  } else if (service_item.discount_type === 'fixed') {
+    // Discount as fixed amount
+    discountAmount = Number(service_item.discount) || 0
+  }
+
+  // Total = base cost + freight + tax - discount
+  const vendorInvoiceTotal = baseCost + freightCost + taxAmount - discountAmount
+
+  return {
+    baseCost: Number(baseCost.toFixed(2)),
+    freightCost: Number(freightCost.toFixed(2)),
+    taxAmount: Number(taxAmount.toFixed(2)),
+    discountAmount: Number(discountAmount.toFixed(2)),
+    vendorInvoiceTotal: Number(vendorInvoiceTotal.toFixed(2))
+  }
+}
 
 const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: UpdateMaterialJobModalProps) => {
   const [vendorAddresses, setVendorAddresses] = useState<VendorPickupAddress[]>([])
@@ -91,6 +158,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
       freight_cost: '',
       tax_amount: '',
       discount_amount: '',
+      total_amount: '',
       vendor_invoice_total: '',
       adjustment_amount: ''
     }
@@ -101,6 +169,9 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
   // Populate form when modal opens or job changes
   useEffect(() => {
     if (open && materialJob) {
+      // Calculate billing information based on service item
+      const billing = calculateBillingInfo(materialJob)
+
       form.reset({
         order_status: materialJob.order_status || '',
         estimated_received_date: materialJob.estimate_received_date
@@ -116,16 +187,17 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
         bill_date: null,
         payment_term_id: '',
         due_date: null,
-        freight_cost: '',
-        tax_amount: '',
-        discount_amount: '',
-        vendor_invoice_total: '',
+        freight_cost: String(billing.freightCost),
+        tax_amount: String(billing.taxAmount),
+        discount_amount: String(billing.discountAmount),
+        total_amount: String(billing.vendorInvoiceTotal),
+        vendor_invoice_total: String(billing.vendorInvoiceTotal),
         adjustment_amount: ''
       })
       setVendorAddresses([])
       setClientAddresses([])
     }
-  }, [open, materialJob])
+  }, [open, materialJob, form])
 
   // Fetch payment terms, warehouses and business locations once on open
   useEffect(() => {
@@ -184,6 +256,31 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
         .finally(() => setIsLoadingAddresses(false))
     }
   }, [shippedTo, open, materialJob])
+
+  // Watch billing fields and recalculate vendor_invoice_total
+  const freightCost = form.watch('freight_cost')
+  const taxAmount = form.watch('tax_amount')
+  const discountAmount = form.watch('discount_amount')
+
+  useEffect(() => {
+    if (!open || !materialJob?.service_item) return
+
+    // Calculate base cost from service item
+    const unitCost = Number(materialJob.service_item.unit_cost) || 0
+    const qty = Number(materialJob.quantity) || 1
+    const baseCost = unitCost * qty
+
+    // Parse input values
+    const freight = freightCost !== '' ? Number(freightCost) : 0
+    const tax = taxAmount !== '' ? Number(taxAmount) : 0
+    const discount = discountAmount !== '' ? Number(discountAmount) : 0
+
+    // Calculate total = base cost + freight + tax - discount
+    const total = baseCost + freight + tax - discount
+
+    // Update total_amount (read-only display) as string
+    form.setValue('total_amount', String(total.toFixed(2)))
+  }, [freightCost, taxAmount, discountAmount, open, materialJob, form])
 
   const getShippedToLabel = () => {
     switch (shippedTo) {
@@ -307,6 +404,8 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
   const vendorEmail = materialJob?.vendor?.email || '—'
   const vendorPhone = materialJob?.vendor?.userable?.phone || '—'
 
+  const calculatedBilling = calculateBillingInfo(materialJob)
+
   const serviceItemName = materialJob?.service_item?.name || '—'
   const serviceItemDescription = materialJob?.service_item?.description || '—'
   const serviceTypeName = materialJob?.service_type?.name || '—'
@@ -361,9 +460,19 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
                 {displayField('Description', serviceItemDescription)}
                 {displayField('Quantity', materialJob?.quantity ?? '—')}
                 {displayField(
-                  'Total Material Cost',
-                  materialJob?.total_material_cost != null
-                    ? `$${Number(materialJob.total_material_cost).toFixed(2)}`
+                  'Unit Cost',
+                  materialJob?.service_item?.unit_cost != null
+                    ? `$${Number(materialJob.service_item?.unit_cost).toFixed(2)}`
+                    : '—'
+                )}
+                {displayField(
+                  'Total Tax Amount',
+                  `$${calculatedBilling.taxAmount.toFixed(2)}${materialJob?.service_item?.tax_type === 'percentage' ? ` (${materialJob.service_item.tax}%)` : ''}`
+                )}
+                {displayField(
+                  'Freight Charge',
+                  materialJob?.service_item?.freight_charge != null
+                    ? `$${Number(materialJob.service_item?.freight_charge).toFixed(2)}`
                     : '—'
                 )}
               </div>
@@ -561,7 +670,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
                         onClick={() => field.onChange(!field.value)}
                         disabled={form.formState.isSubmitting}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
-                          field.value ? 'bg-primary' : 'bg-input'
+                          field.value ? 'bg-primary' : 'bg-gray-300'
                         }`}
                       >
                         <span
@@ -632,114 +741,146 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
                 )}
               />
 
-              {/* Freight */}
-              <FormField
-                control={form.control}
-                name='freight_cost'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Freight</FormLabel>
-                    <FormControl>
-                      <Input
-                        type='number'
-                        min={0}
-                        step='0.01'
-                        placeholder='0.00'
-                        {...field}
-                        disabled={form.formState.isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* ── Financial Fields: inline label + input layout ── */}
+              <div className='col-span-2 border rounded-lg p-4 space-y-2 bg-muted/20'>
+                {/* Freight */}
+                <FormField
+                  control={form.control}
+                  name='freight_cost'
+                  render={({ field }) => (
+                    <FormItem className='flex items-center gap-4 space-y-0'>
+                      <FormLabel className='w-40 shrink-0 text-right text-muted-foreground'>Freight</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          min={0}
+                          step='0.01'
+                          placeholder='0.00'
+                          className='h-8 text-sm'
+                          {...field}
+                          disabled={form.formState.isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Tax Total */}
-              <FormField
-                control={form.control}
-                name='tax_amount'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tax Total</FormLabel>
-                    <FormControl>
-                      <Input
-                        type='number'
-                        min={0}
-                        step='0.01'
-                        placeholder='0.00'
-                        {...field}
-                        disabled={form.formState.isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {/* Tax Total */}
+                <FormField
+                  control={form.control}
+                  name='tax_amount'
+                  render={({ field }) => (
+                    <FormItem className='flex items-center gap-4 space-y-0'>
+                      <FormLabel className='w-40 shrink-0 text-right text-muted-foreground'>Tax Total</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          min={0}
+                          step='0.01'
+                          placeholder='0.00'
+                          className='h-8 text-sm'
+                          {...field}
+                          disabled={form.formState.isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Discount */}
-              <FormField
-                control={form.control}
-                name='discount_amount'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Discount (-)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type='number'
-                        min={0}
-                        step='0.01'
-                        placeholder='0.00'
-                        {...field}
-                        disabled={form.formState.isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {/* Discount */}
+                <FormField
+                  control={form.control}
+                  name='discount_amount'
+                  render={({ field }) => (
+                    <FormItem className='flex items-center gap-4 space-y-0'>
+                      <FormLabel className='w-40 shrink-0 text-right text-orange-500'>Discount (-)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          min={0}
+                          step='0.01'
+                          placeholder='0.00'
+                          className='h-8 text-sm'
+                          {...field}
+                          disabled={form.formState.isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Vendor Invoice Total */}
-              <FormField
-                control={form.control}
-                name='vendor_invoice_total'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vendor Invoice Total</FormLabel>
-                    <FormControl>
-                      <Input
-                        type='number'
-                        min={0}
-                        step='0.01'
-                        placeholder='0.00'
-                        {...field}
-                        disabled={form.formState.isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {/* Total Amount — read-only, auto-calculated */}
+                <FormField
+                  control={form.control}
+                  name='total_amount'
+                  render={({ field }) => (
+                    <FormItem className='flex items-center gap-4 space-y-0'>
+                      <FormLabel className='w-40 shrink-0 text-right font-semibold'>Total Amount</FormLabel>
+                      <FormControl>
+                        <Input
+                          readOnly
+                          tabIndex={-1}
+                          className='h-8 text-sm font-semibold bg-muted cursor-default'
+                          {...field}
+                          value={field.value ? `$${Number(field.value).toFixed(2)}` : '$0.00'}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
 
-              {/* Adjustment Amount (+/-) */}
-              <FormField
-                control={form.control}
-                name='adjustment_amount'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>+/-</FormLabel>
-                    <FormControl>
-                      <Input
-                        type='number'
-                        step='0.01'
-                        placeholder='0.00'
-                        {...field}
-                        disabled={form.formState.isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <div className='border-t my-2' />
+
+                {/* Vendor Invoice Total */}
+                <FormField
+                  control={form.control}
+                  name='vendor_invoice_total'
+                  render={({ field }) => (
+                    <FormItem className='flex items-center gap-4 space-y-0'>
+                      <FormLabel className='w-40 shrink-0 text-right text-muted-foreground'>
+                        Vendor Invoice Total
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          min={0}
+                          step='0.01'
+                          placeholder='0.00'
+                          className='h-8 text-sm'
+                          {...field}
+                          disabled={form.formState.isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Adjustment Amount (+/-) */}
+                <FormField
+                  control={form.control}
+                  name='adjustment_amount'
+                  render={({ field }) => (
+                    <FormItem className='flex items-center gap-4 space-y-0'>
+                      <FormLabel className='w-40 shrink-0 text-right text-muted-foreground'>+/-</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          step='0.01'
+                          placeholder='0.00'
+                          className='h-8 text-sm'
+                          {...field}
+                          disabled={form.formState.isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           </div>
         </form>

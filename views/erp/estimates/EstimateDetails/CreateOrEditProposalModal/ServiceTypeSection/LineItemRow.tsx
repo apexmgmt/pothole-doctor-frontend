@@ -259,7 +259,7 @@ const LineItemRow = ({
           {line.type !== 'deduction' && (
             <Checkbox
               disabled={isLocked}
-              checked={line.is_sale === 1}
+              checked={line.is_sale ? true : false}
               onCheckedChange={checked => updateLine(idx, 'is_sale', checked ? 1 : 0)}
             />
           )}

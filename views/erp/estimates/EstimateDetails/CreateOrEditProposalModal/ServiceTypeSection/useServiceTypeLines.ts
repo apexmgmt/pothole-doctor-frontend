@@ -122,7 +122,7 @@ export const useServiceTypeLines = ({ lines, onLinesChange, taxRate, hideMargin 
         name: product.name,
         description: product.description,
         type: 'product',
-        unit_cost: product?.product_cost.toFixed(2) as unknown as number,
+        unit_cost: Number(product?.product_cost ?? 0).toFixed(2) as unknown as number,
 
         // unit_cost:
         //   (product?.selling_unit_id === product?.purchase_uom_id
