@@ -352,6 +352,7 @@ const EditWorkOrderServicesView = ({
             vendors={vendors}
             taxRate={taxRate}
             hideMargin={true}
+            hidePriceColumns={true}
             showVendor={true}
             showPurchaseQty={true}
             allowedLineTypes={['product', 'labor', 'expense']}
