@@ -134,7 +134,10 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
                   const newCost = Number(e.target.value)
                   const currentMargin = Number(form.getValues('margin'))
 
-                  form.setValue('selling_price', getSellPrice(effectiveCost(newCost), currentMargin), {
+                  // form.setValue('selling_price', getSellPrice(effectiveCost(newCost), currentMargin), {
+                  //   shouldDirty: true
+                  // })
+                  form.setValue('selling_price', getSellPrice(newCost, currentMargin), {
                     shouldDirty: true
                   })
                 }}
@@ -166,7 +169,10 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
                   const newMargin = Number(e.target.value)
                   const currentCost = Number(form.getValues('product_cost'))
 
-                  form.setValue('selling_price', getSellPrice(effectiveCost(currentCost), newMargin), {
+                  // form.setValue('selling_price', getSellPrice(effectiveCost(currentCost), newMargin), {
+                  //   shouldDirty: true
+                  // })
+                  form.setValue('selling_price', getSellPrice(currentCost, newMargin), {
                     shouldDirty: true
                   })
                 }}
@@ -200,7 +206,9 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
                       field.onChange(e)
                       const newSellingPrice = Number(e.target.value)
                       const currentCost = Number(form.getValues('product_cost'))
-                      const newMargin = getMargin(effectiveCost(currentCost), newSellingPrice)
+
+                      // const newMargin = getMargin(effectiveCost(currentCost), newSellingPrice)
+                      const newMargin = getMargin(currentCost, newSellingPrice)
 
                       form.setValue('margin', newMargin.toFixed(4), { shouldDirty: true })
                     }}
@@ -263,16 +271,29 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
           control={form.control}
           name='minimum_qty'
           rules={{
-            required: 'Minimum quantity is required',
-            min: { value: 1, message: 'Must be greater than 0' }
+            validate: value => {
+              if (value === '' || value === null || value === undefined) {
+                return true
+              }
+
+              return Number(value) >= 0 || 'Must be greater than or equal to 0'
+            }
           }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Minimum Quantity <span className='text-red-500'>*</span>
+                Minimum Quantity 
+                {/* <span className='text-red-500'>*</span> */}
               </FormLabel>
               <FormControl>
-                <Input type='number' step='1' min={1} placeholder='Enter minimum quantity' {...field} disabled={disabled} />
+                <Input
+                  type='text'
+                  step='1'
+                  placeholder='Enter minimum quantity'
+                  {...field}
+                  value={field.value ?? ''}
+                  disabled={disabled}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
