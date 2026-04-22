@@ -17,7 +17,7 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters, mathRoundFixed, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import ProductService from '@/services/api/products/products.service'
 import CreateEditViewProductModal from './CreateEditViewProductModal'
@@ -270,7 +270,12 @@ const Products: React.FC<ProductsProps> = ({
       header: 'Coverage',
       cell: (row: Product) => (
         <span className='font-medium'>
-          {row.coverage_per_rate} ({row.coverage_unit?.name})
+          {row.available_stock && row.coverage_per_rate && (
+            <>
+              {mathRoundFixed((row.available_stock ?? 0) * (row.coverage_per_rate ?? 0))} (
+              {row.coverage_unit?.name ?? row.purchase_unit?.name ?? ''})
+            </>
+          )}
         </span>
       ),
       sortable: false
@@ -285,50 +290,54 @@ const Products: React.FC<ProductsProps> = ({
       ),
       sortable: false
     },
-    ...(!hideActionButton ? ([{
-      id: 'actions',
-      header: 'Action',
-      cell: (row: Product) => (
-        <div className='flex items-center justify-center gap-2'>
-          {(canEditProduct || canDeleteProduct || canViewProduct) && (
-            <ThreeDotButton
-              buttons={[
-                ...(canViewProduct
-                  ? [
-                      <ViewButton
-                        tooltip='View Product Information'
-                        onClick={() => handleOpenViewModal(row.id)}
-                        variant='text'
-                      />
-                    ]
-                  : []),
-                ...(canEditProduct
-                  ? [
-                      <EditButton
-                        tooltip='Edit Product Information'
-                        onClick={() => handleOpenEditModal(row.id)}
-                        variant='text'
-                      />
-                    ]
-                  : []),
-                ...(canDeleteProduct
-                  ? [
-                      <DeleteButton
-                        tooltip='Delete Product'
-                        variant='text'
-                        onClick={() => handleDeleteProduct(row.id)}
-                      />
-                    ]
-                  : [])
-              ]}
-            />
-          )}
-        </div>
-      ),
-      sortable: false,
-      headerAlign: 'center',
-      size: 30
-    }]) as Column[] : [])
+    ...(!hideActionButton
+      ? ([
+          {
+            id: 'actions',
+            header: 'Action',
+            cell: (row: Product) => (
+              <div className='flex items-center justify-center gap-2'>
+                {(canEditProduct || canDeleteProduct || canViewProduct) && (
+                  <ThreeDotButton
+                    buttons={[
+                      ...(canViewProduct
+                        ? [
+                            <ViewButton
+                              tooltip='View Product Information'
+                              onClick={() => handleOpenViewModal(row.id)}
+                              variant='text'
+                            />
+                          ]
+                        : []),
+                      ...(canEditProduct
+                        ? [
+                            <EditButton
+                              tooltip='Edit Product Information'
+                              onClick={() => handleOpenEditModal(row.id)}
+                              variant='text'
+                            />
+                          ]
+                        : []),
+                      ...(canDeleteProduct
+                        ? [
+                            <DeleteButton
+                              tooltip='Delete Product'
+                              variant='text'
+                              onClick={() => handleDeleteProduct(row.id)}
+                            />
+                          ]
+                        : [])
+                    ]}
+                  />
+                )}
+              </div>
+            ),
+            sortable: false,
+            headerAlign: 'center',
+            size: 30
+          }
+        ] as Column[])
+      : [])
   ]
 
   const handleClearFilters = () => {
@@ -437,7 +446,7 @@ const Products: React.FC<ProductsProps> = ({
           </Button>
         )}
       </div>
-      {canCreateProduct && !hideActionButton &&  (
+      {canCreateProduct && !hideActionButton && (
         <Button
           variant='default'
           size='sm'
