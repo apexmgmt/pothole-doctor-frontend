@@ -11,7 +11,17 @@ import { toast } from 'sonner'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, EstimateType, DataTableApiResponse, Estimate, ServiceType, Client, Staff, PaymentTerm, BusinessLocation } from '@/types'
+import {
+  Column,
+  EstimateType,
+  DataTableApiResponse,
+  Estimate,
+  ServiceType,
+  Client,
+  Staff,
+  PaymentTerm,
+  BusinessLocation
+} from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -186,9 +196,17 @@ const Estimates: React.FC<{
       sortable: true
     },
     {
-      id: 'location',
+      id: 'address',
       header: 'Job Address',
-      cell: (row: Estimate) => <Description description={row.location} />,
+      cell: (row: Estimate) => (
+        <Description
+          description={
+            row.address
+              ? `${row.address.street_address}, ${row.address.city?.name}, ${row.address.state?.name} ${row.address.zip_code}`
+              : ''
+          }
+        />
+      ),
       sortable: true
     },
     {

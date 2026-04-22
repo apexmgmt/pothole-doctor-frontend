@@ -5,12 +5,10 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,25 +20,23 @@ import { Location, BusinessLocation } from '@/types'
 import { Separator } from '@/components/ui/separator'
 import { generateFileUrl } from '@/utils/utility'
 
-const formSchema = z.object({
-  name: z.string().min(1, 'Location name is required'),
-  phone: z.string().min(1, 'Phone number is required'),
-  email: z.string().email('Invalid email address'),
-  fax: z.string(),
-  is_branding: z.boolean(),
-  logo: z.any().nullable(),
-  website: z.string(),
-  invoice_prefix: z.string().min(1, 'Invoice prefix is required'),
-  sales_tax: z.string(),
-  review_link: z.string(),
-  country_id: z.string().min(1, 'Country is required'),
-  state_id: z.string().min(1, 'State is required'),
-  city_id: z.string().min(1, 'City is required'),
-  street_address: z.string().min(1, 'Street address is required'),
-  zip_code: z.string().min(1, 'ZIP code is required')
-})
-
-type FormData = z.infer<typeof formSchema>
+interface FormData {
+  name: string
+  phone: string
+  email: string
+  fax: string
+  is_branding: boolean
+  logo: File | null
+  website: string
+  invoice_prefix: string
+  sales_tax: string
+  review_link: string
+  country_id: string
+  state_id: string
+  city_id: string
+  street_address: string
+  zip_code: string
+}
 
 const CreateOrEditBusinessLocation = ({
   mode = 'create',
@@ -59,7 +55,6 @@ const CreateOrEditBusinessLocation = ({
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
     defaultValues: businessLocationDetails
       ? {
           name: businessLocationDetails.name || '',
@@ -97,11 +92,10 @@ const CreateOrEditBusinessLocation = ({
         }
   })
 
-  // Watch country_id and state_id to filter states and cities
   const selectedCountryId = form.watch('country_id')
   const selectedStateId = form.watch('state_id')
+  const isBranding = form.watch('is_branding')
 
-  // Get states based on selected country
   const availableStates = useMemo(() => {
     if (!selectedCountryId) return []
     const selectedCountry = countriesWithStateAndCities.find(country => country.id.toString() === selectedCountryId)
@@ -109,7 +103,6 @@ const CreateOrEditBusinessLocation = ({
     return selectedCountry?.states || []
   }, [selectedCountryId, countriesWithStateAndCities])
 
-  // Get cities based on selected state
   const availableCities = useMemo(() => {
     if (!selectedStateId) return []
     const selectedState = availableStates.find(state => state.id.toString() === selectedStateId)
@@ -117,17 +110,14 @@ const CreateOrEditBusinessLocation = ({
     return selectedState?.cities || []
   }, [selectedStateId, availableStates])
 
-  // Set page title on mount
   useEffect(() => {
     dispatch(setPageTitle(mode === 'edit' ? 'Edit Business Location' : 'Add New Business Location'))
 
-    // Set logo preview if exists
     if (businessLocationDetails?.logo) {
       setLogoPreview(generateFileUrl(businessLocationDetails.logo))
     }
   }, [mode, businessLocationDetails, dispatch])
 
-  // Reset dependent dropdowns when parent changes
   useEffect(() => {
     if (selectedCountryId && mode === 'create') {
       const currentStateId = form.getValues('state_id')
@@ -157,7 +147,6 @@ const CreateOrEditBusinessLocation = ({
     if (file) {
       form.setValue('logo', file)
 
-      // Create preview
       const reader = new FileReader()
 
       reader.onloadend = () => {
@@ -167,6 +156,8 @@ const CreateOrEditBusinessLocation = ({
       reader.readAsDataURL(file)
     }
   }
+
+  const logoInputRef = React.useRef<HTMLInputElement>(null)
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true)
@@ -184,12 +175,10 @@ const CreateOrEditBusinessLocation = ({
       formData.append('state_id', data.state_id)
       formData.append('zip_code', data.zip_code)
 
-      // Add optional fields only if they have values
       if (data.fax) formData.append('fax', data.fax)
-      if (data.website) formData.append('website', data.website)
+      if (data.is_branding && data.website) formData.append('website', data.website)
       if (data.review_link) formData.append('review_link', data.review_link)
 
-      // Add sales_tax if present
       if (data.sales_tax) {
         const salesTaxNumber = parseFloat(data.sales_tax)
 
@@ -198,8 +187,7 @@ const CreateOrEditBusinessLocation = ({
         }
       }
 
-      // Add logo if it's a File
-      if (data.logo && data.logo instanceof File) {
+      if (data.is_branding && data.logo && data.logo instanceof File) {
         formData.append('logo', data.logo)
       }
 
@@ -213,7 +201,7 @@ const CreateOrEditBusinessLocation = ({
 
       router.push('/erp/locations/businesses')
     } catch (error: any) {
-      if(error?.errors && typeof error.errors === 'object') {
+      if (error?.errors && typeof error.errors === 'object') {
         Object.values(error.errors).forEach((errMsg: any) => {
           errMsg?.map((msg: string) => toast.error(msg))
         })
@@ -245,9 +233,12 @@ const CreateOrEditBusinessLocation = ({
                 <FormField
                   control={form.control}
                   name='name'
+                  rules={{ required: 'Location name is required' }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Location Name <span className='text-red-500'>*</span></FormLabel>
+                      <FormLabel>
+                        Location Name <span className='text-red-500'>*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input placeholder='Enter location name' {...field} />
                       </FormControl>
@@ -260,9 +251,12 @@ const CreateOrEditBusinessLocation = ({
                 <FormField
                   control={form.control}
                   name='phone'
+                  rules={{ required: 'Phone number is required' }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone <span className='text-red-500'>*</span></FormLabel>
+                      <FormLabel>
+                        Phone <span className='text-red-500'>*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input placeholder='Enter phone number' {...field} />
                       </FormControl>
@@ -275,9 +269,15 @@ const CreateOrEditBusinessLocation = ({
                 <FormField
                   control={form.control}
                   name='email'
+                  rules={{
+                    required: 'Email address is required',
+                    pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Invalid email address' }
+                  }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email <span className='text-red-500'>*</span></FormLabel>
+                      <FormLabel>
+                        Email <span className='text-red-500'>*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input type='email' placeholder='Enter email address' {...field} />
                       </FormControl>
@@ -309,74 +309,98 @@ const CreateOrEditBusinessLocation = ({
                   control={form.control}
                   name='is_branding'
                   render={({ field }) => (
-                    <FormItem className='flex flex-row items-center'>
+                    <FormItem className='flex flex-row items-center gap-3 space-y-0'>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
-                      <div className='space-y-0.5'>
-                        <FormLabel>Location Specific Branding</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                {/* Website */}
-                <FormField
-                  control={form.control}
-                  name='website'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Website</FormLabel>
-                      <FormControl>
-                        <Input placeholder='Enter website URL' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Logo Upload */}
-                <FormField
-                  control={form.control}
-                  name='logo'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Logo</FormLabel>
-                      <FormControl>
-                        <div className='space-y-2'>
-                          <div className='flex items-center gap-4'>
-                            <Input
-                              type='file'
-                              accept='image/*'
-                              onChange={handleLogoChange}
-                              className='cursor-pointer'
-                            />
-                          </div>
-                          {logoPreview && (
-                            <div className='mt-2'>
-                              <img
-                                src={logoPreview}
-                                alt='Logo preview'
-                                className='h-20 w-20 object-contain rounded border'
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
+                      <FormLabel>Location Specific Branding</FormLabel>
                     </FormItem>
                   )}
                 />
               </div>
+              {isBranding && (
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                  {/* Website — only when branding is on */}
+                  {isBranding && (
+                    <FormField
+                      control={form.control}
+                      name='website'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Website</FormLabel>
+                          <FormControl>
+                            <Input placeholder='Enter website URL' {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  {/* Logo Upload — only when branding is on */}
+                  {isBranding && (
+                    <FormField
+                      control={form.control}
+                      name='logo'
+                      render={() => (
+                        <FormItem>
+                          <FormLabel>Logo</FormLabel>
+                          <FormControl>
+                            <div className='space-y-2'>
+                              <input
+                                ref={logoInputRef}
+                                type='file'
+                                accept='image/*'
+                                onChange={handleLogoChange}
+                                className='hidden'
+                              />
+                              {logoPreview ? (
+                                <div
+                                  className='cursor-pointer group relative h-20 w-20'
+                                  onClick={() => logoInputRef.current?.click()}
+                                  title='Click to change logo'
+                                >
+                                  <img
+                                    src={logoPreview}
+                                    alt='Logo preview'
+                                    className='h-20 w-20 object-contain rounded border group-hover:opacity-70 transition-opacity'
+                                  />
+                                  <div className='absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'>
+                                    <span className='text-xs text-foreground bg-background/80 rounded px-1 py-0.5'>
+                                      Change
+                                    </span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <Input
+                                  type='file'
+                                  accept='image/*'
+                                  onChange={handleLogoChange}
+                                  className='cursor-pointer text-white file:text-primary file:border-2 file:px-2 file:rounded-xl'
+                                />
+                              )}
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
+              )}
               <Separator />
+
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                 {/* Invoice Prefix */}
                 <FormField
                   control={form.control}
                   name='invoice_prefix'
+                  rules={{ required: 'Invoice prefix is required' }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Invoice Prefix <span className='text-red-500'>*</span></FormLabel>
+                      <FormLabel>
+                        Invoice Prefix <span className='text-red-500'>*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input placeholder='Enter invoice prefix' {...field} />
                       </FormControl>
@@ -416,14 +440,18 @@ const CreateOrEditBusinessLocation = ({
                 />
               </div>
               <Separator />
+
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                {/* Country Select Field */}
+                {/* Country */}
                 <FormField
                   control={form.control}
                   name='country_id'
+                  rules={{ required: 'Country is required' }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Country <span className='text-red-500'>*</span></FormLabel>
+                      <FormLabel>
+                        Country <span className='text-red-500'>*</span>
+                      </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className='w-full'>
@@ -443,13 +471,16 @@ const CreateOrEditBusinessLocation = ({
                   )}
                 />
 
-                {/* State Select Field */}
+                {/* State */}
                 <FormField
                   control={form.control}
                   name='state_id'
+                  rules={{ required: 'State is required' }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>State <span className='text-red-500'>*</span></FormLabel>
+                      <FormLabel>
+                        State <span className='text-red-500'>*</span>
+                      </FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -479,13 +510,16 @@ const CreateOrEditBusinessLocation = ({
                   )}
                 />
 
-                {/* City Select Field */}
+                {/* City */}
                 <FormField
                   control={form.control}
                   name='city_id'
+                  rules={{ required: 'City is required' }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>City <span className='text-red-500'>*</span></FormLabel>
+                      <FormLabel>
+                        City <span className='text-red-500'>*</span>
+                      </FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -519,9 +553,12 @@ const CreateOrEditBusinessLocation = ({
                 <FormField
                   control={form.control}
                   name='street_address'
+                  rules={{ required: 'Street address is required' }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Street Address <span className='text-red-500'>*</span></FormLabel>
+                      <FormLabel>
+                        Street Address <span className='text-red-500'>*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input placeholder='Enter street address' {...field} />
                       </FormControl>
@@ -534,12 +571,15 @@ const CreateOrEditBusinessLocation = ({
                 <FormField
                   control={form.control}
                   name='zip_code'
+                  rules={{ required: 'ZIP code is required' }}
                   render={({ field }) => {
                     const [zipMain, zipExt] = field.value?.split('-') || ['', '']
 
                     return (
                       <FormItem>
-                        <FormLabel>ZIP Code <span className='text-red-500'>*</span></FormLabel>
+                        <FormLabel>
+                          ZIP Code <span className='text-red-500'>*</span>
+                        </FormLabel>
                         <FormControl>
                           <div className='flex gap-2 items-center'>
                             <Input

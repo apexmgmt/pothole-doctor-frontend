@@ -1,5 +1,5 @@
 import { BusinessLocation } from '../business_location'
-import { Client } from '../clients/clients'
+import { Client, ClientAddress } from '../clients/clients'
 import { EstimateType } from './estimate_types'
 import { PaymentTerm } from '../payment_terms'
 import { ServiceType } from '../service_types'
@@ -10,7 +10,10 @@ export interface Estimate {
   estimate_number: number
   status: string
   title: string
-  location: string
+  location?: BusinessLocation | null
+  address_id?: string | null
+  address?: ClientAddress | null
+  location_id?: string | null
   client_id: string
   client?: Client
   estimate_type_id: string
@@ -44,7 +47,8 @@ export interface EstimatePayload {
   assign_id: string
   payment_term_id: string
   title: string
-  location: string
+  address_id?: string | null
+  location_id?: string | null
   expiration_date: string
   biding_date: string
 

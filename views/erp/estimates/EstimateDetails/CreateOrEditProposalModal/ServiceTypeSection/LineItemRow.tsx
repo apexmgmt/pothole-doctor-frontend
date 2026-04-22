@@ -217,7 +217,7 @@ const LineItemRow = ({
                   max={100}
                   disabled={isLocked}
                 />
-                <span>%</span>
+                <span className='mt-2'>%</span>
               </>
             )}
           </td>

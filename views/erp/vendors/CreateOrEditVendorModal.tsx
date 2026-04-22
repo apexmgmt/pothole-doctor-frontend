@@ -160,6 +160,25 @@ const CreateOrEditVendorModal = ({
     }
   }, [selectedStateId, availableCities, form])
 
+  const handleApiError = (error: any, fallbackMessage: string) => {
+    setIsLoading(false)
+
+    if (error?.errors && typeof error.errors === 'object') {
+      // Map Laravel validation errors to form fields
+      Object.entries(error.errors).forEach(([field, messages]) => {
+        const msg = Array.isArray(messages) ? messages[0] : String(messages)
+
+        form.setError(field as keyof VendorFormValues, { type: 'server', message: msg })
+      })
+
+      if (error.message) {
+        toast.error(error.message)
+      }
+    } else {
+      toast.error(typeof error.message === 'string' ? error.message : fallbackMessage)
+    }
+  }
+
   const onSubmit = async (values: VendorFormValues) => {
     setIsLoading(true)
 
@@ -199,10 +218,7 @@ const CreateOrEditVendorModal = ({
             onSuccess?.()
             form.reset()
           })
-          .catch(error => {
-            setIsLoading(false)
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to create vendor')
-          })
+          .catch(error => handleApiError(error, 'Failed to create vendor'))
       } else if (mode === 'edit' && vendorId) {
         VendorService.update(vendorId, payload)
           .then(response => {
@@ -212,13 +228,11 @@ const CreateOrEditVendorModal = ({
             onSuccess?.()
             form.reset()
           })
-          .catch(error => {
-            setIsLoading(false)
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to update vendor')
-          })
+          .catch(error => handleApiError(error, 'Failed to update vendor'))
       }
     } catch (error: any) {
       toast.error('Something went wrong!')
+      setIsLoading(false)
     }
   }
 

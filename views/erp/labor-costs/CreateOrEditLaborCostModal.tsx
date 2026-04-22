@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import LaborCostService from '@/services/api/labor_costs.service'
 import { LaborCost, LaborCostPayload, ServiceType, Unit } from '@/types'
+import { getSellPrice, getMargin } from '@/utils/business-calculation'
 
 interface CreateOrEditLaborCostModalProps {
   mode?: 'create' | 'edit'
@@ -46,8 +47,6 @@ const CreateOrEditLaborCostModal = ({
   laborCostDetails,
   onSuccess
 }: CreateOrEditLaborCostModalProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-
   const form = useForm<FormValues>({
     defaultValues: {
       name: laborCostDetails?.name || '',
@@ -81,9 +80,23 @@ const CreateOrEditLaborCostModal = ({
   // Memoized filtered units based on selected group
   const filteredUnits = useMemo(() => units.filter(unit => unit.group === unitGroup), [units, unitGroup])
 
-  const onSubmit = async (values: FormValues) => {
-    setIsLoading(true)
+  const handleApiError = (error: any, fallbackMessage: string) => {
+    if (error?.errors && typeof error.errors === 'object') {
+      Object.entries(error.errors).forEach(([field, messages]) => {
+        const msg = Array.isArray(messages) ? messages[0] : String(messages)
 
+        form.setError(field as keyof FormValues, { type: 'server', message: msg })
+      })
+
+      if (error.message) {
+        toast.error(error.message)
+      }
+    } else {
+      toast.error(typeof error.message === 'string' ? error.message : fallbackMessage)
+    }
+  }
+
+  const onSubmit = async (values: FormValues) => {
     const payload: LaborCostPayload = {
       name: values.name,
       description: values.description,
@@ -94,22 +107,31 @@ const CreateOrEditLaborCostModal = ({
       unit_id: values.unit_id
     }
 
-    try {
-      if (mode === 'create') {
+    if (mode === 'create') {
+      try {
         await LaborCostService.store(payload)
-        toast.success('Labor cost created successfully')
-      } else if (mode === 'edit' && laborCostId) {
-        await LaborCostService.update(laborCostId, payload)
-        toast.success('Labor cost updated successfully')
+          .then(() => {
+            toast.success('Labor cost created successfully')
+            onOpenChange(false)
+            onSuccess?.()
+            form.reset()
+          })
+          .catch(error => handleApiError(error, 'Failed to create labor cost'))
+      } catch {
+        toast.error('Something went wrong while creating the labor cost!')
       }
-
-      onOpenChange(false)
-      onSuccess?.()
-      form.reset()
-    } catch (error: any) {
-      toast.error(error?.message || 'Operation failed')
-    } finally {
-      setIsLoading(false)
+    } else if (mode === 'edit' && laborCostId) {
+      try {
+        await LaborCostService.update(laborCostId, payload)
+          .then(() => {
+            toast.success('Labor cost updated successfully')
+            onOpenChange(false)
+            onSuccess?.()
+          })
+          .catch(error => handleApiError(error, 'Failed to update labor cost'))
+      } catch {
+        toast.error('Something went wrong while updating the labor cost!')
+      }
     }
   }
 
@@ -128,7 +150,7 @@ const CreateOrEditLaborCostModal = ({
 
   return (
     <CommonDialog
-      isLoading={isLoading}
+      isLoading={form.formState.isSubmitting}
       loadingMessage='Loading labor cost...'
       open={open}
       onOpenChange={onOpenChange}
@@ -218,42 +240,21 @@ const CreateOrEditLaborCostModal = ({
                       step={0.01}
                       placeholder='0.00'
                       {...field}
-                      onChange={e => field.onChange(Number(e.target.value))}
+                      onChange={e => {
+                        const cost = Number(e.target.value)
+
+                        field.onChange(cost)
+
+                        const margin = form.getValues('margin')
+
+                        form.setValue('price', getSellPrice(cost, margin), { shouldValidate: true })
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {/* Price */}
-            <FormField
-              control={form.control}
-              name='price'
-              rules={{
-                required: 'Price is required',
-                min: { value: 0, message: 'Price must be at least 0' }
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Price <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type='number'
-                      min={0}
-                      step={0.01}
-                      placeholder='0.00'
-                      {...field}
-                      onChange={e => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {/* Margin */}
             <FormField
               control={form.control}
@@ -274,7 +275,50 @@ const CreateOrEditLaborCostModal = ({
                       step={0.01}
                       placeholder='0.00'
                       {...field}
-                      onChange={e => field.onChange(Number(e.target.value))}
+                      onChange={e => {
+                        const margin = Number(e.target.value)
+
+                        field.onChange(margin)
+
+                        const cost = form.getValues('cost')
+
+                        form.setValue('price', getSellPrice(cost, margin), { shouldValidate: true })
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Price */}
+            <FormField
+              control={form.control}
+              name='price'
+              rules={{
+                required: 'Price is required',
+                min: { value: 0, message: 'Price must be at least 0' }
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Price <span className='text-red-500'>*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type='number'
+                      min={0}
+                      step={0.01}
+                      placeholder='0.00'
+                      {...field}
+                      onChange={e => {
+                        const price = Number(e.target.value)
+
+                        field.onChange(price)
+
+                        const cost = form.getValues('cost')
+
+                        form.setValue('margin', getMargin(cost, price), { shouldValidate: true })
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

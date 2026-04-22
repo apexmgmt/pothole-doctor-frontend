@@ -46,7 +46,7 @@ export default class UnitService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create units')
+        throw errorData
       }
 
       await revalidate('units')
@@ -97,7 +97,7 @@ export default class UnitService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update units')
+        throw errorData
       }
 
       await revalidate('units')

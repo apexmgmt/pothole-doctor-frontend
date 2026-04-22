@@ -26,7 +26,10 @@ export interface Invoice extends Model {
   client?: Client
   assign_id: string
   created_by: string
-  location: string | null
+  location: BusinessLocation | null
+  address_id?: string | null
+  address?: ClientAddress | null
+  location_id?: string | null
   payment_term_id: string
   service_type_id: string
   title: string
@@ -67,7 +70,8 @@ export interface InvoicePayload {
   assign_id: string
   payment_term_id: string
   title: string
-  location: string
+  address_id?: string | null
+  location_id?: string | null
   due_date: string
   issue_date: string
 

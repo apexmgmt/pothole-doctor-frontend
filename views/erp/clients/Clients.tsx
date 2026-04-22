@@ -44,6 +44,10 @@ import ClientEmails from './emails/ClientEmails'
 import ClientNotes from './notes/ClientNotes'
 import ClientContacts from './contacts/ClientContacts'
 import ClientAddresses from './addresses/ClientAddresses'
+import ClientTasks from './tasks/ClientTasks'
+import ClientEstimates from './estimates/ClientEstimates'
+import ClientInvoices from './invoices/ClientInvoices'
+import ClientWorkOrders from './work-orders/ClientWorkOrders'
 import { hasPermission } from '@/utils/role-permission'
 
 const Clients: React.FC<{
@@ -51,6 +55,7 @@ const Clients: React.FC<{
   interestLevels: InterestLevel[]
   companies: Company[]
   staffs: Staff[]
+  clients?: Client[]
   clientSources: ClientSource[]
   serviceTypes: ServiceType[]
   businessLocations: BusinessLocation[]
@@ -62,6 +67,7 @@ const Clients: React.FC<{
   interestLevels,
   companies,
   staffs,
+  clients = [],
   clientSources,
   serviceTypes,
   businessLocations,
@@ -526,7 +532,39 @@ const Clients: React.FC<{
       onClick: () => setActiveTab('addresses'),
       isActive: activeTab === 'addresses',
       disabled: !selectedClientId
-    }
+    },
+    ...(type === 'customer'
+      ? [
+          {
+            label: 'Tasks',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('tasks'),
+            isActive: activeTab === 'tasks',
+            disabled: !selectedClientId
+          },
+          {
+            label: 'Estimates',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('estimates'),
+            isActive: activeTab === 'estimates',
+            disabled: !selectedClientId
+          },
+          {
+            label: 'Invoices',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('invoices'),
+            isActive: activeTab === 'invoices',
+            disabled: !selectedClientId
+          },
+          {
+            label: 'Work Orders',
+            icon: DocumentIcon,
+            onClick: () => setActiveTab('work-orders'),
+            isActive: activeTab === 'work-orders',
+            disabled: !selectedClientId
+          }
+        ]
+      : [])
   ]
 
   return (
@@ -571,6 +609,16 @@ const Clients: React.FC<{
           clientId={selectedClientId || ''}
           countriesWithStatesAndCities={countriesWithStatesAndCities}
         />
+      )}
+      {activeTab === 'tasks' && selectedClientId && type === 'customer' && <ClientTasks clientId={selectedClientId} />}
+      {activeTab === 'estimates' && selectedClientId && type === 'customer' && (
+        <ClientEstimates clientId={selectedClientId} />
+      )}
+      {activeTab === 'invoices' && selectedClientId && type === 'customer' && (
+        <ClientInvoices clientId={selectedClientId} />
+      )}
+      {activeTab === 'work-orders' && selectedClientId && type === 'customer' && (
+        <ClientWorkOrders clientId={selectedClientId} />
       )}
       <CreateEditClientModal
         type={type}
