@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 import { MaterialJobAction } from '@/types'
 import MaterialJobService from '@/services/api/products/material-jobs.service'
+import { mathRoundFixed } from '@/utils/utility'
 
 interface MaterialJobActionsRowProps {
   actions: MaterialJobAction[]
@@ -99,7 +100,7 @@ const MaterialJobActionsRow = ({ actions, onActionsChange }: MaterialJobActionsR
               return (
                 <div key={action.id} className='flex items-center gap-0.5'>
                   <Badge variant={getStatusVariant(action.action_status)} className='text-xs capitalize'>
-                    {action.action_status} ({action.quantity} {unitName}){initials && ` - ${initials}`}
+                    {action.action_status} ({mathRoundFixed(action.quantity)} {unitName}){initials && ` - ${initials}`}
                     {dateStr && ` - ${dateStr}`}
                   </Badge>
                   {isLatest && (

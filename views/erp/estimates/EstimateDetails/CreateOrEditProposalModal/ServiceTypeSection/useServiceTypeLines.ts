@@ -122,13 +122,15 @@ export const useServiceTypeLines = ({ lines, onLinesChange, taxRate, hideMargin 
         name: product.name,
         description: product.description,
         type: 'product',
-        unit_cost:
-          (product?.selling_unit_id === product?.purchase_uom_id
-            ? product.product_cost
-            : product?.coverage_per_unit_id === product?.selling_unit_id
-              ? product.product_cost / (product?.coverage_per_rate ?? 1)
-              : product?.product_cost).toFixed(2) as unknown as number,
-        qty: product.minimum_qty || 1,
+        unit_cost: Number(product?.product_cost ?? 0).toFixed(2) as unknown as number,
+
+        // unit_cost:
+        //   (product?.selling_unit_id === product?.purchase_uom_id
+        //     ? product.product_cost
+        //     : product?.coverage_per_unit_id === product?.selling_unit_id
+        //       ? product.product_cost / (product?.coverage_per_rate ?? 1)
+        //       : product?.product_cost).toFixed(2) as unknown as number,
+        qty: product.minimum_qty || product?.coverage_per_rate || 0,
         unit_id: product.selling_unit_id ?? '',
         unit_name: product.selling_unit?.name ?? product.selling_uom?.name ?? '',
         vendor_id: product.vendor_id ?? '',

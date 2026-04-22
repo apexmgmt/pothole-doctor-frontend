@@ -98,7 +98,7 @@ export interface ProductPayload {
   selling_price: number
   product_cost: number
   margin: string
-  minimum_qty: number
+  minimum_qty: number | string
   round_up_quantity: number | 0 | 1
   type: string | 'inventory' | 'non_inventory'
   is_notify: number | 0 | 1
