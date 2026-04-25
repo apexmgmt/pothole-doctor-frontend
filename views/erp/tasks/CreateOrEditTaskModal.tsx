@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useForm } from 'react-hook-form'
 
@@ -98,6 +98,9 @@ const CreateOrEditTaskModal = ({
 }: CreateOrEditTaskModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
+  // Skip reminder sync on initial edit load so existing task_reminder_setting values are preserved
+  const skipReminderSync = useRef(false)
+
   const form = useForm<FormValues>({
     defaultValues: {
       name: taskDetails?.name || '',
@@ -122,9 +125,38 @@ const CreateOrEditTaskModal = ({
     }
   })
 
-  // Reset form when partnerTypeDetails changes or modal opens
+  // Reset form when taskDetails changes or modal opens
   useEffect(() => {
     if (open) {
+      // Build reminder times from existing task_reminder_setting (edit mode)
+      const smsCustomerTimes: Record<string, number> = {}
+      const smsEmployeeTimes: Record<string, number> = {}
+      const emailCustomerTimes: Record<string, number> = {}
+      const emailEmployeeTimes: Record<string, number> = {}
+
+      if (taskDetails?.task_reminder_setting?.length) {
+        taskDetails.task_reminder_setting.forEach(setting => {
+          const channelType = setting.reminder_channel?.type
+
+          if (channelType === 'sms') {
+            if (setting.role_type === 'customer') {
+              smsCustomerTimes[setting.reminder_time_id] = setting.is_enabled
+            } else if (setting.role_type === 'employee') {
+              smsEmployeeTimes[setting.reminder_time_id] = setting.is_enabled
+            }
+          } else if (channelType === 'email') {
+            if (setting.role_type === 'customer') {
+              emailCustomerTimes[setting.reminder_time_id] = setting.is_enabled
+            } else if (setting.role_type === 'employee') {
+              emailEmployeeTimes[setting.reminder_time_id] = setting.is_enabled
+            }
+          }
+        })
+
+        // Mark to skip the task_type_id useEffect overwrite on initial load
+        skipReminderSync.current = true
+      }
+
       form.reset({
         name: taskDetails?.name || '',
         client_id: taskDetails?.client_id || defaultClientId || '',
@@ -138,6 +170,10 @@ const CreateOrEditTaskModal = ({
         email_reminder: taskDetails?.email_reminder || 0,
         location: taskDetails?.location || '',
         comment: taskDetails?.comment || '',
+        sms_customer_times: smsCustomerTimes,
+        sms_employee_times: smsEmployeeTimes,
+        email_customer_times: emailCustomerTimes,
+        email_employee_times: emailEmployeeTimes,
         status: taskDetails?.status || '',
         completed_date: taskDetails?.completed_date || '',
         close_comment: taskDetails?.close_comment || ''
@@ -179,6 +215,13 @@ const CreateOrEditTaskModal = ({
 
   // Sync reminder times when task type changes
   useEffect(() => {
+    // Skip on initial edit load to preserve existing task_reminder_setting values
+    if (skipReminderSync.current) {
+      skipReminderSync.current = false
+
+      return
+    }
+
     if (selectedTaskTypeId && taskReminders.length > 0) {
       const smsChannel = taskReminderChannels.find(ch => ch.type === 'sms')
       const emailChannel = taskReminderChannels.find(ch => ch.type === 'email')
@@ -326,6 +369,22 @@ const CreateOrEditTaskModal = ({
       reminders
     }
 
+    const handleApiError = (error: any, fallbackMessage: string) => {
+      if (error?.errors && typeof error.errors === 'object') {
+        Object.entries(error.errors).forEach(([field, messages]) => {
+          const msg = Array.isArray(messages) ? messages[0] : String(messages)
+
+          form.setError(field as keyof FormValues, { type: 'server', message: msg })
+        })
+
+        if (error.message) {
+          toast.error(error.message)
+        }
+      } else {
+        toast.error(typeof error.message === 'string' ? error.message : fallbackMessage)
+      }
+    }
+
     if (mode === 'create') {
       try {
         const storeCall = proposalId
@@ -341,9 +400,7 @@ const CreateOrEditTaskModal = ({
             onOpenChange(false)
             onSuccess?.()
           })
-          .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to create task')
-          })
+          .catch(error => handleApiError(error, 'Failed to create task'))
       } catch (error) {
         toast.error('Something went wrong while creating the task!')
       }
@@ -361,9 +418,7 @@ const CreateOrEditTaskModal = ({
             onOpenChange(false)
             onSuccess?.()
           })
-          .catch(error => {
-            toast.error(typeof error.message === 'string' ? error.message : 'Failed to update task')
-          })
+          .catch(error => handleApiError(error, 'Failed to update task'))
       } catch (error) {
         toast.error('Something went wrong while updating the task!')
       }
@@ -436,9 +491,14 @@ const CreateOrEditTaskModal = ({
             <FormField
               control={form.control}
               name='client_id'
+              rules={{
+                required: 'Customer is required'
+              }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Customer</FormLabel>
+                  <FormLabel>
+                    Customer <span className='text-red-500'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Select
                       value={field.value}

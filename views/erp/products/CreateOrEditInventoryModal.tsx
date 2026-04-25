@@ -326,9 +326,9 @@ const CreateOrEditInventoryModal = ({
                             onBlur={() => {
                               field.onBlur()
                               const newWoCost = Number(form.getValues('work_order_cost'))
-                              const sellPrice = Number(form.getValues('customer_price'))
+                              const margin = Number(form.getValues('margin'))
 
-                              form.setValue('margin', getMargin(newWoCost, sellPrice))
+                              form.setValue('customer_price', getSellPrice(newWoCost, margin))
                             }}
                           />
                         </FormControl>

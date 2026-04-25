@@ -91,6 +91,24 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
     }
   }, [mode, staffData, reset])
 
+  const handleApiError = (error: any, fallbackMessage: string) => {
+    setIsLoading(false)
+
+    if (error?.errors && typeof error.errors === 'object') {
+      Object.entries(error.errors).forEach(([field, messages]) => {
+        const msg = Array.isArray(messages) ? messages[0] : String(messages)
+
+        form.setError(field as keyof StaffPayload, { type: 'server', message: msg })
+      })
+
+      if (error.message) {
+        toast.error(error.message)
+      }
+    } else {
+      toast.error(typeof error.message === 'string' ? error.message : fallbackMessage)
+    }
+  }
+
   const onSubmit = async (data: StaffPayload) => {
     setIsLoading(true)
 
@@ -103,10 +121,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
             router.push('/erp/staffs')
             reset()
           })
-          .catch(error => {
-            toast.error('Failed to create staff')
-            setIsLoading(false)
-          })
+          .catch(error => handleApiError(error, 'Failed to create staff'))
       } catch (error) {
         toast.error('Something went wrong!')
         setIsLoading(false)
@@ -119,10 +134,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
             toast.success('Staff updated successfully')
             router.push('/erp/staffs')
           })
-          .catch(error => {
-            toast.error('Failed to update staff')
-            setIsLoading(false)
-          })
+          .catch(error => handleApiError(error, 'Failed to update staff'))
       } catch (error) {
         toast.error('Something went wrong!')
         setIsLoading(false)
@@ -188,7 +200,9 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
               rules={{ required: 'Required' }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>First Name</FormLabel>
+                  <FormLabel>
+                    First Name <span className='text-red-500'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder='First name'
@@ -207,7 +221,9 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
               rules={{ required: 'Required' }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Last Name</FormLabel>
+                  <FormLabel>
+                    Last Name <span className='text-red-500'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder='Last name'
@@ -232,7 +248,9 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
               }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>
+                    Email <span className='text-red-500'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type='email'
@@ -270,7 +288,10 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
               rules={{ required: mode === 'create' ? 'Required' : false }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password {mode === 'edit' && '(Leave blank to keep current)'}</FormLabel>
+                  <FormLabel>
+                    Password{' '}
+                    {mode === 'edit' ? '(Leave blank to keep current)' : <span className='text-red-500'>*</span>}
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type='password'
@@ -299,7 +320,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
               }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
+                  <FormLabel>Confirm Password {mode === 'create' && <span className='text-red-500'>*</span>}</FormLabel>
                   <FormControl>
                     <Input
                       type='password'
@@ -319,7 +340,9 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
               rules={{ required: 'Required' }}
               render={({ field }) => (
                 <FormItem className='col-span-2'>
-                  <FormLabel>Address</FormLabel>
+                  <FormLabel>
+                    Address <span className='text-red-500'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <textarea
                       rows={3}

@@ -17,7 +17,10 @@ const ClientDetailsCard = ({ estimateDetails }: { estimateDetails?: Estimate }) 
             <span>
               <LocationEditIcon className='h-4 w-4 inline-block mr-2' />
             </span>
-            {estimateDetails?.location}
+            {estimateDetails?.address?.street_address},
+            {estimateDetails?.address?.city?.name ? estimateDetails?.address?.city?.name : ''}
+            {estimateDetails?.address?.state?.name ? ', ' + estimateDetails?.address?.state?.name : ''}
+            {estimateDetails?.address?.zip_code ? ' ' + estimateDetails?.address?.zip_code : ''}
           </p>
           {estimateDetails?.client?.email && (
             <p className='text-sm text-zinc-400'>

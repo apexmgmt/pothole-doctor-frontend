@@ -22,7 +22,14 @@ const BillingInformation = ({ proposal }: { proposal: Proposal }) => {
       {/* Service Site */}
       <div className='flex flex-col sm:text-right'>
         <h6 className='font-semibold text-base mb-4'>Service Site</h6>
-        <p>{proposal?.estimate?.location}</p>
+        <p className=' wrap-break-word'>
+          {proposal?.estimate?.address?.street_address},
+          {proposal?.estimate?.address?.city?.name ? proposal?.estimate?.address?.city?.name : ''}
+          {proposal?.estimate?.address?.state?.name
+            ? ', ' + proposal?.estimate?.address?.state?.name
+            : ''}
+          {proposal?.estimate?.address?.zip_code ? ' ' + proposal?.estimate?.address?.zip_code : ''}
+        </p>
         <p>{proposal?.estimate?.client?.email}</p>
         <p>{proposal?.estimate?.client?.phone}</p>
       </div>

@@ -56,7 +56,7 @@ interface FormValues {
   product_cost: number
   margin: string
   freight_amount: number
-  minimum_qty: number
+  minimum_qty: number | string
   round_up_quantity: boolean
   type: string
   is_notify: number
@@ -105,14 +105,14 @@ const CreateEditViewProductModal = ({
       piece_per_uom: 0,
       weight_per_uom: 0,
       coverage_per_unit_id: '',
-      coverage_per_rate: 0,
+      coverage_per_rate: 1,
       purchase_to_selling_conversion_rate: 0,
       selling_unit_id: '',
       selling_price: 0,
       product_cost: 0,
       margin: '0',
       freight_amount: 0,
-      minimum_qty: 0,
+      minimum_qty: '',
       round_up_quantity: false,
       type: 'inventory',
       is_notify: 0,
@@ -141,6 +141,12 @@ const CreateEditViewProductModal = ({
   }
 
   useEffect(() => {
+    if (!open) {
+      form.reset()
+
+      return
+    }
+
     if (open && productDetails && (mode === 'edit' || mode === 'view') && productId) {
       form.reset({
         name: productDetails.name ?? '',
@@ -162,14 +168,14 @@ const CreateEditViewProductModal = ({
         piece_per_uom: productDetails.piece_per_uom ?? 0,
         weight_per_uom: productDetails.weight_per_uom ?? 0,
         coverage_per_unit_id: productDetails.coverage_per_unit_id?.toString() ?? '',
-        coverage_per_rate: productDetails.coverage_per_rate ?? 0,
+        coverage_per_rate: productDetails.coverage_per_rate ?? 1,
         purchase_to_selling_conversion_rate: productDetails.purchase_to_selling_conversion_rate ?? 0,
         selling_unit_id: productDetails.selling_unit_id?.toString() ?? '',
         selling_price: productDetails.selling_price ?? 0,
         product_cost: productDetails.product_cost ?? 0,
         margin: productDetails.margin?.toString() ?? '0',
         freight_amount: productDetails.freight_amount ?? 0,
-        minimum_qty: productDetails.minimum_qty ?? 0,
+        minimum_qty: productDetails.minimum_qty ?? '',
         round_up_quantity: !!productDetails.round_up_quantity,
         type: productDetails.type ?? 'inventory',
         is_notify: productDetails.is_notify ?? 0,
@@ -205,14 +211,14 @@ const CreateEditViewProductModal = ({
         piece_per_uom: 0,
         weight_per_uom: 0,
         coverage_per_unit_id: '',
-        coverage_per_rate: 0,
+        coverage_per_rate: 1,
         purchase_to_selling_conversion_rate: 0,
         selling_unit_id: '',
         selling_price: 0,
         product_cost: 0,
         margin: '0',
         freight_amount: 0,
-        minimum_qty: 0,
+        minimum_qty: '',
         round_up_quantity: false,
         is_notify: 0,
         visible: 1,
@@ -224,6 +230,29 @@ const CreateEditViewProductModal = ({
       })
     }
   }, [open, productDetails, mode, productId, form])
+
+  const handleApiError = (error: any, fallbackMessage: string) => {
+    if (error?.errors && typeof error.errors === 'object') {
+      const formValues = form.getValues()
+
+      Object.entries(error.errors).forEach(([field, messages]) => {
+        const normalizedField = field.split('.')[0] as keyof FormValues
+        const message = Array.isArray(messages) ? String(messages[0]) : String(messages)
+
+        if (normalizedField in formValues) {
+          form.setError(normalizedField, { type: 'server', message })
+        } else {
+          toast.error(message)
+        }
+      })
+
+      if (error.message) {
+        toast.error(error.message)
+      }
+    } else {
+      toast.error(error?.message || fallbackMessage)
+    }
+  }
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true)
@@ -255,7 +284,7 @@ const CreateEditViewProductModal = ({
       product_cost: values.product_cost,
       margin: values.margin,
       freight_amount: values.freight_amount,
-      minimum_qty: values.minimum_qty,
+      minimum_qty: values.minimum_qty ?? '',
       round_up_quantity: values.round_up_quantity ? 1 : 0,
       type: values.type,
       is_notify: values.is_notify,
@@ -281,13 +310,7 @@ const CreateEditViewProductModal = ({
         onSuccess?.()
       }
     } catch (error: any) {
-      if (error?.errors && typeof error.errors === 'object') {
-        Object.values(error.errors).forEach((errMsg: any) => {
-          errMsg?.map((msg: string) => toast.error(msg))
-        })
-      } else {
-        toast.error(error?.message || 'Something went wrong')
-      }
+      handleApiError(error, mode === 'create' ? 'Failed to create product' : 'Failed to update product')
     } finally {
       setIsLoading(false)
     }
