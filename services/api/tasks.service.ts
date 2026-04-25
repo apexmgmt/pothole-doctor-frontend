@@ -46,7 +46,7 @@ export default class TaskService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create tasks')
+        throw errorData
       }
 
       await revalidate('tasks')
@@ -95,7 +95,7 @@ export default class TaskService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update tasks')
+        throw errorData
       }
 
       await revalidate('tasks')

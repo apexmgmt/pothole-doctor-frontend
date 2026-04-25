@@ -46,7 +46,7 @@ export default class StaffService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create staff')
+        throw errorData
       }
 
       await revalidate('staffs')
@@ -93,7 +93,7 @@ export default class StaffService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update staff')
+        throw errorData
       }
 
       await revalidate('staffs')

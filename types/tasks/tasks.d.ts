@@ -1,4 +1,4 @@
-import { Staff, TaskType, User, Client } from '..'
+import { Staff, TaskType, User, Client, Model } from '..'
 
 export interface Task {
   id: string
@@ -23,6 +23,7 @@ export interface Task {
   employees?: Staff[]
   completed_date?: string
   close_comment?: string
+  task_reminder_setting?: TaskReminderSetting[]
 }
 
 export interface TaskPayload {
@@ -54,4 +55,25 @@ export interface ReminderPayload {
 export interface ReminderTimeId {
   id: string
   is_enabled: number | 0 | 1
+}
+
+export interface TaskReminderSetting extends Model {
+  task_id: string
+  reminder_channel_id: string
+  task_type_id: string
+  reminder_time_id: string 
+  role_type: 'employee' | 'customer'
+  is_enabled: 0 | 1
+  reminder_channel?: ReminderChannel
+  reminder_time?: ReminderTime
+}
+export interface ReminderChannel extends Model {
+  name: string
+  type: string
+}
+export interface ReminderTime extends Model {
+  reminder_channel_id: string
+  label: string
+  type: string
+  time: number
 }

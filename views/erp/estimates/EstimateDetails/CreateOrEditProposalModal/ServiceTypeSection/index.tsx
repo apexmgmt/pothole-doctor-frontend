@@ -31,6 +31,7 @@ const ServiceTypeSection = ({
   vendors = [],
   taxRate = 0,
   hideMargin = false,
+  hidePriceColumns = false,
   showVendor = false,
   showPurchaseQty = false,
   allowedLineTypes
@@ -48,6 +49,7 @@ const ServiceTypeSection = ({
   vendors: Vendor[]
   taxRate: number
   hideMargin?: boolean
+  hidePriceColumns?: boolean
   showVendor?: boolean
   showPurchaseQty?: boolean
   allowedLineTypes?: ProposalServiceItemPayload['type'][]
@@ -124,8 +126,8 @@ const ServiceTypeSection = ({
                     <th className='px-2 py-1'>Quantity</th>
                     <th className='px-2 py-1'>Total Cost</th>
                     {!hideMargin && <th className='px-2 py-1'>Margin</th>}
-                    <th className='px-2 py-1'>Unit Price</th>
-                    <th className='px-2 py-1'>Total Price</th>
+                    {!hidePriceColumns && <th className='px-2 py-1'>Unit Price</th>}
+                    {!hidePriceColumns && <th className='px-2 py-1'>Total Price</th>}
                     <th className='px-2 py-1'>Sales Tax</th>
                     <th className='px-2 py-1'></th>
                   </tr>
@@ -144,6 +146,8 @@ const ServiceTypeSection = ({
                           idx={idx}
                           isLocked={isLocked}
                           showVendor={showVendor}
+                          hideMargin={hideMargin}
+                          hidePriceColumns={hidePriceColumns}
                         />
                       )
                     }
@@ -160,6 +164,7 @@ const ServiceTypeSection = ({
                         showVendor={showVendor}
                         showPurchaseQty={showPurchaseQty}
                         hideMargin={hideMargin}
+                        hidePriceColumns={hidePriceColumns}
                         units={units}
                         vendors={vendors}
                         updateLineFields={updateLineFields}

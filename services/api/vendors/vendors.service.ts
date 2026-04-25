@@ -43,7 +43,7 @@ export default class VendorService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create vendor')
+        throw errorData
       }
 
       await revalidate('vendors')
@@ -92,7 +92,7 @@ export default class VendorService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update vendor')
+        throw errorData
       }
 
       await revalidate('vendors')

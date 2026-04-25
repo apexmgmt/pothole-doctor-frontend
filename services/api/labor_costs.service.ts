@@ -46,7 +46,7 @@ export default class LaborCostService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create labor cost')
+        throw errorData
       }
 
       await revalidate('labor-costs')
@@ -94,7 +94,7 @@ export default class LaborCostService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update labor cost')
+        throw errorData
       }
 
       await revalidate('labor-costs')

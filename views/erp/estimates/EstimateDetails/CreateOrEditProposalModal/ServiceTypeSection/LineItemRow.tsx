@@ -19,6 +19,7 @@ interface LineItemRowProps {
   showVendor: boolean
   showPurchaseQty: boolean
   hideMargin: boolean
+  hidePriceColumns: boolean
   units: Unit[]
   vendors: Vendor[]
   getEditValue: (idx: number, field: string, fallback: string) => string
@@ -39,6 +40,7 @@ const LineItemRow = ({
   showVendor,
   showPurchaseQty,
   hideMargin,
+  hidePriceColumns,
   units,
   vendors,
   getEditValue,
@@ -90,7 +92,7 @@ const LineItemRow = ({
               updateLine(idx, 'description', e.target.value)
               clearEditValue(idx, 'description')
             }}
-            className='w-full min-w-32 text-red-500'
+            className='w-full min-w-32'
             placeholder='Empty'
             disabled={isLocked}
           />
@@ -153,7 +155,7 @@ const LineItemRow = ({
                   updateLine(idx, 'qty', clamped)
                   clearEditValue(idx, 'qty')
                 }}
-                className='w-28 bg-yellow-200 text-black'
+                className='w-20 bg-yellow-200 text-black'
                 min={0}
                 disabled={isLocked}
               />
@@ -178,7 +180,7 @@ const LineItemRow = ({
                     }}
                     disabled={isLocked}
                   >
-                    <SelectTrigger className='w-28 h-6! text-xs'>
+                    <SelectTrigger className='w-20 h-6! text-xs'>
                       <SelectValue placeholder='Unit' />
                     </SelectTrigger>
                     <SelectContent>
@@ -217,43 +219,47 @@ const LineItemRow = ({
                   max={100}
                   disabled={isLocked}
                 />
-                <span>%</span>
+                <span className='mt-2'>%</span>
               </>
             )}
           </td>
         )}
 
-        {/* Unit Price */}
-        <td className='px-2 py-1'>
-          {line.type !== 'deduction' && <Input value={unitPrice.toFixed(2)} readOnly className='w-28' />}
-        </td>
+        {!hidePriceColumns && (
+          <>
+            {/* Unit Price */}
+            <td className='px-2 py-1'>
+              {line.type !== 'deduction' && <Input value={unitPrice.toFixed(2)} readOnly className='w-28' />}
+            </td>
 
-        {/* Total Price */}
-        <td className='px-2 py-1'>
-          {line.type === 'deduction' ? (
-            <Input
-              disabled={isLocked}
-              type='number'
-              min={0}
-              value={getEditValue(idx, 'total_price', Number(line.total_price)?.toFixed(2) ?? '')}
-              onChange={e => setEditValue(idx, 'total_price', e.target.value)}
-              onBlur={e => {
-                updateLine(idx, 'total_price', parseFloat(e.target.value) || 0)
-                clearEditValue(idx, 'total_price')
-              }}
-              className='w-28'
-            />
-          ) : (
-            <Input value={totalPrice.toFixed(2)} readOnly className='w-28' />
-          )}
-        </td>
+            {/* Total Price */}
+            <td className='px-2 py-1'>
+              {line.type === 'deduction' ? (
+                <Input
+                  disabled={isLocked}
+                  type='number'
+                  min={0}
+                  value={getEditValue(idx, 'total_price', Number(line.total_price)?.toFixed(2) ?? '')}
+                  onChange={e => setEditValue(idx, 'total_price', e.target.value)}
+                  onBlur={e => {
+                    updateLine(idx, 'total_price', parseFloat(e.target.value) || 0)
+                    clearEditValue(idx, 'total_price')
+                  }}
+                  className='w-28'
+                />
+              ) : (
+                <Input value={totalPrice.toFixed(2)} readOnly className='w-28' />
+              )}
+            </td>
+          </>
+        )}
 
         {/* Sales Tax checkbox */}
         <td className='px-2 py-3.5 text-center'>
           {line.type !== 'deduction' && (
             <Checkbox
               disabled={isLocked}
-              checked={line.is_sale === 1}
+              checked={line.is_sale ? true : false}
               onCheckedChange={checked => updateLine(idx, 'is_sale', checked ? 1 : 0)}
             />
           )}

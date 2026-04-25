@@ -31,7 +31,7 @@ export interface WorkOrder extends Model {
   assign_id: string
   assign_user?: User
   created_by: string
-  location: string | null
+  location?: BusinessLocation | null
   payment_term_id: string
   service_type_id: string
   title: string
@@ -62,7 +62,9 @@ export interface WorkOrder extends Model {
   payment_method_data?: Record<string, string> | null
   is_agreed_terms?: boolean | number | null
   is_signed?: boolean
-  location: string | null
+  address_id?: string | null
+  address?: ClientAddress | null
+  location_id?: string | null
 }
 
 export interface WorkOrderPayload {
@@ -72,7 +74,8 @@ export interface WorkOrderPayload {
   assign_id: string
   payment_term_id: string
   title: string
-  location: string
+  address_id?: string | null
+  location_id?: string | null
   issue_date: string
   due_date: string
 

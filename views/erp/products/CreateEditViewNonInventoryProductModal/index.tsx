@@ -54,7 +54,7 @@ interface FormValues {
   product_cost: number
   margin: string
   freight_amount: number
-  minimum_qty: number
+  minimum_qty: number | string
   round_up_quantity: boolean
   type: string
   is_notify: number
@@ -86,14 +86,14 @@ const defaultValues: FormValues = {
   piece_per_uom: 0,
   weight_per_uom: 0,
   coverage_per_unit_id: '',
-  coverage_per_rate: 0,
+  coverage_per_rate: 1,
   purchase_to_selling_conversion_rate: 0,
   selling_unit_id: '',
   selling_price: 0,
   product_cost: 0,
   margin: '0',
   freight_amount: 0,
-  minimum_qty: 0,
+  minimum_qty: '',
   round_up_quantity: false,
   type: 'non_inventory',
   is_notify: 0,
@@ -122,6 +122,12 @@ const CreateEditViewNonInventoryProductModal = ({
   const form = useForm<FormValues>({ defaultValues })
 
   useEffect(() => {
+    if (!open) {
+      form.reset(defaultValues)
+
+      return
+    }
+
     if (open && productDetails && (mode === 'edit' || mode === 'view') && productId) {
       form.reset({
         name: productDetails.name ?? '',
@@ -143,14 +149,14 @@ const CreateEditViewNonInventoryProductModal = ({
         piece_per_uom: productDetails.piece_per_uom ?? 0,
         weight_per_uom: productDetails.weight_per_uom ?? 0,
         coverage_per_unit_id: productDetails.coverage_per_unit_id?.toString() ?? '',
-        coverage_per_rate: productDetails.coverage_per_rate ?? 0,
+        coverage_per_rate: productDetails.coverage_per_rate ?? 1,
         purchase_to_selling_conversion_rate: productDetails.purchase_to_selling_conversion_rate ?? 0,
         selling_unit_id: productDetails.selling_unit_id?.toString() ?? '',
         selling_price: productDetails.selling_price ?? 0,
         product_cost: productDetails.product_cost ?? 0,
         margin: productDetails.margin?.toString() ?? '0',
         freight_amount: productDetails.freight_amount ?? 0,
-        minimum_qty: productDetails.minimum_qty ?? 0,
+        minimum_qty: productDetails.minimum_qty ?? '',
         round_up_quantity: !!productDetails.round_up_quantity,
         type: productDetails.type ?? 'non_inventory',
         is_notify: productDetails.is_notify ?? 0,

@@ -380,8 +380,12 @@ const InvoicePDFDocument = ({
           {/* Service Site */}
           <View style={[s.infoBlock, { alignItems: 'flex-end' }]}>
             <Text style={[s.infoTitle, { textAlign: 'right' }]}>Service Site</Text>
-            {invoice?.estimate?.location && (
-              <Text style={[s.companyInfo, { textAlign: 'right' }]}>{invoice.estimate.location}</Text>
+            {invoice?.address && (
+              <Text style={[s.companyInfo, { textAlign: 'right' }]}>
+                {invoice.address?.street_address},{invoice.address?.city?.name ? invoice.address.city.name : ''}
+                {invoice.address?.state?.name ? ', ' + invoice.address.state.name : ''}
+                {invoice.address?.zip_code ? ' ' + invoice.address.zip_code : ''}
+              </Text>
             )}
             {invoice?.client?.email && (
               <Text style={[s.companyInfo, { textAlign: 'right' }]}>{invoice.client.email}</Text>

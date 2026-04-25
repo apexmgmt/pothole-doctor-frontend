@@ -32,14 +32,14 @@ const CertificateCustomerInfo = ({
         </p>
         <p className=''>
           <span className='font-semibold'>Job Location: </span>
-          {workOrder?.location ??
-            (workOrder?.client?.address?.street_address ?? '') +
+          {workOrder?.address ??
+            (workOrder?.address?.street_address ?? '') +
               ', ' +
-              (workOrder?.client?.address?.city?.name ?? '') +
+              (workOrder?.address?.city?.name ?? '') +
               ', ' +
-              (workOrder?.client?.address?.state?.name ?? '') +
+              (workOrder?.address?.state?.name ?? '') +
               ' ' +
-              (workOrder?.client?.address?.zip_code ?? '')}
+              (workOrder?.address?.zip_code ?? '')}
         </p>
       </div>
     </div>

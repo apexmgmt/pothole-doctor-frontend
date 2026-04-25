@@ -70,7 +70,7 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input type='number' placeholder='Carton/Pallet' {...field} disabled={disabled} />
+                  <Input type='number' placeholder='Unit/Pallet' {...field} disabled={disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -82,7 +82,7 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input type='number' placeholder='Piece/Carton' {...field} disabled={disabled} />
+                  <Input type='number' placeholder='Piece/Unit' {...field} disabled={disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -94,7 +94,7 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input type='number' placeholder='weight_per_uom' {...field} disabled={disabled} />
+                  <Input type='number' placeholder='Weight/Unit' {...field} disabled={disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -106,17 +106,26 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
       {/* Coverage per UOM */}
       <div className='space-y-2'>
         <FormLabel>
-          Coverage per UOM <span className='text-red-500'>*</span>
+          Coverage per UOM
+          {/* <span className='text-red-500'>*</span> */}
         </FormLabel>
         <div className='grid grid-cols-2 gap-2'>
           <FormField
             control={form.control}
             name='coverage_per_rate'
-            rules={{ required: 'Coverage value is required', min: { value: 0, message: 'Must be at least 0' } }}
+            rules={{
+              validate: value => {
+                if (value === '' || value === null || value === undefined) {
+                  return true
+                }
+
+                return Number(value) > 0 || 'Coverage rate must be greater than 0'
+              }
+            }}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input type='number' step='0.01' placeholder='1.0000' {...field} disabled={disabled} />
+                  <Input type='text' step='0.01' placeholder='Coverage Rate' {...field} disabled={disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -125,7 +134,8 @@ export function UOMFields({ form, uomUnits, disabled = false }: UOMFieldsProps) 
           <FormField
             control={form.control}
             name='coverage_per_unit_id'
-            rules={{ required: 'Unit is required' }}
+            
+            // rules={{ required: 'Unit is required' }}
             render={({ field }) => (
               <FormItem>
                 <Select onValueChange={field.onChange} value={field.value || ''} disabled={disabled}>

@@ -140,8 +140,12 @@ const EstimateSection = ({
               </div>
             )}
             <div>
-              <span className='font-semibold text-base text-white'>Estimate location</span>
-              <div>{estimate.location || 'N/A'}</div>
+              <span className='font-semibold text-base text-white'>Business Location</span>
+              <div>{estimate.location ? `${estimate.location.street_address}, ${estimate.location.city?.name}, ${estimate.location.state?.name} ${estimate.location.zip_code}` : 'N/A'}</div>
+            </div>
+            <div>
+              <span className='font-semibold text-base text-white'>Job Location</span>
+              <div>{estimate.address ? `${estimate.address.street_address}, ${estimate.address.city?.name}, ${estimate.address.state?.name} ${estimate.address.zip_code}` : 'N/A'}</div>
             </div>
             {estimate.biding_date && (
               <div>
