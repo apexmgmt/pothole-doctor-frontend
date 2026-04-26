@@ -178,12 +178,12 @@ const CreateEditViewProductModal = ({
         minimum_qty: productDetails.minimum_qty ?? '',
         round_up_quantity: !!productDetails.round_up_quantity,
         type: productDetails.type ?? 'inventory',
-        is_notify: productDetails.is_notify ?? 0,
-        visible: productDetails.visible ?? 1,
-        is_freight_percentage: productDetails.is_freight_percentage ?? 0,
-        is_discontinued_product: productDetails.is_discontinued_product ?? 0,
+        is_notify: productDetails.is_notify ? 1 : 0,
+        visible: productDetails.visible ? 1 : 0,
+        is_freight_percentage: productDetails.is_freight_percentage ? 1 : 0,
+        is_discontinued_product: productDetails.is_discontinued_product ? 1 : 0,
         comments: productDetails.comments ?? '',
-        status: productDetails.status ?? 1,
+        status: productDetails.status ? 1 : 0,
         sku: productDetails.sku ?? ''
       })
 

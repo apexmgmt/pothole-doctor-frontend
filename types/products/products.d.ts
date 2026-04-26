@@ -31,12 +31,12 @@ export interface Product extends Model {
   minimum_qty: number
   round_up_quantity: boolean
   type: string | 'inventory' | 'non_inventory'
-  is_notify: number | 0 | 1
-  visible: number | 0 | 1
-  is_freight_percentage: number | 0 | 1
-  is_discontinued_product: number | 0 | 1
+  is_notify: boolean
+  visible: boolean
+  is_freight_percentage: boolean
+  is_discontinued_product: boolean
   comments: string
-  status: number | 1 | 0
+  status: boolean
   deleted_at: string | null
 
   // Stock & Quantities
