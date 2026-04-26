@@ -1,10 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
-import { zodResolver } from '@hookform/resolvers/zod'
-
-import * as z from 'zod'
+import { useEffect } from 'react'
 
 import { useForm } from 'react-hook-form'
 
@@ -30,64 +26,21 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import ContactTypeService from '@/services/api/settings/contact_types.service'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import CommissionService from '@/services/api/settings/commissions.service'
 import { Separator } from '@/components/ui/separator'
 
-const formSchema = z
-  .object({
-    commission_type: z.string().min(1, { message: 'Please select a commission type' }),
-    based_on: z.string().min(1, { message: 'Please select what the commission is based on' }),
-    per: z.string().min(1, { message: 'Please select per option' }),
-    filter_type: z.string().min(1, { message: 'Please select a filter type' }),
-    amount: z.string(),
-    min_amount: z.string(),
-    max_amount: z.string(),
-    filter_percent: z.boolean(),
-    commission_percent: z.boolean()
-  })
-  .refine(
-    data => {
-      if (data.filter_percent && parseFloat(data.min_amount) > 0) {
-        return parseFloat(data.min_amount) <= 100
-      }
-
-      return true
-    },
-    {
-      message: 'Min amount cannot be greater than 100 when using percentage',
-      path: ['min_amount']
-    }
-  )
-  .refine(
-    data => {
-      if (data.filter_percent && parseFloat(data.max_amount) > 0) {
-        return parseFloat(data.max_amount) <= 100
-      }
-
-      return true
-    },
-    {
-      message: 'Max amount cannot be greater than 100 when using percentage',
-      path: ['max_amount']
-    }
-  )
-  .refine(
-    data => {
-      if (data.commission_percent && parseFloat(data.amount) > 0) {
-        return parseFloat(data.amount) <= 100
-      }
-
-      return true
-    },
-    {
-      message: 'Commission cannot be greater than 100 when using percentage',
-      path: ['amount']
-    }
-  )
-
-type FormValues = z.infer<typeof formSchema>
+interface FormValues {
+  commission_type: string
+  based_on: string
+  per: string
+  filter_type: string
+  amount: string
+  min_amount: string
+  max_amount: string
+  filter_percent: boolean
+  commission_percent: boolean
+}
 
 const CreateOrEditCommissionModal = ({
   mode = 'create',
@@ -101,11 +54,11 @@ const CreateOrEditCommissionModal = ({
   commissionDetails
 }: CreateOrEditCommissionModalProps) => {
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    mode: 'onSubmit',
     defaultValues: {
       commission_type: commissionDetails?.commission_type || '',
       based_on: commissionDetails?.based_on || '',
-      per: commissionDetails?.per || 'Per Job',
+      per: commissionDetails?.per || 'per-job',
       filter_type: commissionDetails?.filter_type || 'between',
       amount: commissionDetails?.amount.toString() || '0',
       min_amount: commissionDetails?.min_amount.toString() || '0',
@@ -129,7 +82,7 @@ const CreateOrEditCommissionModal = ({
       form.reset({
         commission_type: commissionDetails?.commission_type || '',
         based_on: commissionDetails?.based_on || '',
-        per: commissionDetails?.per || 'Per Job',
+        per: commissionDetails?.per || 'per-job',
         filter_type: commissionDetails?.filter_type || 'between',
         amount: commissionDetails?.amount.toString() || '0',
         min_amount: commissionDetails?.min_amount.toString() || '0',
@@ -197,7 +150,7 @@ const CreateOrEditCommissionModal = ({
     form.reset({
       commission_type: commissionDetails?.commission_type || '',
       based_on: commissionDetails?.based_on || '',
-      per: commissionDetails?.per || 'Per Job',
+      per: commissionDetails?.per || 'per-job',
       filter_type: commissionDetails?.filter_type || 'between',
       amount: commissionDetails?.amount.toString() || '0',
       min_amount: commissionDetails?.min_amount.toString() || '0',
@@ -218,6 +171,12 @@ const CreateOrEditCommissionModal = ({
 
   // Watch filter_type to conditionally render fields
   const filterType = form.watch('filter_type')
+  const basedOn = form.watch('based_on')
+
+  // Reset per when based_on changes to avoid stale selection
+  useEffect(() => {
+    form.setValue('per', '')
+  }, [basedOn, form])
 
   // Reset field values when they are hidden
   useEffect(() => {
@@ -271,6 +230,7 @@ const CreateOrEditCommissionModal = ({
             <FormField
               control={form.control}
               name='commission_type'
+              rules={{ required: 'Please select a commission type' }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -303,6 +263,7 @@ const CreateOrEditCommissionModal = ({
             <FormField
               control={form.control}
               name='based_on'
+              rules={{ required: 'Please select what the commission is based on' }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className='text-nowrap'>
@@ -333,6 +294,7 @@ const CreateOrEditCommissionModal = ({
             <FormField
               control={form.control}
               name='per'
+              rules={{ required: 'Please select per option' }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -345,7 +307,15 @@ const CreateOrEditCommissionModal = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value='Per Job'>Per Job</SelectItem>
+                      {basedOn === 'bonus-by-sales' ? (
+                        <>
+                          <SelectItem value='per-job'>Per Job</SelectItem>
+                          <SelectItem value='per-store-sales'>Per Store Sales</SelectItem>
+                          <SelectItem value='per-company-sales'>Per Company Sales</SelectItem>
+                        </>
+                      ) : (
+                        <SelectItem value='per-job'>Per Job</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -360,6 +330,7 @@ const CreateOrEditCommissionModal = ({
             <FormField
               control={form.control}
               name='filter_type'
+              rules={{ required: 'Please select a filter type' }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -392,6 +363,14 @@ const CreateOrEditCommissionModal = ({
                   <FormField
                     control={form.control}
                     name='min_amount'
+                    rules={{
+                      validate: value => {
+                        if (form.getValues('filter_percent') && parseFloat(value) > 100)
+                          return 'Min amount cannot be greater than 100 when using percentage'
+
+                        return true
+                      }
+                    }}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
@@ -411,6 +390,14 @@ const CreateOrEditCommissionModal = ({
                   <FormField
                     control={form.control}
                     name='max_amount'
+                    rules={{
+                      validate: value => {
+                        if (form.getValues('filter_percent') && parseFloat(value) > 100)
+                          return 'Max amount cannot be greater than 100 when using percentage'
+
+                        return true
+                      }
+                    }}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
@@ -468,6 +455,14 @@ const CreateOrEditCommissionModal = ({
                 <FormField
                   control={form.control}
                   name='amount'
+                  rules={{
+                    validate: value => {
+                      if (form.getValues('commission_percent') && parseFloat(value) > 100)
+                        return 'Commission cannot be greater than 100 when using percentage'
+
+                      return true
+                    }
+                  }}
                   render={({ field }) => (
                     <FormItem className='flex-1'>
                       <FormLabel>
