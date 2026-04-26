@@ -1,4 +1,4 @@
-import { Permission, PermissionsByModule, Role, UserAble } from '.'
+import { CommissionType, Permission, PermissionsByModule, Role, UserAble } from '.'
 
 export interface Staff {
   id: string
@@ -31,12 +31,14 @@ export interface StaffPayload {
   address?: string
   permissions?: string[]
   roles?: string[]
+  commission_type_id?: string
 }
 
 export interface CreateOrEditStaffProps {
   mode: 'create' | 'edit'
   roles: Role[]
   permissions: PermissionsByModule
+  commissionTypes?: CommissionType[]
   staffId?: string
   staffData?: Staff
 }
