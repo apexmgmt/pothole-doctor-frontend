@@ -56,6 +56,7 @@ export const PERMISSION_BASED_ROUTES: Record<string, string> = {
 
   // Tasks routes
   '/erp/tasks': 'Manage Task',
+  '/erp/tasks/kanban': 'Manage Task',
 
   // Labor cost routes
   '/erp/labor-costs': 'Manage Labor Cost',
