@@ -240,6 +240,7 @@ const EditWorkOrderServicesModal = ({
         lines: (service.items || []).map(item => ({
           item_id: item.id,
           product_id: item.product_id,
+          product: item?.product,
           labor_cost_id: item.labor_cost_id,
           name: item.name,
           description: item.description,
@@ -261,7 +262,7 @@ const EditWorkOrderServicesModal = ({
           note: item.note || ''
         }))
       }))
-
+      
       setServiceTypeLineItems(newServiceTypeLineItems)
     }
   }, [open, workOrder])

@@ -68,26 +68,26 @@ export function PricingFields({ form, uomUnits, disabled = false }: PricingField
 
   // Recalculate selling_price whenever coverage rate, selling unit, or coverage unit changes.
   // Skipped on the first render so we don't overwrite loaded edit-mode values.
-  useEffect(() => {
-    if (!isMounted.current) {
-      isMounted.current = true
+  // useEffect(() => {
+  //   if (!isMounted.current) {
+  //     isMounted.current = true
 
-      return
-    }
+  //     return
+  //   }
 
-    const cost = Number(form.getValues('product_cost'))
-    const margin = Number(form.getValues('margin'))
-    const rate = Number(coveragePerRate)
+  //   const cost = Number(form.getValues('product_cost'))
+  //   const margin = Number(form.getValues('margin'))
+  //   const rate = Number(coveragePerRate)
 
-    const isCovSell =
-      !!sellingUnitId && !!coveragePerUnitId && sellingUnitId === coveragePerUnitId && sellingUnitId !== purchaseUomId
+  //   const isCovSell =
+  //     !!sellingUnitId && !!coveragePerUnitId && sellingUnitId === coveragePerUnitId && sellingUnitId !== purchaseUomId
 
-    const ec = isCovSell && rate > 0 ? cost / rate : cost
+  //   const ec = isCovSell && rate > 0 ? cost / rate : cost
 
-    if (cost > 0) {
-      form.setValue('selling_price', getSellPrice(ec, margin), { shouldDirty: true })
-    }
-  }, [coveragePerRate, sellingUnitId, coveragePerUnitId])
+  //   if (cost > 0) {
+  //     form.setValue('selling_price', getSellPrice(ec, margin), { shouldDirty: true })
+  //   }
+  // }, [coveragePerRate, sellingUnitId, coveragePerUnitId])
 
   // Build the two selectable options.
   // Deduplicate when purchase and coverage resolve to the same unit.

@@ -163,7 +163,7 @@ const LineItemRow = ({
                 (line.product_id || line.labor_cost_id ? (
                   <span className='text-xs text-zinc-400 px-1 truncate w-28' title={line.unit_name || '—'}>
                     {line.unit_name || '—'}
-                    {showPurchaseQty && line.product_id && !!line.product?.coverage_per_rate && (
+                    {line.product_id && !!line.product?.coverage_per_rate && (
                       <span className='text-xs text-blue-400 px-1 truncate w-28'>
                         {(line.qty / line.product.coverage_per_rate).toFixed(2)}{' '}
                         {line.product.purchase_uom?.name ?? line.product.purchase_unit?.name ?? ''}

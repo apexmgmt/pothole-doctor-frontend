@@ -225,7 +225,7 @@ const ProductStock: React.FC<ProductsProps> = ({
         return (
           <div className='flex flex-col leading-tight'>
             <span className='font-medium'>
-              {row.remaining_stock != null ? mathRoundFixed(row.remaining_stock) : '0'}{' '}
+              {row.available_stock != null ? mathRoundFixed(row.available_stock) : '0'}{' '}
               {purchaseUnitName && <span className='text-muted-foreground text-xs'>({purchaseUnitName})</span>}
             </span>
             {coverageQty != null && (

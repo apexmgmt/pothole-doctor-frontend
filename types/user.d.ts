@@ -5,6 +5,7 @@ export interface UserAble {
   profile_picture: string | null
   address: string | null
   phone: string | null
+  commission_type_id?: string
   deleted_at: string | null
   created_at: string
   updated_at: string

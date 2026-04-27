@@ -32,13 +32,15 @@ const defaultValues: StaffPayload = {
   password_confirmation: '',
   address: '',
   roles: [],
-  permissions: []
+  permissions: [],
+  commission_type_id: ''
 }
 
 const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
   mode = 'create',
   permissions,
   roles,
+  commissionTypes = [],
   staffId = null,
   staffData = null
 }) => {
@@ -57,7 +59,8 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
         password_confirmation: '',
         address: staffData.userable?.address || '',
         roles: staffData.roles?.map(role => role.name) || [],
-        permissions: staffData.permissions?.map(permission => permission.name) || []
+        permissions: staffData.permissions?.map(permission => permission.name) || [],
+        commission_type_id: staffData?.userable?.commission_type_id || ''
       }
     : defaultValues
 
@@ -86,7 +89,8 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
         password_confirmation: '',
         address: staffData.userable?.address || '',
         roles: staffData.roles?.map(role => role.name) || [],
-        permissions: staffData.permissions?.map(permission => permission.name) || []
+        permissions: staffData.permissions?.map(permission => permission.name) || [],
+        commission_type_id: staffData?.userable?.commission_type_id || ''
       })
     }
   }, [mode, staffData, reset])
@@ -119,7 +123,6 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
             setIsLoading(false)
             toast.success('Staff created successfully')
             router.push('/erp/staffs')
-            reset()
           })
           .catch(error => handleApiError(error, 'Failed to create staff'))
       } catch (error) {
@@ -154,7 +157,8 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
         password_confirmation: '',
         address: staffData.userable?.address || '',
         roles: staffData.roles?.map(role => role.name) || [],
-        permissions: staffData.permissions?.map(permission => permission.name) || []
+        permissions: staffData.permissions?.map(permission => permission.name) || [],
+        commission_type_id: staffData?.userable?.commission_type_id || ''
       })
     } else {
       reset(defaultValues)
@@ -350,6 +354,32 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                       className='flex w-full rounded-md border border-border bg-bg-3 px-3 py-2 text-sm text-light placeholder:text-gray focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Commission Type Field */}
+            <FormField
+              control={control}
+              name='commission_type_id'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Commission Type</FormLabel>
+                  <FormControl>
+                    <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                      <SelectTrigger className='bg-bg-3 border-border text-light w-full'>
+                        <SelectValue placeholder='Select commission type' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {commissionTypes.map(ct => (
+                          <SelectItem key={ct.id} value={ct.id}>
+                            {ct.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

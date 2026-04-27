@@ -17,6 +17,10 @@ interface LineItemActionsProps {
 const LineItemActions = ({ line, idx, mode, locked = false, updateLine, removeLine }: LineItemActionsProps) => {
   const isDisabled = mode === 'view' || locked
 
+  const hasFreight = (line.freight_charge ?? 0) > 0
+  const hasDiscount = (line.discount ?? 0) > 0
+  const hasNote = !!(line.note && line.note.trim() !== '')
+
   return (
     <td className='px-2 py-1 flex gap-1 justify-end'>
       {/* Freight charge dropdown */}
@@ -24,7 +28,7 @@ const LineItemActions = ({ line, idx, mode, locked = false, updateLine, removeLi
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size='icon' variant='ghost' title='Freight Charge'>
-              <Truck className='h-4 w-4 text-zinc-400' />
+              <Truck className={`h-4 w-4 ${hasFreight ? 'text-primary' : 'text-zinc-400'}`} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end' className='w-64 p-3'>
@@ -40,7 +44,11 @@ const LineItemActions = ({ line, idx, mode, locked = false, updateLine, removeLi
                 className='w-full'
                 disabled={isDisabled}
               />
-              <div className='text-xs text-zinc-400'>Enter freight charge</div>
+              <div className='text-xs text-zinc-400'>
+                {line.product?.is_freight_percentage
+                  ? `${Number(line.product?.freight_amount ?? 0)}% of total price (auto-calculated)`
+                  : 'Enter freight charge'}
+              </div>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -51,7 +59,7 @@ const LineItemActions = ({ line, idx, mode, locked = false, updateLine, removeLi
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size='icon' variant='ghost' title='Discount'>
-              <BadgeDollarSign className='h-4 w-4 text-zinc-400' />
+              <BadgeDollarSign className={`h-4 w-4 ${hasDiscount ? 'text-primary' : 'text-zinc-400'}`} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end' className='w-64 p-3'>
@@ -111,7 +119,7 @@ const LineItemActions = ({ line, idx, mode, locked = false, updateLine, removeLi
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button size='icon' variant='ghost' title='Note'>
-            <ClipboardPlus className='h-4 w-4 text-zinc-400' />
+            <ClipboardPlus className={`h-4 w-4 ${hasNote ? 'text-primary' : 'text-zinc-400'}`} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end' className='w-64 p-2'>
