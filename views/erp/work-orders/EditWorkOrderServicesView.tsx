@@ -29,6 +29,7 @@ import AddServiceButton from '@/views/erp/estimates/EstimateDetails/CreateOrEdit
 import ClientDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ClientDetailsCard'
 import ProfitDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ProfitDetailsCard'
 import TotalCalculationCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/TotalCalculationCard'
+import AssignUserCard from './AssignUserCard'
 
 const EditWorkOrderServicesView = ({
   workOrder: initialWorkOrder,
@@ -60,6 +61,11 @@ const EditWorkOrderServicesView = ({
   const [isLoading, setIsLoading] = useState(false)
   const [isWorkOrderDetailsOpen, setIsWorkOrderDetailsOpen] = useState(false)
   const [currentWorkOrder, setCurrentWorkOrder] = useState<WorkOrder>(initialWorkOrder)
+  const [customCommission, setCustomCommission] = useState<number>(Number(initialWorkOrder?.custom_commissions ?? 0))
+
+  const [isCustomCommissionPercentage, setIsCustomCommissionPercentage] = useState<boolean>(
+    initialWorkOrder?.is_custom_commission_percentage ?? false
+  )
 
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
   const [selectedServiceType, setSelectedServiceType] = useState<{ id: string; name: string }[]>([])
@@ -184,6 +190,8 @@ const EditWorkOrderServicesView = ({
     message: customMessageRef.current?.value || '',
     discount_type: 'percentage',
     discount: 0,
+    custom_commissions: customCommission,
+    is_custom_commission_percentage: isCustomCommissionPercentage,
     services: serviceTypeLineItems.map((st, index) => ({
       service_type_id: selectedServiceType[index]?.id || st.serviceTypeId,
       group_id: st.groupId ?? null,
@@ -303,6 +311,17 @@ const EditWorkOrderServicesView = ({
       {/* Detail Cards */}
       <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-4'>
         <ClientDetailsCard estimateDetails={currentWorkOrder as any} />
+        <AssignUserCard
+          workOrder={currentWorkOrder}
+          profit={profit}
+          total={lockedTotal}
+          customCommission={customCommission}
+          isCustomCommissionPercentage={isCustomCommissionPercentage}
+          onCommissionChange={(value, isPercentage) => {
+            setCustomCommission(value)
+            setIsCustomCommissionPercentage(isPercentage)
+          }}
+        />
         <ProfitDetailsCard profitPercent={profitPercent} profitAmount={profit} totalProfit={profit} />
         <TotalCalculationCard
           title='Material'

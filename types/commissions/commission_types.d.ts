@@ -1,9 +1,9 @@
-export interface CommissionType {
-  id: string
+import { Commission, Model } from ".."
+
+export interface CommissionType extends Model{
   name: string
   slug: string
-  created_at: string
-  updated_at: string
+  commissions?: Commission[]
 }
 
 export interface CommissionTypePayload {

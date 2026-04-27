@@ -65,6 +65,9 @@ export interface WorkOrder extends Model {
   address_id?: string | null
   address?: ClientAddress | null
   location_id?: string | null
+  commissions: number
+  custom_commissions: number
+  is_custom_commission_percentage: boolean
 }
 
 export interface WorkOrderPayload {
@@ -96,6 +99,8 @@ export interface WorkOrderServicePayload {
   discount: number
   message: string
   services: ServicePayload[]
+  custom_commissions?: number
+  is_custom_commission_percentage?: boolean
 }
 
 export interface ServicePayload {

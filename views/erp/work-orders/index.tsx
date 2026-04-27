@@ -282,6 +282,21 @@ const WorkOrders: React.FC<{
       sortable: true
     },
     {
+      id: 'commissions',
+      header: 'Commissions',
+      cell: (row: WorkOrder) => {
+        const commission = row.commissions ?? 0
+        const isPositive = commission >= 0
+
+        return (
+          <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+            ${Number(commission).toFixed(2)}
+          </span>
+        )
+      },
+      sortable: true
+    },
+    {
       id: 'status',
       header: 'Status',
       cell: (row: WorkOrder) => (
