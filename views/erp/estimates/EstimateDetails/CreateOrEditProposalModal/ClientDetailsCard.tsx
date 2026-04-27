@@ -13,15 +13,17 @@ const ClientDetailsCard = ({ estimateDetails }: { estimateDetails?: Estimate }) 
             </span>
             {estimateDetails?.client?.first_name + ' ' + estimateDetails?.client?.last_name}
           </h6>
-          <p className='text-sm font-semibold text-zinc-400'>
-            <span>
-              <LocationEditIcon className='h-4 w-4 inline-block mr-2' />
-            </span>
-            {estimateDetails?.address?.street_address},
-            {estimateDetails?.address?.city?.name ? estimateDetails?.address?.city?.name : ''}
-            {estimateDetails?.address?.state?.name ? ', ' + estimateDetails?.address?.state?.name : ''}
-            {estimateDetails?.address?.zip_code ? ' ' + estimateDetails?.address?.zip_code : ''}
-          </p>
+          {estimateDetails?.address && (
+            <p className='text-sm font-semibold text-zinc-400'>
+              <span>
+                <LocationEditIcon className='h-4 w-4 inline-block mr-2' />
+              </span>
+              {estimateDetails?.address?.street_address},
+              {estimateDetails?.address?.city?.name ? estimateDetails?.address?.city?.name : ''}
+              {estimateDetails?.address?.state?.name ? ', ' + estimateDetails?.address?.state?.name : ''}
+              {estimateDetails?.address?.zip_code ? ' ' + estimateDetails?.address?.zip_code : ''}
+            </p>
+          )}
           {estimateDetails?.client?.email && (
             <p className='text-sm text-zinc-400'>
               <span>

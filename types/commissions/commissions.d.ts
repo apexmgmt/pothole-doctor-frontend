@@ -11,7 +11,7 @@ export interface Commission {
   commission_type: string
   based_on: string
   filter_type: string | 'greater-than' | 'less-than' | 'between' | 'same-as-store'
-  per: string | 'Per Job'
+  per: string | 'per-job' | 'per-store-sales' | 'per-company-sales'
   amount: number
   min_amount: number
   max_amount: number
@@ -25,7 +25,7 @@ export interface CommissionPayload {
   commission_type: string
   based_on: string
   filter_type: string | 'greater-than' | 'less-than' | 'between' | 'same-as-store'
-  per: string | 'Per Job'
+  per: string | 'per-job' | 'per-store-sales' | 'per-company-sales'
   amount: number
   min_amount: number
   max_amount: number

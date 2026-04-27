@@ -1,4 +1,4 @@
-import { Permission, Role } from '.'
+import { CommissionType, Permission, Role } from '.'
 
 export interface UserAble {
   id: string
@@ -6,6 +6,7 @@ export interface UserAble {
   address: string | null
   phone: string | null
   commission_type_id?: string
+  commission_type?: CommissionType
   deleted_at: string | null
   created_at: string
   updated_at: string
