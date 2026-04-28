@@ -19,6 +19,7 @@ export default function KanbanColumn({
   tasks,
   onAddTask,
   onEdit,
+  onDelete,
   canCreateTask,
   canEditTask,
   canDeleteTask
@@ -27,6 +28,7 @@ export default function KanbanColumn({
   tasks: KanbanTask[]
   onAddTask: (columnId: string) => void
   onEdit: (task: Task) => void
+  onDelete: (taskId: string) => void
   canCreateTask: boolean
   canEditTask: boolean
   canDeleteTask: boolean
@@ -65,7 +67,14 @@ export default function KanbanColumn({
             {/* Added strategy for smoother vertical sorting physics */}
             <SortableContext items={sortedTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
               {sortedTasks.map(task => (
-                <TaskCard key={task.id} task={task} onEdit={onEdit} canEdit={canEditTask} canDelete={canDeleteTask} />
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  canEdit={canEditTask}
+                  canDelete={canDeleteTask}
+                />
               ))}
             </SortableContext>
           </div>

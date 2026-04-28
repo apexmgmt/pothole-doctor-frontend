@@ -82,6 +82,84 @@ export default function KanbanBoard({
   const [canEditTask, setCanEditTask] = useState<boolean>(false)
   const [canDeleteTask, setCanDeleteTask] = useState<boolean>(false)
 
+  // Delete task handler
+  const handleDeleteTask = async (taskId: string) => {
+    // Optimistically remove from UI
+    let deletedTask: KanbanTask | undefined
+
+    setTasks(prevTasks => {
+      deletedTask = prevTasks.find(t => t.id === taskId)
+      if (!deletedTask) return prevTasks
+      let newTasks = prevTasks.filter(t => t.id !== taskId)
+
+      // Get all tasks in the same column, sorted by order
+      const colTasks = newTasks
+        .filter(t => t.columnId === deletedTask!.columnId)
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
+      // Reassign order for tasks after the deleted one
+      newTasks = newTasks.map(t => {
+        if (t.columnId === deletedTask!.columnId) {
+          const newOrder = colTasks.findIndex(ct => ct.id === t.id)
+
+          return { ...t, order: newOrder }
+        }
+
+        return t
+      })
+
+      return newTasks
+    })
+
+    try {
+      await TaskService.destroy(taskId)
+      toast.success('Task deleted successfully')
+    } catch (error: any) {
+      // Revert UI if failed
+      setTasks(prevTasks => {
+        if (!deletedTask) return prevTasks
+
+        // Insert the deleted task back in the correct order
+        let newTasks = [...prevTasks]
+
+        // Find all tasks in the same column
+        const colTasks = newTasks.filter(t => t.columnId === deletedTask!.columnId)
+
+        // Insert at the original order position
+        let insertIdx = colTasks.findIndex(t => (t.order ?? 0) > (deletedTask!.order ?? 0))
+
+        if (insertIdx === -1) {
+          // Insert at end
+          newTasks.push(deletedTask!)
+        } else {
+          // Insert before the first task with greater order
+          // Find the index in the full array
+          let fullIdx = newTasks.findIndex(t => t.id === colTasks[insertIdx].id)
+
+          newTasks.splice(fullIdx, 0, deletedTask!)
+        }
+
+        // Reassign order for all tasks in the column
+        const updatedColTasks = newTasks
+          .filter(t => t.columnId === deletedTask!.columnId)
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
+        newTasks = newTasks.map(t => {
+          if (t.columnId === deletedTask!.columnId) {
+            const newOrder = updatedColTasks.findIndex(ct => ct.id === t.id)
+
+            return { ...t, order: newOrder }
+          }
+
+          return t
+        })
+
+        return newTasks
+      })
+      toast.error(typeof error?.message === 'string' ? error.message : 'Failed to delete task')
+    }
+  }
+
   // check permissions from cookies and set state accordingly
   useEffect(() => {
     // Check permissions
@@ -318,6 +396,7 @@ export default function KanbanBoard({
                 tasks={tasks.filter(t => t.columnId === col.id)}
                 onAddTask={handleAddTask}
                 onEdit={handleEditTask}
+                onDelete={handleDeleteTask}
                 canCreateTask={canCreateTask}
                 canEditTask={canEditTask}
                 canDeleteTask={canDeleteTask}

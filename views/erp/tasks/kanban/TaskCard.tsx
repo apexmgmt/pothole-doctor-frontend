@@ -10,6 +10,7 @@ import { Task } from '@/types'
 interface TaskCardProps {
   task: Task
   onEdit?: (task: Task) => void
+  onDelete?: (taskId: string) => void
   canEdit: boolean
   canDelete: boolean
 }
@@ -24,7 +25,9 @@ function formatDate(dateStr?: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-export function TaskCard({ task, onEdit, canEdit, canDelete }: TaskCardProps) {
+import { Trash2Icon } from 'lucide-react'
+
+export function TaskCard({ task, onEdit, onDelete, canEdit, canDelete }: TaskCardProps) {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: task.id,
     data: { type: 'Task', task }
@@ -51,22 +54,40 @@ export function TaskCard({ task, onEdit, canEdit, canDelete }: TaskCardProps) {
               )}
             </div>
 
-            {canEdit && onEdit && (
-              <Button
-                type='button'
-                variant='ghost'
-                size='icon-sm'
-                onPointerDown={e => e.stopPropagation()}
-                onClick={e => {
-                  e.stopPropagation()
-                  onEdit(task)
-                }}
-                tabIndex={0}
-                aria-label='Edit task'
-              >
-                <PencilIcon className='h-3.5 w-3.5' />
-              </Button>
-            )}
+            <div className='flex gap-1'>
+              {canEdit && onEdit && (
+                <Button
+                  type='button'
+                  variant='ghost'
+                  size='icon-sm'
+                  onPointerDown={e => e.stopPropagation()}
+                  onClick={e => {
+                    e.stopPropagation()
+                    onEdit(task)
+                  }}
+                  tabIndex={0}
+                  aria-label='Edit task'
+                >
+                  <PencilIcon className='h-3.5 w-3.5' />
+                </Button>
+              )}
+              {canDelete && onDelete && (
+                <Button
+                  type='button'
+                  variant='ghost'
+                  size='icon-sm'
+                  onPointerDown={e => e.stopPropagation()}
+                  onClick={e => {
+                    e.stopPropagation()
+                    onDelete(task.id)
+                  }}
+                  tabIndex={0}
+                  aria-label='Delete task'
+                >
+                  <Trash2Icon className='h-3.5 w-3.5 text-destructive' />
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Task name */}
