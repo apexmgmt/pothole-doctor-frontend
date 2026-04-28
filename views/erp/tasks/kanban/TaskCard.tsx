@@ -4,11 +4,15 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { CalendarIcon, MapPinIcon, PencilIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Task } from '@/types'
 
 interface TaskCardProps {
   task: Task
   onEdit?: (task: Task) => void
+  onDelete?: (taskId: string) => void
+  canEdit: boolean
+  canDelete: boolean
 }
 
 function getInitials(first?: string, last?: string): string {
@@ -21,34 +25,23 @@ function formatDate(dateStr?: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  Pending: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  'In Progress': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  Completed: 'bg-green-500/20 text-green-400 border-green-500/30',
-  Cancelled: 'bg-red-500/20 text-red-400 border-red-500/30',
-}
+import { Trash2Icon } from 'lucide-react'
 
-export function TaskCard({ task, onEdit }: TaskCardProps) {
+export function TaskCard({ task, onEdit, onDelete, canEdit, canDelete }: TaskCardProps) {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: task.id,
-    data: { type: 'Task', task },
+    data: { type: 'Task', task }
   })
 
   const style = {
     transition,
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Transform.toString(transform)
   }
 
   const employees = task.employees ?? []
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={isDragging ? 'opacity-0' : undefined}
-    >
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={isDragging ? 'opacity-0' : undefined}>
       <Card className='cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-primary/50 bg-card'>
         <CardContent className='p-3 space-y-2'>
           {/* Header: task type badge + status + edit button */}
@@ -59,28 +52,42 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
                   {task.task_type.name}
                 </span>
               )}
-              {/* {task.status && (
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_COLORS[task.status] ?? 'bg-muted text-muted-foreground'}`}
-                >
-                  {task.status}
-                </span>
-              )} */}
             </div>
 
-            {onEdit && (
-              <button
-                type='button'
-                onPointerDown={e => e.stopPropagation()}
-                onClick={e => {
-                  e.stopPropagation()
-                  onEdit(task)
-                }}
-                className='shrink-0 text-muted-foreground hover:text-foreground transition-colors'
-              >
-                <PencilIcon className='h-3.5 w-3.5' />
-              </button>
-            )}
+            <div className='flex gap-1'>
+              {canEdit && onEdit && (
+                <Button
+                  type='button'
+                  variant='ghost'
+                  size='icon-sm'
+                  onPointerDown={e => e.stopPropagation()}
+                  onClick={e => {
+                    e.stopPropagation()
+                    onEdit(task)
+                  }}
+                  tabIndex={0}
+                  aria-label='Edit task'
+                >
+                  <PencilIcon className='h-3.5 w-3.5' />
+                </Button>
+              )}
+              {canDelete && onDelete && (
+                <Button
+                  type='button'
+                  variant='ghost'
+                  size='icon-sm'
+                  onPointerDown={e => e.stopPropagation()}
+                  onClick={e => {
+                    e.stopPropagation()
+                    onDelete(task.id)
+                  }}
+                  tabIndex={0}
+                  aria-label='Delete task'
+                >
+                  <Trash2Icon className='h-3.5 w-3.5 text-destructive' />
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Task name */}
@@ -99,9 +106,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
               <span className='flex items-center gap-1'>
                 <CalendarIcon className='h-3 w-3 shrink-0' />
                 {formatDate(task.start_date)}
-                {task.end_date && task.end_date !== task.start_date && (
-                  <> - {formatDate(task.end_date)}</>
-                )}
+                {task.end_date && task.end_date !== task.start_date && <> - {formatDate(task.end_date)}</>}
               </span>
             )}
             {task.location && (

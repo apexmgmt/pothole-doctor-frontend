@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   DndContext,
   DragOverlay,
@@ -11,82 +12,52 @@ import {
   DragStartEvent,
   DragOverEvent,
   DragEndEvent,
-  useDroppable,
   pointerWithin
 } from '@dnd-kit/core'
-import { SortableContext, arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { Client, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import { TaskCard } from './TaskCard'
 import TaskService from '@/services/api/tasks.service'
 import CreateOrEditTaskModal from '@/views/erp/tasks/CreateOrEditTaskModal'
-import { Button } from '@/components/ui/button'
-import { PlusIcon } from 'lucide-react'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { KanbanColumn as Column, KanbanTask } from './kanban'
+import KanbanColumn from './KanbanColumn'
+import { toast } from 'sonner'
+import { hasPermission } from '@/utils/role-permission'
+import KanbanFilter from './KanbanFilter'
 
-interface KanbanColumn {
-  id: string
-  label: string
-}
-
-const COLUMNS: KanbanColumn[] = [
-  { id: 'Pending', label: 'Pending' },
-  { id: 'In Progress', label: 'In Progress' },
-  { id: 'Completed', label: 'Completed' },
-  { id: 'Cancelled', label: 'Cancelled' }
+/**
+ * Summary of COLUMNS constant
+ *
+ * 1. Defines the columns for the Kanban board
+ * 2. Each column has an id and a label
+ */
+const COLUMNS: Column[] = [
+  { id: 'backlog', label: 'Backlog' },
+  { id: 'to-do', label: 'To Do' },
+  { id: 'overdue', label: 'Overdue' },
+  { id: 'in-progress', label: 'In Progress' },
+  { id: 'completed', label: 'Completed' },
+  { id: 'cancelled', label: 'Cancelled' }
 ]
 
-interface KanbanTask extends Task {
-  columnId: string
-}
-
+/**
+ * Summary of toKanbanTasks function
+ * 1. Converts an array of Task objects to KanbanTask objects
+ * 2. Pre-sorts the array so our visual flat array acts correctly
+ */
 function toKanbanTasks(tasks: Task[]): KanbanTask[] {
-  return tasks.map(t => ({ ...t, columnId: t.status ?? 'Pending' }))
+  return tasks.map(t => ({ ...t, columnId: t.status ?? 'backlog' })).sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 }
 
-function DroppableColumn({
-  col,
-  tasks,
-  onAddTask,
-  onEdit
-}: {
-  col: KanbanColumn
-  tasks: KanbanTask[]
-  onAddTask: (columnId: string) => void
-  onEdit: (task: Task) => void
-}) {
-  const { setNodeRef, isOver } = useDroppable({ id: col.id, data: { type: 'Column', columnId: col.id } })
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={`flex flex-col w-[350px] min-w-[350px] rounded-xl p-4 transition-colors ${isOver ? 'bg-accent/60' : 'bg-accent/30'}`}
-    >
-      <div className='flex items-center justify-between mb-4'>
-        <h3 className='font-semibold text-lg'>{col.label}</h3>
-        <div className='flex items-center gap-2'>
-          <span className='text-sm bg-accent px-2 py-1 rounded-full'>{tasks.length}</span>
-          <Button
-            size='icon'
-            variant='ghost'
-            className='h-7 w-7'
-            onPointerDown={e => e.stopPropagation()}
-            onClick={() => onAddTask(col.id)}
-          >
-            <PlusIcon className='h-4 w-4' />
-          </Button>
-        </div>
-      </div>
-
-      <div className='flex flex-col gap-3 grow min-h-[150px]'>
-        <SortableContext items={tasks.map(t => t.id)}>
-          {tasks.map(task => (
-            <TaskCard key={task.id} task={task} onEdit={onEdit} />
-          ))}
-        </SortableContext>
-      </div>
-    </div>
-  )
-}
-
+/**
+ * Summary of KanbanBoard component
+ *
+ * 1. Initializes state for tasks, active task, and modal management
+ * 2. Handles adding and editing tasks
+ * 3. Sets up drag-and-drop context with sensors
+ * 4. Renders columns and tasks
+ */
 export default function KanbanBoard({
   initialTasks = [],
   staffs = [],
@@ -102,35 +73,355 @@ export default function KanbanBoard({
   taskReminders?: TaskReminder[]
   taskReminderChannels?: TaskReminderChannel[]
 }) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [tasks, setTasks] = useState<KanbanTask[]>(toKanbanTasks(initialTasks))
+
+  const [filters, setFilters] = useState<{ starting_date?: string; ending_date?: string }>(() => {
+    const starting_date = searchParams.get('starting_date') || undefined
+    const ending_date = searchParams.get('ending_date') || undefined
+
+    return { starting_date, ending_date }
+  })
+
+  const [isLoading, setIsLoading] = useState(false)
   const [activeTask, setActiveTask] = useState<KanbanTask | null>(null)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [defaultStatus, setDefaultStatus] = useState<string>('Pending')
+  const [defaultStatus, setDefaultStatus] = useState<string>('backlog')
+  const [canCreateTask, setCanCreateTask] = useState<boolean>(false)
+  const [canEditTask, setCanEditTask] = useState<boolean>(false)
+  const [canDeleteTask, setCanDeleteTask] = useState<boolean>(false)
 
-  function handleAddTask(columnId: string) {
+  // Fetch tasks with filters
+  const fetchTasks = async (filterOptions: { starting_date?: string; ending_date?: string }) => {
+    setIsLoading(true)
+
+    try {
+      const res = await TaskService.getAll(filterOptions)
+
+      setTasks(toKanbanTasks(res.data || []))
+    } catch {
+      // Optionally handle error
+    }
+
+    setIsLoading(false)
+  }
+
+  // Update URL query params when filters change
+  useEffect(() => {
+    const params = new URLSearchParams()
+
+    if (filters.starting_date) params.set('starting_date', filters.starting_date)
+    if (filters.ending_date) params.set('ending_date', filters.ending_date)
+    const paramStr = params.toString()
+
+    router.replace(paramStr ? `?${paramStr}` : '?', { scroll: false })
+    fetchTasks(filters)
+  }, [filters.starting_date, filters.ending_date])
+
+  // Delete task handler
+  const handleDeleteTask = async (taskId: string) => {
+    // Optimistically remove from UI
+    let deletedTask: KanbanTask | undefined
+
+    setTasks(prevTasks => {
+      deletedTask = prevTasks.find(t => t.id === taskId)
+      if (!deletedTask) return prevTasks
+      let newTasks = prevTasks.filter(t => t.id !== taskId)
+
+      // Get all tasks in the same column, sorted by order
+      const colTasks = newTasks
+        .filter(t => t.columnId === deletedTask!.columnId)
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
+      // Reassign order for tasks after the deleted one
+      newTasks = newTasks.map(t => {
+        if (t.columnId === deletedTask!.columnId) {
+          const newOrder = colTasks.findIndex(ct => ct.id === t.id)
+
+          return { ...t, order: newOrder }
+        }
+
+        return t
+      })
+
+      return newTasks
+    })
+
+    try {
+      await TaskService.destroy(taskId)
+      toast.success('Task deleted successfully')
+    } catch (error: any) {
+      // Revert UI if failed
+      setTasks(prevTasks => {
+        if (!deletedTask) return prevTasks
+
+        // Insert the deleted task back in the correct order
+        let newTasks = [...prevTasks]
+
+        // Find all tasks in the same column
+        const colTasks = newTasks.filter(t => t.columnId === deletedTask!.columnId)
+
+        // Insert at the original order position
+        let insertIdx = colTasks.findIndex(t => (t.order ?? 0) > (deletedTask!.order ?? 0))
+
+        if (insertIdx === -1) {
+          // Insert at end
+          newTasks.push(deletedTask!)
+        } else {
+          // Insert before the first task with greater order
+          // Find the index in the full array
+          let fullIdx = newTasks.findIndex(t => t.id === colTasks[insertIdx].id)
+
+          newTasks.splice(fullIdx, 0, deletedTask!)
+        }
+
+        // Reassign order for all tasks in the column
+        const updatedColTasks = newTasks
+          .filter(t => t.columnId === deletedTask!.columnId)
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
+        newTasks = newTasks.map(t => {
+          if (t.columnId === deletedTask!.columnId) {
+            const newOrder = updatedColTasks.findIndex(ct => ct.id === t.id)
+
+            return { ...t, order: newOrder }
+          }
+
+          return t
+        })
+
+        return newTasks
+      })
+      toast.error(typeof error?.message === 'string' ? error.message : 'Failed to delete task')
+    }
+  }
+
+  // check permissions from cookies and set state accordingly
+  useEffect(() => {
+    // Check permissions
+    hasPermission('Create Task').then(result => setCanCreateTask(result))
+    hasPermission('Update Task').then(result => setCanEditTask(result))
+    hasPermission('Delete Task').then(result => setCanDeleteTask(result))
+  }, [])
+
+  /**
+   * Summary of handleAddTask
+   *
+   * 1. Set default status based on column where add button was clicked
+   * 2. Reset selected task to null for creating a new task
+   * 3. Set modal mode to 'create' for conditional rendering inside modal
+   * 4. Open the modal
+   * @param columnId string uuid
+   */
+  const handleAddTask = (columnId: string) => {
     setDefaultStatus(columnId)
     setSelectedTask(null)
     setModalMode('create')
     setModalOpen(true)
   }
 
-  function handleEditTask(task: Task) {
-    setSelectedTask(task)
-    setModalMode('edit')
-    setModalOpen(true)
+  /**
+   * Summary of handleEditTask
+   *
+   * 1. Set selected task for pre-filling the form
+   * 2. Set modal mode to 'edit' for conditional rendering inside modal
+   * 3. Open the modal
+   * @param task Task object to be edited
+   */
+  const handleEditTask = async (task: Task) => {
+    try {
+      TaskService.show(task.id)
+        .then(response => {
+          setSelectedTask(response.data)
+          setModalMode('edit')
+          setModalOpen(true)
+        })
+        .catch(error => {
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch task details')
+        })
+    } catch (error) {
+      toast.error('Something went wrong while fetching the task details!')
+    }
   }
 
+  /**
+   * Summary of useSensors setup
+   *
+   * 1. PointerSensor with a small activation distance to prevent accidental drags
+   * 2. KeyboardSensor with default coordinate getter for accessibility
+   * @returns {Array} Array of sensors for DndContext
+   */
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
+  /**
+   * Summary of onDragStart
+   *
+   * 1. Check if the dragged item is a task
+   * 2. Set the active task state for rendering in DragOverlay
+   * @param event
+   */
+  const onDragStart = (event: DragStartEvent) => {
+    if (event.active.data.current?.type === 'Task') {
+      setActiveTask(event.active.data.current.task)
+    }
+  }
+
+  /**
+   * Summary of onDragOver
+   * Moves task across arrays & instantly calculates new orders locally (0, 1, 2...)
+   * preventing jumping and blinking.
+   */
+  const onDragOver = (event: DragOverEvent) => {
+    const { active, over } = event
+
+    if (!over) return
+
+    const activeId = String(active.id)
+    const overId = String(over.id)
+
+    if (activeId === overId) return
+
+    const isActiveTask = active.data.current?.type === 'Task'
+
+    if (!isActiveTask) return
+
+    setTasks(tasks => {
+      const activeIndex = tasks.findIndex(t => t.id === activeId)
+      const overIndex = tasks.findIndex(t => t.id === overId)
+
+      if (activeIndex === -1) return tasks
+      const activeTask = tasks[activeIndex]
+
+      const isOverColumn = over.data.current?.type === 'Column'
+      const isOverTask = over.data.current?.type === 'Task'
+
+      let targetColumnId: string
+
+      if (isOverColumn) {
+        targetColumnId = overId
+      } else if (isOverTask) {
+        const overTask = tasks[overIndex]
+
+        if (!overTask) return tasks
+        targetColumnId = overTask.columnId
+      } else {
+        return tasks
+      }
+
+      // If moving inside the same column
+      if (activeTask.columnId === targetColumnId) {
+        if (activeIndex !== overIndex && overIndex !== -1) {
+          let newTasks = arrayMove(tasks, activeIndex, overIndex)
+
+          // Recalculate +1 order for the column instantly
+          const colTasks = newTasks.filter(t => t.columnId === targetColumnId)
+
+          return newTasks.map(t =>
+            t.columnId === targetColumnId ? { ...t, order: colTasks.findIndex(ct => ct.id === t.id) } : t
+          )
+        }
+
+        return tasks
+      }
+
+      // If moving to a DIFFERENT column
+      let newTasks = [...tasks]
+      const sourceColumnId = activeTask.columnId
+
+      // Remove from old location
+      newTasks.splice(activeIndex, 1)
+      const movedTask = { ...activeTask, columnId: targetColumnId }
+
+      // Insert at exact overIndex in the target column
+      if (isOverTask && overIndex !== -1) {
+        const newOverIndex = newTasks.findIndex(t => t.id === overId)
+
+        newTasks.splice(newOverIndex >= 0 ? newOverIndex : newTasks.length, 0, movedTask)
+      } else {
+        newTasks.push(movedTask)
+      }
+
+      // Recalculate orders locally for both source and target columns
+      ;[sourceColumnId, targetColumnId].forEach(colId => {
+        const colTasks = newTasks.filter(t => t.columnId === colId)
+
+        newTasks = newTasks.map(t =>
+          t.columnId === colId ? { ...t, order: colTasks.findIndex(ct => ct.id === t.id) } : t
+        )
+      })
+
+      return newTasks
+    })
+  }
+
+  /**
+   * Summary of onDragEnd
+   * Drops the card into final location and issues API call with exact pre-calculated Order
+   */
+  const onDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    setActiveTask(null)
+    if (!over) return
+
+    const activeId = String(active.id)
+    const overId = String(over.id)
+
+    setTasks(tasks => {
+      const activeTask = tasks.find(t => t.id === activeId)
+
+      if (!activeTask) return tasks
+
+      const targetColumnId = activeTask.columnId
+      let newTasks = [...tasks]
+
+      // Double-check reorder if dropped wildly
+      const activeIndex = newTasks.findIndex(t => t.id === activeId)
+      const overIndex = newTasks.findIndex(t => t.id === overId)
+      const overTask = newTasks.find(t => t.id === overId)
+
+      if (overTask && activeTask.columnId === overTask.columnId && activeIndex !== overIndex && overIndex !== -1) {
+        newTasks = arrayMove(newTasks, activeIndex, overIndex)
+      }
+
+      // Finalize Status and Order sequence accurately
+      const colTasks = newTasks.filter(t => t.columnId === targetColumnId)
+
+      newTasks = newTasks.map(t => {
+        if (t.columnId === targetColumnId) {
+          return { ...t, order: colTasks.findIndex(ct => ct.id === t.id), status: targetColumnId }
+        }
+
+        return t
+      })
+
+      const finalMovedTask = newTasks.find(t => t.id === activeId)
+      const originalTask = active.data.current?.task as Task
+
+      // Call API ONLY if column or order has actually changed vs original state
+      if (finalMovedTask && originalTask) {
+        if (originalTask.status !== finalMovedTask.status || originalTask.order !== finalMovedTask.order) {
+          TaskService.updateStatus(finalMovedTask.id, finalMovedTask.status, finalMovedTask.order).catch(() => {
+            // Handle rollback UI here if needed
+          })
+        }
+      }
+
+      return newTasks
+    })
+  }
+
   return (
     <>
-      <div className='flex h-full w-full gap-4 p-4 overflow-x-auto'>
+      <KanbanFilter onChange={setFilters} initialFilters={filters} />
+      <ScrollArea className='w-full'>
         <DndContext
           sensors={sensors}
           collisionDetection={pointerWithin}
@@ -138,19 +429,28 @@ export default function KanbanBoard({
           onDragOver={onDragOver}
           onDragEnd={onDragEnd}
         >
-          {COLUMNS.map(col => (
-            <DroppableColumn
-              key={col.id}
-              col={col}
-              tasks={tasks.filter(t => t.columnId === col.id)}
-              onAddTask={handleAddTask}
-              onEdit={handleEditTask}
-            />
-          ))}
+          <div className='flex h-[calc(100dvh-8rem)] w-full min-w-full gap-4'>
+            {COLUMNS.map(col => (
+              <KanbanColumn
+                key={col.id}
+                col={col}
+                tasks={tasks.filter(t => t.columnId === col.id)}
+                onAddTask={handleAddTask}
+                onEdit={handleEditTask}
+                onDelete={handleDeleteTask}
+                canCreateTask={canCreateTask}
+                canEditTask={canEditTask}
+                canDeleteTask={canDeleteTask}
+              />
+            ))}
+          </div>
 
-          <DragOverlay>{activeTask ? <TaskCard task={activeTask} /> : null}</DragOverlay>
+          <DragOverlay>
+            {activeTask ? <TaskCard task={activeTask} canEdit={canEditTask} canDelete={canDeleteTask} /> : null}
+          </DragOverlay>
         </DndContext>
-      </div>
+        <ScrollBar orientation='horizontal' />
+      </ScrollArea>
 
       <CreateOrEditTaskModal
         mode={modalMode}
@@ -182,101 +482,4 @@ export default function KanbanBoard({
       />
     </>
   )
-
-  function onDragStart(event: DragStartEvent) {
-    if (event.active.data.current?.type === 'Task') {
-      setActiveTask(event.active.data.current.task)
-    }
-  }
-
-  function onDragOver(event: DragOverEvent) {
-    const { active, over } = event
-
-    if (!over) return
-
-    const activeId = String(active.id)
-    const overId = String(over.id)
-
-    if (activeId === overId) return
-
-    const isOverColumn = over.data.current?.type === 'Column'
-    const isOverTask = over.data.current?.type === 'Task'
-
-    setTasks(tasks => {
-      const activeIndex = tasks.findIndex(t => t.id === activeId)
-
-      if (activeIndex === -1) return tasks
-
-      // Determine the target column id
-      let targetColumnId: string
-
-      if (isOverColumn) {
-        targetColumnId = overId
-      } else if (isOverTask) {
-        const overIndex = tasks.findIndex(t => t.id === overId)
-
-        if (overIndex === -1) return tasks
-
-        targetColumnId = tasks[overIndex].columnId
-
-        // Same column — reorder in place
-        if (tasks[activeIndex].columnId === targetColumnId) {
-          return arrayMove(tasks, activeIndex, overIndex)
-        }
-      } else {
-        return tasks
-      }
-
-      // Move to new column (place at end)
-      const updated = tasks.filter(t => t.id !== activeId)
-      const moved = { ...tasks[activeIndex], columnId: targetColumnId }
-
-      if (isOverTask) {
-        const overIndex = updated.findIndex(t => t.id === overId)
-
-        updated.splice(overIndex, 0, moved)
-      } else {
-        updated.push(moved)
-      }
-
-      return updated
-    })
-  }
-
-  function onDragEnd(event: DragEndEvent) {
-    const { active } = event
-
-    setActiveTask(null)
-
-    // Persist the status change — read final columnId from state
-    setTasks(tasks => {
-      const task = tasks.find(t => t.id === String(active.id))
-
-      if (task && task.columnId !== task.status) {
-        TaskService.update(task.id, {
-          client_id: task.client_id,
-          task_type_id: task.task_type_id,
-          name: task.name,
-          employee_ids: task.employees?.map(e => e.id) ?? [],
-          sms_reminder: task.sms_reminder,
-          email_reminder: task.email_reminder,
-          start_date: task.start_date,
-          start_time: task.start_time,
-          end_date: task.end_date,
-          end_time: task.end_time,
-          location: task.location,
-          comment: task.comment,
-          completed_date: task.completed_date ?? '',
-          close_comment: task.close_comment ?? '',
-          status: task.columnId,
-          reminders: []
-        }).catch(() => {
-          // Revert on API failure
-          setTasks(prev => prev.map(t => (t.id === task.id ? { ...t, columnId: task.status } : t)))
-        })
-      }
-
-      return tasks
-    })
-  }
 }
