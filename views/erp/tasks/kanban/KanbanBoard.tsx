@@ -11,7 +11,6 @@ import {
   DragStartEvent,
   DragOverEvent,
   DragEndEvent,
-  useDroppable,
   pointerWithin
 } from '@dnd-kit/core'
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
@@ -19,6 +18,7 @@ import { Client, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from
 import { TaskCard } from './TaskCard'
 import TaskService from '@/services/api/tasks.service'
 import CreateOrEditTaskModal from '@/views/erp/tasks/CreateOrEditTaskModal'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { KanbanColumn as Column, KanbanTask } from './kanban'
 import KanbanColumn from './KanbanColumn'
 
@@ -124,7 +124,7 @@ export default function KanbanBoard({
 
   return (
     <>
-      <div className='flex h-full w-full gap-4 p-4 overflow-x-auto'>
+      <ScrollArea className='h-[calc(100dvh-8rem)] w-full'>
         <DndContext
           sensors={sensors}
           collisionDetection={pointerWithin}
@@ -132,19 +132,22 @@ export default function KanbanBoard({
           onDragOver={onDragOver}
           onDragEnd={onDragEnd}
         >
-          {COLUMNS.map(col => (
-            <KanbanColumn
-              key={col.id}
-              col={col}
-              tasks={tasks.filter(t => t.columnId === col.id)}
-              onAddTask={handleAddTask}
-              onEdit={handleEditTask}
-            />
-          ))}
+          <div className='flex h-[calc(100dvh-8rem)] w-full min-w-full gap-4 p-4'>
+            {COLUMNS.map(col => (
+              <KanbanColumn
+                key={col.id}
+                col={col}
+                tasks={tasks.filter(t => t.columnId === col.id)}
+                onAddTask={handleAddTask}
+                onEdit={handleEditTask}
+              />
+            ))}
+          </div>
 
           <DragOverlay>{activeTask ? <TaskCard task={activeTask} /> : null}</DragOverlay>
         </DndContext>
-      </div>
+        <ScrollBar orientation='horizontal' />
+      </ScrollArea>
 
       <CreateOrEditTaskModal
         mode={modalMode}

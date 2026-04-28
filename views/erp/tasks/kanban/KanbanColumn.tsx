@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Task } from '@/types'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext } from '@dnd-kit/sortable'
@@ -29,7 +30,7 @@ export default function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col w-[350px] min-w-[350px] rounded-xl p-4 transition-colors ${isOver ? 'bg-accent/60' : 'bg-accent/30'}`}
+      className={`flex h-full flex-col w-[350px] min-w-[350px] rounded-xl p-4 transition-colors ${isOver ? 'bg-accent/60' : 'bg-accent/30'}`}
     >
       <div className='flex items-center justify-between mb-4'>
         <h3 className='font-semibold text-lg'>{col.label}</h3>
@@ -47,12 +48,16 @@ export default function KanbanColumn({
         </div>
       </div>
 
-      <div className='flex flex-col gap-3 grow min-h-[150px]'>
-        <SortableContext items={tasks.map(t => t.id)}>
-          {tasks.map(task => (
-            <TaskCard key={task.id} task={task} onEdit={onEdit} />
-          ))}
-        </SortableContext>
+      <div className='min-h-0 flex-1'>
+        <ScrollArea className='h-full'>
+          <div className='flex flex-col gap-3 pr-1'>
+            <SortableContext items={tasks.map(t => t.id)}>
+              {tasks.map(task => (
+                <TaskCard key={task.id} task={task} onEdit={onEdit} />
+              ))}
+            </SortableContext>
+          </div>
+        </ScrollArea>
       </div>
     </div>
   )
