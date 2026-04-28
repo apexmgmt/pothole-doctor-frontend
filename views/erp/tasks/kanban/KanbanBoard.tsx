@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   DndContext,
   DragOverlay,
@@ -23,6 +24,7 @@ import { KanbanColumn as Column, KanbanTask } from './kanban'
 import KanbanColumn from './KanbanColumn'
 import { toast } from 'sonner'
 import { hasPermission } from '@/utils/role-permission'
+import KanbanFilter from './KanbanFilter'
 
 /**
  * Summary of COLUMNS constant
@@ -71,7 +73,18 @@ export default function KanbanBoard({
   taskReminders?: TaskReminder[]
   taskReminderChannels?: TaskReminderChannel[]
 }) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [tasks, setTasks] = useState<KanbanTask[]>(toKanbanTasks(initialTasks))
+
+  const [filters, setFilters] = useState<{ starting_date?: string; ending_date?: string }>(() => {
+    const starting_date = searchParams.get('starting_date') || undefined
+    const ending_date = searchParams.get('ending_date') || undefined
+
+    return { starting_date, ending_date }
+  })
+
+  const [isLoading, setIsLoading] = useState(false)
   const [activeTask, setActiveTask] = useState<KanbanTask | null>(null)
 
   const [modalOpen, setModalOpen] = useState(false)
@@ -81,6 +94,33 @@ export default function KanbanBoard({
   const [canCreateTask, setCanCreateTask] = useState<boolean>(false)
   const [canEditTask, setCanEditTask] = useState<boolean>(false)
   const [canDeleteTask, setCanDeleteTask] = useState<boolean>(false)
+
+  // Fetch tasks with filters
+  const fetchTasks = async (filterOptions: { starting_date?: string; ending_date?: string }) => {
+    setIsLoading(true)
+
+    try {
+      const res = await TaskService.getAll(filterOptions)
+
+      setTasks(toKanbanTasks(res.data || []))
+    } catch {
+      // Optionally handle error
+    }
+
+    setIsLoading(false)
+  }
+
+  // Update URL query params when filters change
+  useEffect(() => {
+    const params = new URLSearchParams()
+
+    if (filters.starting_date) params.set('starting_date', filters.starting_date)
+    if (filters.ending_date) params.set('ending_date', filters.ending_date)
+    const paramStr = params.toString()
+
+    router.replace(paramStr ? `?${paramStr}` : '?', { scroll: false })
+    fetchTasks(filters)
+  }, [filters.starting_date, filters.ending_date])
 
   // Delete task handler
   const handleDeleteTask = async (taskId: string) => {
@@ -380,6 +420,7 @@ export default function KanbanBoard({
 
   return (
     <>
+      <KanbanFilter onChange={setFilters} initialFilters={filters} />
       <ScrollArea className='w-full'>
         <DndContext
           sensors={sensors}
@@ -388,7 +429,7 @@ export default function KanbanBoard({
           onDragOver={onDragOver}
           onDragEnd={onDragEnd}
         >
-          <div className='flex h-[calc(100dvh-8rem)] w-full min-w-full gap-4 p-4'>
+          <div className='flex h-[calc(100dvh-8rem)] w-full min-w-full gap-4'>
             {COLUMNS.map(col => (
               <KanbanColumn
                 key={col.id}

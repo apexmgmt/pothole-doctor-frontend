@@ -169,12 +169,14 @@ export default class TaskService {
     }
   }
 
-  /** Get all tasks API */
-  static getAll = async () => {
+  /** Get all tasks API (with optional filters) */
+  static getAll = async (filterOptions: object = {}) => {
     try {
       const isTenantApi = await isTenant()
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+      const url = API_URL + (isTenantApi ? TASKS_ALL_TENANT : TASKS_ALL) + (queryParams ? `?${queryParams}` : '')
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? TASKS_ALL_TENANT : TASKS_ALL), {
+      const response = await apiInterceptor(url, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['tasks-all'] } // Cache for 1 hour
