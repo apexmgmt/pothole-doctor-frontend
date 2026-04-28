@@ -325,7 +325,9 @@ export default function KanbanBoard({
             ))}
           </div>
 
-          <DragOverlay>{activeTask ? <TaskCard task={activeTask} /> : null}</DragOverlay>
+          <DragOverlay>
+            {activeTask ? <TaskCard task={activeTask} canEdit={canEditTask} canDelete={canDeleteTask} /> : null}
+          </DragOverlay>
         </DndContext>
         <ScrollBar orientation='horizontal' />
       </ScrollArea>
