@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Task } from '@/types'
 import { useDroppable } from '@dnd-kit/core'
-import { SortableContext } from '@dnd-kit/sortable'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { PlusIcon } from 'lucide-react'
 import { TaskCard } from './TaskCard'
 import { KanbanColumn as Column, KanbanTask } from './kanban'
@@ -25,15 +25,15 @@ export default function KanbanColumn({
   onAddTask: (columnId: string) => void
   onEdit: (task: Task) => void
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: col.id, data: { type: 'Column', columnId: col.id } })
+  const { setNodeRef } = useDroppable({ id: col.id, data: { type: 'Column', columnId: col.id } })
 
-  // Sort tasks by order ascending
+  // Sort tasks visually based on the recalculated order
   const sortedTasks = [...tasks].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 
   return (
     <div
       ref={setNodeRef}
-      className={`flex h-full flex-col w-[350px] min-w-[350px] rounded-xl p-4 transition-colors ${isOver ? 'bg-accent/60' : 'bg-accent/30'}`}
+      className={`flex h-full flex-col w-[350px] min-w-[350px] rounded-xl p-4 transition-colors bg-accent/30 `}
     >
       <div className='flex items-center justify-between mb-4'>
         <h3 className='font-semibold text-lg'>{col.label}</h3>
@@ -54,7 +54,8 @@ export default function KanbanColumn({
       <div className='min-h-0 flex-1'>
         <ScrollArea className='h-full'>
           <div className='flex flex-col gap-3 pr-1'>
-            <SortableContext items={sortedTasks.map(t => t.id)}>
+            {/* Added strategy for smoother vertical sorting physics */}
+            <SortableContext items={sortedTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
               {sortedTasks.map(task => (
                 <TaskCard key={task.id} task={task} onEdit={onEdit} />
               ))}

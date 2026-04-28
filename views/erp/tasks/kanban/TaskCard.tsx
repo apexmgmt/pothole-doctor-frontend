@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { CalendarIcon, MapPinIcon, PencilIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Task } from '@/types'
 
 interface TaskCardProps {
@@ -19,13 +20,6 @@ function formatDate(dateStr?: string): string {
   if (!dateStr) return ''
 
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
-
-const STATUS_COLORS: Record<string, string> = {
-  Pending: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  'In Progress': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  Completed: 'bg-green-500/20 text-green-400 border-green-500/30',
-  Cancelled: 'bg-red-500/20 text-red-400 border-red-500/30',
 }
 
 export function TaskCard({ task, onEdit }: TaskCardProps) {
@@ -69,17 +63,20 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
             </div>
 
             {onEdit && (
-              <button
+              <Button
                 type='button'
+                variant='ghost'
+                size='icon-sm'
                 onPointerDown={e => e.stopPropagation()}
                 onClick={e => {
                   e.stopPropagation()
                   onEdit(task)
                 }}
-                className='shrink-0 text-muted-foreground hover:text-foreground transition-colors'
+                tabIndex={0}
+                aria-label='Edit task'
               >
                 <PencilIcon className='h-3.5 w-3.5' />
-              </button>
+              </Button>
             )}
           </div>
 

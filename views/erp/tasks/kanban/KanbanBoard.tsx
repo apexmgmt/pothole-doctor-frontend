@@ -39,14 +39,11 @@ const COLUMNS: Column[] = [
 
 /**
  * Summary of toKanbanTasks function
- *
  * 1. Converts an array of Task objects to KanbanTask objects
- * 2. Sets the columnId based on the task's status or defaults to 'backlog'
- * @param tasks Array of Task objects
- * @returns Array of KanbanTask objects
+ * 2. Pre-sorts the array so our visual flat array acts correctly
  */
 function toKanbanTasks(tasks: Task[]): KanbanTask[] {
-  return tasks.map(t => ({ ...t, columnId: t.status ?? 'backlog' }))
+  return tasks.map(t => ({ ...t, columnId: t.status ?? 'backlog' })).sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 }
 
 /**
@@ -122,9 +119,154 @@ export default function KanbanBoard({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
+  /**
+   * Summary of onDragOver
+   * Moves task across arrays & instantly calculates new orders locally (0, 1, 2...)
+   * preventing jumping and blinking.
+   */
+  function onDragOver(event: DragOverEvent) {
+    const { active, over } = event
+
+    if (!over) return
+
+    const activeId = String(active.id)
+    const overId = String(over.id)
+
+    if (activeId === overId) return
+
+    const isActiveTask = active.data.current?.type === 'Task'
+
+    if (!isActiveTask) return
+
+    setTasks(tasks => {
+      const activeIndex = tasks.findIndex(t => t.id === activeId)
+      const overIndex = tasks.findIndex(t => t.id === overId)
+
+      if (activeIndex === -1) return tasks
+      const activeTask = tasks[activeIndex]
+
+      const isOverColumn = over.data.current?.type === 'Column'
+      const isOverTask = over.data.current?.type === 'Task'
+
+      let targetColumnId: string
+
+      if (isOverColumn) {
+        targetColumnId = overId
+      } else if (isOverTask) {
+        const overTask = tasks[overIndex]
+
+        if (!overTask) return tasks
+        targetColumnId = overTask.columnId
+      } else {
+        return tasks
+      }
+
+      // If moving inside the same column
+      if (activeTask.columnId === targetColumnId) {
+        if (activeIndex !== overIndex && overIndex !== -1) {
+          let newTasks = arrayMove(tasks, activeIndex, overIndex)
+
+          // Recalculate +1 order for the column instantly
+          const colTasks = newTasks.filter(t => t.columnId === targetColumnId)
+
+          return newTasks.map(t =>
+            t.columnId === targetColumnId ? { ...t, order: colTasks.findIndex(ct => ct.id === t.id) } : t
+          )
+        }
+
+        return tasks
+      }
+
+      // If moving to a DIFFERENT column
+      let newTasks = [...tasks]
+      const sourceColumnId = activeTask.columnId
+
+      // Remove from old location
+      newTasks.splice(activeIndex, 1)
+      const movedTask = { ...activeTask, columnId: targetColumnId }
+
+      // Insert at exact overIndex in the target column
+      if (isOverTask && overIndex !== -1) {
+        const newOverIndex = newTasks.findIndex(t => t.id === overId)
+
+        newTasks.splice(newOverIndex >= 0 ? newOverIndex : newTasks.length, 0, movedTask)
+      } else {
+        newTasks.push(movedTask)
+      }
+
+      // Recalculate orders locally for both source and target columns
+      ;[sourceColumnId, targetColumnId].forEach(colId => {
+        const colTasks = newTasks.filter(t => t.columnId === colId)
+
+        newTasks = newTasks.map(t =>
+          t.columnId === colId ? { ...t, order: colTasks.findIndex(ct => ct.id === t.id) } : t
+        )
+      })
+
+      return newTasks
+    })
+  }
+
+  /**
+   * Summary of onDragEnd
+   * Drops the card into final location and issues API call with exact pre-calculated Order
+   */
+  function onDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+
+    setActiveTask(null)
+    if (!over) return
+
+    const activeId = String(active.id)
+    const overId = String(over.id)
+
+    setTasks(tasks => {
+      const activeTask = tasks.find(t => t.id === activeId)
+
+      if (!activeTask) return tasks
+
+      const targetColumnId = activeTask.columnId
+      let newTasks = [...tasks]
+
+      // Double-check reorder if dropped wildly
+      const activeIndex = newTasks.findIndex(t => t.id === activeId)
+      const overIndex = newTasks.findIndex(t => t.id === overId)
+      const overTask = newTasks.find(t => t.id === overId)
+
+      if (overTask && activeTask.columnId === overTask.columnId && activeIndex !== overIndex && overIndex !== -1) {
+        newTasks = arrayMove(newTasks, activeIndex, overIndex)
+      }
+
+      // Finalize Status and Order sequence accurately
+      const colTasks = newTasks.filter(t => t.columnId === targetColumnId)
+
+      newTasks = newTasks.map(t => {
+        if (t.columnId === targetColumnId) {
+          return { ...t, order: colTasks.findIndex(ct => ct.id === t.id), status: targetColumnId }
+        }
+
+        return t
+      })
+
+      const finalMovedTask = newTasks.find(t => t.id === activeId)
+      const originalTask = active.data.current?.task as Task
+
+      // Call API ONLY if column or order has actually changed vs original state
+      if (finalMovedTask && originalTask) {
+        if (originalTask.status !== finalMovedTask.status || originalTask.order !== finalMovedTask.order) {
+          TaskService.updateStatus(finalMovedTask.id, finalMovedTask.status, finalMovedTask.order).catch(() => {
+            // Handle rollback UI here if needed
+          })
+        }
+      }
+
+      return newTasks
+    })
+  }
+
   return (
     <>
-      <ScrollArea className='h-[calc(100dvh-8rem)] w-full'>
+      <ScrollArea className='w-full'>
         <DndContext
           sensors={sensors}
           collisionDetection={pointerWithin}
@@ -191,152 +333,5 @@ export default function KanbanBoard({
     if (event.active.data.current?.type === 'Task') {
       setActiveTask(event.active.data.current.task)
     }
-  }
-
-  /**
-   * Summary of onDragOver
-   *
-   * 1. Check if dragged over a valid target (column or task)
-   * 2. If over a different column, move task to end of that column
-   * 3. If over a different task in the same column, reorder tasks
-   * 4. If API call fails, revert to previous state
-   * 5. Update active task's columnId in state for correct rendering in DragOverlay
-   * @param event
-   * @returns
-   */
-  function onDragOver(event: DragOverEvent) {
-    const { active, over } = event
-
-    if (!over) return
-
-    const activeId = String(active.id)
-    const overId = String(over.id)
-
-    if (activeId === overId) return
-
-    const isOverColumn = over.data.current?.type === 'Column'
-    const isOverTask = over.data.current?.type === 'Task'
-
-    setTasks(tasks => {
-      const activeIndex = tasks.findIndex(t => t.id === activeId)
-
-      if (activeIndex === -1) return tasks
-
-      // Determine the target column id
-      let targetColumnId: string
-
-      if (isOverColumn) {
-        targetColumnId = overId
-      } else if (isOverTask) {
-        const overIndex = tasks.findIndex(t => t.id === overId)
-
-        if (overIndex === -1) return tasks
-
-        targetColumnId = tasks[overIndex].columnId
-
-        // Same column — reorder in place
-        if (tasks[activeIndex].columnId === targetColumnId) {
-          return arrayMove(tasks, activeIndex, overIndex)
-        }
-      } else {
-        return tasks
-      }
-
-      // Move to new column (place at end)
-      const updated = tasks.filter(t => t.id !== activeId)
-      const moved = { ...tasks[activeIndex], columnId: targetColumnId }
-
-      if (isOverTask) {
-        const overIndex = updated.findIndex(t => t.id === overId)
-
-        updated.splice(overIndex, 0, moved)
-      } else {
-        updated.push(moved)
-      }
-
-      return updated
-    })
-  }
-
-  /**
-   * Summary of onDragEnd
-   *
-   * 1. Check if dropped over a valid target (column or task)
-   * 2. If task was moved to a different column, call API to persist status change
-   * 3. If API call fails, revert to previous state
-   * 4. Clear active task state
-   * @param event
-   */
-  function onDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-
-    setActiveTask(null)
-
-    if (!over) return
-
-    setTasks(tasks => {
-      const activeId = String(active.id)
-      const overId = String(over.id)
-      const movedTask = tasks.find(t => t.id === activeId)
-
-      if (!movedTask) return tasks
-
-      // Find the new column id
-      let newColumnId = movedTask.columnId
-
-      if (over.data.current?.type === 'Column') {
-        newColumnId = overId
-      } else if (over.data.current?.type === 'Task') {
-        const overTask = tasks.find(t => t.id === overId)
-
-        if (overTask) newColumnId = overTask.columnId
-      }
-
-      // Get all tasks in the new column, excluding the moved card, sorted by order
-      let columnTasks = tasks
-        .filter(t => t.id !== activeId && t.columnId === newColumnId)
-        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-
-      // Find the index where the card was dropped
-      let newIndex = columnTasks.length // default to end
-
-      if (over.data.current?.type === 'Task') {
-        newIndex = columnTasks.findIndex(t => t.id === overId)
-        if (newIndex === -1) newIndex = columnTasks.length
-      }
-
-      // Insert the moved card at the new index
-      const newMovedTask = { ...movedTask, columnId: newColumnId, status: newColumnId }
-
-      const previewColumn = [...columnTasks.slice(0, newIndex), newMovedTask, ...columnTasks.slice(newIndex)]
-
-      // Update order for all cards in the column
-      const updatedTasks = tasks.map(t => {
-        if (t.columnId !== newColumnId) return t
-        const idx = previewColumn.findIndex(tc => tc.id === t.id)
-
-        if (idx === -1) return t
-
-        return { ...t, order: idx }
-      })
-
-      // Update the moved card's columnId and status
-      const finalTasks = updatedTasks.map(t =>
-        t.id === activeId
-          ? { ...t, columnId: newColumnId, status: newColumnId, order: previewColumn.findIndex(tc => tc.id === t.id) }
-          : t
-      )
-
-      // Call API only for the moved card with its new order and status
-      const movedIdx = previewColumn.findIndex(tc => tc.id === activeId)
-
-      if (movedIdx !== -1 && (movedTask.order !== movedIdx || movedTask.status !== newColumnId)) {
-        TaskService.updateStatus(movedTask.id, newColumnId, movedIdx).catch(() => {
-          // Optionally: revert UI or show error
-        })
-      }
-
-      return finalTasks
-    })
   }
 }
