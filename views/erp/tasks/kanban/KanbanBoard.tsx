@@ -120,6 +120,19 @@ export default function KanbanBoard({
   )
 
   /**
+   * Summary of onDragStart
+   *
+   * 1. Check if the dragged item is a task
+   * 2. Set the active task state for rendering in DragOverlay
+   * @param event
+   */
+  function onDragStart(event: DragStartEvent) {
+    if (event.active.data.current?.type === 'Task') {
+      setActiveTask(event.active.data.current.task)
+    }
+  }
+
+  /**
    * Summary of onDragOver
    * Moves task across arrays & instantly calculates new orders locally (0, 1, 2...)
    * preventing jumping and blinking.
@@ -321,17 +334,4 @@ export default function KanbanBoard({
       />
     </>
   )
-
-  /**
-   * Summary of onDragStart
-   *
-   * 1. Check if the dragged item is a task
-   * 2. Set the active task state for rendering in DragOverlay
-   * @param event
-   */
-  function onDragStart(event: DragStartEvent) {
-    if (event.active.data.current?.type === 'Task') {
-      setActiveTask(event.active.data.current.task)
-    }
-  }
 }
