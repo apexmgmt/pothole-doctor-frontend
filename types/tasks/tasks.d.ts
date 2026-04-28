@@ -24,6 +24,7 @@ export interface Task {
   completed_date?: string
   close_comment?: string
   task_reminder_setting?: TaskReminderSetting[]
+  order: number
 }
 
 export interface TaskPayload {

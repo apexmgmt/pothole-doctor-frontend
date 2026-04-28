@@ -27,6 +27,9 @@ export default function KanbanColumn({
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: col.id, data: { type: 'Column', columnId: col.id } })
 
+  // Sort tasks by order ascending
+  const sortedTasks = [...tasks].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
   return (
     <div
       ref={setNodeRef}
@@ -35,7 +38,7 @@ export default function KanbanColumn({
       <div className='flex items-center justify-between mb-4'>
         <h3 className='font-semibold text-lg'>{col.label}</h3>
         <div className='flex items-center gap-2'>
-          <span className='text-sm bg-accent px-2 py-1 rounded-full'>{tasks.length}</span>
+          <span className='text-sm bg-accent px-2 py-1 rounded-full'>{sortedTasks.length}</span>
           <Button
             size='icon'
             variant='ghost'
@@ -51,8 +54,8 @@ export default function KanbanColumn({
       <div className='min-h-0 flex-1'>
         <ScrollArea className='h-full'>
           <div className='flex flex-col gap-3 pr-1'>
-            <SortableContext items={tasks.map(t => t.id)}>
-              {tasks.map(task => (
+            <SortableContext items={sortedTasks.map(t => t.id)}>
+              {sortedTasks.map(task => (
                 <TaskCard key={task.id} task={task} onEdit={onEdit} />
               ))}
             </SortableContext>

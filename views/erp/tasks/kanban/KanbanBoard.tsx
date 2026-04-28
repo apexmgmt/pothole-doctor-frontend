@@ -268,39 +268,75 @@ export default function KanbanBoard({
    * @param event
    */
   function onDragEnd(event: DragEndEvent) {
-    const { active } = event
+    const { active, over } = event
 
     setActiveTask(null)
 
-    // Persist the status change — read final columnId from state
-    setTasks(tasks => {
-      const task = tasks.find(t => t.id === String(active.id))
+    if (!over) return
 
-      if (task && task.columnId !== task.status) {
-        TaskService.update(task.id, {
-          client_id: task.client_id,
-          task_type_id: task.task_type_id,
-          name: task.name,
-          employee_ids: task.employees?.map(e => e.id) ?? [],
-          sms_reminder: task.sms_reminder,
-          email_reminder: task.email_reminder,
-          start_date: task.start_date,
-          start_time: task.start_time,
-          end_date: task.end_date,
-          end_time: task.end_time,
-          location: task.location,
-          comment: task.comment,
-          completed_date: task.completed_date ?? '',
-          close_comment: task.close_comment ?? '',
-          status: task.columnId,
-          reminders: []
-        }).catch(() => {
-          // Revert on API failure
-          setTasks(prev => prev.map(t => (t.id === task.id ? { ...t, columnId: task.status } : t)))
+    setTasks(tasks => {
+      const activeId = String(active.id)
+      const overId = String(over.id)
+      const movedTask = tasks.find(t => t.id === activeId)
+
+      if (!movedTask) return tasks
+
+      // Find the new column id
+      let newColumnId = movedTask.columnId
+
+      if (over.data.current?.type === 'Column') {
+        newColumnId = overId
+      } else if (over.data.current?.type === 'Task') {
+        const overTask = tasks.find(t => t.id === overId)
+
+        if (overTask) newColumnId = overTask.columnId
+      }
+
+      // Get all tasks in the new column, excluding the moved card, sorted by order
+      let columnTasks = tasks
+        .filter(t => t.id !== activeId && t.columnId === newColumnId)
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
+      // Find the index where the card was dropped
+      let newIndex = columnTasks.length // default to end
+
+      if (over.data.current?.type === 'Task') {
+        newIndex = columnTasks.findIndex(t => t.id === overId)
+        if (newIndex === -1) newIndex = columnTasks.length
+      }
+
+      // Insert the moved card at the new index
+      const newMovedTask = { ...movedTask, columnId: newColumnId, status: newColumnId }
+
+      const previewColumn = [...columnTasks.slice(0, newIndex), newMovedTask, ...columnTasks.slice(newIndex)]
+
+      // Update order for all cards in the column
+      const updatedTasks = tasks.map(t => {
+        if (t.columnId !== newColumnId) return t
+        const idx = previewColumn.findIndex(tc => tc.id === t.id)
+
+        if (idx === -1) return t
+
+        return { ...t, order: idx }
+      })
+
+      // Update the moved card's columnId and status
+      const finalTasks = updatedTasks.map(t =>
+        t.id === activeId
+          ? { ...t, columnId: newColumnId, status: newColumnId, order: previewColumn.findIndex(tc => tc.id === t.id) }
+          : t
+      )
+
+      // Call API only for the moved card with its new order and status
+      const movedIdx = previewColumn.findIndex(tc => tc.id === activeId)
+
+      if (movedIdx !== -1 && (movedTask.order !== movedIdx || movedTask.status !== newColumnId)) {
+        TaskService.updateStatus(movedTask.id, newColumnId, movedIdx).catch(() => {
+          // Optionally: revert UI or show error
         })
       }
 
-      return tasks
+      return finalTasks
     })
   }
 }
