@@ -1,6 +1,6 @@
 import { isTenant } from '@/utils/utility'
 import apiInterceptor from './api.interceptor'
-import { TASKS_ALL, TASKS, API_URL, TASKS_TENANT, TASKS_ALL_TENANT } from '@/constants/api'
+import { TASKS_ALL, TASKS, API_URL, TASKS_TENANT, TASKS_ALL_TENANT, TASKS_STATUS_TENANT } from '@/constants/api'
 import { TaskPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -96,6 +96,41 @@ export default class TaskService {
         const errorData = await response.json()
 
         throw errorData
+      }
+
+      await revalidate('tasks')
+      await revalidate(`tasks/${taskId}`)
+      await revalidate('tasks-all')
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Summary of the updateStatus API
+   *
+   * This API is used to update the status of a task when it is dragged and dropped in the Kanban board. It will also update the order of the tasks in the columns that it is coming from and going to.
+   * If the task is coming from the same column, it will update the order of the task itself and the tasks that have an order greater than the task's order in that column.
+   * If the task is coming from a different column, it will update the order of the task itself and the tasks that have an order greater than the task's order in both the column it is coming from and going to.
+   * @param taskId string
+   * @param newStatus string (kanban column id)
+   * @param newOrder number
+   * @returns promise with the updated task data if successful, or an error if the API call fails
+   */
+  static updateStatus = async (taskId: string, newStatus: string, newOrder: number) => {
+    try {
+      const response = await apiInterceptor(API_URL + TASKS_STATUS_TENANT(taskId), {
+        requiresAuth: true,
+        method: 'PUT',
+        body: JSON.stringify({ status: newStatus, order: newOrder })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to update task status')
       }
 
       await revalidate('tasks')
