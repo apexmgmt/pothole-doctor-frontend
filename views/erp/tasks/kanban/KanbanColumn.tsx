@@ -18,12 +18,18 @@ export default function KanbanColumn({
   col,
   tasks,
   onAddTask,
-  onEdit
+  onEdit,
+  canCreateTask,
+  canEditTask,
+  canDeleteTask
 }: {
   col: Column
   tasks: KanbanTask[]
   onAddTask: (columnId: string) => void
   onEdit: (task: Task) => void
+  canCreateTask: boolean
+  canEditTask: boolean
+  canDeleteTask: boolean
 }) {
   const { setNodeRef } = useDroppable({ id: col.id, data: { type: 'Column', columnId: col.id } })
 
@@ -39,15 +45,17 @@ export default function KanbanColumn({
         <h3 className='font-semibold text-lg'>{col.label}</h3>
         <div className='flex items-center gap-2'>
           <span className='text-sm bg-accent px-2 py-1 rounded-full'>{sortedTasks.length}</span>
-          <Button
-            size='icon'
-            variant='ghost'
-            className='h-7 w-7'
-            onPointerDown={e => e.stopPropagation()}
-            onClick={() => onAddTask(col.id)}
-          >
-            <PlusIcon className='h-4 w-4' />
-          </Button>
+          {canCreateTask && (
+            <Button
+              size='icon'
+              variant='ghost'
+              className='h-7 w-7'
+              onPointerDown={e => e.stopPropagation()}
+              onClick={() => onAddTask(col.id)}
+            >
+              <PlusIcon className='h-4 w-4' />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -57,7 +65,7 @@ export default function KanbanColumn({
             {/* Added strategy for smoother vertical sorting physics */}
             <SortableContext items={sortedTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
               {sortedTasks.map(task => (
-                <TaskCard key={task.id} task={task} onEdit={onEdit} />
+                <TaskCard key={task.id} task={task} onEdit={onEdit} canEdit={canEditTask} canDelete={canDeleteTask} />
               ))}
             </SortableContext>
           </div>

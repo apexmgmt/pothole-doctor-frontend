@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -21,6 +21,8 @@ import CreateOrEditTaskModal from '@/views/erp/tasks/CreateOrEditTaskModal'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { KanbanColumn as Column, KanbanTask } from './kanban'
 import KanbanColumn from './KanbanColumn'
+import { toast } from 'sonner'
+import { hasPermission } from '@/utils/role-permission'
 
 /**
  * Summary of COLUMNS constant
@@ -76,6 +78,17 @@ export default function KanbanBoard({
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [defaultStatus, setDefaultStatus] = useState<string>('backlog')
+  const [canCreateTask, setCanCreateTask] = useState<boolean>(false)
+  const [canEditTask, setCanEditTask] = useState<boolean>(false)
+  const [canDeleteTask, setCanDeleteTask] = useState<boolean>(false)
+
+  // check permissions from cookies and set state accordingly
+  useEffect(() => {
+    // Check permissions
+    hasPermission('Create Task').then(result => setCanCreateTask(result))
+    hasPermission('Update Task').then(result => setCanEditTask(result))
+    hasPermission('Delete Task').then(result => setCanDeleteTask(result))
+  }, [])
 
   /**
    * Summary of handleAddTask
@@ -86,7 +99,7 @@ export default function KanbanBoard({
    * 4. Open the modal
    * @param columnId string uuid
    */
-  function handleAddTask(columnId: string) {
+  const handleAddTask = (columnId: string) => {
     setDefaultStatus(columnId)
     setSelectedTask(null)
     setModalMode('create')
@@ -101,10 +114,20 @@ export default function KanbanBoard({
    * 3. Open the modal
    * @param task Task object to be edited
    */
-  function handleEditTask(task: Task) {
-    setSelectedTask(task)
-    setModalMode('edit')
-    setModalOpen(true)
+  const handleEditTask = async (task: Task) => {
+    try {
+      TaskService.show(task.id)
+        .then(response => {
+          setSelectedTask(response.data)
+          setModalMode('edit')
+          setModalOpen(true)
+        })
+        .catch(error => {
+          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch task details')
+        })
+    } catch (error) {
+      toast.error('Something went wrong while fetching the task details!')
+    }
   }
 
   /**
@@ -126,7 +149,7 @@ export default function KanbanBoard({
    * 2. Set the active task state for rendering in DragOverlay
    * @param event
    */
-  function onDragStart(event: DragStartEvent) {
+  const onDragStart = (event: DragStartEvent) => {
     if (event.active.data.current?.type === 'Task') {
       setActiveTask(event.active.data.current.task)
     }
@@ -137,7 +160,7 @@ export default function KanbanBoard({
    * Moves task across arrays & instantly calculates new orders locally (0, 1, 2...)
    * preventing jumping and blinking.
    */
-  function onDragOver(event: DragOverEvent) {
+  const onDragOver = (event: DragOverEvent) => {
     const { active, over } = event
 
     if (!over) return
@@ -224,7 +247,7 @@ export default function KanbanBoard({
    * Summary of onDragEnd
    * Drops the card into final location and issues API call with exact pre-calculated Order
    */
-  function onDragEnd(event: DragEndEvent) {
+  const onDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
 
     setActiveTask(null)
@@ -295,6 +318,9 @@ export default function KanbanBoard({
                 tasks={tasks.filter(t => t.columnId === col.id)}
                 onAddTask={handleAddTask}
                 onEdit={handleEditTask}
+                canCreateTask={canCreateTask}
+                canEditTask={canEditTask}
+                canDeleteTask={canDeleteTask}
               />
             ))}
           </div>

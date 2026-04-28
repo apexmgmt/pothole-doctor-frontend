@@ -10,6 +10,8 @@ import { Task } from '@/types'
 interface TaskCardProps {
   task: Task
   onEdit?: (task: Task) => void
+  canEdit: boolean
+  canDelete: boolean
 }
 
 function getInitials(first?: string, last?: string): string {
@@ -22,27 +24,21 @@ function formatDate(dateStr?: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-export function TaskCard({ task, onEdit }: TaskCardProps) {
+export function TaskCard({ task, onEdit, canEdit, canDelete }: TaskCardProps) {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: task.id,
-    data: { type: 'Task', task },
+    data: { type: 'Task', task }
   })
 
   const style = {
     transition,
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Transform.toString(transform)
   }
 
   const employees = task.employees ?? []
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={isDragging ? 'opacity-0' : undefined}
-    >
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={isDragging ? 'opacity-0' : undefined}>
       <Card className='cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-primary/50 bg-card'>
         <CardContent className='p-3 space-y-2'>
           {/* Header: task type badge + status + edit button */}
@@ -53,16 +49,9 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
                   {task.task_type.name}
                 </span>
               )}
-              {/* {task.status && (
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_COLORS[task.status] ?? 'bg-muted text-muted-foreground'}`}
-                >
-                  {task.status}
-                </span>
-              )} */}
             </div>
 
-            {onEdit && (
+            {canEdit && onEdit && (
               <Button
                 type='button'
                 variant='ghost'
@@ -96,9 +85,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
               <span className='flex items-center gap-1'>
                 <CalendarIcon className='h-3 w-3 shrink-0' />
                 {formatDate(task.start_date)}
-                {task.end_date && task.end_date !== task.start_date && (
-                  <> - {formatDate(task.end_date)}</>
-                )}
+                {task.end_date && task.end_date !== task.start_date && <> - {formatDate(task.end_date)}</>}
               </span>
             )}
             {task.location && (
