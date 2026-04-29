@@ -64,24 +64,28 @@ const MenuItem: React.FC<{
         {isExpanded ? <ArrowUpIcon /> : <ArrowDownIcon />}
       </button>
 
-      {isExpanded && (
-        <ul className={`relative space-y-1 mt-1 ${level > 0 ? 'ml-5' : 'ml-8'}`}>
-          {item.subItems.map((subItem, idx) => (
-            <li key={subItem.id}>
-              <MenuItem
-                item={subItem}
-                isLastItem={idx + 1 === item.subItems?.length}
-                level={level + 1}
-                parentIcon={resolvedIcon}
-              />
-            </li>
-          ))}
+      <div
+        className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+      >
+        <div className='overflow-hidden'>
+          <ul className={`relative space-y-1 mt-1 ${level > 0 ? 'ml-5' : 'ml-8'}`}>
+            {item.subItems.map((subItem, idx) => (
+              <li key={subItem.id}>
+                <MenuItem
+                  item={subItem}
+                  isLastItem={idx + 1 === item.subItems?.length}
+                  level={level + 1}
+                  parentIcon={resolvedIcon}
+                />
+              </li>
+            ))}
 
-          <span
-            className={`absolute bottom-10 w-0 h-[calc(100%-30px)] border-l border-border ${level > 0 ? '-left-1' : '-left-3'}`}
-          />
-        </ul>
-      )}
+            <span
+              className={`absolute bottom-10 w-0 h-[calc(100%-30px)] border-l border-border ${level > 0 ? '-left-1' : '-left-3'}`}
+            />
+          </ul>
+        </div>
+      </div>
     </div>
   ) : (
     <Link
