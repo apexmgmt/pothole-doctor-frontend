@@ -1,6 +1,6 @@
 import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { API_URL, PARTNERS, PARTNERS_TENANT } from '@/constants/api'
+import { API_URL, PARTNERS, PARTNERS_ALL_TENANT, PARTNERS_TENANT } from '@/constants/api'
 import { PartnerPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
 
@@ -155,6 +155,30 @@ export default class PartnerService {
       await revalidate('partners')
       await revalidate(`partners/${partnerId}`)
       await revalidate('partners-all')
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Get all partners API without pagination
+   * This is used for dropdowns and other places where we need to fetch all partners without pagination
+   */
+  static getAll = async () => {
+    try {
+      const response = await apiInterceptor(API_URL + PARTNERS_ALL_TENANT, {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 3600, tags: ['partners-all'] } // Cache for 1 hour
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to fetch contractors')
+      }
 
       return await response.json()
     } catch (error) {
