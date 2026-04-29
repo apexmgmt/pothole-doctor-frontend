@@ -151,15 +151,27 @@ const Tasks: React.FC<{
     {
       id: 'status',
       header: 'Status',
-      cell: row => (
-        <Badge
-          key={row.id}
-          variant={row.status === 'Completed' ? 'default' : row.status === 'In Progress' ? 'secondary' : 'destructive'}
-          className='mr-1 mb-1'
-        >
-          {row.status}
-        </Badge>
-      ),
+      cell: row => {
+        // Map status to display text and color variant
+        const statusMap: any = {
+          backlog: { label: 'Backlog', variant: 'secondary' },
+          'to-do': { label: 'To Do', variant: 'secondary' },
+          'in-progress': { label: 'In Progress', variant: 'info' },
+          overdue: { label: 'Overdue', variant: 'destructive' },
+          completed: { label: 'Completed', variant: 'success' },
+          cancelled: { label: 'Cancelled', variant: 'outline' }
+        }
+
+        // Normalize status to lower-case and hyphenated
+        const normalized = (row.status || '').toString().trim().toLowerCase().replace(/\s+/g, '-')
+        const statusObj = statusMap[normalized] || { label: row.status, variant: 'default' }
+
+        return (
+          <Badge key={row.id} variant={statusObj.variant} className='mr-1 mb-1'>
+            {statusObj.label}
+          </Badge>
+        )
+      },
       sortable: true
     },
     {

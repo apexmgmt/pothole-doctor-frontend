@@ -120,7 +120,9 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
           index: (apiResponse?.from || 1) + index,
           commission_type: typeObj ? typeObj.name : commission?.commission_type,
           based_on: baseObj ? baseObj.name : commission?.based_on,
-          per: commission?.per,
+          per:
+            commission?.per?.replace(/-/g, ' ').replace(/\b\w/g, (char: string) => char.toUpperCase()) ||
+            commission?.per,
           filter_type_value: filterObj ? filterObj.type : commission?.filter_type,
           filter_type: commission?.filter_type,
           amount: commission?.amount || 0,

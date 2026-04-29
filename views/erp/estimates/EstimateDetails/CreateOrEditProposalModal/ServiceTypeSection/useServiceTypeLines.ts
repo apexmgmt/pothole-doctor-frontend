@@ -1,5 +1,6 @@
 import { LaborCost, Product, ProposalServiceItemPayload } from '@/types'
 import { getDiscountedUnitPrice } from '@/utils/business-calculation'
+import { mathRoundFixed } from '@/utils/utility'
 
 interface UseServiceTypeLinesParams {
   lines: ProposalServiceItemPayload[]
@@ -15,13 +16,21 @@ export const useServiceTypeLines = ({ lines, onLinesChange, taxRate, hideMargin 
     const total_price = unit_price * line.qty
     const tax_amount = line.is_sale ? unit_price * line.qty * (taxRate / 100) : 0
 
-    return { ...line, unit_price, total_cost, total_price, tax_amount, tax: tax_amount }
+    let freight_charge = line.freight_charge ?? 0
+
+    if (line.type === 'product' && line.product?.is_freight_percentage) {
+      const freightPct = Number(line.product.freight_amount ?? 0)
+
+      freight_charge = mathRoundFixed(total_price * (freightPct / 100), 2)
+    }
+
+    return { ...line, unit_price, total_cost, total_price, tax_amount, tax: tax_amount, freight_charge }
   }
 
   const clampProductQty = (qty: number, line: ProposalServiceItemPayload): number => {
     if (!line.product_id || !line.product) return qty
 
-    const minQty = Number(line.product.minimum_qty ?? 0)
+    const minQty = Number(line.product.minimum_qty ?? line.product.coverage_per_rate ?? 0)
     const roundUp = !!line.product.round_up_quantity
     let adjusted = qty
 
@@ -138,7 +147,7 @@ export const useServiceTypeLines = ({ lines, onLinesChange, taxRate, hideMargin 
         unit_price: 0,
         discount: 0,
         discount_type: 'percentage',
-        freight_charge: 0,
+        freight_charge: !product.is_freight_percentage ? Number(product.freight_amount ?? 0) : 0,
         is_sale: 1,
         tax_type: 'percentage',
         tax: 0,

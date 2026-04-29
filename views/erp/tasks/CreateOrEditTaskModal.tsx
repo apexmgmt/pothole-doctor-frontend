@@ -609,9 +609,12 @@ const CreateOrEditTaskModal = ({
                           <SelectValue placeholder='Select Status' />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value='In Progress'>In Progress</SelectItem>
-                          <SelectItem value='Completed'>Completed</SelectItem>
-                          <SelectItem value='Cancelled'>Cancelled</SelectItem>
+                          <SelectItem value='backlog'>Backlog</SelectItem>
+                          <SelectItem value='to-do'>To Do</SelectItem>
+                          <SelectItem value='overdue'>Overdue</SelectItem>
+                          <SelectItem value='in-progress'>In Progress</SelectItem>
+                          <SelectItem value='completed'>Completed</SelectItem>
+                          <SelectItem value='cancelled'>Cancelled</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>

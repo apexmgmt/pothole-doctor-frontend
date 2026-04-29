@@ -667,7 +667,7 @@ const CreateOrEditEstimateModal = ({
             )}
           />
           {/* Service type field */}
-          <FormField
+          {/* <FormField
             control={form.control}
             name='service_type_id'
             rules={{
@@ -695,7 +695,7 @@ const CreateOrEditEstimateModal = ({
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
           {/* Payment terms field */}
           <FormField
             control={form.control}

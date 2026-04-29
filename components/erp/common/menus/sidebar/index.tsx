@@ -91,8 +91,28 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       label: 'Tasks',
       icon: <CalendarCheck className='h-4 w-4' />,
       href: '/erp/tasks',
-      hasSubItems: false,
+      hasSubItems: true,
       exactMatch: false,
+      subItems: [
+        {
+          id: 'tasks',
+          label: 'Task List',
+          href: '/erp/tasks',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Task']
+        },
+        {
+          id: 'task-kanban',
+          label: 'Kanban Board',
+          href: '/erp/tasks/kanban',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Task']
+        }
+      ],
       permissions: ['Manage Task']
     },
     {
