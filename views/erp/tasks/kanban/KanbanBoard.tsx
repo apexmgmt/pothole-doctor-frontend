@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   DndContext,
@@ -77,11 +77,9 @@ export default function KanbanBoard({
   const searchParams = useSearchParams()
   const [tasks, setTasks] = useState<KanbanTask[]>(toKanbanTasks(initialTasks))
 
-  const [filters, setFilters] = useState<{ starting_date?: string; ending_date?: string }>(() => {
-    const starting_date = searchParams.get('starting_date') || undefined
-    const ending_date = searchParams.get('ending_date') || undefined
-
-    return { starting_date, ending_date }
+  const [filters, setFilters] = useState<any>({
+    starting_date: searchParams.get('starting_date') || undefined,
+    ending_date: searchParams.get('ending_date') || undefined
   })
 
   const [isLoading, setIsLoading] = useState(false)
@@ -95,7 +93,19 @@ export default function KanbanBoard({
   const [canEditTask, setCanEditTask] = useState<boolean>(false)
   const [canDeleteTask, setCanDeleteTask] = useState<boolean>(false)
 
-  // Fetch tasks with filters
+  // The "Interaction Lock" - Only allow fetches after the user touches the filter
+  const hasUserChangedFilter = useRef(false)
+
+  /**
+   * Summary of fetchTasks function
+   *
+   * 1. Sets loading state to true while fetching
+   * 2. Calls TaskService.getAll with filter options to fetch tasks based on current filters
+   * 3. Updates the tasks state with the fetched data
+   * 4. Handles any errors silently (optionally could show a toast)
+   * 5. Sets loading state back to false after completion
+   * @param filterOptions Object containing starting_date and ending_date for filtering tasks
+   */
   const fetchTasks = async (filterOptions: { starting_date?: string; ending_date?: string }) => {
     setIsLoading(true)
 
@@ -110,19 +120,49 @@ export default function KanbanBoard({
     setIsLoading(false)
   }
 
-  // Update URL query params when filters change
+  /**
+   * Summary of the Filter Effect
+   * This now only triggers an API call if the user has manually interacted with filters.
+   * It ignores the initial "settling" of searchParams.
+   */
   useEffect(() => {
+    if (!hasUserChangedFilter.current) return
+
     const params = new URLSearchParams()
 
     if (filters.starting_date) params.set('starting_date', filters.starting_date)
     if (filters.ending_date) params.set('ending_date', filters.ending_date)
+
     const paramStr = params.toString()
 
     router.replace(paramStr ? `?${paramStr}` : '?', { scroll: false })
+
     fetchTasks(filters)
   }, [filters.starting_date, filters.ending_date])
 
-  // Delete task handler
+  // Synchronize tasks if initialTasks change
+  useEffect(() => {
+    setTasks(toKanbanTasks(initialTasks))
+  }, [initialTasks])
+
+  /**
+   * Handle Change from KanbanFilter
+   * We wrap the state update to "unlock" the fetcher.
+   */
+  const handleFilterChange = (newFilters: { starting_date?: string; ending_date?: string }) => {
+    hasUserChangedFilter.current = true // Unlock the effect
+    setFilters(newFilters)
+  }
+
+  /**
+   * Summary of handleDeleteTask
+   *
+   * 1. Optimistically removes the task from the UI
+   * 2. Calls the API to delete the task
+   * 3. If API call fails, reverts the UI to include the task again
+   * 4. Shows success or error toast based on API response
+   * @param taskId - The ID of the task to delete
+   */
   const handleDeleteTask = async (taskId: string) => {
     // Optimistically remove from UI
     let deletedTask: KanbanTask | undefined
@@ -420,7 +460,7 @@ export default function KanbanBoard({
 
   return (
     <>
-      <KanbanFilter onChange={setFilters} initialFilters={filters} />
+      <KanbanFilter onChange={handleFilterChange} initialFilters={filters} />
       <ScrollArea className='w-full'>
         <DndContext
           sensors={sensors}

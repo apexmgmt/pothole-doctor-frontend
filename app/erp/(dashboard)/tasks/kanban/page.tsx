@@ -8,10 +8,41 @@ import KanbanBoard from '@/views/erp/tasks/kanban/KanbanBoard'
 
 export const dynamic = 'force-dynamic'
 
-export default async function TaskKanbanPage() {
+/**
+ * Summary of TaskKanbanPage
+ * 1. Receives searchParams directly from the Next.js Page props
+ * 2. Passes filters to TaskService.getAll() to fetch correct initial data server-side
+ * 3. Prevents UI flickering by ensuring the server-rendered HTML matches the filter state
+ */
+interface PageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export default async function TaskKanbanPage({ searchParams }: PageProps) {
+  // Await the searchParams promise
+  const params = await searchParams
+
+  // Extract and validate potential filter values
+  const sDate = typeof params.starting_date === 'string' ? params.starting_date : null
+  const eDate = typeof params.ending_date === 'string' ? params.ending_date : null
+
+  /**
+   * Construct the filter object only if values exist.
+   * We use 'undefined' as the fallback so TaskService.getAll()
+   * receives nothing if no filters are present.
+   */
+  const filters =
+    sDate || eDate
+      ? {
+          ...(sDate && { starting_date: sDate }),
+          ...(eDate && { ending_date: eDate })
+        }
+      : undefined
+
+  // Fire the requests
   const [tasksRes, staffsRes, clientsRes, taskTypesRes, taskRemindersRes, taskReminderChannelsRes] =
     await Promise.allSettled([
-      TaskService.getAll(),
+      TaskService.getAll(filters),
       StaffService.getAll(),
       ClientService.getAll('customer'),
       TaskTypeService.getAll(),
