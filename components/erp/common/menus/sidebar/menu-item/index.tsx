@@ -61,7 +61,7 @@ const MenuItem: React.FC<{
     <div key={item.id}>
       <button
         onClick={() => toggleSection(item.id)}
-        className={`relative w-full flex items-center justify-between px-3 py-1 rounded-lg text-left transition-colors ${
+        className={`relative w-full flex items-center justify-between px-3 py-1 rounded-lg text-left transition-colors cursor-pointer ${
           isActive ? 'bg-accent/40 text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
         }`}
         type='button'

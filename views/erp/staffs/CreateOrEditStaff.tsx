@@ -457,7 +457,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                               name='permissions'
                               render={({ field }) => {
                                 return (
-                                  <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
+                                  <FormItem className='flex flex-row items-start space-y-0'>
                                     <FormControl>
                                       <Checkbox
                                         checked={field.value?.includes(permission.name)}
