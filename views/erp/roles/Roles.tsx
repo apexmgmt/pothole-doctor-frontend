@@ -153,8 +153,12 @@ const Roles: React.FC = () => {
           {(canEditRole || canDeleteRole) && row.is_editable && (
             <ThreeDotButton
               buttons={[
-                canEditRole && <EditButton tooltip='Edit Role Information' link={`/erp/roles/${row.id}/edit`} variant='text' />,
-                canDeleteRole && <DeleteButton tooltip='Delete Role' variant='text' onClick={() => handleDeleteRole(row.id)} />
+                canEditRole && (
+                  <EditButton tooltip='Edit Role Information' link={`/erp/roles/${row.id}/edit`} variant='text' />
+                ),
+                canDeleteRole && (
+                  <DeleteButton tooltip='Delete Role' variant='text' onClick={() => handleDeleteRole(row.id)} />
+                )
               ]}
             />
           )}
@@ -211,14 +215,14 @@ const Roles: React.FC = () => {
 
   // Custom filters component
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <div className='flex items-center gap-2'>
+    <div className='flex items-center justify-between w-full gap-2.5'>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80! '>
         <InputGroup>
           <InputGroupInput
             placeholder='Search...'
             value={searchValue}
             onChange={e => setSearchValue(e.target.value)}
-            className='w-80'
+            className='lg:w-80 min-w-0'
           />
           <InputGroupAddon>
             <Search />
@@ -234,7 +238,7 @@ const Roles: React.FC = () => {
         <Link href='/erp/roles/create'>
           <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
             <PlusIcon className='w-4 h-4' />
-            Add Role
+            <span className='hidden min-[480px]:block'>Add Role</span>
           </Button>
         </Link>
       )}

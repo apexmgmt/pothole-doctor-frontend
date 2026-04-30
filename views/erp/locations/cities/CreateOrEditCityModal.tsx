@@ -202,7 +202,9 @@ const CreateOrEditCityModal = ({
             name='country_id'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Country</FormLabel>
+                <FormLabel>
+                  Country <span className='text-red-600'>*</span>
+                </FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                   <FormControl>
                     <SelectTrigger className='w-full'>
@@ -230,7 +232,9 @@ const CreateOrEditCityModal = ({
             name='state_id'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>State</FormLabel>
+                <FormLabel>
+                  State <span className='text-red-600'>*</span>
+                </FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -267,7 +271,9 @@ const CreateOrEditCityModal = ({
             name='name'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>City Name</FormLabel>
+                <FormLabel>
+                  City Name <span className='text-red-600'>*</span>
+                </FormLabel>
                 <FormControl>
                   <Input placeholder='Enter city name' {...field} />
                 </FormControl>

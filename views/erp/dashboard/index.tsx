@@ -3,15 +3,21 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { DayPicker } from 'react-day-picker'
 import type { DateRange } from 'react-day-picker'
-import {
-  CartesianGrid, Line, LineChart,
-  ResponsiveContainer, Tooltip, XAxis, YAxis
-} from 'recharts'
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { toast } from 'sonner'
 import {
-  BarChart2, CalendarDays, DollarSign,
-  FileSpreadsheet, FileText, Info,
-  Link2, MapPin, Search, TrendingUp, Users
+  ArrowRight,
+  BarChart2,
+  CalendarDays,
+  DollarSign,
+  FileSpreadsheet,
+  FileText,
+  Info,
+  Link2,
+  MapPin,
+  Search,
+  TrendingUp,
+  Users
 } from 'lucide-react'
 
 import DashboardService from '@/services/api/dashboard.service'
@@ -47,23 +53,23 @@ interface ChartPoint {
 
 /** Maps invoice status strings to their Tailwind badge colours. */
 const INVOICE_STATUS_STYLES: Record<string, string> = {
-  'sent to customer':  'bg-orange-500 text-white',
+  'sent to customer': 'bg-orange-500 text-white',
   'invoice confirmed': 'bg-blue-600 text-white',
-  'partially paid':    'bg-red-500 text-white',
-  'fully paid':        'bg-green-600 text-white',
-  'draft':             'bg-gray-500 text-white',
-  'cancelled':         'bg-red-700 text-white',
-  'overdue':           'bg-red-600 text-white',
-  'pending':           'bg-yellow-500 text-white'
+  'partially paid': 'bg-red-500 text-white',
+  'fully paid': 'bg-green-600 text-white',
+  draft: 'bg-gray-500 text-white',
+  cancelled: 'bg-red-700 text-white',
+  overdue: 'bg-red-600 text-white',
+  pending: 'bg-yellow-500 text-white'
 }
 
 /** Tenant dashboard tab definitions. */
 const TABS = [
-  { id: 'my-sales',          label: 'My Sales',           icon: BarChart2 },
-  { id: 'overview',          label: 'Overview',            icon: Info },
-  { id: 'sales-breakdown',   label: 'Sales Breakdown',     icon: DollarSign },
-  { id: 'sales-conversions', label: 'Sales Conversions',   icon: TrendingUp },
-  { id: 'sales-team',        label: 'Sales Team Rankings', icon: Users }
+  { id: 'my-sales', label: 'My Sales', icon: BarChart2 },
+  { id: 'overview', label: 'Overview', icon: Info },
+  { id: 'sales-breakdown', label: 'Sales Breakdown', icon: DollarSign },
+  { id: 'sales-conversions', label: 'Sales Conversions', icon: TrendingUp },
+  { id: 'sales-team', label: 'Sales Team Rankings', icon: Users }
 ] as const
 
 // ─── Pure helpers ───────────────────────────────────────────────────────────────
@@ -81,7 +87,8 @@ function getChartValue(item: Record<string, unknown>): number {
 /** Formats a number as a compact dollar amount (e.g. $1.23k, $4.56M). */
 function formatMoney(value: number): string {
   if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(2)}M`
-  if (value >= 1_000)     return `$${(value / 1_000).toFixed(2)}k`
+  if (value >= 1_000) return `$${(value / 1_000).toFixed(2)}k`
+
   return `$${value.toFixed(2)}`
 }
 
@@ -89,17 +96,22 @@ function formatMoney(value: number): string {
 function formatYAxis(value: number): string {
   if (value >= 1_000) {
     const k = value / 1_000
+
     return `$${k % 1 === 0 ? k.toFixed(0) : k.toFixed(1)}K`
   }
+
   return `$${value}`
 }
 
 /** Formats an ISO date string to MM/DD/YYYY; returns '—' on failure. */
 function formatDate(raw: string | undefined): string {
   if (!raw) return '—'
+
   try {
     return new Date(raw).toLocaleDateString('en-US', {
-      month: '2-digit', day: '2-digit', year: 'numeric'
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
     })
   } catch {
     return raw
@@ -109,6 +121,7 @@ function formatDate(raw: string | undefined): string {
 /** Reads the first non-null numeric field from `obj` using the provided key list. */
 function getStat(obj: Record<string, unknown> | null, keys: string[]): number {
   for (const k of keys) if (obj?.[k] != null) return Number(obj[k])
+
   return 0
 }
 
@@ -120,16 +133,19 @@ function getStatObj(obj: Record<string, unknown> | null, keys: string[]): StatOb
   for (const k of keys) {
     if (obj?.[k] != null) {
       const v = obj[k] as Record<string, unknown>
+
       if (typeof v === 'object' && v !== null) {
         return {
-          count:      Number(v.count      ?? v.total ?? 0),
+          count: Number(v.count ?? v.total ?? 0),
           percentage: Number(v.percentage ?? v.percent ?? 0),
-          amount:     Number(v.amount     ?? v.total_sales ?? v.value ?? 0)
+          amount: Number(v.amount ?? v.total_sales ?? v.value ?? 0)
         }
       }
+
       return { count: Number(v), percentage: 0, amount: Number(v) }
     }
   }
+
   return { count: 0, percentage: 0, amount: 0 }
 }
 
@@ -154,10 +170,13 @@ function LoadingSkeleton() {
 }
 
 function InvoiceStatusBadge({ status }: { status: string }) {
-  const key   = String(status ?? '').toLowerCase()
+  const key = String(status ?? '').toLowerCase()
   const style = INVOICE_STATUS_STYLES[key] ?? 'bg-gray-500 text-white'
+
   return (
-    <span className={`inline-flex items-center justify-center w-full px-2 py-1 rounded text-[11px] font-semibold ${style}`}>
+    <span
+      className={`inline-flex items-center justify-center w-full px-2 py-1 rounded text-[11px] font-semibold ${style}`}
+    >
       {status || '—'}
     </span>
   )
@@ -165,6 +184,7 @@ function InvoiceStatusBadge({ status }: { status: string }) {
 
 function ProgressBar({ percentage, color = 'bg-gray-700' }: { percentage: number; color?: string }) {
   const pct = Math.min(100, Math.max(0, percentage))
+
   return (
     <div className='relative h-5 rounded bg-border/30 overflow-hidden'>
       <div className={`h-full rounded transition-all ${color}`} style={{ width: `${pct}%` }} />
@@ -175,12 +195,9 @@ function ProgressBar({ percentage, color = 'bg-gray-700' }: { percentage: number
   )
 }
 
-function ChartTooltip({ active, payload, label }: {
-  active?: boolean
-  payload?: { value: number }[]
-  label?: string
-}) {
+function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
   if (!active || !payload?.length) return null
+
   return (
     <div className='rounded-lg border border-border/40 bg-card px-3 py-2 text-xs shadow-lg'>
       <p className='font-semibold text-card-foreground mb-0.5'>{label}</p>
@@ -199,20 +216,20 @@ interface LocationDropdownProps {
 
 function LocationDropdown({ locations, selected, onChange }: LocationDropdownProps) {
   const [open, setOpen] = useState(false)
-  const ref             = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLDivElement>(null)
 
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
+
     if (open) document.addEventListener('mousedown', handleOutside)
+
     return () => document.removeEventListener('mousedown', handleOutside)
   }, [open])
 
-  const label = selected
-    ? locations.find(l => l.id === selected)?.name ?? 'All Locations'
-    : 'All Locations'
+  const label = selected ? (locations.find(l => l.id === selected)?.name ?? 'All Locations') : 'All Locations'
 
   return (
     <div ref={ref} className='relative'>
@@ -231,14 +248,20 @@ function LocationDropdown({ locations, selected, onChange }: LocationDropdownPro
           <DropdownItem
             label='All Locations'
             active={!selected}
-            onClick={() => { onChange(''); setOpen(false) }}
+            onClick={() => {
+              onChange('')
+              setOpen(false)
+            }}
           />
           {locations.map(loc => (
             <DropdownItem
               key={loc.id}
               label={loc.name}
               active={selected === loc.id}
-              onClick={() => { onChange(loc.id); setOpen(false) }}
+              onClick={() => {
+                onChange(loc.id)
+                setOpen(false)
+              }}
             />
           ))}
         </div>
@@ -255,9 +278,11 @@ function DropdownItem({ label, active, onClick }: { label: string; active: boole
         active ? 'text-primary font-semibold' : 'text-card-foreground'
       }`}
     >
-      <span className={`flex-shrink-0 w-3.5 h-3.5 rounded-sm border flex items-center justify-center ${
-        active ? 'border-primary bg-primary' : 'border-border/60 bg-transparent'
-      }`}>
+      <span
+        className={`flex-shrink-0 w-3.5 h-3.5 rounded-sm border flex items-center justify-center ${
+          active ? 'border-primary bg-primary' : 'border-border/60 bg-transparent'
+        }`}
+      >
         {active && (
           <svg viewBox='0 0 10 8' fill='none' className='w-2.5 h-2.5'>
             <path d='M1 4l3 3 5-6' stroke='white' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />
@@ -278,29 +303,105 @@ function startOf(d: Date): Date {
 
 /** Quick-select preset definitions. */
 const DATE_PRESETS = [
-  { label: 'Today',          range: () => { const d = startOf(new Date()); return { from: d, to: d } } },
-  { label: 'Last 7 Days',    range: () => { const to = startOf(new Date()); const from = new Date(to); from.setDate(from.getDate() - 6); return { from, to } } },
-  { label: 'Current Month',  range: () => { const n = new Date(); return { from: new Date(n.getFullYear(), n.getMonth(), 1), to: new Date(n.getFullYear(), n.getMonth() + 1, 0) } } },
-  { label: 'Previous Month', range: () => { const n = new Date(); return { from: new Date(n.getFullYear(), n.getMonth() - 1, 1), to: new Date(n.getFullYear(), n.getMonth(), 0) } } },
-  { label: 'First Quarter',  range: () => { const y = new Date().getFullYear(); return { from: new Date(y, 0, 1),  to: new Date(y, 2,  31) } } },
-  { label: 'Second Quarter', range: () => { const y = new Date().getFullYear(); return { from: new Date(y, 3, 1),  to: new Date(y, 5,  30) } } },
-  { label: 'Third Quarter',  range: () => { const y = new Date().getFullYear(); return { from: new Date(y, 6, 1),  to: new Date(y, 8,  30) } } },
-  { label: 'Fourth Quarter', range: () => { const y = new Date().getFullYear(); return { from: new Date(y, 9, 1),  to: new Date(y, 11, 31) } } },
-  { label: 'Current Year',   range: () => { const y = new Date().getFullYear(); return { from: new Date(y, 0, 1),  to: new Date(y, 11, 31) } } },
-  { label: 'Previous Year',  range: () => { const y = new Date().getFullYear() - 1; return { from: new Date(y, 0, 1), to: new Date(y, 11, 31) } } },
-  { label: 'Custom Range',   range: () => null }
+  {
+    label: 'Today',
+    range: () => {
+      const d = startOf(new Date())
+
+      return { from: d, to: d }
+    }
+  },
+  {
+    label: 'Last 7 Days',
+    range: () => {
+      const to = startOf(new Date())
+      const from = new Date(to)
+
+      from.setDate(from.getDate() - 6)
+
+      return { from, to }
+    }
+  },
+  {
+    label: 'Current Month',
+    range: () => {
+      const n = new Date()
+
+      return { from: new Date(n.getFullYear(), n.getMonth(), 1), to: new Date(n.getFullYear(), n.getMonth() + 1, 0) }
+    }
+  },
+  {
+    label: 'Previous Month',
+    range: () => {
+      const n = new Date()
+
+      return { from: new Date(n.getFullYear(), n.getMonth() - 1, 1), to: new Date(n.getFullYear(), n.getMonth(), 0) }
+    }
+  },
+  {
+    label: 'First Quarter',
+    range: () => {
+      const y = new Date().getFullYear()
+
+      return { from: new Date(y, 0, 1), to: new Date(y, 2, 31) }
+    }
+  },
+  {
+    label: 'Second Quarter',
+    range: () => {
+      const y = new Date().getFullYear()
+
+      return { from: new Date(y, 3, 1), to: new Date(y, 5, 30) }
+    }
+  },
+  {
+    label: 'Third Quarter',
+    range: () => {
+      const y = new Date().getFullYear()
+
+      return { from: new Date(y, 6, 1), to: new Date(y, 8, 30) }
+    }
+  },
+  {
+    label: 'Fourth Quarter',
+    range: () => {
+      const y = new Date().getFullYear()
+
+      return { from: new Date(y, 9, 1), to: new Date(y, 11, 31) }
+    }
+  },
+  {
+    label: 'Current Year',
+    range: () => {
+      const y = new Date().getFullYear()
+
+      return { from: new Date(y, 0, 1), to: new Date(y, 11, 31) }
+    }
+  },
+  {
+    label: 'Previous Year',
+    range: () => {
+      const y = new Date().getFullYear() - 1
+
+      return { from: new Date(y, 0, 1), to: new Date(y, 11, 31) }
+    }
+  },
+  { label: 'Custom Range', range: () => null }
 ] as const
 
 function fmtInput(d: Date | undefined): string {
   if (!d) return ''
+
   return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
 }
 
 function fmtTrigger(range: DateRange | undefined): string {
   if (!range?.from) return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
   const from = range.from.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
   if (!range.to || range.to.getTime() === range.from.getTime()) return from
   const to = range.to.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
   return `${from} - ${to}`
 }
 
@@ -310,25 +411,30 @@ interface DateRangePickerProps {
 }
 
 function DateRangePicker({ value, onChange }: DateRangePickerProps) {
-  const [open,        setOpen]       = useState(false)
-  const [draft,       setDraft]      = useState<DateRange | undefined>(value)
+  const [open, setOpen] = useState(false)
+  const [draft, setDraft] = useState<DateRange | undefined>(value)
   const [activePreset, setActivePreset] = useState<string>('')
   const ref = useRef<HTMLDivElement>(null)
 
   // Sync draft when external value changes
-  useEffect(() => { setDraft(value) }, [value])
+  useEffect(() => {
+    setDraft(value)
+  }, [value])
 
   // Close on outside click
   useEffect(() => {
     function onOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
+
     if (open) document.addEventListener('mousedown', onOutside)
+
     return () => document.removeEventListener('mousedown', onOutside)
   }, [open])
 
-  function applyPreset(preset: typeof DATE_PRESETS[number]) {
+  function applyPreset(preset: (typeof DATE_PRESETS)[number]) {
     const result = preset.range()
+
     if (result) {
       setDraft(result)
       setActivePreset(preset.label)
@@ -364,7 +470,6 @@ function DateRangePicker({ value, onChange }: DateRangePickerProps) {
 
       {open && (
         <div className='absolute right-0 top-full mt-1 z-50 flex rounded border border-border/40 bg-card shadow-xl overflow-hidden'>
-
           {/* ── Left: calendars + inputs ── */}
           <div className='p-3 border-r border-border/20'>
             {/* Date inputs */}
@@ -400,27 +505,28 @@ function DateRangePicker({ value, onChange }: DateRangePickerProps) {
               numberOfMonths={2}
               showOutsideDays
               classNames={{
-                months:          'flex gap-4',
-                month:           'flex flex-col gap-2',
-                month_caption:   'flex items-center justify-center text-xs font-semibold text-card-foreground py-1',
-                nav:             'flex items-center justify-between absolute top-0 w-full px-1',
+                months: 'flex gap-4',
+                month: 'flex flex-col gap-2',
+                month_caption: 'flex items-center justify-center text-xs font-semibold text-card-foreground py-1',
+                nav: 'flex items-center justify-between absolute top-0 w-full px-1',
                 button_previous: 'p-1 rounded hover:bg-border/20 text-muted-foreground',
-                button_next:     'p-1 rounded hover:bg-border/20 text-muted-foreground',
-                weekdays:        'flex',
-                weekday:         'w-8 h-6 flex items-center justify-center text-[10px] text-muted-foreground font-medium',
-                weeks:           'flex flex-col gap-1',
-                week:            'flex',
-                day:             'w-8 h-8 flex items-center justify-center',
-                day_button:      'w-7 h-7 rounded text-[11px] hover:bg-border/30 text-card-foreground transition-colors cursor-pointer',
-                selected:        '[&>button]:bg-blue-600 [&>button]:text-white [&>button]:hover:bg-blue-700',
-                range_start:     '[&>button]:bg-blue-600 [&>button]:text-white [&>button]:rounded-l-full',
-                range_middle:    '[&>button]:bg-blue-500/20 [&>button]:text-card-foreground [&>button]:rounded-none',
-                range_end:       '[&>button]:bg-blue-600 [&>button]:text-white [&>button]:rounded-r-full',
-                today:           '[&>button]:font-bold [&>button]:border [&>button]:border-primary',
-                outside:         '[&>button]:text-muted-foreground [&>button]:opacity-40',
-                disabled:        '[&>button]:opacity-20 [&>button]:cursor-not-allowed',
-                caption_label:   'text-xs font-semibold text-card-foreground',
-                root:            'relative'
+                button_next: 'p-1 rounded hover:bg-border/20 text-muted-foreground',
+                weekdays: 'flex',
+                weekday: 'w-8 h-6 flex items-center justify-center text-[10px] text-muted-foreground font-medium',
+                weeks: 'flex flex-col gap-1',
+                week: 'flex',
+                day: 'w-8 h-8 flex items-center justify-center',
+                day_button:
+                  'w-7 h-7 rounded text-[11px] hover:bg-border/30 text-card-foreground transition-colors cursor-pointer',
+                selected: '[&>button]:bg-blue-600 [&>button]:text-white [&>button]:hover:bg-blue-700',
+                range_start: '[&>button]:bg-blue-600 [&>button]:text-white [&>button]:rounded-l-full',
+                range_middle: '[&>button]:bg-blue-500/20 [&>button]:text-card-foreground [&>button]:rounded-none',
+                range_end: '[&>button]:bg-blue-600 [&>button]:text-white [&>button]:rounded-r-full',
+                today: '[&>button]:font-bold [&>button]:border [&>button]:border-primary',
+                outside: '[&>button]:text-muted-foreground [&>button]:opacity-40',
+                disabled: '[&>button]:opacity-20 [&>button]:cursor-not-allowed',
+                caption_label: 'text-xs font-semibold text-card-foreground',
+                root: 'relative'
               }}
             />
 
@@ -457,7 +563,6 @@ function DateRangePicker({ value, onChange }: DateRangePickerProps) {
               </button>
             ))}
           </div>
-
         </div>
       )}
     </div>
@@ -467,93 +572,108 @@ function DateRangePicker({ value, onChange }: DateRangePickerProps) {
 // ─── Tenant Dashboard ───────────────────────────────────────────────────────────
 
 function TenantDashboardView({ data }: { data: Record<string, unknown> | null }) {
-  const [activeTab,        setActiveTab]        = useState<string>('my-sales')
-  const [invoiceSearch,    setInvoiceSearch]     = useState('')
-  const [locations,        setLocations]         = useState<LocationOption[]>([])
-  const [selectedLocation, setSelectedLocation]  = useState('')
-  const [dateRange,        setDateRange]         = useState<DateRange | undefined>(undefined)
+  const [activeTab, setActiveTab] = useState<string>('my-sales')
+  const [invoiceSearch, setInvoiceSearch] = useState('')
+  const [locations, setLocations] = useState<LocationOption[]>([])
+  const [selectedLocation, setSelectedLocation] = useState('')
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
 
   // Fetch business locations for the filter dropdown once on mount
   useEffect(() => {
     BusinessLocationService.getAll()
       .then(res => {
         const list: Record<string, unknown>[] = (res?.data ?? res) as Record<string, unknown>[]
-        setLocations(
-          Array.isArray(list)
-            ? list.map(l => ({ id: String(l.id), name: String(l.name) }))
-            : []
-        )
+
+        setLocations(Array.isArray(list) ? list.map(l => ({ id: String(l.id), name: String(l.name) })) : [])
       })
       .catch(() => {})
   }, [])
 
   // ── derived values ───────────────────────────────────────────────────────────
-  const totalJobs    = getStat(data, ['total_jobs', 'jobs_count'])
-  const totalSales   = getStat(data, ['total_sales', 'sales_total', 'revenue'])
+  const totalJobs = getStat(data, ['total_jobs', 'jobs_count'])
+  const totalSales = getStat(data, ['total_sales', 'sales_total', 'revenue'])
   const profitMargin = getStat(data, ['profit_margin', 'margin'])
 
   const chartData: ChartPoint[] = (
     (data?.weekly_sales ?? data?.chart_data ?? data?.daily_registrations ?? []) as Record<string, unknown>[]
   ).map(item => ({ label: getDayLabel(item), amount: getChartValue(item) }))
 
-  const myQuotes     = getStatObj(data, ['my_quotes', 'quotes'])
-  const myJobs       = getStatObj(data, ['my_jobs'])
+  const myQuotes = getStatObj(data, ['my_quotes', 'quotes'])
+  const myJobs = getStatObj(data, ['my_jobs'])
   const myTotalSales = getStatObj(data, ['my_total_sales', 'my_sales'])
   const myCommission = getStat(data, ['my_total_commission', 'total_commission', 'commission'])
 
   // Filter invoices by search term across all fields
-  const allInvoices: Record<string, unknown>[] =
-    (data?.current_invoices ?? data?.open_invoices ?? data?.recent_invoices ?? data?.latest_invoices ?? []) as Record<string, unknown>[]
+  const allInvoices: Record<string, unknown>[] = (data?.current_invoices ??
+    data?.open_invoices ??
+    data?.recent_invoices ??
+    data?.latest_invoices ??
+    []) as Record<string, unknown>[]
 
   const invoices = invoiceSearch.trim()
     ? allInvoices.filter(inv => {
         const q = invoiceSearch.toLowerCase()
-        return Object.values(inv).some(v => String(v ?? '').toLowerCase().includes(q))
+
+        return Object.values(inv).some(v =>
+          String(v ?? '')
+            .toLowerCase()
+            .includes(q)
+        )
       })
     : allInvoices
 
   // ── invoice table columns ───────────────────────────────────────────────────
   const invoiceColumns: Column[] = [
     {
-      id: 'status', header: 'Status', sortable: false,
+      id: 'status',
+      header: 'Status',
+      sortable: false,
       cell: row => <InvoiceStatusBadge status={String(row.status ?? row.invoice_status ?? '')} />
     },
     {
-      id: 'invoice_number', header: 'Invoice #', sortable: true,
+      id: 'invoice_number',
+      header: 'Invoice #',
+      sortable: true,
       cell: row => (
-        <span className='text-blue-400 font-medium'>
-          {String(row.invoice_number ?? row.number ?? row.id ?? '—')}
-        </span>
+        <span className='text-blue-400 font-medium'>{String(row.invoice_number ?? row.number ?? row.id ?? '—')}</span>
       )
     },
     {
-      id: 'job_name', header: 'Job Name', sortable: true,
+      id: 'job_name',
+      header: 'Job Name',
+      sortable: true,
       cell: row => <span>{String(row.job_name ?? row.jobName ?? '—')}</span>
     },
     {
-      id: 'company', header: 'Company', sortable: true,
+      id: 'company',
+      header: 'Company',
+      sortable: true,
+      cell: row => <span className='text-blue-400'>{String(row.company ?? row.company_name ?? '—')}</span>
+    },
+    {
+      id: 'customer',
+      header: 'Customer',
+      sortable: true,
       cell: row => (
-        <span className='text-blue-400'>{String(row.company ?? row.company_name ?? '—')}</span>
+        <span className='text-blue-400'>{String(row.customer_name ?? row.customer ?? row.client_name ?? '—')}</span>
       )
     },
     {
-      id: 'customer', header: 'Customer', sortable: true,
-      cell: row => (
-        <span className='text-blue-400'>
-          {String(row.customer_name ?? row.customer ?? row.client_name ?? '—')}
-        </span>
-      )
-    },
-    {
-      id: 'date', header: 'Date', sortable: true,
+      id: 'date',
+      header: 'Date',
+      sortable: true,
       cell: row => <span>{formatDate(String(row.date ?? row.created_at ?? row.invoice_date ?? ''))}</span>
     },
     {
-      id: 'sales_rep', header: 'Sales Rep', sortable: true,
+      id: 'sales_rep',
+      header: 'Sales Rep',
+      sortable: true,
       cell: row => <span>{String(row.sales_rep ?? row.salesRep ?? row.user_name ?? '—')}</span>
     },
     {
-      id: 'total_sales', header: 'Total Sales', sortable: true,
+      id: 'total_sales',
+      header: 'Total Sales',
+      sortable: true,
       cell: row => (
         <span className='font-medium'>
           {row.total_sales != null
@@ -565,7 +685,9 @@ function TenantDashboardView({ data }: { data: Record<string, unknown> | null })
       )
     },
     {
-      id: 'customer_balance', header: 'Customer Balance', sortable: true,
+      id: 'customer_balance',
+      header: 'Customer Balance',
+      sortable: true,
       cell: row => (
         <span>
           {row.customer_balance != null
@@ -580,7 +702,6 @@ function TenantDashboardView({ data }: { data: Record<string, unknown> | null })
 
   return (
     <div className='min-h-screen'>
-
       {/* ── Header: title + stat pills ── */}
       <div className='bg-card border-b border-border/20 px-6 py-3 flex items-center justify-between'>
         <div className='flex items-center gap-2'>
@@ -588,9 +709,24 @@ function TenantDashboardView({ data }: { data: Record<string, unknown> | null })
           <h1 className='text-xl font-bold text-card-foreground'>Dashboard</h1>
         </div>
         <div className='flex items-center gap-2'>
-          <StatPill icon={<FileText className='w-3.5 h-3.5' />} label='Total Jobs'    value={totalJobs.toLocaleString()}       color='bg-[#1e3a8a]' />
-          <StatPill icon={<DollarSign className='w-3.5 h-3.5' />} label='Total Sales' value={formatMoney(totalSales)}          color='bg-[#2563eb]' />
-          <StatPill icon={<TrendingUp className='w-3.5 h-3.5' />} label='Profit Margin' value={Number(profitMargin).toFixed(2)} color='bg-[#16a34a]' />
+          <StatPill
+            icon={<FileText className='w-3.5 h-3.5' />}
+            label='Total Jobs'
+            value={totalJobs.toLocaleString()}
+            color='bg-[#1e3a8a]'
+          />
+          <StatPill
+            icon={<DollarSign className='w-3.5 h-3.5' />}
+            label='Total Sales'
+            value={formatMoney(totalSales)}
+            color='bg-[#2563eb]'
+          />
+          <StatPill
+            icon={<TrendingUp className='w-3.5 h-3.5' />}
+            label='Profit Margin'
+            value={Number(profitMargin).toFixed(2)}
+            color='bg-[#16a34a]'
+          />
         </div>
       </div>
 
@@ -598,8 +734,9 @@ function TenantDashboardView({ data }: { data: Record<string, unknown> | null })
       <div className='bg-card border-b border-border/20 px-4 flex items-center justify-between'>
         <nav className='flex'>
           {TABS.map(tab => {
-            const Icon   = tab.icon
+            const Icon = tab.icon
             const active = activeTab === tab.id
+
             return (
               <button
                 key={tab.id}
@@ -618,23 +755,17 @@ function TenantDashboardView({ data }: { data: Record<string, unknown> | null })
         </nav>
 
         <div className='flex items-center gap-2 py-2'>
-          <LocationDropdown
-            locations={locations}
-            selected={selectedLocation}
-            onChange={setSelectedLocation}
-          />
+          <LocationDropdown locations={locations} selected={selectedLocation} onChange={setSelectedLocation} />
           <DateRangePicker value={dateRange} onChange={setDateRange} />
         </div>
       </div>
 
       {/* ── Tab panels ── */}
       <div className='p-4 space-y-4'>
-
         {/* ── My Sales ── */}
         {activeTab === 'my-sales' && (
           <>
             <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
-
               {/* Sales line chart */}
               <div className='lg:col-span-2 bg-card rounded-xl border border-border/20 p-4'>
                 <div className='flex items-center gap-2 mb-2 text-xs text-muted-foreground'>
@@ -646,12 +777,30 @@ function TenantDashboardView({ data }: { data: Record<string, unknown> | null })
                     <ResponsiveContainer width='100%' height='100%'>
                       <LineChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
                         <CartesianGrid strokeDasharray='3 3' stroke='#3b3637' />
-                        <XAxis dataKey='label' axisLine={false} tickLine={false} tick={{ fill: '#808080', fontSize: 11 }} dy={6} />
-                        <YAxis tickFormatter={formatYAxis} axisLine={false} tickLine={false} tick={{ fill: '#808080', fontSize: 11 }} width={52} />
-                        <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                        <XAxis
+                          dataKey='label'
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: '#808080', fontSize: 11 }}
+                          dy={6}
+                        />
+                        <YAxis
+                          tickFormatter={formatYAxis}
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: '#808080', fontSize: 11 }}
+                          width={52}
+                        />
+                        <Tooltip
+                          content={<ChartTooltip />}
+                          cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
+                        />
                         <Line
-                          type='linear' dataKey='amount' name='Total Sales'
-                          stroke='#3b82f6' strokeWidth={2}
+                          type='linear'
+                          dataKey='amount'
+                          name='Total Sales'
+                          stroke='#3b82f6'
+                          strokeWidth={2}
                           dot={{ r: 4, fill: '#3b82f6', stroke: '#3b82f6' }}
                           activeDot={{ r: 5, fill: '#3b82f6', stroke: '#ffffff', strokeWidth: 2 }}
                         />
@@ -665,8 +814,18 @@ function TenantDashboardView({ data }: { data: Record<string, unknown> | null })
 
               {/* Stats sidebar */}
               <div className='bg-card rounded-xl border border-border/20 p-4 space-y-4 text-sm'>
-                <SidebarStat label='My Quotes'     count={myQuotes.count}     percentage={myQuotes.percentage}     barColor='bg-gray-700' />
-                <SidebarStat label='My Jobs'       count={myJobs.count}       percentage={myJobs.percentage}       barColor='bg-teal-600' />
+                <SidebarStat
+                  label='My Quotes'
+                  count={myQuotes.count}
+                  percentage={myQuotes.percentage}
+                  barColor='bg-gray-700'
+                />
+                <SidebarStat
+                  label='My Jobs'
+                  count={myJobs.count}
+                  percentage={myJobs.percentage}
+                  barColor='bg-teal-600'
+                />
                 <SidebarStat
                   label='My Total Sales'
                   count={myTotalSales.count}
@@ -702,7 +861,7 @@ function TenantDashboardView({ data }: { data: Record<string, unknown> | null })
               </div>
               <div className='px-4 py-2 border-b border-border/20 flex items-center gap-2'>
                 <ToolbarButton icon={<FileSpreadsheet className='w-3.5 h-3.5 text-green-500' />} label='Excel' />
-                <ToolbarButton icon={<FileText className='w-3.5 h-3.5 text-red-500' />}         label='PDF'   />
+                <ToolbarButton icon={<FileText className='w-3.5 h-3.5 text-red-500' />} label='PDF' />
                 <ToolbarButton icon={<Link2 className='w-3.5 h-3.5' />} />
                 <div className='flex items-center border border-border/40 rounded overflow-hidden'>
                   <input
@@ -719,7 +878,15 @@ function TenantDashboardView({ data }: { data: Record<string, unknown> | null })
               </div>
               <div className='px-2'>
                 <CommonTable
-                  data={{ data: invoices, per_page: invoices.length || 10, total: invoices.length, from: 1, to: invoices.length, current_page: 1, last_page: 1 }}
+                  data={{
+                    data: invoices,
+                    per_page: invoices.length || 10,
+                    total: invoices.length,
+                    from: 1,
+                    to: invoices.length,
+                    current_page: 1,
+                    last_page: 1
+                  }}
                   columns={invoiceColumns}
                   showFilters={false}
                   pagination={false}
@@ -738,19 +905,27 @@ function TenantDashboardView({ data }: { data: Record<string, unknown> | null })
 
         {/* ── Sales Breakdown ── */}
         {activeTab === 'sales-breakdown' && (
-          <TabPlaceholder title='Sales Breakdown' description='Detailed breakdown of sales by category, product, and region will appear here.' />
+          <TabPlaceholder
+            title='Sales Breakdown'
+            description='Detailed breakdown of sales by category, product, and region will appear here.'
+          />
         )}
 
         {/* ── Sales Conversions ── */}
         {activeTab === 'sales-conversions' && (
-          <TabPlaceholder title='Sales Conversions' description='Lead-to-sale conversion rates and funnel analytics will appear here.' />
+          <TabPlaceholder
+            title='Sales Conversions'
+            description='Lead-to-sale conversion rates and funnel analytics will appear here.'
+          />
         )}
 
         {/* ── Sales Team Rankings ── */}
         {activeTab === 'sales-team' && (
-          <TabPlaceholder title='Sales Team Rankings' description='Individual and team performance rankings will appear here.' />
+          <TabPlaceholder
+            title='Sales Team Rankings'
+            description='Individual and team performance rankings will appear here.'
+          />
         )}
-
       </div>
     </div>
   )
@@ -758,7 +933,12 @@ function TenantDashboardView({ data }: { data: Record<string, unknown> | null })
 
 // ─── Tenant Dashboard sub-components ───────────────────────────────────────────
 
-function StatPill({ icon, label, value, color }: {
+function StatPill({
+  icon,
+  label,
+  value,
+  color
+}: {
   icon: React.ReactNode
   label: string
   value: string
@@ -773,7 +953,14 @@ function StatPill({ icon, label, value, color }: {
   )
 }
 
-function SidebarStat({ label, count, amount, percentage, barColor, icon }: {
+function SidebarStat({
+  label,
+  count,
+  amount,
+  percentage,
+  barColor,
+  icon
+}: {
   label: string
   count: number
   amount?: string
@@ -805,11 +992,7 @@ function ToolbarButton({ icon, label }: { icon: React.ReactNode; label?: string 
 }
 
 function EmptyState({ message }: { message: string }) {
-  return (
-    <div className='h-full flex items-center justify-center text-sm text-muted-foreground'>
-      {message}
-    </div>
-  )
+  return <div className='h-full flex items-center justify-center text-sm text-muted-foreground'>{message}</div>
 }
 
 function TabPlaceholder({ title, description }: { title: string; description: string }) {
@@ -830,44 +1013,55 @@ interface MainAppDashboardProps {
 }
 
 function MainAppDashboard({ data, impersonateUser }: MainAppDashboardProps) {
-  const chartData = (
-    (data?.daily_registrations ?? []) as Record<string, unknown>[]
-  ).map(item => ({
-    day:   getDayLabel(item),
+  const chartData = ((data?.daily_registrations ?? []) as Record<string, unknown>[]).map(item => ({
+    day: getDayLabel(item),
     count: getChartValue(item)
   }))
 
-  const companiesData = (
-    (data?.latest_organizations ?? []) as Record<string, unknown>[]
-  ).map((company, index) => ({
-    id:         String(company.id),
-    index:      index + 1,
-    name:       `${company.first_name ?? ''} ${company.last_name ?? ''}`.trim() || String(company.name ?? 'N/A'),
-    phone:      String((company.userable as Record<string, unknown>)?.phone ?? company.phone ?? 'N/A'),
-    company:    String((company.domain as Record<string, unknown>)?.domain ?? company.company ?? 'N/A'),
+  const companiesData = ((data?.latest_organizations ?? []) as Record<string, unknown>[]).map((company, index) => ({
+    id: String(company.id),
+    index: index + 1,
+    name: `${company.first_name ?? ''} ${company.last_name ?? ''}`.trim() || String(company.name ?? 'N/A'),
+    phone: String((company.userable as Record<string, unknown>)?.phone ?? company.phone ?? 'N/A'),
+    company: String((company.domain as Record<string, unknown>)?.domain ?? company.company ?? 'N/A'),
     jobAddress: String((company.userable as Record<string, unknown>)?.address ?? company.address ?? 'N/A'),
-    email:      String(company.email ?? 'N/A'),
-    status:     company.status
+    email: String(company.email ?? 'N/A'),
+    status: company.status
   }))
 
   const companyColumns: Column[] = [
-    { id: 'index',      header: '#',           sortable: false, cell: row => <span className='text-gray'>{row.index}</span> },
-    { id: 'name',       header: 'Name',        sortable: false, cell: row => <span className='font-medium'>{row.name}</span> },
-    { id: 'phone',      header: 'Phone',       sortable: false, cell: row => <span>{row.phone}</span> },
-    { id: 'company',    header: 'Company',     sortable: false, cell: row => <span>{row.company}</span> },
-    { id: 'jobAddress', header: 'Job Address', sortable: false, cell: row => <span className='max-w-xs truncate'>{row.jobAddress}</span> },
-    { id: 'email',      header: 'Email',       sortable: false, cell: row => <span>{row.email}</span> },
+    { id: 'index', header: '#', sortable: false, cell: row => <span className='text-gray'>{row.index}</span> },
+    { id: 'name', header: 'Name', sortable: false, cell: row => <span className='font-medium'>{row.name}</span> },
+    { id: 'phone', header: 'Phone', sortable: false, cell: row => <span>{row.phone}</span> },
+    { id: 'company', header: 'Company', sortable: false, cell: row => <span>{row.company}</span> },
     {
-      id: 'status', header: 'Status', sortable: false,
+      id: 'jobAddress',
+      header: 'Job Address',
+      sortable: false,
+      cell: row => <span className='max-w-xs truncate'>{row.jobAddress}</span>
+    },
+    { id: 'email', header: 'Email', sortable: false, cell: row => <span>{row.email}</span> },
+    {
+      id: 'status',
+      header: 'Status',
+      sortable: false,
       cell: row => <OrganizationStatusSwitch checked={row.status} loading={false} companyId={row.id} />
     },
     {
-      id: 'actions', header: 'Action', sortable: false,
+      id: 'actions',
+      header: 'Action',
+      sortable: false,
       cell: row => (
         <ThreeDotButton
           buttons={[
-            <Button key='impersonate' variant='ghost' size='icon' type='button' className='w-full'
-              onClick={() => impersonateUser(String(row.id))}>
+            <Button
+              key='impersonate'
+              variant='ghost'
+              size='icon'
+              type='button'
+              className='w-full'
+              onClick={() => impersonateUser(String(row.id))}
+            >
               Impersonate
             </Button>
           ]}
@@ -877,25 +1071,29 @@ function MainAppDashboard({ data, impersonateUser }: MainAppDashboardProps) {
   ]
 
   return (
-    <div className='p-6 space-y-6'>
-
+    <div className='space-y-6'>
       {/* Daily registrations chart */}
       <div className='rounded-2xl border border-border/30 bg-card overflow-hidden'>
         <div className='px-6 pt-5 pb-2'>
           <h2 className='text-sm font-semibold text-card-foreground'>Daily Registrations</h2>
-          {chartData.length > 0 && (
-            <p className='text-xs text-muted-foreground mt-0.5'>Last {chartData.length} days</p>
-          )}
+          {chartData.length > 0 && <p className='text-xs text-muted-foreground mt-0.5'>Last {chartData.length} days</p>}
         </div>
         <div className='h-[220px] w-full'>
           {chartData.length > 0 ? (
             <ResponsiveContainer width='100%' height='100%'>
               <LineChart data={chartData} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>
-                <XAxis dataKey='day' axisLine={false} tickLine={false} tick={{ fill: '#808080', fontSize: 11 }} dy={6} />
+                <XAxis
+                  dataKey='day'
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#808080', fontSize: 11 }}
+                  dy={6}
+                />
                 <YAxis hide />
                 <Tooltip
                   content={({ active, payload, label }) => {
                     if (!active || !payload?.length) return null
+
                     return (
                       <div className='rounded-lg border border-border/40 bg-card px-3 py-2 text-xs shadow-lg'>
                         <p className='font-semibold text-card-foreground mb-0.5'>{label}</p>
@@ -906,7 +1104,10 @@ function MainAppDashboard({ data, impersonateUser }: MainAppDashboardProps) {
                   cursor={{ stroke: '#7c7ce0', strokeWidth: 1, strokeDasharray: '4 4' }}
                 />
                 <Line
-                  type='monotone' dataKey='count' stroke='#7c7ce0' strokeWidth={2}
+                  type='monotone'
+                  dataKey='count'
+                  stroke='#7c7ce0'
+                  strokeWidth={2}
                   dot={{ r: 4, fill: '#ffffff', stroke: '#7c7ce0', strokeWidth: 2 }}
                   activeDot={{ r: 5, fill: '#7c7ce0', stroke: '#ffffff', strokeWidth: 2 }}
                 />
@@ -924,21 +1125,25 @@ function MainAppDashboard({ data, impersonateUser }: MainAppDashboardProps) {
           <h2 className='text-sm font-semibold text-card-foreground'>Latest Companies</h2>
           <div className='flex items-center gap-3'>
             <span className='text-xs text-muted-foreground'>{companiesData.length} records</span>
-            <a href='/erp/companies' className='text-xs text-primary hover:text-primary/80 font-medium transition-colors'>
-              View All →
+            <a
+              href='/erp/companies'
+              className='text-xs text-primary hover:text-primary/80 font-medium transition-colors flex items-center gap-1'
+            >
+              View All
+              <ArrowRight size={16} />
             </a>
           </div>
         </div>
         <div className='px-2'>
           <CommonTable
             data={{
-              data:         companiesData,
-              per_page:     companiesData.length || 10,
-              total:        companiesData.length,
-              from:         1,
-              to:           companiesData.length,
+              data: companiesData,
+              per_page: companiesData.length || 10,
+              total: companiesData.length,
+              from: 1,
+              to: companiesData.length,
               current_page: 1,
-              last_page:    1
+              last_page: 1
             }}
             columns={companyColumns}
             showFilters={false}
@@ -948,7 +1153,6 @@ function MainAppDashboard({ data, impersonateUser }: MainAppDashboardProps) {
           />
         </div>
       </div>
-
     </div>
   )
 }
@@ -957,18 +1161,19 @@ function MainAppDashboard({ data, impersonateUser }: MainAppDashboardProps) {
 
 const DashboardIndex = () => {
   const [tenantMode, setTenantMode] = useState<boolean | null>(null)
-  const [data,       setData]       = useState<Record<string, unknown> | null>(null)
-  const [loading,    setLoading]    = useState(true)
-  const [error,      setError]      = useState<string | null>(null)
+  const [data, setData] = useState<Record<string, unknown> | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     // Determine tenant context and fetch dashboard data in parallel
     isTenant().then(t => setTenantMode(t))
 
     DashboardService.get()
-      .then(res  => setData(res?.data ?? res))
+      .then(res => setData(res?.data ?? res))
       .catch(err => {
         const msg = String(err?.message ?? '')
+
         // Auth errors are handled globally by the interceptor (redirect to login)
         if (!msg.toLowerCase().includes('authentication')) {
           setError(msg || 'Failed to load dashboard')
@@ -979,18 +1184,21 @@ const DashboardIndex = () => {
 
   const impersonateUser = useCallback(async (userId: string) => {
     try {
-      const response  = await AuthService.impersonate(userId)
-      const authData  = {
-        access_token:  response?.data.access_token,
+      const response = await AuthService.impersonate(userId)
+
+      const authData = {
+        access_token: response?.data.access_token,
         refresh_token: response?.data.refresh_token,
-        token_type:    response?.data.token_type,
-        expires_in:    response?.data.expires_in,
-        user:          response?.data?.user,
-        roles:         response?.data?.roles       ?? [],
-        permissions:   response?.data?.permissions ?? []
+        token_type: response?.data.token_type,
+        expires_in: response?.data.expires_in,
+        user: response?.data?.user,
+        roles: response?.data?.roles ?? [],
+        permissions: response?.data?.permissions ?? []
       }
-      const encrypted   = encryptData(authData)
+
+      const encrypted = encryptData(authData)
       const redirectUrl = `${appUrl(response.data.domain ?? '')}/erp/redirecting?data=${encodeURIComponent(encrypted)}`
+
       window.location.href = redirectUrl
     } catch (err: unknown) {
       toast.error((err as { message?: string })?.message ?? 'Failed to impersonate user')
