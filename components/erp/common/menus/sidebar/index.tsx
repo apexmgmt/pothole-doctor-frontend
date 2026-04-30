@@ -501,7 +501,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
   return (
     <>
       <div
-        className={`fixed w-screen h-screen bg-black/50 z-40 hidden max-md:block transition duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+        className={`fixed w-screen h-screen bg-black/50 hidden max-md:block transition duration-300 backdrop-blur-xs ${isOpen ? 'z-40 opacity-100' : '-z-40 opacity-0'}`}
         onClick={sidebarToggle}
       />
       <aside

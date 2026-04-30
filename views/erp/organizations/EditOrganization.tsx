@@ -85,13 +85,13 @@ const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails })
       <Form {...form}>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className='bg-bg-2 rounded-lg border border-border p-6 w-full max-w-3xl space-y-6 relative'
+          className='bg-bg-2 rounded-lg border border-border p-6 w-full max-w-3xl space-y-6 relative mx-auto'
         >
           {isLoading && <SpinnerCustom />}
 
           <h2 className='text-xl font-semibold text-light'>Edit Company</h2>
 
-          <div className='grid grid-cols-2 gap-6'>
+          <div className='grid grid-cols-1 sm:grid-cols-2! gap-4 lg:gap-6'>
             <FormField
               control={control}
               name='first_name'
@@ -179,7 +179,7 @@ const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails })
               name='address'
               rules={{ required: 'Required' }}
               render={({ field }) => (
-                <FormItem className='col-span-2'>
+                <FormItem className='col-span-1 sm:col-span-2'>
                   <FormLabel>Address</FormLabel>
                   <FormControl>
                     <textarea

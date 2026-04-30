@@ -83,7 +83,7 @@ const CreateOrganization: React.FC = () => {
       <Form {...form}>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className='bg-bg-2 rounded-lg border border-border p-6 w-full max-w-3xl space-y-6 relative'
+          className='bg-bg-2 rounded-lg border border-border p-6 w-full max-w-3xl space-y-6 relative mx-auto'
         >
           {isLoading && <SpinnerCustom />}
 

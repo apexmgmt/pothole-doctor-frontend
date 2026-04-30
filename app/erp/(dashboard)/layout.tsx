@@ -15,10 +15,9 @@ const Layout = async ({ children }: ReactNode) => {
       <SidebarProvider>
         <section className='flex min-h-screen relative overflow-hidden h-screen'>
           <Sidebar user={user} permissions={permissions} />
-
           <section className='flex-1 w-full md:w-[calc(100%-260px)] flex flex-col '>
             <Header />
-            <main className='flex-1 overflow-y-auto p-6'>{children}</main>
+            <main className='flex-1 overflow-y-auto p-4 md:p-6'>{children}</main>
           </section>
         </section>
       </SidebarProvider>
