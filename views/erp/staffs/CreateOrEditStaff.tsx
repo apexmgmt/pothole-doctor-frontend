@@ -197,7 +197,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
 
           <h2 className='text-xl font-semibold text-light'>{mode === 'create' ? 'Create Staff' : 'Edit Staff'}</h2>
 
-          <div className='grid grid-cols-2 gap-6'>
+          <div className='grid grid-cols-1 sm:grid-cols-2! gap-4 lg:gap-6'>
             <FormField
               control={control}
               name='first_name'
@@ -343,7 +343,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
               name='address'
               rules={{ required: 'Required' }}
               render={({ field }) => (
-                <FormItem className='col-span-2'>
+                <FormItem className='sm:col-span-2'>
                   <FormLabel>
                     Address <span className='text-red-500'>*</span>
                   </FormLabel>
@@ -391,7 +391,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
               control={control}
               name='roles'
               render={({ field }) => (
-                <FormItem className='col-span-2'>
+                <FormItem>
                   <FormLabel>Roles</FormLabel>
                   <FormControl>
                     <div className='space-y-3'>
@@ -437,17 +437,17 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
           {/* Permissions Section */}
           <Accordion type='single' collapsible className='space-y-6'>
             <AccordionItem value='permissions' className='border-none'>
-              <AccordionTrigger className='text-base font-semibold text-light hover:no-underline py-0 pb-4'>
+              <AccordionTrigger className='text-base font-semibold text-light hover:no-underline p-2.5 cursor-pointer bg-primary/10  rounded-lg'>
                 Permissions (Optional)
               </AccordionTrigger>
               <AccordionContent>
-                <div className='space-y-6'>
+                <div className='space-y-6 mt-4'>
                   {modules.map(module => (
                     <div key={module} className='space-y-3'>
                       <h3 className='text-base font-medium text-light capitalize border-b border-border pb-2'>
                         {module}
                       </h3>
-                      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pl-2'>
+                      <div className='grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 gap-4 pl-2'>
                         {permissions[module]
                           .sort((a, b) => a.id - b.id)
                           .map(permission => (
