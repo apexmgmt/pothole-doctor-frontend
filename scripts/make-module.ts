@@ -18,7 +18,7 @@ const { lower, pascal, snake, kebab, constant, lowerPlural, pascalPlural, snakeP
 // Paths
 const paths = {
   page: `app/${kebabPlural}/page.tsx`,
-  view: `views/${kebabPlural}/${pascalPlural}.tsx`,
+  view: `views/${pascalPlural}/index.tsx`,
   constFile: `constants/api/${snakePlural}_api.ts`,
   constIndex: `constants/api/index.ts`,
   typeFile: `types/${snakePlural}.d.ts`,
