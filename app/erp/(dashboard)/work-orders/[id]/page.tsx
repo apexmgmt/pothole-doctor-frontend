@@ -14,6 +14,7 @@ import {
   BusinessLocation,
   Client,
   EstimateType,
+  Partner,
   PaymentTerm,
   ProductCategory,
   ServiceType,
@@ -23,6 +24,7 @@ import {
   WorkOrder
 } from '@/types'
 import EditWorkOrderServicesView from '@/views/erp/work-orders/EditWorkOrderServicesView'
+import PartnerService from '@/services/api/partners/partners.service'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,7 +42,8 @@ const WorkOrderServicesPage = async ({ params }: { params: Promise<{ id: string 
     unitsRes,
     productCategoriesRes,
     uomUnitsRes,
-    vendorsRes
+    vendorsRes,
+    partnersRes
   ] = await Promise.allSettled([
     WorkOrderService.show(id),
     EstimateTypeService.getAll(),
@@ -52,7 +55,8 @@ const WorkOrderServicesPage = async ({ params }: { params: Promise<{ id: string 
     UnitService.getAll(),
     ProductCategoryService.getAll(),
     UnitService.getAll('uom'),
-    VendorService.getAll()
+    VendorService.getAll(),
+    PartnerService.getAll()
   ])
 
   if (workOrderRes.status === 'rejected') {
@@ -83,6 +87,7 @@ const WorkOrderServicesPage = async ({ params }: { params: Promise<{ id: string 
 
   const uomUnits: Unit[] = uomUnitsRes.status === 'fulfilled' ? uomUnitsRes.value.data || [] : []
   const vendors: Vendor[] = vendorsRes.status === 'fulfilled' ? vendorsRes.value.data || [] : []
+  const partners: Partner[] = partnersRes.status === 'fulfilled' ? partnersRes.value.data || [] : []
 
   return (
     <EditWorkOrderServicesView
@@ -97,6 +102,7 @@ const WorkOrderServicesPage = async ({ params }: { params: Promise<{ id: string 
       staffs={staffs}
       paymentTerms={paymentTerms}
       businessLocations={businessLocations}
+      partners={partners}
     />
   )
 }

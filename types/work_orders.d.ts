@@ -106,6 +106,8 @@ export interface WorkOrderServicePayload {
 export interface ServicePayload {
   service_type_id: string
   group_id: string | null
+  contractor_id?: string | null
+  contractor_notes?: string | null
   items: WorkOrderServiceItemPayload[]
 }
 
