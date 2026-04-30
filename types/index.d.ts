@@ -53,4 +53,5 @@ export * from './completion_certificates'
 export * from './couriers'
 export * from './products/purchase_orders'
 
-export * from './products/material_jobs';
+export * from './products/material_jobs'
+export * from './schedules'
