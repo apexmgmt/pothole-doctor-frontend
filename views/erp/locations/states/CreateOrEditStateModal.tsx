@@ -175,7 +175,9 @@ const CreateOrEditStateModal = ({
             name='country_id'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Country</FormLabel>
+                <FormLabel>
+                  Country <span className='text-red-600'>*</span>
+                </FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                   <FormControl>
                     <SelectTrigger className='w-full'>
@@ -203,7 +205,9 @@ const CreateOrEditStateModal = ({
             name='name'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>State Name</FormLabel>
+                <FormLabel>
+                  State Name <span className='text-red-600'>*</span>
+                </FormLabel>
                 <FormControl>
                   <Input placeholder='Enter state name' {...field} />
                 </FormControl>

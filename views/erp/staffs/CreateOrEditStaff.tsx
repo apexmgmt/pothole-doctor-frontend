@@ -391,7 +391,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
               control={control}
               name='roles'
               render={({ field }) => (
-                <FormItem>
+                <FormItem className='sm:col-span-2'>
                   <FormLabel>Roles</FormLabel>
                   <FormControl>
                     <div className='space-y-3'>
