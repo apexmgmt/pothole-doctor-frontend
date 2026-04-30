@@ -7,6 +7,7 @@ import { NavigationSubItem, ExpandedSections } from '@/types'
 
 import { ArrowDownIcon, ArrowUpIcon } from '@/public/icons'
 import TreeConnector from './TreeConnector'
+import { useSidebar } from '../sidebarContext'
 
 const MenuItem: React.FC<{
   item: NavigationSubItem
@@ -22,6 +23,14 @@ const MenuItem: React.FC<{
       ...prev,
       [section]: !prev[section]
     }))
+  }
+
+  const { sidebarToggle } = useSidebar()
+
+  const handleClick = () => {
+    if (window.innerWidth < 768) {
+      sidebarToggle()
+    }
   }
 
   // path helpers
@@ -91,6 +100,7 @@ const MenuItem: React.FC<{
     <Link
       key={item.id}
       href={item.href}
+      onClick={handleClick}
       className={`relative flex items-center gap-3 px-3 py-1 rounded-lg transition-colors ${
         isActive ? 'bg-accent text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
       }`}
