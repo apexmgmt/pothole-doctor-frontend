@@ -133,7 +133,13 @@ export default class PartnerService {
     }
   }
 
-  /** Restore Partner API */
+  /**
+   * Restore Partner API - This is used to restore a deleted partner. It sends a POST request to the restore endpoint of the API.
+   * @name restore
+   * @method POST
+   * @param {string} partnerId - The ID of the partner to be restored
+   * @returns {Promise} - The response from the API after restoring the partner
+   */
   static restore = async (partnerId: string) => {
     try {
       const isTenantApi = await isTenant()
