@@ -326,14 +326,14 @@ const Organizations: React.FC = () => {
 
   // Custom filters component
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <div className='flex items-center gap-2'>
+    <div className='flex items-center justify-between w-full gap-2.5'>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80! '>
         <InputGroup>
           <InputGroupInput
             placeholder='Search...'
             value={searchValue}
             onChange={e => setSearchValue(e.target.value)}
-            className='w-80'
+            className='lg:w-80 min-w-0'
           />
           <InputGroupAddon>
             <Search />
@@ -349,7 +349,7 @@ const Organizations: React.FC = () => {
         <Link href='/erp/companies/create'>
           <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
             <PlusIcon className='w-4 h-4' />
-            Add Company
+            <span className='hidden min-[480px]:block'>Add Company</span>
           </Button>
         </Link>
       )}

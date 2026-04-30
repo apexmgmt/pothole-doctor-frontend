@@ -151,7 +151,9 @@ const CreateOrEditCountryModal = ({
             name='name'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Country Name</FormLabel>
+                <FormLabel>
+                  Country Name<span className='text-red-500'>*</span>
+                </FormLabel>
                 <FormControl>
                   <Input placeholder='Enter country name' {...field} />
                 </FormControl>
@@ -166,7 +168,9 @@ const CreateOrEditCountryModal = ({
             name='code'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Country Code</FormLabel>
+                <FormLabel>
+                  Country Code <span className='text-red-500'>*</span>
+                </FormLabel>
                 <FormControl>
                   <Input
                     placeholder='Enter country code (e.g., US, UK)'
