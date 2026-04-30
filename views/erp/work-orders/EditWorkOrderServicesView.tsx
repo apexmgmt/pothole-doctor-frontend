@@ -20,7 +20,8 @@ import {
   Client,
   Staff,
   PaymentTerm,
-  BusinessLocation
+  BusinessLocation,
+  Partner
 } from '@/types'
 import WorkOrderService from '@/services/api/work-orders/work_orders.service'
 import EditWorkOrderModal from './EditWorkOrderModal'
@@ -42,7 +43,8 @@ const EditWorkOrderServicesView = ({
   clients = [],
   staffs = [],
   paymentTerms = [],
-  businessLocations = []
+  businessLocations = [],
+  partners = []
 }: {
   workOrder: WorkOrder
   serviceTypes: ServiceType[]
@@ -55,6 +57,7 @@ const EditWorkOrderServicesView = ({
   staffs?: Staff[]
   paymentTerms?: PaymentTerm[]
   businessLocations?: BusinessLocation[]
+  partners?: Partner[]
 }) => {
   const router = useRouter()
 
@@ -71,7 +74,14 @@ const EditWorkOrderServicesView = ({
   const [selectedServiceType, setSelectedServiceType] = useState<{ id: string; name: string }[]>([])
 
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
-    { serviceTypeName: string; serviceTypeId: string; groupId: string | null; lines: ProposalServiceItemPayload[] }[]
+    {
+      serviceTypeName: string
+      serviceTypeId: string
+      groupId: string | null
+      contractorId: string | null
+      contractorNotes: string | null
+      lines: ProposalServiceItemPayload[]
+    }[]
   >([])
 
   const customMessageRef = useRef<HTMLTextAreaElement>(null)
@@ -134,6 +144,8 @@ const EditWorkOrderServicesView = ({
           serviceTypeName: service.service_type?.name || '',
           serviceTypeId: service.service_type_id,
           groupId: service.id,
+          contractorId: service.contractor_id ?? null,
+          contractorNotes: service.contractor_notes ?? null,
           lines: (service.items || []).map(item => ({
             item_id: item.id,
             product_id: item.product_id,
@@ -173,7 +185,7 @@ const EditWorkOrderServicesView = ({
       setSelectedServiceType(prev => [...prev, { id: found.id, name: found.name }])
       setServiceTypeLineItems(prev => [
         ...prev,
-        { serviceTypeName: found.name, serviceTypeId: found.id, groupId: null, lines: [] }
+        { serviceTypeName: found.name, serviceTypeId: found.id, groupId: null, contractorId: null, contractorNotes: null, lines: [] }
       ])
     }
 
@@ -183,6 +195,16 @@ const EditWorkOrderServicesView = ({
   const handleRemoveServiceType = (index: number) => {
     setSelectedServiceType(prev => prev.filter((_, i) => i !== index))
     setServiceTypeLineItems(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleContractorChange = (index: number, contractorId: string | null, contractorNotes: string | null) => {
+    setServiceTypeLineItems(prev => {
+      const copy = [...prev]
+
+      copy[index] = { ...copy[index], contractorId, contractorNotes }
+
+      return copy
+    })
   }
 
   const buildPayload = (): WorkOrderServicePayload => ({
@@ -195,6 +217,8 @@ const EditWorkOrderServicesView = ({
     services: serviceTypeLineItems.map((st, index) => ({
       service_type_id: selectedServiceType[index]?.id || st.serviceTypeId,
       group_id: st.groupId ?? null,
+      contractor_id: st.contractorId ?? null,
+      contractor_notes: st.contractorNotes ?? null,
       items: st.lines.map(line => ({
         item_id: line.item_id ?? null,
         product_id: line.product_id,
@@ -309,7 +333,7 @@ const EditWorkOrderServicesView = ({
       </div>
 
       {/* Detail Cards */}
-      <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-4'>
+      <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 gap-4'>
         <ClientDetailsCard estimateDetails={currentWorkOrder as any} />
         <AssignUserCard
           workOrder={currentWorkOrder}
@@ -360,6 +384,8 @@ const EditWorkOrderServicesView = ({
                   serviceTypeName: item.name,
                   serviceTypeId: item.id,
                   groupId: serviceTypeLineItems[idx]?.groupId ?? null,
+                  contractorId: serviceTypeLineItems[idx]?.contractorId ?? null,
+                  contractorNotes: serviceTypeLineItems[idx]?.contractorNotes ?? null,
                   lines
                 }
 
@@ -375,6 +401,11 @@ const EditWorkOrderServicesView = ({
             showVendor={true}
             showPurchaseQty={true}
             allowedLineTypes={['product', 'labor', 'expense']}
+            showContractorOptions={true}
+            contractors={partners}
+            contractorId={serviceTypeLineItems[idx]?.contractorId ?? null}
+            contractorNotes={serviceTypeLineItems[idx]?.contractorNotes ?? null}
+            onContractorChange={(contractorId, contractorNotes) => handleContractorChange(idx, contractorId, contractorNotes)}
           />
         ))}
       </div>
