@@ -81,8 +81,8 @@ const Profile: React.FC<ProfileProps> = ({ userData: propUser }) => {
       <ProfileHeader userData={userData} />
 
       {/* Tabs Box - Single container for tabs, sidebar, and content */}
-      <div className='bg-border/40 rounded-lg border border-border/40 p-6'>
-        <div className='flex gap-5'>
+      <div className='bg-border/40 rounded-lg border border-border/40  px-4 py-5 md:p-6'>
+        <div className='flex gap-5 flex-col lg:flex-row'>
           {/* Sidebar Navigation */}
           <ProfileTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
