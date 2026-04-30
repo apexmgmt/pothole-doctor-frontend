@@ -3,7 +3,7 @@ import { Settings2Icon, XIcon } from 'lucide-react'
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { LaborCost, Product, ProductCategory, ProposalServiceItemPayload, ServiceType, Unit, Vendor } from '@/types'
+import { LaborCost, Partner, Product, ProductCategory, ProposalServiceItemPayload, ServiceType, Unit, Vendor } from '@/types'
 import LaborCostsModal from '@/views/erp/labor-costs/LaborCostsModal'
 import ProductsModal from '@/views/erp/products/ProductsModal'
 import NonInventoryProductsModal from '@/views/erp/products/NonInventoryProductsModal'
@@ -34,7 +34,9 @@ const ServiceTypeSection = ({
   hidePriceColumns = false,
   showVendor = false,
   showPurchaseQty = false,
-  allowedLineTypes
+  allowedLineTypes,
+  showContractorOptions = false,
+  contractors = []
 }: {
   mode: 'create' | 'edit' | 'view'
   serviceTypeId: string
@@ -53,6 +55,8 @@ const ServiceTypeSection = ({
   showVendor?: boolean
   showPurchaseQty?: boolean
   allowedLineTypes?: ProposalServiceItemPayload['type'][]
+  showContractorOptions?: boolean
+  contractors?: Partner[]
 }) => {
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
   const [openProductsModal, setOpenProductsModal] = useState(false)

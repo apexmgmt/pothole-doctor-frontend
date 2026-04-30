@@ -20,7 +20,8 @@ import {
   Client,
   Staff,
   PaymentTerm,
-  BusinessLocation
+  BusinessLocation,
+  Partner
 } from '@/types'
 import WorkOrderService from '@/services/api/work-orders/work_orders.service'
 import EditWorkOrderModal from './EditWorkOrderModal'
@@ -42,7 +43,8 @@ const EditWorkOrderServicesView = ({
   clients = [],
   staffs = [],
   paymentTerms = [],
-  businessLocations = []
+  businessLocations = [],
+  partners = []
 }: {
   workOrder: WorkOrder
   serviceTypes: ServiceType[]
@@ -55,6 +57,7 @@ const EditWorkOrderServicesView = ({
   staffs?: Staff[]
   paymentTerms?: PaymentTerm[]
   businessLocations?: BusinessLocation[]
+  partners?: Partner[]
 }) => {
   const router = useRouter()
 
@@ -309,7 +312,7 @@ const EditWorkOrderServicesView = ({
       </div>
 
       {/* Detail Cards */}
-      <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-4'>
+      <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 gap-4'>
         <ClientDetailsCard estimateDetails={currentWorkOrder as any} />
         <AssignUserCard
           workOrder={currentWorkOrder}
@@ -375,6 +378,8 @@ const EditWorkOrderServicesView = ({
             showVendor={true}
             showPurchaseQty={true}
             allowedLineTypes={['product', 'labor', 'expense']}
+            showContractorOptions={true}
+            contractors={partners}
           />
         ))}
       </div>
