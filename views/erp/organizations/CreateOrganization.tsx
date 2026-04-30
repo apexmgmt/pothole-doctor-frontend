@@ -89,14 +89,16 @@ const CreateOrganization: React.FC = () => {
 
           <h2 className='text-xl font-semibold text-light'>Create Company</h2>
 
-          <div className='grid grid-cols-2 gap-6'>
+          <div className='grid grid-cols-1 sm:grid-cols-2! gap-4 lg:gap-6'>
             <FormField
               control={control}
               name='first_name'
               rules={{ required: 'Required' }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>First Name</FormLabel>
+                  <FormLabel>
+                    First Name<span className='text-red-400'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder='First name'
@@ -115,7 +117,9 @@ const CreateOrganization: React.FC = () => {
               rules={{ required: 'Required' }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Last Name</FormLabel>
+                  <FormLabel>
+                    Last Name<span className='text-red-400'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder='Last name'
@@ -140,7 +144,10 @@ const CreateOrganization: React.FC = () => {
               }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>
+                    Email
+                    <span className='text-red-400'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type='email'
@@ -184,8 +191,11 @@ const CreateOrganization: React.FC = () => {
                 }
               }}
               render={({ field }) => (
-                <FormItem className='col-span-2'>
-                  <FormLabel>Subdomain</FormLabel>
+                <FormItem className='sm:col-span-2'>
+                  <FormLabel>
+                    Subdomain
+                    <span className='text-red-400'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder='e.g. acme'
@@ -219,7 +229,10 @@ const CreateOrganization: React.FC = () => {
               rules={{ required: 'Required' }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>
+                    Password
+                    <span className='text-red-400'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type='password'
@@ -242,7 +255,10 @@ const CreateOrganization: React.FC = () => {
               }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
+                  <FormLabel>
+                    Confirm Password
+                    <span className='text-red-400'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type='password'
@@ -261,8 +277,11 @@ const CreateOrganization: React.FC = () => {
               name='address'
               rules={{ required: 'Required' }}
               render={({ field }) => (
-                <FormItem className='col-span-2'>
-                  <FormLabel>Address</FormLabel>
+                <FormItem className='sm:col-span-2'>
+                  <FormLabel>
+                    Address
+                    <span className='text-red-400'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <textarea
                       rows={3}
