@@ -10,24 +10,24 @@ export const hasAnyPermission = (userPermissions: string[], requiredPermissions?
 }
 
 /**
- * Filter menu items based on user permissions
- * If a parent has no permissions but children do, show parent if any child is visible
+ * Recursively filters menu items based on user permissions.
+ * 
+ * @param items - An array of NavigationItem objects representing the menu structure.
+ * @param userPermissions - An array of strings representing the current user's assigned permissions.
+ * @returns A filtered array of NavigationItem objects.
  */
 export const filterMenuByPermissions = (items: NavigationItem[], userPermissions: string[]): NavigationItem[] => {
   return items
     .map(item => {
-      // Filter subItems recursively
+      // FIX: Recursively filter children first if they exist
       const filteredSubItems = item.subItems
-        ? item.subItems.filter(subItem => hasAnyPermission(userPermissions, subItem.permissions))
+        ? filterMenuByPermissions(item.subItems as NavigationItem[], userPermissions)
         : undefined
 
-      // Item is visible if:
-      // 1. User has required permissions, OR
-      // 2. Item has no permission requirement, OR
-      // 3. Item has visible children
       const hasPermission = hasAnyPermission(userPermissions, item.permissions)
       const hasVisibleChildren = filteredSubItems && filteredSubItems.length > 0
 
+      // If the user has no direct permission AND no children are visible, hide this item
       if (!hasPermission && !hasVisibleChildren) return null
 
       return {

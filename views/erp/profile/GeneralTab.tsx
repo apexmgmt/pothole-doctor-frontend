@@ -35,28 +35,28 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ userData }) => {
       <div>
         {/* Left Column */}
         <div className='space-y-5'>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-            <div>
-              <label className='text-xs text-gray uppercase block mb-2'>First Name</label>
+          <div className='grid grid-cols-1 2xl:grid-cols-2 gap-6'>
+            <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
+              <label className='text-xs text-gray uppercase block w-25'>First Name : </label>
               <p className='text-light'>{currentUser?.first_name || ''}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase block mb-2'>Last Name</label>
+            <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
+              <label className='text-xs text-gray uppercase block w-25'>Last Name : </label>
               <p className='text-light'>{currentUser?.last_name || ''}</p>
             </div>
           </div>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-            <div>
-              <label className='text-xs text-gray uppercase block mb-2'>Email</label>
-              <p className='text-light'>{currentUser?.email || ' - '}</p>
+          <div className='grid grid-cols-1 2xl:grid-cols-2 gap-6'>
+            <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
+              <label className='text-xs text-gray uppercase block w-25'>Email : </label>
+              <p className='text-light break-all'>{currentUser?.email || ' - '}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase block mb-2'>Phone</label>
+            <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
+              <label className='text-xs text-gray uppercase block w-25'>Phone : </label>
               <p className='text-light'>{currentUser?.userable?.phone || ' - '}</p>
             </div>
           </div>
-          <div>
-            <label className='text-xs text-gray uppercase block mb-2'>Address</label>
+          <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
+            <label className='text-xs text-gray uppercase block w-25'>Address : </label>
             <p className='text-light'>{currentUser?.userable?.address || ' - '}</p>
           </div>
         </div>

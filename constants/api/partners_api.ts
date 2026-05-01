@@ -15,6 +15,7 @@
  */
 export const PARTNERS: string = '/v1/partners/'
 export const PARTNERS_TENANT: string = '/v1/tenant/partners/'
+export const PARTNERS_ALL_TENANT: string = '/v1/tenant/get-partners/'
 
 /**
  * API endpoint for partner documents

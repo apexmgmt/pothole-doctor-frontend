@@ -26,6 +26,7 @@ import { SettingsIcon, HomeIcon, EstimateIcon } from '@/public/icons'
 import SidebarFooter from './SidebarFooter'
 import MenuItem from './menu-item'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useSidebar } from './sidebarContext'
 
 const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user, permissions }) => {
   const allNavigationItems: NavigationItem[] = [
@@ -111,9 +112,47 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           hasSubItems: false,
           exactMatch: true,
           permissions: ['Manage Task']
+        },
+        {
+          id: 'task-timeline',
+          label: 'Timeline',
+          href: '/erp/tasks/timeline',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Task']
         }
       ],
       permissions: ['Manage Task']
+    },
+    {
+      id: 'schedules-menu',
+      label: 'Schedules',
+      icon: <CalendarCheck className='h-4 w-4' />,
+      href: '/erp/schedules',
+      hasSubItems: true,
+      subItems: [
+        {
+          id: 'schedules-calendar',
+          label: 'Schedules Calendar',
+          href: '/erp/schedules/calendar',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Schedule']
+        },
+        {
+          id: 'schedules-list',
+          label: 'Schedules List',
+          href: '/erp/schedules',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Schedule']
+        }
+      ],
+      exactMatch: false,
+      permissions: ['Manage Schedule']
     },
     {
       id: 'estimates',
@@ -202,7 +241,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           hasSubItems: false,
           exactMatch: true,
           permissions: ['Manage Category']
-        },
+        }
       ],
       exactMatch: false,
       permissions: ['Manage Category', 'Manage Product', 'Manage Work Order']
@@ -240,7 +279,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           hasSubItems: false,
           exactMatch: true,
           permissions: ['Manage Work Order']
-        },
+        }
       ],
       exactMatch: false,
       permissions: ['Manage Product', 'Manage Work Order']
@@ -470,7 +509,6 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           exactMatch: false,
           permissions: ['Manage Courier']
         }
-
       ],
       exactMatch: false,
       permissions: [
@@ -495,28 +533,38 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
 
   // Filter menu items based on user permissions
   const navigationItems = useMemo(() => filterMenuByPermissions(allNavigationItems, permissions), [permissions])
+  const { isOpen } = useSidebar()
+  const { sidebarToggle } = useSidebar()
 
   return (
-    <div className='w-full h-screen bg-bg-2 border-r border-border flex flex-col'>
-      {/* Header/Logo */}
-      <Link href={'/erp'} className='px-4 py-3 border-b border-border'>
-        <Image src='/images/dashboard/logo.webp' alt='logo' width={90} height={37} />
-      </Link>
+    <>
+      <div
+        className={`fixed w-screen h-screen bg-black/50 hidden max-md:block transition duration-300 backdrop-blur-xs ${isOpen ? 'z-40 opacity-100' : '-z-40 opacity-0'}`}
+        onClick={sidebarToggle}
+      />
+      <aside
+        className={`transition-all duration-300 h-screen ${isOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full'} w-[260px] bg-bg-2 border-r border-border flex flex-col max-md:absolute max-md:top-0 max-md:z-50 max-md:h-full`}
+      >
+        {/* Header/Logo */}
+        <Link href={'/erp'} className='px-4 py-3 border-b border-border'>
+          <Image src='/images/dashboard/logo.webp' alt='logo' width={90} height={37} />
+        </Link>
 
-      {/* Main Navigation */}
-      <ScrollArea className='flex-1 p-4'>
-        <ul className='space-y-1'>
-          {navigationItems.map(item => (
-            <li key={item.id}>
-              <MenuItem item={item} />
-            </li>
-          ))}
-        </ul>
-      </ScrollArea>
+        {/* Main Navigation */}
+        <ScrollArea className='flex-1 p-4'>
+          <ul className='space-y-1'>
+            {navigationItems.map(item => (
+              <li key={item.id}>
+                <MenuItem item={item} />
+              </li>
+            ))}
+          </ul>
+        </ScrollArea>
 
-      {/* Bottom Section */}
-      <SidebarFooter user={user} />
-    </div>
+        {/* Bottom Section */}
+        <SidebarFooter user={user} />
+      </aside>
+    </>
   )
 }
 

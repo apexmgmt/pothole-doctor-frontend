@@ -109,7 +109,7 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='bg-bg-2 rounded-lg border border-border p-6 w-full max-w-5xl space-y-6'
+          className='bg-bg-2 rounded-lg border border-border p-6 w-full max-w-5xl space-y-6 mx-auto'
         >
           <h2 className='text-xl font-semibold text-light'>{mode === 'create' ? 'Create New Role' : 'Edit Role'}</h2>
 
@@ -144,7 +144,7 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
             {modules.map(module => (
               <div key={module} className='space-y-3'>
                 <h3 className='text-base font-medium text-light capitalize border-b border-border pb-2'>{module}</h3>
-                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pl-2'>
+                <div className='grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 gap-4 pl-2'>
                   {permissions[module]
                     .sort((a, b) => a.id - b.id)
                     .map(permission => (
@@ -154,7 +154,7 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
                         name='permissions'
                         render={({ field }) => {
                           return (
-                            <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
+                            <FormItem className='flex flex-row items-start space-y-0'>
                               <FormControl>
                                 <Checkbox
                                   checked={field.value?.includes(permission.name)}
@@ -180,7 +180,11 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
 
           {/* Submit Buttons */}
           <div className='flex gap-3 pt-4 border-t border-border'>
-            <Button type='submit' disabled={form.formState.isSubmitting || isLoading} className='flex-1 disabled:opacity-50'>
+            <Button
+              type='submit'
+              disabled={form.formState.isSubmitting || isLoading}
+              className='flex-1 disabled:opacity-50'
+            >
               {isLoading ? 'Saving...' : mode === 'create' ? 'Create Role' : 'Update Role'}
             </Button>
             <Button

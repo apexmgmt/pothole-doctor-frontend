@@ -6,6 +6,7 @@
  * @method DELETE - To delete a work order
  */
 export const WORK_ORDERS: string = '/v1/tenant/work-orders/'
+export const WORK_ORDERS_ALL: string = '/v1/tenant/get-work-orders/'
 
 /**
  * This contains the API endpoint to manage services related to a specific work order.

@@ -2,10 +2,12 @@ import PermissionService from '@/services/api/permission.service'
 import RoleService from '@/services/api/role.service'
 import CommissionTypeService from '@/services/api/settings/commission_types.service'
 import StaffService from '@/services/api/staff.service'
+import { isTenant } from '@/utils/utility'
 import CreateOrEditStaff from '@/views/erp/staffs/CreateOrEditStaff'
 
 const StaffEditPage = async ({ params }: { params: { id: string } }) => {
   const { id } = await params
+  const isTenantDomain = await isTenant()
 
   const [permissionsRes, rolesRes, staffDetailsRes, commissionTypesRes] = await Promise.allSettled([
     PermissionService.index(),
@@ -19,7 +21,7 @@ const StaffEditPage = async ({ params }: { params: { id: string } }) => {
   const staffDetails = staffDetailsRes.status === 'fulfilled' ? staffDetailsRes.value.data || null : null
   const commissionTypes = commissionTypesRes.status === 'fulfilled' ? commissionTypesRes.value?.data || [] : []
 
-  return <CreateOrEditStaff mode='edit' permissions={permissions} roles={roles} staffId={id} staffData={staffDetails} commissionTypes={commissionTypes} />
+  return <CreateOrEditStaff mode='edit' permissions={permissions} roles={roles} staffId={id} staffData={staffDetails} commissionTypes={commissionTypes} isTenant={isTenantDomain} />
 }
 
 export default StaffEditPage

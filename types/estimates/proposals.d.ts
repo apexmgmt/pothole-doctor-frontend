@@ -1,4 +1,4 @@
-import { Client, Estimate, LaborCost, MaterialJobAction, Model, Product, ServiceType, User } from '@/types'
+import { Client, Estimate, LaborCost, MaterialJobAction, Model, Partner, Product, ServiceType, User } from '@/types'
 export interface Proposal extends Model {
   proposal_number: number
   estimate_id: string
@@ -63,6 +63,9 @@ export interface ProposalService extends Model {
   profit: number
   items: ProposalServiceItem[]
   service_type?: ServiceType
+  contractor_id?: string // for work order
+  contractor?: Partner // for work order
+  contractor_notes?: string | null // for work order
 }
 
 export interface ProposalServiceItem extends Model {

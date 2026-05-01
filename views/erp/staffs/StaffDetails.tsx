@@ -71,35 +71,35 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
           <AvatarFallback className='text-lg font-semibold'>{initials || 'C'}</AvatarFallback>
         </Avatar>
         <div className='space-y-1'>
-          <h4 className='text-lg font-medium text-light'>{fullName}</h4>
-          <p className='text-gray'>{staffData.email}</p>
+          <h4 className='text-lg/[1] font-medium text-light'>{fullName}</h4>
+          <p className='text-gray text-sm'>{staffData.email}</p>
         </div>
       </div>
 
       {/* Details Grid */}
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
         {/* Personal Information */}
         <div className='space-y-4'>
           <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Personal Information</h5>
           <div className='space-y-3'>
-            <div>
-              <label className='text-xs text-gray uppercase'>First Name</label>
+            <div className='flex items-start gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-25'>First Name :</label>
               <p className='text-light'>{staffData.first_name || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Last Name</label>
+            <div className='flex items-start gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-25'>Last Name :</label>
               <p className='text-light'>{staffData.last_name || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Email</label>
+            <div className='flex items-start gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-25'>Email :</label>
               <p className='text-light'>{staffData.email || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Phone</label>
+            <div className='flex items-start gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-25'>Phone :</label>
               <p className='text-light'>{staffData.userable?.phone || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Address</label>
+            <div className='flex items-start gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-25'>Address :</label>
               <p className='text-light'>{staffData.userable?.address || 'N/A'}</p>
             </div>
           </div>
@@ -109,8 +109,8 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
         <div className='space-y-4'>
           <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Permission Information</h5>
           <div className='space-y-3'>
-            <div>
-              <label className='text-xs text-gray uppercase'>Roles</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-25'>Roles :</label>
               {staffData?.roles && staffData?.roles.length > 0 ? (
                 <div className='flex flex-wrap gap-2 mt-1'>
                   {staffData.roles.map((role: any) => (
@@ -124,8 +124,8 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
               )}
             </div>
             {staffData?.permissions.length > 0 && (
-              <div>
-                <label className='text-xs text-gray uppercase'>Permissions</label>
+              <div className='flex items-start gap-2.5'>
+                <label className='text-xs text-gray uppercase min-w-25'>Permissions :</label>
                 {staffData?.permissions && staffData?.permissions.length > 0 ? (
                   <div className='flex flex-wrap gap-2 mt-1'>
                     {staffData.permissions.map((permission: any) => (
@@ -145,15 +145,15 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
 
       {/* Timestamps */}
       <div className='pt-4 border-t border-border'>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <label className='text-xs text-gray uppercase'>Created At</label>
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+          <div className='flex items-start gap-2.5'>
+            <label className='text-xs text-gray uppercase min-w-25'>Created At :</label>
             <p className='text-light text-sm'>
               {staffData.created_at ? new Date(staffData.created_at).toLocaleString() : 'N/A'}
             </p>
           </div>
-          <div>
-            <label className='text-xs text-gray uppercase'>Updated At</label>
+          <div className='flex items-start gap-2.5'>
+            <label className='text-xs text-gray uppercase min-w-25'>Updated At :</label>
             <p className='text-light text-sm'>
               {staffData.updated_at ? new Date(staffData.updated_at).toLocaleString() : 'N/A'}
             </p>

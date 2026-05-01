@@ -4,6 +4,7 @@ import { ReactNode } from '@/types'
 import { getAuthUser } from '@/utils/auth'
 import { getPermissions } from '@/utils/role-permission'
 import { DashboardClientWrapper } from '@/hocs/DashboardClientWrapper'
+import { SidebarProvider } from '@/components/erp/common/menus/sidebar/sidebarContext'
 
 const Layout = async ({ children }: ReactNode) => {
   const user = await getAuthUser()
@@ -11,15 +12,15 @@ const Layout = async ({ children }: ReactNode) => {
 
   return (
     <DashboardClientWrapper>
-      <section className='flex min-h-screen relative overflow-hidden h-screen'>
-        <aside className='w-[260px]'>
+      <SidebarProvider>
+        <section className='flex min-h-screen relative overflow-hidden h-screen'>
           <Sidebar user={user} permissions={permissions} />
-        </aside>
-        <section className='w-[calc(100%-260px)] flex flex-col'>
-          <Header />
-          <main className='flex-1 overflow-y-auto p-6'>{children}</main>
+          <section className='flex-1 w-full md:w-[calc(100%-260px)] flex flex-col '>
+            <Header />
+            <main className='flex-1 overflow-y-auto p-4 md:p-6'>{children}</main>
+          </section>
         </section>
-      </section>
+      </SidebarProvider>
     </DashboardClientWrapper>
   )
 }
