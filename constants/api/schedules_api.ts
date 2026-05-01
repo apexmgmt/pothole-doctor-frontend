@@ -18,4 +18,4 @@ export const SCHEDULES: string = '/v1/tenant/schedules/'
 /**
  * API endpoint for retrieving all schedules.
  */
-export const SCHEDULES_ALL: string = '/v1/get-schedules/'
+export const SCHEDULES_ALL: string = '/v1/tenant/get-schedules/'

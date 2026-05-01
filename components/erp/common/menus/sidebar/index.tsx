@@ -117,6 +117,35 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       permissions: ['Manage Task']
     },
     {
+      id: 'schedules-menu',
+      label: 'Schedules',
+      icon: <CalendarCheck className='h-4 w-4' />,
+      href: '/erp/schedules',
+      hasSubItems: true,
+      subItems: [
+        {
+          id: 'schedules-calendar',
+          label: 'Schedules Calendar',
+          href: '/erp/schedules/calendar',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Schedule']
+        },
+        {
+          id: 'schedules-list',
+          label: 'Schedules List',
+          href: '/erp/schedules',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Schedule']
+        }
+      ],
+      exactMatch: false,
+      permissions: ['Manage Schedule']
+    },
+    {
       id: 'estimates',
       label: 'Estimates',
       icon: <EstimateIcon className='h-4 w-4' />,
