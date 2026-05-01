@@ -42,7 +42,8 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
   roles,
   commissionTypes = [],
   staffId = null,
-  staffData = null
+  staffData = null,
+  isTenant = false
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -361,30 +362,32 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
             />
 
             {/* Commission Type Field */}
-            <FormField
-              control={control}
-              name='commission_type_id'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Commission Type</FormLabel>
-                  <FormControl>
-                    <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                      <SelectTrigger className='bg-bg-3 border-border text-light w-full'>
-                        <SelectValue placeholder='Select commission type' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {commissionTypes.map(ct => (
-                          <SelectItem key={ct.id} value={ct.id}>
-                            {ct.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {isTenant && (
+              <FormField
+                control={control}
+                name='commission_type_id'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Commission Type</FormLabel>
+                    <FormControl>
+                      <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                        <SelectTrigger className='bg-bg-3 border-border text-light w-full'>
+                          <SelectValue placeholder='Select commission type' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {commissionTypes.map(ct => (
+                            <SelectItem key={ct.id} value={ct.id}>
+                              {ct.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             {/* Roles Field */}
             <FormField
