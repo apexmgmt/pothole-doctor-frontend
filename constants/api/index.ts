@@ -50,3 +50,4 @@ export * from './products/inventories_api'
 
 export * from './products/material_jobs_api'
 export * from './dashboard_api'
+export * from './schedules_api'

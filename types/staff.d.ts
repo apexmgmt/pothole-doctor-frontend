@@ -40,5 +40,6 @@ export interface CreateOrEditStaffProps {
   permissions: PermissionsByModule
   commissionTypes?: CommissionType[]
   staffId?: string
+  isTenant?: boolean
   staffData?: Staff
 }

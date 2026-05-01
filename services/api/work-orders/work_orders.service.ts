@@ -3,6 +3,7 @@ import {
   COMPLETE_WORK_ORDER,
   VIEW_WORK_ORDER,
   WORK_ORDERS,
+  WORK_ORDERS_ALL,
   WORK_ORDERS_RESTORE,
   WORK_ORDERS_SERVICES
 } from '@/constants/api'
@@ -215,6 +216,31 @@ export default class WorkOrderService {
         const errorData = await response.json()
 
         throw new Error(errorData.message || 'Failed to restore work order')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Fetches a list of all work orders without any filters. This method is used for fetching work orders in dropdowns or other UI elements where we need to show all work orders.
+   *
+   * @returns A promise that resolves to the list of all work orders if the request is successful.
+   * @throws An error if the API request fails or returns a non-OK response.
+   */
+  static getAll = async () => {
+    try {
+      const response = await apiInterceptor(API_URL + WORK_ORDERS_ALL, {
+        requiresAuth: true,
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to fetch work orders')
       }
 
       return await response.json()

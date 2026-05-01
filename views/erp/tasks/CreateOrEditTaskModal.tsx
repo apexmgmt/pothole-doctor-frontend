@@ -440,7 +440,7 @@ const CreateOrEditTaskModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create New Task' : 'Edit Task'}
       description={mode === 'create' ? 'Add a new task to the system' : 'Update task information'}
-      maxWidth='4xl'
+      maxWidth='6xl'
       disableClose={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
