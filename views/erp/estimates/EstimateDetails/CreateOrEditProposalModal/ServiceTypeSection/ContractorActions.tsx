@@ -11,17 +11,19 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { Partner } from '@/types'
-import { CheckIcon, ChevronDownIcon, UserIcon, Users, Settings, Trash2 } from 'lucide-react'
+import { CheckIcon, ChevronDownIcon, UserIcon, Users, CalendarIcon } from 'lucide-react'
 import { useState } from 'react'
 
 const ContractorActions = ({
   contractors = [],
   contractorId = null,
-  handleSelectContractor
+  handleSelectContractor,
+  onAddSchedule
 }: {
   contractors: Partner[]
   contractorId?: string | null
   handleSelectContractor: (id: string) => void
+  onAddSchedule?: () => void
 }) => {
   const [open, setOpen] = useState(false)
   const [showContractorList, setShowContractorList] = useState(false)
@@ -46,28 +48,31 @@ const ContractorActions = ({
           {!showContractorList ? (
             <CommandList>
               <CommandGroup heading='Actions'>
+                <CommandItem
+                  onSelect={() => {
+                    setOpen(false)
+                    onAddSchedule?.()
+                  }}
+                >
+                  <CalendarIcon className='mr-2 h-4 w-4' />
+                  <span>Add / View Schedule</span>
+                </CommandItem>
                 <CommandItem onSelect={() => setShowContractorList(true)}>
                   <Users className='mr-2 h-4 w-4' />
                   <span>Select Contractor</span>
                 </CommandItem>
-                {/* <CommandItem onSelect={() => console.log('Edit Settings')}>
-                  <Settings className='mr-2 h-4 w-4' />
-                  <span>Contractor Settings</span>
-                </CommandItem> */}
               </CommandGroup>
             </CommandList>
           ) : (
             <>
               <CommandInput placeholder='Search contractor...' />
               {/* Added max-h and overflow classes here */}
-              <CommandList className="max-h-[250px] overflow-y-auto overflow-x-hidden">
+              <CommandList className='max-h-[250px] overflow-y-auto overflow-x-hidden'>
                 <CommandEmpty>No contractor found.</CommandEmpty>
                 <CommandSeparator />
                 <CommandGroup>
                   {contractors?.map(contractor => {
-                    const name = [contractor.first_name, contractor.last_name]
-                      .filter(Boolean)
-                      .join(' ') || 'Unnamed'
+                    const name = [contractor.first_name, contractor.last_name].filter(Boolean).join(' ') || 'Unnamed'
 
                     return (
                       <CommandItem
@@ -79,10 +84,7 @@ const ContractorActions = ({
                         }}
                       >
                         <CheckIcon
-                          className={cn(
-                            'mr-2 h-4 w-4', 
-                            contractor.id === contractorId ? 'opacity-100' : 'opacity-0'
-                          )}
+                          className={cn('mr-2 h-4 w-4', contractor.id === contractorId ? 'opacity-100' : 'opacity-0')}
                         />
                         {name}
                       </CommandItem>

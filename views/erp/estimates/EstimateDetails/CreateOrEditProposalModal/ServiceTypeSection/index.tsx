@@ -55,7 +55,8 @@ const ServiceTypeSection = ({
   contractors = [],
   contractorId = null,
   contractorNotes = null,
-  onContractorChange
+  onContractorChange,
+  onAddSchedule
 }: {
   mode: 'create' | 'edit' | 'view'
   serviceTypeId: string
@@ -79,6 +80,7 @@ const ServiceTypeSection = ({
   contractorId?: string | null
   contractorNotes?: string | null
   onContractorChange?: (contractorId: string | null, contractorNotes: string | null) => void
+  onAddSchedule?: () => void
 }) => {
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
   const [openProductsModal, setOpenProductsModal] = useState(false)
@@ -291,6 +293,7 @@ const ServiceTypeSection = ({
                             contractors={contractors}
                             contractorId={selectedContractor?.id || null}
                             handleSelectContractor={handleSelectContractor}
+                            onAddSchedule={onAddSchedule}
                           />
                         )}
                       </th>

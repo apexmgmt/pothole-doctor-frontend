@@ -62,6 +62,7 @@ const EditWorkOrderServicesView = ({
   const router = useRouter()
 
   const [isLoading, setIsLoading] = useState(false)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isWorkOrderDetailsOpen, setIsWorkOrderDetailsOpen] = useState(false)
   const [currentWorkOrder, setCurrentWorkOrder] = useState<WorkOrder>(initialWorkOrder)
   const [customCommission, setCustomCommission] = useState<number>(Number(initialWorkOrder?.custom_commissions ?? 0))
@@ -85,6 +86,8 @@ const EditWorkOrderServicesView = ({
   >([])
 
   const customMessageRef = useRef<HTMLTextAreaElement>(null)
+
+  const markDirty = () => setHasUnsavedChanges(true)
 
   const taxRate = currentWorkOrder?.tax_rate ?? 0
 
@@ -185,8 +188,16 @@ const EditWorkOrderServicesView = ({
       setSelectedServiceType(prev => [...prev, { id: found.id, name: found.name }])
       setServiceTypeLineItems(prev => [
         ...prev,
-        { serviceTypeName: found.name, serviceTypeId: found.id, groupId: null, contractorId: null, contractorNotes: null, lines: [] }
+        {
+          serviceTypeName: found.name,
+          serviceTypeId: found.id,
+          groupId: null,
+          contractorId: null,
+          contractorNotes: null,
+          lines: []
+        }
       ])
+      markDirty()
     }
 
     setServiceSelectOpen(false)
@@ -195,6 +206,7 @@ const EditWorkOrderServicesView = ({
   const handleRemoveServiceType = (index: number) => {
     setSelectedServiceType(prev => prev.filter((_, i) => i !== index))
     setServiceTypeLineItems(prev => prev.filter((_, i) => i !== index))
+    markDirty()
   }
 
   const handleContractorChange = (index: number, contractorId: string | null, contractorNotes: string | null) => {
@@ -205,6 +217,7 @@ const EditWorkOrderServicesView = ({
 
       return copy
     })
+    markDirty()
   }
 
   const buildPayload = (): WorkOrderServicePayload => ({
@@ -247,11 +260,11 @@ const EditWorkOrderServicesView = ({
     }))
   })
 
-  const onSubmit = async () => {
+  const saveWorkOrder = async (): Promise<boolean> => {
     if (selectedServiceType.length === 0) {
       toast.error('Please add at least one service type')
 
-      return
+      return false
     }
 
     setIsLoading(true)
@@ -265,13 +278,45 @@ const EditWorkOrderServicesView = ({
         await WorkOrderService.storeServices(currentWorkOrder.id, buildPayload())
       }
 
-      toast.success('Work order services updated successfully')
-      router.push('/erp/work-orders')
+      toast.success('Work order services saved successfully')
+      setHasUnsavedChanges(false)
+
+      return true
     } catch (error: any) {
       toast.error(error?.message || 'Failed to update work order services')
+
+      return false
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const onSubmit = async () => {
+    const success = await saveWorkOrder()
+
+    if (success) router.push('/erp/work-orders')
+  }
+
+  const handleAddSchedule = async (
+    serviceGroupId: string | null,
+    serviceTypeId: string,
+    contractorId: string | null
+  ) => {
+    if (hasUnsavedChanges) {
+      const success = await saveWorkOrder()
+
+      if (!success) return
+    }
+
+    const params = new URLSearchParams()
+
+    params.set('work_order_id', currentWorkOrder.id)
+    if (serviceGroupId) params.set('dialog_service_group_id', serviceGroupId)
+    if (serviceTypeId) params.set('service_type_id', serviceTypeId)
+    if (contractorId) params.set('contractor_id', contractorId)
+    params.set('open_dialog', 'true')
+
+    router.push(`/erp/schedules/calendar?${params.toString()}`)
   }
 
   const clientName = [currentWorkOrder?.client?.first_name, currentWorkOrder?.client?.last_name]
@@ -391,6 +436,7 @@ const EditWorkOrderServicesView = ({
 
                 return copy
               })
+              markDirty()
             }}
             productCategories={productCategories}
             uomUnits={uomUnits}
@@ -405,7 +451,16 @@ const EditWorkOrderServicesView = ({
             contractors={partners}
             contractorId={serviceTypeLineItems[idx]?.contractorId ?? null}
             contractorNotes={serviceTypeLineItems[idx]?.contractorNotes ?? null}
-            onContractorChange={(contractorId, contractorNotes) => handleContractorChange(idx, contractorId, contractorNotes)}
+            onContractorChange={(contractorId, contractorNotes) =>
+              handleContractorChange(idx, contractorId, contractorNotes)
+            }
+            onAddSchedule={() =>
+              handleAddSchedule(
+                serviceTypeLineItems[idx]?.groupId ?? null,
+                item.id,
+                serviceTypeLineItems[idx]?.contractorId ?? null
+              )
+            }
           />
         ))}
       </div>

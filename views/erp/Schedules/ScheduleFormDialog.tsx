@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { format } from 'date-fns/format'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
@@ -80,6 +80,9 @@ interface ScheduleFormDialogProps {
   schedule?: Schedule | null
   defaultDate?: Date
   defaultContractorId?: string
+  defaultWorkOrderId?: string
+  defaultServiceGroupId?: string
+  defaultServiceTypeId?: string
   partners: Partner[]
   workOrders: WorkOrder[]
   onSuccess: () => void
@@ -92,12 +95,18 @@ export default function ScheduleFormDialog({
   schedule,
   defaultDate,
   defaultContractorId,
+  defaultWorkOrderId,
+  defaultServiceGroupId,
+  defaultServiceTypeId,
   partners,
   workOrders,
   onSuccess
 }: ScheduleFormDialogProps) {
   const [isFetchingWO, setIsFetchingWO] = useState(false)
   const [woServices, setWoServices] = useState<ProposalService[]>([])
+
+  // Tracks whether we've already applied the auto-prefilled service group title
+  const didApplyDefaultServiceGroup = useRef(false)
 
   const form = useForm<FormValues>({
     defaultValues: buildDefaults(defaultDate, defaultContractorId)
@@ -113,7 +122,11 @@ export default function ScheduleFormDialog({
 
   // Reset form when dialog opens
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      didApplyDefaultServiceGroup.current = false
+
+      return
+    }
 
     if (mode === 'edit' && schedule) {
       reset({
@@ -140,8 +153,30 @@ export default function ScheduleFormDialog({
       })
       if (schedule.work_order_id) fetchWOServices(schedule.work_order_id)
     } else {
-      reset(buildDefaults(defaultDate, defaultContractorId))
-      setWoServices([])
+      // Build create defaults, optionally pre-filled from URL params
+      const createDefaults = buildDefaults(defaultDate, defaultContractorId)
+
+      if (defaultWorkOrderId) {
+        createDefaults.work_order_id = defaultWorkOrderId
+        const wo = workOrders.find(w => w.id === defaultWorkOrderId)
+
+        if (wo) {
+          createDefaults.salesman_id = wo.assign_id || ''
+          createDefaults.client_id = wo.client_id || ''
+          createDefaults.title = `#${wo.work_order_number} - ${wo.title}`
+        }
+      }
+
+      if (defaultServiceGroupId) createDefaults.service_group_id = defaultServiceGroupId
+      if (defaultServiceTypeId) createDefaults.service_type_id = defaultServiceTypeId
+
+      reset(createDefaults)
+
+      if (defaultWorkOrderId) {
+        fetchWOServices(defaultWorkOrderId)
+      } else {
+        setWoServices([])
+      }
     }
   }, [open, mode, schedule])
 
@@ -159,6 +194,28 @@ export default function ScheduleFormDialog({
       setIsFetchingWO(false)
     }
   }
+
+  // After woServices loads for a pre-filled service group, update the title to include service type name
+  useEffect(() => {
+    if (woServices.length === 0 || didApplyDefaultServiceGroup.current) return
+
+    const svcGroupId = form.getValues('service_group_id')
+
+    if (!svcGroupId) return
+
+    didApplyDefaultServiceGroup.current = true
+
+    const svc = woServices.find(s => s.id === svcGroupId)
+
+    if (!svc) return
+
+    const currentWoId = form.getValues('work_order_id')
+    const wo = workOrders.find(w => w.id === currentWoId)
+    const baseTitle = wo ? `#${wo.work_order_number} - ${wo.title}` : ''
+    const serviceTypeName = svc.service_type?.name ?? ''
+
+    setValue('title', serviceTypeName ? `${baseTitle} - ${serviceTypeName}` : baseTitle)
+  }, [woServices])
 
   const handleWorkOrderChange = async (workOrderId: string, rhfOnChange: (v: string) => void) => {
     rhfOnChange(workOrderId)

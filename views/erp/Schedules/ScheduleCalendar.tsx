@@ -56,6 +56,10 @@ export default function ScheduleCalendar({
 
   const initialFilters = getInitialFilters(searchParams)
 
+  // Special params for auto-opening the form dialog from work order navigation
+  const openDialogOnMount = searchParams.get('open_dialog') === 'true'
+  const defaultDialogServiceGroupId = searchParams.get('dialog_service_group_id') || undefined
+
   const initialDate = initialFilters.starting_date ? new Date(initialFilters.starting_date) : new Date()
 
   const [currentDate, setCurrentDate] = useState<Date>(initialDate)
@@ -67,6 +71,7 @@ export default function ScheduleCalendar({
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create')
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
+  const [isAutoOpenDialog, setIsAutoOpenDialog] = useState(openDialogOnMount)
 
   const [filterOptions, setFilterOptions] = useState<any>(() => {
     if (!initialFilters.starting_date || !initialFilters.ending_date) {
@@ -90,12 +95,21 @@ export default function ScheduleCalendar({
     updateURL(router, filterOptions)
   }, [filterOptions, refreshKey])
 
+  // Auto-open the form dialog when navigated from work order with open_dialog param
+  useEffect(() => {
+    if (openDialogOnMount) {
+      setDialogMode('create')
+      setDialogOpen(true)
+    }
+  }, [])
+
   const handleNavigate = (date: Date) => {
     setCurrentDate(date)
     setFilterOptions((prev: any) => ({ ...prev, ...getMonthBounds(date) }))
   }
 
   const handleSelectSlot = ({ start }: { start: Date }) => {
+    setIsAutoOpenDialog(false)
     setSelectedDate(start)
     setSelectedSchedule(null)
     setDialogMode('create')
@@ -103,6 +117,7 @@ export default function ScheduleCalendar({
   }
 
   const handleSelectEvent = (event: any) => {
+    setIsAutoOpenDialog(false)
     setSelectedSchedule(event.resource as Schedule)
     setSelectedDate(undefined)
     setDialogMode('edit')
@@ -184,6 +199,9 @@ export default function ScheduleCalendar({
         schedule={selectedSchedule}
         defaultDate={selectedDate}
         defaultContractorId={filterOptions.contractor_id}
+        defaultWorkOrderId={isAutoOpenDialog ? filterOptions.work_order_id || undefined : undefined}
+        defaultServiceGroupId={isAutoOpenDialog ? defaultDialogServiceGroupId : undefined}
+        defaultServiceTypeId={isAutoOpenDialog ? filterOptions.service_type_id || undefined : undefined}
         partners={partners}
         workOrders={workOrders}
         onSuccess={() => setRefreshKey(k => k + 1)}
