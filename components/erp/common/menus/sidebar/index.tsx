@@ -112,6 +112,15 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           hasSubItems: false,
           exactMatch: true,
           permissions: ['Manage Task']
+        },
+        {
+          id: 'task-timeline',
+          label: 'Timeline',
+          href: '/erp/tasks/timeline',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Task']
         }
       ],
       permissions: ['Manage Task']
