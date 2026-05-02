@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeftIcon, UserIcon } from 'lucide-react'
 import { toast } from 'sonner'
@@ -65,6 +65,7 @@ const AddInvoiceServicesView = ({
   const [isSendingEmail, setIsSendingEmail] = useState(false)
   const [isInvoiceDetailsOpen, setIsInvoiceDetailsOpen] = useState(false)
   const [currentInvoice, setCurrentInvoice] = useState<Invoice>(initialInvoice)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
   const [selectedServiceType, setSelectedServiceType] = useState<{ id: string; name: string }[]>([])
@@ -75,7 +76,7 @@ const AddInvoiceServicesView = ({
 
   const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>('percentage')
   const [discountValue, setDiscountValue] = useState(0)
-  const customMessageRef = useRef<HTMLTextAreaElement>(null)
+  const [customMessage, setCustomMessage] = useState(initialInvoice?.message || '')
 
   const taxRate = currentInvoice?.tax_rate ?? 0
 
@@ -159,6 +160,8 @@ const AddInvoiceServicesView = ({
         }))
       )
     }
+
+    setHasUnsavedChanges(false)
   }, [])
 
   const handleAddServiceType = (serviceTypeId: string) => {
@@ -173,16 +176,18 @@ const AddInvoiceServicesView = ({
     }
 
     setServiceSelectOpen(false)
+    setHasUnsavedChanges(true)
   }
 
   const handleRemoveServiceType = (index: number) => {
     setSelectedServiceType(prev => prev.filter((_, i) => i !== index))
     setServiceTypeLineItems(prev => prev.filter((_, i) => i !== index))
+    setHasUnsavedChanges(true)
   }
 
   const buildPayload = (): InvoiceServicePayload => ({
     estimate_id: currentInvoice.id,
-    message: customMessageRef.current?.value || '',
+    message: customMessage,
     discount_type: discountType,
     discount: discountValue,
     services: serviceTypeLineItems.map((st, index) => ({
@@ -267,7 +272,28 @@ const AddInvoiceServicesView = ({
 
     setDiscountType(type)
     setDiscountValue(value)
+    setHasUnsavedChanges(true)
     toast.success(`Discount applied: ${type === 'percentage' ? `${value}%` : `$${value.toFixed(2)}`}`)
+  }
+
+  const saveInvoiceServices = async (showSuccessToast = true) => {
+    if (selectedServiceType.length === 0) {
+      return
+    }
+
+    const hasExistingServices = currentInvoice?.services && currentInvoice.services.length > 0
+
+    if (hasExistingServices) {
+      await InvoiceService.updateServices(currentInvoice.id, buildPayload())
+    } else {
+      await InvoiceService.storeServices(currentInvoice.id, buildPayload())
+    }
+
+    setHasUnsavedChanges(false)
+
+    if (showSuccessToast) {
+      toast.success('Invoice services saved successfully')
+    }
   }
 
   const onSubmit = async () => {
@@ -280,16 +306,9 @@ const AddInvoiceServicesView = ({
     setIsLoading(true)
 
     try {
-      const hasExistingServices = currentInvoice?.services && currentInvoice.services.length > 0
+      await saveInvoiceServices()
 
-      if (hasExistingServices) {
-        await InvoiceService.updateServices(currentInvoice.id, buildPayload())
-      } else {
-        await InvoiceService.storeServices(currentInvoice.id, buildPayload())
-      }
-
-      toast.success('Invoice services saved successfully')
-      router.push('/erp/invoices')
+      // router.push('/erp/invoices')
     } catch (error: any) {
       toast.error(error?.message || 'Failed to save invoice services')
     } finally {
@@ -301,6 +320,10 @@ const AddInvoiceServicesView = ({
     setIsMarkingAsSigned(true)
 
     try {
+      if (hasUnsavedChanges) {
+        await saveInvoiceServices(false)
+      }
+
       const response = await InvoiceService.markSigned(currentInvoice.id)
 
       setCurrentInvoice(response.data || { ...currentInvoice, status: 'invoice signed' })
@@ -317,13 +340,7 @@ const AddInvoiceServicesView = ({
 
     try {
       if (selectedServiceType.length > 0) {
-        const hasExistingServices = currentInvoice?.services && currentInvoice.services.length > 0
-
-        if (hasExistingServices) {
-          await InvoiceService.updateServices(currentInvoice.id, buildPayload())
-        } else {
-          await InvoiceService.storeServices(currentInvoice.id, buildPayload())
-        }
+        await saveInvoiceServices(false)
       }
 
       await InvoiceService.sendEmail(currentInvoice.id)
@@ -377,6 +394,11 @@ const AddInvoiceServicesView = ({
             isMarkingAsSigned={isMarkingAsSigned}
             isSendingEmail={isSendingEmail}
             onViewEditDetails={() => setIsInvoiceDetailsOpen(true)}
+            onViewWorkOrder={() => {
+              if (currentInvoice?.work_order_id) {
+                window.open(`/erp/work-orders/${currentInvoice.work_order_id}?mode=view`, '_blank')
+              }
+            }}
             onMarkAsSigned={handleMarkAsSigned}
             onConfirmedEmailSend={handleEmailWithSave}
           />
@@ -445,6 +467,7 @@ const AddInvoiceServicesView = ({
 
                 return copy
               })
+              setHasUnsavedChanges(true)
             }}
             productCategories={productCategories}
             uomUnits={uomUnits}
@@ -464,8 +487,11 @@ const AddInvoiceServicesView = ({
             id='inv-custom-message'
             className='w-full'
             placeholder='Enter a message or notes for this invoice...'
-            ref={customMessageRef}
-            defaultValue={currentInvoice?.message || ''}
+            value={customMessage}
+            onChange={e => {
+              setCustomMessage(e.target.value)
+              setHasUnsavedChanges(true)
+            }}
           />
         </CardContent>
       </Card>
