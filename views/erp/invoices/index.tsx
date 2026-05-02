@@ -383,6 +383,18 @@ const Invoices: React.FC<{
                   >
                     View Original Proposal
                   </Button>
+                ),
+                row?.work_order_id && (
+                  <Button
+                    key='view-work-order'
+                    className='w-full'
+                    variant='ghost'
+                    onClick={() =>
+                      window.open(`/erp/work-orders/${row.work_order_id}?mode=view`, '_blank')
+                    }
+                  >
+                    View Work Order
+                  </Button>
                 )
               ]}
             />

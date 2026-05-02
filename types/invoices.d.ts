@@ -19,6 +19,7 @@ export interface Invoice extends Model {
   estimate_id: string | null
   estimate?: Estimate
   proposal_id: string | null
+  work_order_id?: string | null
   proposal?: Proposal
   invoice_type_id: string
   invoice_type?: EstimateType
