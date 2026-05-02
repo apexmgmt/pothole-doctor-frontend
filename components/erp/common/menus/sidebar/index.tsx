@@ -539,11 +539,11 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
   return (
     <>
       <div
-        className={`fixed w-screen h-screen bg-black/50 hidden max-md:block transition duration-300 backdrop-blur-xs ${isOpen ? 'z-40 opacity-100' : '-z-40 opacity-0'}`}
+        className={`fixed w-screen h-screen bg-black/50 hidden max-xl:block transition duration-300 backdrop-blur-xs ${isOpen ? 'z-40 opacity-100' : '-z-40 opacity-0'}`}
         onClick={sidebarToggle}
       />
       <aside
-        className={`transition-all duration-300 h-screen ${isOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full'} w-[260px] bg-bg-2 border-r border-border flex flex-col max-md:absolute max-md:top-0 max-md:z-50 max-md:h-full`}
+        className={`transition-all duration-300 h-screen ${isOpen ? 'max-xl:translate-x-0' : 'max-xl:-translate-x-full'} w-[260px] bg-bg-2 border-r border-border flex flex-col max-xl:absolute max-xl:top-0 max-xl:z-50 max-xl:h-full`}
       >
         {/* Header/Logo */}
         <Link href={'/erp'} className='px-4 py-3 border-b border-border'>

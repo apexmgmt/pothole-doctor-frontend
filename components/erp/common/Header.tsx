@@ -19,7 +19,7 @@ const Header: React.FC = () => {
         <CustomButton
           variant='ghost'
           onClick={sidebarToggle}
-          className='block md:hidden p-0! rounded-xl cursor-pointer!'
+          className='block xl:hidden p-0! rounded-xl cursor-pointer!'
         >
           <PanelLeftIcon className='h-5 w-5' />
         </CustomButton>
