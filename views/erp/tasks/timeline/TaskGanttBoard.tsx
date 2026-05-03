@@ -6,28 +6,28 @@ import { format, addDays, differenceInDays, startOfDay, parseISO, isValid } from
 import { Client, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import TaskService from '@/services/api/tasks.service'
 import CreateOrEditTaskModal from '@/views/erp/tasks/CreateOrEditTaskModal'
-import KanbanFilter from '@/views/erp/tasks/kanban/KanbanFilter'
 import { toast } from 'sonner'
-import { Badge } from '@/components/ui/badge'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import GanttFilter from '@/views/erp/tasks/timeline/GanttFilter'
+import GanttTaskRow, { GanttTask } from '@/views/erp/tasks/timeline/GanttTaskRow'
+import { Card, CardContent } from '@/components/ui/card'
 
-// ─── Status colours ──────────────────────────────────────────────────────────
-const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  backlog: { bg: 'bg-slate-600', text: 'text-white', border: 'border-slate-500' },
-  'to-do': { bg: 'bg-blue-600', text: 'text-white', border: 'border-blue-500' },
-  overdue: { bg: 'bg-red-600', text: 'text-white', border: 'border-red-500' },
-  'in-progress': { bg: 'bg-yellow-500', text: 'text-white', border: 'border-yellow-400' },
-  completed: { bg: 'bg-emerald-600', text: 'text-white', border: 'border-emerald-500' },
-  cancelled: { bg: 'bg-zinc-600', text: 'text-white', border: 'border-zinc-500' }
+// ─── Status colours (legend only) ───────────────────────────────────────────
+const STATUS_COLORS: Record<string, { bg: string }> = {
+  backlog: { bg: 'bg-slate-600' },
+  'to-do': { bg: 'bg-blue-600' },
+  overdue: { bg: 'bg-red-600' },
+  'in-progress': { bg: 'bg-yellow-500' },
+  completed: { bg: 'bg-emerald-600' },
+  cancelled: { bg: 'bg-zinc-600' }
 }
 
-const statusColor = (status: string) =>
-  STATUS_COLORS[status] ?? { bg: 'bg-zinc-700', text: 'text-white', border: 'border-zinc-600' }
-
 // ─── Day-column width (px) ────────────────────────────────────────────────────
-const DAY_W = 56 // wide enough to show day name + number
-const ROW_H = 52 // task row height
+const DAY_W = 80 // wide enough to show day name + number
+const ROW_H = 72 // task row height
 const HDR_MONTH = 28 // month header height
 const HDR_DAY = 40 // day header height (two lines)
 
@@ -37,11 +37,6 @@ const safeDate = (s?: string | null): Date | null => {
   const d = parseISO(s)
 
   return isValid(d) ? startOfDay(d) : null
-}
-
-interface GanttTask extends Task {
-  startD: Date
-  endD: Date
 }
 
 interface Props {
@@ -67,16 +62,24 @@ export default function TaskGanttBoard({
   const [allTasks, setAllTasks] = useState<Task[]>(initialTasks)
   const [isLoading, setIsLoading] = useState(false)
 
+  const defaultStart = format(addDays(startOfDay(new Date()), -15), 'yyyy-MM-dd')
+  const defaultEnd = format(addDays(startOfDay(new Date()), 15), 'yyyy-MM-dd')
+
   const [filters, setFilters] = useState<{ starting_date?: string; ending_date?: string }>({
-    starting_date: searchParams.get('starting_date') || undefined,
-    ending_date: searchParams.get('ending_date') || undefined
+    starting_date: searchParams.get('starting_date') || defaultStart,
+    ending_date: searchParams.get('ending_date') || defaultEnd
   })
+
+  const [isExtending, setIsExtending] = useState<'forward' | 'back' | null>(null)
+
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 
   const hasUserChangedFilter = useRef(false)
+  const skipFullRefetch = useRef(false)
 
   // ── Fetch tasks ─────────────────────────────────────────────────────────────
   const fetchTasks = async (f: { starting_date?: string; ending_date?: string }) => {
@@ -85,7 +88,7 @@ export default function TaskGanttBoard({
     try {
       const res = await TaskService.getAll(f)
 
-      setAllTasks(res.data || [])
+      setAllTasks(Array.isArray(res.data) ? res.data : [])
     } catch {
       // silent
     } finally {
@@ -95,12 +98,18 @@ export default function TaskGanttBoard({
 
   // Sync server-rendered initial tasks
   useEffect(() => {
-    setAllTasks(initialTasks)
+    setAllTasks(Array.isArray(initialTasks) ? initialTasks : [])
   }, [initialTasks])
 
   // Re-fetch only on user-initiated filter change
   useEffect(() => {
     if (!hasUserChangedFilter.current) return
+
+    if (skipFullRefetch.current) {
+      skipFullRefetch.current = false
+
+      return
+    }
 
     const params = new URLSearchParams()
 
@@ -114,6 +123,110 @@ export default function TaskGanttBoard({
   const handleFilterChange = (f: { starting_date?: string; ending_date?: string }) => {
     hasUserChangedFilter.current = true
     setFilters(f)
+  }
+
+  // ── Clear filters ───────────────────────────────────────────────────────────
+  const handleClear = () => {
+    handleFilterChange({
+      starting_date: format(addDays(startOfDay(new Date()), -15), 'yyyy-MM-dd'),
+      ending_date: format(addDays(startOfDay(new Date()), 15), 'yyyy-MM-dd')
+    })
+  }
+
+  // ── Extend range forward (+30 days, fetch only delta) ──────────────────────
+  const handleExtendForward = async () => {
+    const baseEnd = filters.ending_date
+      ? startOfDay(parseISO(filters.ending_date))
+      : addDays(startOfDay(new Date()), 15)
+
+    const fetchFrom = addDays(baseEnd, 1)
+    const fetchTo = addDays(baseEnd, 30)
+    const newEndDate = format(fetchTo, 'yyyy-MM-dd')
+
+    skipFullRefetch.current = true
+    hasUserChangedFilter.current = true
+    setFilters(prev => ({ ...prev, ending_date: newEndDate }))
+
+    const urlParams = new URLSearchParams()
+
+    if (filters.starting_date) urlParams.set('starting_date', filters.starting_date)
+    urlParams.set('ending_date', newEndDate)
+    router.replace(`?${urlParams.toString()}`, { scroll: false })
+
+    setIsExtending('forward')
+
+    try {
+      const res = await TaskService.getAll({
+        starting_date: format(fetchFrom, 'yyyy-MM-dd'),
+        ending_date: newEndDate
+      })
+
+      const newTasks = Array.isArray(res.data) ? res.data : []
+
+      setAllTasks(prev => {
+        const existingIds = new Set(prev.map((t: Task) => t.id))
+
+        return [...prev, ...newTasks.filter((t: Task) => !existingIds.has(t.id))]
+      })
+    } catch {
+      // silent
+    } finally {
+      setIsExtending(null)
+    }
+  }
+
+  // ── Extend range back (−30 days, fetch only delta) ───────────────────────────
+  const handleExtendBack = async () => {
+    const baseStart = filters.starting_date
+      ? startOfDay(parseISO(filters.starting_date))
+      : addDays(startOfDay(new Date()), -15)
+
+    const fetchTo = addDays(baseStart, -1)
+    const fetchFrom = addDays(baseStart, -30)
+    const newStartDate = format(fetchFrom, 'yyyy-MM-dd')
+
+    skipFullRefetch.current = true
+    hasUserChangedFilter.current = true
+    setFilters(prev => ({ ...prev, starting_date: newStartDate }))
+
+    const urlParams = new URLSearchParams()
+
+    urlParams.set('starting_date', newStartDate)
+    if (filters.ending_date) urlParams.set('ending_date', filters.ending_date)
+    router.replace(`?${urlParams.toString()}`, { scroll: false })
+
+    setIsExtending('back')
+
+    try {
+      const res = await TaskService.getAll({
+        starting_date: newStartDate,
+        ending_date: format(fetchTo, 'yyyy-MM-dd')
+      })
+
+      const newTasks = Array.isArray(res.data) ? res.data : []
+
+      setAllTasks(prev => {
+        const existingIds = new Set(prev.map(t => t.id))
+
+        return [...newTasks.filter((t: Task) => !existingIds.has(t.id)), ...prev]
+      })
+    } catch {
+      // silent
+    } finally {
+      setIsExtending(null)
+    }
+  }
+
+  // ── Scroll to today ──────────────────────────────────────────────────────────
+  const handleScrollToToday = () => {
+    if (!scrollAreaRef.current) return
+    const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
+
+    if (!viewport) return
+    const rs = filters.starting_date ? startOfDay(parseISO(filters.starting_date)) : startOfDay(new Date())
+    const todayX = differenceInDays(startOfDay(new Date()), rs) * DAY_W
+
+    viewport.scrollLeft = Math.max(todayX - 200, 0)
   }
 
   // ── Handle edit ─────────────────────────────────────────────────────────────
@@ -130,7 +243,7 @@ export default function TaskGanttBoard({
   }
 
   // ── Compute Gantt range ──────────────────────────────────────────────────────
-  const ganttTasks: GanttTask[] = allTasks
+  const ganttTasks: GanttTask[] = (Array.isArray(allTasks) ? allTasks : [])
     .map(t => {
       const startD = safeDate(t.start_date)
       const endD = safeDate(t.end_date) ?? startD
@@ -197,240 +310,196 @@ export default function TaskGanttBoard({
   const gridWidth = totalDays * DAY_W
 
   return (
-    <div className='flex flex-col gap-3'>
-      {/* Filter */}
-      <KanbanFilter onChange={handleFilterChange} initialFilters={filters} />
+    <Card>
+      <CardContent className='flex flex-col gap-6 p-6!'>
+        {/* ── Date-range filter bar ──────────────────────────────────────────── */}
+        <GanttFilter
+          initialFilters={filters}
+          hasActiveFilter={!!(filters.starting_date || filters.ending_date)}
+          onApply={handleFilterChange}
+          onClear={handleClear}
+        />
 
-      {isLoading && (
-        <div className='space-y-2'>
-          {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className='h-10 w-full' />
-          ))}
-        </div>
-      )}
+        {isLoading && (
+          <div className='space-y-2'>
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className='h-10 w-full' />
+            ))}
+          </div>
+        )}
 
-      {!isLoading && ganttTasks.length === 0 && (
-        <div className='flex items-center justify-center h-40 bg-zinc-900 rounded-md border border-zinc-700 border-dashed'>
-          <p className='text-zinc-400 text-sm'>No tasks with valid dates found for this range.</p>
-        </div>
-      )}
-
-      {!isLoading && ganttTasks.length > 0 && (
-        <div className='rounded-md border border-zinc-800 bg-zinc-900 overflow-hidden'>
-          <ScrollArea className='w-full' style={{ maxHeight: 'calc(100vh - 220px)' }}>
-            <div style={{ width: LABEL_COL + gridWidth, minWidth: LABEL_COL + gridWidth }}>
-              {/* ── Month header ───────────────────────────────────────────── */}
-              <div
-                className='flex border-b border-zinc-700 bg-zinc-800'
-                style={{ position: 'sticky', top: 0, zIndex: 20, height: HDR_MONTH }}
+        {!isLoading && (
+          <div className='rounded-md border border-zinc-800 bg-zinc-900 overflow-hidden'>
+            {/* ── Range navigation — sticky, outside scroll ───────────────── */}
+            <div
+              className='py-6 flex items-center justify-center gap-3 border-b border-zinc-700 bg-zinc-800'
+              style={{ height: HDR_MONTH }}
+            >
+              <button
+                type='button'
+                onClick={handleExtendBack}
+                disabled={isExtending !== null}
+                className='text-zinc-400 hover:text-zinc-200 transition-colors p-1 rounded disabled:opacity-50'
+                title='Extend 30 days back'
               >
-                {/* Corner cell — sticky left AND sticky top */}
-                <div
-                  style={{
-                    width: LABEL_COL,
-                    minWidth: LABEL_COL,
-                    position: 'sticky',
-                    left: 0,
-                    zIndex: 30,
-                    background: 'rgb(39 39 42)'
-                  }}
-                  className='shrink-0 border-r border-zinc-700'
-                />
-                {/* Month spans */}
-                {monthGroups.map((mg, i) => (
-                  <div
-                    key={i}
-                    style={{ width: mg.span * DAY_W, minWidth: mg.span * DAY_W }}
-                    className='shrink-0 flex items-center justify-center text-xs font-semibold text-zinc-300 border-r border-zinc-700 last:border-r-0'
-                  >
-                    {mg.label}
-                  </div>
-                ))}
-              </div>
-
-              {/* ── Day header ─────────────────────────────────────────────── */}
-              <div
-                className='flex border-b border-zinc-700 bg-zinc-800/90'
-                style={{ position: 'sticky', top: HDR_MONTH, zIndex: 20, height: HDR_DAY }}
+                {isExtending === 'back' ? (
+                  <Loader2 className='h-6 w-6 animate-spin' />
+                ) : (
+                  <ChevronLeft className='h-6 w-6' />
+                )}
+              </button>
+              <span className='font-semibold text-zinc-300 select-none text-center min-w-44'>
+                {format(rangeStart, 'MMM d')} – {format(rangeEnd, 'MMM d, yyyy')}
+              </span>
+              <button
+                type='button'
+                onClick={handleExtendForward}
+                disabled={isExtending !== null}
+                className='text-zinc-400 hover:text-zinc-200 transition-colors p-1 rounded disabled:opacity-50'
+                title='Extend 30 days forward'
               >
-                {/* Label spacer — sticky left */}
-                <div
-                  style={{
-                    width: LABEL_COL,
-                    minWidth: LABEL_COL,
-                    position: 'sticky',
-                    left: 0,
-                    zIndex: 30,
-                    background: 'rgb(39 39 42 / 0.9)'
-                  }}
-                  className='shrink-0 border-r border-zinc-700 flex items-center px-3 text-xs font-medium text-zinc-400'
-                >
-                  Task
-                </div>
-                {/* Days */}
-                {days.map((d, i) => {
-                  const dow = d.getDay()
-                  const isWeekend = dow === 0 || dow === 6
-                  const isToday = i === todayOffset
+                {isExtending === 'forward' ? (
+                  <Loader2 className='h-6 w-6 animate-spin' />
+                ) : (
+                  <ChevronRight className='h-6 w-6' />
+                )}
+              </button>
+            </div>
 
-                  return (
-                    <div
-                      key={i}
-                      style={{ width: DAY_W, minWidth: DAY_W }}
-                      className={[
-                        'shrink-0 flex flex-col items-center justify-center border-r border-zinc-800 last:border-r-0 select-none',
-                        isWeekend ? 'bg-zinc-800/60 text-zinc-500' : 'text-zinc-400',
-                        isToday ? 'bg-blue-900/50! text-blue-300! font-bold' : ''
-                      ].join(' ')}
-                    >
-                      <span className='text-[10px] leading-none'>{format(d, 'EEE')}</span>
-                      <span className='text-sm font-semibold leading-tight mt-0.5'>{format(d, 'd')}</span>
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* ── Task rows ──────────────────────────────────────────────── */}
-              {ganttTasks.map((task, rowIdx) => {
-                const colors = statusColor(task.status)
-                const left = barLeft(task)
-                const width = barWidth(task)
-                const rowBg = rowIdx % 2 === 0 ? 'rgb(24 24 27)' : 'rgb(28 28 32)'
-
-                return (
+            <div ref={scrollAreaRef}>
+              <ScrollArea className='w-full' style={{ maxHeight: 'calc(100vh - 260px)' }}>
+                <div style={{ width: LABEL_COL + gridWidth, minWidth: LABEL_COL + gridWidth }}>
+                  {/* ── Day header ─────────────────────────────────────────── */}
                   <div
-                    key={task.id}
-                    className='flex border-b border-zinc-800/60 last:border-b-0 hover:brightness-110 transition-all'
-                    style={{ height: ROW_H }}
+                    className='flex border-b border-zinc-700 bg-zinc-800/90 py-6'
+                    style={{ position: 'sticky', top: 0, zIndex: 20, height: HDR_DAY }}
                   >
-                    {/* Task label — sticky left */}
+                    {/* Label spacer — sticky left */}
                     <div
                       style={{
                         width: LABEL_COL,
                         minWidth: LABEL_COL,
                         position: 'sticky',
                         left: 0,
-                        zIndex: 10,
-                        background: rowBg
+                        zIndex: 30,
+                        background: 'rgb(39 39 42 / 1)'
                       }}
-                      className='shrink-0 flex items-center gap-2 px-3 border-r border-zinc-700 h-full'
+                      className='z-50! shrink-0 border-r border-zinc-700 flex items-center px-3 font-bold text-background'
                     >
-                      <button type='button' className='flex-1 text-left min-w-0' onClick={() => handleEdit(task)}>
-                        <p className='text-xs font-medium text-zinc-100 truncate' title={task.name}>
-                          {task.name}
-                        </p>
-                        <p className='text-[10px] text-zinc-500 truncate mt-0.5'>
-                          {task.client ? `${task.client.first_name} ${task.client.last_name}`.trim() : '—'}
-                        </p>
-                        <p className='text-[10px] text-zinc-600 truncate'>
-                          {format(task.startD, 'MMM d')} → {format(task.endD, 'MMM d')}
-                        </p>
-                      </button>
-                      <Badge
-                        variant='outline'
-                        className={`text-[9px] px-1.5 py-0 capitalize shrink-0 ${colors.bg} ${colors.text} border-0`}
-                      >
-                        {task.status}
-                      </Badge>
+                      Tasks
                     </div>
+                    {/* Days */}
+                    {days.map((d, i) => {
+                      const dow = d.getDay()
+                      const isWeekend = dow === 0 || dow === 6
+                      const isToday = i === todayOffset
 
-                    {/* Grid area */}
-                    <div className='relative h-full' style={{ width: gridWidth, background: rowBg }}>
-                      {/* Weekend shading */}
-                      {days.map((d, i) =>
-                        d.getDay() === 0 || d.getDay() === 6 ? (
-                          <div
-                            key={i}
-                            className='absolute inset-y-0 bg-zinc-800/40'
-                            style={{ left: i * DAY_W, width: DAY_W }}
-                          />
-                        ) : null
-                      )}
-
-                      {/* Day grid lines */}
-                      {days.map((_, i) => (
+                      return (
                         <div
                           key={i}
-                          className='absolute inset-y-0 border-r border-zinc-800/40'
-                          style={{ left: (i + 1) * DAY_W - 1, width: 1 }}
-                        />
-                      ))}
-
-                      {/* Today line */}
-                      {showToday && (
-                        <div
-                          className='absolute inset-y-0 w-0.5 bg-blue-400/80 z-10'
-                          style={{ left: todayOffset * DAY_W + DAY_W / 2 }}
-                        />
-                      )}
-
-                      {/* Task bar */}
-                      <button
-                        type='button'
-                        className={[
-                          'absolute top-1/2 -translate-y-1/2 rounded-md cursor-pointer hover:opacity-90 active:opacity-75 transition-opacity shadow-sm',
-                          colors.bg
-                        ].join(' ')}
-                        style={{ left: left + 2, width: Math.max(width - 4, DAY_W - 4), height: 32 }}
-                        onClick={() => handleEdit(task)}
-                        title={`${task.name} · ${format(task.startD, 'MMM d, yyyy')} → ${format(task.endD, 'MMM d, yyyy')}`}
-                      >
-                        <span className='px-2 text-xs font-medium text-white truncate flex items-center h-full'>
-                          {task.name}
-                        </span>
-                      </button>
-                    </div>
+                          style={{ width: DAY_W, minWidth: DAY_W }}
+                          className={[
+                            'shrink-0 flex flex-col items-center justify-center border-r border-zinc-800 last:border-r-0 select-none',
+                            isWeekend ? 'bg-zinc-800/60 text-zinc-500' : 'text-zinc-400',
+                            isToday ? 'bg-blue-900/50! text-blue-300! font-bold' : ''
+                          ].join(' ')}
+                        >
+                          <span className='text-[10px] leading-none'>{format(d, 'EEE')}</span>
+                          <span className='text-sm font-semibold leading-tight mt-0.5'>{format(d, 'd')}</span>
+                        </div>
+                      )
+                    })}
                   </div>
-                )
-              })}
-            </div>
-            <ScrollBar orientation='horizontal' className='mt-1' />
-            <ScrollBar orientation='vertical' />
-          </ScrollArea>
 
-          {/* Legend */}
-          <div className='flex flex-wrap gap-3 px-4 py-2 border-t border-zinc-800 bg-zinc-800/30'>
-            {Object.entries(STATUS_COLORS).map(([status, c]) => (
-              <div key={status} className='flex items-center gap-1.5'>
-                <span className={`inline-block h-3 w-3 rounded-sm ${c.bg}`} />
-                <span className='text-[11px] text-zinc-400 capitalize'>{status}</span>
-              </div>
-            ))}
-            <div className='flex items-center gap-1.5 ml-auto'>
-              <span className='inline-block h-3 w-px bg-blue-400' />
-              <span className='text-[11px] text-zinc-400'>Today</span>
+                  {/* ── Task rows ──────────────────────────────────────────── */}
+                  {ganttTasks.length === 0 && (
+                    <div className='flex' style={{ height: ROW_H }}>
+                      <div
+                        style={{
+                          width: LABEL_COL,
+                          minWidth: LABEL_COL,
+                          position: 'sticky',
+                          left: 0,
+                          zIndex: 10,
+                          background: 'rgb(24 24 27)'
+                        }}
+                        className='shrink-0 border-r border-zinc-700 flex items-center px-3'
+                      >
+                        <p className='text-xs text-zinc-500'>No tasks</p>
+                      </div>
+                      <div className='relative flex-1' style={{ background: 'rgb(24 24 27)' }} />
+                    </div>
+                  )}
+                  {ganttTasks.map((task, rowIdx) => (
+                    <GanttTaskRow
+                      key={task.id}
+                      task={task}
+                      rowIdx={rowIdx}
+                      labelCol={LABEL_COL}
+                      gridWidth={gridWidth}
+                      dayW={DAY_W}
+                      rowH={ROW_H}
+                      days={days}
+                      barLeft={barLeft(task)}
+                      barWidth={barWidth(task)}
+                      todayOffset={todayOffset}
+                      showToday={showToday}
+                      onEdit={handleEdit}
+                    />
+                  ))}
+                </div>
+                <ScrollBar orientation='horizontal' className='mt-1' />
+                <ScrollBar orientation='vertical' />
+              </ScrollArea>
+            </div>
+
+            {/* Legend */}
+            <div className='flex flex-wrap gap-3 px-4 py-2 border-t border-zinc-800 bg-zinc-800/30 items-center'>
+              {Object.entries(STATUS_COLORS).map(([status, c]) => (
+                <div key={status} className='flex items-center gap-1.5'>
+                  <span className={`inline-block h-3 w-3 rounded-sm ${c.bg}`} />
+                  <span className='text-[11px] text-zinc-400 capitalize'>{status}</span>
+                </div>
+              ))}
+              <button
+                type='button'
+                onClick={handleScrollToToday}
+                className='ml-auto text-[11px] text-zinc-400 hover:text-zinc-200 transition-colors border border-zinc-700 rounded px-2 py-0.5'
+              >
+                Today
+              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <CreateOrEditTaskModal
-        mode={modalMode}
-        open={modalOpen}
-        onOpenChange={open => {
-          setModalOpen(open)
-          if (!open) setSelectedTask(null)
-        }}
-        taskId={selectedTask?.id}
-        taskDetails={selectedTask ?? undefined}
-        staffs={staffs}
-        clients={clients}
-        taskTypes={taskTypes}
-        taskReminders={taskReminders}
-        taskReminderChannels={taskReminderChannels}
-        onSuccess={async () => {
-          try {
-            const res = await TaskService.getAll()
+        <CreateOrEditTaskModal
+          mode={modalMode}
+          open={modalOpen}
+          onOpenChange={open => {
+            setModalOpen(open)
+            if (!open) setSelectedTask(null)
+          }}
+          taskId={selectedTask?.id}
+          taskDetails={selectedTask ?? undefined}
+          staffs={staffs}
+          clients={clients}
+          taskTypes={taskTypes}
+          taskReminders={taskReminders}
+          taskReminderChannels={taskReminderChannels}
+          onSuccess={async () => {
+            try {
+              const res = await TaskService.getAll()
 
-            setAllTasks(res.data || [])
-          } catch {
-            // keep current
-          }
+              setAllTasks(Array.isArray(res.data) ? res.data : [])
+            } catch {
+              // keep current
+            }
 
-          setModalOpen(false)
-          setSelectedTask(null)
-        }}
-      />
-    </div>
+            setModalOpen(false)
+            setSelectedTask(null)
+          }}
+        />
+      </CardContent>
+    </Card>
   )
 }
