@@ -20,6 +20,7 @@ import { toast } from 'sonner'
 import ScheduleCalendarFilter from './ScheduleCalendarFilter'
 import ScheduleFormDialog from './ScheduleFormDialog'
 import { getPaletteColorByKey } from '@/constants/colors'
+import { SpinnerCustom } from '@/components/ui/spinner'
 import {
   ScheduleCalendarEvent,
   ScheduleCalendarAgendaEvent,
@@ -92,6 +93,11 @@ export default function ScheduleCalendar({
     return initialFilters
   })
 
+  const applyFilterOptions: React.Dispatch<React.SetStateAction<any>> = updater => {
+    setIsLoading(true)
+    setFilterOptions(updater)
+  }
+
   useEffect(() => {
     setIsLoading(true)
     ScheduleService.getAll(filterOptions)
@@ -119,7 +125,7 @@ export default function ScheduleCalendar({
    */
   const handleNavigate = (date: Date) => {
     setCurrentDate(date)
-    setFilterOptions((prev: any) => ({ ...prev, ...getMonthBounds(date) }))
+    applyFilterOptions((prev: any) => ({ ...prev, ...getMonthBounds(date) }))
   }
 
   /**
@@ -173,6 +179,8 @@ export default function ScheduleCalendar({
     })
   }, [schedules])
 
+  const displayedEvents = isLoading ? [] : events
+
   /**
    * Applies deterministic event background styling by contractor or event ID.
    */
@@ -202,14 +210,22 @@ export default function ScheduleCalendar({
         serviceTypes={serviceTypes}
         partners={partners}
         filterOptions={filterOptions}
-        setFilterOptions={setFilterOptions}
+        setFilterOptions={applyFilterOptions}
       />
 
       <Card className='schedule-calendar-shell shadow-sm flex-1 border-white/10 bg-zinc-950/70 p-4 text-white backdrop-blur'>
-        <CardContent className='p-0'>
+        <CardContent className='relative p-0'>
+          {isLoading && (
+            <div className='absolute inset-0 z-10 flex items-center justify-center rounded-md bg-zinc-950/55 backdrop-blur-sm'>
+              <div className='flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-zinc-900/90 px-4 py-3 text-sm text-white'>
+                <SpinnerCustom position='static' zIndex={0} size='size-5' className='inset-auto!' />
+                <span>Loading schedules...</span>
+              </div>
+            </div>
+          )}
           <Calendar
             localizer={localizer}
-            events={events}
+            events={displayedEvents}
             startAccessor='start'
             endAccessor='end'
             style={{ height: 800 }}
@@ -227,7 +243,7 @@ export default function ScheduleCalendar({
                 event: ScheduleCalendarAgendaEvent
               }
             }}
-            selectable
+            selectable={!isLoading}
             onSelectSlot={handleSelectSlot}
             onSelectEvent={handleSelectEvent}
           />
