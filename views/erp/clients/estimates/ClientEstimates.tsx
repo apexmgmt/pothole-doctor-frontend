@@ -234,18 +234,20 @@ const ClientEstimates = ({ clientId }: { clientId: string }) => {
   ]
 
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <InputGroup>
-        <InputGroupInput
-          placeholder='Search...'
-          value={searchValue}
-          onChange={e => setSearchValue(e.target.value)}
-          className='w-80'
-        />
-        <InputGroupAddon>
-          <Search />
-        </InputGroupAddon>
-      </InputGroup>
+    <div className='flex items-center justify-between w-full gap-2.5'>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80! '>
+        <InputGroup>
+          <InputGroupInput
+            placeholder='Search...'
+            value={searchValue}
+            onChange={e => setSearchValue(e.target.value)}
+            className='lg:w-80 min-w-0'
+          />
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+        </InputGroup>
+      </div>
       <Button
         variant='default'
         size='sm'
@@ -253,7 +255,7 @@ const ClientEstimates = ({ clientId }: { clientId: string }) => {
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Estimate
+        <span className='hidden min-[480px]:block'>Add Estimate</span>
       </Button>
     </div>
   )
