@@ -1,13 +1,16 @@
 'use client'
 
-import React, { useMemo } from 'react'
-import { RotateCcw } from 'lucide-react'
+import React, { useMemo, useState } from 'react'
+import { Check, ChevronsUpDown, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Client, Partner, ServiceType, WorkOrder } from '@/types'
 import { getPaletteColorByKey } from '@/constants/colors'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { cn } from '@/lib/utils'
 
 interface ScheduleCalendarFilterProps {
   clients: Client[]
@@ -18,6 +21,10 @@ interface ScheduleCalendarFilterProps {
   setFilterOptions: React.Dispatch<React.SetStateAction<any>>
 }
 
+/**
+ * Sidebar filter panel for schedule calendar.
+ * Supports customer/work-order/job-type/contractor filtering and contractor color legend.
+ */
 export default function ScheduleCalendarFilter({
   clients,
   workOrders,
@@ -26,6 +33,11 @@ export default function ScheduleCalendarFilter({
   filterOptions,
   setFilterOptions
 }: ScheduleCalendarFilterProps) {
+  const [isContractorOpen, setIsContractorOpen] = useState(false)
+
+  /**
+   * Finds the currently selected work order from preloaded options.
+   */
   const selectedWorkOrder = useMemo(() => {
     if (!filterOptions.work_order_id) {
       return null
@@ -34,6 +46,9 @@ export default function ScheduleCalendarFilter({
     return workOrders.find(wo => wo.id === filterOptions.work_order_id) || null
   }, [filterOptions.work_order_id, workOrders])
 
+  /**
+   * Derives unique service types from the selected work order services.
+   */
   const woServiceTypes = useMemo<ServiceType[]>(() => {
     const services = selectedWorkOrder?.services || []
 
@@ -55,6 +70,10 @@ export default function ScheduleCalendarFilter({
     }, [])
   }, [selectedWorkOrder])
 
+  /**
+   * Applies a single filter value.
+   * Passing `all` clears the filter key from state.
+   */
   const handleChange = (key: string, value: string) => {
     setFilterOptions((prev: any) => {
       const next = { ...prev }
@@ -74,6 +93,9 @@ export default function ScheduleCalendarFilter({
     })
   }
 
+  /**
+   * Clears all user-controlled filter fields while preserving date range and other params.
+   */
   const handleReset = () => {
     setFilterOptions((prev: any) => {
       const { client_id, work_order_id, service_type_id, contractor_id, ...rest } = prev
@@ -89,6 +111,17 @@ export default function ScheduleCalendarFilter({
     filterOptions.contractor_id
 
   const isAllContractorsSelected = !filterOptions.contractor_id || filterOptions.contractor_id === 'all'
+
+  /**
+   * Used to show selected contractor label in the searchable combobox trigger.
+   */
+  const selectedContractor = useMemo(() => {
+    if (!filterOptions.contractor_id || filterOptions.contractor_id === 'all') {
+      return null
+    }
+
+    return partners.find(partner => partner.id === filterOptions.contractor_id) || null
+  }, [filterOptions.contractor_id, partners])
 
   return (
     <ScrollArea className='h-[835px] w-72 shrink-0 rounded-lg border border-border bg-card'>
@@ -166,28 +199,74 @@ export default function ScheduleCalendarFilter({
         {/* Contractor */}
         <div className='flex flex-col gap-1.5'>
           <Label className='text-xs text-muted-foreground'>Contractor</Label>
-          <Select
-            value={filterOptions.contractor_id ?? 'all'}
-            onValueChange={value => handleChange('contractor_id', value)}
-          >
-            <SelectTrigger className='w-full'>
-              <SelectValue placeholder='Select Contractor' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All Contractors</SelectItem>
-              {partners.map(partner => (
-                <SelectItem key={partner.id} value={partner.id}>
-                  <div className='flex items-center gap-2'>
-                    <span
-                      className='inline-block h-2.5 w-2.5 rounded-full border border-white/30'
-                      style={{ backgroundColor: getPaletteColorByKey(partner.id) }}
-                    />
-                    <span>{`${partner.first_name} ${partner.last_name}`.trim()}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover open={isContractorOpen} onOpenChange={setIsContractorOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type='button'
+                variant='outline'
+                role='combobox'
+                aria-expanded={isContractorOpen}
+                className='w-full justify-between bg-transparent px-3 text-sm font-normal'
+              >
+                <span className='truncate text-left'>
+                  {selectedContractor
+                    ? `${selectedContractor.first_name} ${selectedContractor.last_name}`.trim()
+                    : 'All Contractors'}
+                </span>
+                <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className='w-(--radix-popover-trigger-width) p-0' align='start'>
+              <Command>
+                <CommandInput placeholder='Search contractor...' />
+                <CommandList>
+                  <CommandEmpty>No contractor found.</CommandEmpty>
+                  <CommandGroup>
+                    <CommandItem
+                      value='all contractors'
+                      onSelect={() => {
+                        handleChange('contractor_id', 'all')
+                        setIsContractorOpen(false)
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          'mr-2 h-4 w-4',
+                          (filterOptions.contractor_id ?? 'all') === 'all' ? 'opacity-100' : 'opacity-0'
+                        )}
+                      />
+                      <span>All Contractors</span>
+                    </CommandItem>
+
+                    {partners.map(partner => {
+                      const partnerName = `${partner.first_name} ${partner.last_name}`.trim()
+                      const isSelected = filterOptions.contractor_id === partner.id
+
+                      return (
+                        <CommandItem
+                          key={partner.id}
+                          value={partnerName}
+                          onSelect={() => {
+                            handleChange('contractor_id', partner.id)
+                            setIsContractorOpen(false)
+                          }}
+                        >
+                          <Check className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')} />
+                          {isAllContractorsSelected && (
+                            <span
+                              className='mr-2 inline-block h-2.5 w-2.5 rounded-full border border-white/30'
+                              style={{ backgroundColor: getPaletteColorByKey(partner.id) }}
+                            />
+                          )}
+                          <span>{partnerName || 'N/A'}</span>
+                        </CommandItem>
+                      )
+                    })}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {isAllContractorsSelected && partners.length > 0 && (

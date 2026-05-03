@@ -13,6 +13,9 @@ export type ScheduleCalendarEventType = {
   resource: Schedule
 }
 
+/**
+ * Maps schedule status values to badge variants.
+ */
 export const getScheduleStatusVariant = (status?: string) => {
   switch (status?.toLowerCase()) {
     case 'completed':
@@ -26,6 +29,9 @@ export const getScheduleStatusVariant = (status?: string) => {
   }
 }
 
+/**
+ * Returns a formatted contractor display name.
+ */
 export const getContractorName = (schedule?: Schedule) => {
   const firstName = schedule?.contractor?.first_name || ''
   const lastName = schedule?.contractor?.last_name || ''
@@ -33,6 +39,9 @@ export const getContractorName = (schedule?: Schedule) => {
   return `${firstName} ${lastName}`.trim() || 'N/A'
 }
 
+/**
+ * Returns the preferred customer display name.
+ */
 export const getCustomerName = (schedule?: Schedule) => {
   const displayName = schedule?.client?.display_name || ''
   const firstName = schedule?.client?.first_name || ''
@@ -41,6 +50,9 @@ export const getCustomerName = (schedule?: Schedule) => {
   return displayName || `${firstName} ${lastName}`.trim() || 'N/A'
 }
 
+/**
+ * Builds a single-line address string for event display.
+ */
 export const getWorkOrderAddress = (schedule?: Schedule) => {
   const address = schedule?.work_order?.address
   const street = address?.street_address || ''
@@ -51,6 +63,9 @@ export const getWorkOrderAddress = (schedule?: Schedule) => {
   return [street, city, state, zip].filter(Boolean).join(', ') || 'N/A'
 }
 
+/**
+ * Custom event body used in month/week/day calendar cells.
+ */
 export function ScheduleCalendarEvent({ event }: { event?: ScheduleCalendarEventType }) {
   const schedule = event?.resource
 
@@ -68,6 +83,9 @@ export function ScheduleCalendarEvent({ event }: { event?: ScheduleCalendarEvent
   )
 }
 
+/**
+ * Compact agenda-row renderer for list/agenda view.
+ */
 export function ScheduleCalendarAgendaEvent({ event }: { event?: { resource?: Schedule; title?: string } }) {
   const schedule = event?.resource
 

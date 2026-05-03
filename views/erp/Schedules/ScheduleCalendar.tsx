@@ -52,6 +52,10 @@ interface ScheduleCalendarProps {
   partners: Partner[]
 }
 
+/**
+ * Main schedule calendar container.
+ * Handles filtering, schedule fetching, view/date state, and form dialog interactions.
+ */
 export default function ScheduleCalendar({
   clients = [],
   workOrders = [],
@@ -110,11 +114,17 @@ export default function ScheduleCalendar({
     }
   }, [])
 
+  /**
+   * Updates calendar date and syncs month bounds into filter options.
+   */
   const handleNavigate = (date: Date) => {
     setCurrentDate(date)
     setFilterOptions((prev: any) => ({ ...prev, ...getMonthBounds(date) }))
   }
 
+  /**
+   * Opens create dialog with the clicked date preselected.
+   */
   const handleSelectSlot = ({ start }: { start: Date }) => {
     setIsAutoOpenDialog(false)
     setSelectedDate(start)
@@ -123,6 +133,9 @@ export default function ScheduleCalendar({
     setDialogOpen(true)
   }
 
+  /**
+   * Opens edit dialog for the selected schedule event.
+   */
   const handleSelectEvent = (event: any) => {
     setIsAutoOpenDialog(false)
     setSelectedSchedule(event.resource as Schedule)
@@ -160,6 +173,9 @@ export default function ScheduleCalendar({
     })
   }, [schedules])
 
+  /**
+   * Applies deterministic event background styling by contractor or event ID.
+   */
   const eventPropGetter = (event: ScheduleCalendarEventType) => {
     const schedule = event.resource
     const colorKey = isSingleContractorView ? schedule?.id : schedule?.contractor_id || schedule?.contractor?.id

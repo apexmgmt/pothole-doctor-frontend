@@ -8,6 +8,10 @@ import { ScheduleCalendarEventType } from './ScheduleCalendarEvent'
 
 const calendarViewOptions = [Views.MONTH, Views.WEEK, Views.DAY] as const
 
+/**
+ * Custom toolbar for react-big-calendar.
+ * Provides navigation controls and view switching using app-styled buttons.
+ */
 export function ScheduleCalendarToolbar({
   label,
   onNavigate,

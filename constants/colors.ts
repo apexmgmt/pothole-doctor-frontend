@@ -1,49 +1,79 @@
-export const SCHEDULE_PALETTE: string[] = [
-  '#0ea5e9', // sky
-  '#8b5cf6', // violet
-  '#f97316', // orange
-  '#22c55e', // green
-  '#ec4899', // pink
-  '#eab308', // yellow
-  '#14b8a6', // teal
-  '#f43f5e', // rose
-  '#6366f1', // indigo
-  '#84cc16', // lime
-  '#06b6d4', // cyan
-  '#a855f7', // purple
-  '#ef4444', // red
-  '#3b82f6', // blue
-  '#10b981', // emerald
-  '#f59e0b', // amber
-  '#d946ef', // fuchsia
-  '#64748b', // slate
-  '#0d9488', // teal-600
-  '#7c3aed', // violet-600
-  '#b45309', // amber-700
-  '#15803d', // green-700
-  '#be185d', // pink-700
-  '#1d4ed8', // blue-700
-  '#0891b2', // cyan-600
-  '#9333ea', // purple-600
-  '#dc2626', // red-600
-  '#65a30d', // lime-600
-  '#0284c7', // sky-600
-  '#c026d3', // fuchsia-600
-  '#16a34a', // green-600
-  '#ea580c', // orange-600
-  '#7c3aed', // violet-600
-  '#0f766e', // teal-700
-  '#4f46e5' // indigo-600
-]
+const FALLBACK_COLOR = '#0ea5e9'
 
+/**
+ * Generates a stable 32-bit hash using FNV-1a.
+ * This ensures identical IDs always map to the same color.
+ */
+const hashString = (value: string): number => {
+  let hash = 2166136261
+
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i)
+    hash = Math.imul(hash, 16777619)
+  }
+
+  return hash >>> 0
+}
+
+/**
+ * Converts HSL values to a hex color string.
+ */
+const hslToHex = (h: number, s: number, l: number): string => {
+  const saturation = s / 100
+  const lightness = l / 100
+
+  const c = (1 - Math.abs(2 * lightness - 1)) * saturation
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1))
+  const m = lightness - c / 2
+
+  let rPrime = 0
+  let gPrime = 0
+  let bPrime = 0
+
+  if (h < 60) {
+    rPrime = c
+    gPrime = x
+  } else if (h < 120) {
+    rPrime = x
+    gPrime = c
+  } else if (h < 180) {
+    gPrime = c
+    bPrime = x
+  } else if (h < 240) {
+    gPrime = x
+    bPrime = c
+  } else if (h < 300) {
+    rPrime = x
+    bPrime = c
+  } else {
+    rPrime = c
+    bPrime = x
+  }
+
+  const toHex = (channel: number) =>
+    Math.round((channel + m) * 255)
+      .toString(16)
+      .padStart(2, '0')
+
+  return `#${toHex(rPrime)}${toHex(gPrime)}${toHex(bPrime)}`
+}
+
+/**
+ * Returns a deterministic color for a given key.
+ * Useful for assigning stable colors to contractors/schedules across refreshes.
+ */
 export const getPaletteColorByKey = (key?: string): string => {
   const safeKey = (key || '').trim()
 
   if (!safeKey) {
-    return SCHEDULE_PALETTE[0]
+    return FALLBACK_COLOR
   }
 
-  const hash = safeKey.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
+  const hash = hashString(safeKey)
 
-  return SCHEDULE_PALETTE[hash % SCHEDULE_PALETTE.length]
+  const hue = hash % 360
+  const saturation = 62 + (hash % 18)
+  const lightness = 44 + ((hash >> 8) % 12)
+
+  return hslToHex(hue, saturation, lightness)
 }
