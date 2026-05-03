@@ -1,12 +1,11 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useMemo } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Client, Partner, ServiceType, WorkOrder } from '@/types'
-import WorkOrderService from '@/services/api/work-orders/work_orders.service'
 import { getPaletteColorByKey } from '@/constants/colors'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
@@ -27,37 +26,34 @@ export default function ScheduleCalendarFilter({
   filterOptions,
   setFilterOptions
 }: ScheduleCalendarFilterProps) {
-  const [woServiceTypes, setWoServiceTypes] = useState<ServiceType[]>([])
-  const [isFetchingWO, setIsFetchingWO] = useState(false)
-
-  // When work_order_id changes, fetch that WO's services and derive service types
-  useEffect(() => {
+  const selectedWorkOrder = useMemo(() => {
     if (!filterOptions.work_order_id) {
-      setWoServiceTypes([])
-
-      return
+      return null
     }
 
-    setIsFetchingWO(true)
-    WorkOrderService.show(filterOptions.work_order_id)
-      .then(resp => {
-        const wo = resp?.data ?? resp
-        const seen = new Set<string>()
+    return workOrders.find(wo => wo.id === filterOptions.work_order_id) || null
+  }, [filterOptions.work_order_id, workOrders])
 
-        const types: ServiceType[] = []
+  const woServiceTypes = useMemo<ServiceType[]>(() => {
+    const services = selectedWorkOrder?.services || []
 
-        ;(wo.services || []).forEach((svc: any) => {
-          if (svc.service_type && !seen.has(svc.service_type.id)) {
-            seen.add(svc.service_type.id)
-            types.push(svc.service_type)
-          }
-        })
+    if (!services.length) {
+      return []
+    }
 
-        setWoServiceTypes(types)
-      })
-      .catch(() => setWoServiceTypes([]))
-      .finally(() => setIsFetchingWO(false))
-  }, [filterOptions.work_order_id])
+    const seen = new Set<string>()
+
+    return services.reduce<ServiceType[]>((acc, service) => {
+      const serviceType = service.service_type
+
+      if (serviceType?.id && !seen.has(serviceType.id)) {
+        seen.add(serviceType.id)
+        acc.push(serviceType)
+      }
+
+      return acc
+    }, [])
+  }, [selectedWorkOrder])
 
   const handleChange = (key: string, value: string) => {
     setFilterOptions((prev: any) => {
@@ -152,10 +148,9 @@ export default function ScheduleCalendarFilter({
           <Select
             value={filterOptions.service_type_id ?? 'all'}
             onValueChange={value => handleChange('service_type_id', value)}
-            disabled={isFetchingWO}
           >
             <SelectTrigger className='w-full'>
-              <SelectValue placeholder={isFetchingWO ? 'Loading...' : 'Select Job Type'} />
+              <SelectValue placeholder='Select Job Type' />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='all'>All Job Types</SelectItem>
