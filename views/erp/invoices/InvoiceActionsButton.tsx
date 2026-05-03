@@ -18,7 +18,7 @@ const InvoiceActionsButton = ({
   isMarkingAsSigned: boolean
   isSendingEmail: boolean
   onViewEditDetails: () => void
-  onViewWorkOrder: () => void
+  onViewWorkOrder?: () => void
   onMarkAsSigned: () => void
   onConfirmedEmailSend: () => Promise<void>
 }) => {
@@ -38,7 +38,7 @@ const InvoiceActionsButton = ({
             <Eye className='mr-2 h-4 w-4' />
             View/Edit Invoice Details
           </DropdownMenuItem>
-          {invoice?.work_order_id && (
+          {invoice?.work_order_id && onViewWorkOrder && (
             <DropdownMenuItem onClick={onViewWorkOrder}>
               <Eye className='mr-2 h-4 w-4' />
               View Work Order

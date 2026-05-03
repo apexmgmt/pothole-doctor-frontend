@@ -419,6 +419,11 @@ const AddInvoiceServicesModal = ({
               onViewEditDetails={() => setIsInvoiceDetailsOpen(true)}
               onMarkAsSigned={handleMarkAsSigned}
               onConfirmedEmailSend={handleEmailWithSave}
+              onViewWorkOrder={() => {
+                if (currentInvoice?.work_order_id) {
+                  window.open(`/erp/work-orders/${currentInvoice.work_order_id}?mode=view`, '_blank')
+                }
+              }}
             />
             <AddServiceButton
               serviceTypes={serviceTypes}
