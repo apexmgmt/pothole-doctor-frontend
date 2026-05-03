@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Client, Partner, ServiceType, WorkOrder } from '@/types'
 import WorkOrderService from '@/services/api/work-orders/work_orders.service'
+import { getPaletteColorByKey } from '@/constants/colors'
 
 interface ScheduleCalendarFilterProps {
   clients: Client[]
@@ -41,6 +42,7 @@ export default function ScheduleCalendarFilter({
       .then(resp => {
         const wo = resp?.data ?? resp
         const seen = new Set<string>()
+        
         const types: ServiceType[] = []
 
         // eslint-disable-next-line no-extra-semi
@@ -89,6 +91,8 @@ export default function ScheduleCalendarFilter({
     filterOptions.work_order_id ||
     filterOptions.service_type_id ||
     filterOptions.contractor_id
+
+  const isAllContractorsSelected = !filterOptions.contractor_id || filterOptions.contractor_id === 'all'
 
   return (
     <div className='w-72 shrink-0 border border-border rounded-lg p-4 flex flex-col gap-4 bg-card h-fit'>
@@ -177,12 +181,35 @@ export default function ScheduleCalendarFilter({
             <SelectItem value='all'>All Contractors</SelectItem>
             {partners.map(partner => (
               <SelectItem key={partner.id} value={partner.id}>
-                {`${partner.first_name} ${partner.last_name}`.trim()}
+                <div className='flex items-center gap-2'>
+                  <span
+                    className='inline-block h-2.5 w-2.5 rounded-full border border-white/30'
+                    style={{ backgroundColor: getPaletteColorByKey(partner.id) }}
+                  />
+                  <span>{`${partner.first_name} ${partner.last_name}`.trim()}</span>
+                </div>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
+
+      {isAllContractorsSelected && partners.length > 0 && (
+        <div className='flex flex-col gap-2 border border-border rounded-md p-3 bg-accent'>
+          <p className='text-xs font-medium text-background'>Contractor Colors</p>
+          <div className='flex flex-col gap-1.5 max-h-44 overflow-y-auto pr-1'>
+            {partners.map(partner => (
+              <div key={partner.id} className='flex items-center gap-2 text-xs'>
+                <span
+                  className='inline-block h-2.5 w-2.5 rounded-full border border-white/30 shrink-0'
+                  style={{ backgroundColor: getPaletteColorByKey(partner.id) }}
+                />
+                <span className='truncate'>{`${partner.first_name} ${partner.last_name}`.trim()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

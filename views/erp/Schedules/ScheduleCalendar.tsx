@@ -19,9 +19,10 @@ import ScheduleService from '@/services/api/schedules.service'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import { toast } from 'sonner'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
 import ScheduleCalendarFilter from './ScheduleCalendarFilter'
 import ScheduleFormDialog from './ScheduleFormDialog'
+import { getPaletteColorByKey } from '@/constants/colors'
 
 // Setup date-fns localizer for the calendar
 const locales = {
@@ -43,21 +44,6 @@ const getMonthBounds = (date: Date) => ({
 
 const calendarViewOptions = [Views.MONTH, Views.WEEK, Views.DAY] as const
 
-const SCHEDULE_PALETTE = [
-  '#0ea5e9', // sky
-  '#8b5cf6', // violet
-  '#f97316', // orange
-  '#22c55e', // green
-  '#ec4899', // pink
-  '#eab308', // yellow
-  '#14b8a6', // teal
-  '#f43f5e', // rose
-  '#6366f1', // indigo
-  '#84cc16', // lime
-  '#06b6d4', // cyan
-  '#a855f7', // purple
-]
-
 type ScheduleCalendarEventType = {
   id: string
   title: string
@@ -77,6 +63,31 @@ const getScheduleStatusVariant = (status?: string) => {
     default:
       return 'info'
   }
+}
+
+const getContractorName = (schedule?: Schedule) => {
+  const firstName = schedule?.contractor?.first_name || ''
+  const lastName = schedule?.contractor?.last_name || ''
+
+  return `${firstName} ${lastName}`.trim() || 'N/A'
+}
+
+const getCustomerName = (schedule?: Schedule) => {
+  const displayName = schedule?.client?.display_name || ''
+  const firstName = schedule?.client?.first_name || ''
+  const lastName = schedule?.client?.last_name || ''
+
+  return displayName || `${firstName} ${lastName}`.trim() || 'N/A'
+}
+
+const getWorkOrderAddress = (schedule?: Schedule) => {
+  const address = schedule?.work_order?.address
+  const street = address?.street_address || ''
+  const city = address?.city?.name || ''
+  const state = address?.state?.name || ''
+  const zip = address?.zip_code || ''
+
+  return [street, city, state, zip].filter(Boolean).join(', ') || 'N/A'
 }
 
 function ScheduleCalendarToolbar({ label, onNavigate, onView, view }: ToolbarProps<ScheduleCalendarEventType, object>) {
@@ -128,6 +139,23 @@ function ScheduleCalendarAgendaEvent({ event }: { event?: { resource?: Schedule;
       <Badge variant={getScheduleStatusVariant(schedule?.status)} className='border-0 px-1.5 py-0 text-[10px]'>
         {schedule?.status || 'scheduled'}
       </Badge>
+    </div>
+  )
+}
+
+function ScheduleCalendarEvent({ event }: { event?: ScheduleCalendarEventType }) {
+  const schedule = event?.resource
+
+  return (
+    <div className='schedule-calendar-event-content'>
+      <div className='schedule-calendar-event-title'>
+        <CalendarDays className='h-3.5 w-3.5 shrink-0' />
+        <span className='truncate'>{event?.title || schedule?.title || 'Untitled schedule'}</span>
+      </div>
+      <div className='schedule-calendar-event-line'>Service Type: {schedule?.service_type?.name || 'N/A'}</div>
+      <div className='schedule-calendar-event-line'>Contractor: {getContractorName(schedule)}</div>
+      <div className='schedule-calendar-event-line'>Customer: {getCustomerName(schedule)}</div>
+      <div className='schedule-calendar-event-line'>Address: {getWorkOrderAddress(schedule)}</div>
     </div>
   )
 }
@@ -218,17 +246,19 @@ export default function ScheduleCalendar({
     setDialogOpen(true)
   }
 
-  const scheduleColorMap = useMemo(() => {
-    const map = new Map<string, string>()
+  const isSingleContractorView = useMemo(() => {
+    const contractorId = filterOptions?.contractor_id
 
-    schedules.forEach(schedule => {
-      const hash = schedule.id.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
+    if (contractorId == null) return false
 
-      map.set(schedule.id, SCHEDULE_PALETTE[hash % SCHEDULE_PALETTE.length])
-    })
+    if (typeof contractorId === 'string') {
+      const normalized = contractorId.trim().toLowerCase()
 
-    return map
-  }, [schedules])
+      return normalized !== '' && normalized !== 'all'
+    }
+
+    return true
+  }, [filterOptions?.contractor_id])
 
   const events = useMemo<ScheduleCalendarEventType[]>(() => {
     return schedules.map(schedule => {
@@ -246,7 +276,9 @@ export default function ScheduleCalendar({
   }, [schedules])
 
   const eventPropGetter = (event: ScheduleCalendarEventType) => {
-    const color = scheduleColorMap.get(event.id) ?? SCHEDULE_PALETTE[0]
+    const schedule = event.resource
+    const colorKey = isSingleContractorView ? schedule?.id : schedule?.contractor_id || schedule?.contractor?.id
+    const color = getPaletteColorByKey(colorKey)
 
     return {
       style: {
@@ -289,6 +321,7 @@ export default function ScheduleCalendar({
             eventPropGetter={eventPropGetter}
             components={{
               toolbar: ScheduleCalendarToolbar,
+              event: ScheduleCalendarEvent,
               agenda: {
                 event: ScheduleCalendarAgendaEvent
               }
