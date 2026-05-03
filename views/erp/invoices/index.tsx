@@ -389,9 +389,7 @@ const Invoices: React.FC<{
                     key='view-work-order'
                     className='w-full'
                     variant='ghost'
-                    onClick={() =>
-                      window.open(`/erp/work-orders/${row.work_order_id}?mode=view`, '_blank')
-                    }
+                    onClick={() => window.open(`/erp/work-orders/${row.work_order_id}?mode=view`, '_blank')}
                   >
                     View Work Order
                   </Button>
@@ -419,14 +417,14 @@ const Invoices: React.FC<{
   }
 
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <div className='flex items-center gap-2'>
+    <div className='flex items-center justify-between w-full gap-2.5'>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80! '>
         <InputGroup>
           <InputGroupInput
             placeholder='Search...'
             value={searchValue}
             onChange={e => setSearchValue(e.target.value)}
-            className='w-80'
+            className='lg:w-80 min-w-0'
           />
           <InputGroupAddon>
             <Search />
@@ -446,7 +444,7 @@ const Invoices: React.FC<{
           onClick={handleOpenCreateModal}
         >
           <PlusIcon className='w-4 h-4' />
-          Add Invoice
+          <span className='hidden min-[480px]:block'>Add Invoice</span>
         </Button>
       )}
     </div>
