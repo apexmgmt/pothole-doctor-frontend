@@ -1,3 +1,4 @@
+import { addDays, format } from 'date-fns'
 import ClientService from '@/services/api/clients/clients.service'
 import TaskReminderService from '@/services/api/settings/task_reminders.service'
 import TaskTypeService from '@/services/api/settings/task_types.service'
@@ -15,16 +16,14 @@ interface PageProps {
 export default async function TaskTimelinePage({ searchParams }: PageProps) {
   const params = await searchParams
 
-  const sDate = typeof params.starting_date === 'string' ? params.starting_date : null
-  const eDate = typeof params.ending_date === 'string' ? params.ending_date : null
+  const today = new Date()
+  const defaultStart = format(addDays(today, -15), 'yyyy-MM-dd')
+  const defaultEnd = format(addDays(today, 15), 'yyyy-MM-dd')
 
-  const filters =
-    sDate || eDate
-      ? {
-          ...(sDate && { starting_date: sDate }),
-          ...(eDate && { ending_date: eDate })
-        }
-      : undefined
+  const sDate = typeof params.starting_date === 'string' ? params.starting_date : defaultStart
+  const eDate = typeof params.ending_date === 'string' ? params.ending_date : defaultEnd
+
+  const filters = { starting_date: sDate, ending_date: eDate }
 
   const [tasksRes, staffsRes, clientsRes, taskTypesRes, taskRemindersRes, taskReminderChannelsRes] =
     await Promise.allSettled([
