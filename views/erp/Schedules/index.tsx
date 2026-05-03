@@ -290,12 +290,12 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
     <CommonLayout title='Schedules' noTabs={true}>
       <CommonTable
         data={{
-          data: (apiResponse?.data as Schedule[]) || [],
-          per_page: apiResponse?.per_page || 10,
-          total: apiResponse?.total || 0,
-          from: apiResponse?.from || 1,
-          to: apiResponse?.to || 10,
-          current_page: apiResponse?.current_page || 1,
+          data: (apiResponse?.data?.data as Schedule[]) || [],
+          per_page: apiResponse?.data?.per_page || 10,
+          total: apiResponse?.data?.total || 0,
+          from: apiResponse?.data?.from || 1,
+          to: apiResponse?.data?.to || 10,
+          current_page: apiResponse?.data?.current_page || 1,
           last_page: apiResponse?.last_page || 1
         }}
         columns={columns}
