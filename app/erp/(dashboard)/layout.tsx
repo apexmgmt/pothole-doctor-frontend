@@ -1,6 +1,6 @@
 import Header from '@/components/erp/common/Header'
 import Sidebar from '@/components/erp/common/menus/sidebar'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { ReactNode } from '@/types'
 import { getAuthUser } from '@/utils/auth'
 import { getPermissions } from '@/utils/role-permission'
@@ -19,7 +19,10 @@ const Layout = async ({ children }: ReactNode) => {
           <section className='flex-1 w-full xl:w-[calc(100%-260px)] flex flex-col '>
             <Header />
             <main className='flex-1 overflow-hidden p-4 md:p-6'>
-              <ScrollArea className='h-full'>{children}</ScrollArea>
+              <ScrollArea className='h-full w-full'>
+                {children}
+                <ScrollBar orientation='vertical' />
+              </ScrollArea>
             </main>
           </section>
         </section>
