@@ -222,12 +222,6 @@ const ClientTasks = ({ clientId }: { clientId: string }) => {
       sortable: false
     },
     {
-      id: 'comment',
-      header: 'Comment',
-      cell: (row: Task) => <span className='font-medium'>{row?.comment || ''}</span>,
-      sortable: false
-    },
-    {
       id: 'actions',
       header: 'Action',
       cell: (row: Task) => (
