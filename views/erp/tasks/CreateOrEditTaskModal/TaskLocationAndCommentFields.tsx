@@ -51,20 +51,6 @@ export function TaskLocationAndCommentFields({
           </FormItem>
         )}
       />
-      {/* Comment field */}
-      <FormField
-        control={form.control}
-        name='comment'
-        render={({ field }) => (
-          <FormItem className='col-span-1 lg:col-span-2'>
-            <FormLabel>Comment</FormLabel>
-            <FormControl>
-              <Textarea placeholder='Enter comment' rows={4} {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </>
   )
 }

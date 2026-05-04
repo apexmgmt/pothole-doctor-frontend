@@ -166,12 +166,6 @@ const ProposalTasksModal = ({
       sortable: false
     },
     {
-      id: 'comment',
-      header: 'Comment',
-      cell: (row: Task) => <Description description={row.comment} />,
-      sortable: false
-    },
-    {
       id: 'actions',
       header: 'Actions',
       headerAlign: 'center',

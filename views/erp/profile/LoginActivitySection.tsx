@@ -104,15 +104,15 @@ const LoginActivitySection = () => {
         )}
       </div>
 
-      <div className='space-y-2 text-sm'>
-        <div className='flex items-start gap-3'>
+      <div className='space-y-3 min-[450px]:space-y-2 text-sm'>
+        <div className='flex flex-col min-[450px]:flex-row items-start gap-1 min-[450px]:gap-3'>
           <span className='text-gray w-32'>Last accessed:</span>
           <Badge variant='default' className='bg-light text-bg capitalize'>
             {getTimeAgo(activity.login_at)}
           </Badge>
         </div>
 
-        <div className='flex items-start gap-3'>
+        <div className='flex flex-col min-[450px]:flex-row items-start gap-1 min-[450px]:gap-3'>
           <span className='text-gray w-32'>Location:</span>
           <div className='flex-1 flex flex-wrap items-center gap-2'>
             <span className='text-light'>{getLocationText(activity)}</span>
@@ -120,20 +120,20 @@ const LoginActivitySection = () => {
           </div>
         </div>
 
-        <div className='flex items-start gap-3'>
+        <div className='flex flex-col min-[450px]:flex-row items-start gap-1 min-[450px]:gap-3'>
           <span className='text-gray w-32'>Platform:</span>
           <span className='text-light'>
             {activity.browser} on {activity.platform} {activity.platform_version}
           </span>
         </div>
 
-        <div className='flex items-start gap-3'>
+        <div className='flex flex-col min-[450px]:flex-row items-start gap-1 min-[450px]:gap-3'>
           <span className='text-gray w-32'>IP Address:</span>
           <span className='text-light'>{activity.ip_address}</span>
         </div>
 
         {activity.device_type && (
-          <div className='flex items-start gap-3'>
+          <div className='flex flex-col min-[450px]:flex-row items-start gap-1 min-[450px]:gap-3'>
             <span className='text-gray w-32'>Device Type:</span>
             <div className='flex items-center gap-2'>
               {/* <Badge variant='outline'>{activity.device_type}</Badge> */}
@@ -150,7 +150,7 @@ const LoginActivitySection = () => {
   return (
     <div className='space-y-5 pt-6 border-t border-border'>
       <div>
-        <div className='flex flex-row items-center justify-between space-y-0 pb-4'>
+        <div className='flex flex-row items-center justify-between flex-wrap space-y-0 pb-4 gap-2.5'>
           <div className='text-lg font-semibold text-light'>Login Devices</div>
           <Button
             variant='outline'

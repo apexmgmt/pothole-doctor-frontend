@@ -97,7 +97,7 @@ const ChangePasswordSection = () => {
                       <button
                         type='button'
                         onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                        className='absolute right-3 focus:outline-none text-gray hover:text-light transition-colors'
+                        className='absolute right-3 focus:outline-none text-gray hover:text-light transition-colors cursor-pointer'
                       >
                         {showCurrentPassword ? (
                           <EyeCloseIcon className='h-4 w-4' />
@@ -143,7 +143,7 @@ const ChangePasswordSection = () => {
                       <button
                         type='button'
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        className='absolute right-3 focus:outline-none text-gray hover:text-light transition-colors'
+                        className='absolute right-3 focus:outline-none text-gray hover:text-light transition-colors cursor-pointer'
                       >
                         {showNewPassword ? <EyeCloseIcon className='h-4 w-4' /> : <EyeOpenIcon className='h-4 w-4' />}
                       </button>
@@ -178,7 +178,7 @@ const ChangePasswordSection = () => {
                       <button
                         type='button'
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className='absolute right-3 focus:outline-none text-gray hover:text-light transition-colors'
+                        className='absolute right-3 focus:outline-none text-gray hover:text-light transition-colors cursor-pointer'
                       >
                         {showConfirmPassword ? (
                           <EyeCloseIcon className='h-4 w-4' />

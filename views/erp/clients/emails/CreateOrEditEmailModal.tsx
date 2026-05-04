@@ -4,15 +4,13 @@ import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
-import { Descendant } from 'slate'
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Client } from '@/types'
 
-import RichTextEditor, { serializeToHtml } from '@/components/erp/common/editor/RichTextEditor'
+import TipTapRichTextEditor from '@/components/erp/common/editor/TipTapRichTextEditor'
 import ClientEmailService from '@/services/api/clients/client-emails.service'
 
 interface EmailFormValues {
@@ -23,8 +21,6 @@ interface EmailFormValues {
   cc_email: string
 }
 
-const initialValue: Descendant[] = [{ type: 'paragraph', children: [{ text: '' }] }]
-
 const CreateOrEditEmailModal: React.FC<{
   isOpen: boolean
   onClose: () => void
@@ -32,7 +28,7 @@ const CreateOrEditEmailModal: React.FC<{
   client: Client | null
   onSuccess: () => void
 }> = ({ isOpen, onClose, clientId, client, onSuccess }) => {
-  const [editorValue, setEditorValue] = useState<Descendant[]>(initialValue)
+  const [messageHtml, setMessageHtml] = useState('')
 
   const form = useForm<EmailFormValues>({
     defaultValues: {
@@ -53,18 +49,18 @@ const CreateOrEditEmailModal: React.FC<{
         message: '',
         cc_email: client?.clientable?.cc_email || ''
       })
-      setEditorValue(initialValue)
+      setMessageHtml('')
     }
   }, [isOpen, client, clientId, form])
 
   const onSubmit = async (values: EmailFormValues) => {
     try {
-      const message = serializeToHtml(editorValue)
+      const message = messageHtml
 
       await ClientEmailService.store({ ...values, message })
       toast.success('Email sent successfully')
       form.reset()
-      setEditorValue(initialValue)
+      setMessageHtml('')
       onSuccess()
       onClose()
     } catch (e: any) {
@@ -74,7 +70,7 @@ const CreateOrEditEmailModal: React.FC<{
 
   const onCancel = () => {
     form.reset()
-    setEditorValue(initialValue)
+    setMessageHtml('')
     onClose()
   }
 
@@ -160,7 +156,12 @@ const CreateOrEditEmailModal: React.FC<{
             <label className='text-sm font-medium'>
               Message <span className='text-red-500'>*</span>
             </label>
-            <RichTextEditor value={editorValue} onChange={setEditorValue} placeholder='Type your message here...' />
+            <TipTapRichTextEditor
+              value={messageHtml}
+              onChange={setMessageHtml}
+              placeholder='Type your message here...'
+              disabled={form.formState.isSubmitting}
+            />
           </div>
         </form>
       </Form>

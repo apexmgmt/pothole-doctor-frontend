@@ -19,6 +19,16 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import { toast } from 'sonner'
 import ScheduleCalendarFilter from './ScheduleCalendarFilter'
 import ScheduleFormDialog from './ScheduleFormDialog'
+import { getPaletteColorByKey } from '@/constants/colors'
+import { SpinnerCustom } from '@/components/ui/spinner'
+import {
+  ScheduleCalendarEvent,
+  ScheduleCalendarAgendaEvent,
+  type ScheduleCalendarEventType
+} from './ScheduleCalendarEvent'
+import { ScheduleCalendarToolbar } from './ScheduleCalendarToolbar'
+import { useAppDispatch } from '@/lib/hooks'
+import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
 // Setup date-fns localizer for the calendar
 const locales = {
@@ -45,6 +55,10 @@ interface ScheduleCalendarProps {
   partners: Partner[]
 }
 
+/**
+ * Main schedule calendar container.
+ * Handles filtering, schedule fetching, view/date state, and form dialog interactions.
+ */
 export default function ScheduleCalendar({
   clients = [],
   workOrders = [],
@@ -52,6 +66,7 @@ export default function ScheduleCalendar({
   partners = []
 }: ScheduleCalendarProps) {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const initialFilters = getInitialFilters(searchParams)
@@ -73,6 +88,11 @@ export default function ScheduleCalendar({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [isAutoOpenDialog, setIsAutoOpenDialog] = useState(openDialogOnMount)
 
+  /** Set the page title when the component mounts */
+  useEffect(() => {
+    dispatch(setPageTitle('Schedules - Calendar'))
+  }, [])
+
   const [filterOptions, setFilterOptions] = useState<any>(() => {
     if (!initialFilters.starting_date || !initialFilters.ending_date) {
       return { ...getMonthBounds(initialDate), ...initialFilters }
@@ -80,6 +100,11 @@ export default function ScheduleCalendar({
 
     return initialFilters
   })
+
+  const applyFilterOptions: React.Dispatch<React.SetStateAction<any>> = updater => {
+    setIsLoading(true)
+    setFilterOptions(updater)
+  }
 
   useEffect(() => {
     setIsLoading(true)
@@ -103,11 +128,17 @@ export default function ScheduleCalendar({
     }
   }, [])
 
+  /**
+   * Updates calendar date and syncs month bounds into filter options.
+   */
   const handleNavigate = (date: Date) => {
     setCurrentDate(date)
-    setFilterOptions((prev: any) => ({ ...prev, ...getMonthBounds(date) }))
+    applyFilterOptions((prev: any) => ({ ...prev, ...getMonthBounds(date) }))
   }
 
+  /**
+   * Opens create dialog with the clicked date preselected.
+   */
   const handleSelectSlot = ({ start }: { start: Date }) => {
     setIsAutoOpenDialog(false)
     setSelectedDate(start)
@@ -116,6 +147,9 @@ export default function ScheduleCalendar({
     setDialogOpen(true)
   }
 
+  /**
+   * Opens edit dialog for the selected schedule event.
+   */
   const handleSelectEvent = (event: any) => {
     setIsAutoOpenDialog(false)
     setSelectedSchedule(event.resource as Schedule)
@@ -124,7 +158,21 @@ export default function ScheduleCalendar({
     setDialogOpen(true)
   }
 
-  const events = useMemo(() => {
+  const isSingleContractorView = useMemo(() => {
+    const contractorId = filterOptions?.contractor_id
+
+    if (contractorId == null) return false
+
+    if (typeof contractorId === 'string') {
+      const normalized = contractorId.trim().toLowerCase()
+
+      return normalized !== '' && normalized !== 'all'
+    }
+
+    return true
+  }, [filterOptions?.contractor_id])
+
+  const events = useMemo<ScheduleCalendarEventType[]>(() => {
     return schedules.map(schedule => {
       const startString = `${schedule.starting_date}T${schedule.starting_time || '00:00:00'}`
       const endString = `${schedule.ending_date}T${schedule.ending_time || '23:59:59'}`
@@ -139,23 +187,25 @@ export default function ScheduleCalendar({
     })
   }, [schedules])
 
-  const eventPropGetter = (event: any) => {
-    const status = event.resource.status
-    let backgroundColor = '#3174ad'
+  const displayedEvents = isLoading ? [] : events
 
-    if (status === 'scheduled') backgroundColor = '#0ea5e9'
-    if (status === 'completed') backgroundColor = '#22c55e'
-    if (status === 'pending') backgroundColor = '#64748b'
-    if (status === 'cancelled') backgroundColor = '#ef4444'
+  /**
+   * Applies deterministic event background styling by contractor or event ID.
+   */
+  const eventPropGetter = (event: ScheduleCalendarEventType) => {
+    const schedule = event.resource
+    const colorKey = isSingleContractorView ? schedule?.id : schedule?.contractor_id || schedule?.contractor?.id
+    const color = getPaletteColorByKey(colorKey)
 
     return {
       style: {
-        backgroundColor,
-        borderRadius: '4px',
-        opacity: 0.9,
+        backgroundColor: color,
+        borderRadius: '6px',
+        opacity: 0.92,
         color: 'white',
-        border: '0px',
-        display: 'block'
+        border: 'none',
+        display: 'block',
+        boxShadow: `0 1px 4px ${color}55`
       }
     }
   }
@@ -168,24 +218,40 @@ export default function ScheduleCalendar({
         serviceTypes={serviceTypes}
         partners={partners}
         filterOptions={filterOptions}
-        setFilterOptions={setFilterOptions}
+        setFilterOptions={applyFilterOptions}
       />
 
-      <Card className='shadow-sm flex-1 h-[800px] p-4'>
-        <CardContent className='h-full p-0'>
+      <Card className='schedule-calendar-shell shadow-sm flex-1 border-white/10 bg-zinc-950/70 p-4 text-white backdrop-blur'>
+        <CardContent className='relative p-0'>
+          {isLoading && (
+            <div className='absolute inset-0 z-10 flex items-center justify-center rounded-md bg-zinc-950/55 backdrop-blur-sm'>
+              <div className='flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-zinc-900/90 px-4 py-3 text-sm text-white'>
+                <SpinnerCustom position='static' zIndex={0} size='size-5' className='inset-auto!' />
+                <span>Loading schedules...</span>
+              </div>
+            </div>
+          )}
           <Calendar
             localizer={localizer}
-            events={events}
+            events={displayedEvents}
             startAccessor='start'
             endAccessor='end'
-            style={{ height: '100%' }}
-            views={['month', 'week', 'day', 'agenda']}
+            style={{ height: 800 }}
+            showAllEvents
+            views={['month', 'week', 'day']}
             view={currentView}
             onView={view => setCurrentView(view)}
             date={currentDate}
             onNavigate={handleNavigate}
             eventPropGetter={eventPropGetter}
-            selectable
+            components={{
+              toolbar: ScheduleCalendarToolbar,
+              event: ScheduleCalendarEvent,
+              agenda: {
+                event: ScheduleCalendarAgendaEvent
+              }
+            }}
+            selectable={!isLoading}
             onSelectSlot={handleSelectSlot}
             onSelectEvent={handleSelectEvent}
           />

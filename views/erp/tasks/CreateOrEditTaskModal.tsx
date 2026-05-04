@@ -24,7 +24,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import TaskService from '@/services/api/tasks.service'
+import TaskService from '@/services/api/tasks/tasks.service'
 import ProposalTaskService from '@/services/api/estimates/proposal-tasks.service'
 import InvoiceTaskService from '@/services/api/invoices/invoice-tasks.service'
 import { MultiSelect, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -34,6 +34,7 @@ import { TaskLocationAndCommentFields } from './CreateOrEditTaskModal/TaskLocati
 import { Checkbox } from '@/components/ui/checkbox'
 import { TaskReminderFields } from './CreateOrEditTaskModal/TaskReminderFields'
 import { DatePicker } from '@/components/ui/datePicker'
+import TipTapRichTextEditor from '@/components/erp/common/editor/TipTapRichTextEditor'
 
 interface CreateOrEditTaskModalProps {
   mode?: 'create' | 'edit'
@@ -70,7 +71,7 @@ interface FormValues {
   sms_reminder: number | 1 | 0
   email_reminder: number | 1 | 0
   location?: string
-  comment?: string
+  description?: string
   sms_customer_times?: Record<string, number>
   sms_employee_times?: Record<string, number>
   email_customer_times?: Record<string, number>
@@ -97,6 +98,7 @@ const CreateOrEditTaskModal = ({
   defaultClientId
 }: CreateOrEditTaskModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [descriptionHtml, setDescriptionHtml] = useState<string>('')
 
   // Skip reminder sync on initial edit load so existing task_reminder_setting values are preserved
   const skipReminderSync = useRef(false)
@@ -114,7 +116,7 @@ const CreateOrEditTaskModal = ({
       sms_reminder: taskDetails?.sms_reminder || 0,
       email_reminder: taskDetails?.email_reminder || 0,
       location: taskDetails?.location || '',
-      comment: taskDetails?.comment || '',
+      description: taskDetails?.description || '',
       sms_customer_times: {},
       sms_employee_times: {},
       email_customer_times: {},
@@ -169,7 +171,7 @@ const CreateOrEditTaskModal = ({
         sms_reminder: taskDetails?.sms_reminder || 0,
         email_reminder: taskDetails?.email_reminder || 0,
         location: taskDetails?.location || '',
-        comment: taskDetails?.comment || '',
+        description: taskDetails?.description || '',
         sms_customer_times: smsCustomerTimes,
         sms_employee_times: smsEmployeeTimes,
         email_customer_times: emailCustomerTimes,
@@ -178,6 +180,11 @@ const CreateOrEditTaskModal = ({
         completed_date: taskDetails?.completed_date || '',
         close_comment: taskDetails?.close_comment || ''
       })
+
+      // Initialise rich-text editor from saved HTML
+      setDescriptionHtml(taskDetails?.description || '')
+    } else {
+      setDescriptionHtml('')
     }
   }, [taskDetails, open, form])
 
@@ -362,7 +369,7 @@ const CreateOrEditTaskModal = ({
       sms_reminder: values.sms_reminder,
       email_reminder: values.email_reminder,
       location: values.location || '',
-      comment: values.comment || '',
+      description: descriptionHtml,
       completed_date: values.completed_date || '',
       close_comment: values.close_comment || '',
       status: values.status || '',
@@ -468,25 +475,37 @@ const CreateOrEditTaskModal = ({
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
             {/* Task Name Field */}
-            <FormField
-              control={form.control}
-              name='name'
-              rules={{
-                required: 'Task name is required',
-                minLength: { value: 2, message: 'Task name must be at least 2 characters' }
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Task Name <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter task name' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className='space-y-2 lg:col-span-2'>
+              <FormField
+                control={form.control}
+                name='name'
+                rules={{
+                  required: 'Task name is required',
+                  minLength: { value: 2, message: 'Task name must be at least 2 characters' }
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Task Name <span className='text-red-500'>*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder='Enter task name' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Description Field */}
+            <div className='space-y-2 lg:col-span-2'>
+              <label className='text-sm font-medium'>Description</label>
+              <TipTapRichTextEditor
+                value={descriptionHtml}
+                onChange={setDescriptionHtml}
+                placeholder='Enter task description'
+              />
+            </div>
             {/* Customer field */}
             <FormField
               control={form.control}

@@ -14,17 +14,19 @@ import { Button } from '@/components/ui/button'
 import { Client, Column, DataTableApiResponse, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
+import ViewButton from '@/components/erp/common/buttons/ViewButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import TaskService from '@/services/api/tasks.service'
+import TaskService from '@/services/api/tasks/tasks.service'
 import { formatDate } from '@/utils/date'
 import { Badge } from '@/components/ui/badge'
 import CreateOrEditTaskModal from './CreateOrEditTaskModal'
 import { hasPermission } from '@/utils/role-permission'
 import { Description } from '@/components/ui/description'
+import TaskViewModal from './TaskViewModal'
 
 const Tasks: React.FC<{
   staffs: Staff[]
@@ -43,6 +45,8 @@ const Tasks: React.FC<{
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState<boolean>(false)
+  const [selectedViewTaskId, setSelectedViewTaskId] = useState<string | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
@@ -139,6 +143,16 @@ const Tasks: React.FC<{
     setIsModalOpen(false)
     setSelectedTaskId(null)
     setSelectedTask(null)
+  }
+
+  const handleOpenViewModal = (id: string) => {
+    setSelectedViewTaskId(id)
+    setIsViewModalOpen(true)
+  }
+
+  const handleViewModalClose = () => {
+    setIsViewModalOpen(false)
+    setSelectedViewTaskId(null)
   }
 
   const handleSuccess = () => {
@@ -249,12 +263,6 @@ const Tasks: React.FC<{
       sortable: true
     },
     {
-      id: 'comment',
-      header: 'Comment',
-      cell: (row: Task) => <span className='font-medium'>{row?.comment || ''}</span>,
-      sortable: true
-    },
-    {
       id: 'location',
       header: 'Event Location',
       cell: (row: Task) => <Description description={row.location} />,
@@ -279,7 +287,8 @@ const Tasks: React.FC<{
                   : []),
                 ...(canDeleteTask
                   ? [<DeleteButton tooltip='Delete Task' variant='text' onClick={() => handleDeleteTask(row.id)} />]
-                  : [])
+                  : []),
+                <ViewButton tooltip='View Task Details' onClick={() => handleOpenViewModal(row.id)} variant='text' />
               ]}
             />
           )}
@@ -320,14 +329,14 @@ const Tasks: React.FC<{
 
   // Custom filters component
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <div className='flex items-center gap-2'>
+    <div className='flex items-center justify-between w-full gap-2.5'>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1'>
         <InputGroup>
           <InputGroupInput
             placeholder='Search...'
             value={searchValue}
             onChange={e => setSearchValue(e.target.value)}
-            className='w-80'
+            className='lg:w-80 min-w-0'
           />
           <InputGroupAddon>
             <Search />
@@ -347,7 +356,7 @@ const Tasks: React.FC<{
           onClick={handleOpenCreateModal}
         >
           <PlusIcon className='w-4 h-4' />
-          Add Task
+          <span className='hidden min-[480px]:block'>Add Task</span>
         </Button>
       )}
     </div>
@@ -388,6 +397,25 @@ const Tasks: React.FC<{
         taskTypes={taskTypes}
         taskReminders={taskReminders}
         taskReminderChannels={taskReminderChannels}
+      />
+
+      <TaskViewModal
+        open={isViewModalOpen}
+        onOpenChange={open => {
+          if (!open) {
+            handleViewModalClose()
+
+            return
+          }
+
+          setIsViewModalOpen(true)
+        }}
+        taskId={selectedViewTaskId || undefined}
+        canEditTask={canEditTask}
+        onEditTask={id => {
+          handleViewModalClose()
+          void handleOpenEditModal(id)
+        }}
       />
     </>
   )

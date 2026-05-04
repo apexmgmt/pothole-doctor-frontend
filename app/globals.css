@@ -35,6 +35,50 @@
   --text-large-title: 38px;
   --text-heading: 36px;
   --text-body-text: 16px;
+
+  /* Keyframes for Dialog */
+  @keyframes enter {
+    from {
+      opacity: var(--tw-enter-opacity, 1);
+      transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0)
+        scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), var(--tw-enter-scale, 1));
+    }
+  }
+  @keyframes exit {
+    to {
+      opacity: var(--tw-exit-opacity, 1);
+      transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0)
+        scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1));
+    }
+  }
+
+  /* Animation Utilities */
+  --animate-in: enter 0.3s ease-out;
+  --animate-out: exit 0.3s ease-in;
+}
+
+@utility animate-in {
+  animation: var(--animate-in);
+}
+
+@utility animate-out {
+  animation: var(--animate-out);
+}
+
+@utility fade-in-0 {
+  --tw-enter-opacity: 0;
+}
+
+@utility fade-out-0 {
+  --tw-exit-opacity: 0;
+}
+
+@utility zoom-in-95 {
+  --tw-enter-scale: 0.95;
+}
+
+@utility zoom-out-95 {
+  --tw-exit-scale: 0.95;
 }
 
 @keyframes accordion-down {
@@ -214,6 +258,207 @@
   background-clip: text;
   color: transparent;
   display: inline-block;
+}
+
+.schedule-calendar-shell .rbc-calendar {
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.schedule-calendar-shell .rbc-toolbar {
+  display: none;
+}
+
+.schedule-calendar-shell .rbc-month-view,
+.schedule-calendar-shell .rbc-time-view,
+.schedule-calendar-shell .rbc-agenda-view {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(24, 24, 27, 0.98), rgba(17, 24, 39, 0.92));
+}
+
+/* Allow month rows to expand vertically based on event count */
+.schedule-calendar-shell .rbc-month-view {
+  overflow-y: auto;
+}
+
+.schedule-calendar-shell .rbc-month-row {
+  flex: none !important;
+  block-size: auto !important;
+  min-block-size: 133px !important;
+  overflow: visible !important;
+}
+
+/* rbc-row-content-scroll-container is the inner wrapper react-big-calendar
+   uses with showAllEvents — it defaults to overflow-y: hidden with a fixed
+   max-height which clips every event row after the first one. */
+.schedule-calendar-shell .rbc-row-content-scroll-container {
+  overflow: visible !important;
+  max-block-size: none !important;
+  block-size: auto !important;
+}
+
+.schedule-calendar-shell .rbc-row-content {
+  block-size: auto !important;
+  overflow: visible;
+}
+
+/* Keep the bg layer in sync with the expanded row height */
+.schedule-calendar-shell .rbc-row-bg {
+  position: absolute;
+  inset: 0;
+  block-size: 100%;
+}
+
+.schedule-calendar-shell .rbc-header {
+  border-block-end: 1px solid rgba(255, 255, 255, 0.08);
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.05);
+  padding-block: 0.85rem;
+  padding-inline: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.schedule-calendar-shell .rbc-header:first-child,
+.schedule-calendar-shell .rbc-month-row .rbc-date-cell:first-child,
+.schedule-calendar-shell .rbc-time-header-content,
+.schedule-calendar-shell .rbc-time-content > * + * > * {
+  border-inline-start: none;
+}
+
+.schedule-calendar-shell .rbc-day-bg,
+.schedule-calendar-shell .rbc-month-row + .rbc-month-row,
+.schedule-calendar-shell .rbc-timeslot-group,
+.schedule-calendar-shell .rbc-time-content,
+.schedule-calendar-shell .rbc-time-header-content,
+.schedule-calendar-shell .rbc-time-view,
+.schedule-calendar-shell .rbc-agenda-view table.rbc-agenda-table,
+.schedule-calendar-shell .rbc-agenda-view table.rbc-agenda-table tbody > tr > td,
+.schedule-calendar-shell .rbc-agenda-view table.rbc-agenda-table tbody > tr > th {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.schedule-calendar-shell .rbc-day-bg {
+  background: #171717;
+}
+
+.schedule-calendar-shell .rbc-off-range-bg {
+  background: #1f1f1f!important;
+}
+
+.schedule-calendar-shell .rbc-today {
+  background: var(--color-primary);
+}
+
+.schedule-calendar-shell .rbc-date-cell {
+  padding-block-start: 0.45rem;
+  padding-inline: 0.55rem;
+  padding-block-end: 0;
+  text-align: end;
+}
+
+.schedule-calendar-shell .rbc-date-cell > a {
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.schedule-calendar-shell .rbc-off-range .rbc-date-cell > a {
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.schedule-calendar-shell .rbc-row-segment {
+  padding-inline: 0.35rem;
+}
+
+.schedule-calendar-shell .rbc-event,
+.schedule-calendar-shell .rbc-background-event {
+  min-block-size: 22px;
+}
+
+.schedule-calendar-shell .rbc-event-content {
+  display: block;
+  font-size: 0.68rem;
+  line-height: 1.2;
+  font-weight: 500;
+  padding: 0;
+  white-space: normal;
+  overflow: visible;
+}
+
+.schedule-calendar-event-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-block: 2px;
+  padding-inline: 3px;
+}
+
+.schedule-calendar-event-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.schedule-calendar-event-line {
+  font-size: 0.63rem;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.schedule-calendar-shell .rbc-show-more {
+  color: rgba(62, 207, 109, 0.95);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: transparent;
+}
+
+.schedule-calendar-shell .rbc-current-time-indicator {
+  background-color: rgba(62, 207, 109, 0.9);
+}
+
+.schedule-calendar-shell .rbc-time-slot,
+.schedule-calendar-shell .rbc-label,
+.schedule-calendar-shell .rbc-agenda-date-cell,
+.schedule-calendar-shell .rbc-agenda-time-cell,
+.schedule-calendar-shell .rbc-agenda-event-cell {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.schedule-calendar-shell .rbc-agenda-view table.rbc-agenda-table {
+  background: rgba(24, 24, 27, 0.96);
+}
+
+.schedule-calendar-shell .rbc-agenda-view table.rbc-agenda-table tbody > tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+@media (max-width: 640px) {
+  .schedule-calendar-shell {
+    min-block-size: 680px;
+  }
+
+  .schedule-calendar-shell .rbc-date-cell {
+    padding-inline: 0.35rem;
+  }
+
+  .schedule-calendar-shell .rbc-row-segment {
+    padding-inline: 0.15rem;
+  }
+
+  .schedule-calendar-event-content {
+    padding-inline: 2px;
+  }
 }
 
 .hide-time-icon::-webkit-calendar-picker-indicator {

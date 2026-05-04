@@ -18,7 +18,7 @@ import { Client, Column, DataTableApiResponse, Staff, Task, TaskReminder, TaskRe
 import { formatDate } from '@/utils/date'
 import ClientService from '@/services/api/clients/clients.service'
 import StaffService from '@/services/api/staff.service'
-import TaskService from '@/services/api/tasks.service'
+import TaskService from '@/services/api/tasks/tasks.service'
 import TaskReminderService from '@/services/api/settings/task_reminders.service'
 import TaskTypeService from '@/services/api/settings/task_types.service'
 import CreateOrEditTaskModal from '@/views/erp/tasks/CreateOrEditTaskModal'
@@ -222,12 +222,6 @@ const ClientTasks = ({ clientId }: { clientId: string }) => {
       sortable: false
     },
     {
-      id: 'comment',
-      header: 'Comment',
-      cell: (row: Task) => <span className='font-medium'>{row?.comment || ''}</span>,
-      sortable: false
-    },
-    {
       id: 'actions',
       header: 'Action',
       cell: (row: Task) => (
@@ -252,18 +246,20 @@ const ClientTasks = ({ clientId }: { clientId: string }) => {
   ]
 
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <InputGroup>
-        <InputGroupInput
-          placeholder='Search...'
-          value={searchValue}
-          onChange={e => setSearchValue(e.target.value)}
-          className='w-80'
-        />
-        <InputGroupAddon>
-          <Search />
-        </InputGroupAddon>
-      </InputGroup>
+    <div className='flex items-center justify-between w-full gap-2.5'>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80! '>
+        <InputGroup>
+          <InputGroupInput
+            placeholder='Search...'
+            value={searchValue}
+            onChange={e => setSearchValue(e.target.value)}
+            className='lg:w-80 min-w-0'
+          />
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+        </InputGroup>
+      </div>
       <Button
         variant='default'
         size='sm'
@@ -271,7 +267,7 @@ const ClientTasks = ({ clientId }: { clientId: string }) => {
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        Add Task
+        <span className='hidden min-[480px]:block'>Add Task</span>
       </Button>
     </div>
   )

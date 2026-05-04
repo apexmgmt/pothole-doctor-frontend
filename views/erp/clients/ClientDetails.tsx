@@ -59,7 +59,7 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
 
   if (isLoading) {
     return (
-      <div className='space-y-6'>
+      <div className='space-y-6 mt-2.5'>
         <div className='flex items-center justify-between'>
           <Skeleton className='h-8 w-48' />
         </div>
@@ -71,7 +71,7 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
             <Skeleton className='h-6 w-20' />
           </div>
         </div>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           <Skeleton className='h-64' />
           <Skeleton className='h-64' />
         </div>
@@ -118,39 +118,39 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
       </div>
 
       {/* Details Grid */}
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
         {/* Client Information */}
         <div className='space-y-4'>
           <h5 className='text-sm font-medium text-light uppercase tracking-wide'>
             {type === 'lead' ? 'Lead' : 'Customer'} Information
           </h5>
           <div className='space-y-3'>
-            <div>
-              <label className='text-xs text-gray uppercase'>First Name</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>First Name :</label>
               <p className='text-light'>{clientData?.first_name || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Last Name</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Last Name :</label>
               <p className='text-light'>{clientData?.last_name || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Display Name</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Display Name :</label>
               <p className='text-light'>{clientData?.display_name || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Email</label>
-              <p className='text-light'>{clientData?.email || 'N/A'}</p>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Email :</label>
+              <p className='text-light break-all'>{clientData?.email || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Phone</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Phone :</label>
               <p className='text-light'>{clientData?.phone || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Cell Phone</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Cell Phone :</label>
               <p className='text-light'>{clientData?.clientable?.cell_phone || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Address</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Address :</label>
               <p className='text-light'>
                 {clientData?.address?.street_address
                   ? `${clientData.address.street_address}, ${clientData.address.city?.name || ''}, ${clientData.address.state?.name || ''} ${clientData.address.zip_code || ''}`
@@ -164,36 +164,38 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
         <div className='space-y-4'>
           <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Business Information</h5>
           <div className='space-y-3'>
-            <div>
-              <label className='text-xs text-gray uppercase'>Company</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Company :</label>
               <p className='text-light'>{clientData?.company?.name || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Contact Type</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Contact Type :</label>
               <p className='text-light'>{clientData?.contact_type?.name || 'N/A'}</p>
             </div>
             {type === 'customer' && (
-              <div>
-                <label className='text-xs text-gray uppercase'>Location</label>
+              <div className='flex items-center gap-2.5'>
+                <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Location :</label>
                 <p className='text-light'>{clientData?.location?.name || 'N/A'}</p>
               </div>
             )}
-            <div>
-              <label className='text-xs text-gray uppercase'>{type === 'lead' ? 'Lead' : 'Client'} Source</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>
+                {type === 'lead' ? 'Lead' : 'Client'} Source :
+              </label>
               <p className='text-light'>{clientData?.source?.name || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Interest Level</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Interest Level :</label>
               <p className='text-light'>{clientData?.interest_level?.name || 'N/A'}</p>
             </div>
             {type === 'lead' && (
-              <div>
-                <label className='text-xs text-gray uppercase'>Lead Cost</label>
+              <div className='flex items-center gap-2.5'>
+                <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Lead Cost :</label>
                 <p className='text-light'>${clientData?.lead_cost || '0.00'}</p>
               </div>
             )}
-            <div>
-              <label className='text-xs text-gray uppercase'>Sales Rep.</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Sales Rep. :</label>
               <p className='text-light'>
                 {clientData?.reference?.first_name && clientData?.reference?.last_name
                   ? `${clientData?.reference.first_name} ${clientData?.reference.last_name}`
@@ -201,8 +203,8 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
               </p>
             </div>
             {type === 'customer' && clientData?.added_by && (
-              <div>
-                <label className='text-xs text-gray uppercase'>Added By</label>
+              <div className='flex items-center gap-2.5'>
+                <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Added By :</label>
                 <p className='text-light'>{`${clientData?.added_by.first_name} ${clientData?.added_by.last_name}`}</p>
               </div>
             )}
@@ -227,28 +229,28 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
       {/* Additional Information */}
       <div className='space-y-4 pt-4 border-t border-border'>
         <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Additional Information</h5>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           <div className='space-y-3'>
-            <div>
-              <label className='text-xs text-gray uppercase'>Spouse Name</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Spouse Name :</label>
               <p className='text-light'>{clientData?.clientable?.spouse_name || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Spouse Phone</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Spouse Phone :</label>
               <p className='text-light'>{clientData?.clientable?.spouse_phone || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Best Time to Contact</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Best Time to Contact :</label>
               <p className='text-light'>{clientData?.clientable?.best_time || 'N/A'}</p>
             </div>
           </div>
           <div className='space-y-3'>
-            <div>
-              <label className='text-xs text-gray uppercase'>CC Email</label>
-              <p className='text-light'>{clientData?.clientable?.cc_email || 'N/A'}</p>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>CC Email :</label>
+              <p className='text-light break-all'>{clientData?.clientable?.cc_email || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-gray uppercase'>Pre-Qualified Amount</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Pre-Qualified Amount :</label>
               <p className='text-light'>${clientData?.clientable?.pre_qualified_amount || '0.00'}</p>
             </div>
             <div>
@@ -269,15 +271,15 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
 
       {/* Timestamps */}
       <div className='pt-4 border-t border-border'>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <label className='text-xs text-gray uppercase'>Created At</label>
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+          <div className='flex items-center gap-2.5'>
+            <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Created At :</label>
             <p className='text-light text-sm'>
               {clientData?.created_at ? new Date(clientData.created_at).toLocaleString() : 'N/A'}
             </p>
           </div>
-          <div>
-            <label className='text-xs text-gray uppercase'>Updated At</label>
+          <div className='flex items-center gap-2.5'>
+            <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Updated At :</label>
             <p className='text-light text-sm'>
               {clientData?.updated_at ? new Date(clientData.updated_at).toLocaleString() : 'N/A'}
             </p>

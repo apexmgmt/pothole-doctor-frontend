@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   DndContext,
@@ -17,7 +17,7 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { Client, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import { TaskCard } from './TaskCard'
-import TaskService from '@/services/api/tasks.service'
+import TaskService from '@/services/api/tasks/tasks.service'
 import CreateOrEditTaskModal from '@/views/erp/tasks/CreateOrEditTaskModal'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { KanbanColumn as Column, KanbanTask } from './kanban'
@@ -25,6 +25,9 @@ import KanbanColumn from './KanbanColumn'
 import { toast } from 'sonner'
 import { hasPermission } from '@/utils/role-permission'
 import KanbanFilter from './KanbanFilter'
+import TaskViewModal from '@/views/erp/tasks/TaskViewModal'
+import { useAppDispatch } from '@/lib/hooks'
+import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
 /**
  * Summary of COLUMNS constant
@@ -75,6 +78,7 @@ export default function KanbanBoard({
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const dispatch = useAppDispatch()
   const [tasks, setTasks] = useState<KanbanTask[]>(toKanbanTasks(initialTasks))
 
   const [filters, setFilters] = useState<any>({
@@ -88,6 +92,8 @@ export default function KanbanBoard({
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [selectedViewTaskId, setSelectedViewTaskId] = useState<string | null>(null)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [defaultStatus, setDefaultStatus] = useState<string>('backlog')
   const [canCreateTask, setCanCreateTask] = useState<boolean>(false)
   const [canEditTask, setCanEditTask] = useState<boolean>(false)
@@ -95,6 +101,12 @@ export default function KanbanBoard({
 
   // The "Interaction Lock" - Only allow fetches after the user touches the filter
   const hasUserChangedFilter = useRef(false)
+  const lastDragOverKeyRef = useRef<string | null>(null)
+
+  /** Set the page title when the component mounts */
+  useEffect(() => {
+    dispatch(setPageTitle('Tasks - Kanban Board'))
+  }, [])
 
   /**
    * Summary of fetchTasks function
@@ -288,6 +300,32 @@ export default function KanbanBoard({
     }
   }
 
+  const handleOpenViewTask = (taskId: string) => {
+    setSelectedViewTaskId(taskId)
+    setIsViewModalOpen(true)
+  }
+
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false)
+    setSelectedViewTaskId(null)
+  }
+
+  const tasksByColumn = useMemo(() => {
+    const grouped: Record<string, KanbanTask[]> = Object.fromEntries(COLUMNS.map(column => [column.id, []]))
+
+    for (const task of tasks) {
+      const columnId = task.columnId || 'backlog'
+
+      if (!grouped[columnId]) {
+        grouped[columnId] = []
+      }
+
+      grouped[columnId].push(task)
+    }
+
+    return grouped
+  }, [tasks])
+
   /**
    * Summary of useSensors setup
    *
@@ -308,6 +346,8 @@ export default function KanbanBoard({
    * @param event
    */
   const onDragStart = (event: DragStartEvent) => {
+    lastDragOverKeyRef.current = null
+
     if (event.active.data.current?.type === 'Task') {
       setActiveTask(event.active.data.current.task)
     }
@@ -325,6 +365,11 @@ export default function KanbanBoard({
 
     const activeId = String(active.id)
     const overId = String(over.id)
+    const dragOverKey = `${activeId}:${overId}`
+
+    if (dragOverKey === lastDragOverKeyRef.current) return
+
+    lastDragOverKeyRef.current = dragOverKey
 
     if (activeId === overId) return
 
@@ -358,14 +403,7 @@ export default function KanbanBoard({
       // If moving inside the same column
       if (activeTask.columnId === targetColumnId) {
         if (activeIndex !== overIndex && overIndex !== -1) {
-          let newTasks = arrayMove(tasks, activeIndex, overIndex)
-
-          // Recalculate +1 order for the column instantly
-          const colTasks = newTasks.filter(t => t.columnId === targetColumnId)
-
-          return newTasks.map(t =>
-            t.columnId === targetColumnId ? { ...t, order: colTasks.findIndex(ct => ct.id === t.id) } : t
-          )
+          return arrayMove(tasks, activeIndex, overIndex)
         }
 
         return tasks
@@ -373,11 +411,10 @@ export default function KanbanBoard({
 
       // If moving to a DIFFERENT column
       let newTasks = [...tasks]
-      const sourceColumnId = activeTask.columnId
 
       // Remove from old location
       newTasks.splice(activeIndex, 1)
-      const movedTask = { ...activeTask, columnId: targetColumnId }
+      const movedTask = { ...activeTask, columnId: targetColumnId, status: targetColumnId }
 
       // Insert at exact overIndex in the target column
       if (isOverTask && overIndex !== -1) {
@@ -387,15 +424,6 @@ export default function KanbanBoard({
       } else {
         newTasks.push(movedTask)
       }
-
-      // Recalculate orders locally for both source and target columns
-      ;[sourceColumnId, targetColumnId].forEach(colId => {
-        const colTasks = newTasks.filter(t => t.columnId === colId)
-
-        newTasks = newTasks.map(t =>
-          t.columnId === colId ? { ...t, order: colTasks.findIndex(ct => ct.id === t.id) } : t
-        )
-      })
 
       return newTasks
     })
@@ -409,6 +437,8 @@ export default function KanbanBoard({
     const { active, over } = event
 
     setActiveTask(null)
+    lastDragOverKeyRef.current = null
+
     if (!over) return
 
     const activeId = String(active.id)
@@ -419,6 +449,8 @@ export default function KanbanBoard({
 
       if (!activeTask) return tasks
 
+      const originalTask = active.data.current?.task as Task | undefined
+      const sourceColumnId = originalTask?.status || activeTask.columnId
       const targetColumnId = activeTask.columnId
       let newTasks = [...tasks]
 
@@ -431,19 +463,30 @@ export default function KanbanBoard({
         newTasks = arrayMove(newTasks, activeIndex, overIndex)
       }
 
-      // Finalize Status and Order sequence accurately
-      const colTasks = newTasks.filter(t => t.columnId === targetColumnId)
+      // Finalize order/status only for the affected columns
+      const affectedColumns = new Set<string>([targetColumnId])
 
-      newTasks = newTasks.map(t => {
-        if (t.columnId === targetColumnId) {
-          return { ...t, order: colTasks.findIndex(ct => ct.id === t.id), status: targetColumnId }
+      if (sourceColumnId && sourceColumnId !== targetColumnId) {
+        affectedColumns.add(sourceColumnId)
+      }
+
+      for (const colId of affectedColumns) {
+        let order = 0
+
+        for (let index = 0; index < newTasks.length; index++) {
+          const currentTask = newTasks[index]
+
+          if (currentTask.columnId !== colId) continue
+
+          if (currentTask.order !== order || currentTask.status !== colId) {
+            newTasks[index] = { ...currentTask, order, status: colId }
+          }
+
+          order += 1
         }
-
-        return t
-      })
+      }
 
       const finalMovedTask = newTasks.find(t => t.id === activeId)
-      const originalTask = active.data.current?.task as Task
 
       // Call API ONLY if column or order has actually changed vs original state
       if (finalMovedTask && originalTask) {
@@ -474,10 +517,11 @@ export default function KanbanBoard({
               <KanbanColumn
                 key={col.id}
                 col={col}
-                tasks={tasks.filter(t => t.columnId === col.id)}
+                tasks={tasksByColumn[col.id] || []}
                 onAddTask={handleAddTask}
                 onEdit={handleEditTask}
                 onDelete={handleDeleteTask}
+                onView={handleOpenViewTask}
                 canCreateTask={canCreateTask}
                 canEditTask={canEditTask}
                 canDeleteTask={canDeleteTask}
@@ -486,7 +530,9 @@ export default function KanbanBoard({
           </div>
 
           <DragOverlay>
-            {activeTask ? <TaskCard task={activeTask} canEdit={canEditTask} canDelete={canDeleteTask} /> : null}
+            {activeTask ? (
+              <TaskCard task={activeTask} canEdit={canEditTask} canDelete={canDeleteTask} isOverlay />
+            ) : null}
           </DragOverlay>
         </DndContext>
         <ScrollBar orientation='horizontal' />
@@ -518,6 +564,30 @@ export default function KanbanBoard({
 
           setModalOpen(false)
           setSelectedTask(null)
+        }}
+      />
+
+      <TaskViewModal
+        open={isViewModalOpen}
+        onOpenChange={open => {
+          if (!open) {
+            handleCloseViewModal()
+
+            return
+          }
+
+          setIsViewModalOpen(true)
+        }}
+        taskId={selectedViewTaskId || undefined}
+        canEditTask={canEditTask}
+        onEditTask={id => {
+          const taskToEdit = tasks.find(task => task.id === id)
+
+          handleCloseViewModal()
+
+          if (taskToEdit) {
+            void handleEditTask(taskToEdit)
+          }
         }}
       />
     </>

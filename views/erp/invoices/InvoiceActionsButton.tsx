@@ -10,6 +10,7 @@ const InvoiceActionsButton = ({
   isMarkingAsSigned,
   isSendingEmail,
   onViewEditDetails,
+  onViewWorkOrder,
   onMarkAsSigned,
   onConfirmedEmailSend
 }: {
@@ -17,6 +18,7 @@ const InvoiceActionsButton = ({
   isMarkingAsSigned: boolean
   isSendingEmail: boolean
   onViewEditDetails: () => void
+  onViewWorkOrder?: () => void
   onMarkAsSigned: () => void
   onConfirmedEmailSend: () => Promise<void>
 }) => {
@@ -36,16 +38,21 @@ const InvoiceActionsButton = ({
             <Eye className='mr-2 h-4 w-4' />
             View/Edit Invoice Details
           </DropdownMenuItem>
+          {invoice?.work_order_id && onViewWorkOrder && (
+            <DropdownMenuItem onClick={onViewWorkOrder}>
+              <Eye className='mr-2 h-4 w-4' />
+              View Work Order
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => setConfirmEmailOpen(true)} disabled={isSendingEmail}>
             <Mail className='mr-2 h-4 w-4' />
             {isSendingEmail ? 'Sending...' : 'Email Invoice to Customer'}
           </DropdownMenuItem>
-          {invoice.status?.toLowerCase() === 'new' && (
-            <DropdownMenuItem onClick={onMarkAsSigned} disabled={isMarkingAsSigned}>
-              <Check className='mr-2 h-4 w-4' />
-              {isMarkingAsSigned ? 'Marking...' : 'Mark Invoice as Signed'}
-            </DropdownMenuItem>
-          )}
+
+          <DropdownMenuItem onClick={onMarkAsSigned} disabled={isSendingEmail}>
+            <Check className='mr-2 h-4 w-4' />
+            {isMarkingAsSigned ? 'Marking...' : 'Mark Invoice as Signed'}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
