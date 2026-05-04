@@ -17,6 +17,7 @@ import { getAuthUser } from '@/utils/auth'
 import { generateFileUrl } from '@/utils/utility'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
+import TaskDocuments from './documents/TaskDocuments'
 
 interface TaskViewModalProps {
   open: boolean
@@ -527,6 +528,8 @@ export default function TaskViewModal({
               <p className='text-sm whitespace-pre-wrap'>{task?.close_comment || '-'}</p>
             </div>
           </div>
+
+          <TaskDocuments taskId={taskId} />
         </div>
       </div>
     </CommonDialog>
