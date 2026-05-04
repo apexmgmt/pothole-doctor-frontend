@@ -1,18 +1,21 @@
+import { useRef } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Card, CardContent } from '@/components/ui/card'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { CalendarIcon, MapPinIcon, PencilIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Task } from '@/types'
+import { Staff, Task } from '@/types'
 
 interface TaskCardProps {
   task: Task
   onEdit?: (task: Task) => void
   onDelete?: (taskId: string) => void
+  onView?: (taskId: string) => void
   canEdit: boolean
   canDelete: boolean
+  isOverlay?: boolean
 }
 
 function getInitials(first?: string, last?: string): string {
@@ -26,23 +29,69 @@ function formatDate(dateStr?: string): string {
 }
 
 import { Trash2Icon } from 'lucide-react'
+import { generateFileUrl } from '@/utils/utility'
 
-export function TaskCard({ task, onEdit, onDelete, canEdit, canDelete }: TaskCardProps) {
+export function TaskCard({ task, onEdit, onDelete, onView, canEdit, canDelete, isOverlay = false }: TaskCardProps) {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: task.id,
-    data: { type: 'Task', task }
+    data: { type: 'Task', task },
+    disabled: isOverlay
   })
+
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null)
+  const movedRef = useRef(false)
 
   const style = {
     transition,
     transform: CSS.Transform.toString(transform)
   }
 
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (isOverlay) return
+
+    listeners?.onPointerDown?.(event)
+
+    pointerStartRef.current = { x: event.clientX, y: event.clientY }
+    movedRef.current = false
+  }
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!pointerStartRef.current || movedRef.current) return
+
+    const dx = Math.abs(event.clientX - pointerStartRef.current.x)
+    const dy = Math.abs(event.clientY - pointerStartRef.current.y)
+
+    if (dx > 1 || dy > 1) {
+      movedRef.current = true
+    }
+  }
+
+  const handlePointerUp = () => {
+    pointerStartRef.current = null
+  }
+
+  const handleCardClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (isOverlay || !onView || isDragging || movedRef.current) return
+
+    event.stopPropagation()
+    onView(task.id)
+  }
+
   const employees = task.employees ?? []
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={isDragging ? 'opacity-0' : undefined}>
-      <Card className='cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-primary/50 bg-card'>
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...(isOverlay ? {} : attributes)}
+      {...(isOverlay ? {} : listeners)}
+      className={isDragging ? 'opacity-0' : undefined}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onClick={handleCardClick}
+    >
+      <Card className='cursor-grab active:cursor-grabbing bg-card'>
         <CardContent className='p-3 space-y-2'>
           {/* Header: task type badge + status + edit button */}
           <div className='flex items-start justify-between gap-2'>
@@ -121,10 +170,11 @@ export function TaskCard({ task, onEdit, onDelete, canEdit, canDelete }: TaskCar
           {employees.length > 0 && (
             <TooltipProvider delayDuration={100}>
               <div className='flex items-center -space-x-2'>
-                {employees.slice(0, 4).map(emp => (
+                {employees.slice(0, 4).map((emp: Staff) => (
                   <Tooltip key={emp.id}>
                     <TooltipTrigger asChild>
                       <Avatar className='h-6 w-6'>
+                        <AvatarImage src={generateFileUrl(emp?.userable?.profile_picture) || undefined} alt={`${emp.first_name} ${emp.last_name}`} />
                         <AvatarFallback className='text-[10px]'>
                           {getInitials(emp.first_name, emp.last_name)}
                         </AvatarFallback>

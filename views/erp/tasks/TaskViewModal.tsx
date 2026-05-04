@@ -52,11 +52,11 @@ const getDisplayName = (comment: TaskComment) => {
 }
 
 const getAvatarUrl = (comment: TaskComment) => {
-  const raw = comment.user?.profile_picture || comment.user?.userable?.profile_picture || ''
+  const raw = comment.user?.userable?.profile_picture || comment.user?.profile_picture || ''
 
   if (!raw) return ''
 
-  return raw
+  return generateFileUrl(raw)
 }
 
 const getInitials = (name: string) => {
@@ -261,15 +261,15 @@ export default function TaskViewModal({
                 return (
                   <div key={comment.id} className='flex gap-3'>
                     <Avatar className='h-9 w-9'>
-                      {avatarUrl ? <AvatarImage src={avatarUrl} alt={displayName} /> : null}
+                      {avatarUrl ? <AvatarImage src={avatarUrl} alt={displayName} referrerPolicy="no-referrer" /> : null}
                       <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
                     </Avatar>
                     <div className='flex-1 px-3'>
                       <div className='flex flex-wrap items-center justify-between gap-2'>
-                        <p className='text-sm font-medium'>{displayName}</p>
+                        <p className='text-sm font-bold'>{displayName}</p>
                         <p className='text-xs text-muted-foreground'>{formatDateTime(updatedAt)}</p>
                       </div>
-                      <div className='mt-1 rounded-md border border-border bg-muted/20 p-2'>
+                      <div className='mt-1 rounded-md py-2'>
                         <div
                           className='text-sm wrap-break-word [&_h1]:text-lg [&_h1]:font-semibold [&_h2]:text-base [&_h2]:font-semibold [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-2 [&_p:last-child]:mb-0'
                           dangerouslySetInnerHTML={{ __html: comment.comment || '' }}
