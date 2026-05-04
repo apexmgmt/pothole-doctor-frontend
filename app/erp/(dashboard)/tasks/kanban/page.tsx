@@ -2,7 +2,7 @@ import ClientService from '@/services/api/clients/clients.service'
 import TaskReminderService from '@/services/api/settings/task_reminders.service'
 import TaskTypeService from '@/services/api/settings/task_types.service'
 import StaffService from '@/services/api/staff.service'
-import TaskService from '@/services/api/tasks.service'
+import TaskService from '@/services/api/tasks/tasks.service'
 import { Client, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import KanbanBoard from '@/views/erp/tasks/kanban/KanbanBoard'
 

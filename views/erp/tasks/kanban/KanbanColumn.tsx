@@ -20,6 +20,7 @@ export default function KanbanColumn({
   onAddTask,
   onEdit,
   onDelete,
+  onView,
   canCreateTask,
   canEditTask,
   canDeleteTask
@@ -29,14 +30,12 @@ export default function KanbanColumn({
   onAddTask: (columnId: string) => void
   onEdit: (task: Task) => void
   onDelete: (taskId: string) => void
+  onView: (taskId: string) => void
   canCreateTask: boolean
   canEditTask: boolean
   canDeleteTask: boolean
 }) {
   const { setNodeRef } = useDroppable({ id: col.id, data: { type: 'Column', columnId: col.id } })
-
-  // Sort tasks visually based on the recalculated order
-  const sortedTasks = [...tasks].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 
   return (
     <div
@@ -46,7 +45,7 @@ export default function KanbanColumn({
       <div className='flex items-center justify-between mb-4'>
         <h3 className='font-semibold text-lg'>{col.label}</h3>
         <div className='flex items-center gap-2'>
-          <span className='text-sm bg-accent px-2 py-1 rounded-full'>{sortedTasks.length}</span>
+          <span className='text-sm bg-accent px-2 py-1 rounded-full'>{tasks.length}</span>
           {canCreateTask && (
             <Button
               size='icon'
@@ -65,13 +64,14 @@ export default function KanbanColumn({
         <ScrollArea className='h-full'>
           <div className='flex flex-col gap-3 pr-1'>
             {/* Added strategy for smoother vertical sorting physics */}
-            <SortableContext items={sortedTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-              {sortedTasks.map(task => (
+            <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+              {tasks.map(task => (
                 <TaskCard
                   key={task.id}
                   task={task}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  onView={onView}
                   canEdit={canEditTask}
                   canDelete={canDeleteTask}
                 />

@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from './api.interceptor'
+import apiInterceptor from '../api.interceptor'
 import { TASKS_ALL, TASKS, API_URL, TASKS_TENANT, TASKS_ALL_TENANT, TASKS_STATUS_TENANT } from '@/constants/api'
 import { TaskPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'

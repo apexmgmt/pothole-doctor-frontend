@@ -18,7 +18,7 @@ import { Client, Column, DataTableApiResponse, Staff, Task, TaskReminder, TaskRe
 import { formatDate } from '@/utils/date'
 import ClientService from '@/services/api/clients/clients.service'
 import StaffService from '@/services/api/staff.service'
-import TaskService from '@/services/api/tasks.service'
+import TaskService from '@/services/api/tasks/tasks.service'
 import TaskReminderService from '@/services/api/settings/task_reminders.service'
 import TaskTypeService from '@/services/api/settings/task_types.service'
 import CreateOrEditTaskModal from '@/views/erp/tasks/CreateOrEditTaskModal'
@@ -219,12 +219,6 @@ const ClientTasks = ({ clientId }: { clientId: string }) => {
       id: 'location',
       header: 'Event Location',
       cell: (row: Task) => <Description description={row.location} />,
-      sortable: false
-    },
-    {
-      id: 'comment',
-      header: 'Comment',
-      cell: (row: Task) => <span className='font-medium'>{row?.comment || ''}</span>,
       sortable: false
     },
     {
