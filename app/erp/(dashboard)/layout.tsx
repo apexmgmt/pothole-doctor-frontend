@@ -19,7 +19,7 @@ const Layout = async ({ children }: ReactNode) => {
           <Sidebar user={user} permissions={permissions} />
           <section className='flex-1 w-full xl:w-[calc(100%-260px)] flex flex-col '>
             <Header />
-            <main className='flex-1 overflow-hidden p-4 md:p-6'>
+            <main className='flex-1 overflow-y-auto p-4 md:p-6'>
               {/* <ScrollArea className='h-full w-dvw'> */}
               {children}
               {/* <ScrollBar orientation='vertical' /> */}
