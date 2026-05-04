@@ -24,7 +24,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import TaskService from '@/services/api/tasks.service'
+import TaskService from '@/services/api/tasks/tasks.service'
 import ProposalTaskService from '@/services/api/estimates/proposal-tasks.service'
 import InvoiceTaskService from '@/services/api/invoices/invoice-tasks.service'
 import { MultiSelect, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'

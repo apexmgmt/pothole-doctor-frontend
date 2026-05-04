@@ -30,3 +30,16 @@ export const TASKS_ALL_TENANT: string = '/v1/tenant/get-tasks/'
  * @returns '/v1/tenant/tasks/{taskId}/status/'
  */
 export const TASKS_STATUS_TENANT = (taskId: string): string => `/v1/tenant/tasks/${taskId}/status/`
+
+/**
+ * Task comments API Endpoint
+ * 
+ * @method GET to get comments of a task
+ * @method POST to add comment to a task
+ * @method PUT /{commentId} to update a comment of a task
+ * @method GET /{commentId} to get a comment of a task
+ * @method DELETE /{commentId} to delete a comment of a task
+ * @param taskId string
+ * @returns 
+ */
+export const TASKS_COMMENTS = (taskId: string): string => `/v1/tasks/${taskId}/comments/`

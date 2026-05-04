@@ -17,7 +17,7 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { Client, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import { TaskCard } from './TaskCard'
-import TaskService from '@/services/api/tasks.service'
+import TaskService from '@/services/api/tasks/tasks.service'
 import CreateOrEditTaskModal from '@/views/erp/tasks/CreateOrEditTaskModal'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { KanbanColumn as Column, KanbanTask } from './kanban'
