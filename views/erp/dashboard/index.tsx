@@ -709,7 +709,7 @@ function TenantDashboardView({ data }: { data: Record<string, unknown> | null })
             <BarChart2 className='w-6 h-6 text-card-foreground' />
             <h1 className='text-xl font-bold text-card-foreground'>Dashboard</h1>
           </div>
-          <div className='flex items-center gap-2 w-full overflow-x-auto whitespace-nowrap [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.12)_rgba(0,0,0,0.0)]'>
+          <div className='flex items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.12)_rgba(0,0,0,0.0)]'>
             <StatPill
               icon={<FileText className='w-3.5 h-3.5' />}
               label='Total Jobs'

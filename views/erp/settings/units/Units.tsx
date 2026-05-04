@@ -232,14 +232,14 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
 
   // Custom filters component
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <div className='flex items-center gap-2'>
+    <div className='flex items-center justify-between w-full gap-2.5'>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1'>
         <InputGroup>
           <InputGroupInput
             placeholder='Search...'
             value={searchValue}
             onChange={e => setSearchValue(e.target.value)}
-            className='w-80'
+            className='lg:w-80 min-w-0'
           />
           <InputGroupAddon>
             <Search />
@@ -259,7 +259,7 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
           onClick={handleOpenCreateModal}
         >
           <PlusIcon className='w-4 h-4' />
-          Add Unit
+          <span className='hidden min-[480px]:block'>Add Unit</span>
         </Button>
       )}
     </div>

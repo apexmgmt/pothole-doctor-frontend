@@ -3,6 +3,7 @@
 import React, { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 interface ButtonType {
   label: string
@@ -39,13 +40,13 @@ const CommonLayout: React.FC<CommonLayoutProps> = ({
   return (
     <div className={`bg-bg-2 rounded-lg border border-border p-5 ${className}`}>
       {/* Header Section */}
-      <div className={`border-b border-border ${noTabs ? '' : 'pb-4'}`}>
+      <div className={`border-b border-border ${noTabs ? '' : 'pb-2'}`}>
         {/* Title */}
         <h2 className='text-xl font-semibold text-light mb-4'>{title}</h2>
 
         {/* Switcher Buttons */}
-        {!noTabs && buttons.length > 0 && (
-          <div>
+        <ScrollArea className='pb-2'>
+          {!noTabs && buttons.length > 0 && (
             <div className='inline-flex bg-border/40 border border-border rounded-lg p-1 gap-1'>
               {buttons.map((button, index) => (
                 <Button
@@ -61,15 +62,17 @@ const CommonLayout: React.FC<CommonLayoutProps> = ({
                   } ${button.disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                 >
                   {button.icon &&
-                    (typeof button.icon === 'function' || (typeof button.icon === 'object' && !React.isValidElement(button.icon))
+                    (typeof button.icon === 'function' ||
+                    (typeof button.icon === 'object' && !React.isValidElement(button.icon))
                       ? React.createElement(button.icon, { className: 'w-4 h-4' })
                       : button.icon)}
                   <span className='text-sm font-medium'>{button.label}</span>
                 </Button>
               ))}
             </div>
-          </div>
-        )}
+          )}
+          <ScrollBar orientation='horizontal' />
+        </ScrollArea>
       </div>
 
       {/* Content Area */}
