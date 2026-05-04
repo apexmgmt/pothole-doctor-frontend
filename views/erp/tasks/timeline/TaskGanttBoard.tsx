@@ -6,6 +6,7 @@ import { format, addDays, differenceInDays, startOfDay, parseISO, isValid } from
 import { Client, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import TaskService from '@/services/api/tasks/tasks.service'
 import CreateOrEditTaskModal from '@/views/erp/tasks/CreateOrEditTaskModal'
+import TaskViewModal from '../TaskViewModal'
 import { toast } from 'sonner'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -75,8 +76,9 @@ export default function TaskGanttBoard({
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   const [modalOpen, setModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [viewTaskId, setViewTaskId] = useState<string | undefined>(undefined)
+  const [taskViewOpen, setTaskViewOpen] = useState(false)
 
   const hasUserChangedFilter = useRef(false)
   const skipFullRefetch = useRef(false)
@@ -229,14 +231,20 @@ export default function TaskGanttBoard({
     viewport.scrollLeft = Math.max(todayX - 200, 0)
   }
 
-  // ── Handle edit ─────────────────────────────────────────────────────────────
-  const handleEdit = async (task: Task) => {
+  // ── Open task details modal from gantt row click ───────────────────────────
+  const handleEdit = (task: Task) => {
+    setViewTaskId(task.id)
+    setTaskViewOpen(true)
+  }
+
+  // ── Open edit modal from task view modal ────────────────────────────────────
+  const handleEditFromTaskView = async (id: string) => {
     try {
-      const res = await TaskService.show(task.id)
+      const res = await TaskService.show(id)
 
       setSelectedTask(res.data)
-      setModalMode('edit')
       setModalOpen(true)
+      setTaskViewOpen(false)
     } catch (err: any) {
       toast.error(err?.message || 'Failed to fetch task details')
     }
@@ -473,7 +481,7 @@ export default function TaskGanttBoard({
         )}
 
         <CreateOrEditTaskModal
-          mode={modalMode}
+          mode='edit'
           open={modalOpen}
           onOpenChange={open => {
             setModalOpen(open)
@@ -488,7 +496,7 @@ export default function TaskGanttBoard({
           taskReminderChannels={taskReminderChannels}
           onSuccess={async () => {
             try {
-              const res = await TaskService.getAll()
+              const res = await TaskService.getAll(filters)
 
               setAllTasks(Array.isArray(res.data) ? res.data : [])
             } catch {
@@ -497,7 +505,23 @@ export default function TaskGanttBoard({
 
             setModalOpen(false)
             setSelectedTask(null)
+            setViewTaskId(selectedTask?.id)
+            setTaskViewOpen(true)
           }}
+        />
+
+        <TaskViewModal
+          open={taskViewOpen}
+          onOpenChange={open => {
+            setTaskViewOpen(open)
+
+            if (!open) {
+              setViewTaskId(undefined)
+            }
+          }}
+          taskId={viewTaskId}
+          canEditTask={true}
+          onEditTask={handleEditFromTaskView}
         />
       </CardContent>
     </Card>
