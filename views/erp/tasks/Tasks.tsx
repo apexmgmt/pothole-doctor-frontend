@@ -249,12 +249,6 @@ const Tasks: React.FC<{
       sortable: true
     },
     {
-      id: 'comment',
-      header: 'Comment',
-      cell: (row: Task) => <span className='font-medium'>{row?.comment || ''}</span>,
-      sortable: true
-    },
-    {
       id: 'location',
       header: 'Event Location',
       cell: (row: Task) => <Description description={row.location} />,

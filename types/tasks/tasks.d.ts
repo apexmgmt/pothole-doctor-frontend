@@ -1,22 +1,21 @@
 import { Staff, TaskType, User, Client, Model } from '..'
 
-export interface Task {
+export interface Task extends Model {
   id: string
   client_id: string
   created_by?: User
   task_type_id: string
   name: string
+  description: string | null
+  comments: TaskComment[]
   start_date: string
   start_time: string
   end_date: string
   end_time: string
   location: string
-  comment: string
   sms_reminder: number | 0 | 1
   email_reminder: number | 0 | 1
   status: string
-  created_at: string
-  updated_at: string
   deleted_at?: string | null
   client?: Client
   task_type?: TaskType
@@ -27,7 +26,14 @@ export interface Task {
   order: number
 }
 
+export interface TaskComment extends Model {
+  task_id: string
+  user_id: string
+  comment: string
+}
+
 export interface TaskPayload {
+  description: string
   client_id: string
   task_type_id: string
   name: string
@@ -39,11 +45,16 @@ export interface TaskPayload {
   end_date: string
   end_time: string
   location: string
-  comment: string
   completed_date: string
   close_comment: string
   status: string
   reminders: ReminderPayload[]
+}
+
+export interface TaskCommentPayload {
+  task_id?: string
+  user_id: string 
+  comment: string
 }
 
 export interface ReminderPayload {
