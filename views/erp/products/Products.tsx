@@ -369,10 +369,10 @@ const Products: React.FC<ProductsProps> = ({
 
   // Custom filters component
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <div className='flex items-center gap-2'>
+    <div className='flex items-center justify-between w-full gap-2.5 '>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1 '>
         {/* Global search filter */}
-        <div className='flex flex-col'>
+        <div className='flex flex-col flex-1'>
           <label htmlFor='product-search' className='text-xs font-medium mb-1 text-muted-foreground'>
             Search
           </label>
@@ -382,20 +382,20 @@ const Products: React.FC<ProductsProps> = ({
               placeholder='Search...'
               value={searchValue}
               onChange={e => setSearchValue(e.target.value)}
-              className='w-80'
+              className='lg:w-80 min-w-0'
             />
-            <InputGroupAddon>
+            <InputGroupAddon className='hidden! sm:block!'>
               <Search />
             </InputGroupAddon>
           </InputGroup>
         </div>
         {/* Category filter */}
-        <div className='flex flex-col'>
+        <div className='flex flex-col flex-1'>
           <label htmlFor='category-filter' className='text-xs font-medium mb-1 text-muted-foreground'>
             Category
           </label>
           <Select value={filterOptions.category_id || 'all'} onValueChange={handleCategoryChange}>
-            <SelectTrigger id='category-filter' className='w-40'>
+            <SelectTrigger id='category-filter' className='md:min-w-40 min-w-0 w-full'>
               <SelectValue placeholder='All' />
             </SelectTrigger>
             <SelectContent>
@@ -409,7 +409,7 @@ const Products: React.FC<ProductsProps> = ({
           </Select>
         </div>
         {/* SKU filter */}
-        <div className='flex flex-col'>
+        <div className='flex flex-col flex-1'>
           <label htmlFor='sku-filter' className='text-xs font-medium mb-1 text-muted-foreground'>
             SKU
           </label>
@@ -436,7 +436,7 @@ const Products: React.FC<ProductsProps> = ({
                   return newOptions
                 })
               }}
-              className='w-40'
+              className='lg:w-40 min-w-0'
             />
           </InputGroup>
         </div>
@@ -454,7 +454,7 @@ const Products: React.FC<ProductsProps> = ({
           onClick={handleOpenCreateModal}
         >
           <PlusIcon className='w-4 h-4' />
-          Add Product
+          <span className='hidden sm:block'>Add Product</span>
         </Button>
       )}
     </div>
