@@ -290,8 +290,8 @@ const ProductStock: React.FC<ProductsProps> = ({
 
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
-      <div className='flex items-center gap-2'>
-        <div className='flex flex-col'>
+      <div className='flex items-center gap-2  w-full sm:max-w-80! '>
+        <div className='flex flex-col flex-2'>
           <label htmlFor='stock-search' className='text-xs font-medium mb-1 text-muted-foreground'>
             Search
           </label>
@@ -301,7 +301,7 @@ const ProductStock: React.FC<ProductsProps> = ({
               placeholder='Search...'
               value={searchValue}
               onChange={e => setSearchValue(e.target.value)}
-              className='w-80'
+              className='w-full lg:w-80 min-w-0'
             />
             <InputGroupAddon>
               <Search />
@@ -309,12 +309,12 @@ const ProductStock: React.FC<ProductsProps> = ({
           </InputGroup>
         </div>
 
-        <div className='flex flex-col'>
+        <div className='flex flex-col flex-1'>
           <label htmlFor='stock-category' className='text-xs font-medium mb-1 text-muted-foreground'>
             Category
           </label>
           <Select value={filterOptions.category_id || 'all'} onValueChange={handleCategoryChange}>
-            <SelectTrigger id='stock-category' className='w-40'>
+            <SelectTrigger id='stock-category' className='w-full lg:w-40 min-w-0'>
               <SelectValue placeholder='All' />
             </SelectTrigger>
             <SelectContent>

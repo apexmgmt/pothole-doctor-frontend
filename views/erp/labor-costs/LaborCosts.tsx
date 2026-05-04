@@ -313,7 +313,7 @@ const LaborCosts: React.FC<{
   // Custom filters component
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80! '>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80!'>
         {/* Global search filter */}
         <div className='flex flex-col'>
           <label htmlFor='product-search' className='text-xs font-medium mb-1 text-muted-foreground'>
@@ -338,7 +338,7 @@ const LaborCosts: React.FC<{
             Service Type
           </label>
           <Select value={filterOptions.service_type_id || 'all'} onValueChange={handleServiceTypeChange}>
-            <SelectTrigger id='service-type-filter' className='w-72'>
+            <SelectTrigger id='service-type-filter' className='lg:w-72 min-w-25'>
               <SelectValue placeholder='All' />
             </SelectTrigger>
             <SelectContent>
