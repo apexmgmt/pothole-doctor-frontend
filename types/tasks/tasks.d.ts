@@ -29,6 +29,7 @@ export interface Task extends Model {
 export interface TaskComment extends Model {
   task_id: string
   user_id: string
+  user?: User
   comment: string
 }
 

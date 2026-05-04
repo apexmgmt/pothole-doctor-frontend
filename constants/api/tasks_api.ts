@@ -42,4 +42,4 @@ export const TASKS_STATUS_TENANT = (taskId: string): string => `/v1/tenant/tasks
  * @param taskId string
  * @returns 
  */
-export const TASKS_COMMENTS = (taskId: string): string => `/v1/tasks/${taskId}/comments/`
+export const TASKS_COMMENTS = (taskId: string): string => `/v1/tenant/tasks/${taskId}/comments/`

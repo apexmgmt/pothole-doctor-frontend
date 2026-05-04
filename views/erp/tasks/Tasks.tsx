@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Client, Column, DataTableApiResponse, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
+import ViewButton from '@/components/erp/common/buttons/ViewButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
@@ -25,6 +26,7 @@ import { Badge } from '@/components/ui/badge'
 import CreateOrEditTaskModal from './CreateOrEditTaskModal'
 import { hasPermission } from '@/utils/role-permission'
 import { Description } from '@/components/ui/description'
+import TaskViewModal from './TaskViewModal'
 
 const Tasks: React.FC<{
   staffs: Staff[]
@@ -43,6 +45,8 @@ const Tasks: React.FC<{
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState<boolean>(false)
+  const [selectedViewTaskId, setSelectedViewTaskId] = useState<string | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
@@ -139,6 +143,16 @@ const Tasks: React.FC<{
     setIsModalOpen(false)
     setSelectedTaskId(null)
     setSelectedTask(null)
+  }
+
+  const handleOpenViewModal = (id: string) => {
+    setSelectedViewTaskId(id)
+    setIsViewModalOpen(true)
+  }
+
+  const handleViewModalClose = () => {
+    setIsViewModalOpen(false)
+    setSelectedViewTaskId(null)
   }
 
   const handleSuccess = () => {
@@ -273,7 +287,8 @@ const Tasks: React.FC<{
                   : []),
                 ...(canDeleteTask
                   ? [<DeleteButton tooltip='Delete Task' variant='text' onClick={() => handleDeleteTask(row.id)} />]
-                  : [])
+                  : []),
+                <ViewButton tooltip='View Task Details' onClick={() => handleOpenViewModal(row.id)} variant='text' />
               ]}
             />
           )}
@@ -382,6 +397,25 @@ const Tasks: React.FC<{
         taskTypes={taskTypes}
         taskReminders={taskReminders}
         taskReminderChannels={taskReminderChannels}
+      />
+
+      <TaskViewModal
+        open={isViewModalOpen}
+        onOpenChange={open => {
+          if (!open) {
+            handleViewModalClose()
+
+            return
+          }
+
+          setIsViewModalOpen(true)
+        }}
+        taskId={selectedViewTaskId || undefined}
+        canEditTask={canEditTask}
+        onEditTask={id => {
+          handleViewModalClose()
+          void handleOpenEditModal(id)
+        }}
       />
     </>
   )

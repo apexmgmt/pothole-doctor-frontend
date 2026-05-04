@@ -1,6 +1,6 @@
 'use client'
 
-import { forwardRef, useEffect, useImperativeHandle } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -43,11 +43,23 @@ export interface TipTapRichTextEditorRef {
   focus: () => void
 }
 
+const hasVisibleText = (html: string) => {
+  if (!html) return false
+
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+  const text = (doc.body.textContent || '').replace(/\u00A0/g, ' ').trim()
+
+  return Boolean(text)
+}
+
 const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextEditorProps>(
   function TipTapRichTextEditor(
     { value, onChange, placeholder = 'Type here...', className, disabled = false }: TipTapRichTextEditorProps,
     ref
   ) {
+    const [isExpanded, setIsExpanded] = useState(() => hasVisibleText(value || ''))
+
     const editor = useEditor({
       immediatelyRender: false,
       editable: !disabled,
@@ -92,7 +104,11 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
       if (!incomingHtml && !editor.isEmpty) {
         editor.commands.clearContent(false)
       }
-    }, [editor, value])
+
+      if (!isExpanded && hasVisibleText(incomingHtml)) {
+        setIsExpanded(true)
+      }
+    }, [editor, value, isExpanded])
 
     useImperativeHandle(
       ref,
@@ -128,6 +144,13 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
       editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
     }
 
+    const expandEditor = () => {
+      if (disabled) return
+
+      setIsExpanded(true)
+      editor?.chain().focus().run()
+    }
+
     return (
       <div
         className={cn(
@@ -136,7 +159,12 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           className
         )}
       >
-        <div className='flex flex-wrap items-center gap-1 border-b border-border bg-transparent p-2'>
+        <div
+          className={cn(
+            'flex flex-wrap items-center gap-1 border-b border-border bg-transparent p-2',
+            !isExpanded && 'hidden'
+          )}
+        >
           <Button
             type='button'
             variant='ghost'
@@ -370,7 +398,13 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
 
         <EditorContent
           editor={editor}
-          className='[&_.ProseMirror]:min-h-48 [&_.ProseMirror]:w-full [&_.ProseMirror]:px-3 [&_.ProseMirror]:py-2 [&_.ProseMirror]:text-base [&_.ProseMirror]:text-background [&_.ProseMirror]:outline-none [&_.ProseMirror]:md:text-sm [&_.ProseMirror_h1]:text-2xl [&_.ProseMirror_h1]:font-semibold [&_.ProseMirror_h2]:text-xl [&_.ProseMirror_h2]:font-semibold [&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:pl-3 [&_.ProseMirror_blockquote]:italic [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-5 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-5 [&_.ProseMirror_.is-editor-empty:first-child::before]:pointer-events-none [&_.ProseMirror_.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_.is-editor-empty:first-child::before]:h-0 [&_.ProseMirror_.is-editor-empty:first-child::before]:text-muted-foreground [&_.ProseMirror_.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]'
+          onClick={expandEditor}
+          className={cn(
+            '[&_.ProseMirror]:w-full [&_.ProseMirror]:px-3 [&_.ProseMirror]:py-2 [&_.ProseMirror]:text-base [&_.ProseMirror]:text-background [&_.ProseMirror]:outline-none [&_.ProseMirror]:md:text-sm [&_.ProseMirror_.is-editor-empty:first-child::before]:pointer-events-none [&_.ProseMirror_.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_.is-editor-empty:first-child::before]:h-0 [&_.ProseMirror_.is-editor-empty:first-child::before]:text-muted-foreground [&_.ProseMirror_.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]',
+            isExpanded
+              ? '[&_.ProseMirror]:min-h-24 [&_.ProseMirror_h1]:text-2xl [&_.ProseMirror_h1]:font-semibold [&_.ProseMirror_h2]:text-xl [&_.ProseMirror_h2]:font-semibold [&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:pl-3 [&_.ProseMirror_blockquote]:italic [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-5 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-5'
+              : '[&_.ProseMirror]:min-h-10 [&_.ProseMirror]:cursor-text'
+          )}
         />
       </div>
     )
