@@ -12,10 +12,11 @@ import { Label } from '@/components/ui/label'
 import TipTapRichTextEditor from '@/components/erp/common/editor/TipTapRichTextEditor'
 import TaskService from '@/services/api/tasks/tasks.service'
 import TaskCommentService from '@/services/api/tasks/task-comments.service'
-import { Task, TaskComment } from '@/types'
+import { ReminderPayload, Task, TaskComment, TaskPayload } from '@/types'
 import { getAuthUser } from '@/utils/auth'
 import { generateFileUrl } from '@/utils/utility'
 import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
 
 interface TaskViewModalProps {
   open: boolean
@@ -95,6 +96,33 @@ const sortCommentsByUpdatedAt = (items: TaskComment[]) => {
   })
 }
 
+const buildTaskReminderPayload = (task: Task): ReminderPayload[] => {
+  const groupedReminders = new Map<string, ReminderPayload>()
+
+  ;(task.task_reminder_setting || []).forEach(setting => {
+    if (setting.is_enabled !== 1) return
+
+    const taskTypeId = setting.task_type_id || task.task_type_id || ''
+    const key = `${setting.reminder_channel_id}|${setting.role_type}|${taskTypeId}`
+
+    if (!groupedReminders.has(key)) {
+      groupedReminders.set(key, {
+        reminder_channel_id: setting.reminder_channel_id,
+        role_type: setting.role_type,
+        task_type_id: taskTypeId,
+        reminder_time_ids: []
+      })
+    }
+
+    groupedReminders.get(key)?.reminder_time_ids.push({
+      id: setting.reminder_time_id,
+      is_enabled: setting.is_enabled
+    })
+  })
+
+  return Array.from(groupedReminders.values()).filter(item => item.reminder_time_ids.length > 0)
+}
+
 export default function TaskViewModal({
   open,
   onOpenChange,
@@ -105,8 +133,11 @@ export default function TaskViewModal({
   const [task, setTask] = useState<Task | null>(null)
   const [comments, setComments] = useState<TaskComment[]>([])
   const [commentHtml, setCommentHtml] = useState('')
+  const [descriptionHtml, setDescriptionHtml] = useState('')
   const [isLoadingTask, setIsLoadingTask] = useState(false)
   const [isAddingComment, setIsAddingComment] = useState(false)
+  const [isEditingDescription, setIsEditingDescription] = useState(false)
+  const [isSavingDescription, setIsSavingDescription] = useState(false)
   const [currentUserId, setCurrentUserId] = useState('')
 
   useEffect(() => {
@@ -125,6 +156,8 @@ export default function TaskViewModal({
       const taskData = response?.data as Task
 
       setTask(taskData)
+      setDescriptionHtml(taskData?.description || '')
+      setIsEditingDescription(false)
       setComments(sortCommentsByUpdatedAt(taskData?.comments || []))
     } catch (error: any) {
       toast.error(typeof error?.message === 'string' ? error.message : 'Failed to load task details')
@@ -138,7 +171,69 @@ export default function TaskViewModal({
 
     void loadTaskDetails()
     setCommentHtml('')
+    setIsEditingDescription(false)
   }, [open, taskId])
+
+  const startEditingDescription = () => {
+    if (!task) return
+
+    setDescriptionHtml(task.description || '')
+    setIsEditingDescription(true)
+  }
+
+  const cancelDescriptionEdit = () => {
+    setDescriptionHtml(task?.description || '')
+    setIsEditingDescription(false)
+  }
+
+  const saveDescription = async () => {
+    if (!task || !taskId) return
+
+    const payload: TaskPayload = {
+      name: task.name || '',
+      client_id: task.client_id || '',
+      task_type_id: task.task_type_id || '',
+      employee_ids: task.employees?.map(employee => employee.id) || [],
+      start_date: task.start_date || '',
+      start_time: task.start_time || '',
+      end_date: task.end_date || '',
+      end_time: task.end_time || '',
+      sms_reminder: task.sms_reminder || 0,
+      email_reminder: task.email_reminder || 0,
+      location: task.location || '',
+      description: descriptionHtml || '',
+      completed_date: task.completed_date || '',
+      close_comment: task.close_comment || '',
+      status: task.status || '',
+      reminders: buildTaskReminderPayload(task)
+    }
+
+    setIsSavingDescription(true)
+
+    try {
+      const response = await TaskService.update(taskId, payload)
+      const updatedTask = response?.data as Task | undefined
+
+      if (updatedTask?.id) {
+        // setTask(updatedTask)
+        setTask(prev => (prev ? { ...prev, description: updatedTask.description } : prev))
+        setDescriptionHtml(updatedTask.description || '')
+
+        // if (updatedTask.comments) {
+        //   setComments(sortCommentsByUpdatedAt(updatedTask.comments))
+        // }
+      } else {
+        setTask(prev => (prev ? { ...prev, description: descriptionHtml } : prev))
+      }
+
+      setIsEditingDescription(false)
+      toast.success('Description updated successfully')
+    } catch (error: any) {
+      toast.error(typeof error?.message === 'string' ? error.message : 'Failed to update description')
+    } finally {
+      setIsSavingDescription(false)
+    }
+  }
 
   const sortedComments = useMemo(() => {
     return sortCommentsByUpdatedAt(comments)
@@ -221,14 +316,65 @@ export default function TaskViewModal({
             <Separator />
           </div>
           <div className='space-y-2'>
-            <Label>Description</Label>
-            <div className='p-4'>
-              {task?.description ? (
-                <div dangerouslySetInnerHTML={{ __html: task.description }} />
-              ) : (
-                <p className='text-sm text-muted-foreground'>No description available.</p>
-              )}
+            <div className='flex items-center justify-between gap-2'>
+              <Label>Description</Label>
+              {/* {task && !isEditingDescription ? (
+                <Button type='button' variant='outline' size='sm' onClick={startEditingDescription}>
+                  Edit
+                </Button>
+              ) : null} */}
             </div>
+
+            {isEditingDescription ? (
+              <div className='rounded-md border border-border p-2 space-y-2'>
+                <TipTapRichTextEditor
+                  value={descriptionHtml}
+                  onChange={setDescriptionHtml}
+                  placeholder='Enter task description'
+                  disabled={isSavingDescription}
+                />
+                <div className='flex justify-end gap-2'>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    onClick={cancelDescriptionEdit}
+                    disabled={isSavingDescription}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type='button' onClick={saveDescription} disabled={isSavingDescription}>
+                    {isSavingDescription ? 'Saving...' : 'Save'}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div
+                className={cn(
+                  'p-4 rounded-md border border-transparent',
+                  task && 'cursor-pointer transition-colors hover:border-border'
+                )}
+                onClick={startEditingDescription}
+                role={task ? 'button' : undefined}
+                tabIndex={task ? 0 : -1}
+                onKeyDown={event => {
+                  if (!task) return
+
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    startEditingDescription()
+                  }
+                }}
+              >
+                {task?.description ? (
+                  <div
+                    className='text-sm wrap-break-word [&_h1]:text-lg [&_h1]:font-semibold [&_h2]:text-base [&_h2]:font-semibold [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_img]:my-2 [&_img]:max-w-full [&_img]:rounded-md [&_video]:my-2 [&_video]:max-w-full [&_video]:rounded-md'
+                    dangerouslySetInnerHTML={{ __html: task.description }}
+                  />
+                ) : (
+                  <p className='text-sm text-muted-foreground'>No description available.</p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className='space-y-3'>
@@ -261,7 +407,9 @@ export default function TaskViewModal({
                 return (
                   <div key={comment.id} className='flex gap-3'>
                     <Avatar className='h-9 w-9'>
-                      {avatarUrl ? <AvatarImage src={avatarUrl} alt={displayName} referrerPolicy="no-referrer" /> : null}
+                      {avatarUrl ? (
+                        <AvatarImage src={avatarUrl} alt={displayName} referrerPolicy='no-referrer' />
+                      ) : null}
                       <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
                     </Avatar>
                     <div className='flex-1 px-3'>
