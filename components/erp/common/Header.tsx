@@ -25,7 +25,7 @@ const Header: React.FC = () => {
         </CustomButton>
         <div className='flex-1 text-lg md:text-xl font-semibold text-light-2'>{pageTitle}</div>
       </div>
-      <div className='flex gap-2'>
+      <div className='flex gap-2 opacity-0 pointer-events-none'>
         <CustomButton icon={<SearchIcon />} variant='outline' className='md:p-2.5! p-1.5! md:rounded-xl rounded-lg' />
         <CustomButton icon={<BellIcon />} variant='outline' className='md:p-2.5! p-1.5! md:rounded-xl rounded-lg' />
       </div>

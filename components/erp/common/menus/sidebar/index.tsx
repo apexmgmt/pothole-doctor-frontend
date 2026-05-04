@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import {
+  Box,
   Boxes,
   Building2,
   CalendarCheck,
@@ -22,11 +23,17 @@ import {
 import { NavigationItem, User } from '@/types'
 import { filterMenuByPermissions } from '@/utils/menu-permissions'
 
-import { SettingsIcon, HomeIcon, EstimateIcon } from '@/public/icons'
+import { SettingsIcon, HomeIcon } from '@/public/icons'
 import SidebarFooter from './SidebarFooter'
 import MenuItem from './menu-item'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useSidebar } from './sidebarContext'
+import TaskIcon from '@/public/icons/TaskIcon'
+import EstimateIcon from '@/public/icons/Estimate'
+import InvoiceIcon from '@/public/icons/Invoice'
+import WorkOrderIcon from '@/public/icons/WorkOrderIcon'
+import MaterialJobsIcon from '@/public/icons/MaterialJobIcon'
+import MaterialJobIcon from '@/public/icons/MaterialJobIcon'
 
 const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user, permissions }) => {
   const allNavigationItems: NavigationItem[] = [
@@ -90,7 +97,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
     {
       id: 'tasks',
       label: 'Tasks',
-      icon: <CalendarCheck className='h-4 w-4' />,
+      icon: <TaskIcon className='h-4 w-4' />,
       href: '/erp/tasks',
       hasSubItems: true,
       exactMatch: false,
@@ -166,7 +173,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
     {
       id: 'invoices',
       label: 'Invoices',
-      icon: <EstimateIcon className='h-4 w-4' />,
+      icon: <InvoiceIcon className='h-4 w-4' />,
       href: '/erp/invoices',
       hasSubItems: false,
       exactMatch: false,
@@ -175,7 +182,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
     {
       id: 'work-orders',
       label: 'Work Orders',
-      icon: <EstimateIcon className='h-4 w-4' />,
+      icon: <WorkOrderIcon className='h-4 w-4' />,
       href: '/erp/work-orders',
       hasSubItems: false,
       exactMatch: false,
@@ -184,7 +191,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
     {
       id: 'material-jobs',
       label: 'Material Jobs',
-      icon: <EstimateIcon className='h-4 w-4' />,
+      icon: <MaterialJobIcon className='h-4 w-4' />,
       href: '/erp/material-jobs',
       hasSubItems: false,
       exactMatch: false,
@@ -249,7 +256,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
     {
       id: 'non-inventory-products',
       label: 'Non-Inventory Products',
-      icon: <Boxes className='h-4 w-4' />,
+      icon: <Box className='h-4 w-4' />,
       href: '/erp/non-inventory-products',
       hasSubItems: true,
       subItems: [
