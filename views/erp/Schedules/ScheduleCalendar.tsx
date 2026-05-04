@@ -27,6 +27,8 @@ import {
   type ScheduleCalendarEventType
 } from './ScheduleCalendarEvent'
 import { ScheduleCalendarToolbar } from './ScheduleCalendarToolbar'
+import { useAppDispatch } from '@/lib/hooks'
+import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
 // Setup date-fns localizer for the calendar
 const locales = {
@@ -64,6 +66,7 @@ export default function ScheduleCalendar({
   partners = []
 }: ScheduleCalendarProps) {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const initialFilters = getInitialFilters(searchParams)
@@ -84,6 +87,11 @@ export default function ScheduleCalendar({
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [isAutoOpenDialog, setIsAutoOpenDialog] = useState(openDialogOnMount)
+
+  /** Set the page title when the component mounts */
+  useEffect(() => {
+    dispatch(setPageTitle('Schedules - Calendar'))
+  }, [])
 
   const [filterOptions, setFilterOptions] = useState<any>(() => {
     if (!initialFilters.starting_date || !initialFilters.ending_date) {

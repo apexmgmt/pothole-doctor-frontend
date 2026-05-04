@@ -26,6 +26,8 @@ import { toast } from 'sonner'
 import { hasPermission } from '@/utils/role-permission'
 import KanbanFilter from './KanbanFilter'
 import TaskViewModal from '@/views/erp/tasks/TaskViewModal'
+import { useAppDispatch } from '@/lib/hooks'
+import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
 /**
  * Summary of COLUMNS constant
@@ -76,6 +78,7 @@ export default function KanbanBoard({
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const dispatch = useAppDispatch()
   const [tasks, setTasks] = useState<KanbanTask[]>(toKanbanTasks(initialTasks))
 
   const [filters, setFilters] = useState<any>({
@@ -99,6 +102,11 @@ export default function KanbanBoard({
   // The "Interaction Lock" - Only allow fetches after the user touches the filter
   const hasUserChangedFilter = useRef(false)
   const lastDragOverKeyRef = useRef<string | null>(null)
+
+  /** Set the page title when the component mounts */
+  useEffect(() => {
+    dispatch(setPageTitle('Tasks - Kanban Board'))
+  }, [])
 
   /**
    * Summary of fetchTasks function

@@ -554,7 +554,14 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       >
         {/* Header/Logo */}
         <Link href={'/erp'} className='px-4 py-3 border-b border-border'>
-          <Image src='/images/dashboard/logo.webp' alt='logo' width={90} height={37} />
+          <Image
+            src='/images/dashboard/logo.webp'
+            alt='logo'
+            width={90}
+            height={37}
+            loading='eager'
+            style={{ width: '90px', height: 'auto' }}
+          />{' '}
         </Link>
 
         {/* Main Navigation */}

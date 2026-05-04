@@ -27,7 +27,8 @@ import {
   ServiceType,
   Staff,
   Unit,
-  Vendor
+  Vendor,
+  ProposalService
 } from '@/types'
 import { formatDate } from '@/utils/date'
 import { getInitialFilters, updateURL } from '@/utils/utility'
@@ -42,6 +43,7 @@ import InvoiceNotesModal from './InvoiceNotesModal'
 import InvoiceAddNoteModal from './InvoiceAddNoteModal'
 import InvoiceDocuments from './documents/InvoiceDocuments'
 import InvoiceJobImages from './job-images/InvoiceJobImages'
+import { Description } from '@/components/ui/description'
 
 const Invoices: React.FC<{
   invoiceTypes: EstimateType[]
@@ -238,58 +240,6 @@ const Invoices: React.FC<{
       sortable: false
     },
     {
-      id: 'title',
-      header: 'Title',
-      cell: (row: Invoice) => <span className='font-medium'>{row.title}</span>,
-      sortable: true
-    },
-    {
-      id: 'company',
-      header: 'Company',
-      cell: (row: Invoice) => <span className='font-medium'>{row?.client?.company?.name || ''}</span>,
-      sortable: false
-    },
-    {
-      id: 'client',
-      header: 'Customer',
-      cell: (row: Invoice) => {
-        const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
-
-        return <span className='font-medium'>{parts.join(' ') || ''}</span>
-      },
-      sortable: false
-    },
-    {
-      id: 'issue_date',
-      header: 'Issue Date',
-      cell: (row: Invoice) => <span className='font-medium'>{formatDate(row.issue_date || '') || '—'}</span>,
-      sortable: true
-    },
-    {
-      id: 'due_date',
-      header: 'Due Date',
-      cell: (row: Invoice) => <span className='font-medium'>{formatDate(row.due_date || '') || '—'}</span>,
-      sortable: true
-    },
-    {
-      id: 'status',
-      header: 'Status',
-      cell: (row: Invoice) => (
-        <Badge variant={getStatusVariant(row.status)} className='capitalize'>
-          {row.status || '—'}
-        </Badge>
-      ),
-      sortable: true
-    },
-    {
-      id: 'total',
-      header: 'Total',
-      cell: (row: Invoice) => (
-        <span className='font-medium'>${row.total != null ? Number(row.total).toFixed(2) : '0.00'}</span>
-      ),
-      sortable: true
-    },
-    {
       id: 'actions',
       header: 'Action',
       cell: (row: Invoice) => (
@@ -402,7 +352,158 @@ const Invoices: React.FC<{
       sortable: false,
       headerAlign: 'center',
       size: 30
-    }
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      cell: (row: Invoice) => (
+        <Badge variant={getStatusVariant(row.status)} className='capitalize'>
+          {row.status || '—'}
+        </Badge>
+      ),
+      sortable: true
+    },
+    {
+      id: 'created_at',
+      header: 'Created Date',
+      cell: (row: Invoice) => <span className='font-medium'>{formatDate(row.created_at || '') || '—'}</span>,
+      sortable: true
+    },
+
+    // Invoice confirmation date (date)
+    // Final Invoice Sent (bool)
+    // Invoice date (we don't have invoice date)
+    {
+      id: 'issue_date',
+      header: 'Invoice Date',
+      cell: (row: Invoice) => <span className='font-medium'>{formatDate(row.issue_date || '') || '—'}</span>,
+      sortable: true
+    },
+    {
+      id: 'company',
+      header: 'Company',
+      cell: (row: Invoice) => <span className='font-medium'>{row?.client?.company?.name || ''}</span>,
+      sortable: false
+    },
+
+    // need to link to client details
+    {
+      id: 'client',
+      header: 'Customer',
+      cell: (row: Invoice) => {
+        const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
+
+        return <span className='font-medium'>{parts.join(' ') || ''}</span>
+      },
+      sortable: false
+    },
+
+    // service types
+    {
+      id: 'service_types',
+      header: 'Service Type(s)',
+      cell: (row: Invoice) => {
+        const serviceTypeNames: string[] =
+          row?.services?.map((service: ProposalService) => service?.service_type?.name || '') || []
+
+        const uniqueServiceTypeNames = Array.from(new Set(serviceTypeNames)).filter(name => name)
+
+        return <Description description={uniqueServiceTypeNames.join(', ') || '—'} />
+      },
+      sortable: false
+    },
+
+    // job address
+    {
+      id: 'address',
+      header: 'Job Address',
+      cell: (row: Invoice) => {
+        const addressParts = [row?.address?.street_address, row?.address?.city?.name, row?.address?.state?.name].filter(
+          Boolean
+        )
+
+        return <Description description={addressParts.join(', ') || '—'} />
+      },
+      sortable: false
+    },
+    {
+      id: 'invoice_type',
+      header: 'Invoice Type',
+      cell: (row: Invoice) => {
+        return <span className='font-medium'>{row?.invoice_type?.name || '—'}</span>
+      },
+      sortable: false
+    },
+    {
+      id: 'service_site_contact',
+      header: 'Service Site Contact',
+      cell: (row: Invoice) => {
+        return (
+          <p className='font-medium'>
+            {row?.address?.email && <span>{row.address.email}</span>}
+            {row?.address?.phone && <span>{row.address.phone}</span>}
+          </p>
+        )
+      },
+      sortable: false
+    },
+    {
+      id: 'title',
+      header: 'Job Name',
+      cell: (row: Invoice) => <span className='font-medium'>{row.title}</span>,
+      sortable: true
+    },
+    {
+      id: 'location',
+      header: 'Location',
+      cell: (row: Invoice) => {
+        return <span className='font-medium'>{row?.location?.name || '—'}</span>
+      },
+      sortable: false
+    },
+    {
+      id: 'assign_user',
+      header: 'Sales Rep',
+      cell: (row: Invoice) => {
+        return <span className='font-medium'>{row?.assign_user?.first_name + ' ' + row?.assign_user?.last_name || '—'}</span>
+      },
+      sortable: false
+    },
+    {
+      id: 'due_date',
+      header: 'Due Date',
+      cell: (row: Invoice) => <span className='font-medium'>{formatDate(row.due_date || '') || '—'}</span>,
+      sortable: true
+    },
+
+    // Material Sale
+    // Labor Sale
+
+    {
+      id: 'discount',
+      header: 'Discount',
+      cell: (row: Invoice) => (
+        <span className='font-medium'>${row.discount != null ? Number(row.discount).toFixed(2) : '0.00'}</span>
+      ),
+      sortable: true
+    },
+    {
+      id: 'total',
+      header: 'Total',
+      cell: (row: Invoice) => (
+        <span className='font-medium'>${row.total != null ? Number(row.total).toFixed(2) : '0.00'}</span>
+      ),
+      sortable: true
+    },
+    {
+      id: 'sale_tax',
+      header: 'Total Tax',
+      cell: (row: Invoice) => (
+        <span className='font-medium'>${row.sale_tax != null ? Number(row.sale_tax).toFixed(2) : '0.00'}</span>
+      ),
+      sortable: true
+    },
+    
   ]
 
   const handleClearFilters = () => {

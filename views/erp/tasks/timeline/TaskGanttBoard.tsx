@@ -15,6 +15,8 @@ import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import GanttFilter from '@/views/erp/tasks/timeline/GanttFilter'
 import GanttTaskRow, { GanttTask } from '@/views/erp/tasks/timeline/GanttTaskRow'
 import { Card, CardContent } from '@/components/ui/card'
+import { useAppDispatch } from '@/lib/hooks'
+import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
 // ─── Status colours (legend only) ───────────────────────────────────────────
 const STATUS_COLORS: Record<string, { bg: string }> = {
@@ -58,6 +60,7 @@ export default function TaskGanttBoard({
   taskReminderChannels = []
 }: Props) {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [allTasks, setAllTasks] = useState<Task[]>(initialTasks)
@@ -82,6 +85,11 @@ export default function TaskGanttBoard({
 
   const hasUserChangedFilter = useRef(false)
   const skipFullRefetch = useRef(false)
+
+  /** Set the page title when the component mounts */
+  useEffect(() => {
+    dispatch(setPageTitle('Tasks - Timeline'))
+  }, [])
 
   // ── Fetch tasks ─────────────────────────────────────────────────────────────
   const fetchTasks = async (f: { starting_date?: string; ending_date?: string }) => {

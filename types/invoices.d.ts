@@ -9,7 +9,8 @@ import {
   LaborCost,
   Product,
   User,
-  Model
+  Model,
+  Staff
 } from '.'
 
 export interface Invoice extends Model {
@@ -26,6 +27,7 @@ export interface Invoice extends Model {
   client_id: string
   client?: Client
   assign_id: string
+  assign_user?: Staff
   created_by: string
   location: BusinessLocation | null
   address_id?: string | null
