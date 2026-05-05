@@ -134,7 +134,7 @@ const InvoiceDocuments = ({ invoiceId }: { invoiceId: string }) => {
             </Link>
           ) : (
             <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='flex items-center'>
-              <DocumentIcon className='w-10 h-10' />
+              <DocumentIcon className='w-7 h-7' />
             </Link>
           )}
         </>
