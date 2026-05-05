@@ -157,7 +157,7 @@ function Skeleton({ className }: { className?: string }) {
 
 function LoadingSkeleton() {
   return (
-    <div className='p-6 space-y-4'>
+    <div className='space-y-4'>
       <Skeleton className='h-14 w-full' />
       <Skeleton className='h-10 w-full' />
       <div className='grid grid-cols-3 gap-4'>
@@ -701,7 +701,7 @@ function TenantDashboardView({ data }: { data: Record<string, unknown> | null })
   ]
 
   return (
-    <div className='min-h-screen'>
+    <div className=''>
       <div className='rounded-xl bg-card'>
         {/* ── Header: title + stat pills ── */}
         <div className='border-b border-border/20 px-4 py-3 flex items-center justify-between flex-wrap gap-2.5'>
