@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ImageIcon, PlusIcon, Search } from 'lucide-react'
 import { toast } from 'sonner'
@@ -8,7 +8,6 @@ import { toast } from 'sonner'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
@@ -27,10 +26,8 @@ import {
   ServiceType,
   Staff,
   Unit,
-  Vendor,
-  ProposalService
+  Vendor
 } from '@/types'
-import { formatDate } from '@/utils/date'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
 import { DocumentIcon, UserIcon } from '@/public/icons'
@@ -43,7 +40,7 @@ import InvoiceNotesModal from './InvoiceNotesModal'
 import InvoiceAddNoteModal from './InvoiceAddNoteModal'
 import InvoiceDocuments from './documents/InvoiceDocuments'
 import InvoiceJobImages from './job-images/InvoiceJobImages'
-import { Description } from '@/components/ui/description'
+import { getSharedInvoiceColumns } from './sharedInvoiceColumns'
 
 const Invoices: React.FC<{
   invoiceTypes: EstimateType[]
@@ -205,41 +202,8 @@ const Invoices: React.FC<{
     }
   }
 
-  const getStatusVariant = (
-    status: string
-  ): 'default' | 'secondary' | 'destructive' | 'outline' | 'warning' | 'info' | 'success' | 'pending' => {
-    switch (status?.toLowerCase()) {
-      case 'paid':
-        return 'success'
-      case 'overdue':
-        return 'destructive'
-      case 'sent':
-      case 'sent to customer':
-        return 'warning'
-      case 'viewed':
-      case 'viewed by customer':
-        return 'info'
-      case 'void':
-        return 'destructive'
-      case 'new':
-        return 'secondary'
-      default:
-        return 'outline'
-    }
-  }
-
-  const columns: Column[] = [
-    {
-      id: 'invoice_number',
-      header: 'Invoice #',
-      cell: (row: Invoice) => (
-        <span className='font-medium hover:underline cursor-pointer' onClick={() => handleOpenEditModal(row.id)}>
-          {row.invoice_number?.toString().padStart(6, '0') || 'N/A'}
-        </span>
-      ),
-      sortable: false
-    },
-    {
+  const actionColumn: Column = useMemo(
+    () => ({
       id: 'actions',
       header: 'Action',
       cell: (row: Invoice) => (
@@ -352,159 +316,16 @@ const Invoices: React.FC<{
       sortable: false,
       headerAlign: 'center',
       size: 30
-    },
-    {
-      id: 'status',
-      header: 'Status',
-      cell: (row: Invoice) => (
-        <Badge variant={getStatusVariant(row.status)} className='capitalize'>
-          {row.status || '—'}
-        </Badge>
-      ),
-      sortable: true
-    },
-    {
-      id: 'created_at',
-      header: 'Created Date',
-      cell: (row: Invoice) => <span className='font-medium'>{formatDate(row.created_at || '') || '—'}</span>,
-      sortable: true
-    },
+    }),
+    [canEditInvoice, canDeleteInvoice]
+  )
 
-    // Invoice confirmation date (date)
-    // Final Invoice Sent (bool)
-    // Invoice date (we don't have invoice date)
-    {
-      id: 'issue_date',
-      header: 'Invoice Date',
-      cell: (row: Invoice) => <span className='font-medium'>{formatDate(row.issue_date || '') || '—'}</span>,
-      sortable: true
-    },
-    {
-      id: 'company',
-      header: 'Company',
-      cell: (row: Invoice) => <span className='font-medium'>{row?.client?.company?.name || ''}</span>,
-      sortable: false
-    },
+  const columns: Column[] = useMemo(() => {
+    const sharedColumns = getSharedInvoiceColumns(row => handleOpenEditModal(row.id))
+    const [invoiceNumberColumn, ...remainingSharedColumns] = sharedColumns
 
-    // need to link to client details
-    {
-      id: 'client',
-      header: 'Customer',
-      cell: (row: Invoice) => {
-        const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
-
-        return <span className='font-medium'>{parts.join(' ') || ''}</span>
-      },
-      sortable: false
-    },
-
-    // service types
-    {
-      id: 'service_types',
-      header: 'Service Type(s)',
-      cell: (row: Invoice) => {
-        const serviceTypeNames: string[] =
-          row?.services?.map((service: ProposalService) => service?.service_type?.name || '') || []
-
-        const uniqueServiceTypeNames = Array.from(new Set(serviceTypeNames)).filter(name => name)
-
-        return <Description description={uniqueServiceTypeNames.join(', ') || '—'} />
-      },
-      sortable: false
-    },
-
-    // job address
-    {
-      id: 'address',
-      header: 'Job Address',
-      cell: (row: Invoice) => {
-        const addressParts = [row?.address?.street_address, row?.address?.city?.name, row?.address?.state?.name].filter(
-          Boolean
-        )
-
-        return <Description description={addressParts.join(', ') || '—'} />
-      },
-      sortable: false
-    },
-    {
-      id: 'invoice_type',
-      header: 'Invoice Type',
-      cell: (row: Invoice) => {
-        return <span className='font-medium'>{row?.invoice_type?.name || '—'}</span>
-      },
-      sortable: false
-    },
-    {
-      id: 'service_site_contact',
-      header: 'Service Site Contact',
-      cell: (row: Invoice) => {
-        return (
-          <p className='font-medium'>
-            {row?.address?.email && <span>{row.address.email}</span>}
-            {row?.address?.phone && <span>{row.address.phone}</span>}
-          </p>
-        )
-      },
-      sortable: false
-    },
-    {
-      id: 'title',
-      header: 'Job Name',
-      cell: (row: Invoice) => <span className='font-medium'>{row.title}</span>,
-      sortable: true
-    },
-    {
-      id: 'location',
-      header: 'Location',
-      cell: (row: Invoice) => {
-        return <span className='font-medium'>{row?.location?.name || '—'}</span>
-      },
-      sortable: false
-    },
-    {
-      id: 'assign_user',
-      header: 'Sales Rep',
-      cell: (row: Invoice) => {
-        return <span className='font-medium'>{row?.assign_user?.first_name + ' ' + row?.assign_user?.last_name || '—'}</span>
-      },
-      sortable: false
-    },
-    {
-      id: 'due_date',
-      header: 'Due Date',
-      cell: (row: Invoice) => <span className='font-medium'>{formatDate(row.due_date || '') || '—'}</span>,
-      sortable: true
-    },
-
-    // Material Sale
-    // Labor Sale
-
-    {
-      id: 'discount',
-      header: 'Discount',
-      cell: (row: Invoice) => (
-        <span className='font-medium'>${row.discount != null ? Number(row.discount).toFixed(2) : '0.00'}</span>
-      ),
-      sortable: true
-    },
-    {
-      id: 'total',
-      header: 'Total',
-      cell: (row: Invoice) => (
-        <span className='font-medium'>${row.total != null ? Number(row.total).toFixed(2) : '0.00'}</span>
-      ),
-      sortable: true
-    },
-    {
-      id: 'sale_tax',
-      header: 'Total Tax',
-      cell: (row: Invoice) => (
-        <span className='font-medium'>${row.sale_tax != null ? Number(row.sale_tax).toFixed(2) : '0.00'}</span>
-      ),
-      sortable: true
-    },
-    
-  ]
+    return [invoiceNumberColumn, actionColumn, ...remainingSharedColumns]
+  }, [actionColumn])
 
   const handleClearFilters = () => {
     setFilterOptions({})
