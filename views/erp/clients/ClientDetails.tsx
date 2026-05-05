@@ -108,9 +108,9 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
           <AvatarImage src={''} alt={fullName} />
           <AvatarFallback className='text-lg font-semibold'>{initials || 'C'}</AvatarFallback>
         </Avatar>
-        <div className='space-y-1'>
-          <h4 className='text-lg font-medium text-light'>{fullName || 'N/A'}</h4>
-          <p className='text-gray'>{clientData?.email || 'N/A'}</p>
+        <div className=''>
+          <h4 className='text-lg/[1.1] font-medium text-light'>{fullName || 'N/A'}</h4>
+          <p className='text-gray text-sm/[1.25]'>{clientData?.email || 'N/A'}</p>
           <Badge variant={clientData?.status === 1 ? 'default' : 'destructive'}>
             {clientData?.status === 1 ? 'Active' : 'Inactive'}
           </Badge>

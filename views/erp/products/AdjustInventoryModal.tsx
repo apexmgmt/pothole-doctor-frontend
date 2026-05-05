@@ -78,7 +78,7 @@ const AdjustInventoryModal = ({ open, onOpenChange, onSuccess, inventory, produc
   const displayField = (label: string, value: string | number | null | undefined) => (
     <div className='flex flex-col gap-1'>
       <span className='text-xs text-muted-foreground'>{label}</span>
-      <span className='text-sm font-medium rounded-md px-3 py-2 bg-muted min-h-9'>{value ?? '—'}</span>
+      <span className='text-sm font-medium rounded-md px-3 py-2 bg-white/5 min-h-9'>{value ?? '—'}</span>
     </div>
   )
 
