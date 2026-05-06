@@ -104,7 +104,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       subItems: [
         {
           id: 'tasks',
-          label: 'Task List',
+          label: 'List',
           href: '/erp/tasks',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
@@ -112,9 +112,9 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           permissions: ['Manage Task']
         },
         {
-          id: 'task-kanban',
-          label: 'Kanban Board',
-          href: '/erp/tasks/kanban',
+          id: 'task-kanban-board',
+          label: 'Board',
+          href: '/erp/tasks/board',
           icon: <LocateIcon className='h-4 w-4' />,
           hasSubItems: false,
           exactMatch: true,
@@ -198,98 +198,109 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       permissions: ['Manage Work Order']
     },
     {
-      id: 'inventory-products',
-      label: 'Inventory Products',
+      id: 'all-products',
+      label: 'Products',
       icon: <Boxes className='h-4 w-4' />,
       href: '/erp/products',
       hasSubItems: true,
       subItems: [
         {
-          id: 'products',
-          label: 'Products',
+          id: 'inventory-products',
+          label: 'Inventory',
+          icon: <Boxes className='h-4 w-4' />,
           href: '/erp/products',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Product']
+          hasSubItems: true,
+          subItems: [
+            {
+              id: 'products',
+              label: 'Products',
+              href: '/erp/products',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: true,
+              permissions: ['Manage Product']
+            },
+            {
+              id: 'product-stock',
+              label: 'Product Stock',
+              href: '/erp/products/stock',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: true,
+              permissions: ['Manage Product']
+            },
+            {
+              id: 'product-purchase-order',
+              label: 'Purchase Orders',
+              href: '/erp/products/purchase-orders',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: true,
+              permissions: ['Manage Product']
+            },
+            {
+              id: 'inventory-jobs',
+              label: 'Jobs',
+              href: '/erp/products/inventory-jobs',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: true,
+              permissions: ['Manage Work Order']
+            },
+            {
+              id: 'product-categories',
+              label: 'Categories',
+              href: '/erp/products/categories',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: true,
+              permissions: ['Manage Category']
+            }
+          ],
+          exactMatch: false,
+          permissions: ['Manage Category', 'Manage Product', 'Manage Work Order']
         },
         {
-          id: 'product-stock',
-          label: 'Product Stock',
-          href: '/erp/products/stock',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Product']
-        },
-        {
-          id: 'product-purchase-order',
-          label: 'Purchase Orders',
-          href: '/erp/products/purchase-orders',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Product']
-        },
-        {
-          id: 'inventory-jobs',
-          label: 'Inventory Jobs',
-          href: '/erp/products/inventory-jobs',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Work Order']
-        },
-        {
-          id: 'product-categories',
-          label: 'Categories',
-          href: '/erp/products/categories',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Category']
-        }
-      ],
-      exactMatch: false,
-      permissions: ['Manage Category', 'Manage Product', 'Manage Work Order']
-    },
-    {
-      id: 'non-inventory-products',
-      label: 'Non-Inventory Products',
-      icon: <Box className='h-4 w-4' />,
-      href: '/erp/non-inventory-products',
-      hasSubItems: true,
-      subItems: [
-        {
-          id: 'products',
-          label: 'Products',
+          id: 'non-inventory-products',
+          label: 'Non-Inventory',
+          icon: <Box className='h-4 w-4' />,
           href: '/erp/non-inventory-products',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Product']
-        },
-        {
-          id: 'non-inventory-jobs',
-          label: 'Non-Inventory Jobs',
-          href: '/erp/non-inventory-products/non-inventory-jobs',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Work Order']
-        },
-        {
-          id: 'order-by-product',
-          label: 'Order By Product',
-          href: '/erp/non-inventory-products/order-by-product',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Work Order']
+          hasSubItems: true,
+          subItems: [
+            {
+              id: 'products',
+              label: 'Products',
+              href: '/erp/non-inventory-products',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: true,
+              permissions: ['Manage Product']
+            },
+            {
+              id: 'non-inventory-jobs',
+              label: 'Jobs',
+              href: '/erp/non-inventory-products/non-inventory-jobs',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: true,
+              permissions: ['Manage Work Order']
+            },
+            {
+              id: 'order-by-product',
+              label: 'Order By Product',
+              href: '/erp/non-inventory-products/order-by-product',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: true,
+              permissions: ['Manage Work Order']
+            }
+          ],
+          exactMatch: false,
+          permissions: ['Manage Product', 'Manage Work Order']
         }
       ],
-      exactMatch: false,
-      permissions: ['Manage Product', 'Manage Work Order']
+      exactMatch: true,
+      permissions: ['Manage Product', 'Manage Category', 'Manage Work Order']
     },
     {
       id: 'settings',
