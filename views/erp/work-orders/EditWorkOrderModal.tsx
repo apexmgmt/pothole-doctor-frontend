@@ -517,7 +517,7 @@ const EditWorkOrderModal = ({
                 <FormLabel>Event Location</FormLabel>
                 <FormControl>
                   <Select value={field.value ?? ''} onValueChange={field.onChange} disabled={!selectedClient}>
-                    <SelectTrigger className='w-full h-auto text-left whitespace-normal'>
+                    <SelectTrigger className='w-full h-auto! text-left whitespace-normal'>
                       <SelectValue placeholder={selectedClient ? 'Select Address' : 'Select Customer first'} />
                     </SelectTrigger>
                     <SelectContent>

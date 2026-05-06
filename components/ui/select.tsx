@@ -198,7 +198,7 @@ function MultiSelect({
                   <Badge key={value} variant='default' className='mr-1'>
                     {option?.label}
                     <span
-                      className='ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer inline-flex'
+                      className='ml-2 rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer inline-flex'
                       onKeyDown={e => {
                         if (e.key === 'Enter') {
                           handleRemove(value, e as any)
@@ -212,7 +212,7 @@ function MultiSelect({
                       role='button'
                       tabIndex={0}
                     >
-                      <X className='h-3 w-3 text-muted-foreground hover:text-foreground' />
+                      <X className='h-3 w-3 text-white' />
                     </span>
                   </Badge>
                 )
@@ -245,7 +245,7 @@ function MultiSelect({
                   >
                     <div
                       className={cn(
-                        'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-border',
+                        'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
                         isSelected ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
                       )}
                     >
@@ -336,7 +336,7 @@ function CreatableMultiSelect({
                   <Badge key={value} variant='default' className='mr-1'>
                     {label}
                     <span
-                      className='ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer inline-flex'
+                      className='ml-2 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer inline-flex'
                       onKeyDown={e => {
                         if (e.key === 'Enter') {
                           handleRemove(value, e as any)
@@ -350,7 +350,7 @@ function CreatableMultiSelect({
                       role='button'
                       tabIndex={0}
                     >
-                      <X className='h-3 w-3 text-muted-foreground hover:text-foreground' />
+                      <X className='h-3 w-3 text-white' />
                     </span>
                   </Badge>
                 )

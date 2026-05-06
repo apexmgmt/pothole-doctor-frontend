@@ -202,7 +202,9 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
 
         {/* Country */}
         <div className='space-y-2'>
-          <Label htmlFor='country_id'>Country</Label>
+          <Label htmlFor='country_id'>
+            Country <span className='text-red-500'>*</span>
+          </Label>
           <Controller
             name='country_id'
             control={control}
@@ -227,7 +229,9 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
 
         {/* State */}
         <div className='space-y-2'>
-          <Label htmlFor='state_id'>State</Label>
+          <Label htmlFor='state_id'>
+            State <span className='text-red-500'>*</span>
+          </Label>
           <Controller
             name='state_id'
             control={control}
@@ -262,7 +266,9 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
 
         {/* City */}
         <div className='space-y-2'>
-          <Label htmlFor='city_id'>City</Label>
+          <Label htmlFor='city_id'>
+            City <span className='text-red-500'>*</span>
+          </Label>
           <Controller
             name='city_id'
             control={control}
