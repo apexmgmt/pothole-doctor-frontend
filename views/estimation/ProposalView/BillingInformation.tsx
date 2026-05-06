@@ -16,8 +16,8 @@ const BillingInformation = ({ proposal }: { proposal: Proposal }) => {
             : ''}
           {proposal?.estimate?.client?.address?.zip_code ? ' ' + proposal?.estimate?.client?.address?.zip_code : ''}
         </p>
-        <p>{proposal?.estimate?.client?.email}</p>
-        <p>{proposal?.estimate?.client?.phone}</p>
+        {proposal?.estimate?.client?.email && <p>{proposal?.estimate?.client?.email}</p>}
+        {proposal?.estimate?.client?.phone && <p>{proposal?.estimate?.client?.phone}</p>}
       </div>
       {/* Service Site */}
       <div className='flex flex-col sm:text-right'>
@@ -28,10 +28,10 @@ const BillingInformation = ({ proposal }: { proposal: Proposal }) => {
           {proposal?.estimate?.address?.state?.name
             ? ', ' + proposal?.estimate?.address?.state?.name
             : ''}
-          {proposal?.estimate?.address?.zip_code ? ' ' + proposal?.estimate?.address?.zip_code : ''}
+          {proposal?.estimate?.address?.zip_code ? ', ' + proposal?.estimate?.address?.zip_code : ''}
         </p>
-        <p>{proposal?.estimate?.client?.email}</p>
-        <p>{proposal?.estimate?.client?.phone}</p>
+        {proposal?.estimate?.address?.email || proposal?.estimate?.client?.email ? <p>{proposal?.estimate?.address?.email || proposal?.estimate?.client?.email}</p> : null}
+        {proposal?.estimate?.address?.phone || proposal?.estimate?.client?.phone ? <p>{proposal?.estimate?.address?.phone || proposal?.estimate?.client?.phone}</p> : null}
       </div>
     </div>
   )

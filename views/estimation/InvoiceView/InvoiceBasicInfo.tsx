@@ -7,11 +7,11 @@ const InvoiceBasicInfo = ({ invoice }: { invoice: Invoice }) => {
       {/* Company Info */}
       <div className='flex flex-col text-sm'>
         {/* Company Address */}
-        <p>{invoice?.estimate?.assign_user?.userable?.address}</p>
+        {invoice?.assign_user?.userable?.address && <p>{invoice.assign_user.userable.address}</p>}
         {/* Company Email */}
-        <p>Email: {invoice?.estimate?.assign_user?.email}</p>
+        {invoice?.assign_user?.email && <p>Email: {invoice.assign_user.email}</p>}
         {/* Company Phone */}
-        <p>Phone: {invoice?.estimate?.assign_user?.userable?.phone}</p>
+        {invoice?.assign_user?.userable?.phone && <p>Phone: {invoice.assign_user.userable.phone}</p>}
       </div>
       {/* Invoice Info */}
       <div className='flex flex-col sm:text-right text-sm'>
