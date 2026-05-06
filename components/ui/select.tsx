@@ -186,7 +186,7 @@ function MultiSelect({
           variant='outline'
           role='combobox'
           aria-expanded={open}
-          className={cn('w-full justify-between h-auto min-h-9 border-border bg-muted', className)}
+          className={cn('w-full justify-between h-auto min-h-9 border-border bg-transparent', className)}
           disabled={disabled}
         >
           <div className='flex flex-wrap gap-1'>
@@ -323,7 +323,7 @@ function CreatableMultiSelect({
           variant='outline'
           role='combobox'
           aria-expanded={open}
-          className={cn('w-full border-border bg-muted justify-between h-auto min-h-9', className)}
+          className={cn('w-full border-border bg-transparent justify-between h-auto min-h-9', className)}
           disabled={disabled}
         >
           <div className='flex flex-wrap gap-1'>
@@ -470,7 +470,7 @@ function CreatableSelect({
           variant='outline'
           role='combobox'
           aria-expanded={open}
-          className={cn('w-full border-border bg-muted justify-between h-9', className)}
+          className={cn('w-full border-border bg-transparent justify-between h-9', className)}
           disabled={disabled}
         >
           <span>{value ? displayLabel : <span className='text-muted-foreground'>{placeholder}</span>}</span>

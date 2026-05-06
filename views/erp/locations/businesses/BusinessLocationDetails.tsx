@@ -213,7 +213,7 @@ const BusinessLocationDetails: React.FC<BusinessLocationDetailsProps> = ({ busin
 
       {/* Timestamps */}
       <div className='pt-4 border-t border-border'>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
           <div>
             <label className='text-xs text-muted-foreground uppercase'>Created At</label>
             <p className='text-sm font-medium'>

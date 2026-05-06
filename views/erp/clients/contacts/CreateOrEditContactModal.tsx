@@ -202,7 +202,7 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
               </FormItem>
             )}
           />
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             <FormField
               control={form.control}
               name='email'
@@ -228,12 +228,13 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
             <FormField
               control={form.control}
               name='phone'
-              rules={{ required: 'Phone is required',
+              rules={{
+                required: 'Phone is required',
                 pattern: {
                   value: /^[0-9+\-() ]+$/,
                   message: 'Invalid phone number'
                 }
-               }}
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>

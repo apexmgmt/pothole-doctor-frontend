@@ -47,7 +47,7 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit }) => {
           <Skeleton className='h-8 w-48' />
           {/* <Skeleton className='h-10 w-24' /> */}
         </div>
-        <div className='flex items-center space-x-4 p-4 bg-bg-3 rounded-lg'>
+        <div className='flex items-center space-x-4 py-4 bg-bg-3 rounded-lg'>
           <Skeleton className='h-16 w-16 rounded-full' />
           <div className='space-y-2 flex-1'>
             <Skeleton className='h-6 w-48' />
@@ -106,14 +106,14 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit }) => {
       </div>
 
       {/* Profile Section */}
-      <div className='flex items-center space-x-4 p-4 bg-bg-3 rounded-lg'>
+      <div className='flex items-center space-x-4 py-4 bg-bg-3 rounded-lg'>
         <Avatar className='h-16 w-16'>
           <AvatarImage src={''} alt={fullName} />
           <AvatarFallback className='text-lg font-semibold'>{initials || 'V'}</AvatarFallback>
         </Avatar>
         <div className=''>
           <h4 className='text-lg/[1.1] font-medium text-light'>{fullName}</h4>
-          <p className='text-gray text-sm/tight'>{vendorData.email}</p>
+          <p className='text-gray text-sm/tight break-all'>{vendorData.email}</p>
           <Badge variant={vendorData.status ? 'default' : 'destructive'}>
             {vendorData.status ? 'Active' : 'Inactive'}
           </Badge>
@@ -229,7 +229,7 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit }) => {
 
       {/* Timestamps */}
       <div className='pt-4 border-t border-border'>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
           <div>
             <label className='text-xs text-gray uppercase'>Created At</label>
             <p className='text-light text-sm'>

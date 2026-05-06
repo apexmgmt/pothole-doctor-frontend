@@ -65,7 +65,7 @@ const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fe
       </div>
 
       {/* Profile Section */}
-      <div className='flex items-center space-x-4 p-4 bg-bg-3 rounded-lg'>
+      <div className='flex items-center space-x-4 py-4 bg-bg-3 rounded-lg'>
         <Avatar className='h-16 w-16'>
           <AvatarImage src={staffData.userable?.profile_picture} alt={fullName} />
           <AvatarFallback className='text-lg font-semibold'>{initials || 'C'}</AvatarFallback>
