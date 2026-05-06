@@ -209,12 +209,13 @@ const Estimates: React.FC<{
       ),
       sortable: true
     },
-    {
-      id: 'service_type',
-      header: 'Service Type',
-      cell: (row: Estimate) => <span className='font-medium'>{row?.service_type?.name || ''}</span>,
-      sortable: true
-    },
+
+    // {
+    //   id: 'service_type',
+    //   header: 'Service Type',
+    //   cell: (row: Estimate) => <span className='font-medium'>{row?.service_type?.name || ''}</span>,
+    //   sortable: true
+    // },
 
     // {
     //   id: 'status',
