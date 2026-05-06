@@ -58,7 +58,7 @@ export default function GanttTaskRow({
     >
       {/* Task label — sticky left */}
       <div
-        style={{ width: labelCol, minWidth: labelCol, position: 'sticky', left: 0, zIndex: 10, background: rowBg }}
+        style={{ width: labelCol, minWidth: labelCol, position: 'sticky', left: 0, zIndex: 20, background: rowBg }}
         className='shrink-0 flex items-center gap-2 px-3 border-r border-zinc-700 h-full'
       >
         <button type='button' className='flex-1 text-left min-w-0' onClick={() => onEdit(task)}>
@@ -117,7 +117,9 @@ export default function GanttTaskRow({
           onClick={() => onEdit(task)}
           title={`${task.name} · ${format(task.startD, 'MMM d, yyyy')} → ${format(task.endD, 'MMM d, yyyy')}`}
         >
-          <span className='px-3 text-xs font-medium text-white truncate flex items-center h-full'>{task.name}</span>
+          <span className='px-3 text-xs font-medium text-white truncate block w-full text-left leading-[30px]'>
+            {task.name}
+          </span>
         </button>
       </div>
     </div>

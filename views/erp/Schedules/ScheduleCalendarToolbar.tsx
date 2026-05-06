@@ -24,7 +24,7 @@ export function ScheduleCalendarToolbar({
         <Button type='button' variant='outline' size='sm' onClick={() => onNavigate('TODAY')}>
           Today
         </Button>
-        <div className='flex items-center gap-1 rounded-lg border border-white/10 bg-zinc-900/80 p-1'>
+        <div className='flex items-center gap-1 rounded-lg border border-white/10 bg-zinc-900/80'>
           <Button type='button' variant='ghost' size='icon-sm' onClick={() => onNavigate('PREV')}>
             <ChevronLeft className='h-4 w-4' />
           </Button>
@@ -32,7 +32,7 @@ export function ScheduleCalendarToolbar({
             <ChevronRight className='h-4 w-4' />
           </Button>
         </div>
-        <div className='pl-1 font-medium text-white'>{label}</div>
+        <div className='pl-1 text-xs sm:text-base font-medium text-white'>{label}</div>
       </div>
 
       <div className='flex flex-wrap items-center gap-1 rounded-lg border border-white/10 bg-zinc-900/80 p-1'>

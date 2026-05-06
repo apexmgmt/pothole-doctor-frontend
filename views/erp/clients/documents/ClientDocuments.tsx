@@ -155,8 +155,19 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
       cell: row => (
         <>
           {getFileType(row.full_path) === 'image' ? (
-            <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
-              <Image src={row.full_path} alt={row.name} width={100} height={100} unoptimized className='rounded-md' />
+            <Link
+              href={row.full_path}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='font-medium relative h-20 w-20 inline-block'
+            >
+              <Image
+                src={row.full_path}
+                alt={row.name}
+                fill
+                unoptimized
+                className='h-full w-full rounded-md object-cover object-center'
+              />
             </Link>
           ) : getFileType(row.full_path) === 'video' ? (
             <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
@@ -166,12 +177,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
               </video>
             </Link>
           ) : (
-            <Link
-              href={row.full_path}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='font-medium flex items-center justify-center'
-            >
+            <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
               <DocumentIcon className='w-10 h-10' />{' '}
             </Link>
           )}

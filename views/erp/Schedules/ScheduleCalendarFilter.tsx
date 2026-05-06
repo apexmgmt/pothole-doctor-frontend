@@ -124,7 +124,7 @@ export default function ScheduleCalendarFilter({
   }, [filterOptions.contractor_id, partners])
 
   return (
-    <ScrollArea className='h-[835px] w-72 shrink-0 rounded-lg border border-border bg-card'>
+    <ScrollArea className='xl:h-[835px] w-full xl:w-72 shrink-0 rounded-lg border border-border bg-card'>
       <div className='flex flex-col gap-4 p-4'>
         <div className='flex items-center justify-between'>
           <span className='font-semibold text-sm'>Filters</span>
@@ -137,136 +137,138 @@ export default function ScheduleCalendarFilter({
         </div>
 
         {/* Customer */}
-        <div className='flex flex-col gap-1.5'>
-          <Label className='text-xs text-muted-foreground'>Customer</Label>
-          <Select value={filterOptions.client_id ?? 'all'} onValueChange={value => handleChange('client_id', value)}>
-            <SelectTrigger className='w-full'>
-              <SelectValue placeholder='Select Customer' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All Customers</SelectItem>
-              {clients.map(client => (
-                <SelectItem key={client.id} value={client.id}>
-                  {client.company?.name || `${client.first_name} ${client.last_name}`.trim()}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4 '>
+          <div className='flex flex-col gap-1.5'>
+            <Label className='text-xs text-muted-foreground'>Customer</Label>
+            <Select value={filterOptions.client_id ?? 'all'} onValueChange={value => handleChange('client_id', value)}>
+              <SelectTrigger className='w-full'>
+                <SelectValue placeholder='Select Customer' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>All Customers</SelectItem>
+                {clients.map(client => (
+                  <SelectItem key={client.id} value={client.id}>
+                    {client.company?.name || `${client.first_name} ${client.last_name}`.trim()}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        {/* Work Order */}
-        <div className='flex flex-col gap-1.5'>
-          <Label className='text-xs text-muted-foreground'>Work Order</Label>
-          <Select
-            value={filterOptions.work_order_id ?? 'all'}
-            onValueChange={value => handleChange('work_order_id', value)}
-          >
-            <SelectTrigger className='w-full'>
-              <SelectValue placeholder='Select Work Order' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All Work Orders</SelectItem>
-              {workOrders.map(wo => (
-                <SelectItem key={wo.id} value={wo.id}>
-                  #{wo.work_order_number} – {wo.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          {/* Work Order */}
+          <div className='flex flex-col gap-1.5'>
+            <Label className='text-xs text-muted-foreground'>Work Order</Label>
+            <Select
+              value={filterOptions.work_order_id ?? 'all'}
+              onValueChange={value => handleChange('work_order_id', value)}
+            >
+              <SelectTrigger className='w-full'>
+                <SelectValue placeholder='Select Work Order' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>All Work Orders</SelectItem>
+                {workOrders.map(wo => (
+                  <SelectItem key={wo.id} value={wo.id}>
+                    #{wo.work_order_number} – {wo.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        {/* Job Type / Service Type */}
-        <div className='flex flex-col gap-1.5'>
-          <Label className='text-xs text-muted-foreground'>Job Type</Label>
-          <Select
-            value={filterOptions.service_type_id ?? 'all'}
-            onValueChange={value => handleChange('service_type_id', value)}
-          >
-            <SelectTrigger className='w-full'>
-              <SelectValue placeholder='Select Job Type' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All Job Types</SelectItem>
-              {(filterOptions.work_order_id ? woServiceTypes : serviceTypes).map(st => (
-                <SelectItem key={st.id} value={st.id}>
-                  {st.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          {/* Job Type / Service Type */}
+          <div className='flex flex-col gap-1.5'>
+            <Label className='text-xs text-muted-foreground'>Job Type</Label>
+            <Select
+              value={filterOptions.service_type_id ?? 'all'}
+              onValueChange={value => handleChange('service_type_id', value)}
+            >
+              <SelectTrigger className='w-full'>
+                <SelectValue placeholder='Select Job Type' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>All Job Types</SelectItem>
+                {(filterOptions.work_order_id ? woServiceTypes : serviceTypes).map(st => (
+                  <SelectItem key={st.id} value={st.id}>
+                    {st.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        {/* Contractor */}
-        <div className='flex flex-col gap-1.5'>
-          <Label className='text-xs text-muted-foreground'>Contractor</Label>
-          <Popover open={isContractorOpen} onOpenChange={setIsContractorOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                type='button'
-                variant='outline'
-                role='combobox'
-                aria-expanded={isContractorOpen}
-                className='w-full justify-between bg-transparent px-3 text-sm font-normal'
-              >
-                <span className='truncate text-left'>
-                  {selectedContractor
-                    ? `${selectedContractor.first_name} ${selectedContractor.last_name}`.trim()
-                    : 'All Contractors'}
-                </span>
-                <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className='w-(--radix-popover-trigger-width) p-0' align='start'>
-              <Command>
-                <CommandInput placeholder='Search contractor...' />
-                <CommandList>
-                  <CommandEmpty>No contractor found.</CommandEmpty>
-                  <CommandGroup>
-                    <CommandItem
-                      value='all contractors'
-                      onSelect={() => {
-                        handleChange('contractor_id', 'all')
-                        setIsContractorOpen(false)
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          'mr-2 h-4 w-4',
-                          (filterOptions.contractor_id ?? 'all') === 'all' ? 'opacity-100' : 'opacity-0'
-                        )}
-                      />
-                      <span>All Contractors</span>
-                    </CommandItem>
-
-                    {partners.map(partner => {
-                      const partnerName = `${partner.first_name} ${partner.last_name}`.trim()
-                      const isSelected = filterOptions.contractor_id === partner.id
-
-                      return (
-                        <CommandItem
-                          key={partner.id}
-                          value={partnerName}
-                          onSelect={() => {
-                            handleChange('contractor_id', partner.id)
-                            setIsContractorOpen(false)
-                          }}
-                        >
-                          <Check className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')} />
-                          {isAllContractorsSelected && (
-                            <span
-                              className='mr-2 inline-block h-2.5 w-2.5 rounded-full border border-white/30'
-                              style={{ backgroundColor: getPaletteColorByKey(partner.id) }}
-                            />
+          {/* Contractor */}
+          <div className='flex flex-col gap-1.5'>
+            <Label className='text-xs text-muted-foreground'>Contractor</Label>
+            <Popover open={isContractorOpen} onOpenChange={setIsContractorOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type='button'
+                  variant='outline'
+                  role='combobox'
+                  aria-expanded={isContractorOpen}
+                  className='w-full justify-between bg-transparent px-3 text-sm font-normal'
+                >
+                  <span className='truncate text-left'>
+                    {selectedContractor
+                      ? `${selectedContractor.first_name} ${selectedContractor.last_name}`.trim()
+                      : 'All Contractors'}
+                  </span>
+                  <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className='w-(--radix-popover-trigger-width) p-0' align='start'>
+                <Command>
+                  <CommandInput placeholder='Search contractor...' />
+                  <CommandList>
+                    <CommandEmpty>No contractor found.</CommandEmpty>
+                    <CommandGroup>
+                      <CommandItem
+                        value='all contractors'
+                        onSelect={() => {
+                          handleChange('contractor_id', 'all')
+                          setIsContractorOpen(false)
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            'mr-2 h-4 w-4',
+                            (filterOptions.contractor_id ?? 'all') === 'all' ? 'opacity-100' : 'opacity-0'
                           )}
-                          <span>{partnerName || 'N/A'}</span>
-                        </CommandItem>
-                      )
-                    })}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+                        />
+                        <span>All Contractors</span>
+                      </CommandItem>
+
+                      {partners.map(partner => {
+                        const partnerName = `${partner.first_name} ${partner.last_name}`.trim()
+                        const isSelected = filterOptions.contractor_id === partner.id
+
+                        return (
+                          <CommandItem
+                            key={partner.id}
+                            value={partnerName}
+                            onSelect={() => {
+                              handleChange('contractor_id', partner.id)
+                              setIsContractorOpen(false)
+                            }}
+                          >
+                            <Check className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')} />
+                            {isAllContractorsSelected && (
+                              <span
+                                className='mr-2 inline-block h-2.5 w-2.5 rounded-full border border-white/30'
+                                style={{ backgroundColor: getPaletteColorByKey(partner.id) }}
+                              />
+                            )}
+                            <span>{partnerName || 'N/A'}</span>
+                          </CommandItem>
+                        )
+                      })}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
 
         {isAllContractorsSelected && partners.length > 0 && (

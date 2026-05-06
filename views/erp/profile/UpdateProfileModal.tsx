@@ -122,7 +122,7 @@ const UpdateProfileModal = ({ open, onOpenChange, userData }: UpdateProfileModal
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             {/* First Name Field */}
             <FormField
               control={form.control}
@@ -160,7 +160,7 @@ const UpdateProfileModal = ({ open, onOpenChange, userData }: UpdateProfileModal
             />
           </div>
 
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             {/* Email Field (Read Only) */}
             <FormItem>
               <FormLabel>Email</FormLabel>

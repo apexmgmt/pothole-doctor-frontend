@@ -231,21 +231,21 @@ const CreateOrEditInvoiceModal = ({
             {form.formState.isSubmitting
               ? 'Saving...'
               : mode === 'create'
-                ? 'Create & Add Services →'
+                ? 'Create & Add Services '
                 : 'Update & Edit Services →'}
           </Button>
         </div>
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='grid grid-cols-2 gap-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
           {/* Title */}
           <FormField
             control={form.control}
             name='title'
             rules={{ required: 'Invoice title is required', minLength: { value: 2, message: 'Min 2 characters' } }}
             render={({ field }) => (
-              <FormItem className='col-span-2'>
+              <FormItem className='col-span-1 sm:col-span-2'>
                 <FormLabel>
                   Title <span className='text-red-500'>*</span>
                 </FormLabel>
@@ -326,7 +326,7 @@ const CreateOrEditInvoiceModal = ({
               name='interaction'
               rules={{ required: 'Interaction type is required' }}
               render={({ field }) => (
-                <FormItem className='col-span-2'>
+                <FormItem className='col-span-1 sm:col-span-2'>
                   <FormLabel>
                     Interaction <span className='text-red-500'>*</span>
                   </FormLabel>
@@ -427,7 +427,7 @@ const CreateOrEditInvoiceModal = ({
                 control={form.control}
                 name='pickup_notes'
                 render={({ field }) => (
-                  <FormItem className='col-span-2'>
+                  <FormItem className='col-span-1 sm:col-span-2'>
                     <FormLabel>Notes</FormLabel>
                     <FormControl>
                       <Textarea placeholder='Enter notes...' rows={3} {...field} value={field.value ?? ''} />
@@ -497,7 +497,7 @@ const CreateOrEditInvoiceModal = ({
                 control={form.control}
                 name='delivery_notes'
                 render={({ field }) => (
-                  <FormItem className='col-span-2'>
+                  <FormItem className='col-span-1 sm:col-span-2'>
                     <FormLabel>Notes</FormLabel>
                     <FormControl>
                       <Textarea placeholder='Enter notes...' rows={3} {...field} value={field.value ?? ''} />
@@ -513,7 +513,7 @@ const CreateOrEditInvoiceModal = ({
             control={form.control}
             name='location_id'
             render={({ field }) => (
-              <FormItem className='col-span-2'>
+              <FormItem className='col-span-1 sm:col-span-2'>
                 <FormLabel>Business Location</FormLabel>
                 <FormControl>
                   <Select value={field.value ?? ''} onValueChange={field.onChange}>
@@ -542,11 +542,11 @@ const CreateOrEditInvoiceModal = ({
             control={form.control}
             name='address_id'
             render={({ field }) => (
-              <FormItem className='col-span-2'>
+              <FormItem className='col-span-1 sm:col-span-2'>
                 <FormLabel>Event Location</FormLabel>
                 <FormControl>
                   <Select value={field.value ?? ''} onValueChange={field.onChange} disabled={!selectedClient}>
-                    <SelectTrigger className='w-full h-auto text-left whitespace-normal'>
+                    <SelectTrigger className='w-full h-auto! text-left whitespace-normal'>
                       <SelectValue placeholder={selectedClient ? 'Select Address' : 'Select Customer first'} />
                     </SelectTrigger>
                     <SelectContent>

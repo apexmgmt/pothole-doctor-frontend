@@ -95,7 +95,11 @@ const CommonDialog = ({
         )}
 
         <ScrollArea
-          className={cn('relative max-h-[80vh] p-1', isLoading && 'pointer-events-none opacity-50', contentClassName)}
+          className={cn(
+            'relative max-h-[80vh] pr-2 -mr-2',
+            isLoading && 'pointer-events-none opacity-50',
+            contentClassName
+          )}
           ref={contentRef}
         >
           {isLoading && (

@@ -473,9 +473,9 @@ const CreateOrEditTaskModal = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             {/* Task Name Field */}
-            <div className='space-y-2 lg:col-span-2'>
+            <div className='space-y-2 sm:col-span-2'>
               <FormField
                 control={form.control}
                 name='name'
@@ -498,7 +498,7 @@ const CreateOrEditTaskModal = ({
             </div>
 
             {/* Description Field */}
-            <div className='space-y-2 lg:col-span-2'>
+            <div className='space-y-2 sm:col-span-2'>
               <label className='text-sm font-medium'>Description</label>
               <TipTapRichTextEditor
                 value={descriptionHtml}
@@ -614,7 +614,7 @@ const CreateOrEditTaskModal = ({
 
           {/* Edit Mode Only Fields */}
           {mode === 'edit' && (
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4 border-t'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t'>
               {/* Status field */}
               <FormField
                 control={form.control}

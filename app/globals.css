@@ -278,8 +278,11 @@
 }
 
 /* Allow month rows to expand vertically based on event count */
-.schedule-calendar-shell .rbc-month-view {
+.schedule-calendar-shell .rbc-month-view,
+.rbc-time-content {
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) rgba(0, 0, 0, 0);
 }
 
 .schedule-calendar-shell .rbc-month-row {
@@ -342,12 +345,25 @@
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+.schedule-calendar-shell .rbc-header + .rbc-header,
+.schedule-calendar-shell .rbc-day-bg + .rbc-day-bg {
+  border-left: 1px solid #ffffff14 !important;
+}
+
+.rbc-day-slot .rbc-time-slot {
+  border-top: 1px solid #ffffff14 !important;
+}
+
+.rbc-time-header.rbc-overflowing {
+  border-right: 1px solid #ffffff14 !important;
+}
+
 .schedule-calendar-shell .rbc-day-bg {
   background: #171717;
 }
 
 .schedule-calendar-shell .rbc-off-range-bg {
-  background: #1f1f1f!important;
+  background: #1f1f1f !important;
 }
 
 .schedule-calendar-shell .rbc-today {

@@ -329,7 +329,7 @@ export default function ScheduleFormDialog({
     >
       <Form {...form}>
         <form id='schedule-form' onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-4'>
-          <div className='grid grid-cols-[140px_1fr] items-start gap-x-3 gap-y-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-[140px_1fr] items-start gap-2 sm:gap-x-3 sm:gap-y-4'>
             {/* Work Order */}
             <FormField
               control={control}
@@ -458,7 +458,7 @@ export default function ScheduleFormDialog({
                 <>
                   <FormLabel className='text-right pt-2 text-sm'>Start Date/Time</FormLabel>
                   <FormItem className='m-0'>
-                    <div className='flex gap-2'>
+                    <div className='flex gap-2 flex-col sm:flex-row'>
                       <FormControl>
                         <DatePicker
                           value={field.value ? new Date(field.value + 'T00:00:00') : null}
@@ -488,7 +488,7 @@ export default function ScheduleFormDialog({
                 <>
                   <FormLabel className='text-right pt-2 text-sm'>End Date/Time</FormLabel>
                   <FormItem className='m-0'>
-                    <div className='flex gap-2'>
+                    <div className='flex gap-2 flex-col sm:flex-row'>
                       <FormControl>
                         <DatePicker
                           value={field.value ? new Date(field.value + 'T00:00:00') : null}
@@ -531,7 +531,7 @@ export default function ScheduleFormDialog({
           </div>
 
           {/* Notification toggles — 2-column grid */}
-          <div className='grid grid-cols-2 gap-3 border border-border rounded-md p-3'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 border border-border rounded-md p-3'>
             {TOGGLE_FIELDS.map(({ label, key }) => (
               <FormField
                 key={key}

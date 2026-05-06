@@ -63,12 +63,12 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
         <div className='flex items-center justify-between'>
           <Skeleton className='h-8 w-48' />
         </div>
-        <div className='flex items-center space-x-4 p-4 bg-bg-3 rounded-lg'>
-          <Skeleton className='h-16 w-16 rounded-full' />
+        <div className='flex items-center space-x-4 py-4 bg-bg-3 rounded-lg'>
+          <Skeleton className='h-12 w-12 sm:w-16 sm:h-16 rounded-full' />
           <div className='space-y-2 flex-1'>
-            <Skeleton className='h-6 w-48' />
-            <Skeleton className='h-4 w-64' />
-            <Skeleton className='h-6 w-20' />
+            <Skeleton className='h-6 w-24 sm:w-48' />
+            <Skeleton className='h-4 w-48 sm:w-64' />
+            <Skeleton className='h-6 w-12 sm:w-20' />
           </div>
         </div>
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
@@ -103,14 +103,14 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
       </div>
 
       {/* Profile Section */}
-      <div className='flex items-center space-x-4 p-4 bg-bg-3 rounded-lg'>
+      <div className='flex items-center space-x-4 py-4 bg-bg-3 rounded-lg'>
         <Avatar className='h-16 w-16'>
           <AvatarImage src={''} alt={fullName} />
           <AvatarFallback className='text-lg font-semibold'>{initials || 'C'}</AvatarFallback>
         </Avatar>
         <div className=''>
           <h4 className='text-lg/[1.1] font-medium text-light'>{fullName || 'N/A'}</h4>
-          <p className='text-gray text-sm/[1.25]'>{clientData?.email || 'N/A'}</p>
+          <p className='text-gray text-sm/tight break-all'>{clientData?.email || 'N/A'}</p>
           <Badge variant={clientData?.status === 1 ? 'default' : 'destructive'}>
             {clientData?.status === 1 ? 'Active' : 'Inactive'}
           </Badge>
