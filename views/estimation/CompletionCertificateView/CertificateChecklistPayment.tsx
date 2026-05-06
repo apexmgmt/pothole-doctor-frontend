@@ -1,5 +1,6 @@
 'use client'
 
+import { formatCurrency } from '@/utils/currency'
 import { forwardRef, useImperativeHandle, useState } from 'react'
 
 type PaymentMethod = 'ACH' | 'Card' | 'Cash' | 'Check' | 'None'
@@ -256,7 +257,7 @@ const CertificateChecklistPayment = forwardRef<CertificateChecklistPaymentHandle
         {/* Invoice Balance Amount */}
         <div className='mb-5'>
           <p className='font-semibold text-sm'>Invoice Balance Amount:</p>
-          <p className='text-2xl font-bold mt-1'>${Number(total ?? 0).toFixed(2)}</p>
+          <p className='text-2xl font-bold mt-1'>{formatCurrency(Number(total ?? 0))}</p>
         </div>
 
         {/* Payment Method */}
