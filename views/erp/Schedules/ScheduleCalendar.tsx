@@ -211,7 +211,7 @@ export default function ScheduleCalendar({
   }
 
   return (
-    <div className='flex gap-4 items-start'>
+    <div className='flex gap-4 flex-col xl:flex-row items-start'>
       <ScheduleCalendarFilter
         clients={clients}
         workOrders={workOrders}
@@ -221,7 +221,7 @@ export default function ScheduleCalendar({
         setFilterOptions={applyFilterOptions}
       />
 
-      <Card className='schedule-calendar-shell shadow-sm flex-1 border-white/10 bg-zinc-950/70 p-4 text-white backdrop-blur'>
+      <Card className='schedule-calendar-shell shadow-sm w-full xl:w-auto flex-1 border-white/10 bg-zinc-950/70 p-4 text-white backdrop-blur'>
         <CardContent className='relative p-0'>
           {isLoading && (
             <div className='absolute inset-0 z-10 flex items-center justify-center rounded-md bg-zinc-950/55 backdrop-blur-sm'>

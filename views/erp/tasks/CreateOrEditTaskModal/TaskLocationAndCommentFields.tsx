@@ -25,12 +25,12 @@ export function TaskLocationAndCommentFields({
             <FormLabel>Event Location</FormLabel>
             <FormControl>
               <Select value={field.value} onValueChange={field.onChange} disabled={!selectedClient}>
-                <SelectTrigger className='w-full'>
+                <SelectTrigger className='w-full! min-w-0!'>
                   <SelectValue placeholder={selectedClient ? 'Select Address' : 'Select Customer first'} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className='w-[var(--radix-select-trigger-width)] max-w-[calc(100vw-2rem)]'>
                   {addressOptions.length === 0 ? (
-                    <div className='px-3 py-2 text-muted-foreground text-sm'>No addresses found</div>
+                    <div className='px-3 py-2 text-muted-foreground text-sm '>No addresses found</div>
                   ) : (
                     addressOptions.map(address => {
                       const value = [address.street_address, address.city?.name, address.state?.name, address.zip_code]
@@ -38,7 +38,7 @@ export function TaskLocationAndCommentFields({
                         .join(', ')
 
                       return (
-                        <SelectItem key={address.id} value={value}>
+                        <SelectItem key={address.id} value={value} className='whitespace-normal wrap-break-words'>
                           {address.title} - {value}
                         </SelectItem>
                       )

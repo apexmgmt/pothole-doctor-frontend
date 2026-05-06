@@ -387,7 +387,7 @@ export default function TaskGanttBoard({
                 <div style={{ width: LABEL_COL + gridWidth, minWidth: LABEL_COL + gridWidth }}>
                   {/* ── Day header ─────────────────────────────────────────── */}
                   <div
-                    className='flex border-b border-zinc-700 bg-zinc-800/90 py-6'
+                    className='flex border-b border-zinc-700 bg-zinc-800/90'
                     style={{ position: 'sticky', top: 0, zIndex: 20, height: HDR_DAY }}
                   >
                     {/* Label spacer — sticky left */}
@@ -400,7 +400,7 @@ export default function TaskGanttBoard({
                         zIndex: 30,
                         background: 'rgb(39 39 42 / 1)'
                       }}
-                      className='z-50! shrink-0 border-r border-zinc-700 flex items-center px-3 font-bold text-background'
+                      className='bg-zinc-800 z-50! shrink-0 border-r border-zinc-700 flex items-center px-3 font-bold text-background'
                     >
                       Tasks
                     </div>
@@ -473,7 +473,7 @@ export default function TaskGanttBoard({
             <div className='flex flex-wrap gap-3 px-4 py-2 border-t border-zinc-800 bg-zinc-800/30 items-center'>
               {Object.entries(STATUS_COLORS).map(([status, c]) => (
                 <div key={status} className='flex items-center gap-1.5'>
-                  <span className={`inline-block h-3 w-3 rounded-sm ${c.bg}`} />
+                  <span className={`inline-block h-4 w-4 rounded-sm ${c.bg}`} />
                   <span className='text-[11px] text-zinc-400 capitalize'>{status}</span>
                 </div>
               ))}

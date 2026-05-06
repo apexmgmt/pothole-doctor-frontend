@@ -352,7 +352,7 @@ export default function TaskViewModal({
               <div
                 className={cn(
                   'p-4 rounded-md border border-transparent',
-                  task && 'cursor-pointer transition-colors hover:border-border'
+                  task && 'cursor-pointer transition-colors border-border'
                 )}
                 onClick={startEditingDescription}
                 role={task ? 'button' : undefined}
@@ -449,46 +449,46 @@ export default function TaskViewModal({
               ) : null}
             </div>
 
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Status</Label>
+            <div className='flex items-center gap-3 flex-row '>
+              <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Status : </Label>
               <Badge variant={statusMeta.variant}>{statusMeta.label}</Badge>
             </div>
 
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Task Type</Label>
-              <p className='text-sm'>{task?.task_type?.name || '-'}</p>
+            <div className='flex items-center gap-3 flex-row '>
+              <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Task Type : </Label>
+              <p className='text-sm flex-1'>{task?.task_type?.name || '-'}</p>
             </div>
 
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Customer</Label>
-              <p className='text-sm'>
+            <div className='flex items-center gap-3 flex-row '>
+              <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Customer : </Label>
+              <p className='text-sm flex-1'>
                 {[task?.client?.first_name, task?.client?.last_name].filter(Boolean).join(' ') || '-'}
               </p>
             </div>
 
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Company</Label>
-              <p className='text-sm'>{task?.client?.company?.name || '-'}</p>
+            <div className='flex items-center gap-3 flex-row '>
+              <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Company : </Label>
+              <p className='text-sm flex-1'>{task?.client?.company?.name || '-'}</p>
             </div>
 
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Location</Label>
-              <p className='text-sm'>{task?.location || '-'}</p>
+            <div className='flex items-start gap-3 flex-row '>
+              <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Location : </Label>
+              <p className='text-sm flex-1'>{task?.location || '-'}</p>
             </div>
 
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Start</Label>
-              <p className='text-sm'>{[task?.start_date, task?.start_time].filter(Boolean).join(' ') || '-'}</p>
+            <div className='flex items-center gap-3 flex-row '>
+              <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Start : </Label>
+              <p className='text-sm flex-1'>{[task?.start_date, task?.start_time].filter(Boolean).join(' ') || '-'}</p>
             </div>
 
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>End</Label>
-              <p className='text-sm'>{[task?.end_date, task?.end_time].filter(Boolean).join(' ') || '-'}</p>
+            <div className='flex items-center gap-3 flex-row '>
+              <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>End : </Label>
+              <p className='text-sm flex-1'>{[task?.end_date, task?.end_time].filter(Boolean).join(' ') || '-'}</p>
             </div>
 
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Assigned To</Label>
-              <div className='flex flex-wrap gap-1'>
+            <div className='flex items-center gap-3 flex-row '>
+              <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Assigned To : </Label>
+              <div className='flex  flex-1flex-wrap gap-1'>
                 {task?.employees?.length ? (
                   task.employees.map(employee => (
                     <Badge key={employee.id} variant='outline'>
@@ -501,31 +501,31 @@ export default function TaskViewModal({
               </div>
             </div>
 
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Created By</Label>
-              <p className='text-sm'>
+            <div className='flex items-center gap-3 flex-row '>
+              <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Created By : </Label>
+              <p className='text-sm flex-1'>
                 {[task?.created_by?.first_name, task?.created_by?.last_name].filter(Boolean).join(' ') || '-'}
               </p>
             </div>
 
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Created At</Label>
-              <p className='text-sm'>{formatDateTime(task?.created_at)}</p>
+            <div className='flex items-center gap-3 flex-row '>
+              <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Created At : </Label>
+              <p className='text-sm flex-1'>{formatDateTime(task?.created_at)}</p>
             </div>
 
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Updated At</Label>
-              <p className='text-sm'>{formatDateTime(task?.updated_at)}</p>
+            <div className='flex items-center gap-3 flex-row '>
+              <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Updated At : </Label>
+              <p className='text-sm flex-1'>{formatDateTime(task?.updated_at)}</p>
             </div>
 
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Completed Date</Label>
-              <p className='text-sm'>{task?.completed_date || '-'}</p>
+            <div className='flex items-center gap-3 flex-row '>
+              <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Completed Date : </Label>
+              <p className='text-sm flex-1'>{task?.completed_date || '-'}</p>
             </div>
 
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Close Comment</Label>
-              <p className='text-sm whitespace-pre-wrap'>{task?.close_comment || '-'}</p>
+            <div className='flex items-center gap-3 flex-row '>
+              <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Close Comment : </Label>
+              <p className='text-sm flex-1 whitespace-pre-wrap'>{task?.close_comment || '-'}</p>
             </div>
           </div>
 
