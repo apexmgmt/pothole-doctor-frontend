@@ -283,7 +283,7 @@ const CreateOrEditPurchaseOrderModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Add New Purchase Order' : 'Edit Purchase Order'}
       description=''
-      maxWidth='full'
+      maxWidth='5xl'
       isLoading={isLoading}
       loadingMessage={mode === 'create' ? 'Creating purchase order...' : 'Updating purchase order...'}
       disableClose={isLoading}

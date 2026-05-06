@@ -145,7 +145,7 @@ const EstimateTypes: React.FC = () => {
       header: 'Title',
       cell: row => <span className='font-medium'>{row.name}</span>,
       sortable: true
-    },
+    }
     // {
     //   id: 'actions',
     //   header: 'Action',
@@ -219,7 +219,7 @@ const EstimateTypes: React.FC = () => {
             placeholder='Search...'
             value={searchValue}
             onChange={e => setSearchValue(e.target.value)}
-            className='w-80'
+            className='lg:w-80 min-w-0'
           />
           <InputGroupAddon>
             <Search />

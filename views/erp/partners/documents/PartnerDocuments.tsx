@@ -234,7 +234,7 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
             placeholder='Search...'
             value={searchValue}
             onChange={e => setSearchValue(e.target.value)}
-            className='w-80'
+            className='lg:w-80 min-w-0'
           />
           <InputGroupAddon>
             <Search />
