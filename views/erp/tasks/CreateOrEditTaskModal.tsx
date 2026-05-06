@@ -64,7 +64,7 @@ interface FormValues {
   client_id: string
   task_type_id?: string
   employee_ids?: string[]
-  start_date: string
+  start_date?: string
   start_time?: string
   end_date?: string
   end_time?: string
@@ -447,7 +447,7 @@ const CreateOrEditTaskModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create New Task' : 'Edit Task'}
       description={mode === 'create' ? 'Add a new task to the system' : 'Update task information'}
-      maxWidth='6xl'
+      maxWidth='4xl'
       disableClose={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
@@ -576,38 +576,38 @@ const CreateOrEditTaskModal = ({
                 </FormItem>
               )}
             />
-            {/* Employees field */}
-            <FormField
-              control={form.control}
-              name='employee_ids'
-              rules={{
-                required: 'Employees are required',
-                minLength: { value: 1, message: 'Select at least one employee' }
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Employees <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <MultiSelect
-                      options={staffs?.map(staff => ({
-                        value: staff.id,
-                        label: staff.first_name + ' ' + staff.last_name
-                      }))}
-                      selected={field.value || []}
-                      onChange={field.onChange}
-                      placeholder='Select employees...'
-                      className='w-full'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* time fields */}
-            <TaskDateTimeFields form={form} />
           </div>
+          {/* Employees field */}
+          <FormField
+            control={form.control}
+            name='employee_ids'
+            rules={{
+              required: 'Employees are required',
+              minLength: { value: 1, message: 'Select at least one employee' }
+            }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Employees <span className='text-red-500'>*</span>
+                </FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={staffs?.map(staff => ({
+                      value: staff.id,
+                      label: staff.first_name + ' ' + staff.last_name
+                    }))}
+                    selected={field.value || []}
+                    onChange={field.onChange}
+                    placeholder='Select employees...'
+                    className='w-full'
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* time fields */}
+          <TaskDateTimeFields form={form} />
 
           <TaskReminderFields form={form} taskReminderChannels={taskReminderChannels} />
           <TaskLocationAndCommentFields form={form} selectedClient={selectedClient} addressOptions={addressOptions} />
