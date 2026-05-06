@@ -7,11 +7,11 @@ const ProposalBasicInfo = ({proposal}: {proposal: Proposal}) => {
       {/* Company Info */}
       <div className='flex flex-col text-sm'>
         {/* Company Address */}
-        <p>{proposal?.estimate?.assign_user?.userable?.address}</p>
+        {proposal?.estimate?.assign_user?.userable?.address && <p>{proposal?.estimate?.assign_user?.userable?.address}</p>}
         {/* Company Email */}
-        <p>Email: {proposal?.estimate?.assign_user?.email}</p>
+        {proposal?.estimate?.assign_user?.email && <p>Email: {proposal?.estimate?.assign_user?.email}</p>}
         {/* Company Phone */}
-        <p>Phone: {proposal?.estimate?.assign_user?.userable?.phone}</p>
+        {proposal?.estimate?.assign_user?.userable?.phone && <p>Phone: {proposal?.estimate?.assign_user?.userable?.phone}</p>}
       </div>
       {/* Proposal Info */}
       <div className='flex flex-col sm:text-right text-sm'>

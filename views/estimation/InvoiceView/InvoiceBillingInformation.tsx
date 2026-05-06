@@ -14,8 +14,8 @@ const InvoiceBillingInformation = ({ invoice }: { invoice: Invoice }) => {
           {invoice?.client?.address?.state?.name ? ', ' + invoice.client.address.state.name : ''}
           {invoice?.client?.address?.zip_code ? ' ' + invoice.client.address.zip_code : ''}
         </p>
-        <p>{invoice?.client?.email}</p>
-        <p>{invoice?.client?.phone}</p>
+        {invoice?.client?.email && <p>{invoice.client.email}</p>}
+        {invoice?.client?.phone && <p>{invoice.client.phone}</p>}
       </div>
       {/* Service Site */}
       <div className='flex flex-col sm:text-right'>
@@ -26,8 +26,12 @@ const InvoiceBillingInformation = ({ invoice }: { invoice: Invoice }) => {
           {invoice?.address?.state?.name ? ', ' + invoice.address.state.name : ''}
           {invoice?.address?.zip_code ? ' ' + invoice.address.zip_code : ''}
         </p>
-        <p>{invoice?.client?.email}</p>
-        <p>{invoice?.client?.phone}</p>
+        {invoice?.client?.email || invoice?.client?.address?.email ? (
+          <p>{invoice?.client?.address?.email || invoice.client.email}</p>
+        ) : null}
+        {invoice?.client?.phone || invoice?.client?.address?.phone ? (
+          <p>{invoice?.client?.address?.phone || invoice.client.phone}</p>
+        ) : null}
       </div>
     </div>
   )
