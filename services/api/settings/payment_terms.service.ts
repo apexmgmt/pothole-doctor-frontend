@@ -58,6 +58,7 @@ export default class PaymentTermsService {
       }
 
       await revalidate('payment-terms')
+      await revalidate('payment-terms-all')
 
       return await response.json()
     } catch (error) {
