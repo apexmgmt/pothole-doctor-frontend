@@ -334,11 +334,14 @@ const LaborCosts: React.FC<{
         </div>
         {/* Service type filter */}
         <div className='flex flex-col'>
-          <label htmlFor='service-type-filter' className='text-xs font-medium mb-1 text-muted-foreground'>
+          <label
+            htmlFor='service-type-filter'
+            className='text-xs font-medium mb-1 text-muted-foreground whitespace-nowrap'
+          >
             Service Type
           </label>
           <Select value={filterOptions.service_type_id || 'all'} onValueChange={handleServiceTypeChange}>
-            <SelectTrigger id='service-type-filter' className='lg:w-72 min-w-25'>
+            <SelectTrigger id='service-type-filter' className='lg:w-72 min-w-0 sm:min-w-25'>
               <SelectValue placeholder='All' />
             </SelectTrigger>
             <SelectContent>
@@ -364,7 +367,7 @@ const LaborCosts: React.FC<{
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        <span className='hidden min-[480px]:block'>Add Labor Cost</span>
+        <span className='hidden sm:block'>Add Labor Cost</span>
       </Button>
     </div>
   )

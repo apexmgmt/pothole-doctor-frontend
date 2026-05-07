@@ -111,25 +111,25 @@ const BusinessLocationDetails: React.FC<BusinessLocationDetailsProps> = ({ busin
         <div className='space-y-4'>
           <h5 className='text-sm font-medium uppercase tracking-wide text-muted-foreground'>Contact Information</h5>
           <div className='space-y-3'>
-            <div>
-              <label className='text-xs text-muted-foreground uppercase'>Location Name</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-muted-foreground uppercase min-w-25'>Location Name :</label>
               <p className='text-sm font-medium'>{businessLocationData.name || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-muted-foreground uppercase'>Email</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-muted-foreground uppercase min-w-25'>Email :</label>
               <p className='text-sm font-medium'>{businessLocationData.email || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-muted-foreground uppercase'>Phone</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-muted-foreground uppercase min-w-25'>Phone :</label>
               <p className='text-sm font-medium'>{businessLocationData.phone || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-muted-foreground uppercase'>Fax</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-muted-foreground uppercase min-w-25'>Fax :</label>
               <p className='text-sm font-medium'>{businessLocationData.fax || 'N/A'}</p>
             </div>
             {businessLocationData.website && (
-              <div>
-                <label className='text-xs text-muted-foreground uppercase'>Website</label>
+              <div className='flex items-center gap-2.5'>
+                <label className='text-xs text-muted-foreground uppercase min-w-25'>Website :</label>
                 <a
                   href={businessLocationData.website}
                   target='_blank'
@@ -148,20 +148,20 @@ const BusinessLocationDetails: React.FC<BusinessLocationDetailsProps> = ({ busin
           <h5 className='text-sm font-medium uppercase tracking-wide text-muted-foreground'>Business Information</h5>
           <div className='space-y-3'>
             {businessLocationData.invoice_prefix && (
-              <div>
-                <label className='text-xs text-muted-foreground uppercase'>Invoice Prefix</label>
+              <div className='flex items-center gap-2.5'>
+                <label className='text-xs text-muted-foreground uppercase min-w-25'>Invoice Prefix :</label>
                 <p className='text-sm font-medium'>{businessLocationData.invoice_prefix}</p>
               </div>
             )}
             {businessLocationData.sales_tax !== undefined && businessLocationData.sales_tax !== null && (
-              <div>
-                <label className='text-xs text-muted-foreground uppercase'>Sales Tax</label>
+              <div className='flex items-center gap-2.5'>
+                <label className='text-xs text-muted-foreground uppercase min-w-25'>Sales Tax :</label>
                 <p className='text-sm font-medium'>{businessLocationData.sales_tax}%</p>
               </div>
             )}
             {businessLocationData.review_link && (
-              <div>
-                <label className='text-xs text-muted-foreground uppercase'>Review Link</label>
+              <div className='flex items-center gap-2.5'>
+                <label className='text-xs text-muted-foreground uppercase min-w-25'>Review Link :</label>
                 <a
                   href={businessLocationData.review_link}
                   target='_blank'
@@ -172,8 +172,8 @@ const BusinessLocationDetails: React.FC<BusinessLocationDetailsProps> = ({ busin
                 </a>
               </div>
             )}
-            <div>
-              <label className='text-xs text-muted-foreground uppercase'>Branding</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-muted-foreground uppercase min-w-25'>Branding :</label>
               <p className='text-sm font-medium'>{businessLocationData.is_branding === 1 ? 'Enabled' : 'Disabled'}</p>
             </div>
           </div>
@@ -183,27 +183,27 @@ const BusinessLocationDetails: React.FC<BusinessLocationDetailsProps> = ({ busin
         <div className='space-y-4 md:col-span-2'>
           <h5 className='text-sm font-medium uppercase tracking-wide text-muted-foreground'>Address Information</h5>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-            <div>
-              <label className='text-xs text-muted-foreground uppercase'>Street Address</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-muted-foreground uppercase min-w-25'>Street Address :</label>
               <p className='text-sm font-medium'>{businessLocationData.street_address || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-muted-foreground uppercase'>City</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-muted-foreground uppercase min-w-25'>City :</label>
               <p className='text-sm font-medium'>{businessLocationData.city?.name || 'N/A'}</p>
             </div>
-            <div>
-              <label className='text-xs text-muted-foreground uppercase'>State</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-muted-foreground uppercase min-w-25'>State :</label>
               <p className='text-sm font-medium'>
                 {businessLocationData.state?.name || businessLocationData.city?.state?.name || 'N/A'}
               </p>
             </div>
-            <div>
-              <label className='text-xs text-muted-foreground uppercase'>Country</label>
+            <div className='flex items-center gap-2.5'>
+              <label className='text-xs text-muted-foreground uppercase min-w-25'>Country :</label>
               <p className='text-sm font-medium'>{businessLocationData.city?.state?.country?.name || 'N/A'}</p>
             </div>
             {businessLocationData.zip_code && (
-              <div>
-                <label className='text-xs text-muted-foreground uppercase'>ZIP Code</label>
+              <div className='flex items-center gap-2.5'>
+                <label className='text-xs text-muted-foreground uppercase min-w-25'>ZIP Code :</label>
                 <p className='text-sm font-medium'>{businessLocationData.zip_code}</p>
               </div>
             )}
@@ -214,14 +214,14 @@ const BusinessLocationDetails: React.FC<BusinessLocationDetailsProps> = ({ busin
       {/* Timestamps */}
       <div className='pt-4 border-t border-border'>
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-          <div>
-            <label className='text-xs text-muted-foreground uppercase'>Created At</label>
+          <div className='flex items-center gap-2.5'>
+            <label className='text-xs text-muted-foreground uppercase min-w-25'>Created At :</label>
             <p className='text-sm font-medium'>
               {businessLocationData.created_at ? new Date(businessLocationData.created_at).toLocaleString() : 'N/A'}
             </p>
           </div>
-          <div>
-            <label className='text-xs text-muted-foreground uppercase'>Updated At</label>
+          <div className='flex items-center gap-2.5'>
+            <label className='text-xs text-muted-foreground uppercase min-w-25'>Updated At :</label>
             <p className='text-sm font-medium'>
               {businessLocationData.updated_at ? new Date(businessLocationData.updated_at).toLocaleString() : 'N/A'}
             </p>
