@@ -202,7 +202,7 @@ const CreateOrEditDocumentModal = ({
                         href={generateFileUrl(documentDetails.full_path) ?? ''}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='text-blue-600 underline'
+                        className='text-primary underline'
                       >
                         View current file
                       </a>

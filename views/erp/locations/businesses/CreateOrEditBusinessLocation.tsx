@@ -218,7 +218,7 @@ const CreateOrEditBusinessLocation = ({
   }
 
   return (
-    <div className=''>
+    <div className='max-w-5xl mx-auto'>
       <Card className='bg-card border-border'>
         <CardHeader>
           <CardTitle className='text-2xl font-semibold'>
@@ -228,7 +228,7 @@ const CreateOrEditBusinessLocation = ({
         <CardContent className='max-w-5xl'>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6'>
                 {/* Location Name */}
                 <FormField
                   control={form.control}
@@ -303,7 +303,7 @@ const CreateOrEditBusinessLocation = ({
               </div>
               <Separator />
 
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6'>
                 {/* Location Specific Branding Switch */}
                 <FormField
                   control={form.control}
@@ -319,7 +319,7 @@ const CreateOrEditBusinessLocation = ({
                 />
               </div>
               {isBranding && (
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6'>
                   {/* Website — only when branding is on */}
                   {isBranding && (
                     <FormField
@@ -390,7 +390,7 @@ const CreateOrEditBusinessLocation = ({
               )}
               <Separator />
 
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6'>
                 {/* Invoice Prefix */}
                 <FormField
                   control={form.control}
@@ -441,7 +441,7 @@ const CreateOrEditBusinessLocation = ({
               </div>
               <Separator />
 
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6'>
                 {/* Country */}
                 <FormField
                   control={form.control}

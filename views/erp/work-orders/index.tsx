@@ -320,7 +320,7 @@ const WorkOrders: React.FC<{
           const pct = Math.round((completed / total) * 100)
 
           return (
-            <div className='w-28 h-5 rounded bg-muted overflow-hidden relative'>
+            <div className='w-28 h-5 rounded overflow-hidden relative'>
               <div
                 className={`h-full transition-all ${allDone ? 'bg-green-500' : 'bg-blue-400'}`}
                 style={{ width: `${pct}%` }}
