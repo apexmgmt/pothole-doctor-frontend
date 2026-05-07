@@ -174,7 +174,7 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
               rel='noopener noreferrer'
               className='font-medium flex items-center'
             >
-              <DocumentIcon className='w-10 h-10' />{' '}
+              <DocumentIcon className='w-7 h-7' />{' '}
             </Link>
           )}
         </>

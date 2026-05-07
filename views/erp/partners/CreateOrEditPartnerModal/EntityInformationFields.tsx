@@ -17,13 +17,13 @@ export function EntityInformationFields({ form }: EntityInformationFieldsProps) 
   const user_type = form.watch('user_type')
 
   return (
-    <div className='flex flex-col gap-4'>
+    <div className='grid grid-cols-1 gap-4 col-span-1 sm:col-span-2 md:col-span-1 sm:grid-cols-2 md:grid-cols-1'>
       {/* Status Radio Group */}
       <FormField
         control={form.control}
         name='status'
         render={({ field }) => (
-          <FormItem className='flex flex-row gap-4'>
+          <FormItem className='flex flex-col gap-4'>
             <FormLabel>Status</FormLabel>
             <FormControl>
               <RadioGroup
@@ -56,7 +56,7 @@ export function EntityInformationFields({ form }: EntityInformationFieldsProps) 
           control={form.control}
           name='entity'
           render={({ field }) => (
-            <FormItem className='flex flex-row gap-4'>
+            <FormItem className='flex flex-col gap-4'>
               <FormLabel>Entity</FormLabel>
               <FormControl>
                 <RadioGroup
