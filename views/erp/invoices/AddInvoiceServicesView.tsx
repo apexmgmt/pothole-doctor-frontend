@@ -359,7 +359,7 @@ const AddInvoiceServicesView = ({
   return (
     <div className='space-y-4'>
       {/* Page Header */}
-      <div className='flex items-center justify-between'>
+      <div className='flex items-center justify-between flex-wrap'>
         <div className='flex items-center gap-3'>
           <Button
             type='button'
@@ -387,7 +387,7 @@ const AddInvoiceServicesView = ({
       </div>
 
       {/* Action Bar */}
-      <div className='flex justify-between items-center'>
+      <div className='flex justify-between items-center gap-2.5 flex-wrap'>
         <div className='flex gap-2'>
           <InvoiceActionsButton
             invoice={currentInvoice}

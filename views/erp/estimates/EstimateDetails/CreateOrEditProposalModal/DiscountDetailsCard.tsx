@@ -44,10 +44,10 @@ const DiscountDetailsCard = ({
     <Card className='bg-zinc-900 border-zinc-800'>
       <CardContent className='p-4'>
         <h6 className='flex justify-end text-sm font-semibold text-zinc-200 mb-4'>Discount</h6>
-        <div className='flex justify-end mb-2'>
+        <div className='flex justify-end mb-3'>
           <p className='text-sm font-semibold text-red-400'>${totalDiscount.toFixed(2)}</p>
         </div>
-        <Separator className='mb-2' />
+        <Separator className='mb-4' />
         {mode !== 'view' && (
           <div className='flex justify-end gap-1'>
             <DropdownMenu>
