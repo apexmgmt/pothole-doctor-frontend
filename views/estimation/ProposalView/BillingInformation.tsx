@@ -9,29 +9,29 @@ const BillingInformation = ({ proposal }: { proposal: Proposal }) => {
         {proposal?.estimate?.client?.company?.name && <p>{proposal?.estimate?.client?.company?.name}</p>}
         <p>{proposal?.estimate?.client?.first_name + ' ' + proposal?.estimate?.client?.last_name}</p>
         <p className=' wrap-break-word'>
-          {proposal?.estimate?.client?.address?.street_address},
-          {proposal?.estimate?.client?.address?.city?.name ? proposal?.estimate?.client?.address?.city?.name : ''}
+          {proposal?.estimate?.client?.address?.street_address ? proposal?.estimate?.client?.address?.street_address : ''}
+          {proposal?.estimate?.client?.address?.city?.name ? ', ' + proposal?.estimate?.client?.address?.city?.name : ''}
           {proposal?.estimate?.client?.address?.state?.name
             ? ', ' + proposal?.estimate?.client?.address?.state?.name
             : ''}
-          {proposal?.estimate?.client?.address?.zip_code ? ' ' + proposal?.estimate?.client?.address?.zip_code : ''}
+          {proposal?.estimate?.client?.address?.zip_code ? ', ' + proposal?.estimate?.client?.address?.zip_code : ''}
         </p>
-        <p>{proposal?.estimate?.client?.email}</p>
-        <p>{proposal?.estimate?.client?.phone}</p>
+        {proposal?.estimate?.client?.email && <p>{proposal?.estimate?.client?.email}</p>}
+        {proposal?.estimate?.client?.phone && <p>{proposal?.estimate?.client?.phone}</p>}
       </div>
       {/* Service Site */}
       <div className='flex flex-col sm:text-right'>
         <h6 className='font-semibold text-base mb-4'>Service Site</h6>
         <p className=' wrap-break-word'>
-          {proposal?.estimate?.address?.street_address},
-          {proposal?.estimate?.address?.city?.name ? proposal?.estimate?.address?.city?.name : ''}
+          {proposal?.estimate?.address?.street_address ? proposal?.estimate?.address?.street_address : ''}
+          {proposal?.estimate?.address?.city?.name ? ', ' + proposal?.estimate?.address?.city?.name : ''}
           {proposal?.estimate?.address?.state?.name
             ? ', ' + proposal?.estimate?.address?.state?.name
             : ''}
-          {proposal?.estimate?.address?.zip_code ? ' ' + proposal?.estimate?.address?.zip_code : ''}
+          {proposal?.estimate?.address?.zip_code ? ', ' + proposal?.estimate?.address?.zip_code : ''}
         </p>
-        <p>{proposal?.estimate?.client?.email}</p>
-        <p>{proposal?.estimate?.client?.phone}</p>
+        {proposal?.estimate?.address?.email || proposal?.estimate?.client?.email ? <p>{proposal?.estimate?.address?.email || proposal?.estimate?.client?.email}</p> : null}
+        {proposal?.estimate?.address?.phone || proposal?.estimate?.client?.phone ? <p>{proposal?.estimate?.address?.phone || proposal?.estimate?.client?.phone}</p> : null}
       </div>
     </div>
   )

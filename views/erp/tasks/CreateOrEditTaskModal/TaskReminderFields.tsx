@@ -112,7 +112,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
     }
 
   return (
-    <div className='space-y-4'>
+    <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
       {/* SMS Reminder */}
       <div className='space-y-3'>
         <FormField
@@ -123,7 +123,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
               <FormControl>
                 <Checkbox checked={!!field.value} onCheckedChange={checked => field.onChange(checked ? 1 : 0)} />
               </FormControl>
-              <FormLabel className='font-normal'>SMS Reminder</FormLabel>
+              <FormLabel className='font-normal cursor-pointer'>SMS Reminder</FormLabel>
             </FormItem>
           )}
         />
@@ -147,7 +147,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
                             onCheckedChange={handleTimeCheckedChange('sms', 'customer', time.id)}
                           />
                         </FormControl>
-                        <FormLabel className='font-normal text-sm'>{time.label}</FormLabel>
+                        <FormLabel className='font-normal text-sm cursor-pointer'>{time.label}</FormLabel>
                       </FormItem>
                     )}
                   />
@@ -179,7 +179,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
                             onCheckedChange={handleTimeCheckedChange('sms', 'employee', time.id)}
                           />
                         </FormControl>
-                        <FormLabel className='font-normal text-sm'>{time.label}</FormLabel>
+                        <FormLabel className='font-normal text-sm cursor-pointer'>{time.label}</FormLabel>
                       </FormItem>
                     )}
                   />
@@ -208,7 +208,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
               <FormControl>
                 <Checkbox checked={!!field.value} onCheckedChange={checked => field.onChange(checked ? 1 : 0)} />
               </FormControl>
-              <FormLabel className='font-normal'>Email Reminder</FormLabel>
+              <FormLabel className='font-normal cursor-pointer'>Email Reminder</FormLabel>
             </FormItem>
           )}
         />
@@ -232,7 +232,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
                             onCheckedChange={handleTimeCheckedChange('email', 'customer', time.id)}
                           />
                         </FormControl>
-                        <FormLabel className='font-normal text-sm'>{time.label}</FormLabel>
+                        <FormLabel className='font-normal text-sm cursor-pointer'>{time.label}</FormLabel>
                       </FormItem>
                     )}
                   />
@@ -264,7 +264,7 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
                             onCheckedChange={handleTimeCheckedChange('email', 'employee', time.id)}
                           />
                         </FormControl>
-                        <FormLabel className='font-normal text-sm'>{time.label}</FormLabel>
+                        <FormLabel className='font-normal text-sm cursor-pointer'>{time.label}</FormLabel>
                       </FormItem>
                     )}
                   />

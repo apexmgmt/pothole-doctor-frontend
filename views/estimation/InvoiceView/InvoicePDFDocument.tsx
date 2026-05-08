@@ -3,6 +3,7 @@
 import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 import type { Invoice } from '@/types'
 import { formatDate } from '@/utils/date'
+import { formatCurrency } from '@/utils/currency'
 
 // ─── Agreement Sections ──────────────────────────────────────────────────────
 const AGREEMENT_SECTIONS = [
@@ -346,12 +347,12 @@ const InvoicePDFDocument = ({
         {/* ── BASIC INFO: company left, invoice meta right ── */}
         <View style={[s.spaceBetween, { marginBottom: 10, alignItems: 'flex-start' }]}>
           <View style={s.companyInfo}>
-            {invoice?.estimate?.assign_user?.userable?.address && (
-              <Text>{invoice.estimate.assign_user.userable.address}</Text>
+            {invoice?.assign_user?.userable?.address && (
+              <Text>{invoice.assign_user.userable.address}</Text>
             )}
-            {invoice?.estimate?.assign_user?.email && <Text>Email: {invoice.estimate.assign_user.email}</Text>}
-            {invoice?.estimate?.assign_user?.userable?.phone && (
-              <Text>Phone: {invoice.estimate.assign_user.userable.phone}</Text>
+            {invoice?.assign_user?.email && <Text>Email: {invoice.assign_user.email}</Text>}
+            {invoice?.assign_user?.userable?.phone && (
+              <Text>Phone: {invoice.assign_user.userable.phone}</Text>
             )}
           </View>
           <View>
@@ -416,7 +417,7 @@ const InvoicePDFDocument = ({
               <View key={`${si}-${ii}`} style={s.tableRow}>
                 <Text style={[s.tableText, s.colItem]}>{item?.name ?? ''}</Text>
                 <Text style={[s.tableText, s.colDesc]}>{item?.description ?? ''}</Text>
-                <Text style={[s.tableText, s.colAmount]}>${item?.total_price ?? ''}</Text>
+                <Text style={[s.tableText, s.colAmount]}>{formatCurrency(item?.total_price)}</Text>
               </View>
             ))}
           </View>
@@ -426,22 +427,22 @@ const InvoicePDFDocument = ({
         <View style={s.totalsBox}>
           <View style={s.totalRow}>
             <Text style={s.totalLabel}>Subtotal</Text>
-            <Text style={s.totalValue}>${invoice?.subtotal}</Text>
+            <Text style={s.totalValue}>{formatCurrency(invoice?.subtotal)}</Text>
           </View>
           {(invoice?.discount ?? 0) > 0 && (
             <View style={s.totalRow}>
               <Text style={s.totalLabel}>Discount</Text>
-              <Text style={s.totalValue}>-${invoice.discount}</Text>
+              <Text style={s.totalValue}>-{formatCurrency(invoice?.discount)}</Text>
             </View>
           )}
           <View style={s.totalRow}>
-            <Text style={s.totalLabel}>Tax ({invoice?.tax_rate ?? 0}%)</Text>
-            <Text style={s.totalValue}>${invoice?.sale_tax}</Text>
+            <Text style={s.totalLabel}>Tax {invoice?.tax_rate ? `(${invoice?.tax_rate}%)` : ''}</Text>
+            <Text style={s.totalValue}>{formatCurrency(invoice?.sale_tax)}</Text>
           </View>
           <View style={s.totalDivider} />
           <View style={s.totalRow}>
             <Text style={s.grandTotalLabel}>Total</Text>
-            <Text style={s.grandTotalValue}>${invoice?.total}</Text>
+            <Text style={s.grandTotalValue}>{formatCurrency(invoice?.total)}</Text>
           </View>
         </View>
 

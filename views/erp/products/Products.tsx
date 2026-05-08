@@ -285,7 +285,7 @@ const Products: React.FC<ProductsProps> = ({
       header: 'Product Price',
       cell: (row: Product) => (
         <span className='font-medium'>
-          {Number(row?.selling_price ?? 0).toFixed(2)}/{row.selling_unit?.name}
+          ${Number(row?.selling_price ?? 0).toFixed(2)}/{row.selling_unit?.name}
         </span>
       ),
       sortable: false

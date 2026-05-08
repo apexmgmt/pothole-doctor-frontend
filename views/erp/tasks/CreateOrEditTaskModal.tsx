@@ -64,7 +64,7 @@ interface FormValues {
   client_id: string
   task_type_id?: string
   employee_ids?: string[]
-  start_date: string
+  start_date?: string
   start_time?: string
   end_date?: string
   end_time?: string
@@ -447,7 +447,7 @@ const CreateOrEditTaskModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create New Task' : 'Edit Task'}
       description={mode === 'create' ? 'Add a new task to the system' : 'Update task information'}
-      maxWidth='6xl'
+      maxWidth='4xl'
       disableClose={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
@@ -473,9 +473,9 @@ const CreateOrEditTaskModal = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             {/* Task Name Field */}
-            <div className='space-y-2 lg:col-span-2'>
+            <div className='space-y-2 sm:col-span-2'>
               <FormField
                 control={form.control}
                 name='name'
@@ -498,7 +498,7 @@ const CreateOrEditTaskModal = ({
             </div>
 
             {/* Description Field */}
-            <div className='space-y-2 lg:col-span-2'>
+            <div className='space-y-2 sm:col-span-2'>
               <label className='text-sm font-medium'>Description</label>
               <TipTapRichTextEditor
                 value={descriptionHtml}
@@ -576,45 +576,45 @@ const CreateOrEditTaskModal = ({
                 </FormItem>
               )}
             />
-            {/* Employees field */}
-            <FormField
-              control={form.control}
-              name='employee_ids'
-              rules={{
-                required: 'Employees are required',
-                minLength: { value: 1, message: 'Select at least one employee' }
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Employees <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <MultiSelect
-                      options={staffs?.map(staff => ({
-                        value: staff.id,
-                        label: staff.first_name + ' ' + staff.last_name
-                      }))}
-                      selected={field.value || []}
-                      onChange={field.onChange}
-                      placeholder='Select employees...'
-                      className='w-full'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* time fields */}
-            <TaskDateTimeFields form={form} />
           </div>
+          {/* Employees field */}
+          <FormField
+            control={form.control}
+            name='employee_ids'
+            rules={{
+              required: 'Employees are required',
+              minLength: { value: 1, message: 'Select at least one employee' }
+            }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Employees <span className='text-red-500'>*</span>
+                </FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={staffs?.map(staff => ({
+                      value: staff.id,
+                      label: staff.first_name + ' ' + staff.last_name
+                    }))}
+                    selected={field.value || []}
+                    onChange={field.onChange}
+                    placeholder='Select employees...'
+                    className='w-full'
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* time fields */}
+          <TaskDateTimeFields form={form} />
 
           <TaskReminderFields form={form} taskReminderChannels={taskReminderChannels} />
           <TaskLocationAndCommentFields form={form} selectedClient={selectedClient} addressOptions={addressOptions} />
 
           {/* Edit Mode Only Fields */}
           {mode === 'edit' && (
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4 border-t'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t'>
               {/* Status field */}
               <FormField
                 control={form.control}

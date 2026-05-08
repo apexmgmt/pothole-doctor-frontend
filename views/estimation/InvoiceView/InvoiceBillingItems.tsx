@@ -2,6 +2,7 @@ import React from 'react'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Invoice } from '@/types'
+import { formatCurrency } from '@/utils/currency'
 
 const InvoiceBillingItems = ({ invoice }: { invoice: Invoice }) => {
   return (
@@ -31,7 +32,9 @@ const InvoiceBillingItems = ({ invoice }: { invoice: Invoice }) => {
                         <td className='px-4 py-2 text-sm text-[rgba(0,0,0,0.8)] align-top max-w-md whitespace-normal'>
                           {item.description}
                         </td>
-                        <td className='px-4 py-2 text-sm text-black text-right align-top'>${item.total_price}</td>
+                        <td className='px-4 py-2 text-sm text-black text-right align-top'>
+                          {formatCurrency(item.total_price)}
+                        </td>
                       </tr>
                     ))}
                 </React.Fragment>
@@ -46,22 +49,22 @@ const InvoiceBillingItems = ({ invoice }: { invoice: Invoice }) => {
         <div className='w-full sm:max-w-[300px] space-y-4 bg-[#f3f4f6] p-4 rounded-md'>
           <div className='flex justify-between text-sm'>
             <span className='text-[rgba(0,0,0,0.8)]'>Subtotal</span>
-            <span className='text-black font-medium'>${invoice?.subtotal}</span>
+            <span className='text-black font-medium'>{formatCurrency(invoice?.subtotal)}</span>
           </div>
           {invoice?.discount > 0 && (
             <div className='flex justify-between text-sm'>
               <span className='text-[rgba(0,0,0,0.8)]'>Discount</span>
-              <span className='text-black font-medium'>-${invoice.discount}</span>
+              <span className='text-black font-medium'>-{formatCurrency(invoice.discount)}</span>
             </div>
           )}
           <div className='flex justify-between text-sm'>
             <span className='text-[rgba(0,0,0,0.8)]'>Tax ({invoice?.tax_rate ?? 0}%)</span>
-            <span className='text-black font-medium'>${invoice?.sale_tax}</span>
+            <span className='text-black font-medium'>{formatCurrency(invoice?.sale_tax)}</span>
           </div>
           <Separator className='bg-[#d1d5db]' />
           <div className='flex justify-between text-lg font-semibold'>
             <span className='text-black'>Total</span>
-            <span className='text-black'>${invoice?.total}</span>
+            <span className='text-black'>{formatCurrency(invoice?.total)}</span>
           </div>
         </div>
       </div>

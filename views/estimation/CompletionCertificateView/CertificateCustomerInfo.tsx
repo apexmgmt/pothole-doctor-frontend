@@ -20,8 +20,8 @@ const CertificateCustomerInfo = ({
           {workOrder?.client?.address?.state?.name ? ', ' + workOrder.client.address.state.name : ''}
           {workOrder?.client?.address?.zip_code ? ' ' + workOrder.client.address.zip_code : ''}
         </p>
-        <p>{workOrder?.client?.email}</p>
-        <p>{workOrder?.client?.phone}</p>
+        {workOrder?.client?.email && <p>{workOrder?.client?.email}</p>}
+        {workOrder?.client?.phone && <p>{workOrder?.client?.phone}</p>}
       </div>
       {/* Job Site Info */}
       <div className='flex flex-col sm:text-right'>
@@ -34,12 +34,9 @@ const CertificateCustomerInfo = ({
           <span className='font-semibold'>Job Location: </span>
           {workOrder?.address ??
             (workOrder?.address?.street_address ?? '') +
-              ', ' +
-              (workOrder?.address?.city?.name ?? '') +
-              ', ' +
-              (workOrder?.address?.state?.name ?? '') +
-              ' ' +
-              (workOrder?.address?.zip_code ?? '')}
+              (workOrder?.address?.city ? ', ' + workOrder.address.city.name : '') +
+              (workOrder?.address?.state ? ', ' + workOrder.address.state.name : '') +
+              (workOrder?.address?.zip_code ? ' ' + workOrder.address.zip_code : '')}
         </p>
       </div>
     </div>

@@ -42,7 +42,7 @@ export default function GanttFilter({ initialFilters, hasActiveFilter, onApply, 
   }
 
   return (
-    <div className='flex items-center gap-2'>
+    <div className='flex items-center gap-2 flex-wrap'>
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <Button

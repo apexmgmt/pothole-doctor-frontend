@@ -166,9 +166,9 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
 
   return (
     <div className='space-y-4'>
-      <div className='grid grid-cols-2 gap-4'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
         {/* Address Title */}
-        <div className='space-y-2 col-span-2'>
+        <div className='space-y-2 sm:col-span-2'>
           <Label htmlFor='address_title'>Address Title</Label>
           <Controller
             name='address_title'
@@ -179,7 +179,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
         </div>
 
         {/* Search Location */}
-        <div className='space-y-2 col-span-2'>
+        <div className='space-y-2 sm:col-span-2'>
           <Label htmlFor='address-search'>Search Location</Label>
           {isLoaded ? (
             <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
@@ -190,7 +190,7 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
           )}
         </div>
 
-        <div className='space-y-2 col-span-2'>
+        <div className='space-y-2 sm:col-span-2'>
           <Label htmlFor='address'>Street Address</Label>
           <Controller
             name='address'
@@ -202,7 +202,9 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
 
         {/* Country */}
         <div className='space-y-2'>
-          <Label htmlFor='country_id'>Country</Label>
+          <Label htmlFor='country_id'>
+            Country <span className='text-red-500'>*</span>
+          </Label>
           <Controller
             name='country_id'
             control={control}
@@ -227,7 +229,9 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
 
         {/* State */}
         <div className='space-y-2'>
-          <Label htmlFor='state_id'>State</Label>
+          <Label htmlFor='state_id'>
+            State <span className='text-red-500'>*</span>
+          </Label>
           <Controller
             name='state_id'
             control={control}
@@ -262,7 +266,9 @@ const AddressFields: React.FC<AddressFieldsProps> = ({ methods, countriesWithSta
 
         {/* City */}
         <div className='space-y-2'>
-          <Label htmlFor='city_id'>City</Label>
+          <Label htmlFor='city_id'>
+            City <span className='text-red-500'>*</span>
+          </Label>
           <Controller
             name='city_id'
             control={control}

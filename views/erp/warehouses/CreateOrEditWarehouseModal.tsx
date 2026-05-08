@@ -199,7 +199,7 @@ const CreateOrEditWarehouseModal = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
           {/* Basic Information */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             {/* Location Multi-select */}
             <FormField
               control={form.control}
@@ -283,7 +283,9 @@ const CreateOrEditWarehouseModal = ({
               }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone <span className='text-red-500'>*</span></FormLabel>
+                  <FormLabel>
+                    Phone <span className='text-red-500'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input type='tel' placeholder='Enter phone' {...field} />
                   </FormControl>
@@ -338,7 +340,7 @@ const CreateOrEditWarehouseModal = ({
           <Separator />
 
           {/* Location Information */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             {/* Country */}
             <FormField
               control={form.control}

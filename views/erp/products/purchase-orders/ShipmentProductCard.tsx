@@ -142,7 +142,7 @@ const ShipmentProductCard = ({
                   {/* product selling_price (read-only) */}
                   <div className='flex items-center gap-1'>
                     <div className='h-7 flex items-center px-2 rounded-md border border-border bg-muted text-xs w-24 text-muted-foreground'>
-                      {p.product_selling_price.toFixed(2)}
+                      {Number(p?.product_selling_price ?? 0).toFixed(2)}
                     </div>
                     <span className='text-xs text-muted-foreground whitespace-nowrap'>{p.selling_unit_name}</span>
                   </div>

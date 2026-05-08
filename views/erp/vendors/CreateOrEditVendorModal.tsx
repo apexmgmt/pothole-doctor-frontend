@@ -265,7 +265,7 @@ const CreateOrEditVendorModal = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
           {/* Basic Information */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             {/* Vendor Name */}
             <FormField
               control={form.control}
@@ -486,7 +486,7 @@ const CreateOrEditVendorModal = ({
             />
 
             {isB2BEnabled && (
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4 pl-7'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 pl-7'>
                 <FormField
                   control={form.control}
                   name='b2b_host_url'
@@ -588,7 +588,7 @@ const CreateOrEditVendorModal = ({
           <Separator />
 
           {/* Location Information */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             {/* Country */}
             <FormField
               control={form.control}
