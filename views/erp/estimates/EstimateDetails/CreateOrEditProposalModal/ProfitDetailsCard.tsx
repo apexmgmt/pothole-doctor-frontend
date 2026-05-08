@@ -14,11 +14,11 @@ const ProfitDetailsCard = ({
   <Card className='bg-zinc-900 border-zinc-800'>
     <CardContent className='p-4'>
       <h6 className='text-sm font-semibold text-zinc-200 mb-4 flex justify-end'>{'Profit'}</h6>
-      <div className='flex justify-between'>
+      <div className='flex justify-between mb-3'>
         <Badge>{profitPercent.toFixed(2)}%</Badge>
         <p className='text-sm font-semibold text-red-400'>${profitAmount.toFixed(2)}</p>
       </div>
-      <Separator />
+      <Separator className='mb-3' />
       <div className='flex justify-between'>
         <p className='text-sm font-semibold text-zinc-200'>{'Total Profit'}</p>
         <p className='text-sm font-semibold text-zinc-400'>${totalProfit.toFixed(2)}</p>

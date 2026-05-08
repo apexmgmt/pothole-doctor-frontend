@@ -36,7 +36,7 @@ export function DateTimePicker({
         <Button
           variant='outline'
           className={cn(
-            'w-full bg-muted justify-start text-left font-normal h-10 px-3 py-2',
+            'w-full bg-transparent justify-start text-left font-normal h-10 px-3 py-2 min-w-0 overflow-hidden',
             !value && 'text-muted-foreground',
             className
           )}

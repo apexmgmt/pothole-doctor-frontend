@@ -15,8 +15,8 @@ interface TotalsSectionProps {
 
 const TotalsSection = ({ form, totalProductCost, shippingCost, finalCost }: TotalsSectionProps) => {
   return (
-    <div className='flex justify-end'>
-      <div className='w-72 space-y-1 text-sm border border-border rounded-lg p-4'>
+    <div className='flex justify-end text-sm border border-border rounded-lg p-4'>
+      <div className='w-full space-y-1 '>
         <div className='flex justify-between'>
           <span className='text-muted-foreground'>Total Product Cost:</span>
           <span className='font-medium'>${totalProductCost.toFixed(2)}</span>
@@ -46,7 +46,7 @@ const TotalsSection = ({ form, totalProductCost, shippingCost, finalCost }: Tota
             )}
           />
         </div>
-        <div className='flex justify-between border-t border-border pt-2 font-semibold'>
+        <div className='flex justify-between border-t border-border pt-3 mt-2 font-semibold'>
           <span>Final Cost:</span>
           <span>${finalCost.toFixed(2)}</span>
         </div>

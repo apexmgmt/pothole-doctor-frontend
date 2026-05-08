@@ -252,7 +252,7 @@ const AddNonInventoryJobActionModal = ({
     >
       <Form {...form}>
         <form id='non-inventory-action-form' onSubmit={form.handleSubmit(onSubmit)}>
-          <div className='grid grid-cols-2 gap-x-8 gap-y-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             {/* Left column */}
             <div className='space-y-4'>
               {/* Action Status */}

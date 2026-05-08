@@ -182,7 +182,7 @@ export function BasicProductFields({
         )}
       />
 
-      <div className='grid grid-cols-2 gap-4'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         {/* Vendor Style Field */}
         <FormField
           control={form.control}
@@ -253,7 +253,7 @@ export function BasicProductFields({
           </FormItem>
         )}
       />
-      <div className='grid grid-cols-2 gap-4'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         {/* Private Style Field */}
         <FormField
           control={form.control}
@@ -298,7 +298,7 @@ export function BasicProductFields({
           </FormItem>
         )}
       />
-      <div className='grid grid-cols-2 gap-4'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         {/* Dropped Date Field */}
         <FormField
           control={form.control}

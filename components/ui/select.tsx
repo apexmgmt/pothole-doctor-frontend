@@ -470,7 +470,7 @@ function CreatableSelect({
           variant='outline'
           role='combobox'
           aria-expanded={open}
-          className={cn('w-full border-border bg-transparent justify-between h-9', className)}
+          className={cn('w-full border-border bg-transparent justify-between h-9 min-w-0 truncate', className)}
           disabled={disabled}
         >
           <span>{value ? displayLabel : <span className='text-muted-foreground'>{placeholder}</span>}</span>

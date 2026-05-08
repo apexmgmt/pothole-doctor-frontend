@@ -105,7 +105,7 @@ const AdjustInventoryModal = ({ open, onOpenChange, onSuccess, inventory, produc
     >
       <Form {...form}>
         <form id='adjustment-form' onSubmit={form.handleSubmit(onSubmit)}>
-          <div className='grid grid-cols-2 gap-x-8 gap-y-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             {/* Left column */}
             <div className='space-y-4'>
               {displayField('PO#', `PO-${inventory.purchase_order_number}`)}
@@ -166,7 +166,7 @@ const AdjustInventoryModal = ({ open, onOpenChange, onSuccess, inventory, produc
                 )}
               />
             </div>
-            <div className='col-span-2'>
+            <div className='sm:col-span-2'>
               <FormField
                 control={form.control}
                 name='reason'

@@ -367,7 +367,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                 control={control}
                 name='commission_type_id'
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className='sm:col-span-2'>
                     <FormLabel>Commission Type</FormLabel>
                     <FormControl>
                       <Select value={field.value ?? ''} onValueChange={field.onChange}>
@@ -421,7 +421,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                               <button
                                 type='button'
                                 onClick={() => handleRoleRemove(roleName)}
-                                className='text-gray hover:text-light'
+                                className='text-gray hover:text-light cursor-pointer'
                               >
                                 ×
                               </button>

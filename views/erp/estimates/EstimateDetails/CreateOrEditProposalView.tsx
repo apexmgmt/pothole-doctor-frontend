@@ -340,7 +340,7 @@ const CreateOrEditProposalView = ({
   return (
     <div className='space-y-4'>
       {/* Page header */}
-      <div className='flex items-center justify-between'>
+      <div className='flex items-center justify-between gap-2.5 flex-wrap'>
         <Button variant='ghost' onClick={handleBack} disabled={isLoading}>
           <ChevronLeftIcon className='h-4 w-4 mr-2' />
           Back to Estimate
@@ -386,7 +386,7 @@ const CreateOrEditProposalView = ({
       </div>
 
       {/* Summary cards */}
-      <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-4'>
         <ClientDetailsCard estimateDetails={estimateDetails} />
         <SalesRepresentativeCard estimateDetails={estimateDetails} />
         <DiscountDetailsCard

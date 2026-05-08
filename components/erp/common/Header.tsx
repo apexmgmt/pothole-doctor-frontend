@@ -15,7 +15,7 @@ const Header: React.FC = () => {
 
   return (
     <header className='flex items-center justify-between gap-5 px-4 md:px-6 py-2.5 bg-dark text-white border-b border-b-border'>
-      <div className='flex items-center gap-2'>
+      <div className='flex items-center gap-2 flex-1 min-w-0'>
         <CustomButton
           variant='ghost'
           onClick={sidebarToggle}
@@ -23,7 +23,7 @@ const Header: React.FC = () => {
         >
           <PanelLeftIcon className='h-5 w-5' />
         </CustomButton>
-        <div className='flex-1 text-lg md:text-xl font-semibold text-light-2'>{pageTitle}</div>
+        <div className='flex-1 text-lg md:text-xl font-semibold text-light-2 truncate min-w-0'>{pageTitle}</div>
       </div>
       <div className='flex gap-2 opacity-0 pointer-events-none'>
         <CustomButton icon={<SearchIcon />} variant='outline' className='md:p-2.5! p-1.5! md:rounded-xl rounded-lg' />

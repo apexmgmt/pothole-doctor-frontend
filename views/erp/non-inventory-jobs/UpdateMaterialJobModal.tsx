@@ -437,7 +437,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
           {/* ── Section 1: Vendor Details ── */}
           <div>
             <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3'>Vendor Details</h3>
-            <div className='grid grid-cols-2 gap-x-8 gap-y-3 p-4 rounded-lg border bg-muted/30'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-lg border bg-muted/30'>
               {displayField('Vendor Name', vendorName)}
               {displayField('Email', vendorEmail)}
               {displayField('Phone', vendorPhone)}
@@ -454,7 +454,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
               </span>
             </div>
             <div className='p-4 rounded-lg border bg-muted/30 space-y-3'>
-              <div className='grid grid-cols-2 gap-x-8 gap-y-3'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                 {displayField('Product Name', serviceItemName)}
                 {displayField('Color', productColor)}
                 {displayField('Description', serviceItemDescription)}
@@ -477,7 +477,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
                 )}
               </div>
 
-              <div className='grid grid-cols-3 gap-x-6 gap-y-4 pt-2'>
+              <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2'>
                 {/* Order Status */}
                 <FormField
                   control={form.control}
@@ -542,7 +542,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
             <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3'>
               Order Information
             </h3>
-            <div className='grid grid-cols-2 gap-x-8 gap-y-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
               {/* Order Number */}
               <FormField
                 control={form.control}
@@ -626,7 +626,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
               )}
 
               {/* Comments — full width */}
-              <div className='col-span-2'>
+              <div className='sm:col-span-2'>
                 <FormField
                   control={form.control}
                   name='comments'
@@ -654,7 +654,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
             <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3'>
               Bill Information
             </h3>
-            <div className='grid grid-cols-2 gap-x-8 gap-y-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
               {/* Reconciled Toggle */}
               <FormField
                 control={form.control}
@@ -669,7 +669,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
                         aria-checked={field.value}
                         onClick={() => field.onChange(!field.value)}
                         disabled={form.formState.isSubmitting}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer ${
                           field.value ? 'bg-primary' : 'bg-gray-300'
                         }`}
                       >
@@ -742,7 +742,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
               />
 
               {/* ── Financial Fields: inline label + input layout ── */}
-              <div className='col-span-2 border rounded-lg p-4 space-y-2 bg-muted/20'>
+              <div className='sm:col-span-2 border rounded-lg p-4 space-y-2 bg-muted/20'>
                 {/* Freight */}
                 <FormField
                   control={form.control}

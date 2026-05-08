@@ -150,21 +150,10 @@ const CreateOrEditPaymentTermModal = ({
       disableClose={isLoading}
       actions={
         <div className='flex gap-3'>
-          <Button
-            type='button'
-            variant='outline'
-            onClick={onCancel}
-            disabled={isLoading}
-            className='flex-1'
-          >
+          <Button type='button' variant='outline' onClick={onCancel} disabled={isLoading} className='flex-1'>
             Cancel
           </Button>
-          <Button
-            type='submit'
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={isLoading}
-            className='flex-1'
-          >
+          <Button type='submit' onClick={form.handleSubmit(onSubmit)} disabled={isLoading} className='flex-1'>
             {form.formState.isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
           </Button>
         </div>
@@ -220,7 +209,9 @@ const CreateOrEditPaymentTermModal = ({
               name='due_time'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{getDueTimeLabel()}</FormLabel>
+                  <FormLabel>
+                    {getDueTimeLabel()} <span className='text-red-500'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input type='number' placeholder={`Enter ${getDueTimeLabel().toLowerCase()}`} {...field} min='1' />
                   </FormControl>
