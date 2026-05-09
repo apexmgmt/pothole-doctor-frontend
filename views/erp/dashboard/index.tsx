@@ -1198,10 +1198,15 @@ const DashboardIndex = () => {
         permissions: response?.data?.permissions ?? []
       }
 
-      const encrypted = encryptData(authData)
-      const redirectUrl = `${appUrl(response.data.domain ?? '')}/erp/redirecting?data=${encodeURIComponent(encrypted)}`
+      const encryptedData = encryptData(authData)
+      const baseUrl = appUrl(response.data.domain ?? '')
+      const redirectUrl = `${baseUrl}/erp/redirecting?data=${encodeURIComponent(encryptedData)}`
 
-      window.location.href = redirectUrl
+      const newWindow = window.open(redirectUrl, '_blank')
+
+      if (!newWindow) {
+        toast.error('Pop-up blocked. Please allow pop-ups for this site.')
+      }
     } catch (err: unknown) {
       toast.error((err as { message?: string })?.message ?? 'Failed to impersonate user')
     }
