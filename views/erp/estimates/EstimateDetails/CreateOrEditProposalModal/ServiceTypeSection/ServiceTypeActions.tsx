@@ -6,6 +6,7 @@ import { ProposalServiceItemPayload } from '@/types'
 
 interface ServiceTypeActionsProps {
   mode: 'create' | 'edit' | 'view'
+  documentTypeName?: string | null
   margin: string
   setMargin: (v: string) => void
   lines: any[]
@@ -21,6 +22,7 @@ interface ServiceTypeActionsProps {
 
 const ServiceTypeActions = ({
   mode,
+  documentTypeName,
   margin,
   setMargin,
   lines,
@@ -35,6 +37,10 @@ const ServiceTypeActions = ({
 }: ServiceTypeActionsProps) => {
   const isAllowed = (type: ProposalServiceItemPayload['type']) =>
     !allowedLineTypes || allowedLineTypes.includes(type)
+
+  const normalizedDocumentType = (documentTypeName || '').trim().toLowerCase()
+  const hideLaborActions = normalizedDocumentType === 'material only'
+  const hideMaterialActions = normalizedDocumentType === 'labor only'
 
   return (
   <div className='flex items-center gap-2 bg-zinc-800 p-3 rounded-md'>
@@ -73,29 +79,33 @@ const ServiceTypeActions = ({
     {/* Action Buttons */}
     {mode !== 'view' && (
       <div className='flex items-center gap-1 ml-auto'>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='ghost' size='sm' className='h-8 w-8 p-0 text-zinc-400' title='Add products'>
-              <Boxes className='h-4 w-4' />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='start'>
-            <DropdownMenuItem onClick={() => setOpenProductsModal(true)}>
-              <Boxes className='mr-2 h-4 w-4' /> Inventory Products
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setOpenNonInventoryProductsModal(true)}>
-              <Box className='mr-2 h-4 w-4' /> Non-Inventory Products
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <Button
-          onClick={() => setOpenLaborCostModal(true)}
-          variant='ghost'
-          size='sm'
-          className='h-8 w-8 p-0 text-zinc-400'
-        >
-          <Wrench className='h-4 w-4' />
-        </Button>
+        {!hideMaterialActions && isAllowed('product') && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='ghost' size='sm' className='h-8 w-8 p-0 text-zinc-400' title='Add products'>
+                <Boxes className='h-4 w-4' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='start'>
+              <DropdownMenuItem onClick={() => setOpenProductsModal(true)}>
+                <Boxes className='mr-2 h-4 w-4' /> Inventory Products
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOpenNonInventoryProductsModal(true)}>
+                <Box className='mr-2 h-4 w-4' /> Non-Inventory Products
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+        {!hideLaborActions && isAllowed('labor') && (
+          <Button
+            onClick={() => setOpenLaborCostModal(true)}
+            variant='ghost'
+            size='sm'
+            className='h-8 w-8 p-0 text-zinc-400'
+          >
+            <Wrench className='h-4 w-4' />
+          </Button>
+        )}
         <Button asChild variant='outline' size='sm' className='h-8 px-3 text-xs'>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -107,12 +117,12 @@ const ServiceTypeActions = ({
                   <GridIcon className='mr-2 h-4 w-4' /> Add Quote/Invoice Line Item
                 </DropdownMenuItem>
               )}
-              {isAllowed('product') && (
+              {isAllowed('product') && !hideMaterialActions && (
                 <DropdownMenuItem onClick={() => addLine('product')}>
                   <Boxes className='mr-2 h-4 w-4' /> Add Material Line Item
                 </DropdownMenuItem>
               )}
-              {isAllowed('labor') && (
+              {isAllowed('labor') && !hideLaborActions && (
                 <DropdownMenuItem onClick={() => addLine('labor')}>
                   <Wrench className='mr-2 h-4 w-4' /> Add Labor Line Item
                 </DropdownMenuItem>

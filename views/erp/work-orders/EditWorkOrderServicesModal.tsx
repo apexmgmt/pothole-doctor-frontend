@@ -382,6 +382,7 @@ const EditWorkOrderServicesModal = ({
               taxRate={taxRate}
               hideMargin={true}
               allowedLineTypes={['product', 'labor', 'expense']}
+              documentTypeName={currentWorkOrder?.work_order_type?.name ?? null}
             />
           ))}
         </div>

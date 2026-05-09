@@ -476,6 +476,7 @@ const CreateOrEditProposalView = ({
             uomUnits={uomUnits}
             vendors={vendors}
             taxRate={taxRate}
+            documentTypeName={estimateDetails?.estimate_type?.name ?? null}
           />
         ))}
       </div>

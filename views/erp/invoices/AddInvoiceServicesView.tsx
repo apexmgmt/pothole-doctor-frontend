@@ -473,6 +473,7 @@ const AddInvoiceServicesView = ({
             uomUnits={uomUnits}
             vendors={vendors}
             taxRate={taxRate}
+            documentTypeName={currentInvoice?.invoice_type?.name ?? null}
           />
         ))}
       </div>
