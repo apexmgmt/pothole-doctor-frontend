@@ -1,6 +1,8 @@
 'use client'
 
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
+import { Invoice } from '@/types'
+import { formatCurrency } from '@/utils/currency'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 type PaymentMethod = 'ach' | 'in-store' | 'card' | 'check'
 
@@ -42,17 +44,40 @@ const UnderlineField = ({
 const InvoicePaymentMethod = forwardRef<
   InvoicePaymentMethodHandle,
   {
+    invoice: Invoice
     total: number
     onMethodChange: (method: PaymentMethod | null) => void
     readOnly?: boolean
     initialMethod?: string | null
     initialData?: Record<string, string> | null
   }
->(({ total, onMethodChange, readOnly = false, initialMethod = null, initialData = null }, ref) => {
-  const resolvedInitial: PaymentMethod | null = initialMethod ? (REVERSE_METHOD_MAP[initialMethod] ?? null) : null
+>(({ invoice, total, onMethodChange, readOnly = false, initialMethod = null, initialData = null }, ref) => {
+  const resolvedInitial: PaymentMethod = initialMethod ? (REVERSE_METHOD_MAP[initialMethod] ?? 'in-store') : 'in-store'
+
+  const hasDownPaymentAmount =
+    invoice.down_payment_amount !== null && invoice.down_payment_amount !== undefined && !Number.isNaN(Number(invoice.down_payment_amount))
+
+  const hasDownPaymentPercentage =
+    invoice.down_payment_percentage !== null &&
+    invoice.down_payment_percentage !== undefined &&
+    !Number.isNaN(Number(invoice.down_payment_percentage))
+
+  const computedDownPaymentAmount = hasDownPaymentAmount
+    ? Number(invoice.down_payment_amount)
+    : hasDownPaymentPercentage
+      ? (Number(total) * Number(invoice.down_payment_percentage)) / 100
+      : null
+
+  const amountDue = computedDownPaymentAmount ?? Number(total)
+  const isAmountDueReadOnly = readOnly || computedDownPaymentAmount !== null
+  const amountDueDisplay = `${Number.isFinite(amountDue) ? formatCurrency(amountDue) : formatCurrency(0)}`
 
   const [method, setMethod] = useState<PaymentMethod | null>(resolvedInitial)
   const fieldsContainerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    onMethodChange(method)
+  }, [method, onMethodChange])
 
   useImperativeHandle(ref, () => ({
     getSelectedMethod: () => method,
@@ -80,7 +105,6 @@ const InvoicePaymentMethod = forwardRef<
     const next = method === m ? null : m
 
     setMethod(next)
-    onMethodChange(next)
   }
 
   return (
@@ -135,9 +159,9 @@ const InvoicePaymentMethod = forwardRef<
             <div className='flex items-end gap-2'>
               <span className='text-sm font-semibold text-black'>Amount Due:</span>
               <input
-                defaultValue={`$${total}`}
-                readOnly={readOnly}
-                className={`${inputCls} max-w-[200px] font-semibold ${readOnly ? readOnlyCls : ''}`}
+                defaultValue={amountDueDisplay}
+                readOnly={isAmountDueReadOnly}
+                className={`${inputCls} max-w-[200px] font-semibold ${isAmountDueReadOnly ? readOnlyCls : ''}`}
               />
             </div>
 
@@ -201,9 +225,9 @@ const InvoicePaymentMethod = forwardRef<
           <div className='flex items-end gap-2 mt-5'>
             <span className='text-sm font-semibold text-black'>Amount Due:</span>
             <input
-              defaultValue={`$${total}`}
-              readOnly={readOnly}
-              className={`${inputCls} max-w-[200px] font-semibold ${readOnly ? readOnlyCls : ''}`}
+              defaultValue={amountDueDisplay}
+              readOnly={isAmountDueReadOnly}
+              className={`${inputCls} max-w-[200px] font-semibold ${isAmountDueReadOnly ? readOnlyCls : ''}`}
             />
           </div>
         )}
