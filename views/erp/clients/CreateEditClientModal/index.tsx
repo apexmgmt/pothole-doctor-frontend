@@ -183,7 +183,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
   const onSubmit = async (data: ClientPayload) => {
     try {
       setIsLoading(true)
-      
+
       // separate address, state_id, city_id and zip_code from data
       const {
         address,
@@ -292,7 +292,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       actions={dialogActions}
       disableClose={true}
     >
-      <form id='client-form' onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+      <form id='client-form' onSubmit={handleSubmit(onSubmit)} className='space-y-6 mr-0.5'>
         <BasicClientReferenceFields
           type={type}
           methods={methods}

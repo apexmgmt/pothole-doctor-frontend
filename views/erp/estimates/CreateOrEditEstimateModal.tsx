@@ -263,7 +263,7 @@ const CreateOrEditEstimateModal = ({
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='grid grid-cols-2 gap-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
           {/* Estimate Title Field */}
           <FormField
             control={form.control}
@@ -273,7 +273,7 @@ const CreateOrEditEstimateModal = ({
               minLength: { value: 2, message: 'Estimate title must be at least 2 characters' }
             }}
             render={({ field }) => (
-              <FormItem className='col-span-2'>
+              <FormItem className=' sm:col-span-2'>
                 <FormLabel>
                   Title <span className='text-red-500'>*</span>
                 </FormLabel>
@@ -360,7 +360,7 @@ const CreateOrEditEstimateModal = ({
               name='interaction'
               rules={{ required: 'Interaction type is required' }}
               render={({ field }) => (
-                <FormItem className='col-span-2'>
+                <FormItem className=' sm:col-span-2'>
                   <FormLabel>
                     Interaction <span className='text-red-500'>*</span>
                   </FormLabel>
@@ -460,7 +460,7 @@ const CreateOrEditEstimateModal = ({
                 control={form.control}
                 name='pickup_notes'
                 render={({ field }) => (
-                  <FormItem className='col-span-2'>
+                  <FormItem className=' sm:col-span-2'>
                     <FormLabel>Notes</FormLabel>
                     <FormControl>
                       <Textarea
@@ -547,7 +547,7 @@ const CreateOrEditEstimateModal = ({
                 control={form.control}
                 name='delivery_notes'
                 render={({ field }) => (
-                  <FormItem className='col-span-2'>
+                  <FormItem className=' sm:col-span-2'>
                     <FormLabel>Notes</FormLabel>
                     <FormControl>
                       <Textarea
@@ -572,7 +572,7 @@ const CreateOrEditEstimateModal = ({
             control={form.control}
             name='location_id'
             render={({ field }) => (
-              <FormItem className='col-span-2'>
+              <FormItem className=' sm:col-span-2'>
                 <FormLabel>Business Location</FormLabel>
                 <FormControl>
                   <Select value={field.value ?? ''} onValueChange={field.onChange}>
@@ -601,7 +601,7 @@ const CreateOrEditEstimateModal = ({
             control={form.control}
             name='address_id'
             render={({ field }) => (
-              <FormItem className='col-span-2'>
+              <FormItem className=' sm:col-span-2'>
                 <FormLabel>Event Location</FormLabel>
                 <FormControl>
                   <Select value={field.value ?? ''} onValueChange={field.onChange} disabled={!selectedClient}>

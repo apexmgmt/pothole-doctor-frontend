@@ -14,7 +14,7 @@ const ClientDetailsCard = ({ estimateDetails }: { estimateDetails?: Estimate }) 
             {estimateDetails?.client?.first_name + ' ' + estimateDetails?.client?.last_name}
           </h6>
           {estimateDetails?.address && (
-            <p className='text-sm font-semibold text-zinc-400'>
+            <p className='text-sm font-semibold text-zinc-400 flex items-start'>
               <span>
                 <LocationEditIcon className='h-4 w-4 inline-block mr-2' />
               </span>

@@ -178,7 +178,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
             </Link>
           ) : (
             <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
-              <DocumentIcon className='w-10 h-10' />{' '}
+              <DocumentIcon className='w-7 h-7' />{' '}
             </Link>
           )}
         </>
@@ -238,7 +238,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
             placeholder='Search...'
             value={searchValue}
             onChange={e => setSearchValue(e.target.value)}
-            className='w-80'
+            className='lg:w-80 min-w-0'
           />
           <InputGroupAddon>
             <Search />

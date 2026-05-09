@@ -172,7 +172,6 @@ const CreateOrEditDocumentModal = ({
                     type='file'
                     accept='*'
                     placeholder='Upload file'
-
                     // ref={fileInputRef}
                     {...field}
                     onChange={e => {
@@ -204,7 +203,7 @@ const CreateOrEditDocumentModal = ({
                         href={generateFileUrl(documentDetails.full_path) ?? ''}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='text-blue-600 underline'
+                        className='text-primary underline'
                       >
                         View current file
                       </a>

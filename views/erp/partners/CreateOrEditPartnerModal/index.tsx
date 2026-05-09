@@ -292,26 +292,26 @@ const CreateOrEditPartnerModal = ({
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mb-4'>
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mb-4 mr-0.5'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'>
             <BasicInformationFields form={form} businessLocations={businessLocations} companies={companies} />
 
             {/* Entity Information section */}
             <EntityInformationFields form={form} />
 
             {user_type === 'contractor' && (
-              <div className='col-span-3'>
+              <div className='sm:col-span-2 md:col-span-3'>
                 <Separator />
               </div>
             )}
             {/* Contractor Details section */}
             <ContractorDetailsFields form={form} skills={skills} partnerTypes={partnerTypes} />
-            <div className='col-span-3'>
+            <div className='sm:col-span-2 md:col-span-3'>
               <Separator />
             </div>
             {/* Hold Amount section */}
             <HoldAmountFields form={form} />
-            <div className='col-span-3'>
+            <div className='sm:col-span-2 md:col-span-3'>
               <Separator />
             </div>
             {/* Location section */}

@@ -168,7 +168,7 @@ export function LocationFields({ form, countriesWithStatesAndCities }: LocationF
       />
 
       {/* Street Address Field */}
-      <div className='col-span-2'>
+      <div className='md:col-span-2'>
         <FormField
           control={form.control}
           name='street_address'

@@ -203,7 +203,7 @@ const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
           </div>
 
           {/* Estimate Type and Estimate Number */}
-          <div className='grid grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             <div className='space-y-2'>
               <Label htmlFor='estimateType' className='text-light-2 text-sm font-medium'>
                 Estimate type
@@ -282,7 +282,7 @@ const AddEstimateModal = ({ isOpen, onClose, onSave }) => {
           </div>
 
           {/* Bid Date and Expiration Date */}
-          <div className='grid grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             <div className='space-y-2'>
               <Label htmlFor='bidDate' className='text-light-2 text-sm font-medium'>
                 Select bid date

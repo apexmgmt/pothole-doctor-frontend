@@ -73,7 +73,7 @@ export default function EmailTemplates({ templates: initialTemplates }: { templa
 
   return (
     <>
-      <div className='grid grid-cols-1 lg:grid-cols-2'>
+      <div className='grid grid-cols-1 xl:grid-cols-2'>
         <Tabs defaultValue={groups[0]} className='w-full'>
           <TabsList className='grid w-full' style={{ gridTemplateColumns: `repeat(${groups.length}, 1fr)` }}>
             {groups.map(group => (
@@ -96,7 +96,7 @@ export default function EmailTemplates({ templates: initialTemplates }: { templa
                     <AccordionItem key={template.id} value={template.id} className='border rounded-lg'>
                       <AccordionTrigger className='px-6 hover:no-underline'>
                         <div className='flex items-center gap-2'>
-                          <Info className='h-5 w-5 text-accent-foreground' />
+                          <Info className='hidden sm:block h-5 w-5 text-accent-foreground' />
                           <span className='text-lg font-semibold'>{template.title}</span>
                         </div>
                       </AccordionTrigger>
@@ -116,7 +116,7 @@ export default function EmailTemplates({ templates: initialTemplates }: { templa
                     <AccordionItem key={template.id} value={template.id} className='border rounded-lg'>
                       <AccordionTrigger className='px-6 hover:no-underline'>
                         <div className='flex items-center gap-2'>
-                          <Info className='h-5 w-5 text-accent-foreground' />
+                          <Info className='hidden sm:block h-5 w-5 text-accent-foreground' />
                           <span className='text-lg font-semibold'>{template.title}</span>
                         </div>
                       </AccordionTrigger>

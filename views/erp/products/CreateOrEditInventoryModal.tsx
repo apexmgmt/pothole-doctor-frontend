@@ -202,32 +202,24 @@ const CreateOrEditInventoryModal = ({
               <CardTitle>Product Information</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className='grid grid-cols-2 gap-x-8 gap-y-3'>
-                <div className='grid grid-cols-2 gap-4'>
-                  {displayField('Vendor', product.vendor?.first_name)}
-                  {displayField('Category', product.category?.name)}
-                </div>
-                <div className='grid grid-cols-2 gap-4'>
-                  {displayField('SKU', product.sku)}
-                  {displayField('Size/Description', product.description)}
-                </div>
-                <div className='grid grid-cols-2 gap-4'>
-                  {displayField('Vendor Product Name', product.vendor_product_name)}
-                  {displayField('Private Product Name', product.private_product_name)}
-                </div>
-                <div className='grid grid-cols-2 gap-4'>
-                  {displayField('Vendor Style', product.vendor_style)}
-                  {displayField('Private Style', product.private_style)}
-                </div>
-                <div className='grid grid-cols-2 gap-4'>
-                  {displayField('Vendor Color', product.vendor_color)}
-                  {displayField('Private Color', product.private_color)}
-                </div>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 '>
+                {displayField('Vendor', product.vendor?.first_name)}
+                {displayField('Category', product.category?.name)}
+                {displayField('SKU', product.sku)}
+                {displayField('Size/Description', product.description)}
+                {displayField('Vendor Product Name', product.vendor_product_name)}
+                {displayField('Private Product Name', product.private_product_name)}
+
+                {displayField('Vendor Style', product.vendor_style)}
+                {displayField('Private Style', product.private_style)}
+
+                {displayField('Vendor Color', product.vendor_color)}
+                {displayField('Private Color', product.private_color)}
               </div>
             </CardContent>
           </Card>
 
-          <div className='grid grid-cols-2 gap-6'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             {/* UOM / Coverage Information */}
             <Card>
               <CardHeader className='pb-3'>
@@ -406,7 +398,7 @@ const CreateOrEditInventoryModal = ({
               <CardTitle>Purchase Order Information</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className='grid grid-cols-2 gap-x-8 gap-y-4'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                 {/* Left column */}
                 <div className='space-y-4'>
                   {mode === 'edit' &&

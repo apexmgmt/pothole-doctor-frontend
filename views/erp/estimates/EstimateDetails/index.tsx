@@ -60,30 +60,34 @@ const EstimateDetails = ({
 
   return (
     <>
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-4 items-start'>
-        <ProposalSection
-          estimateId={estimateId}
-          estimateDetails={estimate}
-          serviceTypes={serviceTypes}
-          units={units}
-          productCategories={productCategories}
-          uomUnits={uomUnits}
-          vendors={vendors}
-        />
-        <div className='flex flex-col gap-4'>
+      <div className='grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 items-start'>
+        <div className='order-2 2xl:order-1'>
+          <ProposalSection
+            estimateId={estimateId}
+            estimateDetails={estimate}
+            serviceTypes={serviceTypes}
+            units={units}
+            productCategories={productCategories}
+            uomUnits={uomUnits}
+            vendors={vendors}
+          />
+        </div>
+        <div className='order-3 2xl:order-2 flex flex-col gap-4'>
           <PerformTakeOfSection estimate={estimate} />
           <NotesSection estimateId={estimateId} estimateNotes={estimateNotes} />
         </div>
-        <EstimateSection
-          estimateId={estimateId}
-          estimate={estimate}
-          serviceTypes={serviceTypes}
-          estimateTypes={estimateTypes}
-          clients={clients}
-          staffs={staffs}
-          paymentTerms={paymentTerms}
-          businessLocations={businessLocations}
-        />
+        <div className='order-1 2xl:order-3 col-span-1 md:col-span-2 2xl:col-span-1 '>
+          <EstimateSection
+            estimateId={estimateId}
+            estimate={estimate}
+            serviceTypes={serviceTypes}
+            estimateTypes={estimateTypes}
+            clients={clients}
+            staffs={staffs}
+            paymentTerms={paymentTerms}
+            businessLocations={businessLocations}
+          />
+        </div>
       </div>
     </>
   )

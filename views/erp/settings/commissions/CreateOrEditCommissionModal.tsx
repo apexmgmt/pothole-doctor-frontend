@@ -226,7 +226,7 @@ const CreateOrEditCommissionModal = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
           {/* Commission Name Field */}
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 gap-4'>
             <FormField
               control={form.control}
               name='commission_type'
@@ -357,7 +357,7 @@ const CreateOrEditCommissionModal = ({
               )}
             />
             {filterType !== 'same-as-store' && (
-              <div className='col-span-2 flex flex-row gap-2'>
+              <div className='lg:col-span-2 flex flex-row gap-2'>
                 {/* Min amount field - shown for 'between' and 'greater-than' */}
                 {(filterType === 'between' || filterType === 'greater-than') && (
                   <FormField
@@ -372,7 +372,7 @@ const CreateOrEditCommissionModal = ({
                       }
                     }}
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className='flex-1'>
                         <FormLabel>
                           Min Amount <span className='text-red-500'>*</span>
                         </FormLabel>
@@ -399,7 +399,7 @@ const CreateOrEditCommissionModal = ({
                       }
                     }}
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className='flex-1'>
                         <FormLabel>
                           Max Amount <span className='text-red-500'>*</span>
                         </FormLabel>
@@ -449,7 +449,7 @@ const CreateOrEditCommissionModal = ({
           <Separator />
 
           {filterType !== 'same-as-store' && (
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+            <div className='grid grid-cols-1 gap-4'>
               <div className='flex justify-between gap-2'>
                 {/* Amount field */}
                 <FormField

@@ -174,7 +174,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
               rel='noopener noreferrer'
               className='font-medium flex items-center justify-center'
             >
-              <DocumentIcon className='w-10 h-10' />{' '}
+              <DocumentIcon className='w-7 h-7' />{' '}
             </Link>
           )}
         </>
@@ -234,7 +234,7 @@ const VendorDocuments = ({ vendorId }: { vendorId: string }) => {
             placeholder='Search...'
             value={searchValue}
             onChange={e => setSearchValue(e.target.value)}
-            className='w-80'
+            className='lg:w-80 min-w-0'
           />
           <InputGroupAddon>
             <Search />

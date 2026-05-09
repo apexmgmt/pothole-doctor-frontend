@@ -65,67 +65,67 @@ const EstimateSection = ({
         </CardHeader>
         <CardContent>
           <div className='flex flex-col gap-2 text-zinc-200 text-sm'>
-            <div>
-              <span className='font-semibold text-base text-white'>Estimate number</span>
-              <div>{estimate.estimate_number?.toString().padStart(6, '0') || 'N/A'}</div>
+            <div className='flex gap-1 items-start'>
+              <span className='font-semibold text-base text-white min-w-40'>Estimate number : </span>
+              <div className='flex-1'>{estimate.estimate_number?.toString().padStart(6, '0') || 'N/A'}</div>
             </div>
-            <div>
-              <span className='font-semibold text-base text-white'>Estimate title</span>
-              <div>{estimate.title || ''}</div>
+            <div className='flex gap-1 items-start'>
+              <span className='font-semibold text-base text-white min-w-40'>Estimate title : </span>
+              <div className='flex-1'>{estimate.title || ''}</div>
             </div>
-            <div>
-              <span className='font-semibold text-base text-white'>Estimate type</span>
-              <div>{estimate.estimate_type?.name || 'N/A'}</div>
+            <div className='flex gap-1 items-start'>
+              <span className='font-semibold text-base text-white min-w-40'>Estimate type : </span>
+              <div className='flex-1'>{estimate.estimate_type?.name || 'N/A'}</div>
             </div>
             {estimate.estimate_type?.name === 'Material Only' && estimate?.interaction && (
               <>
                 {estimate.interaction === 'cash_and_pickup' ? (
                   <>
-                    <div>
-                      <span className='font-semibold text-base text-white'>Interaction</span>
-                      <div>Cash and Pickup</div>
+                    <div className='flex gap-1 items-start'>
+                      <span className='font-semibold text-base text-white min-w-40'>Interaction : </span>
+                      <div className='flex-1'>Cash and Pickup</div>
                     </div>
                     {estimate?.pickup_date && (
-                      <div>
-                        <span className='font-semibold text-base text-white'>Pickup date</span>
-                        <div>{formatDate(estimate.pickup_date)}</div>
+                      <div className='flex gap-1 items-start'>
+                        <span className='font-semibold text-base text-white min-w-40'>Pickup date : </span>
+                        <div className='flex-1'>{formatDate(estimate.pickup_date)}</div>
                       </div>
                     )}
                     {estimate?.pickup_location && (
-                      <div>
-                        <span className='font-semibold text-base text-white'>Pickup location</span>
-                        <div>{estimate.pickup_location?.name || 'N/A'}</div>
+                      <div className='flex gap-1 items-start'>
+                        <span className='font-semibold text-base text-white min-w-40'>Pickup location : </span>
+                        <div className='flex-1'>{estimate.pickup_location?.name || 'N/A'}</div>
                       </div>
                     )}
                     {estimate?.pickup_notes && (
-                      <div>
-                        <span className='font-semibold text-base text-white'>Pickup notes</span>
-                        <div>{estimate.pickup_notes || 'N/A'}</div>
+                      <div className='flex gap-1 items-start'>
+                        <span className='font-semibold text-base text-white min-w-40'>Pickup notes : </span>
+                        <div className='flex-1'>{estimate.pickup_notes || 'N/A'}</div>
                       </div>
                     )}
                   </>
                 ) : (
                   <>
-                    <div>
-                      <span className='font-semibold text-base text-white'>Interaction</span>
-                      <div>Cash and Delivery</div>
+                    <div className='flex gap-1 items-start'>
+                      <span className='font-semibold text-base text-white min-w-40'>Interaction : </span>
+                      <div className='flex-1'>Cash and Delivery</div>
                     </div>
                     {estimate?.delivery_datetime && (
-                      <div>
-                        <span className='font-semibold text-base text-white'>Delivery datetime</span>
-                        <div>{formatDateTime(estimate.delivery_datetime)}</div>
+                      <div className='flex gap-1 items-start'>
+                        <span className='font-semibold text-base text-white min-w-40'>Delivery datetime : </span>
+                        <div className='flex-1'>{formatDateTime(estimate.delivery_datetime)}</div>
                       </div>
                     )}
                     {estimate?.delivery_location && (
-                      <div>
-                        <span className='font-semibold text-base text-white'>Delivery location</span>
-                        <div>{estimate.delivery_location || 'N/A'}</div>
+                      <div className='flex gap-1 items-start'>
+                        <span className='font-semibold text-base text-white min-w-40'>Delivery location : </span>
+                        <div className='flex-1'>{estimate.delivery_location || 'N/A'}</div>
                       </div>
                     )}
                     {estimate?.delivery_notes && (
-                      <div>
-                        <span className='font-semibold text-base text-white'>Delivery notes</span>
-                        <div>{estimate.delivery_notes || 'N/A'}</div>
+                      <div className='flex gap-1 items-start'>
+                        <span className='font-semibold text-base text-white min-w-40'>Delivery notes : </span>
+                        <div className='flex-1'>{estimate.delivery_notes || 'N/A'}</div>
                       </div>
                     )}
                   </>
@@ -134,57 +134,66 @@ const EstimateSection = ({
             )}
 
             {estimate.service_type && (
-              <div>
-                <span className='font-semibold text-base text-white'>Service type</span>
-                <div>{estimate.service_type?.name ?? 'N/A'}</div>
+              <div className='flex gap-1 items-start'>
+                <span className='font-semibold text-base text-white min-w-40'>Service type : </span>
+                <div className='flex-1'>{estimate.service_type?.name ?? 'N/A'}</div>
               </div>
             )}
-            <div>
-              <span className='font-semibold text-base text-white'>Business Location</span>
-              <div>{estimate.location ? `${estimate.location.street_address}, ${estimate.location.city?.name}, ${estimate.location.state?.name} ${estimate.location.zip_code}` : 'N/A'}</div>
+            <div className='flex gap-1 items-start'>
+              <span className='font-semibold text-base text-white min-w-40'>Business Location : </span>
+              <div className='flex-1'>
+                {estimate.location
+                  ? `${estimate.location.street_address}, ${estimate.location.city?.name}, ${estimate.location.state?.name} ${estimate.location.zip_code}`
+                  : 'N/A'}
+              </div>
             </div>
-            <div>
-              <span className='font-semibold text-base text-white'>Job Location</span>
-              <div>{estimate.address ? `${estimate.address.street_address}, ${estimate.address.city?.name}, ${estimate.address.state?.name} ${estimate.address.zip_code}` : 'N/A'}</div>
+            <div className='flex gap-1 items-start'>
+              <span className='font-semibold text-base text-white min-w-40'>Job Location : </span>
+              <div>
+                {estimate.address
+                  ? `${estimate.address.street_address}, ${estimate.address.city?.name}, ${estimate.address.state?.name} ${estimate.address.zip_code}`
+                  : 'N/A'}
+              </div>
             </div>
             {estimate.biding_date && (
-              <div>
-                <span className='font-semibold text-base text-white'>Select bid date</span>
-                <div>{formatDate(estimate.biding_date)}</div>
+              <div className='flex gap-1 items-start'>
+                <span className='font-semibold text-base text-white min-w-40'>Select bid date : </span>
+                <div className='flex-1'>{formatDate(estimate.biding_date)}</div>
               </div>
             )}
             {estimate.expiration_date && (
-              <div>
-                <span className='font-semibold text-base text-white'>Expiration date</span>
-                <div>{formatDate(estimate.expiration_date)}</div>
+              <div className='flex gap-1 items-start'>
+                <span className='font-semibold text-base text-white min-w-40'>Expiration date : </span>
+                <div className='flex-1'>{formatDate(estimate.expiration_date)}</div>
               </div>
             )}
             {estimate.client && (
-              <div>
-                <span className='font-semibold text-base text-white'>Customer</span>
+              <div className='flex gap-1 items-start'>
+                <span className='font-semibold text-base text-white min-w-40'>Customer : </span> className="flex-1"
                 <div>
                   {estimate.client?.first_name} {estimate.client?.last_name}
                 </div>
               </div>
             )}
             {estimate.payment_term && (
-              <div>
-                <span className='font-semibold text-base text-white'>Payment terms</span>
-                <div>{estimate.payment_term?.name ?? estimate.payment_term_id}</div>
+              <div className='flex gap-1 items-start'>
+                <span className='font-semibold text-base text-white min-w-40'>Payment terms : </span>
+                <div className='flex-1'>{estimate.payment_term?.name ?? estimate.payment_term_id}</div>
               </div>
             )}
             {estimate.assign_user && (
-              <div>
-                <span className='font-semibold text-base text-white'>Assigned estimator</span>
+              <div className='flex gap-1 items-start'>
+                <span className='font-semibold text-base text-white min-w-40'>Assigned estimator : </span>{' '}
+                className="flex-1"
                 <div>
                   {estimate.assign_user?.first_name} {estimate.assign_user?.last_name}
                 </div>
               </div>
             )}
             {estimate.tax_rate && (
-              <div>
-                <span className='font-semibold text-base text-white'>Tax Rate</span>
-                <div>{estimate.tax_rate}</div>
+              <div className='flex gap-1 items-start'>
+                <span className='font-semibold text-base text-white min-w-40'>Tax Rate : </span>
+                <div className='flex-1'>{estimate.tax_rate}</div>
               </div>
             )}
           </div>

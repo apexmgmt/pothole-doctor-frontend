@@ -313,10 +313,13 @@
   block-size: 100%;
 }
 
+.rbc-time-view .rbc-row {
+  min-height: auto !important;
+}
 .schedule-calendar-shell .rbc-header {
   border-block-end: 1px solid rgba(255, 255, 255, 0.08);
   border-inline-start: 1px solid rgba(255, 255, 255, 0.05);
-  padding-block: 0.85rem;
+  padding-block: 16px !important;
   padding-inline: 0.5rem;
   background: rgba(255, 255, 255, 0.03);
   color: rgba(255, 255, 255, 0.76);
@@ -325,6 +328,9 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+/* .schedule-calendar-shell .rbc-header button {
+  margin-bottom: 30px;
+} */
 
 .schedule-calendar-shell .rbc-header:first-child,
 .schedule-calendar-shell .rbc-month-row .rbc-date-cell:first-child,
@@ -479,6 +485,13 @@
 
 .hide-time-icon::-webkit-calendar-picker-indicator {
   display: none;
+}
+
+input[type='time']::-webkit-calendar-picker-indicator {
+  display: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
 }
 
 /* @theme inline {
