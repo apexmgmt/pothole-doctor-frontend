@@ -461,6 +461,7 @@ const EditWorkOrderServicesView = ({
                 serviceTypeLineItems[idx]?.contractorId ?? null
               )
             }
+            documentTypeName={currentWorkOrder?.work_order_type?.name ?? null}
           />
         ))}
       </div>

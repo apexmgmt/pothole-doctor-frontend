@@ -50,6 +50,7 @@ const ServiceTypeSection = ({
   hidePriceColumns = false,
   showVendor = false,
   showPurchaseQty = false,
+  documentTypeName,
   allowedLineTypes,
   showContractorOptions = false,
   contractors = [],
@@ -74,6 +75,7 @@ const ServiceTypeSection = ({
   hidePriceColumns?: boolean
   showVendor?: boolean
   showPurchaseQty?: boolean
+  documentTypeName?: string | null
   allowedLineTypes?: ProposalServiceItemPayload['type'][]
   showContractorOptions?: boolean
   contractors?: Partner[]
@@ -155,6 +157,7 @@ const ServiceTypeSection = ({
         <CardContent className='space-y-4'>
           <ServiceTypeActions
             mode={mode}
+            documentTypeName={documentTypeName}
             margin={margin}
             setMargin={setMargin}
             lines={lines}

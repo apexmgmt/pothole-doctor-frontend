@@ -53,7 +53,7 @@ const BillingItems = ({ proposal }: { proposal: Proposal }) => {
             <span className='text-light font-medium print:text-black'>${proposal?.subtotal}</span>
           </div>
           <div className='flex justify-between text-sm'>
-            <span className='text-light/60 print:text-black/80'>Tax (0%)</span>
+            <span className='text-light/60 print:text-black/80'>Tax {proposal?.estimate?.tax_rate ? `(${proposal.estimate.tax_rate}%)` : ''}</span>
             <span className='text-light font-medium print:text-black'>${proposal?.sale_tax}</span>
           </div>
           <Separator className='bg-accent' />

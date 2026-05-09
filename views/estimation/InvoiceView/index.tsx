@@ -220,6 +220,7 @@ const InvoiceView = ({
         <Separator className='mb-4 bg-[#e5e7eb]' />
         {/* Payment Method */}
         <InvoicePaymentMethod
+          invoice={invoice}
           ref={paymentRef}
           total={displayInvoice.total}
           onMethodChange={m => setHasPayment(!!m)}

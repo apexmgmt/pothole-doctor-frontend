@@ -43,8 +43,8 @@ const PaymentSettingModal = ({
     const initPercent = total > 0 ? (initAmount / total) * 100 : 0
 
     setIsMaterials(initMaterials)
-    setAmountStr(initAmount.toFixed(2))
-    setPercentStr(initPercent.toFixed(4))
+    setAmountStr(Number(initAmount).toFixed(2))
+    setPercentStr(Number(initPercent).toFixed(4))
   }, [open])
 
   // Percentage is always relative to total, regardless of isMaterials.
@@ -55,8 +55,8 @@ const PaymentSettingModal = ({
       const newAmount = materialTotal
       const newPercent = total > 0 ? (newAmount / total) * 100 : 0
 
-      setAmountStr(newAmount.toFixed(2))
-      setPercentStr(newPercent.toFixed(4))
+      setAmountStr(Number(newAmount).toFixed(2))
+      setPercentStr(Number(newPercent).toFixed(4))
     }
 
     setIsMaterials(checked)
@@ -68,7 +68,7 @@ const PaymentSettingModal = ({
     const num = parseFloat(value) || 0
     const newPercent = total > 0 ? (num / total) * 100 : 0
 
-    setPercentStr(newPercent.toFixed(4))
+    setPercentStr(Number(newPercent).toFixed(4))
   }
 
   const handlePercentChange = (value: string) => {
@@ -77,7 +77,7 @@ const PaymentSettingModal = ({
     const num = parseFloat(value) || 0
     const newAmount = (num / 100) * total
 
-    setAmountStr(newAmount.toFixed(2))
+    setAmountStr(Number(newAmount).toFixed(2))
   }
 
   const handleSave = () => {
@@ -114,7 +114,7 @@ const PaymentSettingModal = ({
         </div>
         {isMaterials && (
           <p className='text-xs text-muted-foreground'>
-            Base: material items total — <span className='font-semibold'>${materialTotal.toFixed(2)}</span>
+            Base: material items total — <span className='font-semibold'>${Number(materialTotal).toFixed(2)}</span>
           </p>
         )}
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>

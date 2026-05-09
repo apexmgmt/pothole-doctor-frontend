@@ -91,7 +91,7 @@ const ProposalActionsDropdown = ({
             <FileStack className='mr-2 h-4 w-4' />
             View Proposal Versions
           </DropdownMenuItem>
-          {proposalId && mode === 'view' && (
+          {proposalId && (
             <DropdownMenuItem onClick={onPaymentSettingClick}>
               <Check className='mr-2 h-4 w-4' />
               Payment Setting

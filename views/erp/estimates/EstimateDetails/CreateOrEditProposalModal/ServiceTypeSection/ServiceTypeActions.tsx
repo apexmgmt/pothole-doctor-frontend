@@ -6,6 +6,7 @@ import { ProposalServiceItemPayload } from '@/types'
 
 interface ServiceTypeActionsProps {
   mode: 'create' | 'edit' | 'view'
+  documentTypeName?: string | null
   margin: string
   setMargin: (v: string) => void
   lines: any[]
@@ -21,6 +22,7 @@ interface ServiceTypeActionsProps {
 
 const ServiceTypeActions = ({
   mode,
+  documentTypeName,
   margin,
   setMargin,
   lines,
@@ -33,45 +35,51 @@ const ServiceTypeActions = ({
   hideMargin = false,
   allowedLineTypes
 }: ServiceTypeActionsProps) => {
-  const isAllowed = (type: ProposalServiceItemPayload['type']) => !allowedLineTypes || allowedLineTypes.includes(type)
+  const isAllowed = (type: ProposalServiceItemPayload['type']) =>
+    !allowedLineTypes || allowedLineTypes.includes(type)
+
+  const normalizedDocumentType = (documentTypeName || '').trim().toLowerCase()
+  const hideLaborActions = normalizedDocumentType === 'material only'
+  const hideMaterialActions = normalizedDocumentType === 'labor only'
 
   return (
-    <div className='flex items-center gap-2 bg-zinc-800 p-3 rounded-md flex-wrap'>
-      {mode !== 'view' && !hideMargin && (
-        <div className='flex items-center gap-2 flex-1'>
-          <span className='text-sm font-medium text-zinc-300'>% Margin:</span>
-          <Input
-            type='number'
-            value={margin}
-            onChange={e => setMargin(e.target.value)}
-            className='w-24 h-8 bg-zinc-900 border-zinc-700'
-            min={0}
-            max={100}
-          />
-          <Button
-            variant='ghost'
-            size='sm'
-            className='h-8 w-8 p-0'
-            onClick={() => {
-              const marginValue = parseFloat(margin) || 0
+  <div className='flex items-center gap-2 bg-zinc-800 p-3 rounded-md'>
+    {mode !== 'view' && !hideMargin && (
+      <div className='flex items-center gap-2 flex-1'>
+        <span className='text-sm font-medium text-zinc-300'>% Margin:</span>
+        <Input
+          type='number'
+          value={margin}
+          onChange={e => setMargin(e.target.value)}
+          className='w-24 h-8 bg-zinc-900 border-zinc-700'
+          min={0}
+          max={100}
+        />
+        <Button
+          variant='ghost'
+          size='sm'
+          className='h-8 w-8 p-0'
+          onClick={() => {
+            const marginValue = parseFloat(margin) || 0
 
-              const updated = lines.map(line =>
-                line.type !== 'deduction' && line.type !== 'comment'
-                  ? recalculateLine({ ...line, margin: marginValue })
-                  : line
-              )
+            const updated = lines.map(line =>
+              line.type !== 'deduction' && line.type !== 'comment'
+                ? recalculateLine({ ...line, margin: marginValue })
+                : line
+            )
 
-              onLinesChange(updated)
-            }}
-          >
-            <span className='text-zinc-400'>↻</span>
-          </Button>
-        </div>
-      )}
+            onLinesChange(updated)
+          }}
+        >
+          <span className='text-zinc-400'>↻</span>
+        </Button>
+      </div>
+    )}
 
-      {/* Action Buttons */}
-      {mode !== 'view' && (
-        <div className='flex items-center gap-1'>
+    {/* Action Buttons */}
+    {mode !== 'view' && (
+      <div className='flex items-center gap-1 ml-auto'>
+        {!hideMaterialActions && isAllowed('product') && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant='ghost' size='sm' className='h-8 w-8 p-0 text-zinc-400' title='Add products'>
@@ -87,6 +95,8 @@ const ServiceTypeActions = ({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+        )}
+        {!hideLaborActions && isAllowed('labor') && (
           <Button
             onClick={() => setOpenLaborCostModal(true)}
             variant='ghost'
@@ -95,48 +105,49 @@ const ServiceTypeActions = ({
           >
             <Wrench className='h-4 w-4' />
           </Button>
-          <Button asChild variant='outline' size='sm' className='h-8 px-3 text-xs'>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant='outline'>Add Line Item</Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='end'>
-                {isAllowed('invoice') && (
-                  <DropdownMenuItem onClick={() => addLine('invoice')}>
-                    <GridIcon className='mr-2 h-4 w-4' /> Add Quote/Invoice Line Item
-                  </DropdownMenuItem>
-                )}
-                {isAllowed('product') && (
-                  <DropdownMenuItem onClick={() => addLine('product')}>
-                    <Boxes className='mr-2 h-4 w-4' /> Add Material Line Item
-                  </DropdownMenuItem>
-                )}
-                {isAllowed('labor') && (
-                  <DropdownMenuItem onClick={() => addLine('labor')}>
-                    <Wrench className='mr-2 h-4 w-4' /> Add Labor Line Item
-                  </DropdownMenuItem>
-                )}
-                {isAllowed('expense') && (
-                  <DropdownMenuItem onClick={() => addLine('expense')}>
-                    <ClipboardIcon className='mr-2 h-4 w-4' /> Add Expense Line Item
-                  </DropdownMenuItem>
-                )}
-                {isAllowed('comment') && (
-                  <DropdownMenuItem onClick={() => addLine('comment')}>
-                    <MessageSquareIcon className='mr-2 h-4 w-4' /> Add Comment Line Item
-                  </DropdownMenuItem>
-                )}
-                {isAllowed('deduction') && (
-                  <DropdownMenuItem onClick={() => addLine('deduction')}>
-                    <Minus className='mr-2 h-4 w-4' /> Add Deduction Line Item
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </Button>
-        </div>
-      )}
-    </div>
+        )}
+        <Button asChild variant='outline' size='sm' className='h-8 px-3 text-xs'>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='outline'>Add Line Item</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              {isAllowed('invoice') && (
+                <DropdownMenuItem onClick={() => addLine('invoice')}>
+                  <GridIcon className='mr-2 h-4 w-4' /> Add Quote/Invoice Line Item
+                </DropdownMenuItem>
+              )}
+              {isAllowed('product') && !hideMaterialActions && (
+                <DropdownMenuItem onClick={() => addLine('product')}>
+                  <Boxes className='mr-2 h-4 w-4' /> Add Material Line Item
+                </DropdownMenuItem>
+              )}
+              {isAllowed('labor') && !hideLaborActions && (
+                <DropdownMenuItem onClick={() => addLine('labor')}>
+                  <Wrench className='mr-2 h-4 w-4' /> Add Labor Line Item
+                </DropdownMenuItem>
+              )}
+              {isAllowed('expense') && (
+                <DropdownMenuItem onClick={() => addLine('expense')}>
+                  <ClipboardIcon className='mr-2 h-4 w-4' /> Add Expense Line Item
+                </DropdownMenuItem>
+              )}
+              {isAllowed('comment') && (
+                <DropdownMenuItem onClick={() => addLine('comment')}>
+                  <MessageSquareIcon className='mr-2 h-4 w-4' /> Add Comment Line Item
+                </DropdownMenuItem>
+              )}
+              {isAllowed('deduction') && (
+                <DropdownMenuItem onClick={() => addLine('deduction')}>
+                  <Minus className='mr-2 h-4 w-4' /> Add Deduction Line Item
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </Button>
+      </div>
+    )}
+  </div>
   )
 }
 
