@@ -57,7 +57,8 @@ const ServiceTypeSection = ({
   contractorId = null,
   contractorNotes = null,
   onContractorChange,
-  onAddSchedule
+  onAddSchedule,
+  lineErrors
 }: {
   mode: 'create' | 'edit' | 'view'
   serviceTypeId: string
@@ -83,7 +84,9 @@ const ServiceTypeSection = ({
   contractorNotes?: string | null
   onContractorChange?: (contractorId: string | null, contractorNotes: string | null) => void
   onAddSchedule?: () => void
+  lineErrors?: Record<number, Record<string, string>>
 }) => {
+  const resolvedLineErrors = lineErrors ?? {}
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
   const [openProductsModal, setOpenProductsModal] = useState(false)
   const [openNonInventoryProductsModal, setOpenNonInventoryProductsModal] = useState(false)
@@ -218,6 +221,7 @@ const ServiceTypeSection = ({
                         {...sharedRowProps}
                         line={line}
                         idx={idx}
+                        fieldErrors={resolvedLineErrors[idx]}
                         mode={mode}
                         isLocked={isLocked}
                         hasActions={hasActions}
@@ -313,6 +317,7 @@ const ServiceTypeSection = ({
                           {...sharedRowProps}
                           line={line}
                           idx={idx}
+                          fieldErrors={resolvedLineErrors[idx]}
                           mode={mode}
                           isLocked={isLocked}
                           hasActions={hasActions}

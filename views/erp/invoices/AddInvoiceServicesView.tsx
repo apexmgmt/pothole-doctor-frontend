@@ -32,6 +32,7 @@ import ClientDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEdi
 import DiscountDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/DiscountDetailsCard'
 import ProfitDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ProfitDetailsCard'
 import { getDiscountedUnitPrice } from '@/utils/business-calculation'
+import { extractServiceLineErrors, hasServiceLineErrors, ServiceLineErrors } from '@/utils/service-line-validation'
 
 const AddInvoiceServicesView = ({
   invoice: initialInvoice,
@@ -61,6 +62,7 @@ const AddInvoiceServicesView = ({
   const router = useRouter()
 
   const [isLoading, setIsLoading] = useState(false)
+  const [serviceFieldErrors, setServiceFieldErrors] = useState<ServiceLineErrors>({})
   const [isMarkingAsSigned, setIsMarkingAsSigned] = useState(false)
   const [isSendingEmail, setIsSendingEmail] = useState(false)
   const [isInvoiceDetailsOpen, setIsInvoiceDetailsOpen] = useState(false)
@@ -177,12 +179,14 @@ const AddInvoiceServicesView = ({
 
     setServiceSelectOpen(false)
     setHasUnsavedChanges(true)
+    setServiceFieldErrors({})
   }
 
   const handleRemoveServiceType = (index: number) => {
     setSelectedServiceType(prev => prev.filter((_, i) => i !== index))
     setServiceTypeLineItems(prev => prev.filter((_, i) => i !== index))
     setHasUnsavedChanges(true)
+    setServiceFieldErrors({})
   }
 
   const buildPayload = (): InvoiceServicePayload => ({
@@ -283,12 +287,23 @@ const AddInvoiceServicesView = ({
 
     const hasExistingServices = currentInvoice?.services && currentInvoice.services.length > 0
 
-    if (hasExistingServices) {
-      await InvoiceService.updateServices(currentInvoice.id, buildPayload())
-    } else {
-      await InvoiceService.storeServices(currentInvoice.id, buildPayload())
+    try {
+      if (hasExistingServices) {
+        await InvoiceService.updateServices(currentInvoice.id, buildPayload())
+      } else {
+        await InvoiceService.storeServices(currentInvoice.id, buildPayload())
+      }
+    } catch (error: any) {
+      const lineErrors = extractServiceLineErrors(error)
+
+      if (hasServiceLineErrors(lineErrors)) {
+        setServiceFieldErrors(lineErrors)
+      }
+
+      throw error
     }
 
+    setServiceFieldErrors({})
     setHasUnsavedChanges(false)
 
     if (showSuccessToast) {
@@ -304,12 +319,22 @@ const AddInvoiceServicesView = ({
     }
 
     setIsLoading(true)
+    setServiceFieldErrors({})
 
     try {
       await saveInvoiceServices()
 
       // router.push('/erp/invoices')
     } catch (error: any) {
+      const lineErrors = extractServiceLineErrors(error)
+
+      if (hasServiceLineErrors(lineErrors)) {
+        setServiceFieldErrors(lineErrors)
+        toast.error('Please fix the highlighted service fields and try again.')
+
+        return
+      }
+
       toast.error(error?.message || 'Failed to save invoice services')
     } finally {
       setIsLoading(false)
@@ -329,6 +354,15 @@ const AddInvoiceServicesView = ({
       setCurrentInvoice(response.data || { ...currentInvoice, status: 'invoice signed' })
       toast.success('Invoice marked as signed successfully')
     } catch (error: any) {
+      const lineErrors = extractServiceLineErrors(error)
+
+      if (hasServiceLineErrors(lineErrors)) {
+        setServiceFieldErrors(lineErrors)
+        toast.error('Please fix the highlighted service fields and try again.')
+
+        return
+      }
+
       toast.error(error?.message || 'Failed to mark invoice as signed')
     } finally {
       setIsMarkingAsSigned(false)
@@ -346,6 +380,15 @@ const AddInvoiceServicesView = ({
       await InvoiceService.sendEmail(currentInvoice.id)
       toast.success('Invoice email sent to customer successfully')
     } catch (error: any) {
+      const lineErrors = extractServiceLineErrors(error)
+
+      if (hasServiceLineErrors(lineErrors)) {
+        setServiceFieldErrors(lineErrors)
+        toast.error('Please fix the highlighted service fields and try again.')
+
+        return
+      }
+
       toast.error(error?.message || 'Failed to send invoice email')
     } finally {
       setIsSendingEmail(false)
@@ -474,6 +517,7 @@ const AddInvoiceServicesView = ({
             vendors={vendors}
             taxRate={taxRate}
             documentTypeName={currentInvoice?.invoice_type?.name ?? null}
+            lineErrors={serviceFieldErrors[idx]}
           />
         ))}
       </div>

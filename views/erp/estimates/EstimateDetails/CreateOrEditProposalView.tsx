@@ -29,6 +29,7 @@ import ProfitDetailsCard from './CreateOrEditProposalModal/ProfitDetailsCard'
 import TotalCalculationCard from './CreateOrEditProposalModal/TotalCalculationCard'
 import ProposalService from '@/services/api/estimates/proposals.service'
 import { getDiscountedUnitPrice } from '@/utils/business-calculation'
+import { extractServiceLineErrors, hasServiceLineErrors, ServiceLineErrors } from '@/utils/service-line-validation'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
@@ -59,6 +60,7 @@ const CreateOrEditProposalView = ({
   const dispatch = useAppDispatch()
 
   const [isLoading, setIsLoading] = useState(false)
+  const [serviceFieldErrors, setServiceFieldErrors] = useState<ServiceLineErrors>({})
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
   const [selectedServiceType, setSelectedServiceType] = useState<{ id: string; name: string }[]>([])
   const [serviceSelectValue, setServiceSelectValue] = useState<string | undefined>(undefined)
@@ -115,11 +117,13 @@ const CreateOrEditProposalView = ({
     }
 
     setServiceSelectOpen(false)
+    setServiceFieldErrors({})
   }
 
   const handleRemoveServiceType = (index: number) => {
     setSelectedServiceType(prev => prev.filter((_, i) => i !== index))
     setServiceTypeLineItems(prev => prev.filter((_, i) => i !== index))
+    setServiceFieldErrors({})
   }
 
   const allLines = serviceTypeLineItems.flatMap(st => st.lines)
@@ -241,6 +245,7 @@ const CreateOrEditProposalView = ({
 
   const onSubmit = async () => {
     setIsLoading(true)
+    setServiceFieldErrors({})
 
     const payload = buildPayload()
 
@@ -258,6 +263,15 @@ const CreateOrEditProposalView = ({
 
       router.push(`/erp/estimates/${estimateId}`)
     } catch (error: any) {
+      const lineErrors = extractServiceLineErrors(error)
+
+      if (hasServiceLineErrors(lineErrors)) {
+        setServiceFieldErrors(lineErrors)
+        toast.error('Please fix the highlighted service fields and try again.')
+
+        return
+      }
+
       toast.error(error?.message || `Failed to ${initialMode === 'create' ? 'create' : 'update'} proposal.`)
     } finally {
       setIsLoading(false)
@@ -266,6 +280,7 @@ const CreateOrEditProposalView = ({
 
   const handleEmailWithSave = async () => {
     setIsLoading(true)
+    setServiceFieldErrors({})
 
     try {
       let savedId = proposalId
@@ -287,6 +302,15 @@ const CreateOrEditProposalView = ({
       //   router.push(`/erp/estimates/${estimateId}`)
       // }
     } catch (error: any) {
+      const lineErrors = extractServiceLineErrors(error)
+
+      if (hasServiceLineErrors(lineErrors)) {
+        setServiceFieldErrors(lineErrors)
+        toast.error('Please fix the highlighted service fields and try again.')
+
+        return
+      }
+
       toast.error(error?.message || 'Failed to save and send proposal.')
     } finally {
       setIsLoading(false)
@@ -478,12 +502,14 @@ const CreateOrEditProposalView = ({
 
                 return copy
               })
+              setServiceFieldErrors({})
             }}
             productCategories={productCategories}
             uomUnits={uomUnits}
             vendors={vendors}
             taxRate={taxRate}
             documentTypeName={estimateDetails?.estimate_type?.name ?? null}
+            lineErrors={serviceFieldErrors[idx]}
           />
         ))}
       </div>

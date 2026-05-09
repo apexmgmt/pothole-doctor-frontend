@@ -59,7 +59,7 @@ export default class ProposalService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create proposals')
+        throw errorData
       }
 
       await revalidate('proposals')
@@ -108,7 +108,7 @@ export default class ProposalService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update proposal')
+        throw errorData
       }
 
       await revalidate('proposals')

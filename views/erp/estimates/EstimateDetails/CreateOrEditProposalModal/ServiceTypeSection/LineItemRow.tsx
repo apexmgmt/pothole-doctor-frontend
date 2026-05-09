@@ -13,6 +13,7 @@ import MaterialJobActionsRow from './MaterialJobActionsRow'
 interface LineItemRowProps {
   line: ProposalServiceItemPayload
   idx: number
+  fieldErrors?: Record<string, string>
   mode: 'create' | 'edit' | 'view'
   isLocked: boolean
   hasActions: boolean
@@ -34,6 +35,7 @@ interface LineItemRowProps {
 const LineItemRow = ({
   line,
   idx,
+  fieldErrors,
   mode,
   isLocked,
   hasActions,
@@ -69,33 +71,41 @@ const LineItemRow = ({
             {line.type === 'expense' && <ClipboardIcon className='h-4 w-4 text-zinc-400' />}
             {line.type === 'invoice' && <GridIcon className='h-4 w-4 text-zinc-400' />}
             {line.type === 'deduction' && <Minus className='h-4 w-4 text-red-500' />}
-            <Input
-              value={getEditValue(idx, 'name', line.name ?? '')}
-              onChange={e => setEditValue(idx, 'name', e.target.value)}
-              onBlur={e => {
-                updateLine(idx, 'name', e.target.value)
-                clearEditValue(idx, 'name')
-              }}
-              className={cn('w-full min-w-32', line.type === 'deduction' && 'text-red-500')}
-              placeholder='Item Name'
-              disabled={isLocked}
-            />
+            <div className='w-full min-w-32'>
+              <Input
+                value={getEditValue(idx, 'name', line.name ?? '')}
+                onChange={e => setEditValue(idx, 'name', e.target.value)}
+                onBlur={e => {
+                  updateLine(idx, 'name', e.target.value)
+                  clearEditValue(idx, 'name')
+                }}
+                className={cn(
+                  'w-full',
+                  line.type === 'deduction' && 'text-red-500',
+                  fieldErrors?.name && 'border-red-500 focus-visible:ring-red-500'
+                )}
+                placeholder='Item Name'
+                disabled={isLocked}
+              />
+            </div>
           </div>
         </td>
 
         {/* Description */}
         <td className='px-2 py-1'>
-          <Input
-            value={getEditValue(idx, 'description', line.description ?? '')}
-            onChange={e => setEditValue(idx, 'description', e.target.value)}
-            onBlur={e => {
-              updateLine(idx, 'description', e.target.value)
-              clearEditValue(idx, 'description')
-            }}
-            className='w-full min-w-32'
-            placeholder='Empty'
-            disabled={isLocked}
-          />
+          <div className='w-full min-w-32'>
+            <Input
+              value={getEditValue(idx, 'description', line.description ?? '')}
+              onChange={e => setEditValue(idx, 'description', e.target.value)}
+              onBlur={e => {
+                updateLine(idx, 'description', e.target.value)
+                clearEditValue(idx, 'description')
+              }}
+              className={cn('w-full', fieldErrors?.description && 'border-red-500 focus-visible:ring-red-500')}
+              placeholder='Empty'
+              disabled={isLocked}
+            />
+          </div>
         </td>
 
         {/* Vendor */}
@@ -107,7 +117,9 @@ const LineItemRow = ({
                 onValueChange={val => updateLine(idx, 'vendor_id', val)}
                 disabled={isLocked || !!line.product_id}
               >
-                <SelectTrigger className='w-36 text-xs'>
+                <SelectTrigger
+                  className={cn('w-36 text-xs', fieldErrors?.vendor_id && 'border-red-500 focus:ring-red-500')}
+                >
                   <SelectValue placeholder='Vendor' />
                 </SelectTrigger>
                 <SelectContent>
@@ -133,7 +145,7 @@ const LineItemRow = ({
                 updateLine(idx, 'unit_cost', parseFloat(e.target.value) || 0)
                 clearEditValue(idx, 'unit_cost')
               }}
-              className='w-28'
+              className={cn('w-28', fieldErrors?.unit_cost && 'border-red-500 focus-visible:ring-red-500')}
               min={0}
               disabled={isLocked}
             />
@@ -155,7 +167,10 @@ const LineItemRow = ({
                   updateLine(idx, 'qty', clamped)
                   clearEditValue(idx, 'qty')
                 }}
-                className='w-20 bg-yellow-200 text-black'
+                className={cn(
+                  'w-20 bg-yellow-200 text-black',
+                  fieldErrors?.qty && 'border-red-500 focus-visible:ring-red-500'
+                )}
                 min={0}
                 disabled={isLocked}
               />
@@ -180,7 +195,9 @@ const LineItemRow = ({
                     }}
                     disabled={isLocked}
                   >
-                    <SelectTrigger className='w-20 h-6! text-xs'>
+                    <SelectTrigger
+                      className={cn('w-20 h-6! text-xs', fieldErrors?.unit_id && 'border-red-500 focus:ring-red-500')}
+                    >
                       <SelectValue placeholder='Unit' />
                     </SelectTrigger>
                     <SelectContent>
@@ -214,7 +231,7 @@ const LineItemRow = ({
                     updateLine(idx, 'margin', parseFloat(e.target.value) || 0)
                     clearEditValue(idx, 'margin')
                   }}
-                  className='w-28'
+                  className={cn('w-28', fieldErrors?.margin && 'border-red-500 focus-visible:ring-red-500')}
                   min={0}
                   max={100}
                   disabled={isLocked}
@@ -245,7 +262,7 @@ const LineItemRow = ({
                     updateLine(idx, 'total_price', parseFloat(e.target.value) || 0)
                     clearEditValue(idx, 'total_price')
                   }}
-                  className='w-28'
+                  className={cn('w-28', fieldErrors?.total_price && 'border-red-500 focus-visible:ring-red-500')}
                 />
               ) : (
                 <Input value={totalPrice.toFixed(2)} readOnly className='w-28' />
@@ -255,6 +272,7 @@ const LineItemRow = ({
         )}
 
         {/* Sales Tax checkbox */}
+
         <td className='px-2 py-3.5 text-center'>
           {line.type !== 'deduction' && (
             <Checkbox
