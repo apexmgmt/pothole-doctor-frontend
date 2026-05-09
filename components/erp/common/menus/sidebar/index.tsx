@@ -568,8 +568,8 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           <Image
             src='/images/dashboard/logo.webp'
             alt='logo'
-            width={90}
-            height={37}
+            width={172}
+            height={72}
             loading='eager'
             style={{ width: '90px', height: 'auto' }}
           />{' '}

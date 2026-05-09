@@ -13,6 +13,15 @@ const layout = ({ children }: { children: ReactNode }) => {
           <Image src='/images/dashboard/auth-gradient.webp' fill alt='' className=' !raletive' />
         </div>
         <div className='w-full max-w-[405px] rounded-2xl bg-bg shadow-[0_18px_60px_-4px_rgba(24,39,75,0.1)] p-6 backdrop-blur-2xl'>
+          <div className='flex justify-center items-center'>
+            <Image
+              src='/images/dashboard/logo.webp'
+              width={172}
+              height={72}
+              alt='Pothole Doctors'
+              className='mb-6 h-14 w-auto'
+            />
+          </div>
           {children}
         </div>
       </div>
