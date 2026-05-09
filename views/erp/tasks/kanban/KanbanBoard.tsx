@@ -16,6 +16,7 @@ import {
 } from '@dnd-kit/core'
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { Client, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
+import type { TaskPayload } from '@/types'
 import { TaskCard } from './TaskCard'
 import TaskService from '@/services/api/tasks/tasks.service'
 import CreateOrEditTaskModal from '@/views/erp/tasks/CreateOrEditTaskModal'
@@ -94,7 +95,6 @@ export default function KanbanBoard({
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [selectedViewTaskId, setSelectedViewTaskId] = useState<string | null>(null)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
-  const [defaultStatus, setDefaultStatus] = useState<string>('backlog')
   const [canCreateTask, setCanCreateTask] = useState<boolean>(false)
   const [canEditTask, setCanEditTask] = useState<boolean>(false)
   const [canDeleteTask, setCanDeleteTask] = useState<boolean>(false)
@@ -260,20 +260,68 @@ export default function KanbanBoard({
     hasPermission('Delete Task').then(result => setCanDeleteTask(result))
   }, [])
 
-  /**
-   * Summary of handleAddTask
-   *
-   * 1. Set default status based on column where add button was clicked
-   * 2. Reset selected task to null for creating a new task
-   * 3. Set modal mode to 'create' for conditional rendering inside modal
-   * 4. Open the modal
-   * @param columnId string uuid
-   */
-  const handleAddTask = (columnId: string) => {
-    setDefaultStatus(columnId)
-    setSelectedTask(null)
-    setModalMode('create')
-    setModalOpen(true)
+  const handleAddTask = async (columnId: string, name = '') => {
+    const taskName = name.trim()
+
+    if (!taskName) return
+
+    const payload: TaskPayload = {
+      name: taskName,
+      status: columnId,
+      client_id: '',
+      task_type_id: '',
+      employee_ids: [],
+      sms_reminder: 0,
+      email_reminder: 0,
+      start_date: '',
+      start_time: '',
+      end_date: '',
+      end_time: '',
+      location: '',
+      description: '',
+      completed_date: '',
+      close_comment: '',
+      reminders: []
+    }
+
+    try {
+      const response = await TaskService.store(payload)
+      const createdTask = response?.data as Task | undefined
+
+      if (createdTask?.id) {
+        const normalized = toKanbanTasks([{ ...createdTask, status: createdTask.status || columnId }])[0]
+
+        setTasks(prevTasks => {
+          const alreadyExists = prevTasks.some(task => task.id === normalized.id)
+
+          if (alreadyExists) return prevTasks
+
+          const targetColumnId = normalized.columnId || columnId
+
+          const shiftedTasks = prevTasks.map(task =>
+            (task.columnId || 'backlog') === targetColumnId ? { ...task, order: (task.order ?? 0) + 1 } : task
+          )
+
+          const newTask = { ...normalized, columnId: targetColumnId, status: targetColumnId, order: 0 }
+          const firstColumnIndex = shiftedTasks.findIndex(task => (task.columnId || 'backlog') === targetColumnId)
+
+          if (firstColumnIndex === -1) {
+            return [...shiftedTasks, newTask]
+          }
+
+          const nextTasks = [...shiftedTasks]
+
+          nextTasks.splice(firstColumnIndex, 0, newTask)
+
+          return nextTasks
+        })
+      }
+
+      toast.success('Task created successfully')
+    } catch (error: any) {
+      toast.error(typeof error?.message === 'string' ? error.message : 'Failed to create task')
+      throw error
+    }
   }
 
   /**

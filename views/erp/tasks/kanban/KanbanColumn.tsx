@@ -1,4 +1,6 @@
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Task } from '@/types'
 import { useDroppable } from '@dnd-kit/core'
@@ -27,7 +29,7 @@ export default function KanbanColumn({
 }: {
   col: Column
   tasks: KanbanTask[]
-  onAddTask: (columnId: string) => void
+  onAddTask: (columnId: string, name: string) => Promise<void>
   onEdit: (task: Task) => void
   onDelete: (taskId: string) => void
   onView: (taskId: string) => void
@@ -36,6 +38,36 @@ export default function KanbanColumn({
   canDeleteTask: boolean
 }) {
   const { setNodeRef } = useDroppable({ id: col.id, data: { type: 'Column', columnId: col.id } })
+  const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false)
+  const [taskName, setTaskName] = useState('')
+  const [isCreating, setIsCreating] = useState(false)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    if (isQuickCreateOpen) {
+      inputRef.current?.focus()
+    }
+  }, [isQuickCreateOpen])
+
+  const closeQuickCreate = () => {
+    setTaskName('')
+    setIsQuickCreateOpen(false)
+  }
+
+  const submitQuickCreate = async () => {
+    const trimmedName = taskName.trim()
+
+    if (!trimmedName || isCreating) return
+
+    setIsCreating(true)
+
+    try {
+      await onAddTask(col.id, trimmedName)
+      closeQuickCreate()
+    } finally {
+      setIsCreating(false)
+    }
+  }
 
   return (
     <div
@@ -52,13 +84,58 @@ export default function KanbanColumn({
               variant='ghost'
               className='h-7 w-7'
               onPointerDown={e => e.stopPropagation()}
-              onClick={() => onAddTask(col.id)}
+              onClick={() => setIsQuickCreateOpen(true)}
             >
               <PlusIcon className='h-4 w-4' />
             </Button>
           )}
         </div>
       </div>
+
+      {canCreateTask && isQuickCreateOpen && (
+        <div className='mb-3 rounded-lg border border-accent p-2'>
+          <Input
+            ref={inputRef}
+            value={taskName}
+            onChange={event => setTaskName(event.target.value)}
+            onPointerDown={event => event.stopPropagation()}
+            onKeyDown={event => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                void submitQuickCreate()
+              }
+
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                closeQuickCreate()
+              }
+            }}
+            placeholder='Type task name...'
+            disabled={isCreating}
+          />
+          <div className='mt-2 flex justify-end gap-2'>
+            <Button
+              type='button'
+              variant='ghost'
+              size='sm'
+              onPointerDown={event => event.stopPropagation()}
+              onClick={closeQuickCreate}
+              disabled={isCreating}
+            >
+              Cancel
+            </Button>
+            <Button
+              type='button'
+              size='sm'
+              onPointerDown={event => event.stopPropagation()}
+              onClick={() => void submitQuickCreate()}
+              disabled={!taskName.trim() || isCreating}
+            >
+              {isCreating ? 'Creating...' : 'Create'}
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className='min-h-0 flex-1'>
         <ScrollArea className='h-full'>
