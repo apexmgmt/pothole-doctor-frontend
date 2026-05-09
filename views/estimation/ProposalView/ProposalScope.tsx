@@ -74,7 +74,7 @@ const ProposalScope = ({
         {isConverted && isLast && (
           <div className='rounded-md border border-green-500/40 bg-green-500/10 p-4 text-sm print:hidden'>
             <p className='font-semibold text-green-400'>✓ Converted to Invoice</p>
-            <p className='text-primary-foreground/60 mt-1'>
+            <p className='text-black mt-1'>
               This proposal has been approved and converted to an invoice.
             </p>
           </div>
