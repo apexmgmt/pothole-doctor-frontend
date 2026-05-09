@@ -245,10 +245,17 @@ const CreateOrEditProposalView = ({
     const payload = buildPayload()
 
     try {
-      await submitProposal(payload)
+      const response = await submitProposal(payload)
+
       toast.success(initialMode === 'create' ? 'Proposal created successfully' : 'Proposal updated successfully')
 
       //   resetForm()
+      if (response?.data?.id) {
+        router.push(`/erp/estimates/${estimateId}/proposals/${response.data.id}`)
+
+        return
+      }
+
       router.push(`/erp/estimates/${estimateId}`)
     } catch (error: any) {
       toast.error(error?.message || `Failed to ${initialMode === 'create' ? 'create' : 'update'} proposal.`)
@@ -275,10 +282,10 @@ const CreateOrEditProposalView = ({
       await ProposalService.sendEmail(savedId)
       toast.success('Proposal emailed to customer successfully')
 
-      if (initialMode !== 'view') {
-        resetForm()
-        router.push(`/erp/estimates/${estimateId}`)
-      }
+      // if (initialMode !== 'view') {
+      //   resetForm()
+      //   router.push(`/erp/estimates/${estimateId}`)
+      // }
     } catch (error: any) {
       toast.error(error?.message || 'Failed to save and send proposal.')
     } finally {
@@ -476,6 +483,7 @@ const CreateOrEditProposalView = ({
             uomUnits={uomUnits}
             vendors={vendors}
             taxRate={taxRate}
+            documentTypeName={estimateDetails?.estimate_type?.name ?? null}
           />
         ))}
       </div>
