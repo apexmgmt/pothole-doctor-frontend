@@ -31,6 +31,7 @@ import ClientDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEdi
 import ProfitDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ProfitDetailsCard'
 import TotalCalculationCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/TotalCalculationCard'
 import AssignUserCard from './AssignUserCard'
+import { extractServiceLineErrors, hasServiceLineErrors, ServiceLineErrors } from '@/utils/service-line-validation'
 
 const EditWorkOrderServicesView = ({
   workOrder: initialWorkOrder,
@@ -62,6 +63,7 @@ const EditWorkOrderServicesView = ({
   const router = useRouter()
 
   const [isLoading, setIsLoading] = useState(false)
+  const [serviceFieldErrors, setServiceFieldErrors] = useState<ServiceLineErrors>({})
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isWorkOrderDetailsOpen, setIsWorkOrderDetailsOpen] = useState(false)
   const [currentWorkOrder, setCurrentWorkOrder] = useState<WorkOrder>(initialWorkOrder)
@@ -198,6 +200,7 @@ const EditWorkOrderServicesView = ({
         }
       ])
       markDirty()
+      setServiceFieldErrors({})
     }
 
     setServiceSelectOpen(false)
@@ -207,6 +210,7 @@ const EditWorkOrderServicesView = ({
     setSelectedServiceType(prev => prev.filter((_, i) => i !== index))
     setServiceTypeLineItems(prev => prev.filter((_, i) => i !== index))
     markDirty()
+    setServiceFieldErrors({})
   }
 
   const handleContractorChange = (index: number, contractorId: string | null, contractorNotes: string | null) => {
@@ -268,6 +272,7 @@ const EditWorkOrderServicesView = ({
     }
 
     setIsLoading(true)
+    setServiceFieldErrors({})
 
     try {
       const hasExistingServices = currentWorkOrder?.services && currentWorkOrder.services.length > 0
@@ -283,6 +288,15 @@ const EditWorkOrderServicesView = ({
 
       return true
     } catch (error: any) {
+      const lineErrors = extractServiceLineErrors(error)
+
+      if (hasServiceLineErrors(lineErrors)) {
+        setServiceFieldErrors(lineErrors)
+        toast.error('Please fix the highlighted service fields and try again.')
+
+        return false
+      }
+
       toast.error(error?.message || 'Failed to update work order services')
 
       return false
@@ -437,6 +451,7 @@ const EditWorkOrderServicesView = ({
                 return copy
               })
               markDirty()
+              setServiceFieldErrors({})
             }}
             productCategories={productCategories}
             uomUnits={uomUnits}
@@ -462,6 +477,7 @@ const EditWorkOrderServicesView = ({
               )
             }
             documentTypeName={currentWorkOrder?.work_order_type?.name ?? null}
+            lineErrors={serviceFieldErrors[idx]}
           />
         ))}
       </div>
