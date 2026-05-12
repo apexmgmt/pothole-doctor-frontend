@@ -58,7 +58,9 @@ const ServiceTypeSection = ({
   contractorNotes = null,
   onContractorChange,
   onAddSchedule,
-  lineErrors
+  lineErrors,
+  hideTaxOption = false,
+  hideDiscountOption = false
 }: {
   mode: 'create' | 'edit' | 'view'
   serviceTypeId: string
@@ -85,6 +87,8 @@ const ServiceTypeSection = ({
   onContractorChange?: (contractorId: string | null, contractorNotes: string | null) => void
   onAddSchedule?: () => void
   lineErrors?: Record<number, Record<string, string>>
+  hideDiscountOption?: boolean
+  hideTaxOption?: boolean
 }) => {
   const resolvedLineErrors = lineErrors ?? {}
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
@@ -191,7 +195,7 @@ const ServiceTypeSection = ({
                     {!hideMargin && <th className='px-2 py-1 whitespace-nowrap'>Margin</th>}
                     {!hidePriceColumns && <th className='px-2 py-1 whitespace-nowrap'>Unit Price</th>}
                     {!hidePriceColumns && <th className='px-2 py-1 whitespace-nowrap'>Total Price</th>}
-                    <th className='px-2 py-1 whitespace-nowrap'>Sales Tax</th>
+                    {!hideTaxOption && <th className='px-2 py-1 whitespace-nowrap'>Sales Tax</th>}
                     <th className='px-2 py-1 whitespace-nowrap'></th>
                   </tr>
                 </thead>
@@ -229,6 +233,8 @@ const ServiceTypeSection = ({
                         showPurchaseQty={showPurchaseQty}
                         hideMargin={hideMargin}
                         hidePriceColumns={hidePriceColumns}
+                        hideTaxOption={hideTaxOption}
+                        hideDiscountOption={hideDiscountOption}
                         units={units}
                         vendors={vendors}
                         updateLineFields={updateLineFields}

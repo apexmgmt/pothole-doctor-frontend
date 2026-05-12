@@ -12,9 +12,10 @@ interface LineItemActionsProps {
   locked?: boolean
   updateLine: (idx: number, field: keyof ProposalServiceItemPayload, value: any) => void
   removeLine: (idx: number) => void
+  hideDiscountOption?: boolean
 }
 
-const LineItemActions = ({ line, idx, mode, locked = false, updateLine, removeLine }: LineItemActionsProps) => {
+const LineItemActions = ({ line, idx, mode, locked = false, updateLine, removeLine, hideDiscountOption = false }: LineItemActionsProps) => {
   const isDisabled = mode === 'view' || locked
 
   const hasFreight = (line.freight_charge ?? 0) > 0
@@ -55,7 +56,7 @@ const LineItemActions = ({ line, idx, mode, locked = false, updateLine, removeLi
       )}
 
       {/* Discount button dropdown */}
-      {line.type !== 'expense' && line.type !== 'deduction' && (
+      {!hideDiscountOption && line.type !== 'expense' && line.type !== 'deduction' && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size='icon' variant='ghost' title='Discount'>

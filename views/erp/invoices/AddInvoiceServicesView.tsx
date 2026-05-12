@@ -155,7 +155,7 @@ const AddInvoiceServicesView = ({
             is_sale: item.is_sale,
             tax_type: item.tax_type,
             tax: item.tax,
-            tax_amount: item.tax_amount,
+            tax_amount: item.total_tax,
             total_price: item.total_price,
             note: item.note || ''
           }))

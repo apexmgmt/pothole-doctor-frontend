@@ -6,6 +6,12 @@ export interface Proposal extends Model {
   subtotal: number
   sale_tax: number
   total: number
+  total_freight_charge: number
+  total_cost: number
+  total_material_cost: number
+  total_material_sale: number
+  total_labor_cost: number
+  total_labor_sale: number
   is_down_payment_materials: boolean
   down_payment_amount: number
   down_payment_percentage: number
@@ -57,9 +63,11 @@ export interface ProposalService extends Model {
   freight_charge: number
   expense_cost: number
   sale_tax: number
+  total_cost: number
   total_sale: number
   material_sale: number
   labor_sale: number
+  labor_tax: number
   profit: number
   items: ProposalServiceItem[]
   service_type?: ServiceType
@@ -88,13 +96,17 @@ export interface ProposalServiceItem extends Model {
   unit?: Unit
   vendor_id?: string | null
   total_price: number
+  
   discount: number
-  tax: number
   discount_type: 'percentage' | 'fixed'
+  total_discount: number
+
+  tax: number
   tax_type: 'percentage' | 'fixed'
   note: string | null
   is_sale: number | 1 | 0
-  tax_amount: number
+  tax_amount: number // note: just for calculation, not stored in db
+  total_tax: number 
   freight_charge: number
   material_job_actions?: MaterialJobAction[]
 }

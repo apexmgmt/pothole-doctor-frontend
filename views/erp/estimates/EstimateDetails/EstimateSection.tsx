@@ -132,29 +132,37 @@ const EstimateSection = ({
                 )}
               </>
             )}
-
-            {estimate.service_type && (
+            {estimate.location && (
               <div className='flex gap-1 items-start'>
-                <span className='font-semibold text-base text-white min-w-40'>Service type : </span>
-                <div className='flex-1'>{estimate.service_type?.name ?? 'N/A'}</div>
+                <span className='font-semibold text-base text-white min-w-40'>Location :</span>
+
+                <div className='flex-1'>
+                  {[
+                    estimate.location?.name,
+                    estimate.location?.street_address,
+                    estimate.location?.city?.name,
+                    [estimate.location?.state?.name, estimate.location?.zip_code].filter(Boolean).join(' ')
+                  ]
+                    .filter(Boolean)
+                    .join(', ') || 'N/A'}
+                </div>
               </div>
             )}
-            <div className='flex gap-1 items-start'>
-              <span className='font-semibold text-base text-white min-w-40'>Business Location : </span>
-              <div className='flex-1'>
-                {estimate.location
-                  ? `${estimate.location.street_address}, ${estimate.location.city?.name}, ${estimate.location.state?.name} ${estimate.location.zip_code}`
-                  : 'N/A'}
+            {estimate.address && (
+              <div className='flex gap-1 items-start'>
+                <span className='font-semibold text-base text-white min-w-40'>Job Location :</span>
+
+                <div>
+                  {[
+                    estimate.address?.street_address,
+                    estimate.address?.city?.name,
+                    [estimate.address?.state?.name, estimate.address?.zip_code].filter(Boolean).join(' ')
+                  ]
+                    .filter(Boolean)
+                    .join(', ') || 'N/A'}
+                </div>
               </div>
-            </div>
-            <div className='flex gap-1 items-start'>
-              <span className='font-semibold text-base text-white min-w-40'>Job Location : </span>
-              <div>
-                {estimate.address
-                  ? `${estimate.address.street_address}, ${estimate.address.city?.name}, ${estimate.address.state?.name} ${estimate.address.zip_code}`
-                  : 'N/A'}
-              </div>
-            </div>
+            )}
             {estimate.biding_date && (
               <div className='flex gap-1 items-start'>
                 <span className='font-semibold text-base text-white min-w-40'>Select bid date : </span>
@@ -169,8 +177,8 @@ const EstimateSection = ({
             )}
             {estimate.client && (
               <div className='flex gap-1 items-start'>
-                <span className='font-semibold text-base text-white min-w-40'>Customer : </span> className="flex-1"
-                <div>
+                <span className='font-semibold text-base text-white min-w-40'>Customer : </span>
+                <div className='flex-1'>
                   {estimate.client?.first_name} {estimate.client?.last_name}
                 </div>
               </div>
@@ -184,8 +192,7 @@ const EstimateSection = ({
             {estimate.assign_user && (
               <div className='flex gap-1 items-start'>
                 <span className='font-semibold text-base text-white min-w-40'>Assigned estimator : </span>{' '}
-                className="flex-1"
-                <div>
+                <div className='flex-1'>
                   {estimate.assign_user?.first_name} {estimate.assign_user?.last_name}
                 </div>
               </div>
