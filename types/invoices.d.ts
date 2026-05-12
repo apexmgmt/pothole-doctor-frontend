@@ -52,6 +52,12 @@ export interface Invoice extends Model {
   subtotal: number
   sale_tax: number
   total: number
+  total_cost: number
+  total_freight_charge: number
+  total_material_cost: number
+  total_material_sale: number
+  total_labor_cost: number
+  total_labor_sale: number
   message: string | null
   reason: string | null
   take_off_data: TakeoffData | null

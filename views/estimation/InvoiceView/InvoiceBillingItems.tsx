@@ -27,15 +27,21 @@ const InvoiceBillingItems = ({ invoice }: { invoice: Invoice }) => {
                   </tr>
                   {service?.items?.length > 0 &&
                     service.items.map((item, itemIndex) => (
-                      <tr key={index + '-' + itemIndex} className='transition-colors'>
-                        <td className='px-4 py-2 text-sm text-black align-top'>{item?.name || ''}</td>
-                        <td className='px-4 py-2 text-sm text-[rgba(0,0,0,0.8)] align-top max-w-md whitespace-normal'>
+                      <>
+                      <tr
+                        key={index + '-' + itemIndex}
+                        className={`hover:bg-gray-100 print:bg-white transition-colors ${item.type === 'deduction' ? 'text-red-700!' : ''}`}
+                      >
+                        <td className='px-4 py-2 text-sm text-light  print:text-black align-top'>{item?.name || ''}</td>
+
+                        <td className='px-4 py-2 text-sm text-light/80 print:text-black/80 align-top max-w-md whitespace-normal'>
                           {item.description}
                         </td>
-                        <td className='px-4 py-2 text-sm text-black text-right align-top'>
+                        <td className='px-4 py-2 text-sm text-light print:text-black text-right align-top'>
+                          {item.type === 'deduction' ? '- ' : ''}
                           {formatCurrency(item.total_price)}
                         </td>
-                      </tr>
+                      </tr></>
                     ))}
                 </React.Fragment>
               ))}
@@ -49,7 +55,9 @@ const InvoiceBillingItems = ({ invoice }: { invoice: Invoice }) => {
         <div className='w-full sm:max-w-[300px] space-y-4 bg-[#f3f4f6] p-4 rounded-md'>
           <div className='flex justify-between text-sm'>
             <span className='text-[rgba(0,0,0,0.8)]'>Subtotal</span>
-            <span className='text-black font-medium'>{formatCurrency(invoice?.subtotal)}</span>
+            <span className='text-black font-medium'>
+              {formatCurrency(Number(invoice?.subtotal ?? 0) + Number(invoice?.discount ?? 0))}
+            </span>
           </div>
           {invoice?.discount > 0 && (
             <div className='flex justify-between text-sm'>
@@ -58,7 +66,7 @@ const InvoiceBillingItems = ({ invoice }: { invoice: Invoice }) => {
             </div>
           )}
           <div className='flex justify-between text-sm'>
-            <span className='text-[rgba(0,0,0,0.8)]'>Tax ({invoice?.tax_rate ?? 0}%)</span>
+            <span className='text-[rgba(0,0,0,0.8)]'>Tax</span>
             <span className='text-black font-medium'>{formatCurrency(invoice?.sale_tax)}</span>
           </div>
           <Separator className='bg-[#d1d5db]' />

@@ -30,6 +30,8 @@ interface LineItemRowProps {
   updateLineFields: (idx: number, fields: Partial<ProposalServiceItemPayload>) => void
   removeLine: (idx: number) => void
   clampProductQty: (qty: number, line: ProposalServiceItemPayload) => number
+  hideTaxOption?: boolean
+  hideDiscountOption?: boolean
 }
 
 const LineItemRow = ({
@@ -51,7 +53,9 @@ const LineItemRow = ({
   updateLine,
   updateLineFields,
   removeLine,
-  clampProductQty
+  clampProductQty,
+  hideTaxOption = false,
+  hideDiscountOption = false
 }: LineItemRowProps) => {
   const totalCost = line.unit_cost * line.qty
   const unitPrice = getDiscountedUnitPrice(line)
@@ -273,15 +277,16 @@ const LineItemRow = ({
 
         {/* Sales Tax checkbox */}
 
-        <td className='px-2 py-3.5 text-center'>
-          {line.type !== 'deduction' && (
-            <Checkbox
-              disabled={isLocked}
-              checked={line.is_sale ? true : false}
-              onCheckedChange={checked => updateLine(idx, 'is_sale', checked ? 1 : 0)}
+        {!hideTaxOption && (
+          <td className='px-2 py-3.5 text-center'>
+            {line.type !== 'deduction' && (
+              <Checkbox
+                disabled={isLocked}
+                checked={line.is_sale ? true : false}
+                onCheckedChange={checked => updateLine(idx, 'is_sale', checked ? 1 : 0)}
             />
           )}
-        </td>
+        </td>)}
 
         {/* Actions dropdown */}
         <LineItemActions
@@ -291,6 +296,7 @@ const LineItemRow = ({
           locked={hasActions}
           updateLine={updateLine}
           removeLine={removeLine}
+          hideDiscountOption={hideDiscountOption}
         />
 
         <td className='hidden'>

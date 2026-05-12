@@ -39,6 +39,7 @@ import EditWorkOrderModal from './EditWorkOrderModal'
 import CompletionCertificatesModal from './CompletionCertificatesModal'
 import WorkOrderDocuments from './documents/WorkOrderDocuments'
 import InvoiceJobImages from '../invoices/job-images/InvoiceJobImages'
+import { formatCurrency } from '@/utils/currency'
 
 const WorkOrders: React.FC<{
   workOrderTypes: EstimateType[]
@@ -259,23 +260,23 @@ const WorkOrders: React.FC<{
     },
 
     {
-      id: 'total',
+      id: 'invoice_total',
       header: 'Total',
       cell: (row: WorkOrder) => (
-        <span className='font-medium'>${row.total != null ? Number(row.total).toFixed(2) : '0.00'}</span>
+        <span className='font-medium'>{formatCurrency(row.invoice_total != null ? Number(row.invoice_total) : 0)}</span>
       ),
       sortable: true
     },
     {
-      id: 'profit',
+      id: 'total_profit',
       header: 'Profit',
       cell: (row: WorkOrder) => {
-        const profit = row.profit ?? 0
-        const isPositive = profit >= 0
+        const total_profit = row.total_profit ?? 0
+        const isPositive = total_profit >= 0
 
         return (
           <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-            ${Number(profit).toFixed(2)}
+            {formatCurrency(total_profit)}
           </span>
         )
       },
@@ -286,11 +287,10 @@ const WorkOrders: React.FC<{
       header: 'Commissions',
       cell: (row: WorkOrder) => {
         const commission = row.commissions ?? 0
-        const isPositive = commission >= 0
 
         return (
-          <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-            ${Number(commission).toFixed(2)}
+          <span className={`font-medium`}>
+            {formatCurrency(commission)}
           </span>
         )
       },
