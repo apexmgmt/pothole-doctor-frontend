@@ -579,7 +579,7 @@ const EditWorkOrderModal = ({
             )}
           />
           {/* Service Type */}
-          <FormField
+          {/* <FormField
             control={form.control}
             name='service_type_id'
             rules={{ required: 'Service type is required' }}
@@ -605,7 +605,7 @@ const EditWorkOrderModal = ({
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
           {/* Payment Term */}
           <FormField
             control={form.control}
