@@ -58,16 +58,16 @@ const MenuItem: React.FC<{
   const resolvedIcon = item.icon ?? parentIcon // ensure submenu shows an icon
 
   return item.hasSubItems && item.subItems ? (
-    <div key={item.id}>
+    <div key={item.id} className='relative'>
       <button
         onClick={() => toggleSection(item.id)}
-        className={`relative w-full flex items-center justify-between px-3 py-1 rounded-lg text-left transition-colors cursor-pointer ${
+        className={`w-full flex items-center justify-between px-3 py-1 rounded-lg text-left transition-colors cursor-pointer ${
           isActive ? 'bg-accent/40 text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
         }`}
         type='button'
       >
         <div className='flex items-center gap-3'>
-          <TreeConnector level={level} resolvedIcon={resolvedIcon} />
+          <TreeConnector level={level} isLastItem={isLastItem} resolvedIcon={resolvedIcon} />
           <span className='font-normal'>{item.label}</span>
         </div>
         {isExpanded ? <ArrowUpIcon /> : <ArrowDownIcon />}
@@ -77,7 +77,7 @@ const MenuItem: React.FC<{
         className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
       >
         <div className='overflow-hidden'>
-          <ul className={`relative space-y-1 mt-1 ${level > 0 ? 'ml-5' : 'ml-8'}`}>
+          <ul className={`relative space-y-0 mt-1 ${level > 0 ? 'ml-5' : 'ml-8'}`}>
             {item.subItems.map((subItem, idx) => (
               <li key={subItem.id}>
                 <MenuItem
@@ -88,26 +88,24 @@ const MenuItem: React.FC<{
                 />
               </li>
             ))}
-
-            <span
-              className={`absolute bottom-10 w-0 h-[calc(100%-30px)] border-l border-border ${level > 0 ? '-left-1' : '-left-3'}`}
-            />
           </ul>
         </div>
       </div>
     </div>
   ) : (
-    <Link
-      key={item.id}
-      href={item.href}
-      onClick={handleClick}
-      className={`relative flex items-center gap-3 px-3 py-1 rounded-lg transition-colors ${
-        isActive ? 'bg-accent text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
-      }`}
-    >
-      <TreeConnector isLastItem={isLastItem} level={level} resolvedIcon={resolvedIcon} />
-      <span className='font-normal'>{item.label}</span>
-    </Link>
+    <div className='relative'>
+      <Link
+        key={item.id}
+        href={item.href}
+        onClick={handleClick}
+        className={`flex items-center gap-3 px-3 py-1 rounded-lg transition-colors ${
+          isActive ? 'bg-accent text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
+        }`}
+      >
+        <TreeConnector isLastItem={isLastItem} level={level} resolvedIcon={resolvedIcon} />
+        <span className='font-normal'>{item.label}</span>
+      </Link>
+    </div>
   )
 }
 

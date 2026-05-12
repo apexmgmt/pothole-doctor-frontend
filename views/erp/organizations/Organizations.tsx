@@ -195,15 +195,22 @@ const Organizations: React.FC = () => {
           }
 
           const encryptedData = encryptData(authData)
-          const redirectUrl = `${appUrl(response.data.domain ?? '')}/erp/redirecting?data=${encodeURIComponent(encryptedData)}`
+          const baseUrl = appUrl(response.data.domain ?? '')
+          const redirectUrl = `${baseUrl}/erp/redirecting?data=${encodeURIComponent(encryptedData)}`
 
-          window.location.href = redirectUrl
+          const newWindow = window.open(redirectUrl, '_blank')
+
+          if (!newWindow) {
+            toast.error('Pop-up blocked. Please allow pop-ups for this site.')
+          }
         })
         .catch(error => {
           toast.error(error?.message || 'Failed to impersonate user')
+          console.error('Impersonation error:', error)
         })
     } catch (error) {
       toast.error('Something went wrong during impersonation!')
+      console.error('Impersonation exception:', error)
     }
   }
 

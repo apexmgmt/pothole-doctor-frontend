@@ -51,7 +51,16 @@ export interface WorkOrder extends Model {
   subtotal: number
   sale_tax: number
   total: number
-  profit: number
+  profit: number // invoice profit, not work order profit
+  total_profit: number // work order profit, not invoice profit
+  total_net_profit: number // total_profit - commissions
+  total_cost: number
+  total_freight_charge: number
+  total_material_cost: number
+  total_labor_cost: number
+  invoice_total: number
+  invoice_subtotal: number
+  invoice_total_tax: number 
   message: string | null
   reason: string | null
   take_off_data: TakeoffData | null

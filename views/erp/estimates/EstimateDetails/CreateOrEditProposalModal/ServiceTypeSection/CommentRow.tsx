@@ -37,7 +37,7 @@ const CommentRow = ({
   return (
     <tr className={cn('border-b border-zinc-800 bg-muted align-top')}>
       <td className='px-2 py-3'>{idx + 1}.</td>
-      <td colSpan={totalColumns - 2} className='px-2 py-1 pr-8'>
+      <td colSpan={totalColumns - 3} className='px-2 py-1 '>
         <div className='flex items-center gap-2'>
           <MessageSquareIcon className='h-4 w-4 text-zinc-400' />
           <Input
@@ -53,6 +53,7 @@ const CommentRow = ({
           />
         </div>
       </td>
+      <td></td>
       <td className='px-2 py-1 flex justify-end gap-1'>
         {!isLocked && (
           <Button size='icon' variant='ghost' onClick={() => removeLine(idx)}>

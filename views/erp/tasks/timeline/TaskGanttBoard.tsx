@@ -529,6 +529,8 @@ export default function TaskGanttBoard({
           }}
           taskId={viewTaskId}
           canEditTask={true}
+          clients={clients}
+          taskTypes={taskTypes}
           onEditTask={handleEditFromTaskView}
         />
       </CardContent>

@@ -412,6 +412,8 @@ const Tasks: React.FC<{
         }}
         taskId={selectedViewTaskId || undefined}
         canEditTask={canEditTask}
+        clients={clients}
+        taskTypes={taskTypes}
         onEditTask={id => {
           handleViewModalClose()
           void handleOpenEditModal(id)

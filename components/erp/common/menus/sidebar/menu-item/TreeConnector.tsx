@@ -6,10 +6,20 @@ const TreeConnector: React.FC<{
   resolvedIcon: ReactNode
 }> = ({ isLastItem, level, resolvedIcon }) => {
   if (level > 0) {
+    const verticalPosition = level > 1 ? '-left-1 w-3!' : '-left-3'
+    const horizontalPosition = level > 1 ? '-left-1 w-3!' : '-left-3'
+
+    if (isLastItem) {
+      return (
+        <span className={`absolute ${verticalPosition} -top-1 h-5 w-4 rounded-bl-xl border-b border-l border-border`} />
+      )
+    }
+
     return (
-      <span
-        className={`absolute bottom-0 -translate-y-4 border-b border-border ${level > 1 ? '-left-1 w-3' : '-left-3 w-4'} ${isLastItem ? 'h-6 border-l rounded-bl-2xl' : 'h-0'}`}
-      />
+      <>
+        <span className={`absolute ${verticalPosition} top-0 h-full w-0 border-l border-border`} />
+        <span className={`absolute ${horizontalPosition} top-4 w-4 border-b border-border`} />
+      </>
     )
   }
 

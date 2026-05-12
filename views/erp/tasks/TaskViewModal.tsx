@@ -8,16 +8,21 @@ import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DatePicker } from '@/components/ui/datePicker'
 import TipTapRichTextEditor from '@/components/erp/common/editor/TipTapRichTextEditor'
 import TaskService from '@/services/api/tasks/tasks.service'
 import TaskCommentService from '@/services/api/tasks/task-comments.service'
-import { ReminderPayload, Task, TaskComment, TaskPayload } from '@/types'
+import { Client, ReminderPayload, Task, TaskComment, TaskPayload, TaskType } from '@/types'
 import { getAuthUser } from '@/utils/auth'
 import { generateFileUrl } from '@/utils/utility'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import TaskDocuments from './documents/TaskDocuments'
+import { format, parse } from 'date-fns'
 
 interface TaskViewModalProps {
   open: boolean
@@ -25,7 +30,23 @@ interface TaskViewModalProps {
   taskId?: string
   canEditTask?: boolean
   onEditTask?: (id: string) => void
+  clients?: Client[]
+  taskTypes?: TaskType[]
+  onTaskStatusChanged?: (taskId: string, newStatus: string, newOrder: number, updatedTask?: Task) => void
 }
+
+type InlineEditableField =
+  | 'name'
+  | 'location'
+  | 'start_date'
+  | 'start_time'
+  | 'end_date'
+  | 'end_time'
+  | 'completed_date'
+  | 'close_comment'
+  | 'client_id'
+  | 'task_type_id'
+  | 'status'
 
 const STATUS_STYLES: Record<
   string,
@@ -97,6 +118,10 @@ const sortCommentsByUpdatedAt = (items: TaskComment[]) => {
   })
 }
 
+const parseDateString = (dateString: string | null | undefined) => {
+  return dateString ? parse(dateString, 'yyyy-MM-dd', new Date()) : null
+}
+
 const buildTaskReminderPayload = (task: Task): ReminderPayload[] => {
   const groupedReminders = new Map<string, ReminderPayload>()
 
@@ -129,7 +154,10 @@ export default function TaskViewModal({
   onOpenChange,
   taskId,
   canEditTask = false,
-  onEditTask
+  onEditTask,
+  clients = [],
+  taskTypes = [],
+  onTaskStatusChanged
 }: TaskViewModalProps) {
   const [task, setTask] = useState<Task | null>(null)
   const [comments, setComments] = useState<TaskComment[]>([])
@@ -139,6 +167,9 @@ export default function TaskViewModal({
   const [isAddingComment, setIsAddingComment] = useState(false)
   const [isEditingDescription, setIsEditingDescription] = useState(false)
   const [isSavingDescription, setIsSavingDescription] = useState(false)
+  const [editingField, setEditingField] = useState<InlineEditableField | null>(null)
+  const [editingValue, setEditingValue] = useState('')
+  const [isSavingInlineField, setIsSavingInlineField] = useState(false)
   const [currentUserId, setCurrentUserId] = useState('')
 
   useEffect(() => {
@@ -159,6 +190,8 @@ export default function TaskViewModal({
       setTask(taskData)
       setDescriptionHtml(taskData?.description || '')
       setIsEditingDescription(false)
+      setEditingField(null)
+      setEditingValue('')
       setComments(sortCommentsByUpdatedAt(taskData?.comments || []))
     } catch (error: any) {
       toast.error(typeof error?.message === 'string' ? error.message : 'Failed to load task details')
@@ -173,7 +206,29 @@ export default function TaskViewModal({
     void loadTaskDetails()
     setCommentHtml('')
     setIsEditingDescription(false)
+    setEditingField(null)
+    setEditingValue('')
   }, [open, taskId])
+
+  const buildTaskPayload = (sourceTask: Task, overrides: Partial<TaskPayload> = {}): TaskPayload => ({
+    name: sourceTask.name || '',
+    client_id: sourceTask.client_id || '',
+    task_type_id: sourceTask.task_type_id || '',
+    employee_ids: sourceTask.employees?.map(employee => employee.id) || [],
+    start_date: sourceTask.start_date || '',
+    start_time: sourceTask.start_time || '',
+    end_date: sourceTask.end_date || '',
+    end_time: sourceTask.end_time || '',
+    sms_reminder: sourceTask.sms_reminder || 0,
+    email_reminder: sourceTask.email_reminder || 0,
+    location: sourceTask.location || '',
+    description: sourceTask.description || '',
+    completed_date: sourceTask.completed_date || '',
+    close_comment: sourceTask.close_comment || '',
+    status: sourceTask.status || '',
+    reminders: buildTaskReminderPayload(sourceTask),
+    ...overrides
+  })
 
   const startEditingDescription = () => {
     if (!task) return
@@ -190,24 +245,7 @@ export default function TaskViewModal({
   const saveDescription = async () => {
     if (!task || !taskId) return
 
-    const payload: TaskPayload = {
-      name: task.name || '',
-      client_id: task.client_id || '',
-      task_type_id: task.task_type_id || '',
-      employee_ids: task.employees?.map(employee => employee.id) || [],
-      start_date: task.start_date || '',
-      start_time: task.start_time || '',
-      end_date: task.end_date || '',
-      end_time: task.end_time || '',
-      sms_reminder: task.sms_reminder || 0,
-      email_reminder: task.email_reminder || 0,
-      location: task.location || '',
-      description: descriptionHtml || '',
-      completed_date: task.completed_date || '',
-      close_comment: task.close_comment || '',
-      status: task.status || '',
-      reminders: buildTaskReminderPayload(task)
-    }
+    const payload = buildTaskPayload(task, { description: descriptionHtml || '' })
 
     setIsSavingDescription(true)
 
@@ -233,6 +271,114 @@ export default function TaskViewModal({
       toast.error(typeof error?.message === 'string' ? error.message : 'Failed to update description')
     } finally {
       setIsSavingDescription(false)
+    }
+  }
+
+  const startInlineEdit = (field: InlineEditableField, value?: string) => {
+    if (!task || !canEditTask || isSavingInlineField) return
+
+    setEditingField(field)
+    setEditingValue(value ?? '')
+  }
+
+  const cancelInlineEdit = () => {
+    setEditingField(null)
+    setEditingValue('')
+  }
+
+  const saveInlineField = async (field: InlineEditableField, explicitValue?: string) => {
+    if (!task || !taskId || isSavingInlineField) return
+
+    const rawValue = explicitValue ?? editingValue
+    const nextValue = field === 'close_comment' ? rawValue : rawValue.trim()
+    const currentValue = `${(task as any)[field] || ''}`
+
+    if (nextValue === currentValue) {
+      cancelInlineEdit()
+
+      return
+    }
+
+    setIsSavingInlineField(true)
+
+    try {
+      if (field === 'status') {
+        const response = await TaskService.updateStatus(taskId, nextValue, 0)
+        const statusUpdate = response?.data as Partial<Task> | undefined
+
+        setTask(prev => {
+          if (!prev) return prev
+
+          return {
+            ...prev,
+            ...statusUpdate,
+            status: nextValue,
+            order: 0,
+            updated_at: statusUpdate?.updated_at || new Date().toISOString()
+          }
+        })
+
+        const mergedTask: Task = {
+          ...task,
+          ...statusUpdate,
+          status: nextValue,
+          order: 0
+        }
+
+        onTaskStatusChanged?.(taskId, nextValue, 0, mergedTask)
+        toast.success('Status updated successfully')
+      } else {
+        const payloadOverrides: Partial<TaskPayload> =
+          field === 'client_id'
+            ? { client_id: nextValue }
+            : field === 'task_type_id'
+              ? { task_type_id: nextValue }
+              : ({ [field]: nextValue } as Partial<TaskPayload>)
+
+        const payload = buildTaskPayload(task, payloadOverrides)
+        const response = await TaskService.update(taskId, payload)
+        const updatedTask = response?.data as Task | undefined
+        const selectedClient = field === 'client_id' ? clients.find(client => client.id === nextValue) : undefined
+
+        const selectedTaskType =
+          field === 'task_type_id' ? taskTypes.find(taskType => taskType.id === nextValue) : undefined
+
+        if (updatedTask?.id) {
+          setTask(prev => {
+            if (!prev) return prev
+
+            return {
+              ...prev,
+              ...updatedTask,
+              ...(field === 'client_id' ? { client_id: nextValue, client: selectedClient || prev.client } : {}),
+              ...(field === 'task_type_id'
+                ? { task_type_id: nextValue, task_type: selectedTaskType || prev.task_type }
+                : {})
+            }
+          })
+        } else {
+          setTask(prev => {
+            if (!prev) return prev
+
+            return {
+              ...prev,
+              [field]: nextValue,
+              ...(field === 'client_id' ? { client_id: nextValue, client: selectedClient || prev.client } : {}),
+              ...(field === 'task_type_id'
+                ? { task_type_id: nextValue, task_type: selectedTaskType || prev.task_type }
+                : {})
+            }
+          })
+        }
+
+        toast.success('Task updated successfully')
+      }
+
+      cancelInlineEdit()
+    } catch (error: any) {
+      toast.error(typeof error?.message === 'string' ? error.message : 'Failed to update task')
+    } finally {
+      setIsSavingInlineField(false)
     }
   }
 
@@ -295,6 +441,7 @@ export default function TaskViewModal({
   }, [task])
 
   const statusMeta = getStatusMeta(task?.status)
+  const addressOptions = task?.client?.addresses || []
 
   return (
     <CommonDialog
@@ -313,7 +460,35 @@ export default function TaskViewModal({
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         <div className='lg:col-span-2 space-y-5'>
           <div className='space-y-2'>
-            <p className='text-xl'>{task?.name || '-'}</p>
+            {editingField === 'name' ? (
+              <Input
+                value={editingValue}
+                autoFocus
+                disabled={isSavingInlineField}
+                onChange={event => setEditingValue(event.target.value)}
+                onBlur={() => {
+                  void saveInlineField('name')
+                }}
+                onKeyDown={event => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault()
+                    void saveInlineField('name')
+                  }
+
+                  if (event.key === 'Escape') {
+                    event.preventDefault()
+                    cancelInlineEdit()
+                  }
+                }}
+              />
+            ) : (
+              <p
+                className={cn('text-xl', canEditTask && 'cursor-pointer')}
+                onClick={() => startInlineEdit('name', task?.name || '')}
+              >
+                {task?.name || '-'}
+              </p>
+            )}
             <Separator />
           </div>
           <div className='space-y-2'>
@@ -451,39 +626,272 @@ export default function TaskViewModal({
 
             <div className='flex items-center gap-3 flex-row '>
               <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Status : </Label>
-              <Badge variant={statusMeta.variant}>{statusMeta.label}</Badge>
+              {editingField === 'status' ? (
+                <div className='flex-1'>
+                  <Select
+                    value={editingValue || task?.status || ''}
+                    onValueChange={value => {
+                      setEditingValue(value)
+                      void saveInlineField('status', value)
+                    }}
+                    disabled={isSavingInlineField}
+                  >
+                    <SelectTrigger className='w-full'>
+                      <SelectValue placeholder='Select status' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='backlog'>Backlog</SelectItem>
+                      <SelectItem value='to-do'>To Do</SelectItem>
+                      <SelectItem value='overdue'>Overdue</SelectItem>
+                      <SelectItem value='in-progress'>In Progress</SelectItem>
+                      <SelectItem value='completed'>Completed</SelectItem>
+                      <SelectItem value='cancelled'>Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <Badge
+                  variant={statusMeta.variant}
+                  className={cn(canEditTask && 'cursor-pointer')}
+                  onClick={() => startInlineEdit('status', task?.status || '')}
+                >
+                  {statusMeta.label}
+                </Badge>
+              )}
             </div>
 
             <div className='flex items-center gap-3 flex-row '>
               <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Task Type : </Label>
-              <p className='text-sm flex-1'>{task?.task_type?.name || '-'}</p>
+              {editingField === 'task_type_id' ? (
+                <div className='flex-1'>
+                  <Select
+                    value={editingValue || task?.task_type_id || ''}
+                    onValueChange={value => {
+                      setEditingValue(value)
+                      void saveInlineField('task_type_id', value)
+                    }}
+                    disabled={isSavingInlineField}
+                  >
+                    <SelectTrigger className='w-full'>
+                      <SelectValue placeholder='Select Task Type' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {taskTypes?.map(taskType => (
+                        <SelectItem key={taskType.id} value={taskType.id}>
+                          {taskType.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <p
+                  className={cn('text-sm flex-1', canEditTask && 'cursor-pointer')}
+                  onClick={() => startInlineEdit('task_type_id', task?.task_type_id || '')}
+                >
+                  {task?.task_type?.name || '-'}
+                </p>
+              )}
             </div>
 
             <div className='flex items-center gap-3 flex-row '>
               <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Customer : </Label>
-              <p className='text-sm flex-1'>
-                {[task?.client?.first_name, task?.client?.last_name].filter(Boolean).join(' ') || '-'}
-              </p>
+              {editingField === 'client_id' ? (
+                <div className='flex-1'>
+                  <Select
+                    value={editingValue || task?.client_id || ''}
+                    onValueChange={value => {
+                      setEditingValue(value)
+                      void saveInlineField('client_id', value)
+                    }}
+                    disabled={isSavingInlineField}
+                  >
+                    <SelectTrigger className='w-full'>
+                      <SelectValue placeholder='Select Customer' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {clients?.map(client => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.first_name} {client.last_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <p
+                  className={cn('text-sm flex-1', canEditTask && 'cursor-pointer')}
+                  onClick={() => startInlineEdit('client_id', task?.client_id || '')}
+                >
+                  {[task?.client?.first_name, task?.client?.last_name].filter(Boolean).join(' ') || '-'}
+                </p>
+              )}
             </div>
 
             <div className='flex items-center gap-3 flex-row '>
               <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Company : </Label>
-              <p className='text-sm flex-1'>{task?.client?.company?.name || '-'}</p>
+              <p
+                className={cn('text-sm flex-1', canEditTask && 'cursor-pointer')}
+                onClick={() => startInlineEdit('client_id', task?.client_id || '')}
+              >
+                {task?.client?.company?.name || '-'}
+              </p>
             </div>
 
             <div className='flex items-start gap-3 flex-row '>
               <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Location : </Label>
-              <p className='text-sm flex-1'>{task?.location || '-'}</p>
+              {editingField === 'location' ? (
+                <div className='flex-1'>
+                  <Select
+                    value={editingValue || task?.location || ''}
+                    onValueChange={value => {
+                      setEditingValue(value)
+                      void saveInlineField('location', value)
+                    }}
+                    disabled={isSavingInlineField || addressOptions.length === 0}
+                  >
+                    <SelectTrigger className='w-full'>
+                      <SelectValue placeholder='Select Address' />
+                    </SelectTrigger>
+                    <SelectContent className='w-(--radix-select-trigger-width) max-w-[calc(100vw-2rem)]'>
+                      {addressOptions.length === 0 ? (
+                        <div className='px-3 py-2 text-muted-foreground text-sm'>No addresses found</div>
+                      ) : (
+                        addressOptions.map(address => {
+                          const value = [address.street_address, address.city?.name, address.state?.name, address.zip_code]
+                            .filter(Boolean)
+                            .join(', ')
+
+                          return (
+                            <SelectItem key={address.id} value={value} className='whitespace-normal wrap-break-words'>
+                              {address.title} - {value}
+                            </SelectItem>
+                          )
+                        })
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <p
+                  className={cn('text-sm flex-1', canEditTask && 'cursor-pointer')}
+                  onClick={() => startInlineEdit('location', task?.location || '')}
+                >
+                  {task?.location || '-'}
+                </p>
+              )}
             </div>
 
             <div className='flex items-center gap-3 flex-row '>
               <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Start : </Label>
-              <p className='text-sm flex-1'>{[task?.start_date, task?.start_time].filter(Boolean).join(' ') || '-'}</p>
+              <div className='flex-1 flex gap-2'>
+                {editingField === 'start_date' ? (
+                  <DatePicker
+                    value={editingValue ? parseDateString(editingValue) : null}
+                    onChange={val => {
+                      const nextDate = val ? format(val, 'yyyy-MM-dd') : ''
+
+                      setEditingValue(nextDate)
+                      void saveInlineField('start_date', nextDate)
+                    }}
+                    placeholder='Select start date'
+                  />
+                ) : (
+                  <p
+                    className={cn('text-sm', canEditTask && 'cursor-pointer')}
+                    onClick={() => startInlineEdit('start_date', task?.start_date || '')}
+                  >
+                    {task?.start_date || '-'}
+                  </p>
+                )}
+                {editingField === 'start_time' ? (
+                  <Input
+                    type='time'
+                    step='1'
+                    value={editingValue}
+                    autoFocus
+                    disabled={isSavingInlineField}
+                    onChange={event => setEditingValue(event.target.value)}
+                    onBlur={() => {
+                      void saveInlineField('start_time')
+                    }}
+                    onKeyDown={event => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault()
+                        void saveInlineField('start_time')
+                      }
+
+                      if (event.key === 'Escape') {
+                        event.preventDefault()
+                        cancelInlineEdit()
+                      }
+                    }}
+                  />
+                ) : (
+                  <p
+                    className={cn('text-sm', canEditTask && 'cursor-pointer')}
+                    onClick={() => startInlineEdit('start_time', task?.start_time || '')}
+                  >
+                    {task?.start_time || '-'}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className='flex items-center gap-3 flex-row '>
               <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>End : </Label>
-              <p className='text-sm flex-1'>{[task?.end_date, task?.end_time].filter(Boolean).join(' ') || '-'}</p>
+              <div className='flex-1 flex gap-2'>
+                {editingField === 'end_date' ? (
+                  <DatePicker
+                    value={editingValue ? parseDateString(editingValue) : null}
+                    onChange={val => {
+                      const nextDate = val ? format(val, 'yyyy-MM-dd') : ''
+
+                      setEditingValue(nextDate)
+                      void saveInlineField('end_date', nextDate)
+                    }}
+                    placeholder='Select end date'
+                  />
+                ) : (
+                  <p
+                    className={cn('text-sm', canEditTask && 'cursor-pointer')}
+                    onClick={() => startInlineEdit('end_date', task?.end_date || '')}
+                  >
+                    {task?.end_date || '-'}
+                  </p>
+                )}
+                {editingField === 'end_time' ? (
+                  <Input
+                    type='time'
+                    step='1'
+                    value={editingValue}
+                    autoFocus
+                    disabled={isSavingInlineField}
+                    onChange={event => setEditingValue(event.target.value)}
+                    onBlur={() => {
+                      void saveInlineField('end_time')
+                    }}
+                    onKeyDown={event => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault()
+                        void saveInlineField('end_time')
+                      }
+
+                      if (event.key === 'Escape') {
+                        event.preventDefault()
+                        cancelInlineEdit()
+                      }
+                    }}
+                  />
+                ) : (
+                  <p
+                    className={cn('text-sm', canEditTask && 'cursor-pointer')}
+                    onClick={() => startInlineEdit('end_time', task?.end_time || '')}
+                  >
+                    {task?.end_time || '-'}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className='flex items-center gap-3 flex-row '>
@@ -520,12 +928,61 @@ export default function TaskViewModal({
 
             <div className='flex items-center gap-3 flex-row '>
               <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Completed Date : </Label>
-              <p className='text-sm flex-1'>{task?.completed_date || '-'}</p>
+              {editingField === 'completed_date' ? (
+                <div className='flex-1'>
+                  <DatePicker
+                    value={editingValue ? parseDateString(editingValue) : null}
+                    onChange={val => {
+                      const nextDate = val ? format(val, 'yyyy-MM-dd') : ''
+
+                      setEditingValue(nextDate)
+                      void saveInlineField('completed_date', nextDate)
+                    }}
+                    placeholder='Select completed date'
+                  />
+                </div>
+              ) : (
+                <p
+                  className={cn('text-sm flex-1', canEditTask && 'cursor-pointer')}
+                  onClick={() => startInlineEdit('completed_date', task?.completed_date || '')}
+                >
+                  {task?.completed_date || '-'}
+                </p>
+              )}
             </div>
 
             <div className='flex items-center gap-3 flex-row '>
               <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Close Comment : </Label>
-              <p className='text-sm flex-1 whitespace-pre-wrap'>{task?.close_comment || '-'}</p>
+              {editingField === 'close_comment' ? (
+                <Textarea
+                  value={editingValue}
+                  autoFocus
+                  disabled={isSavingInlineField}
+                  onChange={event => setEditingValue(event.target.value)}
+                  onBlur={() => {
+                    void saveInlineField('close_comment')
+                  }}
+                  onKeyDown={event => {
+                    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                      event.preventDefault()
+                      void saveInlineField('close_comment')
+                    }
+
+                    if (event.key === 'Escape') {
+                      event.preventDefault()
+                      cancelInlineEdit()
+                    }
+                  }}
+                  className='flex-1 min-h-20'
+                />
+              ) : (
+                <p
+                  className={cn('text-sm flex-1 whitespace-pre-wrap', canEditTask && 'cursor-pointer')}
+                  onClick={() => startInlineEdit('close_comment', task?.close_comment || '')}
+                >
+                  {task?.close_comment || '-'}
+                </p>
+              )}
             </div>
           </div>
 

@@ -31,6 +31,7 @@ import ClientDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEdi
 import ProfitDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ProfitDetailsCard'
 import TotalCalculationCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/TotalCalculationCard'
 import AssignUserCard from './AssignUserCard'
+import { extractServiceLineErrors, hasServiceLineErrors, ServiceLineErrors } from '@/utils/service-line-validation'
 
 const EditWorkOrderServicesView = ({
   workOrder: initialWorkOrder,
@@ -62,6 +63,7 @@ const EditWorkOrderServicesView = ({
   const router = useRouter()
 
   const [isLoading, setIsLoading] = useState(false)
+  const [serviceFieldErrors, setServiceFieldErrors] = useState<ServiceLineErrors>({})
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isWorkOrderDetailsOpen, setIsWorkOrderDetailsOpen] = useState(false)
   const [currentWorkOrder, setCurrentWorkOrder] = useState<WorkOrder>(initialWorkOrder)
@@ -91,9 +93,9 @@ const EditWorkOrderServicesView = ({
 
   const taxRate = currentWorkOrder?.tax_rate ?? 0
 
-  const lockedTotal = Number(currentWorkOrder?.total ?? 0)
-  const lockedSubtotal = Number(currentWorkOrder?.subtotal ?? 0)
-  const lockedSalesTax = Number(currentWorkOrder?.sale_tax ?? 0)
+  const lockedTotal = Number(currentWorkOrder?.invoice_total ?? 0)
+  const lockedSubtotal = Number(currentWorkOrder?.invoice_subtotal ?? 0)
+  const lockedSalesTax = Number(currentWorkOrder?.invoice_total_tax ?? 0)
 
   const allLines = serviceTypeLineItems.flatMap(st => st.lines)
 
@@ -110,8 +112,8 @@ const EditWorkOrderServicesView = ({
     0
   )
 
-  const profit = lockedTotal - currentCost - totalFreight - totalTax
-  const profitPercent = lockedTotal > 0 ? (profit / lockedTotal) * 100 : 0
+  const profit = lockedSubtotal - currentCost - totalFreight
+  const profitPercent = lockedSubtotal > 0 ? (profit / lockedTotal) * 100 : 0
 
   const materialLines = allLines.filter(l => l.type === 'product' || l.type === 'invoice' || l.type === 'expense')
   const materialSubtotal = materialLines.reduce((sum, l) => sum + Number(l.unit_cost ?? 0) * Number(l.qty ?? 0), 0)
@@ -171,7 +173,7 @@ const EditWorkOrderServicesView = ({
             is_sale: item.is_sale,
             tax_type: item.tax_type,
             tax: item.tax,
-            tax_amount: item.tax_amount,
+            tax_amount: item.total_tax,
             total_price: item.total_price,
             note: item.note || '',
             material_job_actions: item.material_job_actions
@@ -198,6 +200,7 @@ const EditWorkOrderServicesView = ({
         }
       ])
       markDirty()
+      setServiceFieldErrors({})
     }
 
     setServiceSelectOpen(false)
@@ -207,6 +210,7 @@ const EditWorkOrderServicesView = ({
     setSelectedServiceType(prev => prev.filter((_, i) => i !== index))
     setServiceTypeLineItems(prev => prev.filter((_, i) => i !== index))
     markDirty()
+    setServiceFieldErrors({})
   }
 
   const handleContractorChange = (index: number, contractorId: string | null, contractorNotes: string | null) => {
@@ -268,6 +272,7 @@ const EditWorkOrderServicesView = ({
     }
 
     setIsLoading(true)
+    setServiceFieldErrors({})
 
     try {
       const hasExistingServices = currentWorkOrder?.services && currentWorkOrder.services.length > 0
@@ -283,6 +288,15 @@ const EditWorkOrderServicesView = ({
 
       return true
     } catch (error: any) {
+      const lineErrors = extractServiceLineErrors(error)
+
+      if (hasServiceLineErrors(lineErrors)) {
+        setServiceFieldErrors(lineErrors)
+        toast.error('Please fix the highlighted service fields and try again.')
+
+        return false
+      }
+
       toast.error(error?.message || 'Failed to update work order services')
 
       return false
@@ -399,7 +413,7 @@ const EditWorkOrderServicesView = ({
           total={materialTotal}
         />
         <TotalCalculationCard title='Labor' subtotal={laborSubtotal} salesTax={laborTax} total={laborTotal} />
-        <TotalCalculationCard title='Total' subtotal={lockedSubtotal} salesTax={lockedSalesTax} total={lockedTotal} />
+        <TotalCalculationCard title='Total' subtotal={currentWorkOrder?.invoice_subtotal ?? 0} salesTax={currentWorkOrder?.invoice_total_tax ?? 0} total={currentWorkOrder?.invoice_total ?? 0} />
       </div>
 
       {/* Service Type Sections */}
@@ -437,6 +451,7 @@ const EditWorkOrderServicesView = ({
                 return copy
               })
               markDirty()
+              setServiceFieldErrors({})
             }}
             productCategories={productCategories}
             uomUnits={uomUnits}
@@ -446,6 +461,8 @@ const EditWorkOrderServicesView = ({
             hidePriceColumns={true}
             showVendor={true}
             showPurchaseQty={true}
+            hideDiscountOption={true}
+            hideTaxOption={true}
             allowedLineTypes={['product', 'labor', 'expense']}
             showContractorOptions={true}
             contractors={partners}
@@ -462,6 +479,7 @@ const EditWorkOrderServicesView = ({
               )
             }
             documentTypeName={currentWorkOrder?.work_order_type?.name ?? null}
+            lineErrors={serviceFieldErrors[idx]}
           />
         ))}
       </div>
