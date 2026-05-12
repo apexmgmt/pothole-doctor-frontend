@@ -11,6 +11,7 @@ import { Column } from '@/types'
 import { formatDate, formatMoney, getStat, getStatObj, startOf, type LocationOption } from '../utils'
 import DateRangePicker from './DateRangePicker'
 import SalesmanReportChart, { type SalesmanReportPayload } from './SalesmanReportChart'
+import SalesmanRankingTable, { type RankingItem } from './SalesmanRankingTable'
 import { InvoiceStatusBadge, SidebarStat, StatPill, TabPlaceholder, ToolbarButton } from './shared'
 
 /** Tenant dashboard tab definitions. */
@@ -48,6 +49,9 @@ export default function TenantDashboardView({ data }: { data: Record<string, unk
   const [salesmanReport, setSalesmanReport] = useState<SalesmanReportPayload | null>(null)
   const [salesmanChartLoading, setSalesmanChartLoading] = useState(false)
   const [salesmanChartError, setSalesmanChartError] = useState<string | null>(null)
+  const [rankingData, setRankingData] = useState<RankingItem[]>([])
+  const [rankingLoading, setRankingLoading] = useState(false)
+  const [rankingError, setRankingError] = useState<string | null>(null)
 
   // Fetch business locations for the filter dropdown once on mount
   useEffect(() => {
@@ -79,6 +83,29 @@ export default function TenantDashboardView({ data }: { data: Record<string, unk
         setSalesmanChartError(String(err?.message ?? 'Failed to load salesman report'))
       })
       .finally(() => setSalesmanChartLoading(false))
+  }, [dateRange, selectedLocations])
+
+  useEffect(() => {
+    if (!dateRange?.from || !dateRange?.to) return
+
+    setRankingLoading(true)
+    setRankingError(null)
+
+    ReportService.getSalesmanRankingReport({
+      starting_date: toApiDate(dateRange.from),
+      end_date: toApiDate(dateRange.to),
+      location_ids: selectedLocations
+    })
+      .then(res => {
+        const rankingArray = (res?.data?.ranking ?? null) as RankingItem[] | null
+
+        setRankingData(rankingArray ?? [])
+      })
+      .catch(err => {
+        setRankingData([])
+        setRankingError(String(err?.message ?? 'Failed to load ranking report'))
+      })
+      .finally(() => setRankingLoading(false))
   }, [dateRange, selectedLocations])
 
   // ── derived values ───────────────────────────────────────────────────────────
@@ -387,10 +414,7 @@ export default function TenantDashboardView({ data }: { data: Record<string, unk
 
         {/* ── Sales Team Rankings ── */}
         {activeTab === 'sales-team' && (
-          <TabPlaceholder
-            title='Sales Team Rankings'
-            description='Individual and team performance rankings will appear here.'
-          />
+          <SalesmanRankingTable ranking={rankingData} loading={rankingLoading} error={rankingError} />
         )}
       </div>
     </div>
