@@ -358,6 +358,68 @@ export default function KanbanBoard({
     setSelectedViewTaskId(null)
   }
 
+  const handleTaskStatusChangedFromView = (
+    taskId: string,
+    newStatus: string,
+    newOrder: number,
+    updatedTask?: Task
+  ) => {
+    setTasks(prevTasks => {
+      const currentTask = prevTasks.find(task => task.id === taskId)
+
+      if (!currentTask) return prevTasks
+
+      const sourceColumnId = currentTask.columnId || currentTask.status || 'backlog'
+      const targetColumnId = newStatus || 'backlog'
+
+      let nextTasks = prevTasks
+        .filter(task => task.id !== taskId)
+        .map(task =>
+          (task.columnId || 'backlog') === targetColumnId ? { ...task, order: (task.order ?? 0) + 1 } : task
+        )
+
+      const movedTask: KanbanTask = {
+        ...currentTask,
+        ...(updatedTask || {}),
+        status: targetColumnId,
+        columnId: targetColumnId,
+        order: newOrder
+      }
+
+      const insertIndex = nextTasks.findIndex(task => (task.columnId || 'backlog') === targetColumnId)
+
+      if (insertIndex === -1) {
+        nextTasks.push(movedTask)
+      } else {
+        nextTasks.splice(insertIndex, 0, movedTask)
+      }
+
+      const affectedColumns = new Set<string>([targetColumnId])
+
+      if (sourceColumnId !== targetColumnId) {
+        affectedColumns.add(sourceColumnId)
+      }
+
+      for (const columnId of affectedColumns) {
+        let order = 0
+
+        for (let index = 0; index < nextTasks.length; index++) {
+          const existingTask = nextTasks[index]
+
+          if ((existingTask.columnId || 'backlog') !== columnId) continue
+
+          if (existingTask.order !== order || existingTask.status !== columnId || existingTask.columnId !== columnId) {
+            nextTasks[index] = { ...existingTask, order, status: columnId, columnId }
+          }
+
+          order += 1
+        }
+      }
+
+      return nextTasks
+    })
+  }
+
   const tasksByColumn = useMemo(() => {
     const grouped: Record<string, KanbanTask[]> = Object.fromEntries(COLUMNS.map(column => [column.id, []]))
 
@@ -628,6 +690,9 @@ export default function KanbanBoard({
         }}
         taskId={selectedViewTaskId || undefined}
         canEditTask={canEditTask}
+        clients={clients}
+        taskTypes={taskTypes}
+        onTaskStatusChanged={handleTaskStatusChangedFromView}
         onEditTask={id => {
           const taskToEdit = tasks.find(task => task.id === id)
 
