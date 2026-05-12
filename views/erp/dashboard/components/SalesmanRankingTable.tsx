@@ -67,8 +67,8 @@ export default function SalesmanRankingTable({ ranking, loading, error }: Salesm
               <th className='px-4 py-3 text-left font-semibold text-muted-foreground'>Rank</th>
               <th className='px-4 py-3 text-left font-semibold text-muted-foreground'>Sales Rep</th>
               <th className='px-4 py-3 text-right font-semibold text-muted-foreground'>Lead Count</th>
-              <th className='px-4 py-3 text-right font-semibold text-muted-foreground'>Quotes Count</th>
-              <th className='px-4 py-3 text-right font-semibold text-muted-foreground'>Converted Quotes</th>
+              <th className='px-4 py-3 text-right font-semibold text-muted-foreground'>Estimate Count</th>
+              <th className='px-4 py-3 text-right font-semibold text-muted-foreground'>Converted Proposal</th>
               <th className='px-4 py-3 text-right font-semibold text-muted-foreground'>Conv. Rate</th>
               <th className='px-4 py-3 text-right font-semibold text-muted-foreground'>Invoices Count</th>
               <th className='px-4 py-3 text-right font-semibold text-muted-foreground'>Total Sales Without Tax</th>
