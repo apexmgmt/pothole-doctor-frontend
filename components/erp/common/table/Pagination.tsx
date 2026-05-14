@@ -124,7 +124,7 @@ const Pagination: React.FC<PaginationProps> = ({
                 variant='ghost'
                 size='sm'
                 className={`${
-                  currentPage === page ? 'bg-light text-bg font-medium hover:bg-light/90' : 'text-gray hover:text-light'
+                  currentPage === page ? 'bg-light text-bg font-medium hover:bg-light/90 hover:text-bg' : 'text-gray hover:text-light'
                 }`}
               >
                 {page}
