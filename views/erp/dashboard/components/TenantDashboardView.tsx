@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { DateRange } from 'react-day-picker'
 import { BarChart2, DollarSign, FileSpreadsheet, FileText, Info, Link2, Search, TrendingUp, Users } from 'lucide-react'
 
@@ -6,13 +7,14 @@ import ReportService from '@/services/api/reports.service'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
 import CommonTable from '@/components/erp/common/table'
 import { MultiSelect } from '@/components/ui/select'
-import { Column } from '@/types'
+import { Invoice } from '@/types'
 
-import { formatDate, formatMoney, getStat, getStatObj, startOf, type LocationOption } from '../utils'
+import { formatMoney, getStat, getStatObj, startOf, type LocationOption } from '../utils'
 import DateRangePicker from './DateRangePicker'
 import SalesmanReportChart, { type SalesmanReportPayload } from './SalesmanReportChart'
 import SalesmanRankingTable, { type RankingItem } from './SalesmanRankingTable'
-import { InvoiceStatusBadge, SidebarStat, StatPill, TabPlaceholder, ToolbarButton } from './shared'
+import { SidebarStat, StatPill, TabPlaceholder, ToolbarButton } from './shared'
+import { getSharedInvoiceColumns } from '../../invoices/sharedInvoiceColumns'
 
 /** Tenant dashboard tab definitions. */
 const TABS = [
@@ -41,6 +43,7 @@ function getDefaultSalesReportRange(): DateRange {
 }
 
 export default function TenantDashboardView({ data }: { data: Record<string, unknown> | null }) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<string>('my-sales')
   const [invoiceSearch, setInvoiceSearch] = useState('')
   const [locations, setLocations] = useState<LocationOption[]>([])
@@ -137,83 +140,49 @@ export default function TenantDashboardView({ data }: { data: Record<string, unk
       })
     : allInvoices
 
-  // ── invoice table columns ───────────────────────────────────────────────────
-  const invoiceColumns: Column[] = [
-    {
-      id: 'status',
-      header: 'Status',
-      sortable: false,
-      cell: row => <InvoiceStatusBadge status={String(row.status ?? row.invoice_status ?? '')} />
-    },
-    {
-      id: 'invoice_number',
-      header: 'Invoice #',
-      sortable: true,
-      cell: row => (
-        <span className='text-blue-400 font-medium'>{String(row.invoice_number ?? row.number ?? row.id ?? '—')}</span>
-      )
-    },
-    {
-      id: 'job_name',
-      header: 'Job Name',
-      sortable: true,
-      cell: row => <span>{String(row.job_name ?? row.jobName ?? '—')}</span>
-    },
-    {
-      id: 'company',
-      header: 'Company',
-      sortable: true,
-      cell: row => <span className='text-blue-400'>{String(row.company ?? row.company_name ?? '—')}</span>
-    },
-    {
-      id: 'customer',
-      header: 'Customer',
-      sortable: true,
-      cell: row => (
-        <span className='text-blue-400'>{String(row.customer_name ?? row.customer ?? row.client_name ?? '—')}</span>
-      )
-    },
-    {
-      id: 'date',
-      header: 'Date',
-      sortable: true,
-      cell: row => <span>{formatDate(String(row.date ?? row.created_at ?? row.invoice_date ?? ''))}</span>
-    },
-    {
-      id: 'sales_rep',
-      header: 'Sales Rep',
-      sortable: true,
-      cell: row => <span>{String(row.sales_rep ?? row.salesRep ?? row.user_name ?? '—')}</span>
-    },
-    {
-      id: 'total_sales',
-      header: 'Total Sales',
-      sortable: true,
-      cell: row => (
-        <span className='font-medium'>
-          {row.total_sales != null
-            ? `$${Number(row.total_sales).toFixed(2)}`
-            : row.amount != null
-              ? `$${Number(row.amount).toFixed(2)}`
-              : '—'}
-        </span>
-      )
-    },
-    {
-      id: 'customer_balance',
-      header: 'Customer Balance',
-      sortable: true,
-      cell: row => (
-        <span>
-          {row.customer_balance != null
-            ? `$${Number(row.customer_balance).toFixed(2)}`
-            : row.balance != null
-              ? `$${Number(row.balance).toFixed(2)}`
-              : '—'}
-        </span>
-      )
-    }
-  ]
+  const normalizedInvoices = useMemo(() => {
+    return invoices.map(inv => {
+      const firstName = String(inv.customer_first_name ?? '').trim()
+      const lastName = String(inv.customer_last_name ?? '').trim()
+      const customerName = String(inv.customer_name ?? inv.customer ?? inv.client_name ?? '').trim()
+      const [fallbackFirstName = '', ...restNameParts] = customerName.split(' ').filter(Boolean)
+      const fallbackLastName = restNameParts.join(' ')
+
+      return {
+        ...inv,
+        issue_date: inv.issue_date ?? inv.invoice_date ?? inv.date ?? inv.created_at,
+        created_at: inv.created_at ?? inv.date ?? inv.invoice_date,
+        client: inv.client ?? {
+          first_name: firstName || fallbackFirstName,
+          last_name: lastName || fallbackLastName,
+          company: {
+            name: String(inv.company ?? inv.company_name ?? '')
+          }
+        },
+        assign_user: inv.assign_user ?? {
+          first_name: String(inv.sales_rep_first_name ?? '').trim(),
+          last_name: String(inv.sales_rep_last_name ?? '').trim() || String(inv.sales_rep ?? inv.user_name ?? '').trim()
+        },
+        title: inv.title ?? inv.job_name,
+        total: inv.total ?? inv.total_sales ?? inv.amount,
+        sale_tax: inv.sale_tax ?? inv.tax,
+        discount: inv.discount ?? 0,
+        location: inv.location ?? {
+          name: String(inv.location_name ?? '')
+        }
+      } as Invoice
+    })
+  }, [invoices])
+
+  const invoiceColumns = useMemo(
+    () =>
+      getSharedInvoiceColumns((row: Invoice) => {
+        if (row?.id) {
+          router.push(`/erp/invoices/${row.id}`)
+        }
+      }),
+    [router]
+  )
 
   return (
     <div className=''>
@@ -372,11 +341,11 @@ export default function TenantDashboardView({ data }: { data: Record<string, unk
               <div className='px-2'>
                 <CommonTable
                   data={{
-                    data: invoices,
-                    per_page: invoices.length || 10,
-                    total: invoices.length,
+                    data: normalizedInvoices,
+                    per_page: normalizedInvoices.length || 10,
+                    total: normalizedInvoices.length,
                     from: 1,
-                    to: invoices.length,
+                    to: normalizedInvoices.length,
                     current_page: 1,
                     last_page: 1
                   }}
