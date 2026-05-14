@@ -10,7 +10,6 @@ type Option = {
 }
 
 type FieldProps = {
-  // common
   type?: 'text' | 'email' | 'password' | 'select' | 'checkbox' | 'radio' | 'textarea'
   label?: string
   name?: string
@@ -151,6 +150,7 @@ const Field: React.FC<FieldProps> = ({
           {...rest}
           required={required}
           disabled={disabled}
+
           //   placeholder={placeholder}
           onBlur={onBlur}
           name={name}
@@ -172,6 +172,7 @@ const Field: React.FC<FieldProps> = ({
         onChange={onChange as React.ChangeEventHandler<HTMLSelectElement>}
         required={required}
         disabled={disabled}
+        
         // placeholder={placeholder}
         onBlur={onBlur}
         name={name}

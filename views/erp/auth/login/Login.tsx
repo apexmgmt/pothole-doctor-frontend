@@ -96,20 +96,19 @@ const Login: React.FC<{ isTenant: boolean }> = ({ isTenant }) => {
       <h1 className='text-light-2 text-2xl font-semibold mb-1'>Welcome to Pothole Doctors!</h1>
       <p className='text-gray mb-6'>Sign in to your account to begin.</p>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <Field
           label='Email'
-          type='email'
+          type='text'
           name='email'
           placeholder='Enter email'
           register={register('email', {
-            required: 'Email is required'
-
-            // pattern: {
-            //   value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
-            //   message: 'Invalid email address'
-            // }
-          })}
+              required: 'Email is required',
+              pattern: {
+                value: /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/, 
+                message: 'Invalid email address'
+              }
+            })}
           error={errors.email}
         />
         <Field
