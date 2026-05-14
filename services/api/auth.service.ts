@@ -8,6 +8,7 @@ import {
   AUTH_ME_TENANT,
   AUTH_REFRESH_TOKEN,
   AUTH_REFRESH_TOKEN_TENANT,
+  FORGOT_PASSWORD,
   IMPERSONATE,
   PROFILE_CHANGE_PASSWORD,
   PROFILE_CHANGE_PASSWORD_TENANT,
@@ -16,7 +17,9 @@ import {
   PROFILE_PICTURE,
   PROFILE_PICTURE_TENANT,
   PROFILE_UPDATE,
-  PROFILE_UPDATE_TENANT
+  PROFILE_UPDATE_TENANT,
+  RESET_PASSWORD,
+  VERIFY_FORGOT_PASSWORD_OTP
 } from '@/constants/api'
 import { isTenant } from '@/utils/utility'
 import CookieService from '../app/cookie.service'
@@ -281,5 +284,95 @@ export default class AuthService {
     // } catch (error) {
     //   throw error
     // }
+  }
+
+  /**
+   * Forgot Password API call
+   * @param email string - user's email
+   * @returns Promise<any>
+   */
+  static forgotPassword = async (email: string) => {
+    const isTenantApi = await isTenant()
+
+    try {
+      const response = await apiInterceptor(API_URL + FORGOT_PASSWORD(isTenantApi), {
+        requiresAuth: false,
+        method: 'POST',
+        body: JSON.stringify({ email })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Verify Forgot Password OTP API call
+   * @param email string - user's email
+   * @param otp string - OTP received by user
+   * @returns Promise<any>
+   */
+  static verifyForgotPasswordOtp = async (email: string, otp: string) => {
+    const isTenantApi = await isTenant()
+
+    try {
+      const response = await apiInterceptor(API_URL + VERIFY_FORGOT_PASSWORD_OTP(isTenantApi), {
+        requiresAuth: false,
+        method: 'POST',
+        body: JSON.stringify({ email, otp })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Reset Password API call
+   * @param email string - user's email
+   * @param password string - new password
+   * @param password_confirmation string - confirmation of the new password
+   * @param reset_token string - token received for password reset
+   * @returns Promise<any>
+   */
+  static resetPassword = async (
+    email: string,
+    password: string,
+    password_confirmation: string,
+    reset_token: string
+  ) => {
+    const isTenantApi = await isTenant()
+
+    try {
+      const response = await apiInterceptor(API_URL + RESET_PASSWORD(isTenantApi), {
+        requiresAuth: false,
+        method: 'POST',
+        body: JSON.stringify({ email, password, password_confirmation, reset_token })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
   }
 }
