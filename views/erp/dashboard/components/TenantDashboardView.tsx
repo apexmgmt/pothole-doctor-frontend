@@ -15,6 +15,8 @@ import SalesmanReportChart, { type SalesmanReportPayload } from './SalesmanRepor
 import SalesmanRankingTable, { type RankingItem } from './SalesmanRankingTable'
 import { SidebarStat, StatPill, TabPlaceholder, ToolbarButton } from './shared'
 import { getSharedInvoiceColumns } from '../../invoices/sharedInvoiceColumns'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 /** Tenant dashboard tab definitions. */
 const TABS = [
@@ -314,29 +316,14 @@ export default function TenantDashboardView({ data }: { data: Record<string, unk
               <div className='px-4 py-3 border-b border-border/20 flex items-center justify-between flex-wrap gap-2.5'>
                 <div className='flex items-center gap-2'>
                   <FileText className='w-4 h-4 text-card-foreground' />
-                  <h2 className='text-sm font-semibold text-card-foreground'>Current Open Invoices</h2>
+                  <h2 className='text-sm font-semibold text-card-foreground'>Latest Invoices</h2>
                 </div>
-                <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-                  <span>My Invoices Only</span>
-                  <span className='border border-border/40 rounded px-1.5 py-0.5'>NO</span>
-                </div>
-              </div>
-              <div className='px-4 py-2 border-b border-border/20 flex items-center gap-2 max-[575px]:flex-wrap [&>button]:max-[575px]:flex-1 [&>button]:max-[575px]:justify-center'>
-                <ToolbarButton icon={<FileSpreadsheet className='w-3.5 h-3.5 text-green-500' />} label='Excel' />
-                <ToolbarButton icon={<FileText className='w-3.5 h-3.5 text-red-500' />} label='PDF' />
-                <ToolbarButton icon={<Link2 className='w-3.5 h-3.5' />} />
-                <div className='flex items-center border border-border/40 rounded overflow-hidden max-[575px]:w-full'>
-                  <input
-                    type='text'
-                    placeholder='Search All Columns'
-                    value={invoiceSearch}
-                    onChange={e => setInvoiceSearch(e.target.value)}
-                    className='bg-transparent text-xs px-3 py-1.5 text-card-foreground placeholder-muted-foreground outline-none w-48 flex-1'
-                  />
-                  <div className='px-2 py-1.5 border-l border-border/40'>
-                    <Search className='w-3.5 h-3.5 text-muted-foreground' />
-                  </div>
-                </div>
+
+                <Button variant='outline' size='sm' className='px-3' asChild>
+                  <Link href='/erp/invoices' prefetch={true}>
+                    View All
+                  </Link>
+                </Button>
               </div>
               <div className='px-2'>
                 <CommonTable
