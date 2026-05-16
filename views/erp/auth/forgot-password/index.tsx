@@ -70,7 +70,7 @@ const ForgotPassword: React.FC = () => {
           </CustomButton>
         </div>
         <div className='mt-3'>
-          <Link href='/erp/login'>
+          <Link href='/erp/login' prefetch={true}>
             <CustomButton type='button' variant='secondary' fullWidth className='!py-2'>
               Login
             </CustomButton>

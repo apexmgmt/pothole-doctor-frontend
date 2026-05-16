@@ -215,6 +215,7 @@ const OTPIndex: React.FC = () => {
       </CustomButton>
       <Link
         href='/erp/login'
+        prefetch={true}
         className='flex justify-center items-center gap-1 text-sm text-gray-400 hover:text-gray-100 mt-2'
       >
         Back to Login
