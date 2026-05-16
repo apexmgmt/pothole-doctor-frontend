@@ -9,6 +9,7 @@ import CustomButton from '@/components/erp/common/CustomButton'
 import Field from '@/components/erp/common/Field'
 import AuthService from '@/services/api/auth.service'
 import { decryptData } from '@/utils/encryption'
+import Link from 'next/link'
 
 type ResetRoutePayload = {
   type: string
@@ -124,7 +125,13 @@ const NewPassIndex: React.FC = () => {
             {isSubmitting ? 'Submitting...' : 'Confirm'}
           </CustomButton>
         </div>
-
+        <Link
+          href='/erp/login'
+          prefetch={true}
+          className='flex justify-center items-center gap-1 text-sm text-gray-400 hover:text-gray-100 mt-2'
+        >
+          Back to Login
+        </Link>
         {apiError && <p className='text-red-500 text-sm mt-3'>{apiError}</p>}
       </form>
     </>

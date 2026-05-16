@@ -191,7 +191,27 @@ const CreateOrEditPartnerModal = ({
         onSuccess?.()
       }
     } catch (error: any) {
-      toast.error(typeof error?.message === 'string' ? error.message : 'Failed to save contractor')
+      if (error?.errors && typeof error.errors === 'object') {
+        Object.entries(error.errors).forEach(([fieldName, errMsg]) => {
+          const message =
+            Array.isArray(errMsg) && errMsg.length > 0
+              ? String(errMsg[0])
+              : typeof errMsg === 'string'
+                ? errMsg
+                : ''
+
+          if (!message) return
+
+          form.setError(fieldName as keyof FormValues, {
+            type: 'server',
+            message
+          })
+        })
+
+        toast.error('Please fix the highlighted fields and try again')
+      } else {
+        toast.error(typeof error?.message === 'string' ? error.message : 'Failed to save contractor')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -246,6 +266,7 @@ const CreateOrEditPartnerModal = ({
   }, [selectedStateId, availableCities, form])
 
   const user_type = form.watch('user_type')
+  const entity = form.watch('entity')
 
   // Clear contractor-specific fields when user_type changes to referral
   useEffect(() => {
@@ -258,6 +279,15 @@ const CreateOrEditPartnerModal = ({
       form.setValue('w9_expiration', null)
     }
   }, [user_type, form])
+
+  // Clear name fields when entity changes to business, clear company_name when entity changes to individual
+  useEffect(() => {
+    if (entity === 'business') {
+      form.clearErrors(['first_name', 'last_name'])
+    } else if (entity === 'individual') {
+      form.clearErrors(['company_name'])
+    }
+  }, [entity, form])
 
   return (
     <CommonDialog
@@ -294,7 +324,12 @@ const CreateOrEditPartnerModal = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mb-4 mr-0.5'>
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'>
-            <BasicInformationFields form={form} businessLocations={businessLocations} companies={companies} />
+            <BasicInformationFields 
+              form={form} 
+              businessLocations={businessLocations} 
+              companies={companies}
+              entity={entity}
+            />
 
             {/* Entity Information section */}
             <EntityInformationFields form={form} />

@@ -119,9 +119,9 @@ const CreateOrEditCommissionModal = ({
         await CommissionService.store(payload)
           .then(response => {
             toast.success('Commission created successfully')
-            form.reset()
             onOpenChange(false)
             onSuccess?.()
+            form.reset()
           })
           .catch(error => {
             toast.error(typeof error.message === 'string' ? error.message : 'Failed to create commission')
@@ -136,6 +136,7 @@ const CreateOrEditCommissionModal = ({
             toast.success('Commission updated successfully')
             onOpenChange(false)
             onSuccess?.()
+            form.reset()
           })
           .catch(error => {
             toast.error(typeof error.message === 'string' ? error.message : 'Failed to update commission')

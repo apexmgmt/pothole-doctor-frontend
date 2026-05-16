@@ -78,10 +78,10 @@ const CreateOrEditTaskTypeModal = ({
         await TaskTypeService.store(payload)
           .then(response => {
             toast.success('Task type created successfully')
-            form.reset()
             onOpenChange(false)
             onSuccess?.()
             setIsLoading(false)
+            form.reset()
           })
           .catch(error => {
             toast.error(typeof error.message === 'string' ? error.message : 'Failed to create task type')

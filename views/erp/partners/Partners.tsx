@@ -118,7 +118,7 @@ const Partners: React.FC<PartnersProps> = ({
         return {
           id: partner.id,
           index: (apiResponse?.from || 1) + index,
-          name: partner.first_name + ' ' + (partner.last_name || ''),
+          name: (partner?.first_name ?? '') + ' ' + (partner?.last_name ?? ''),
           company: userable?.company?.name || '',
           email: partner.email,
           phone: userable?.phone || '',

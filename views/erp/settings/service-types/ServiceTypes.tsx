@@ -196,7 +196,7 @@ const ServiceTypes: React.FC = () => {
                       variant='text'
                     />
                   ),
-                  row.is_editable && canDeleteServiceType && (
+                  canDeleteServiceType && (
                     <DeleteButton
                       tooltip='Delete Service Type'
                       variant='text'

@@ -96,10 +96,10 @@ const CreateOrEditPaymentTermModal = ({
         await PaymentTermsService.store(payload)
           .then(response => {
             toast.success('Payment term created successfully')
-            form.reset()
             onOpenChange(false)
             onSuccess?.()
             setIsLoading(false)
+            form.reset()
           })
           .catch(error => {
             toast.error(typeof error.message === 'string' ? error.message : 'Failed to create payment term')
@@ -117,6 +117,7 @@ const CreateOrEditPaymentTermModal = ({
             onOpenChange(false)
             onSuccess?.()
             setIsLoading(false)
+            form.reset()
           })
           .catch(error => {
             toast.error(typeof error.message === 'string' ? error.message : 'Failed to update payment term')

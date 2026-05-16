@@ -176,8 +176,18 @@ const CreateOrEditBusinessLocation = ({
       formData.append('zip_code', data.zip_code)
 
       if (data.fax) formData.append('fax', data.fax)
-      if (data.is_branding && data.website) formData.append('website', data.website)
-      if (data.review_link) formData.append('review_link', data.review_link)
+
+      if (data.is_branding && data.website) {
+        const websiteUrl = data.website.startsWith('http') ? data.website : `https://${data.website}`
+
+        formData.append('website', websiteUrl)
+      }
+
+      if (data.review_link) {
+        const reviewLinkUrl = data.review_link.startsWith('http') ? data.review_link : `https://${data.review_link}`
+
+        formData.append('review_link', reviewLinkUrl)
+      }
 
       if (data.sales_tax) {
         const salesTaxNumber = parseFloat(data.sales_tax)
@@ -202,8 +212,13 @@ const CreateOrEditBusinessLocation = ({
       router.push('/erp/locations/businesses')
     } catch (error: any) {
       if (error?.errors && typeof error.errors === 'object') {
-        Object.values(error.errors).forEach((errMsg: any) => {
-          errMsg?.map((msg: string) => toast.error(msg))
+        Object.entries(error.errors).forEach(([fieldName, errMsg]: [string, any]) => {
+          if (errMsg && Array.isArray(errMsg) && errMsg.length > 0) {
+            form.setError(fieldName as any, {
+              type: 'manual',
+              message: errMsg[0]
+            })
+          }
         })
       } else {
         toast.error(error?.message || 'Something went wrong')
@@ -279,7 +294,7 @@ const CreateOrEditBusinessLocation = ({
                         Email <span className='text-red-500'>*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input type='email' placeholder='Enter email address' {...field} />
+                        <Input type='text' placeholder='Enter email address' {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -325,6 +340,9 @@ const CreateOrEditBusinessLocation = ({
                     <FormField
                       control={form.control}
                       name='website'
+                      rules={{
+                        pattern: { value: /^(https?:\/\/)?.+\..+/, message: 'Invalid website URL' }
+                      }}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Website</FormLabel>
@@ -428,6 +446,9 @@ const CreateOrEditBusinessLocation = ({
                 <FormField
                   control={form.control}
                   name='review_link'
+                  rules={{
+                    pattern: { value: /^(https?:\/\/)?.+\..+/, message: 'Invalid review link URL' }
+                  }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Review Link</FormLabel>
