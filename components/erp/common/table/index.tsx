@@ -260,7 +260,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
                   const isExpanded = expandableRow?.isExpanded(row) ?? false
 
                   return (
-                    <React.Fragment key={rowIndex}>
+                    <React.Fragment key={rowId ?? rowIndex}>
                       <tr
                         onClick={() => handleRowClick(row)}
                         className={`transition-colors cursor-pointer ${
