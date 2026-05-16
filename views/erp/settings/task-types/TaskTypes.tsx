@@ -21,6 +21,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import TaskTypeService from '@/services/api/settings/task_types.service'
 import CreateOrEditTaskTypeModal from './CreateOrEditTaskTypeModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
+import { hasPermission } from '@/utils/role-permission'
 
 const TaskTypes: React.FC = () => {
   const router = useRouter()
@@ -34,12 +35,21 @@ const TaskTypes: React.FC = () => {
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [canCreate, setCanCreate] = useState<boolean>(false)
+  const [canUpdate, setCanUpdate] = useState<boolean>(false)
+  const [canDelete, setCanDelete] = useState<boolean>(false)
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
 
   // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    dispatch(setPageTitle('Manage Task Types'))
+
+    // Check permissions
+    hasPermission('Create Task Type').then(result => setCanCreate(result))
+    hasPermission('Update Task Type').then(result => setCanUpdate(result))
+    hasPermission('Delete Task Type').then(result => setCanDelete(result))
   }, [])
 
   // Debounced search update
@@ -89,7 +99,6 @@ const TaskTypes: React.FC = () => {
   useEffect(() => {
     fetchData()
     updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Task Types'))
   }, [filterOptions])
 
   // Transform API data to match table format
@@ -167,12 +176,14 @@ const TaskTypes: React.FC = () => {
         <div className='flex items-center justify-end gap-2'>
           <ThreeDotButton
             buttons={[
-              <EditButton
-                tooltip='Edit Task Type Information'
-                onClick={() => handleOpenEditModal(row.id)}
-                variant='text'
-              />,
-              row.is_editable && (
+              canUpdate && (
+                <EditButton
+                  tooltip='Edit Task Type Information'
+                  onClick={() => handleOpenEditModal(row.id)}
+                  variant='text'
+                />
+              ),
+              canDelete && (
                 <DeleteButton tooltip='Delete Task Type' variant='text' onClick={() => handleDeleteTaskType(row.id)} />
               )
             ]}
@@ -233,15 +244,17 @@ const TaskTypes: React.FC = () => {
           </Button>
         )}
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        <span className='hidden min-[480px]:block'>Add Task Type</span>
-      </Button>
+      {canCreate && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Add Task Type</span>
+        </Button>
+      )}
     </div>
   )
 
@@ -268,14 +281,16 @@ const TaskTypes: React.FC = () => {
         />
       </CommonLayout>
 
-      <CreateOrEditTaskTypeModal
-        mode={modalMode}
-        open={isModalOpen}
-        onOpenChange={handleModalClose}
-        taskTypeId={selectedTaskTypeId || undefined}
-        taskTypeDetails={selectedTaskType || undefined}
-        onSuccess={handleSuccess}
-      />
+      {(canCreate || canUpdate) && isModalOpen && (
+        <CreateOrEditTaskTypeModal
+          mode={modalMode}
+          open={isModalOpen}
+          onOpenChange={handleModalClose}
+          taskTypeId={selectedTaskTypeId || undefined}
+          taskTypeDetails={selectedTaskType || undefined}
+          onSuccess={handleSuccess}
+        />
+      )}
     </>
   )
 }
