@@ -246,19 +246,10 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
               hasSubItems: false,
               exactMatch: true,
               permissions: ['Manage Work Order']
-            },
-            {
-              id: 'product-categories',
-              label: 'Categories',
-              href: '/erp/products/categories',
-              icon: <LocateIcon className='h-4 w-4' />,
-              hasSubItems: false,
-              exactMatch: true,
-              permissions: ['Manage Category']
             }
           ],
           exactMatch: false,
-          permissions: ['Manage Category', 'Manage Product', 'Manage Work Order']
+          permissions: ['Manage Product', 'Manage Work Order']
         },
         {
           id: 'non-inventory-products',
@@ -297,6 +288,15 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           ],
           exactMatch: false,
           permissions: ['Manage Product', 'Manage Work Order']
+        },
+        {
+          id: 'product-categories',
+          label: 'Categories',
+          href: '/erp/products/categories',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Category']
         }
       ],
       exactMatch: true,
