@@ -11,6 +11,7 @@ import { encryptData } from '@/utils/encryption'
 import { useAppDispatch } from '@/lib/hooks'
 import { setUserData } from '@/lib/features/auth/authSlice'
 import { appUrl } from '@/utils/utility'
+import Link from 'next/link'
 
 type LoginForm = {
   email: string
@@ -96,19 +97,18 @@ const Login: React.FC<{ isTenant: boolean }> = ({ isTenant }) => {
       <h1 className='text-light-2 text-2xl font-semibold mb-1'>Welcome to Pothole Doctors!</h1>
       <p className='text-gray mb-6'>Sign in to your account to begin.</p>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <Field
           label='Email'
-          type='email'
+          type='text'
           name='email'
           placeholder='Enter email'
           register={register('email', {
-            required: 'Email is required'
-
-            // pattern: {
-            //   value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
-            //   message: 'Invalid email address'
-            // }
+            required: 'Email is required',
+            pattern: {
+              value: /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/,
+              message: 'Invalid email address'
+            }
           })}
           error={errors.email}
         />
@@ -121,6 +121,13 @@ const Login: React.FC<{ isTenant: boolean }> = ({ isTenant }) => {
           error={errors.password}
         />
 
+        {/* Forgot Password */}
+        <Link
+          href='/erp/forgot-password'
+          className='flex items-center gap-1 text-sm text-gray-400 hover:text-gray-100 mt-2'
+        >
+          Forgot Password?
+        </Link>
         <div className='mt-4'>
           <CustomButton type='submit' variant='primary' fullWidth className='py-2!' disabled={isLoading}>
             {isLoading ? 'Logging in...' : 'Login'}

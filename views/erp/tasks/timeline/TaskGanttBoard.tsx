@@ -530,6 +530,7 @@ export default function TaskGanttBoard({
           taskId={viewTaskId}
           canEditTask={true}
           clients={clients}
+          staffs={staffs}
           taskTypes={taskTypes}
           onEditTask={handleEditFromTaskView}
         />

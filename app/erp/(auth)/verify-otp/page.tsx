@@ -4,8 +4,8 @@ import OTPIndex from '@/views/erp/auth/otp'
 
 export const dynamic = 'force-dynamic'
 
-const OTPPage = () => {
+const VerifyOtpPage = () => {
   return <OTPIndex />
 }
 
-export default OTPPage
+export default VerifyOtpPage

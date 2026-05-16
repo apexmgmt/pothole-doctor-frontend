@@ -358,12 +358,7 @@ export default function KanbanBoard({
     setSelectedViewTaskId(null)
   }
 
-  const handleTaskStatusChangedFromView = (
-    taskId: string,
-    newStatus: string,
-    newOrder: number,
-    updatedTask?: Task
-  ) => {
+  const handleTaskStatusChangedFromView = (taskId: string, newStatus: string, newOrder: number, updatedTask?: Task) => {
     setTasks(prevTasks => {
       const currentTask = prevTasks.find(task => task.id === taskId)
 
@@ -691,6 +686,7 @@ export default function KanbanBoard({
         taskId={selectedViewTaskId || undefined}
         canEditTask={canEditTask}
         clients={clients}
+        staffs={staffs}
         taskTypes={taskTypes}
         onTaskStatusChanged={handleTaskStatusChangedFromView}
         onEditTask={id => {

@@ -111,7 +111,7 @@ export const UNAUTHENTICATED_ROUTES: string[] = [
   '/erp/login',
   '/erp/forgot-password',
   '/erp/reset-password',
-  '/erp/otp-verification'
+  '/erp/verify-otp'
 ]
 
 /**

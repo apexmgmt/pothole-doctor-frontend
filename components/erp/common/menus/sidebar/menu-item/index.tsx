@@ -101,6 +101,7 @@ const MenuItem: React.FC<{
         className={`flex items-center gap-3 px-3 py-1 rounded-lg transition-colors ${
           isActive ? 'bg-accent text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
         }`}
+        prefetch={true}
       >
         <TreeConnector isLastItem={isLastItem} level={level} resolvedIcon={resolvedIcon} />
         <span className='font-normal'>{item.label}</span>
