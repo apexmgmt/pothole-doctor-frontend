@@ -13,9 +13,13 @@ interface BasicInformationFieldsProps {
   form: UseFormReturn<any>
   businessLocations: BusinessLocation[]
   companies: Company[]
+  entity?: string
 }
 
-export function BasicInformationFields({ form, businessLocations, companies }: BasicInformationFieldsProps) {
+export function BasicInformationFields({ form, businessLocations, companies, entity }: BasicInformationFieldsProps) {
+  const isIndividual = entity === 'individual'
+  const isBusiness = entity === 'business'
+
   return (
     <div className='sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4'>
       {/* User type Radio Group */}
@@ -83,9 +87,20 @@ export function BasicInformationFields({ form, businessLocations, companies }: B
       <FormField
         control={form.control}
         name='company_name'
+        rules={{
+          validate: value => {
+            if (entity === 'business' && !value?.trim()) {
+              return 'Company name is required'
+            }
+
+            return true
+          }
+        }}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Company Name</FormLabel>
+            <FormLabel>
+              Company Name {isBusiness && <span className='text-red-500'>*</span>}
+            </FormLabel>
             <FormControl>
               <CreatableSelect
                 options={companies.map(company => ({
@@ -109,13 +124,24 @@ export function BasicInformationFields({ form, businessLocations, companies }: B
         control={form.control}
         name='first_name'
         rules={{
-          required: 'First name is required',
-          minLength: { value: 2, message: 'First name must be at least 2 characters' }
+          validate: value => {
+            const normalized = value?.trim() || ''
+
+            if (entity === 'individual' && !normalized) {
+              return 'First name is required'
+            }
+
+            if (normalized && normalized.length < 2) {
+              return 'First name must be at least 2 characters'
+            }
+
+            return true
+          }
         }}
         render={({ field }) => (
           <FormItem>
             <FormLabel>
-              First Name <span className='text-red-500'>*</span>
+              First Name {isIndividual && <span className='text-red-500'>*</span>}
             </FormLabel>
             <FormControl>
               <Input placeholder='Enter first name' {...field} />
@@ -128,9 +154,20 @@ export function BasicInformationFields({ form, businessLocations, companies }: B
       <FormField
         control={form.control}
         name='last_name'
+        rules={{
+          validate: value => {
+            if (entity === 'individual' && !value?.trim()) {
+              return 'Last name is required'
+            }
+
+            return true
+          }
+        }}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Last Name</FormLabel>
+            <FormLabel>
+              Last Name {isIndividual && <span className='text-red-500'>*</span>}
+            </FormLabel>
             <FormControl>
               <Input placeholder='Enter last name' {...field} />
             </FormControl>

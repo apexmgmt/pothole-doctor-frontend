@@ -46,7 +46,7 @@ export default class PartnerService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create contractors')
+        throw errorData
       }
 
       await revalidate('partners')
@@ -94,7 +94,7 @@ export default class PartnerService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update contractors')
+        throw errorData
       }
 
       await revalidate('partners')
