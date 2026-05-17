@@ -25,6 +25,7 @@ import ViewButton from '@/components/erp/common/buttons/ViewButton'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { hasPermission } from '@/utils/role-permission'
+import { formatCurrency } from '@/utils/currency'
 
 const Products: React.FC<ProductsProps> = ({
   productCategories,
@@ -282,10 +283,10 @@ const Products: React.FC<ProductsProps> = ({
     },
     {
       id: 'product_price',
-      header: 'Product Price',
+      header: 'Customer Price',
       cell: (row: Product) => (
         <span className='font-medium'>
-          ${Number(row?.selling_price ?? 0).toFixed(2)}/{row.selling_unit?.name}
+          {row?.selling_price != null ? formatCurrency(row.selling_price) : '—'}/{row.selling_unit?.name}
         </span>
       ),
       sortable: false
