@@ -2,7 +2,11 @@ export interface ProfileDetailsPayload {
   first_name: string
   last_name: string
   phone: string
-  address: string
+  address?: string
+  street_address?: string
+  city_id?: string
+  state_id?: string
+  zip_code?: string
 }
 
 export interface ProfileChangePasswordPayload {

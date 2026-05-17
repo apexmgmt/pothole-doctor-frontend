@@ -1,4 +1,4 @@
-import { CommissionType, Permission, Role } from '.'
+import { City, CommissionType, Company, Permission, Role, State } from '.'
 
 export interface UserAble {
   id: string
@@ -10,6 +10,14 @@ export interface UserAble {
   deleted_at: string | null
   created_at: string
   updated_at: string
+  company_id?: string
+  company?: Company
+  street_address?: string
+  city_id?: string
+  city?: City
+  state_id?: string
+  state?: State
+  zip_code?: string
 }
 
 export interface User {
