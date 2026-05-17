@@ -38,6 +38,7 @@ interface CreateOrEditContactTypeModalProps {
 interface FormValues {
   name: string
   payment_term_id: string
+  material_labor_down_payment: number
   material_down_payment: number
   labor_down_payment: number
 }
@@ -62,6 +63,7 @@ const CreateOrEditContactTypeModal = ({
     defaultValues: {
       name: contactTypeDetails?.name || '',
       payment_term_id: contactTypeDetails?.payment_term_id || '',
+      material_labor_down_payment: contactTypeDetails?.material_labor_down_payment || 0,
       material_down_payment: contactTypeDetails?.material_down_payment || 0,
       labor_down_payment: contactTypeDetails?.labor_down_payment || 0
     }
@@ -73,6 +75,7 @@ const CreateOrEditContactTypeModal = ({
       reset({
         name: contactTypeDetails?.name || '',
         payment_term_id: contactTypeDetails?.payment_term_id || '',
+        material_labor_down_payment: contactTypeDetails?.material_labor_down_payment || 0,
         material_down_payment: contactTypeDetails?.material_down_payment || 0,
         labor_down_payment: contactTypeDetails?.labor_down_payment || 0
       })
@@ -83,6 +86,7 @@ const CreateOrEditContactTypeModal = ({
     const payload: ContactTypePayload = {
       name: values.name,
       payment_term_id: values.payment_term_id,
+      material_labor_down_payment: Number(values.material_labor_down_payment),
       material_down_payment: Number(values.material_down_payment),
       labor_down_payment: Number(values.labor_down_payment)
     }
@@ -113,6 +117,7 @@ const CreateOrEditContactTypeModal = ({
     reset({
       name: contactTypeDetails?.name || '',
       payment_term_id: contactTypeDetails?.payment_term_id || '',
+      material_labor_down_payment: contactTypeDetails?.material_labor_down_payment || 0,
       material_down_payment: contactTypeDetails?.material_down_payment || 0,
       labor_down_payment: contactTypeDetails?.labor_down_payment || 0
     })
@@ -191,6 +196,43 @@ const CreateOrEditContactTypeModal = ({
           />
           {errors.payment_term_id && (
             <p className='text-sm font-medium text-destructive mt-1'>{errors.payment_term_id.message}</p>
+          )}
+        </div>
+
+        {/* Contact Type material labor down payment Field */}
+        <div>
+          <Label htmlFor='material_labor_down_payment' className='mb-1'>
+            Material & Labor Down Payment <span className='text-red-500'>*</span>
+          </Label>
+          <Controller
+            name='material_labor_down_payment'
+            control={control}
+            rules={{
+              required: 'Material & labor down payment is required',
+              min: {
+                value: 0,
+                message: 'Material & labor down payment must be at least 0'
+              },
+              max: {
+                value: 100,
+                message: 'Material & labor down payment must not exceed 100'
+              }
+            }}
+            render={({ field }) => (
+              <Input
+                {...field}
+                id='material_labor_down_payment'
+                type='number'
+                min={0}
+                max={100}
+                step={0.01}
+                placeholder='Enter material & labor down payment'
+                onChange={e => field.onChange(Number(e.target.value))}
+              />
+            )}
+          />
+          {errors.material_labor_down_payment && (
+            <p className='text-sm font-medium text-destructive mt-1'>{errors.material_labor_down_payment.message}</p>
           )}
         </div>
 

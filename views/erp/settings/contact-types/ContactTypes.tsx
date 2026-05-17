@@ -109,8 +109,9 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
           index: (apiResponse?.from || 1) + index,
           name: contactType.name,
           payment_term: contactType?.payment_term?.name || 'N/A',
-          material_down_payment: `${contactType.material_down_payment}%`,
-          labor_down_payment: `${contactType.labor_down_payment}%`
+          material_labor_down_payment: `${contactType.material_labor_down_payment ?? 0}%`,
+          material_down_payment: `${contactType.material_down_payment ?? 0}%`,
+          labor_down_payment: `${contactType.labor_down_payment ?? 0}%`
         }
       })
     : []
@@ -167,6 +168,12 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
       id: 'payment_term',
       header: 'Payment Term',
       cell: row => <span className='font-medium'>{row.payment_term}</span>,
+      sortable: true
+    },
+    {
+      id: 'material_labor_down_payment',
+      header: 'Material & Labor Down Payment',
+      cell: row => <span className='font-medium'>{row.material_labor_down_payment}</span>,
       sortable: true
     },
     {
