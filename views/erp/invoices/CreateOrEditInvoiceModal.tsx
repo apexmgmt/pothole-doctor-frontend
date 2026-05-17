@@ -237,6 +237,7 @@ const CreateOrEditInvoiceModal = ({
             onClick={form.handleSubmit(onSubmit)}
             disabled={form.formState.isSubmitting}
             className='flex-1'
+            
           >
             {form.formState.isSubmitting
               ? 'Saving...'

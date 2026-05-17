@@ -134,6 +134,14 @@ const CreateOrEditProposalModal = ({
     return sum + unitPrice * line.qty
   }, 0)
 
+  const totalCost = allLines.reduce((sum, line) => {
+    if (line.type !== 'deduction' && line.type !== 'comment') {
+      return sum + (line.unit_cost * line.qty) + (line.freight_charge ?? 0)
+    }
+    
+    return sum
+  }, 0)
+
   const profitAmount = allLines.reduce((sum, line) => {
     if (line.type === 'deduction') {
       return sum - (line.total_price ?? 0) // Deduction reduces profit

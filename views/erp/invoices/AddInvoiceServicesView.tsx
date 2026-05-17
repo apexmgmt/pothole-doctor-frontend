@@ -98,6 +98,14 @@ const AddInvoiceServicesView = ({
     return sum + (unitPrice - line.unit_cost) * line.qty - (line.freight_charge ?? 0)
   }, 0)
 
+  const totalCost = allLines.reduce((sum, line) => {
+    if (line.type !== 'deduction' && line.type !== 'comment') {
+      return sum + (Number(line.unit_cost) * Number(line.qty)) + (Number(line.freight_charge) ?? 0)
+    }
+    
+    return sum
+  }, 0)
+
   const profitPercent = totalSales > 0 ? (profitAmount / totalSales) * 100 : 0
 
   const salesTax = allLines
@@ -474,7 +482,7 @@ const AddInvoiceServicesView = ({
           totalDiscount={totalDiscount}
           onApplyDiscount={handleApplyDiscount}
         />
-        <ProfitDetailsCard profitPercent={profitPercent} profitAmount={profitAmount} totalProfit={profitAmount} />
+        <ProfitDetailsCard profitPercent={profitPercent} profitAmount={profitAmount} totalProfit={profitAmount} totalCost={totalCost} />
         <TotalCalculationCard subtotal={totalSales} salesTax={salesTax} total={total} />
       </div>
 

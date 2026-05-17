@@ -30,7 +30,7 @@ import AddServiceButton from '@/views/erp/estimates/EstimateDetails/CreateOrEdit
 import ClientDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ClientDetailsCard'
 import ProfitDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ProfitDetailsCard'
 import TotalCalculationCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/TotalCalculationCard'
-import AssignUserCard from './AssignUserCard'
+import AssignUserCard, { calculateRuleCommission } from './AssignUserCard'
 import { extractServiceLineErrors, hasServiceLineErrors, ServiceLineErrors } from '@/utils/service-line-validation'
 
 const EditWorkOrderServicesView = ({
@@ -114,6 +114,15 @@ const EditWorkOrderServicesView = ({
 
   const profit = lockedSubtotal - currentCost - totalFreight
   const profitPercent = lockedSubtotal > 0 ? (profit / lockedTotal) * 100 : 0
+
+  const commissions = currentWorkOrder?.assign_user?.userable?.commission_type?.commissions ?? []
+  const isCustomCommissionActive = customCommission !== 0
+
+  const totalCommission = isCustomCommissionActive
+    ? Number(currentWorkOrder?.commissions ?? 0)
+    : calculateRuleCommission(commissions, profit, lockedTotal)
+
+  const totalNetProfit = profit - totalCommission
 
   const materialLines = allLines.filter(l => l.type === 'product' || l.type === 'invoice' || l.type === 'expense')
   const materialSubtotal = materialLines.reduce((sum, l) => sum + Number(l.unit_cost ?? 0) * Number(l.qty ?? 0), 0)
@@ -405,7 +414,12 @@ const EditWorkOrderServicesView = ({
             setIsCustomCommissionPercentage(isPercentage)
           }}
         />
-        <ProfitDetailsCard profitPercent={profitPercent} profitAmount={profit} totalProfit={profit} />
+        <ProfitDetailsCard
+          profitPercent={profitPercent}
+          profitAmount={profit}
+          totalProfit={profit}
+          totalNetProfit={totalNetProfit}
+        />
         <TotalCalculationCard
           title='Material'
           subtotal={materialSubtotal}
