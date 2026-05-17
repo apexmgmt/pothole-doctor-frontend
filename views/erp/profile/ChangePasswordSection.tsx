@@ -53,12 +53,6 @@ const ChangePasswordSection = () => {
       await AuthService.updatePassword(payload)
       toast.success('Password updated successfully')
       form.reset()
-      CookieService.delete('access_token')
-      CookieService.delete('refresh_token')
-      CookieService.delete('token_type')
-      CookieService.delete('user')
-      dispatch(logoutUserSuccess())
-      router.push('/login')
     } catch (error: any) {
       toast.error(error?.message || 'Failed to update password')
     } finally {
