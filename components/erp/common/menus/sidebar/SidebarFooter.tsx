@@ -53,7 +53,7 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
 
   const firstName = effectiveUser.first_name || ''
   const lastName = effectiveUser.last_name || ''
-  const fullName = effectiveUser.name || [firstName, lastName].filter(Boolean).join(' ') || 'User'
+  const fullName = effectiveUser.name || [firstName, lastName].filter(Boolean).join(' ') || (effectiveUser?.user_type === 'contractor' || effectiveUser?.user_type === 'referral' ? effectiveUser?.userable?.company?.name : undefined) || 'User'
 
   const email = effectiveUser.email || '---'
 

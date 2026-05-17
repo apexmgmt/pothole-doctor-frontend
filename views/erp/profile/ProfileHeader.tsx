@@ -28,7 +28,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ userData }) => {
 
   const firstName = userData?.first_name || ''
   const lastName = userData?.last_name || ''
-  const fullName = userData?.name || [firstName, lastName].filter(Boolean).join(' ') || 'User'
+  const fullName = userData?.name || [firstName, lastName].filter(Boolean).join(' ') || (userData?.user_type === 'contractor' || userData?.user_type === 'referral' ? userData?.userable?.company?.name : undefined) || 'User'
   const email = userData?.email || '---'
 
   const profilePicture = userData?.profile_picture

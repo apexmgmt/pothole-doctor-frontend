@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import CookieService from '@/services/app/cookie.service'
 import { decryptData } from '@/utils/encryption'
-import { User } from '@/types'
+import { CountryWithStates, User } from '@/types'
 import ProfileHeader from './ProfileHeader'
 import ProfileTabs from './ProfileTabs'
 import GeneralTab from './GeneralTab'
@@ -16,9 +16,10 @@ import { GenaralTabIcon, KeyIcon, SecurityIcon } from '@/public/icons'
 
 interface ProfileProps {
   userData?: User | any
+  countryWithStates?: CountryWithStates[]
 }
 
-const Profile: React.FC<ProfileProps> = ({ userData: propUser }) => {
+const Profile: React.FC<ProfileProps> = ({ userData: propUser, countryWithStates = [] }) => {
   const dispatch = useAppDispatch()
   const reduxUser = useAppSelector(state => state.auth.user) as User | null
   const [activeTab, setActiveTab] = useState<string>('general')
@@ -67,11 +68,11 @@ const Profile: React.FC<ProfileProps> = ({ userData: propUser }) => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'general':
-        return <GeneralTab userData={userData} />
+        return <GeneralTab userData={userData} countryWithStates={countryWithStates} />
       case 'security':
         return <SecurityTab />
       default:
-        return <GeneralTab userData={userData} />
+        return <GeneralTab userData={userData} countryWithStates={countryWithStates} />
     }
   }
 

@@ -7,6 +7,7 @@ export interface ContactType {
   payment_term?: PaymentTerm
   material_down_payment: number
   labor_down_payment: number
+  material_labor_down_payment: number
   created_at: string
   updated_at: string
 }
@@ -14,6 +15,7 @@ export interface ContactType {
 export interface ContactTypePayload {
   name: string
   payment_term_id: string
+  material_labor_down_payment: number
   material_down_payment: number
   labor_down_payment: number
 }

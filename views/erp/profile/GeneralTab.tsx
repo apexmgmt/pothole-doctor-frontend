@@ -3,15 +3,16 @@
 import React, { useState } from 'react'
 
 import EditButton from '@/components/erp/common/buttons/EditButton'
-import { User } from '@/types'
+import { CountryWithStates, User } from '@/types'
 import { useAppSelector } from '@/lib/hooks'
 import UpdateProfileModal from './UpdateProfileModal'
 
 interface GeneralTabProps {
   userData: User | null
+  countryWithStates?: CountryWithStates[]
 }
 
-const GeneralTab: React.FC<GeneralTabProps> = ({ userData }) => {
+const GeneralTab: React.FC<GeneralTabProps> = ({ userData, countryWithStates = [] }) => {
   const user: User = useAppSelector(state => state.auth.user) as User
   const currentUser = user || userData
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -45,6 +46,14 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ userData }) => {
               <p className='text-light'>{currentUser?.last_name || ''}</p>
             </div>
           </div>
+          {currentUser?.user_type === 'contractor' || currentUser?.user_type === 'referral' ? (
+            <div className='grid grid-cols-1 gap-6'>
+              <div className='flex items-center gap-2.5 flex-row'>
+                <label className='text-xs text-gray uppercase block w-25'>Company :</label>
+                <p className='text-light'>{currentUser?.userable?.company?.name || ''}</p>
+              </div>
+            </div>
+          ) : null}
           <div className='grid grid-cols-1 2xl:grid-cols-2 gap-6'>
             <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
               <label className='text-xs text-gray uppercase block w-25'>Email : </label>
@@ -55,15 +64,31 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ userData }) => {
               <p className='text-light'>{currentUser?.userable?.phone || ' - '}</p>
             </div>
           </div>
-          <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
-            <label className='text-xs text-gray uppercase block w-25'>Address : </label>
-            <p className='text-light'>{currentUser?.userable?.address || ' - '}</p>
-          </div>
+          {currentUser?.user_type !== 'contractor' && currentUser?.user_type !== 'referral' ? (
+            <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
+              <label className='text-xs text-gray uppercase block w-25'>Address : </label>
+              <p className='text-light'>{currentUser?.userable?.address || ' - '}</p>
+            </div>
+          ) : (
+            <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
+              <label className='text-xs text-gray uppercase block w-25'>Address : </label>
+              <p className='text-light'>
+                {[
+                  currentUser?.userable?.street_address,
+                  currentUser?.userable?.city?.name,
+                  currentUser?.userable?.state?.name,
+                  currentUser?.userable?.zip_code
+                ]
+                  .filter(Boolean)
+                  .join(', ') || ' - '}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Update Profile Modal */}
-      {currentUser && <UpdateProfileModal open={isModalOpen} onOpenChange={setIsModalOpen} userData={currentUser} />}
+      {currentUser && <UpdateProfileModal open={isModalOpen} onOpenChange={setIsModalOpen} userData={currentUser} countryWithStates={countryWithStates} />}
     </div>
   )
 }

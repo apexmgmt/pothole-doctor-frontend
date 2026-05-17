@@ -201,6 +201,16 @@ const CreateOrEditInvoiceModal = ({
     form.setValue('location_id', selectedClient?.location_id ?? '')
   }, [form.watch('client_id')])
 
+  // Auto-populate tax_rate from selected business location's sales_tax if tax_rate is empty
+  useEffect(() => {
+    const selectedLocation = businessLocations.find(loc => loc.id === form.watch('location_id'))
+    const currentTaxRate = form.watch('tax_rate')
+
+    if (selectedLocation && selectedLocation.sales_tax && currentTaxRate === 0) {
+      form.setValue('tax_rate', selectedLocation.sales_tax)
+    }
+  }, [form.watch('location_id'), businessLocations])
+
   return (
     <CommonDialog
       isLoading={form.formState.isSubmitting}
