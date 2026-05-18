@@ -24,6 +24,7 @@ type FormValues = {
   email: string
   phone: string
   address: string
+  company_name: string
 }
 
 const defaultValues: FormValues = {
@@ -31,7 +32,8 @@ const defaultValues: FormValues = {
   last_name: '',
   email: '',
   phone: '',
-  address: ''
+  address: '',
+  company_name: ''
 }
 
 const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails }) => {
@@ -44,7 +46,8 @@ const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails })
     last_name: companyDetails.last_name || '',
     email: companyDetails.email || '',
     phone: companyDetails.userable?.phone || '',
-    address: companyDetails.userable?.address || ''
+    address: companyDetails.userable?.address || '',
+    company_name: companyDetails.userable?.company_name || ''
   }
 
   const form = useForm<FormValues>({ defaultValues: mappedDefaults, mode: 'onSubmit' })
@@ -93,6 +96,24 @@ const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails })
           <h2 className='text-xl font-semibold text-light'>Edit Company</h2>
 
           <div className='grid grid-cols-1 sm:grid-cols-2! gap-4 lg:gap-6'>
+            <FormField
+              control={control}
+              name='company_name'
+              rules={{ required: 'Required' }}
+              render={({ field }) => (
+                <FormItem className='col-span-2'>
+                  <FormLabel>Company Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='Company Name'
+                      className='bg-bg-3 border-border text-light placeholder:text-gray'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={control}
               name='first_name'
@@ -203,13 +224,13 @@ const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails })
             <Button
               type='button'
               variant='outline'
-
-              // onClick={onCancel}
               disabled={isLoading}
               className='flex-1 border-border text-light hover:bg-bg-3 disabled:opacity-50'
               asChild
             >
-              <Link href='/erp/companies' prefetch>Cancel</Link>
+              <Link href='/erp/companies' prefetch>
+                Cancel
+              </Link>
             </Button>
           </div>
         </form>

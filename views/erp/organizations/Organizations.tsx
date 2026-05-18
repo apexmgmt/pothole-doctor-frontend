@@ -173,7 +173,7 @@ const Organizations: React.FC = () => {
         index: (apiResponse?.from || 1) + index,
         name: `${company.first_name || ''} ${company.last_name || ''}`.trim(),
         phone: company.userable?.phone || 'N/A',
-        company: company.domain?.domain || 'N/A',
+        company: company.userable?.company_name || 'N/A',
         jobAddress: company.userable?.address || 'N/A',
         email: company.email,
         status: company.status
@@ -235,7 +235,7 @@ const Organizations: React.FC = () => {
       sortable: true
     },
     {
-      id: 'domain',
+      id: 'company_name',
       header: 'Company',
       cell: row => <span>{row.company}</span>,
       sortable: false
