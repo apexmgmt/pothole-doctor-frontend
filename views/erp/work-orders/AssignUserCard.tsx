@@ -64,7 +64,7 @@ function checkFilterType(commission: Commission, compareValue: number, minAmount
   }
 }
 
-function calculateRuleCommission(commissions: Commission[], profitAmount: number, totalAmount: number): number {
+export function calculateRuleCommission(commissions: Commission[], profitAmount: number, totalAmount: number): number {
   const eligible = [...commissions]
     .filter(c => c.per === 'per-job')
     .sort((a, b) => (filterPriority[a.filter_type] ?? 99) - (filterPriority[b.filter_type] ?? 99))

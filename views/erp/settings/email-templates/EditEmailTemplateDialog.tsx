@@ -69,7 +69,13 @@ export default function EditEmailTemplateDialog({
     { label: 'Task Name', value: '{{TaskName}}' },
     { label: 'Date Time', value: '{{DateTime}}' },
     { label: 'Company Name', value: '{{CompanyName}}' },
-    { label: 'Phone Number', value: '{{PhoneNumber}}' }
+    { label: 'Phone Number', value: '{{PhoneNumber}}' },
+    { label: 'Quote URL', value: '{{QuoteURL}}' },
+    { label: 'Invoice URL', value: '{{InvoiceURL}}' },
+    { label: 'Salesman', value: '{{Salesman}}' },
+    { label: 'Salesman Phone Number', value: '{{SalesmanPhoneNumber}}' },
+    { label: 'Salesman Email', value: '{{SalesmanEmail}}' },
+
   ]
 
   const insertPlaceholder = (placeholder: string) => {

@@ -21,6 +21,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@
 import { PackageIcon, WarehouseIcon, SlidersHorizontalIcon } from 'lucide-react'
 import ProductInventorySection from './ProductInventorySection'
 import InventoryAdjustmentSection from './InventoryAdjustmentSection'
+import { formatCurrency } from '@/utils/currency'
 
 const ProductStock: React.FC<ProductsProps> = ({
   productCategories,
@@ -242,7 +243,7 @@ const ProductStock: React.FC<ProductsProps> = ({
       id: 'company_cost',
       header: 'Company Cost',
       cell: (row: Product) => (
-        <span className='font-medium'>{row.product_cost != null ? Number(row.product_cost).toFixed(2) : '—'}</span>
+        <span className='font-medium'>{row.product_cost != null ? formatCurrency(row.product_cost) : '—'}</span>
       ),
       sortable: false
     },
@@ -252,9 +253,9 @@ const ProductStock: React.FC<ProductsProps> = ({
       cell: (row: Product) => (
         <span className='font-medium'>
           {row.work_order_cost != null
-            ? Number(row.work_order_cost).toFixed(2)
+            ? formatCurrency(row.work_order_cost)
             : row.product_cost != null
-              ? Number(row.product_cost).toFixed(2)
+              ? formatCurrency(row.product_cost)
               : '—'}
         </span>
       ),

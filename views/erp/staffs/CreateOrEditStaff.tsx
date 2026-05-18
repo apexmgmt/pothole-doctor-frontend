@@ -8,6 +8,8 @@ import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
+import { Eye, EyeOff } from 'lucide-react'
+
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -70,12 +72,20 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
   const { isSubmitting } = formState
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedRole, setSelectedRole] = useState<string>('')
+  const [showPassword, setShowPassword] = useState<boolean>(false)
 
   const selectedRoles = watch('roles') || []
 
   useEffect(() => {
     dispatch(setPageTitle('Manage Staff'))
   }, [dispatch])
+
+  // Auto-sync password_confirmation with password
+  useEffect(() => {
+    const password = watch('password')
+
+    form.setValue('password_confirmation', password)
+  }, [watch('password'), form])
 
   // Update form when staffData changes
   useEffect(() => {
@@ -298,47 +308,53 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                     {mode === 'edit' ? '(Leave blank to keep current)' : <span className='text-red-500'>*</span>}
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      type='password'
-                      placeholder='Password'
-                      className='bg-bg-3 border-border text-light placeholder:text-gray'
-                      {...field}
-                    />
+                    <div className='relative'>
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder='Password'
+                        className='bg-bg-3 border-border text-light placeholder:text-gray pr-10'
+                        {...field}
+                      />
+                      <button
+                        type='button'
+                        onClick={() => setShowPassword(!showPassword)}
+                        className='absolute right-3 top-1/2 -translate-y-1/2 text-gray hover:text-light cursor-pointer'
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={control}
-              name='password_confirmation'
-              rules={{
-                required: mode === 'create' ? 'Required' : false,
-                validate: (value: string) => {
-                  const password = getValues('password')
-
-                  if (password && value !== password) return 'Does not match'
-
-                  return true
-                }
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirm Password {mode === 'create' && <span className='text-red-500'>*</span>}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='password'
-                      placeholder='Confirm password'
-                      className='bg-bg-3 border-border text-light placeholder:text-gray'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+            {/* Commission Type Field */}
+            {isTenant && (
+              <FormField
+                control={control}
+                name='commission_type_id'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Commission Type</FormLabel>
+                    <FormControl>
+                      <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                        <SelectTrigger className='bg-bg-3 border-border text-light w-full'>
+                          <SelectValue placeholder='Select commission type' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {commissionTypes.map(ct => (
+                            <SelectItem key={ct.id} value={ct.id}>
+                              {ct.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={control}
               name='address'
@@ -360,35 +376,6 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                 </FormItem>
               )}
             />
-
-            {/* Commission Type Field */}
-            {isTenant && (
-              <FormField
-                control={control}
-                name='commission_type_id'
-                render={({ field }) => (
-                  <FormItem className='sm:col-span-2'>
-                    <FormLabel>Commission Type</FormLabel>
-                    <FormControl>
-                      <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                        <SelectTrigger className='bg-bg-3 border-border text-light w-full'>
-                          <SelectValue placeholder='Select commission type' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {commissionTypes.map(ct => (
-                            <SelectItem key={ct.id} value={ct.id}>
-                              {ct.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
             {/* Roles Field */}
             <FormField
               control={control}
