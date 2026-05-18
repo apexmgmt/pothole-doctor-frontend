@@ -19,6 +19,8 @@ import { UOMFields } from './UOMFields'
 import { PricingFields } from './PricingFields'
 import { AdditionalInfoFields } from './AdditionalInfoFields'
 import { ProductGallerySection } from './ProductGallerySection'
+import { QrCodeSection } from './QrCodeSection'
+import { BarCodeSection } from './BarCodeSection'
 
 interface CreateEditViewProductModalProps extends ProductsProps {
   mode?: 'create' | 'edit' | 'view'
@@ -423,6 +425,8 @@ const CreateEditViewProductModal = ({
             {/* Gallery Section - Only show in edit/view mode */}
             {mode !== 'create' && productId && (
               <div className='space-y-4'>
+                <QrCodeSection qrCodePath={productDetails?.qr_code} />
+                <BarCodeSection barCodePath={productDetails?.bar_code} />
                 <h3 className='text-lg font-semibold'>Product Gallery</h3>
                 <ProductGallerySection
                   productId={productId}
