@@ -223,7 +223,7 @@ const Organizations: React.FC = () => {
       sortable: false
     },
     {
-      id: 'name',
+      id: 'first_name',
       header: 'Name',
       cell: row => <span className='font-medium'>{row.name}</span>,
       sortable: true
@@ -235,16 +235,16 @@ const Organizations: React.FC = () => {
       sortable: true
     },
     {
-      id: 'company',
+      id: 'domain',
       header: 'Company',
       cell: row => <span>{row.company}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'jobAddress',
       header: 'Job Address',
       cell: row => <span className='max-w-xs truncate'>{row.jobAddress}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'email',
