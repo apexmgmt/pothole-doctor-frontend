@@ -153,7 +153,7 @@ const Staffs: React.FC = () => {
       sortable: false
     },
     {
-      id: 'name',
+      id: 'first_name',
       header: 'Name',
       cell: row => <span className='font-medium'>{row.name}</span>,
       sortable: true
@@ -168,13 +168,13 @@ const Staffs: React.FC = () => {
       id: 'phone',
       header: 'Phone',
       cell: row => <span>{row.phone}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'jobAddress',
       header: 'Job Address',
       cell: row => <span className='max-w-xs truncate'>{row.jobAddress}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'actions',

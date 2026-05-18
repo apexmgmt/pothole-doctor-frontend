@@ -112,17 +112,21 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({ companyData, 
           <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Company Information</h5>
           <div className='space-y-3'>
             <div className='flex items-start gap-2.5'>
+              <label className='text-xs text-gray uppercase min-w-25'>Company Name : </label>
+              <p className='text-light flex-1'>{companyData.userable?.company_name || 'N/A'}</p>
+            </div>
+            <div className='flex items-start gap-2.5'>
               <label className='text-xs text-gray uppercase min-w-25'>Domain : </label>
               <p className='text-light flex-1 break-all'>{appUrl(companyData.domain?.domain) || 'N/A'}</p>
             </div>
-            <div className='flex items-start gap-2.5'>
+            {/* <div className='flex items-start gap-2.5'>
               <label className='text-xs text-gray uppercase min-w-25'>Guard : </label>
               <p className='text-light flex-1'>{companyData.guard || 'N/A'}</p>
             </div>
             <div className='flex items-start gap-2.5'>
               <label className='text-xs text-gray uppercase min-w-25'>Tenant ID : </label>
-              <p className='text-light flex-1 text-xs break-all'>{companyData.tenant_id || 'N/A'}</p>
-            </div>
+              <p className='text-light flex-1 text-xs break-all'>{companyData.tenant_id || 'N/A'}</p> 
+            </div>*/}
             {/* <div className='flex items-center gap-2'>
               <label className='text-xs text-gray uppercase'>Status</label>
               <OrganizationStatusSwitch

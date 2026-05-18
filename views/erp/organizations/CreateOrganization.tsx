@@ -16,6 +16,7 @@ import OrganizationService from '@/services/api/organizations.service'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
+import Link from 'next/link'
 
 type FormValues = {
   first_name: string
@@ -27,6 +28,7 @@ type FormValues = {
   password_confirmation: string
   subdomain: string
   address: string
+  company_name: string
 }
 
 const defaultValues: FormValues = {
@@ -38,7 +40,8 @@ const defaultValues: FormValues = {
   password: '',
   password_confirmation: '',
   subdomain: '',
-  address: ''
+  address: '',
+  company_name: ''
 }
 
 const CreateOrganization: React.FC = () => {
@@ -90,6 +93,26 @@ const CreateOrganization: React.FC = () => {
           <h2 className='text-xl font-semibold text-light'>Create Company</h2>
 
           <div className='grid grid-cols-1 sm:grid-cols-2! gap-4 lg:gap-6'>
+            <FormField
+              control={control}
+              name='company_name'
+              rules={{ required: 'Required' }}
+              render={({ field }) => (
+                <FormItem className='col-span-2'>
+                  <FormLabel>
+                    Company Name<span className='text-red-400'>*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='Company Name'
+                      className='bg-bg-3 border-border text-light placeholder:text-gray'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={control}
               name='first_name'
@@ -303,11 +326,11 @@ const CreateOrganization: React.FC = () => {
             <Button
               type='button'
               variant='outline'
-              onClick={onCancel}
               disabled={isLoading}
               className='flex-1 border-border text-light disabled:opacity-50'
+              asChild
             >
-              Reset
+              <Link href='/erp/companies' prefetch>Cancel</Link>
             </Button>
           </div>
         </form>

@@ -61,6 +61,8 @@ export interface Product extends Model {
   selling_unit?: Unit
   coverage_uom?: Unit
   coverage_unit?: Unit
+  qr_code?: string
+  bar_code?: string
 }
 
 export interface SellingInfo {
