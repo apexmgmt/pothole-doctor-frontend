@@ -34,6 +34,7 @@ import { formatDate } from '@/utils/date'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import PurchaseOrderService from '@/services/api/products/purchase_orders.service'
 import CreateOrEditPurchaseOrderModal from './CreateOrEditPurchaseOrderModal'
+import { hasPermission } from '@/utils/role-permission'
 
 interface PurchaseOrdersProps {
   vendors: Vendor[]
@@ -66,9 +67,17 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
   const [isShipmentModalOpen, setIsShipmentModalOpen] = useState<boolean>(false)
   const [shipmentPurchaseOrderId, setShipmentPurchaseOrderId] = useState<string | undefined>(undefined)
   const [isShipmentViewOnly, setIsShipmentViewOnly] = useState<boolean>(false)
+  const [canCreate, setCanCreate] = useState<boolean>(false)
+  const [canEdit, setCanEdit] = useState<boolean>(false)
+  const [canDelete, setCanDelete] = useState<boolean>(false)
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+
+    // check permissions
+    hasPermission('Create Purchase Order').then(result => setCanCreate(result))
+    hasPermission('Update Purchase Order').then(result => setCanEdit(result))
+    hasPermission('Delete Purchase Order').then(result => setCanDelete(result))
   }, [])
 
   useEffect(() => {
@@ -334,22 +343,26 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
 
         if (isEditable) {
           buttons.push(
-            <EditButton
-              key='edit'
-              tooltip='Edit Purchase Order'
-              onClick={() => {
-                setModalMode('edit')
-                setSelectedPurchaseOrderId(row.id)
-                setIsModalOpen(true)
-              }}
-              variant='text'
-            />,
-            <DeleteButton
-              key='delete'
-              tooltip='Delete Purchase Order'
-              variant='text'
-              onClick={() => handleDelete(row.id)}
-            />
+            canEdit && (
+              <EditButton
+                key='edit'
+                tooltip='Edit Purchase Order'
+                onClick={() => {
+                  setModalMode('edit')
+                  setSelectedPurchaseOrderId(row.id)
+                  setIsModalOpen(true)
+                }}
+                variant='text'
+              />
+            ),
+            canDelete && (
+              <DeleteButton
+                key='delete'
+                tooltip='Delete Purchase Order'
+                variant='text'
+                onClick={() => handleDelete(row.id)}
+              />
+            )
           )
         }
 
@@ -396,17 +409,19 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
           </Button>
         )}
       </div>
-      <Button
-        size='sm'
-        onClick={() => {
-          setModalMode('create')
-          setSelectedPurchaseOrderId(undefined)
-          setIsModalOpen(true)
-        }}
-      >
-        <PlusIcon className='w-4 h-4 mr-1' />
-        <span className='hidden min-[480px]:block'>Create Purchase Order</span>
-      </Button>
+      {canCreate && (
+        <Button
+          size='sm'
+          onClick={() => {
+            setModalMode('create')
+            setSelectedPurchaseOrderId(undefined)
+            setIsModalOpen(true)
+          }}
+        >
+          <PlusIcon className='w-4 h-4 mr-1' />
+          <span className='hidden min-[480px]:block'>Create Purchase Order</span>
+        </Button>
+      )}
     </div>
   )
 
