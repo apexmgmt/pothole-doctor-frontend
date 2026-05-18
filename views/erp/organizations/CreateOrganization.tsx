@@ -16,6 +16,7 @@ import OrganizationService from '@/services/api/organizations.service'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
+import Link from 'next/link'
 
 type FormValues = {
   first_name: string
@@ -303,11 +304,11 @@ const CreateOrganization: React.FC = () => {
             <Button
               type='button'
               variant='outline'
-              onClick={onCancel}
               disabled={isLoading}
               className='flex-1 border-border text-light disabled:opacity-50'
+              asChild
             >
-              Reset
+              <Link href='/erp/companies' prefetch>Cancel</Link>
             </Button>
           </div>
         </form>
