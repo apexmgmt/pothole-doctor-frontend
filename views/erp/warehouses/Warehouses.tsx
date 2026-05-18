@@ -23,6 +23,7 @@ import WarehouseService from '@/services/api/warehouses.service'
 import { Badge } from '@/components/ui/badge'
 import CreateOrEditWarehouseModal from './CreateOrEditWarehouseModal'
 import { hasPermission } from '@/utils/role-permission'
+import WarehousePurchaseOrders from './WarehousePurchaseOrders'
 
 const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWithStateAndCities }) => {
   const router = useRouter()
@@ -31,6 +32,8 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
 
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [activeTab, setActiveTab] = useState<'warehouses' | 'purchase_orders'>('warehouses')
+  const [selectedWarehouseRow, setSelectedWarehouseRow] = useState<{ id: string; title: string } | null>(null)
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<string | null>(null)
   const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
@@ -40,6 +43,7 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
   const [canCreateWarehouse, setCanCreateWarehouse] = useState<boolean>(false)
   const [canEditWarehouse, setCanEditWarehouse] = useState<boolean>(false)
   const [canDeleteWarehouse, setCanDeleteWarehouse] = useState<boolean>(false)
+  const [canManagePurchaseOrder, setCanManagePurchaseOrder] = useState<boolean>(false)
 
   // Set initial search value from filterOptions and check permissions
   useEffect(() => {
@@ -47,6 +51,7 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
     hasPermission('Create Warehouse').then(result => setCanCreateWarehouse(result))
     hasPermission('Update Warehouse').then(result => setCanEditWarehouse(result))
     hasPermission('Delete Warehouse').then(result => setCanDeleteWarehouse(result))
+    hasPermission('Manage Purchase Order').then(result => setCanManagePurchaseOrder(result))
   }, [])
 
   // Debounced search update
@@ -305,27 +310,54 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
     </div>
   )
 
+  const tabs = [
+    {
+      label: 'Warehouses',
+      onClick: () => setActiveTab('warehouses'),
+      isActive: activeTab === 'warehouses'
+    },
+    ...(canManagePurchaseOrder
+      ? [
+          {
+            label: selectedWarehouseRow ? `Purchase Orders (${selectedWarehouseRow.title})` : 'Purchase Orders',
+            onClick: () => selectedWarehouseRow && setActiveTab('purchase_orders'),
+            isActive: activeTab === 'purchase_orders',
+            disabled: !selectedWarehouseRow
+          }
+        ]
+      : [])
+  ]
+
   return (
     <>
-      <CommonLayout title='Warehouses' noTabs={true}>
-        <CommonTable
-          data={{
-            data: warehousesData,
-            per_page: apiResponse?.per_page || 10,
-            total: apiResponse?.total || 0,
-            from: apiResponse?.from || 1,
-            to: apiResponse?.to || 10,
-            current_page: apiResponse?.current_page || 1,
-            last_page: apiResponse?.last_page || 1
-          }}
-          columns={columns}
-          customFilters={customFilters}
-          setFilterOptions={setFilterOptions}
-          showFilters={true}
-          pagination={true}
-          isLoading={isLoading}
-          emptyMessage='No warehouse found'
-        />
+      <CommonLayout title='Warehouses' buttons={tabs}>
+        {activeTab === 'warehouses' && (
+          <CommonTable
+            data={{
+              data: warehousesData,
+              per_page: apiResponse?.per_page || 10,
+              total: apiResponse?.total || 0,
+              from: apiResponse?.from || 1,
+              to: apiResponse?.to || 10,
+              current_page: apiResponse?.current_page || 1,
+              last_page: apiResponse?.last_page || 1
+            }}
+            columns={columns}
+            customFilters={customFilters}
+            setFilterOptions={setFilterOptions}
+            showFilters={true}
+            pagination={true}
+            isLoading={isLoading}
+            emptyMessage='No warehouse found'
+            handleRowSelect={row => {
+              setSelectedWarehouseRow({ id: row.id, title: row.title })
+            }}
+          />
+        )}
+
+        {activeTab === 'purchase_orders' && selectedWarehouseRow && (
+          <WarehousePurchaseOrders warehouseId={selectedWarehouseRow.id} />
+        )}
       </CommonLayout>
 
       <CreateOrEditWarehouseModal
