@@ -172,6 +172,7 @@ const CreateOrEditDocumentModal = ({
                     type='file'
                     accept='*'
                     placeholder='Upload file'
+                    
                     // ref={fileInputRef}
                     {...field}
                     onChange={e => {

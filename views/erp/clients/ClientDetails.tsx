@@ -4,21 +4,50 @@ import React, { useEffect, useState } from 'react'
 
 import { toast } from 'sonner'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Client } from '@/types'
+import { Client, CountryWithStates, NoteType } from '@/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import ClientService from '@/services/api/clients/clients.service'
+import { Button } from '@/components/ui/button'
+import { DocumentIcon, MessageIcon, UserIcon } from '@/public/icons'
+import clsx from 'clsx'
+import ClientDetailsContent from './ClientDetailsContent'
+import ClientNotes from './notes/ClientNotes'
+import ClientDocuments from './documents/ClientDocuments'
+import ClientSmsView from './sms/ClientSms'
+import ClientEmails from './emails/ClientEmails'
+import ClientContacts from './contacts/ClientContacts'
+import ClientAddresses from './addresses/ClientAddresses'
+import ClientTasks from './tasks/ClientTasks'
+import ClientEstimates from './estimates/ClientEstimates'
+import ClientInvoices from './invoices/ClientInvoices'
+import ClientWorkOrders from './work-orders/ClientWorkOrders'
 
 interface ClientDetailsProps {
   type: 'lead' | 'customer'
   clientId: string | null
-  onEdit?: (client: Client) => void
+  canEditClient: boolean
+  handleEditClient: () => void
+  noteTypes: NoteType[]
+  countriesWithStatesAndCities: CountryWithStates[]
 }
 
-const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit }) => {
+const ClientDetails: React.FC<ClientDetailsProps> = ({
+  type,
+  clientId,
+  canEditClient,
+  handleEditClient,
+  noteTypes = [],
+  countriesWithStatesAndCities
+}) => {
   const [clientData, setClientData] = useState<Client | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [activeTab, setActiveTab] = useState<string>('notes')
+
+  useEffect(() => {
+    if (type === 'lead' && ['tasks', 'estimates', 'invoices', 'work-orders'].includes(activeTab)) {
+      setActiveTab('notes')
+    }
+  }, [type, activeTab])
 
   const fetchClientDetails = async () => {
     if (!clientId) {
@@ -58,22 +87,48 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
   }
 
   if (isLoading) {
+    const tabs = [
+      { id: 'documents' },
+      { id: 'sms' },
+      { id: 'emails' },
+      { id: 'notes' },
+      { id: 'contacts' },
+      { id: 'addresses' },
+      ...(type === 'customer'
+        ? [{ id: 'tasks' }, { id: 'estimates' }, { id: 'invoices' }, { id: 'work-orders' }]
+        : [])
+    ]
+
     return (
-      <div className='space-y-6 mt-2.5'>
-        <div className='flex items-center justify-between'>
-          <Skeleton className='h-8 w-48' />
-        </div>
-        <div className='flex items-center space-x-4 py-4 bg-bg-3 rounded-lg'>
-          <Skeleton className='h-12 w-12 sm:w-16 sm:h-16 rounded-full' />
-          <div className='space-y-2 flex-1'>
-            <Skeleton className='h-6 w-24 sm:w-48' />
-            <Skeleton className='h-4 w-48 sm:w-64' />
-            <Skeleton className='h-6 w-12 sm:w-20' />
+      <div className='space-y-5 mt-2.5'>
+        <div className='rounded-xl border border-border/50 bg-bg-3'>
+          <div className='grid grid-cols-1 lg:grid-cols-2'>
+            <div className='p-5 space-y-4'>
+              <Skeleton className='h-6 w-52' />
+              <Skeleton className='h-4 w-60' />
+              <Skeleton className='h-4 w-72' />
+              <Skeleton className='h-4 w-56' />
+              <Skeleton className='h-4 w-64' />
+            </div>
+            <div className='p-5 space-y-4 border-l border-border/50'>
+              <Skeleton className='h-6 w-36' />
+              <Skeleton className='h-4 w-72' />
+              <Skeleton className='h-4 w-52' />
+              <Skeleton className='h-4 w-48' />
+            </div>
           </div>
         </div>
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-          <Skeleton className='h-64' />
-          <Skeleton className='h-64' />
+
+        <div className='flex items-center gap-2 flex-wrap'>
+          {tabs.map(tab => (
+            <Skeleton key={tab.id} className='h-8 w-24 rounded-md' />
+          ))}
+        </div>
+
+        <div className='space-y-3'>
+          <Skeleton className='h-10 w-full rounded-lg' />
+          <Skeleton className='h-10 w-full rounded-lg' />
+          <Skeleton className='h-10 w-2/3 rounded-lg' />
         </div>
       </div>
     )
@@ -87,205 +142,111 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({ type, clientId, onEdit })
     )
   }
 
-  const fullName = `${clientData?.first_name || ''} ${clientData?.last_name || ''}`.trim()
-
-  const initials = fullName
-    .split(' ')
-    .map((name: string) => name.charAt(0))
-    .join('')
-    .toUpperCase()
+  const tabs = [
+    {
+      id: 'notes',
+      label: 'Notes',
+      icon: DocumentIcon
+    },
+    {
+      id: 'documents',
+      label: 'Documents',
+      icon: DocumentIcon
+    },
+    {
+      id: 'sms',
+      label: 'SMS',
+      icon: MessageIcon
+    },
+    {
+      id: 'emails',
+      label: 'Emails',
+      icon: MessageIcon
+    },
+    
+    {
+      id: 'contacts',
+      label: 'Contacts',
+      icon: UserIcon
+    },
+    {
+      id: 'addresses',
+      label: 'Addresses',
+      icon: UserIcon
+    },
+    ...(type === 'customer'
+      ? [
+          {
+            id: 'tasks',
+            label: 'Tasks',
+            icon: DocumentIcon
+          },
+          {
+            id: 'estimates',
+            label: 'Estimates',
+            icon: DocumentIcon
+          },
+          {
+            id: 'invoices',
+            label: 'Invoices',
+            icon: DocumentIcon
+          },
+          {
+            id: 'work-orders',
+            label: 'Work Orders',
+            icon: DocumentIcon
+          }
+        ]
+      : [])
+  ]
 
   return (
-    <div className='space-y-6'>
-      {/* Header */}
-      <div className='flex items-center justify-between'>
-        <h3 className='text-xl font-semibold text-light mt-2'>{type === 'lead' ? 'Lead' : 'Customer'} Details</h3>
+    <div className=''>
+      <ClientDetailsContent
+        clientData={clientData}
+        canEditClient={canEditClient}
+        handleEditClient={handleEditClient}
+      />
+
+      <div className='my-4 flex items-center gap-2 flex-wrap'>
+        {tabs.map(tab => {
+          const Icon = tab.icon
+
+          return (
+            <Button
+              key={tab.id}
+              variant={activeTab === tab.id ? 'default' : 'ghost'}
+              size='sm'
+              type='button'
+              className={clsx(
+                'gap-2 border',
+                activeTab === tab.id
+                  ? 'bg-light text-bg hover:bg-light/90 border-light'
+                  : 'text-light hover:text-light border-border/50'
+              )}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <Icon className='h-4 w-4' />
+              <span>{tab.label}</span>
+            </Button>
+          )
+        })}
       </div>
 
-      {/* Profile Section */}
-      <div className='flex items-center space-x-4 py-4 bg-bg-3 rounded-lg'>
-        <Avatar className='h-16 w-16'>
-          <AvatarImage src={''} alt={fullName} />
-          <AvatarFallback className='text-lg font-semibold'>{initials || 'C'}</AvatarFallback>
-        </Avatar>
-        <div className=''>
-          <h4 className='text-lg/[1.1] font-medium text-light'>{fullName || 'N/A'}</h4>
-          <p className='text-gray text-sm/tight break-all'>{clientData?.email || 'N/A'}</p>
-          <Badge variant={clientData?.status === 1 ? 'default' : 'destructive'}>
-            {clientData?.status === 1 ? 'Active' : 'Inactive'}
-          </Badge>
-        </div>
-      </div>
-
-      {/* Details Grid */}
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-        {/* Client Information */}
-        <div className='space-y-4'>
-          <h5 className='text-sm font-medium text-light uppercase tracking-wide'>
-            {type === 'lead' ? 'Lead' : 'Customer'} Information
-          </h5>
-          <div className='space-y-3'>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>First Name :</label>
-              <p className='text-light'>{clientData?.first_name || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Last Name :</label>
-              <p className='text-light'>{clientData?.last_name || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Display Name :</label>
-              <p className='text-light'>{clientData?.display_name || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Email :</label>
-              <p className='text-light break-all'>{clientData?.email || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Phone :</label>
-              <p className='text-light'>{clientData?.phone || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Cell Phone :</label>
-              <p className='text-light'>{clientData?.clientable?.cell_phone || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Address :</label>
-              <p className='text-light'>
-                {clientData?.address?.street_address
-                  ? `${clientData.address.street_address}, ${clientData.address.city?.name || ''}, ${clientData.address.state?.name || ''} ${clientData.address.zip_code || ''}`
-                  : 'N/A'}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Business Information */}
-        <div className='space-y-4'>
-          <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Business Information</h5>
-          <div className='space-y-3'>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Company :</label>
-              <p className='text-light'>{clientData?.company?.name || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Contact Type :</label>
-              <p className='text-light'>{clientData?.contact_type?.name || 'N/A'}</p>
-            </div>
-            {type === 'customer' && (
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Location :</label>
-                <p className='text-light'>{clientData?.location?.name || 'N/A'}</p>
-              </div>
-            )}
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>
-                {type === 'lead' ? 'Lead' : 'Client'} Source :
-              </label>
-              <p className='text-light'>{clientData?.source?.name || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Interest Level :</label>
-              <p className='text-light'>{clientData?.interest_level?.name || 'N/A'}</p>
-            </div>
-            {type === 'lead' && (
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Lead Cost :</label>
-                <p className='text-light'>${clientData?.lead_cost || '0.00'}</p>
-              </div>
-            )}
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Sales Rep. :</label>
-              <p className='text-light'>
-                {clientData?.reference?.first_name && clientData?.reference?.last_name
-                  ? `${clientData?.reference.first_name} ${clientData?.reference.last_name}`
-                  : 'N/A'}
-              </p>
-            </div>
-            {type === 'customer' && clientData?.added_by && (
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Added By :</label>
-                <p className='text-light'>{`${clientData?.added_by.first_name} ${clientData?.added_by.last_name}`}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Desired Services */}
-      {clientData?.desired_services && clientData.desired_services.length > 0 && (
-        <div className='space-y-4 pt-4 border-t border-border'>
-          <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Desired Services</h5>
-          <div className='flex flex-wrap gap-2'>
-            {clientData.desired_services.map(service => (
-              <Badge key={service.id} variant='secondary'>
-                {service.name}
-              </Badge>
-            ))}
-          </div>
-        </div>
+      {activeTab === 'documents' && clientId && <ClientDocuments clientId={clientId} />}
+      {activeTab === 'sms' && clientId && <ClientSmsView clientId={clientId} client={clientData} />}
+      {activeTab === 'emails' && clientId && <ClientEmails clientId={clientId} client={clientData} />}
+      {activeTab === 'notes' && clientId && <ClientNotes clientId={clientId} noteTypes={noteTypes} />}
+      {activeTab === 'contacts' && clientId && (
+        <ClientContacts clientId={clientId} countriesWithStatesAndCities={countriesWithStatesAndCities} />
       )}
-
-      {/* Additional Information */}
-      <div className='space-y-4 pt-4 border-t border-border'>
-        <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Additional Information</h5>
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-          <div className='space-y-3'>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Spouse Name :</label>
-              <p className='text-light'>{clientData?.clientable?.spouse_name || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Spouse Phone :</label>
-              <p className='text-light'>{clientData?.clientable?.spouse_phone || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Best Time to Contact :</label>
-              <p className='text-light'>{clientData?.clientable?.best_time || 'N/A'}</p>
-            </div>
-          </div>
-          <div className='space-y-3'>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>CC Email :</label>
-              <p className='text-light break-all'>{clientData?.clientable?.cc_email || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Pre-Qualified Amount :</label>
-              <p className='text-light'>${clientData?.clientable?.pre_qualified_amount || '0.00'}</p>
-            </div>
-            <div>
-              <label className='text-xs text-gray uppercase mr-2'>Tax Exempt</label>
-              <Badge variant={clientData?.clientable?.is_tax_exempt === 1 ? 'default' : 'secondary'}>
-                {clientData?.clientable?.is_tax_exempt === 1 ? 'Yes' : 'No'}
-              </Badge>
-            </div>
-            <div>
-              <label className='text-xs text-gray uppercase mr-2'>QuickBooks</label>
-              <Badge variant={clientData?.clientable?.is_quick_book === 1 ? 'default' : 'secondary'}>
-                {clientData?.clientable?.is_quick_book === 1 ? 'Yes' : 'No'}
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Timestamps */}
-      <div className='pt-4 border-t border-border'>
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
-          <div className='flex items-center gap-2.5'>
-            <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Created At :</label>
-            <p className='text-light text-sm'>
-              {clientData?.created_at ? new Date(clientData.created_at).toLocaleString() : 'N/A'}
-            </p>
-          </div>
-          <div className='flex items-center gap-2.5'>
-            <label className='text-xs text-gray uppercase min-w-30 md:min-w-40'>Updated At :</label>
-            <p className='text-light text-sm'>
-              {clientData?.updated_at ? new Date(clientData.updated_at).toLocaleString() : 'N/A'}
-            </p>
-          </div>
-        </div>
-      </div>
+      {activeTab === 'addresses' && clientId && (
+        <ClientAddresses clientId={clientId} countriesWithStatesAndCities={countriesWithStatesAndCities} />
+      )}
+      {activeTab === 'tasks' && clientId && type === 'customer' && <ClientTasks clientId={clientId} />}
+      {activeTab === 'estimates' && clientId && type === 'customer' && <ClientEstimates clientId={clientId} />}
+      {activeTab === 'invoices' && clientId && type === 'customer' && <ClientInvoices clientId={clientId} />}
+      {activeTab === 'work-orders' && clientId && type === 'customer' && <ClientWorkOrders clientId={clientId} />}
     </div>
   )
 }

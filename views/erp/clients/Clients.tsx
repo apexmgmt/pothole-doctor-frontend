@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
-import { DetailsIcon, DocumentIcon, MessageIcon, UserIcon } from '@/public/icons'
+import { DetailsIcon, UserIcon } from '@/public/icons'
 import { Button } from '@/components/ui/button'
 import {
   BusinessLocation,
@@ -38,16 +38,6 @@ import ClientService from '@/services/api/clients/clients.service'
 import { Badge } from '@/components/ui/badge'
 import CreateEditClientModal from './CreateEditClientModal'
 import ClientDetails from './ClientDetails'
-import ClientDocuments from './documents/ClientDocuments'
-import ClientSmsView from './sms/ClientSms'
-import ClientEmails from './emails/ClientEmails'
-import ClientNotes from './notes/ClientNotes'
-import ClientContacts from './contacts/ClientContacts'
-import ClientAddresses from './addresses/ClientAddresses'
-import ClientTasks from './tasks/ClientTasks'
-import ClientEstimates from './estimates/ClientEstimates'
-import ClientInvoices from './invoices/ClientInvoices'
-import ClientWorkOrders from './work-orders/ClientWorkOrders'
 import { hasPermission } from '@/utils/role-permission'
 import ChangeLeadStageModal, { LeadStage } from '@/views/erp/clients/ChangeLeadStageModal'
 
@@ -579,84 +569,85 @@ const Clients: React.FC<{
       isActive: activeTab === 'details',
       disabled: !selectedClientId
     },
-    {
-      label: 'Documents',
-      icon: DocumentIcon,
-      onClick: () => setActiveTab('documents'),
-      isActive: activeTab === 'documents',
-      disabled: !selectedClientId
-    },
-    {
-      label: 'SMS',
-      icon: MessageIcon,
-      onClick: () => setActiveTab('sms'),
-      isActive: activeTab === 'sms',
-      disabled: !selectedClientId
-    },
-    {
-      label: 'Emails',
-      icon: MessageIcon,
-      onClick: () => setActiveTab('emails'),
-      isActive: activeTab === 'emails',
-      disabled: !selectedClientId
-    },
-    {
-      label: 'Notes',
-      icon: DocumentIcon,
-      onClick: () => setActiveTab('notes'),
-      isActive: activeTab === 'notes',
-      disabled: !selectedClientId
-    },
-    {
-      label: 'Contacts',
-      icon: UserIcon,
-      onClick: () => setActiveTab('contacts'),
-      isActive: activeTab === 'contacts',
-      disabled: !selectedClientId
-    },
-    {
-      label: 'Addresses',
-      icon: UserIcon,
-      onClick: () => setActiveTab('addresses'),
-      isActive: activeTab === 'addresses',
-      disabled: !selectedClientId
-    },
-    ...(type === 'customer'
-      ? [
-          {
-            label: 'Tasks',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('tasks'),
-            isActive: activeTab === 'tasks',
-            disabled: !selectedClientId
-          },
-          {
-            label: 'Estimates',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('estimates'),
-            isActive: activeTab === 'estimates',
-            disabled: !selectedClientId
-          },
-          {
-            label: 'Invoices',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('invoices'),
-            isActive: activeTab === 'invoices',
-            disabled: !selectedClientId
-          },
-          {
-            label: 'Work Orders',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('work-orders'),
-            isActive: activeTab === 'work-orders',
-            disabled: !selectedClientId
-          }
-        ]
-      : [])
+
+    // {
+    //   label: 'Documents',
+    //   icon: DocumentIcon,
+    //   onClick: () => setActiveTab('documents'),
+    //   isActive: activeTab === 'documents',
+    //   disabled: !selectedClientId
+    // },
+    // {
+    //   label: 'SMS',
+    //   icon: MessageIcon,
+    //   onClick: () => setActiveTab('sms'),
+    //   isActive: activeTab === 'sms',
+    //   disabled: !selectedClientId
+    // },
+    // {
+    //   label: 'Emails',
+    //   icon: MessageIcon,
+    //   onClick: () => setActiveTab('emails'),
+    //   isActive: activeTab === 'emails',
+    //   disabled: !selectedClientId
+    // },
+    // {
+    //   label: 'Notes',
+    //   icon: DocumentIcon,
+    //   onClick: () => setActiveTab('notes'),
+    //   isActive: activeTab === 'notes',
+    //   disabled: !selectedClientId
+    // },
+    // {
+    //   label: 'Contacts',
+    //   icon: UserIcon,
+    //   onClick: () => setActiveTab('contacts'),
+    //   isActive: activeTab === 'contacts',
+    //   disabled: !selectedClientId
+    // },
+    // {
+    //   label: 'Addresses',
+    //   icon: UserIcon,
+    //   onClick: () => setActiveTab('addresses'),
+    //   isActive: activeTab === 'addresses',
+    //   disabled: !selectedClientId
+    // },
+    // ...(type === 'customer'
+    //   ? [
+    //       {
+    //         label: 'Tasks',
+    //         icon: DocumentIcon,
+    //         onClick: () => setActiveTab('tasks'),
+    //         isActive: activeTab === 'tasks',
+    //         disabled: !selectedClientId
+    //       },
+    //       {
+    //         label: 'Estimates',
+    //         icon: DocumentIcon,
+    //         onClick: () => setActiveTab('estimates'),
+    //         isActive: activeTab === 'estimates',
+    //         disabled: !selectedClientId
+    //       },
+    //       {
+    //         label: 'Invoices',
+    //         icon: DocumentIcon,
+    //         onClick: () => setActiveTab('invoices'),
+    //         isActive: activeTab === 'invoices',
+    //         disabled: !selectedClientId
+    //       },
+    //       {
+    //         label: 'Work Orders',
+    //         icon: DocumentIcon,
+    //         onClick: () => setActiveTab('work-orders'),
+    //         isActive: activeTab === 'work-orders',
+    //         disabled: !selectedClientId
+    //       }
+    //     ]
+    //   : [])
   ]
 
   return (
-    <CommonLayout title={type === 'lead' ? 'Leads' : 'Customers'} buttons={tabs}>
+    <CommonLayout title={`${type === 'lead' ? 'Leads' : 'Customers'}${selectedClient ? ` - ${selectedClient?.first_name + ' ' + selectedClient?.last_name}` : ''}`} buttons={tabs}>
       {activeTab === 'clients' && (
         <CommonTable
           data={{
@@ -678,35 +669,15 @@ const Clients: React.FC<{
           handleRowSelect={handleRowSelect}
         />
       )}
-      {activeTab === 'details' && <ClientDetails type={type} clientId={selectedClientId} />}
-      {activeTab === 'documents' && selectedClientId && <ClientDocuments clientId={selectedClientId || ''} />}
-      {activeTab === 'sms' && selectedClientId && (
-        <ClientSmsView clientId={selectedClientId || ''} client={selectedClient || null} />
-      )}
-      {activeTab === 'emails' && selectedClientId && (
-        <ClientEmails clientId={selectedClientId || ''} client={selectedClient || null} />
-      )}
-      {activeTab === 'notes' && selectedClientId && (
-        <ClientNotes clientId={selectedClientId || ''} noteTypes={noteTypes} />
-      )}
-      {activeTab === 'contacts' && selectedClientId && (
-        <ClientContacts clientId={selectedClientId || ''} countriesWithStatesAndCities={countriesWithStatesAndCities} />
-      )}
-      {activeTab === 'addresses' && selectedClientId && (
-        <ClientAddresses
-          clientId={selectedClientId || ''}
+      {activeTab === 'details' && (
+        <ClientDetails
+          type={type}
+          clientId={selectedClientId}
+          canEditClient={canEditClient}
+          handleEditClient={() => handleOpenEditModal(selectedClientId ?? '')}
+          noteTypes={noteTypes}
           countriesWithStatesAndCities={countriesWithStatesAndCities}
         />
-      )}
-      {activeTab === 'tasks' && selectedClientId && type === 'customer' && <ClientTasks clientId={selectedClientId} />}
-      {activeTab === 'estimates' && selectedClientId && type === 'customer' && (
-        <ClientEstimates clientId={selectedClientId} />
-      )}
-      {activeTab === 'invoices' && selectedClientId && type === 'customer' && (
-        <ClientInvoices clientId={selectedClientId} />
-      )}
-      {activeTab === 'work-orders' && selectedClientId && type === 'customer' && (
-        <ClientWorkOrders clientId={selectedClientId} />
       )}
       <CreateEditClientModal
         type={type}
