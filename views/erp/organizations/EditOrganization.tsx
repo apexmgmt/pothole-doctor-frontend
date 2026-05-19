@@ -17,17 +17,9 @@ import { SpinnerCustom } from '@/components/ui/spinner'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import Link from 'next/link'
+import { OrganizationEditPayload } from '@/types'
 
-type FormValues = {
-  first_name: string
-  last_name: string
-  email: string
-  phone: string
-  address: string
-  company_name: string
-}
-
-const defaultValues: FormValues = {
+const defaultValues: OrganizationEditPayload = {
   first_name: '',
   last_name: '',
   email: '',
@@ -41,7 +33,7 @@ const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails })
   const dispatch = useAppDispatch()
 
   // Map companyDetails to form values, pulling address and phone from userable
-  const mappedDefaults: FormValues = {
+  const mappedDefaults: OrganizationEditPayload = {
     first_name: companyDetails.first_name || '',
     last_name: companyDetails.last_name || '',
     email: companyDetails.email || '',
@@ -50,7 +42,7 @@ const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails })
     company_name: companyDetails.userable?.company_name || ''
   }
 
-  const form = useForm<FormValues>({ defaultValues: mappedDefaults, mode: 'onSubmit' })
+  const form = useForm<OrganizationEditPayload>({ defaultValues: mappedDefaults, mode: 'onSubmit' })
   const { handleSubmit, control, getValues, reset, formState } = form
   const { isSubmitting } = formState
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -59,7 +51,7 @@ const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails })
     dispatch(setPageTitle('Manage Companies'))
   }, [])
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: OrganizationEditPayload) => {
     setIsLoading(true)
 
     try {
@@ -81,8 +73,6 @@ const EditOrganization: React.FC<{ companyDetails: any }> = ({ companyDetails })
       setIsLoading(false)
     }
   }
-
-  const onCancel = () => reset()
 
   return (
     <div>

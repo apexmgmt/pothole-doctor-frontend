@@ -2,6 +2,7 @@ import { getApiUrl } from '@/utils/utility'
 import apiInterceptor from './api.interceptor'
 import { ORGANIZATIONS, ORGANIZATION_STATUS_CHANGE } from '@/constants/api'
 import { revalidate } from '../app/cache.service'
+import { OrganizationCreatePayload, OrganizationEditPayload } from '@/types'
 
 export default class OrganizationService {
   /** Company List API */
@@ -30,7 +31,7 @@ export default class OrganizationService {
   }
 
   /**Create company API */
-  static store = async (payload: object) => {
+  static store = async (payload: OrganizationCreatePayload) => {
     try {
       const apiUrl: string = await getApiUrl()
 
@@ -79,7 +80,7 @@ export default class OrganizationService {
   }
 
   /** Update Organization Details */
-  static update = async (organizationId: string, payload: object) => {
+  static update = async (organizationId: string, payload: OrganizationEditPayload) => {
     try {
       const apiUrl: string = await getApiUrl()
 
