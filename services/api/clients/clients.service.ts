@@ -1,7 +1,7 @@
 import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
 import { revalidate } from '@/services/app/cache.service'
-import { API_URL, CLIENTS, CLIENTS_ALL, CLIENTS_ALL_TENANT, CLIENTS_TENANT } from '@/constants/api'
+import { API_URL, CLIENTS, CLIENTS_ALL, CLIENTS_ALL_TENANT, CLIENTS_LEAD_STAGE, CLIENTS_TENANT } from '@/constants/api'
 import { ClientPayload } from '@/types'
 
 export default class ClientService {
@@ -115,6 +115,30 @@ export default class ClientService {
         await revalidate(`clients-${type}`)
         await revalidate(`clients-all-${type}`)
       }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /** Update Client Lead Stage API */
+  static updateLeadStage = async (clientId: string, stage: 'prospect' | 'open' | 'working' | 'meeting-set' | 'opportunity' | 'closed-won' | 'closed-lost') => {
+    try {
+      const response = await apiInterceptor(API_URL + CLIENTS_LEAD_STAGE(clientId, stage), {
+        requiresAuth: true,
+        method: 'PUT'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new errorData
+      }
+
+      await revalidate('clients')
+      await revalidate(`clients/${clientId}`)
+      await revalidate('clients-all')
 
       return await response.json()
     } catch (error) {

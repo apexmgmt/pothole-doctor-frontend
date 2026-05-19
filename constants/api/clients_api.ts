@@ -21,6 +21,18 @@ export const CLIENTS_ALL: string = '/v1/get-clients'
 export const CLIENTS_ALL_TENANT: string = '/v1/tenant/get-clients/'
 
 /**
+ * Update lead stage api endpoint
+ * @method PUT
+ * @param clientId 
+ * @param stage 
+ * @returns `/v1/tenant/clients/${clientId}/lead-stage/${stage}`
+ */
+export const CLIENTS_LEAD_STAGE = (
+  clientId: string,
+  stage: 'prospect' | 'open' | 'working' | 'meeting-set' | 'opportunity' | 'closed-won' | 'closed-lost'
+) => `/v1/tenant/clients/${clientId}/lead-stage/${stage}`
+
+/**
  * API endpoint for Clients documents
  *
  * Data table operation method: GET

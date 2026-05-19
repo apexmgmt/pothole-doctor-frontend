@@ -49,6 +49,7 @@ import ClientEstimates from './estimates/ClientEstimates'
 import ClientInvoices from './invoices/ClientInvoices'
 import ClientWorkOrders from './work-orders/ClientWorkOrders'
 import { hasPermission } from '@/utils/role-permission'
+import ChangeLeadStageModal, { LeadStage } from '@/views/erp/clients/ChangeLeadStageModal'
 
 const Clients: React.FC<{
   type: 'lead' | 'customer'
@@ -88,6 +89,9 @@ const Clients: React.FC<{
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isStageModalOpen, setIsStageModalOpen] = useState<boolean>(false)
+  const [stageClientId, setStageClientId] = useState<string | null>(null)
+  const [stageClientCurrentStage, setStageClientCurrentStage] = useState<LeadStage | null>(null)
   const [canCreateClient, setCanCreateClient] = useState<boolean>(false)
   const [canEditClient, setCanEditClient] = useState<boolean>(false)
   const [canDeleteClient, setCanDeleteClient] = useState<boolean>(false)
@@ -165,7 +169,15 @@ const Clients: React.FC<{
           {
             id: 'stage',
             header: 'Stage',
-            cell: (row: Client) => <span className='font-medium'>{''}</span>,
+            cell: (row: Client) => {
+              const stage = row?.clientable?.stage
+
+              return (
+                <Badge variant='secondary' className='capitalize'>
+                  {stage ? stage.replace(/-/g, ' ') : 'New'}
+                </Badge>
+              )
+            },
             sortable: false
           }
         ]
@@ -187,19 +199,19 @@ const Clients: React.FC<{
       id: 'first_name',
       header: 'First Name',
       cell: (row: Client) => <span className='font-medium'>{row.first_name}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'last_name',
       header: 'Last Name',
       cell: (row: Client) => <span className='font-medium'>{row.last_name}</span>,
-      sortable: false
+      sortable: true
     },
     {
-      id: 'full_name',
+      id: 'name',
       header: 'Full Name',
       cell: (row: Client) => <span className='font-medium'>{`${row.first_name} ${row.last_name}`}</span>,
-      sortable: true
+      sortable: false
     },
     ...(type === 'lead'
       ? [
@@ -355,30 +367,52 @@ const Clients: React.FC<{
     {
       id: 'actions',
       header: 'Action',
-      cell: row => (
-        <div className='flex items-center justify-center gap-2'>
-          {(canEditClient || canDeleteClient) && (
-            <ThreeDotButton
-              buttons={[
-                canEditClient && (
-                  <EditButton
-                    tooltip={`Edit ${type === 'lead' ? 'Lead' : 'Customer'} Information`}
-                    onClick={() => handleOpenEditModal(row.id)}
-                    variant='text'
-                  />
-                ),
-                canDeleteClient && (
-                  <DeleteButton
-                    tooltip={`Delete ${type === 'lead' ? 'Lead' : 'Customer'}`}
-                    variant='text'
-                    onClick={() => handleDeleteClient(row.id)}
-                  />
-                )
-              ]}
+      cell: (row: Client) => {
+        const actionButtons: React.ReactNode[] = []
+
+        if (type === 'lead' && canEditClient) {
+          actionButtons.push(
+            <Button
+              key='change-stage'
+              variant='ghost'
+              size='sm'
+              type='button'
+              className='w-full hover:text-dark hover:bg-white hover:border-white'
+              onClick={() => handleOpenStageModal(row.id, row?.clientable?.stage || null)}
+            >
+              Stage
+            </Button>
+          )
+        }
+
+        if (canEditClient) {
+          actionButtons.push(
+            <EditButton
+              key='edit-client'
+              tooltip={`Edit ${type === 'lead' ? 'Lead' : 'Customer'} Information`}
+              onClick={() => handleOpenEditModal(row.id)}
+              variant='text'
             />
-          )}
-        </div>
-      ),
+          )
+        }
+
+        if (canDeleteClient) {
+          actionButtons.push(
+            <DeleteButton
+              key='delete-client'
+              tooltip={`Delete ${type === 'lead' ? 'Lead' : 'Customer'}`}
+              variant='text'
+              onClick={() => handleDeleteClient(row.id)}
+            />
+          )
+        }
+
+        return (
+          <div className='flex items-center justify-center gap-2'>
+            {actionButtons.length > 0 && <ThreeDotButton buttons={actionButtons} />}
+          </div>
+        )
+      },
       sortable: false
     }
   ]
@@ -422,6 +456,60 @@ const Clients: React.FC<{
     } catch (error) {
       toast.error(`Something went wrong while deleting the ${type === 'lead' ? 'lead' : 'client'}!`)
     }
+  }
+
+  const handleOpenStageModal = (clientId: string, currentStage: LeadStage | null) => {
+    setStageClientId(clientId)
+    setStageClientCurrentStage(currentStage)
+    setIsStageModalOpen(true)
+  }
+
+  const handleStageModalOpenChange = (open: boolean) => {
+    setIsStageModalOpen(open)
+
+    if (!open) {
+      setStageClientId(null)
+      setStageClientCurrentStage(null)
+    }
+  }
+
+  const handleLeadStageUpdateSuccess = (clientId: string, stage: LeadStage) => {
+    setApiResponse(prev => {
+      if (!prev) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        data: prev.data.map((client: Client) => {
+          if (client.id !== clientId) {
+            return client
+          }
+
+          return {
+            ...client,
+            clientable: {
+              ...(client.clientable || ({} as NonNullable<Client['clientable']>)),
+              stage
+            }
+          }
+        })
+      }
+    })
+
+    setSelectedClient(prev => {
+      if (!prev || prev.id !== clientId) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        clientable: {
+          ...(prev.clientable || ({} as NonNullable<Client['clientable']>)),
+          stage
+        }
+      }
+    })
   }
 
   const handleClearFilters = () => {
@@ -637,6 +725,15 @@ const Clients: React.FC<{
         contactTypes={contactTypes}
         countriesWithStatesAndCities={countriesWithStatesAndCities}
       />
+      {type === 'lead' && (
+        <ChangeLeadStageModal
+          open={isStageModalOpen}
+          onOpenChange={handleStageModalOpenChange}
+          clientId={stageClientId}
+          currentStage={stageClientCurrentStage}
+          onSuccess={handleLeadStageUpdateSuccess}
+        />
+      )}
     </CommonLayout>
   )
 }
