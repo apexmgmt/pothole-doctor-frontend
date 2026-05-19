@@ -1,6 +1,5 @@
-import { getApiUrl } from '@/utils/utility'
 import apiInterceptor from './api.interceptor'
-import { ORGANIZATIONS, ORGANIZATION_STATUS_CHANGE } from '@/constants/api'
+import { API_URL, ORGANIZATIONS, ORGANIZATION_PASSWORD_CHANGE, ORGANIZATION_STATUS_CHANGE } from '@/constants/api'
 import { revalidate } from '../app/cache.service'
 import { OrganizationCreatePayload, OrganizationEditPayload } from '@/types'
 
@@ -8,10 +7,9 @@ export default class OrganizationService {
   /** Company List API */
   static index = async (filterOptions: object = {}, options: object = {}) => {
     try {
-      const apiUrl: string = await getApiUrl()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(apiUrl + ORGANIZATIONS + (queryParams ? `?${queryParams}` : ''), {
+      const response = await apiInterceptor(API_URL + ORGANIZATIONS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['organizations', 'login'] }, // Cache for 60 seconds
@@ -33,9 +31,7 @@ export default class OrganizationService {
   /**Create company API */
   static store = async (payload: OrganizationCreatePayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-
-      const response = await apiInterceptor(apiUrl + ORGANIZATIONS, {
+      const response = await apiInterceptor(API_URL + ORGANIZATIONS, {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
@@ -59,9 +55,7 @@ export default class OrganizationService {
   /** Get Organization Details */
   static show = async (organizationId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-
-      const response = await apiInterceptor(apiUrl + ORGANIZATIONS + organizationId, {
+      const response = await apiInterceptor(API_URL + ORGANIZATIONS + organizationId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`organizations/${organizationId}`] } // Cache for 60 seconds
@@ -82,9 +76,7 @@ export default class OrganizationService {
   /** Update Organization Details */
   static update = async (organizationId: string, payload: OrganizationEditPayload) => {
     try {
-      const apiUrl: string = await getApiUrl()
-
-      const response = await apiInterceptor(apiUrl + ORGANIZATIONS + organizationId, {
+      const response = await apiInterceptor(API_URL + ORGANIZATIONS + organizationId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
@@ -101,15 +93,15 @@ export default class OrganizationService {
       await revalidate(`organizations/${organizationId}`)
 
       return await response.json()
-    } catch (error) {}
+    } catch (error) {
+      throw error
+    }
   }
 
   /** Organization status change */
   static changeStatus = async (organizationId: string) => {
     try {
-      const apiUrl: string = await getApiUrl()
-
-      const response = await apiInterceptor(apiUrl + ORGANIZATION_STATUS_CHANGE, {
+      const response = await apiInterceptor(API_URL + ORGANIZATION_STATUS_CHANGE, {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify({ id: organizationId })
@@ -130,4 +122,25 @@ export default class OrganizationService {
       throw error
     }
   }
+
+  static changePassword = async (organizationId: string, payload: {password: string, password_confirmation: string}) => {
+    try {
+      const response = await apiInterceptor(API_URL + ORGANIZATION_PASSWORD_CHANGE + organizationId, {
+        requiresAuth: true,
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
 }

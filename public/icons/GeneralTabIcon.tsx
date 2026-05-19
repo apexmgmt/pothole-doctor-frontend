@@ -4,7 +4,7 @@ import React from 'react'
  * GeneralTabIcon SVG component.
  * @returns {JSX.Element} The General Tab icon.
  */
-const GenaralTabIcon: React.FC<React.SVGProps<SVGSVGElement>> = props => (
+const GeneralTabIcon: React.FC<React.SVGProps<SVGSVGElement>> = props => (
   <svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
     <path
       d='M14.6199 4.50732L12.3733 13.5273C12.2133 14.2007 11.6133 14.6673 10.9199 14.6673H2.15992C1.15326 14.6673 0.433267 13.6806 0.733267 12.7139L3.53993 3.70068C3.73326 3.07402 4.31327 2.64062 4.96661 2.64062H13.1666C13.7999 2.64062 14.3266 3.02729 14.5466 3.56063C14.6733 3.84729 14.6999 4.17399 14.6199 4.50732Z'
@@ -55,4 +55,4 @@ const GenaralTabIcon: React.FC<React.SVGProps<SVGSVGElement>> = props => (
   </svg>
 )
 
-export default GenaralTabIcon
+export default GeneralTabIcon

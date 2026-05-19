@@ -65,7 +65,6 @@ const Organizations: React.FC = () => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
-  const [selectedCompany, setSelectedCompany] = useState<object | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [statusLoading, setStatusLoading] = useState<{ [key: string]: boolean }>({})
   const [canCreateCompany, setCanCreateCompany] = useState<boolean>(false)
@@ -293,17 +292,6 @@ const Organizations: React.FC = () => {
 
   const handleRowSelect = (company: any) => {
     setSelectedCompanyId(company?.id || null)
-
-    if (canViewCompany) {
-      OrganizationService.show(company?.id)
-        .then(response => {
-          setSelectedCompany(response.data)
-        })
-        .catch(error => {
-          setSelectedCompany(null)
-          console.error('Error fetching company details:', error)
-        })
-    }
   }
 
   // Check if filters are active (excluding pagination)
@@ -407,7 +395,7 @@ const Organizations: React.FC = () => {
       )}
 
       {activeTab === 'details' && (
-        <OrganizationDetails companyData={selectedCompany} setCompanyData={setSelectedCompany} fetchData={fetchData} />
+        <OrganizationDetails companyId={selectedCompanyId} fetchData={fetchData} />
       )}
     </CommonLayout>
   )
