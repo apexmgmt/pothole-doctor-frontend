@@ -97,7 +97,7 @@ const ClientDetailsContent: React.FC<ClientDetailsContentProps> = ({ clientData,
         </div>
       </div>
 
-      <div className='p-5 border-t lg:border-t-0 lg:border-l border-border/50 space-y-4'>
+      <div className='px-5 pb-5 mt-5 border-t lg:border-t-0 lg:border-l border-border/50 space-y-4'>
         <h5 className='text-lg font-semibold text-light'>
           {clientData?.type === 'lead' ? 'Lead' : 'Customer'} Information
         </h5>

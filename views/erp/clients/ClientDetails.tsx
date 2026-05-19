@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { Client, CountryWithStates, NoteType } from '@/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import ClientService from '@/services/api/clients/clients.service'
-import { Button } from '@/components/ui/button'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DocumentIcon, MessageIcon, UserIcon } from '@/public/icons'
 import clsx from 'clsx'
 import ClientDetailsContent from './ClientDetailsContent'
@@ -87,48 +87,62 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({
   }
 
   if (isLoading) {
-    const tabs = [
+    const skeletonTabs = [
+      { id: 'notes' },
       { id: 'documents' },
       { id: 'sms' },
       { id: 'emails' },
-      { id: 'notes' },
       { id: 'contacts' },
       { id: 'addresses' },
-      ...(type === 'customer'
-        ? [{ id: 'tasks' }, { id: 'estimates' }, { id: 'invoices' }, { id: 'work-orders' }]
-        : [])
+      ...(type === 'customer' ? [{ id: 'tasks' }, { id: 'estimates' }, { id: 'invoices' }, { id: 'work-orders' }] : [])
     ]
 
     return (
       <div className='space-y-5 mt-2.5'>
+        {/* Client Details Content Skeleton */}
         <div className='rounded-xl border border-border/50 bg-bg-3'>
           <div className='grid grid-cols-1 lg:grid-cols-2'>
+            {/* Left Column */}
             <div className='p-5 space-y-4'>
-              <Skeleton className='h-6 w-52' />
-              <Skeleton className='h-4 w-60' />
-              <Skeleton className='h-4 w-72' />
-              <Skeleton className='h-4 w-56' />
-              <Skeleton className='h-4 w-64' />
+              <Skeleton className='h-7 w-48' />
+              <div className='space-y-3'>
+                <Skeleton className='h-4 w-64' />
+                <Skeleton className='h-4 w-72' />
+                <Skeleton className='h-4 w-60' />
+                <Skeleton className='h-4 w-56' />
+              </div>
             </div>
+            {/* Right Column */}
             <div className='p-5 space-y-4 border-l border-border/50'>
-              <Skeleton className='h-6 w-36' />
-              <Skeleton className='h-4 w-72' />
-              <Skeleton className='h-4 w-52' />
-              <Skeleton className='h-4 w-48' />
+              <Skeleton className='h-7 w-40' />
+              <div className='space-y-3'>
+                <Skeleton className='h-4 w-56' />
+                <Skeleton className='h-4 w-64' />
+                <Skeleton className='h-4 w-52' />
+              </div>
             </div>
           </div>
         </div>
 
-        <div className='flex items-center gap-2 flex-wrap'>
-          {tabs.map(tab => (
-            <Skeleton key={tab.id} className='h-8 w-24 rounded-md' />
+        {/* Tabs Skeleton */}
+        <div className='bg-accent/40 border border-accent/40 rounded-xl p-1 flex items-center gap-2 flex-wrap overflow-x-auto'>
+          {skeletonTabs.map(tab => (
+            <Skeleton key={tab.id} className='h-10 w-28 rounded-lg flex-shrink-0' />
           ))}
         </div>
 
-        <div className='space-y-3'>
-          <Skeleton className='h-10 w-full rounded-lg' />
-          <Skeleton className='h-10 w-full rounded-lg' />
-          <Skeleton className='h-10 w-2/3 rounded-lg' />
+        {/* Tab Content Skeleton */}
+        <div className='space-y-4 rounded-lg border border-border/50 bg-bg-3 p-5'>
+          <div className='space-y-3'>
+            <Skeleton className='h-6 w-40' />
+            <Skeleton className='h-4 w-full' />
+            <Skeleton className='h-4 w-5/6' />
+          </div>
+          <div className='pt-4 space-y-3'>
+            <Skeleton className='h-10 w-full rounded-lg' />
+            <Skeleton className='h-10 w-full rounded-lg' />
+            <Skeleton className='h-10 w-3/4 rounded-lg' />
+          </div>
         </div>
       </div>
     )
@@ -163,7 +177,7 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({
       label: 'Emails',
       icon: MessageIcon
     },
-    
+
     {
       id: 'contacts',
       label: 'Contacts',
@@ -202,36 +216,28 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({
 
   return (
     <div className=''>
-      <ClientDetailsContent
-        clientData={clientData}
-        canEditClient={canEditClient}
-        handleEditClient={handleEditClient}
-      />
+      <ClientDetailsContent clientData={clientData} canEditClient={canEditClient} handleEditClient={handleEditClient} />
 
-      <div className='my-4 flex items-center gap-2 flex-wrap'>
-        {tabs.map(tab => {
-          const Icon = tab.icon
+      <Tabs value={activeTab} onValueChange={setActiveTab} className='my-4'>
+        <TabsList className='h-auto w-full justify-start overflow-x-auto bg-accent/40 border-accent/40 rounded-xl p-1'>
+          {tabs.map(tab => {
+            const Icon = tab.icon
 
-          return (
-            <Button
-              key={tab.id}
-              variant={activeTab === tab.id ? 'default' : 'ghost'}
-              size='sm'
-              type='button'
-              className={clsx(
-                'gap-2 border',
-                activeTab === tab.id
-                  ? 'bg-light text-bg hover:bg-light/90 border-light'
-                  : 'text-light hover:text-light border-border/50'
-              )}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <Icon className='h-4 w-4' />
-              <span>{tab.label}</span>
-            </Button>
-          )
-        })}
-      </div>
+            return (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className={clsx(
+                  'h-10 gap-2 whitespace-nowrap rounded-lg border border-transparent px-3 text-accent-foreground/50 data-[state=active]:border-accent data-[state=active]:bg-accent/90 data-[state=active]:text-accent-foreground'
+                )}
+              >
+                <Icon className='h-4 w-4' />
+                <span>{tab.label}</span>
+              </TabsTrigger>
+            )
+          })}
+        </TabsList>
+      </Tabs>
 
       {activeTab === 'documents' && clientId && <ClientDocuments clientId={clientId} />}
       {activeTab === 'sms' && clientId && <ClientSmsView clientId={clientId} client={clientData} />}
