@@ -217,11 +217,11 @@ const ClientContacts = ({
             <Search />
           </InputGroupAddon>
         </InputGroup>
-        {hasActiveFilters() && (
+        {/* {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
             Clear
           </Button>
-        )}
+        )} */}
       </div>
       <Button
         variant='default'

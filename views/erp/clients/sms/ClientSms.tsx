@@ -213,11 +213,6 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
             <Search />
           </InputGroupAddon>
         </InputGroup>
-        {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
-            Clear
-          </Button>
-        )}
       </div>
       <Button
         variant='default'

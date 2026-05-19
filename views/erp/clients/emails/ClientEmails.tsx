@@ -175,11 +175,11 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
             <Search />
           </InputGroupAddon>
         </InputGroup>
-        {hasActiveFilters() && (
+        {/* {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
             Clear
           </Button>
-        )}
+        )} */}
       </div>
       <Button
         variant='default'

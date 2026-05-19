@@ -55,3 +55,5 @@ export * from './products/purchase_orders'
 
 export * from './products/material_jobs'
 export * from './schedules'
+
+export * from './organizationses';

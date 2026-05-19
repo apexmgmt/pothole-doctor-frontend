@@ -49,17 +49,16 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
     }
   }, [reduxUser, propUser])
 
-  const effectiveUser = reduxUser || propUser || cookieUser || {}
+  const effectiveUser: User | null = reduxUser || propUser || cookieUser || null
 
-  const firstName = effectiveUser.first_name || ''
-  const lastName = effectiveUser.last_name || ''
-  const fullName = effectiveUser.name || [firstName, lastName].filter(Boolean).join(' ') || (effectiveUser?.user_type === 'contractor' || effectiveUser?.user_type === 'referral' ? effectiveUser?.userable?.company?.name : undefined) || 'User'
+  const firstName = effectiveUser?.first_name ?? ''
+  const lastName = effectiveUser?.last_name ?? ''
+  const fullName = [firstName, lastName].filter(Boolean).join(' ') || (effectiveUser?.user_type === 'contractor' || effectiveUser?.user_type === 'referral' ? effectiveUser?.userable?.company?.name : undefined) || 'User'
 
-  const email = effectiveUser.email || '---'
+  const email = effectiveUser?.email ?? '---'
 
   const avatar =
-    generateFileUrl(effectiveUser.profile_picture) ||
-    generateFileUrl(effectiveUser.userable?.profile_picture) ||
+    generateFileUrl(effectiveUser?.userable?.profile_picture) ||
     '/images/avatar.webp'
 
   const initials = fullName

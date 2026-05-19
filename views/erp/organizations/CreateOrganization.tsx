@@ -17,21 +17,10 @@ import { SpinnerCustom } from '@/components/ui/spinner'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import Link from 'next/link'
+import { OrganizationCreatePayload } from '@/types'
 
-type FormValues = {
-  first_name: string
-  last_name: string
-  email: string
-  phone: string
-  user_type: string
-  password: string
-  password_confirmation: string
-  subdomain: string
-  address: string
-  company_name: string
-}
 
-const defaultValues: FormValues = {
+const defaultValues: OrganizationCreatePayload = {
   first_name: '',
   last_name: '',
   email: '',
@@ -47,7 +36,7 @@ const defaultValues: FormValues = {
 const CreateOrganization: React.FC = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const form = useForm<FormValues>({ defaultValues, mode: 'onSubmit' })
+  const form = useForm<OrganizationCreatePayload>({ defaultValues, mode: 'onSubmit' })
   const { handleSubmit, control, getValues, reset, formState } = form
   const { isSubmitting } = formState
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -56,7 +45,7 @@ const CreateOrganization: React.FC = () => {
     dispatch(setPageTitle('Manage Companies'))
   }, [])
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: OrganizationCreatePayload) => {
     setIsLoading(true)
 
     try {
@@ -78,8 +67,6 @@ const CreateOrganization: React.FC = () => {
       setIsLoading(false)
     }
   }
-
-  const onCancel = () => reset()
 
   return (
     <div>
