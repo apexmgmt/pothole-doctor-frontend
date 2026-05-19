@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import ProfileTabs from '@/views/erp/profile/ProfileTabs'
 import { GeneralTabIcon, SecurityIcon } from '@/public/icons'
 import GeneralTab from './GeneralTab'
+import { Organization } from '@/types'
 import SecurityTab from './SecurityTab'
 
 interface OrganizationDetailsProps {
@@ -160,7 +161,10 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({ companyId, fe
             {activeTab === 'security' ? (
               <SecurityTab companyId={String(companyData.id)} onPasswordChanged={fetchOrganizationDetails} />
             ) : (
-              <GeneralTab companyData={companyData} />
+              <GeneralTab
+                companyData={companyData}
+                onCompanyUpdated={(updatedCompany: Organization) => setCompanyData(updatedCompany)}
+              />
             )}
           </main>
         </div>
