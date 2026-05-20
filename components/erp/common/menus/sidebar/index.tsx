@@ -268,18 +268,9 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           exactMatch: false,
           permissions: ['Manage Product', 'Manage Work Order']
         },
-        {
-          id: 'product-categories',
-          label: 'Categories',
-          href: '/erp/products/categories',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Category']
-        }
       ],
       exactMatch: true,
-      permissions: ['Manage Product', 'Manage Category', 'Manage Work Order']
+      permissions: ['Manage Product', 'Manage Work Order']
     },
     {
       id: 'settings',
@@ -478,6 +469,14 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           hasSubItems: true,
           subItems: [
             {
+          id: 'product-categories',
+          label: 'Product Categories',
+          href: '/erp/settings/product-categories',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Category']
+        },{
               id: 'interest-levels',
               label: 'Interest Levels',
               href: '/erp/settings/interest-levels',
@@ -488,7 +487,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
             }
           ],
           exactMatch: false,
-          permissions: ['Manage Lead Interest']
+          permissions: ['Manage Lead Interest', 'Manage Category']
         },
 
         {
