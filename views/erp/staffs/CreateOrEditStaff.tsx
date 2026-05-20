@@ -17,7 +17,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import OrganizationService from '@/services/api/organizations.service'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
