@@ -23,6 +23,7 @@ import RoleService from '@/services/api/role.service'
 
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
+import Link from 'next/link'
 
 interface CreateOrEditRoleProps {
   mode?: 'create' | 'edit'
@@ -190,11 +191,12 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
             <Button
               type='button'
               variant='outline'
-              onClick={onCancel}
-              disabled={form.formState.isSubmitting}
               className='flex-1 border-border text-light disabled:opacity-50'
+              asChild
             >
-              Reset
+              <Link href='/erp/roles' prefetch>
+                Cancel
+              </Link>
             </Button>
           </div>
         </form>
