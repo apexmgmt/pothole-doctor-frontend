@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
-import { Search } from 'lucide-react'
+import { Search, ShoppingCartIcon } from 'lucide-react'
 
 import { toast } from 'sonner'
 
@@ -320,6 +320,24 @@ const ProductStock: React.FC<ProductsProps> = ({
       header: 'Location Notes',
       cell: (row: Product) => <span className='font-medium'>{row.location_notes ?? '—'}</span>,
       sortable: true
+    },
+    {
+      id: 'action',
+      header: 'Action',
+      cell: (row: Product) => (
+        <Button
+          variant='ghost'
+          size='icon'
+          onClick={() =>
+            router.push(
+              `/erp/products/purchase-orders?open_po_modal=create&po_product_id=${encodeURIComponent(row.id)}`
+            )
+          }
+        >
+          <ShoppingCartIcon className='w-6 h-6' />
+        </Button>
+      ),
+      sortable: false
     }
   ]
 
