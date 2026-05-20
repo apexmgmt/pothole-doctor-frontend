@@ -1,0 +1,68 @@
+import { Controller, FieldValues, Path } from 'react-hook-form';
+
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+import { FieldComponentProps } from './types';
+
+type SelectFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>;
+
+const SelectField = <T extends FieldValues>({
+  name,
+  placeholder,
+  control,
+  rules,
+  selectOptions,
+  value,
+  onChange,
+  onBlur,
+  className = ''
+}: SelectFieldProps<T>) => {
+  if (!selectOptions) return null;
+
+  const renderSelect = (selectedValue: string, setSelectedValue: (nextValue: string) => void) => (
+    <Select
+      onValueChange={nextValue => {
+        setSelectedValue(nextValue);
+        onBlur?.(nextValue);
+      }}
+      value={selectedValue}
+    >
+      <SelectTrigger className={`w-full ${className}`}>
+        <SelectValue placeholder={placeholder ?? ''} />
+      </SelectTrigger>
+      <SelectContent position="popper">
+        {selectOptions.length > 0 && (
+          <SelectGroup>
+            {selectOptions.map((opt, idx) => (
+              <SelectItem key={idx} value={opt.value} disabled={!!opt?.disabled}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        )}
+      </SelectContent>
+    </Select>
+  );
+
+  if (!control || !name) {
+    return renderSelect(String(value ?? ''), nextValue => {
+      onChange?.(nextValue);
+    });
+  }
+
+  return (
+    <Controller
+      name={name as Path<T>}
+      control={control}
+      rules={rules}
+      render={({ field }) =>
+        renderSelect(String(field.value ?? value ?? ''), nextValue => {
+          field.onChange(nextValue);
+          onChange?.(nextValue);
+        })
+      }
+    />
+  );
+};
+
+export default SelectField;

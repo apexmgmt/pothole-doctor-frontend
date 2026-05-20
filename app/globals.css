@@ -314,7 +314,7 @@
 }
 
 .rbc-time-view .rbc-row {
-  min-height: auto !important;
+  min-block-size: auto !important;
 }
 .schedule-calendar-shell .rbc-header {
   border-block-end: 1px solid rgba(255, 255, 255, 0.08);
@@ -353,15 +353,15 @@
 
 .schedule-calendar-shell .rbc-header + .rbc-header,
 .schedule-calendar-shell .rbc-day-bg + .rbc-day-bg {
-  border-left: 1px solid #ffffff14 !important;
+  border-inline-start: 1px solid #ffffff14 !important;
 }
 
 .rbc-day-slot .rbc-time-slot {
-  border-top: 1px solid #ffffff14 !important;
+  border-block-start: 1px solid #ffffff14 !important;
 }
 
 .rbc-time-header.rbc-overflowing {
-  border-right: 1px solid #ffffff14 !important;
+  border-inline-end: 1px solid #ffffff14 !important;
 }
 
 .schedule-calendar-shell .rbc-day-bg {
@@ -621,3 +621,56 @@ input[type='time']::-webkit-calendar-picker-indicator {
     background: transparent !important;
   }
 }
+
+/* Google dropdown container */
+.pac-container {
+  @apply bg-popover text-white rounded-lg shadow-lg overflow-hidden;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.875rem;
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+  border: 1px solid var(--border);
+  padding-block: 0.25rem 0;
+  padding-inline: 0.25rem;
+}
+
+/* each suggestion item */
+.pac-item {
+  @apply px-2 py-0.5;
+  transition: background-color 0.2s;
+  border-radius: 0.5rem;
+  border: none;
+}
+
+/* hovered / selected item */
+.pac-item:hover,
+.pac-item.pac-item-selected {
+  @apply bg-accent text-white;
+}
+
+/* bolded matched part */
+.pac-item-query {
+  @apply font-semibold text-white;
+}
+
+.pac-icon {
+  display: none;
+}
+
+.pac-item span {
+  @apply text-white;
+}
+
+/* scroll styling */
+.pac-container::-webkit-scrollbar {
+  inline-size: 6px;
+}
+
+.pac-container::-webkit-scrollbar-thumb {
+  @apply bg-muted rounded-full;
+}
+
+.pac-container::-webkit-scrollbar-track {
+  @apply bg-white/10 rounded-full;
+}
+/* Google dropdown container ends */

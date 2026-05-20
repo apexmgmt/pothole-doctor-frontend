@@ -170,6 +170,7 @@ const BasicClientFields: React.FC<BasicClientFieldsProps> = ({
             )}
           />
         </div>
+
         <div className='space-y-2'>
           <Label htmlFor='phone'>
             Main Phone <span className='text-red-500'>*</span>
@@ -270,6 +271,7 @@ const BasicClientFields: React.FC<BasicClientFieldsProps> = ({
             )}
           />
         </div>
+
         <div className='space-y-2'>
           <Label htmlFor='pre_qualified_amount'>Pre-qualified Financing Amount</Label>
           <Controller

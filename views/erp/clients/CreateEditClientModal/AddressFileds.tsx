@@ -13,6 +13,7 @@ import { MultiSelect, Select, SelectTrigger, SelectContent, SelectItem, SelectVa
 import { ClientPayload, CountryWithStates, ServiceType } from '@/types'
 import { Textarea } from '@/components/ui/textarea'
 import { useGoogleMaps } from '@/hocs/GoogleMapProvider'
+import GooglePlaceField from '@/components/form/fields/GooglePlaceField'
 
 interface AddressFieldsProps {
   methods: UseFormReturn<ClientPayload>
