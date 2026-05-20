@@ -1,72 +1,28 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import OrganizationService from '@/services/api/organizations.service'
 import { Skeleton } from '@/components/ui/skeleton'
 import ProfileTabs from '@/views/erp/profile/ProfileTabs'
 import { GeneralTabIcon, SecurityIcon } from '@/public/icons'
+import { Staff } from '@/types'
+import { generateFileUrl } from '@/utils/utility'
 import GeneralTab from './GeneralTab'
-import { Organization } from '@/types'
 import SecurityTab from './SecurityTab'
 
-interface OrganizationDetailsProps {
-  companyId: string | null
-  onCompanyUpdated?: (updatedCompany: Organization) => void
-  impersonateUser?: (userId: string) => Promise<void>
-  isImpersonating?: boolean
-  onStatusToggle?: (companyId: string) => Promise<void>
-  statusLoading?: boolean
+interface StaffDetailsProps {
+  staffData: Staff | null
+  setStaffData: (options: Staff | null) => void
+  fetchData?: () => void
+  canEditStaff?: boolean
 }
 
-const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
-  companyId,
-  onCompanyUpdated,
-  impersonateUser,
-  isImpersonating = false,
-  onStatusToggle,
-  statusLoading = false
-}) => {
-  const [companyData, setCompanyData] = useState<any>(null)
-  const [isLoadingCompany, setIsLoadingCompany] = useState(false)
+const StaffDetails: React.FC<StaffDetailsProps> = ({ staffData, setStaffData, fetchData, canEditStaff }) => {
   const [activeTab, setActiveTab] = useState<string>('general')
 
-  const fetchOrganizationDetails = async () => {
-    if (!companyId) {
-      setCompanyData(null)
-
-      return
-    }
-
-    setIsLoadingCompany(true)
-
-    OrganizationService.show(companyId)
-      .then(response => {
-        setCompanyData(response.data)
-      })
-      .catch(error => {
-        console.error('Error fetching company details:', error)
-      })
-      .finally(() => {
-        setIsLoadingCompany(false)
-      })
-  }
-
-  useEffect(() => {
-    fetchOrganizationDetails()
-  }, [companyId])
-
-  if (!companyId) {
-    return (
-      <div className='flex items-center justify-center h-64'>
-        <p className='text-gray'>No company selected</p>
-      </div>
-    )
-  }
-
-  if (isLoadingCompany) {
+  if (!staffData) {
     return (
       <div className='space-y-5'>
         <div className='relative bg-border/40 rounded-lg border border-border/40 overflow-hidden'>
@@ -93,7 +49,6 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
               <Skeleton className='h-5 w-40' />
               <Skeleton className='h-12 w-full' />
               <Skeleton className='h-12 w-full' />
-              <Skeleton className='h-12 w-36 ml-auto' />
             </div>
           </div>
         </div>
@@ -101,15 +56,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
     )
   }
 
-  if (!companyData) {
-    return (
-      <div className='flex items-center justify-center h-64'>
-        <p className='text-gray'>No company selected</p>
-      </div>
-    )
-  }
-
-  const fullName = `${companyData.first_name || ''} ${companyData.last_name || ''}`.trim()
+  const fullName = `${staffData.first_name || ''} ${staffData.last_name || ''}`.trim()
 
   const initials = fullName
     .split(' ')
@@ -144,17 +91,17 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
 
           <div className='absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 z-10'>
             <Avatar className='h-[86px] w-[86px] border border-light shadow-lg'>
-              <AvatarImage src={companyData.userable?.profile_picture || ''} alt={fullName} />
+              <AvatarImage src={generateFileUrl(staffData.userable?.profile_picture) || ''} alt={fullName} />
               <AvatarFallback className='bg-accent text-accent-foreground text-2xl font-semibold'>
-                {initials || 'C'}
+                {initials || 'S'}
               </AvatarFallback>
             </Avatar>
           </div>
         </div>
 
         <div className='pt-[60px] pb-5 px-5 text-center'>
-          <h2 className='text-base font-semibold text-light-2 mb-2'>{fullName || 'Company'}</h2>
-          <p className='text-gray text-sm'>{companyData.email || 'N/A'}</p>
+          <h2 className='text-base font-semibold text-light-2 mb-2'>{fullName || 'Staff'}</h2>
+          <p className='text-gray text-sm'>{staffData.email || 'N/A'}</p>
         </div>
       </div>
 
@@ -166,18 +113,13 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
 
           <main className='flex-1'>
             {activeTab === 'security' ? (
-              <SecurityTab companyId={String(companyData.id)} onPasswordChanged={fetchOrganizationDetails} />
+              <SecurityTab staffId={String(staffData.id)} canEditStaff={canEditStaff} />
             ) : (
               <GeneralTab
-                companyData={companyData}
-                onCompanyUpdated={(updatedCompany: Organization) => {
-                  setCompanyData(updatedCompany)
-                  onCompanyUpdated?.(updatedCompany)
-                }}
-                impersonateUser={impersonateUser}
-                isImpersonating={isImpersonating}
-                onStatusToggle={onStatusToggle}
-                statusLoading={statusLoading}
+                staffData={staffData}
+                canEditStaff={canEditStaff}
+                onStaffUpdated={updatedStaff => setStaffData(updatedStaff)}
+                fetchData={fetchData}
               />
             )}
           </main>
@@ -187,4 +129,4 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
   )
 }
 
-export default OrganizationDetails
+export default StaffDetails

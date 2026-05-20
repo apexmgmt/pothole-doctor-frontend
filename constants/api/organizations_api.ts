@@ -6,6 +6,6 @@ export const ORGANIZATION_STATUS_CHANGE: string = '/v1/organization-status-chang
 
 /**
  * Organization Password Change API: PUT
- * request = {password: required, confirmation_password: required}
+ * request = {password: required, password_confirmation: required}
  */
 export const ORGANIZATION_PASSWORD_CHANGE: string = '/v1/organization-password-change/' // + organizationId

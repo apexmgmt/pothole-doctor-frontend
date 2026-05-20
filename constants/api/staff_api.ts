@@ -15,3 +15,10 @@ export const STAFFS: string = '/v1/staffs/'
 export const STAFFS_TENANT: string = '/v1/tenant/staffs/'
 export const STAFFS_ALL: string = '/v1/get-staffs'
 export const STAFFS_ALL_TENANT: string = '/v1/tenant/get-staffs'
+
+/**
+ * @method: PUT - Change password for a specific staff entry by ID. /id
+ * @request: {password, password_confirmation}
+ */
+export const STAFF_CHANGE_PASSWORD: string = '/v1/staff-password-change/' // + staffId
+export const STAFF_CHANGE_PASSWORD_TENANT: string = '/v1/tenant/staff-password-change/' // + staffId
