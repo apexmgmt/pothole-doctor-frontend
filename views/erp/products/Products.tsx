@@ -226,13 +226,13 @@ const Products: React.FC<ProductsProps> = ({
       id: 'vendor',
       header: 'Vendor',
       cell: (row: Product) => <span className='font-medium'>{row?.vendor?.first_name ?? ''}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'category',
       header: 'Category',
       cell: (row: Product) => <span className='font-medium'>{row?.category?.name ?? ''}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'sku',
@@ -246,25 +246,25 @@ const Products: React.FC<ProductsProps> = ({
       cell: (row: Product) => (
         <span className='font-medium'>{row.vendor_product_name || row.private_product_name}</span>
       ),
-      sortable: true
+      sortable: false
     },
     {
       id: 'description',
       header: 'Description',
       cell: (row: Product) => <span className='font-medium'>{row.description}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'style',
       header: 'Style',
       cell: (row: Product) => <span className='font-medium'>{row.vendor_style || row.private_style}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'color',
       header: 'Color',
       cell: (row: Product) => <span className='font-medium'>{row.vendor_color || row.private_color}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'coverage',
@@ -282,14 +282,14 @@ const Products: React.FC<ProductsProps> = ({
       sortable: false
     },
     {
-      id: 'product_price',
+      id: 'selling_price',
       header: 'Customer Price',
       cell: (row: Product) => (
         <span className='font-medium'>
           {row?.selling_price != null ? formatCurrency(row.selling_price) : '—'}/{row.selling_unit?.name}
         </span>
       ),
-      sortable: false
+      sortable: true
     },
     ...(!hideActionButton
       ? ([
@@ -327,7 +327,17 @@ const Products: React.FC<ProductsProps> = ({
                               onClick={() => handleDeleteProduct(row.id)}
                             />
                           ]
-                        : [])
+                        : []),
+                      <Button
+                        variant='ghost'
+                        onClick={() =>
+                          router.push(
+                            `/erp/products/stock?tab=inventory&inventory_product_id=${encodeURIComponent(row.id)}`
+                          )
+                        }
+                      >
+                        Show Inventory
+                      </Button>
                     ]}
                   />
                 )}

@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
+import ProductService from '@/services/api/products/products.service'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import PurchaseOrderService from '@/services/api/products/purchase_orders.service'
 import { BusinessLocation, Courier, Product, ProductCategory, ServiceType, Vendor, Warehouse } from '@/types'
@@ -25,6 +26,7 @@ interface CreateOrEditPurchaseOrderModalProps {
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
   purchaseOrderId?: string
+  preselectedProductId?: string
   vendors: Vendor[]
   warehouses: Warehouse[]
   businessLocations: BusinessLocation[]
@@ -39,6 +41,7 @@ const CreateOrEditPurchaseOrderModal = ({
   onOpenChange,
   onSuccess,
   purchaseOrderId,
+  preselectedProductId,
   vendors,
   warehouses,
   businessLocations,
@@ -68,6 +71,10 @@ const CreateOrEditPurchaseOrderModal = ({
     }
   })
 
+  const {
+    formState: { isSubmitting }
+  } = form
+
   const warehouseType = form.watch('warehouse_type')
   const shippingCost = Number(form.watch('est_shipping_cost')) || 0
   const taxAmount = Number(form.watch('tax_amount')) || 0
@@ -80,6 +87,23 @@ const CreateOrEditPurchaseOrderModal = ({
       setSelectedVendorId('')
       setAddedProducts([])
       setSelectedProductRows([])
+
+      if (preselectedProductId) {
+        setIsLoading(true)
+        ProductService.show(preselectedProductId)
+          .then(response => {
+            const product = response.data as Product
+
+            if (product?.vendor_id) {
+              setSelectedVendorId(product.vendor_id)
+              form.setValue('vendor_id', product.vendor_id)
+            }
+
+            setSelectedProductRows([product])
+          })
+          .catch(() => toast.error('Failed to preselect product'))
+          .finally(() => setIsLoading(false))
+      }
 
       return
     }
@@ -124,7 +148,7 @@ const CreateOrEditPurchaseOrderModal = ({
         .catch(() => toast.error('Failed to load purchase order details'))
         .finally(() => setIsLoading(false))
     }
-  }, [open])
+  }, [open, mode, purchaseOrderId, preselectedProductId])
 
   useEffect(() => {
     form.setValue('vendor_id', selectedVendorId)
@@ -283,7 +307,7 @@ const CreateOrEditPurchaseOrderModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Add New Purchase Order' : 'Edit Purchase Order'}
       description=''
-      maxWidth='5xl'
+      maxWidth='7xl'
       isLoading={isLoading}
       loadingMessage={mode === 'create' ? 'Creating purchase order...' : 'Updating purchase order...'}
       disableClose={isLoading}
@@ -296,8 +320,8 @@ const CreateOrEditPurchaseOrderModal = ({
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancel
             </Button>
-            <Button type='submit' form='purchase-order-form' disabled={isLoading}>
-              {isLoading ? (mode === 'create' ? 'Creating...' : 'Saving...') : mode === 'create' ? 'Save' : 'Update'}
+            <Button type='submit' form='purchase-order-form' disabled={isSubmitting}>
+              {isSubmitting ? (mode === 'create' ? 'Creating...' : 'Saving...') : mode === 'create' ? 'Save' : 'Update'}
             </Button>
           </div>
         </div>

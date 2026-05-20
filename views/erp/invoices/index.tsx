@@ -49,21 +49,23 @@ const Invoices: React.FC<{
   staffs: Staff[]
   paymentTerms: PaymentTerm[]
   businessLocations: BusinessLocation[]
-  units: Unit[]
-  productCategories: ProductCategory[]
-  uomUnits: Unit[]
-  vendors: Vendor[]
+
+  // units: Unit[]
+  // productCategories: ProductCategory[]
+  // uomUnits: Unit[]
+  // vendors: Vendor[]
 }> = ({
   invoiceTypes,
   serviceTypes,
   clients,
   staffs,
   paymentTerms,
-  businessLocations,
-  units,
-  productCategories,
-  uomUnits,
-  vendors
+  businessLocations
+
+  // units,
+  // productCategories,
+  // uomUnits,
+  // vendors
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
