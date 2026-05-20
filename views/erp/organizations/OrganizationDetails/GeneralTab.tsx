@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Check, X, LogIn } from 'lucide-react'
+import { Check, X, LogIn, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -120,6 +120,31 @@ const GeneralTab = ({
     </div>
   )
 
+  const EditableDisplay = ({
+    value,
+    onClick,
+    breakAll = false,
+    preserveLineBreaks = false
+  }: {
+    value: string
+    onClick: () => void
+    breakAll?: boolean
+    preserveLineBreaks?: boolean
+  }) => (
+    <button
+      type='button'
+      onClick={onClick}
+      className='group flex-1 min-w-0 min-h-9 py-1 rounded-md flex items-start gap-3 text-left text-light hover:text-primary hover:bg-bg-3/40 transition-colors'
+    >
+      <span
+        className={`${breakAll ? 'break-all' : 'break-words'} ${preserveLineBreaks ? 'whitespace-pre-line' : ''} min-w-0`}
+      >
+        {value || ' - '}
+      </span>
+      <Pencil className='h-3.5 w-3.5 mt-1 text-gray opacity-0 group-hover:opacity-100 shrink-0 transition-opacity' />
+    </button>
+  )
+
   return (
     <div className='space-y-5'>
       <div className='flex items-center justify-between'>
@@ -137,7 +162,7 @@ const GeneralTab = ({
       </div>
 
       <div className='space-y-5'>
-        <div className='grid grid-cols-1 2xl:grid-cols-2 gap-6'>
+        <div className='grid grid-cols-1 gap-6'>
           <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
             <label className='text-xs text-gray uppercase block w-25'>Name : </label>
             {editingField === 'name' ? (
@@ -159,13 +184,10 @@ const GeneralTab = ({
                 <ActionButtons />
               </div>
             ) : (
-              <button
-                type='button'
+              <EditableDisplay
+                value={`${companyData.first_name || ''} ${companyData.last_name || ''}`.trim()}
                 onClick={() => openFieldEditor('name')}
-                className='text-light text-left hover:text-primary transition-colors'
-              >
-                {companyData.first_name || ''} {companyData.last_name || ''}
-              </button>
+              />
             )}
           </div>
         </div>
@@ -183,13 +205,10 @@ const GeneralTab = ({
                 <ActionButtons />
               </div>
             ) : (
-              <button
-                type='button'
+              <EditableDisplay
+                value={companyData.userable?.company_name || ''}
                 onClick={() => openFieldEditor('company_name')}
-                className='text-light text-left hover:text-primary transition-colors'
-              >
-                {companyData.userable?.company_name || ' - '}
-              </button>
+              />
             )}
           </div>
           <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
@@ -215,13 +234,7 @@ const GeneralTab = ({
                 <ActionButtons />
               </div>
             ) : (
-              <button
-                type='button'
-                onClick={() => openFieldEditor('phone')}
-                className='text-light text-left hover:text-primary transition-colors'
-              >
-                {companyData.userable?.phone || ' - '}
-              </button>
+              <EditableDisplay value={companyData.userable?.phone || ''} onClick={() => openFieldEditor('phone')} />
             )}
           </div>
         </div>
@@ -239,8 +252,8 @@ const GeneralTab = ({
           </div>
         </div>
 
-        <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
-          <label className='text-xs text-gray uppercase block w-25'>Address : </label>
+        <div className='flex min-[480px]:items-start items-start gap-2.5 flex-col min-[480px]:flex-row'>
+          <label className='text-xs text-gray uppercase block w-25 mt-2.5'>Address : </label>
           {editingField === 'address' ? (
             <div className='flex w-full items-start gap-2'>
               <Textarea
@@ -248,18 +261,17 @@ const GeneralTab = ({
                 value={draft.address}
                 onChange={e => updateDraft('address', e.target.value)}
                 placeholder='Address'
-                className='bg-bg-3 border-border text-light placeholder:text-gray min-h-9 flex-1'
+                className='bg-bg-3 border-border text-light placeholder:text-gray  flex-1'
               />
               <ActionButtons />
             </div>
           ) : (
-            <button
-              type='button'
+            <EditableDisplay
+              value={companyData.userable?.address || ''}
               onClick={() => openFieldEditor('address')}
-              className='text-light text-left hover:text-primary transition-colors'
-            >
-              {companyData.userable?.address || ' - '}
-            </button>
+              breakAll={false}
+              preserveLineBreaks
+            />
           )}
         </div>
       </div>
