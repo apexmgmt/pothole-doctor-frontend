@@ -14,10 +14,21 @@ import SecurityTab from './SecurityTab'
 
 interface OrganizationDetailsProps {
   companyId: string | null
-  fetchData?: () => void
+  onCompanyUpdated?: (updatedCompany: Organization) => void
+  impersonateUser?: (userId: string) => Promise<void>
+  isImpersonating?: boolean
+  onStatusToggle?: (companyId: string) => Promise<void>
+  statusLoading?: boolean
 }
 
-const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({ companyId, fetchData }) => {
+const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
+  companyId,
+  onCompanyUpdated,
+  impersonateUser,
+  isImpersonating = false,
+  onStatusToggle,
+  statusLoading = false
+}) => {
   const [companyData, setCompanyData] = useState<any>(null)
   const [isLoadingCompany, setIsLoadingCompany] = useState(false)
   const [activeTab, setActiveTab] = useState<string>('general')
@@ -34,10 +45,6 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({ companyId, fe
     OrganizationService.show(companyId)
       .then(response => {
         setCompanyData(response.data)
-
-        if (fetchData) {
-          fetchData()
-        }
       })
       .catch(error => {
         console.error('Error fetching company details:', error)
@@ -163,7 +170,14 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({ companyId, fe
             ) : (
               <GeneralTab
                 companyData={companyData}
-                onCompanyUpdated={(updatedCompany: Organization) => setCompanyData(updatedCompany)}
+                onCompanyUpdated={(updatedCompany: Organization) => {
+                  setCompanyData(updatedCompany)
+                  onCompanyUpdated?.(updatedCompany)
+                }}
+                impersonateUser={impersonateUser}
+                isImpersonating={isImpersonating}
+                onStatusToggle={onStatusToggle}
+                statusLoading={statusLoading}
               />
             )}
           </main>

@@ -1,14 +1,14 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Check, X } from 'lucide-react'
+import { Check, X, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 
-import EditButton from '@/components/erp/common/buttons/EditButton'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import OrganizationService from '@/services/api/organizations.service'
+import OrganizationStatusSwitch from '@/views/erp/organizations/OrganizationStatusSwitch'
 import { Organization, OrganizationEditPayload } from '@/types'
 import { appUrl } from '@/utils/utility'
 
@@ -17,6 +17,10 @@ type EditableField = 'name' | 'company_name' | 'phone' | 'address' | null
 interface GeneralTabProps {
   companyData: Organization
   onCompanyUpdated?: (updatedCompany: Organization) => void
+  impersonateUser?: (userId: string) => Promise<void>
+  isImpersonating?: boolean
+  onStatusToggle?: (companyId: string) => Promise<void>
+  statusLoading?: boolean
 }
 
 const getPayloadFromCompany = (company: Organization): OrganizationEditPayload => ({
@@ -28,7 +32,14 @@ const getPayloadFromCompany = (company: Organization): OrganizationEditPayload =
   company_name: company.userable?.company_name || ''
 })
 
-const GeneralTab = ({ companyData, onCompanyUpdated }: GeneralTabProps) => {
+const GeneralTab = ({
+  companyData,
+  onCompanyUpdated,
+  impersonateUser,
+  isImpersonating = false,
+  onStatusToggle,
+  statusLoading = false
+}: GeneralTabProps) => {
   const [editingField, setEditingField] = useState<EditableField>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [draft, setDraft] = useState<OrganizationEditPayload>(() => getPayloadFromCompany(companyData))
@@ -113,14 +124,16 @@ const GeneralTab = ({ companyData, onCompanyUpdated }: GeneralTabProps) => {
     <div className='space-y-5'>
       <div className='flex items-center justify-between'>
         <h3 className='text-lg font-semibold text-light'>Company Details</h3>
-        <EditButton
-          title='Edit'
-          tooltip='Edit Company Information'
-          link={`/erp/companies/${companyData.id}/edit`}
-          variant='icon'
-          buttonSize='default'
-          buttonVariant='ghost'
-        />
+        {impersonateUser && (
+          <Button
+            onClick={() => impersonateUser(String(companyData.id))}
+            disabled={isImpersonating}
+            variant='ghost'
+            size='sm'
+          >
+            <LogIn className='h-4 w-4' /> Impersonate
+          </Button>
+        )}
       </div>
 
       <div className='space-y-5'>
@@ -210,6 +223,19 @@ const GeneralTab = ({ companyData, onCompanyUpdated }: GeneralTabProps) => {
                 {companyData.userable?.phone || ' - '}
               </button>
             )}
+          </div>
+        </div>
+        <div className='grid grid-cols-1 2xl:grid-cols-2 gap-6'>
+          <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
+            <label className='text-xs text-gray uppercase block w-25'>Status : </label>
+            <div className='flex items-center gap-2'>
+              <OrganizationStatusSwitch
+                checked={companyData.status}
+                loading={statusLoading}
+                companyId={String(companyData.id)}
+                variant='button'
+              />
+            </div>
           </div>
         </div>
 

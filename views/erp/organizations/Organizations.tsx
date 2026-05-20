@@ -165,7 +165,6 @@ const Organizations: React.FC = () => {
     dispatch(setPageTitle('Manage Companies'))
   }, [filterOptions])
 
-
   const impersonateUser = async (userId: string) => {
     try {
       AuthService.impersonate(userId)
@@ -211,7 +210,9 @@ const Organizations: React.FC = () => {
     {
       id: 'first_name',
       header: 'Name',
-      cell: (row: Organization) => <span className='font-medium'>{[row?.first_name, row?.last_name].filter(Boolean).join(' ')}</span>,
+      cell: (row: Organization) => (
+        <span className='font-medium'>{[row?.first_name, row?.last_name].filter(Boolean).join(' ')}</span>
+      ),
       sortable: true
     },
     {
@@ -220,7 +221,7 @@ const Organizations: React.FC = () => {
       cell: (row: Organization) => <span>{row?.userable?.phone}</span>,
       sortable: true
     },
-    
+
     {
       id: 'address',
       header: 'Job Address',
@@ -294,6 +295,30 @@ const Organizations: React.FC = () => {
     setSelectedCompanyId(company?.id || null)
   }
 
+  const handleCompanyRowUpdate = (updatedCompany: Organization) => {
+    setApiResponse(prev => {
+      if (!prev?.data?.length) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        data: prev.data.map(company =>
+          company.id === updatedCompany.id
+            ? {
+                ...company,
+                ...updatedCompany,
+                userable: {
+                  ...company.userable,
+                  ...updatedCompany.userable
+                }
+              }
+            : company
+        )
+      }
+    })
+  }
+
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
@@ -360,22 +385,37 @@ const Organizations: React.FC = () => {
     try {
       await OrganizationService.changeStatus(companyId)
 
-      // Refetch data after status change
-      fetchData()
+      const updatedCompany = apiResponse?.data?.find(company => company.id === companyId)
+
+      if (updatedCompany) {
+        const company = {
+          ...updatedCompany,
+          status: !updatedCompany.status
+        }
+
+        handleCompanyRowUpdate(company as Organization)
+      }
     } catch (error) {
-      // Optionally show error
       console.error('Failed to change status', error)
     }
 
     setStatusLoading(prev => ({ ...prev, [companyId]: false }))
   }
 
+  const selectedCompany = selectedCompanyId && apiResponse?.data?.find(company => company.id === selectedCompanyId)
+
+  const companyDisplayName = selectedCompany
+    ? selectedCompany.userable?.company_name || `${selectedCompany.first_name} ${selectedCompany.last_name}`.trim()
+    : ''
+
+  const pageTitle = `Companies${selectedCompany ? ` - ${companyDisplayName}` : ''}`
+
   return (
-    <CommonLayout title='Companies' buttons={tabs}>
-      {activeTab === 'companies' && (
+    <CommonLayout title={pageTitle} buttons={tabs}>
+      <div className={activeTab === 'companies' ? 'block' : 'hidden'}>
         <CommonTable
           data={{
-            data: apiResponse?.data as Organization[] || [],
+            data: (apiResponse?.data as Organization[]) || [],
             per_page: apiResponse?.per_page || 10,
             total: apiResponse?.total || 0,
             from: apiResponse?.from || 1,
@@ -392,11 +432,18 @@ const Organizations: React.FC = () => {
           emptyMessage='No companies found'
           handleRowSelect={handleRowSelect}
         />
-      )}
+      </div>
 
-      {activeTab === 'details' && (
-        <OrganizationDetails companyId={selectedCompanyId} fetchData={fetchData} />
-      )}
+      <div className={activeTab === 'details' ? 'block' : 'hidden'}>
+        <OrganizationDetails
+          companyId={selectedCompanyId}
+          onCompanyUpdated={handleCompanyRowUpdate}
+          impersonateUser={impersonateUser}
+          isImpersonating={selectedCompanyId ? statusLoading[selectedCompanyId] : false}
+          onStatusToggle={handleStatusToggle}
+          statusLoading={selectedCompanyId ? statusLoading[selectedCompanyId] : false}
+        />
+      </div>
     </CommonLayout>
   )
 }
