@@ -21,6 +21,7 @@ import ClientTasks from './tasks/ClientTasks'
 import ClientEstimates from './estimates/ClientEstimates'
 import ClientInvoices from './invoices/ClientInvoices'
 import ClientWorkOrders from './work-orders/ClientWorkOrders'
+import { MapPinIcon } from 'lucide-react'
 
 interface ClientDetailsProps {
   type: 'lead' | 'customer'
@@ -127,7 +128,7 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({
         {/* Tabs Skeleton */}
         <div className='bg-accent/40 border border-accent/40 rounded-xl p-1 flex items-center gap-2 flex-wrap overflow-x-auto'>
           {skeletonTabs.map(tab => (
-            <Skeleton key={tab.id} className='h-10 w-28 rounded-lg flex-shrink-0' />
+            <Skeleton key={tab.id} className='h-10 w-28 rounded-lg shrink-0' />
           ))}
         </div>
 
@@ -186,7 +187,7 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({
     {
       id: 'addresses',
       label: 'Addresses',
-      icon: UserIcon
+      icon: MapPinIcon
     },
     ...(type === 'customer'
       ? [
