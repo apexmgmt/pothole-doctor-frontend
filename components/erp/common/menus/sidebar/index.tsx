@@ -480,7 +480,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
             {
               id: 'interest-levels',
               label: 'Interest Levels',
-              href: '/erp/leads/interest-levels',
+              href: '/erp/settings/interest-levels',
               icon: <LocateIcon className='h-4 w-4' />,
               hasSubItems: false,
               exactMatch: true,
