@@ -23,6 +23,7 @@ import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { CreateOrEditStaffProps, StaffPayload } from '@/types'
 import StaffService from '@/services/api/staff.service'
+import Link from 'next/link'
 
 const defaultValues: StaffPayload = {
   first_name: '',
@@ -478,14 +479,10 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
             <Button type='submit' disabled={isLoading} className='flex-1 disabled:opacity-50'>
               {isLoading ? 'Saving...' : mode === 'create' ? 'Create Staff' : 'Update Staff'}
             </Button>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={onCancel}
-              disabled={isLoading}
-              className='flex-1 border-border text-light disabled:opacity-50'
-            >
-              Reset
+            <Button type='button' variant='outline' className='flex-1 border-border text-light disabled:opacity-50'>
+              <Link href='/erp/staffs/' prefetch>
+                Cancel
+              </Link>
             </Button>
           </div>
         </form>
