@@ -167,13 +167,13 @@ const ProductStock: React.FC<ProductsProps> = ({
       id: 'vendor',
       header: 'Vendor',
       cell: (row: Product) => <span className='font-medium'>{row?.vendor?.first_name ?? ''}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'category',
       header: 'Category',
       cell: (row: Product) => <span className='font-medium'>{row?.category?.name ?? ''}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'sku',
@@ -187,7 +187,7 @@ const ProductStock: React.FC<ProductsProps> = ({
       cell: (row: Product) => (
         <span className='font-medium'>{row.vendor_product_name || row.private_product_name}</span>
       ),
-      sortable: true
+      sortable: false
     },
     {
       id: 'description',
@@ -219,31 +219,31 @@ const ProductStock: React.FC<ProductsProps> = ({
       id: 'on_hand_stock',
       header: 'On Hand',
       cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.on_hand_stock ?? 0)}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'allocated_stock',
       header: 'Allocated',
       cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.allocated_stock ?? 0)}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'prepared_stock',
       header: 'Prepared',
       cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.prepared_stock ?? 0)}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'available_stock',
       header: 'Available',
       cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.available_stock ?? 0)}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'picked_up_stock',
       header: 'Picked Up',
       cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.picked_up_stock ?? 0)}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'remaining_stock',
@@ -274,12 +274,12 @@ const ProductStock: React.FC<ProductsProps> = ({
       sortable: false
     },
     {
-      id: 'company_cost',
+      id: 'product_cost',
       header: 'Company Cost',
       cell: (row: Product) => (
         <span className='font-medium'>{row.product_cost != null ? formatCurrency(row.product_cost) : '—'}</span>
       ),
-      sortable: false
+      sortable: true
     },
     {
       id: 'work_order_cost',
@@ -293,7 +293,7 @@ const ProductStock: React.FC<ProductsProps> = ({
               : '—'}
         </span>
       ),
-      sortable: false
+      sortable: true
     },
     {
       id: 'cost_uom',
@@ -307,19 +307,19 @@ const ProductStock: React.FC<ProductsProps> = ({
       id: 'required_stock',
       header: 'Required',
       cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.required_stock ?? 0)}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'shortage_stock',
       header: 'Shortage',
       cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.shortage_stock ?? 0)}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'location_notes',
       header: 'Location Notes',
       cell: (row: Product) => <span className='font-medium'>{row.location_notes ?? '—'}</span>,
-      sortable: false
+      sortable: true
     }
   ]
 
