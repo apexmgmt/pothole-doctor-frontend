@@ -49,7 +49,7 @@ const LaborCostsModal = ({
             Cancel
           </Button>
           <Button type='submit' onClick={onSubmit} disabled={isLoading} className='flex-1'>
-            {isLoading ? 'Selecting...' : 'Select'}
+            {isLoading ? 'Importing...' : 'Import'}
           </Button>
         </div>
       }

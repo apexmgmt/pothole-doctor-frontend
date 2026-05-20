@@ -29,22 +29,24 @@ export default async function InvoicesPage() {
     clientsRes,
     staffsRes,
     paymentTermsRes,
-    businessLocationsRes,
-    unitsRes,
-    productCategoriesRes,
-    uomUnitsRes,
-    vendorsRes
+    businessLocationsRes
+
+    // unitsRes,
+    // productCategoriesRes,
+    // uomUnitsRes,
+    // vendorsRes
   ] = await Promise.allSettled([
     EstimateTypeService.getAll(),
     ServiceTypeService.getAll(),
     ClientService.getAll('customer'),
     StaffService.getAll(),
     PaymentTermsService.getAllPaymentTerms(),
-    BusinessLocationService.getAll(),
-    UnitService.getAll(),
-    ProductCategoryService.getAll(),
-    UnitService.getAll('uom'),
-    VendorService.getAll()
+    BusinessLocationService.getAll()
+
+    // UnitService.getAll(),
+    // ProductCategoryService.getAll(),
+    // UnitService.getAll('uom'),
+    // VendorService.getAll()
   ])
 
   const invoiceTypes: EstimateType[] = invoiceTypesRes.status === 'fulfilled' ? invoiceTypesRes.value.data || [] : []
@@ -56,13 +58,13 @@ export default async function InvoicesPage() {
   const businessLocations: BusinessLocation[] =
     businessLocationsRes.status === 'fulfilled' ? businessLocationsRes.value.data || [] : []
 
-  const units: Unit[] = unitsRes.status === 'fulfilled' ? unitsRes.value.data || [] : []
+  // const units: Unit[] = unitsRes.status === 'fulfilled' ? unitsRes.value.data || [] : []
 
-  const productCategories: ProductCategory[] =
-    productCategoriesRes.status === 'fulfilled' ? productCategoriesRes.value.data || [] : []
+  // const productCategories: ProductCategory[] =
+  //   productCategoriesRes.status === 'fulfilled' ? productCategoriesRes.value.data || [] : []
 
-  const uomUnits: Unit[] = uomUnitsRes.status === 'fulfilled' ? uomUnitsRes.value.data || [] : []
-  const vendors: Vendor[] = vendorsRes.status === 'fulfilled' ? vendorsRes.value.data || [] : []
+  // const uomUnits: Unit[] = uomUnitsRes.status === 'fulfilled' ? uomUnitsRes.value.data || [] : []
+  // const vendors: Vendor[] = vendorsRes.status === 'fulfilled' ? vendorsRes.value.data || [] : []
 
   return (
     <Invoices
@@ -72,10 +74,11 @@ export default async function InvoicesPage() {
       staffs={staffs}
       paymentTerms={paymentTerms}
       businessLocations={businessLocations}
-      units={units}
-      productCategories={productCategories}
-      uomUnits={uomUnits}
-      vendors={vendors}
+
+      // units={units}
+      // productCategories={productCategories}
+      // uomUnits={uomUnits}
+      // vendors={vendors}
     />
   )
 }
