@@ -32,7 +32,6 @@ import TaskIcon from '@/public/icons/TaskIcon'
 import EstimateIcon from '@/public/icons/Estimate'
 import InvoiceIcon from '@/public/icons/Invoice'
 import WorkOrderIcon from '@/public/icons/WorkOrderIcon'
-import MaterialJobsIcon from '@/public/icons/MaterialJobIcon'
 import MaterialJobIcon from '@/public/icons/MaterialJobIcon'
 
 const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user, permissions }) => {
@@ -61,29 +60,9 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
       label: 'Leads',
       icon: <Users2 className='h-4 w-4' />,
       href: '/erp/leads',
-      hasSubItems: true,
-      subItems: [
-        {
-          id: 'leads',
-          label: 'Leads',
-          href: '/erp/leads',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Lead']
-        },
-        {
-          id: 'interest-levels',
-          label: 'Interest Levels',
-          href: '/erp/leads/interest-levels',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Interest Level']
-        }
-      ],
+      hasSubItems: false,
       exactMatch: false,
-      permissions: ['Manage Lead', 'Manage Interest Level']
+      permissions: ['Manage Lead']
     },
     {
       id: 'customers',
@@ -289,18 +268,9 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           exactMatch: false,
           permissions: ['Manage Product', 'Manage Work Order']
         },
-        {
-          id: 'product-categories',
-          label: 'Categories',
-          href: '/erp/products/categories',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Category']
-        }
       ],
       exactMatch: true,
-      permissions: ['Manage Product', 'Manage Category', 'Manage Work Order']
+      permissions: ['Manage Product', 'Manage Work Order']
     },
     {
       id: 'settings',
@@ -491,6 +461,35 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           exactMatch: false,
           permissions: ['Manage Task Reminder']
         },
+        {
+          id: 'system-list',
+          label: 'System List',
+          href: '/erp/settings',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: true,
+          subItems: [
+            {
+          id: 'product-categories',
+          label: 'Product Categories',
+          href: '/erp/settings/product-categories',
+          icon: <LocateIcon className='h-4 w-4' />,
+          hasSubItems: false,
+          exactMatch: true,
+          permissions: ['Manage Category']
+        },{
+              id: 'interest-levels',
+              label: 'Interest Levels',
+              href: '/erp/settings/interest-levels',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: true,
+              permissions: ['Manage Interest Level']
+            }
+          ],
+          exactMatch: false,
+          permissions: ['Manage Lead Interest', 'Manage Category']
+        },
+
         {
           id: 'uom-units',
           label: 'Uom Units',

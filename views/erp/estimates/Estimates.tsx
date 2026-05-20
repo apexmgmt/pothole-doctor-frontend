@@ -161,7 +161,7 @@ const Estimates: React.FC<{
       id: 'estimate_number',
       header: 'Estimate#',
       cell: row => (
-        <Link href={`/erp/estimates/${row.id}`}>
+        <Link href={`/erp/estimates/${row.id}`} prefetch>
           <span className='font-medium hover:underline'>{row.estimate_number?.toString().padStart(6, '0')}</span>
         </Link>
       ),
@@ -170,20 +170,20 @@ const Estimates: React.FC<{
     {
       id: 'title',
       header: 'Title',
-      cell: (row: Estimate) => <span className='font-medium'>{row.title}</span>,
+      cell: (row: Estimate) => <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>{row.title}</Link>,
       sortable: true
     },
     {
       id: 'biding_date',
       header: 'Date',
-      cell: (row: Estimate) => <span className='font-medium'>{formatDate(row?.biding_date) || ''}</span>,
+      cell: (row: Estimate) => <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>{formatDate(row?.biding_date) || ''}</Link>,
       sortable: true
     },
     {
       id: 'company',
       header: 'Company',
-      cell: (row: Estimate) => <span className='font-medium'>{row?.client?.company?.name || ''}</span>,
-      sortable: true
+      cell: (row: Estimate) => <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>{row?.client?.company?.name || ''}</Link>,
+      sortable: false
     },
     {
       id: 'client',
@@ -191,23 +191,25 @@ const Estimates: React.FC<{
       cell: (row: Estimate) => {
         const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
 
-        return <span className='font-medium'>{parts.join(' ') || ''}</span>
+        return <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>{parts.join(' ') || ''}</Link>
       },
-      sortable: true
+      sortable: false
     },
     {
       id: 'address',
       header: 'Job Address',
       cell: (row: Estimate) => (
-        <Description
-          description={
-            row.address
-              ? `${row.address.street_address}, ${row.address.city?.name}, ${row.address.state?.name} ${row.address.zip_code}`
-              : ''
-          }
-        />
+        <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>
+          <Description
+            description={
+              row.address
+                ? `${row.address.street_address}, ${row.address.city?.name}, ${row.address.state?.name} ${row.address.zip_code}`
+                : ''
+            }
+          />
+        </Link>
       ),
-      sortable: true
+      sortable: false
     },
 
     // {
