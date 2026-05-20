@@ -327,7 +327,17 @@ const Products: React.FC<ProductsProps> = ({
                               onClick={() => handleDeleteProduct(row.id)}
                             />
                           ]
-                        : [])
+                        : []),
+                      <Button
+                        variant='ghost'
+                        onClick={() =>
+                          router.push(
+                            `/erp/products/stock?tab=inventory&inventory_product_id=${encodeURIComponent(row.id)}`
+                          )
+                        }
+                      >
+                        Show Inventory
+                      </Button>
                     ]}
                   />
                 )}

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -38,10 +38,21 @@ const ProductStock: React.FC<ProductsProps> = ({
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+
+  const [filterOptions, setFilterOptions] = useState<any>(() => {
+    const filters = getInitialFilters(searchParams)
+
+    // These are navigation params, not API filters.
+    delete filters.inventory_product_id
+    delete filters.tab
+
+    return filters
+  })
+
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [selectedInventory, setSelectedInventory] = useState<PurchaseOrder | null>(null)
   const [activeTab, setActiveTab] = useState<'stock' | 'inventory' | 'adjustment'>('stock')
+  const hasProcessedInitialNavigation = useRef(false)
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
@@ -68,6 +79,29 @@ const ProductStock: React.FC<ProductsProps> = ({
 
     return () => clearTimeout(timer)
   }, [searchValue])
+
+  useEffect(() => {
+    if (hasProcessedInitialNavigation.current) {
+      return
+    }
+
+    hasProcessedInitialNavigation.current = true
+
+    const tab = searchParams.get('tab')
+    const inventoryProductId = searchParams.get('inventory_product_id')
+
+    if (tab === 'inventory' && inventoryProductId) {
+      ProductService.show(inventoryProductId)
+        .then(response => {
+          setSelectedProduct(response.data)
+          setSelectedInventory(null)
+          setActiveTab('inventory')
+        })
+        .catch(error => {
+          toast.error(typeof error?.message === 'string' ? error.message : 'Failed to fetch product details')
+        })
+    }
+  }, [searchParams])
 
   const fetchData = async () => {
     setIsLoading(true)
