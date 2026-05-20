@@ -8,7 +8,7 @@ export default function VideoPlayer() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [videoError, setVideoError] = useState(false)
-  const videoRef = useRef(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
 
   const handlePlayClick = async () => {
     if (videoRef.current) {
@@ -78,7 +78,7 @@ export default function VideoPlayer() {
               src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
               type="video/mp4"
             /> */}
-            <source src='/video/fill_asphalt.mp4' type='video/mp4' />
+            <source src='/videos/fill_asphalt.mp4' type='video/mp4' />
             Your browser does not support the video tag.
           </video>
           {/* Play button with smooth animations */}
