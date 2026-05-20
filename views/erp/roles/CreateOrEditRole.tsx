@@ -142,41 +142,45 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
               )}
             </div>
 
-            {modules.map(module => (
-              <div key={module} className='space-y-3'>
-                <h3 className='text-base font-medium text-light capitalize border-b border-border pb-2'>{module}</h3>
-                <div className='grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 gap-4 pl-2'>
-                  {permissions[module]
-                    .sort((a, b) => a.id - b.id)
-                    .map(permission => (
-                      <FormField
-                        key={permission.id}
-                        control={form.control}
-                        name='permissions'
-                        render={({ field }) => {
-                          return (
-                            <FormItem className='flex flex-row items-start space-y-0'>
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value?.includes(permission.name)}
-                                  onCheckedChange={checked => {
-                                    return checked
-                                      ? field.onChange([...field.value, permission.name])
-                                      : field.onChange(field.value?.filter(value => value !== permission.name))
-                                  }}
-                                />
-                              </FormControl>
-                              <FormLabel className='text-sm font-normal cursor-pointer text-light'>
-                                {permission.name}
-                              </FormLabel>
-                            </FormItem>
-                          )
-                        }}
-                      />
-                    ))}
+            {modules
+              .sort((a, b) => a.localeCompare(b))
+              .map(module => (
+                <div key={module} className='space-y-3'>
+                  <h3 className='text-base font-medium text-light capitalize border-b border-border pb-2'>
+                    {module?.replace(/-/g, ' ')}
+                  </h3>
+                  <div className='grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 gap-4 pl-2'>
+                    {permissions[module]
+                      .sort((a, b) => a.id - b.id)
+                      .map(permission => (
+                        <FormField
+                          key={permission.id}
+                          control={form.control}
+                          name='permissions'
+                          render={({ field }) => {
+                            return (
+                              <FormItem className='flex flex-row items-start space-y-0'>
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(permission.name)}
+                                    onCheckedChange={checked => {
+                                      return checked
+                                        ? field.onChange([...field.value, permission.name])
+                                        : field.onChange(field.value?.filter(value => value !== permission.name))
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className='text-sm font-normal cursor-pointer text-light'>
+                                  {permission.name}
+                                </FormLabel>
+                              </FormItem>
+                            )
+                          }}
+                        />
+                      ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
 
           {/* Submit Buttons */}
