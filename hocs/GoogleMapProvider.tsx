@@ -1,15 +1,20 @@
 'use client'
 
-import React, { ReactNode, createContext, useContext } from 'react'
-import { useLoadScript } from '@react-google-maps/api'
+import { ReactNode, createContext, useContext } from 'react'
+import { Libraries, useLoadScript } from '@react-google-maps/api'
 
-const GoogleMapsContext = createContext<{ isLoaded: boolean }>({ isLoaded: false })
+type GoogleMapsContextType = {
+  isLoaded: boolean
+  loadError?: Error
+}
+
+const GoogleMapsContext = createContext<GoogleMapsContextType>({ isLoaded: false })
 
 export function useGoogleMaps() {
   return useContext(GoogleMapsContext)
 }
 
-const libraries: ('places' | 'drawing' | 'geometry')[] = ['places', 'drawing', 'geometry']
+const libraries: Libraries = ['places', 'drawing', 'geometry']
 
 export function GoogleMapsProvider({ children }: { children: ReactNode }) {
   const { isLoaded, loadError } = useLoadScript({
@@ -20,5 +25,5 @@ export function GoogleMapsProvider({ children }: { children: ReactNode }) {
 
   if (loadError) return <div>Error loading maps</div>
 
-  return <GoogleMapsContext.Provider value={{ isLoaded }}>{children}</GoogleMapsContext.Provider>
+  return <GoogleMapsContext.Provider value={{ isLoaded, loadError }}>{children}</GoogleMapsContext.Provider>
 }

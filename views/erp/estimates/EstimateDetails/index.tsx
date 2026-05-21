@@ -53,9 +53,7 @@ const EstimateDetails = ({
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    dispatch(
-      setPageTitle(`Estimate Details - ${estimate.title}(#${estimate.estimate_number.toString().padStart(6, '0')})`)
-    )
+    dispatch(setPageTitle(`Estimate Details - ${estimate.title}(#${estimate.estimate_number.toString()})`))
   }, [])
 
   return (

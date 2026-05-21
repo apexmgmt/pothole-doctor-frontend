@@ -12,7 +12,7 @@ import ProfileTabs from './ProfileTabs'
 import GeneralTab from './GeneralTab'
 import PermissionsTab from './PermissionsTab'
 import SecurityTab from './SecurityTab'
-import { GenaralTabIcon, KeyIcon, SecurityIcon } from '@/public/icons'
+import { GeneralTabIcon, KeyIcon, SecurityIcon } from '@/public/icons'
 
 interface ProfileProps {
   userData?: User | any
@@ -61,7 +61,7 @@ const Profile: React.FC<ProfileProps> = ({ userData: propUser, countryWithStates
   }
 
   const tabs = [
-    { id: 'general', label: 'General', icon: GenaralTabIcon },
+    { id: 'general', label: 'General', icon: GeneralTabIcon },
     { id: 'security', label: 'Security', icon: SecurityIcon }
   ]
 

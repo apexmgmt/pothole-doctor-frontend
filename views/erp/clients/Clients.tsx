@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
-import { DetailsIcon, DocumentIcon, MessageIcon, UserIcon } from '@/public/icons'
+import { DetailsIcon, UserIcon } from '@/public/icons'
 import { Button } from '@/components/ui/button'
 import {
   BusinessLocation,
@@ -38,17 +38,8 @@ import ClientService from '@/services/api/clients/clients.service'
 import { Badge } from '@/components/ui/badge'
 import CreateEditClientModal from './CreateEditClientModal'
 import ClientDetails from './ClientDetails'
-import ClientDocuments from './documents/ClientDocuments'
-import ClientSmsView from './sms/ClientSms'
-import ClientEmails from './emails/ClientEmails'
-import ClientNotes from './notes/ClientNotes'
-import ClientContacts from './contacts/ClientContacts'
-import ClientAddresses from './addresses/ClientAddresses'
-import ClientTasks from './tasks/ClientTasks'
-import ClientEstimates from './estimates/ClientEstimates'
-import ClientInvoices from './invoices/ClientInvoices'
-import ClientWorkOrders from './work-orders/ClientWorkOrders'
 import { hasPermission } from '@/utils/role-permission'
+import ChangeLeadStageModal, { LeadStage } from '@/views/erp/clients/ChangeLeadStageModal'
 
 const Clients: React.FC<{
   type: 'lead' | 'customer'
@@ -88,6 +79,9 @@ const Clients: React.FC<{
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isStageModalOpen, setIsStageModalOpen] = useState<boolean>(false)
+  const [stageClientId, setStageClientId] = useState<string | null>(null)
+  const [stageClientCurrentStage, setStageClientCurrentStage] = useState<LeadStage | null>(null)
   const [canCreateClient, setCanCreateClient] = useState<boolean>(false)
   const [canEditClient, setCanEditClient] = useState<boolean>(false)
   const [canDeleteClient, setCanDeleteClient] = useState<boolean>(false)
@@ -165,7 +159,15 @@ const Clients: React.FC<{
           {
             id: 'stage',
             header: 'Stage',
-            cell: (row: Client) => <span className='font-medium'>{''}</span>,
+            cell: (row: Client) => {
+              const stage = row?.clientable?.stage
+
+              return (
+                <Badge variant='secondary' className='capitalize'>
+                  {stage ? stage.replace(/-/g, ' ') : 'New'}
+                </Badge>
+              )
+            },
             sortable: false
           }
         ]
@@ -187,19 +189,19 @@ const Clients: React.FC<{
       id: 'first_name',
       header: 'First Name',
       cell: (row: Client) => <span className='font-medium'>{row.first_name}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'last_name',
       header: 'Last Name',
       cell: (row: Client) => <span className='font-medium'>{row.last_name}</span>,
-      sortable: false
+      sortable: true
     },
     {
-      id: 'full_name',
+      id: 'name',
       header: 'Full Name',
       cell: (row: Client) => <span className='font-medium'>{`${row.first_name} ${row.last_name}`}</span>,
-      sortable: true
+      sortable: false
     },
     ...(type === 'lead'
       ? [
@@ -355,30 +357,52 @@ const Clients: React.FC<{
     {
       id: 'actions',
       header: 'Action',
-      cell: row => (
-        <div className='flex items-center justify-center gap-2'>
-          {(canEditClient || canDeleteClient) && (
-            <ThreeDotButton
-              buttons={[
-                canEditClient && (
-                  <EditButton
-                    tooltip={`Edit ${type === 'lead' ? 'Lead' : 'Customer'} Information`}
-                    onClick={() => handleOpenEditModal(row.id)}
-                    variant='text'
-                  />
-                ),
-                canDeleteClient && (
-                  <DeleteButton
-                    tooltip={`Delete ${type === 'lead' ? 'Lead' : 'Customer'}`}
-                    variant='text'
-                    onClick={() => handleDeleteClient(row.id)}
-                  />
-                )
-              ]}
+      cell: (row: Client) => {
+        const actionButtons: React.ReactNode[] = []
+
+        if (type === 'lead' && canEditClient) {
+          actionButtons.push(
+            <Button
+              key='change-stage'
+              variant='ghost'
+              size='sm'
+              type='button'
+              className='w-full hover:text-dark hover:bg-white hover:border-white'
+              onClick={() => handleOpenStageModal(row.id, row?.clientable?.stage || null)}
+            >
+              Stage
+            </Button>
+          )
+        }
+
+        if (canEditClient) {
+          actionButtons.push(
+            <EditButton
+              key='edit-client'
+              tooltip={`Edit ${type === 'lead' ? 'Lead' : 'Customer'} Information`}
+              onClick={() => handleOpenEditModal(row.id)}
+              variant='text'
             />
-          )}
-        </div>
-      ),
+          )
+        }
+
+        if (canDeleteClient) {
+          actionButtons.push(
+            <DeleteButton
+              key='delete-client'
+              tooltip={`Delete ${type === 'lead' ? 'Lead' : 'Customer'}`}
+              variant='text'
+              onClick={() => handleDeleteClient(row.id)}
+            />
+          )
+        }
+
+        return (
+          <div className='flex items-center justify-center gap-2'>
+            {actionButtons.length > 0 && <ThreeDotButton buttons={actionButtons} />}
+          </div>
+        )
+      },
       sortable: false
     }
   ]
@@ -422,6 +446,60 @@ const Clients: React.FC<{
     } catch (error) {
       toast.error(`Something went wrong while deleting the ${type === 'lead' ? 'lead' : 'client'}!`)
     }
+  }
+
+  const handleOpenStageModal = (clientId: string, currentStage: LeadStage | null) => {
+    setStageClientId(clientId)
+    setStageClientCurrentStage(currentStage)
+    setIsStageModalOpen(true)
+  }
+
+  const handleStageModalOpenChange = (open: boolean) => {
+    setIsStageModalOpen(open)
+
+    if (!open) {
+      setStageClientId(null)
+      setStageClientCurrentStage(null)
+    }
+  }
+
+  const handleLeadStageUpdateSuccess = (clientId: string, stage: LeadStage) => {
+    setApiResponse(prev => {
+      if (!prev) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        data: prev.data.map((client: Client) => {
+          if (client.id !== clientId) {
+            return client
+          }
+
+          return {
+            ...client,
+            clientable: {
+              ...(client.clientable || ({} as NonNullable<Client['clientable']>)),
+              stage
+            }
+          }
+        })
+      }
+    })
+
+    setSelectedClient(prev => {
+      if (!prev || prev.id !== clientId) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        clientable: {
+          ...(prev.clientable || ({} as NonNullable<Client['clientable']>)),
+          stage
+        }
+      }
+    })
   }
 
   const handleClearFilters = () => {
@@ -491,84 +569,85 @@ const Clients: React.FC<{
       isActive: activeTab === 'details',
       disabled: !selectedClientId
     },
-    {
-      label: 'Documents',
-      icon: DocumentIcon,
-      onClick: () => setActiveTab('documents'),
-      isActive: activeTab === 'documents',
-      disabled: !selectedClientId
-    },
-    {
-      label: 'SMS',
-      icon: MessageIcon,
-      onClick: () => setActiveTab('sms'),
-      isActive: activeTab === 'sms',
-      disabled: !selectedClientId
-    },
-    {
-      label: 'Emails',
-      icon: MessageIcon,
-      onClick: () => setActiveTab('emails'),
-      isActive: activeTab === 'emails',
-      disabled: !selectedClientId
-    },
-    {
-      label: 'Notes',
-      icon: DocumentIcon,
-      onClick: () => setActiveTab('notes'),
-      isActive: activeTab === 'notes',
-      disabled: !selectedClientId
-    },
-    {
-      label: 'Contacts',
-      icon: UserIcon,
-      onClick: () => setActiveTab('contacts'),
-      isActive: activeTab === 'contacts',
-      disabled: !selectedClientId
-    },
-    {
-      label: 'Addresses',
-      icon: UserIcon,
-      onClick: () => setActiveTab('addresses'),
-      isActive: activeTab === 'addresses',
-      disabled: !selectedClientId
-    },
-    ...(type === 'customer'
-      ? [
-          {
-            label: 'Tasks',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('tasks'),
-            isActive: activeTab === 'tasks',
-            disabled: !selectedClientId
-          },
-          {
-            label: 'Estimates',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('estimates'),
-            isActive: activeTab === 'estimates',
-            disabled: !selectedClientId
-          },
-          {
-            label: 'Invoices',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('invoices'),
-            isActive: activeTab === 'invoices',
-            disabled: !selectedClientId
-          },
-          {
-            label: 'Work Orders',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('work-orders'),
-            isActive: activeTab === 'work-orders',
-            disabled: !selectedClientId
-          }
-        ]
-      : [])
+
+    // {
+    //   label: 'Documents',
+    //   icon: DocumentIcon,
+    //   onClick: () => setActiveTab('documents'),
+    //   isActive: activeTab === 'documents',
+    //   disabled: !selectedClientId
+    // },
+    // {
+    //   label: 'SMS',
+    //   icon: MessageIcon,
+    //   onClick: () => setActiveTab('sms'),
+    //   isActive: activeTab === 'sms',
+    //   disabled: !selectedClientId
+    // },
+    // {
+    //   label: 'Emails',
+    //   icon: MessageIcon,
+    //   onClick: () => setActiveTab('emails'),
+    //   isActive: activeTab === 'emails',
+    //   disabled: !selectedClientId
+    // },
+    // {
+    //   label: 'Notes',
+    //   icon: DocumentIcon,
+    //   onClick: () => setActiveTab('notes'),
+    //   isActive: activeTab === 'notes',
+    //   disabled: !selectedClientId
+    // },
+    // {
+    //   label: 'Contacts',
+    //   icon: UserIcon,
+    //   onClick: () => setActiveTab('contacts'),
+    //   isActive: activeTab === 'contacts',
+    //   disabled: !selectedClientId
+    // },
+    // {
+    //   label: 'Addresses',
+    //   icon: UserIcon,
+    //   onClick: () => setActiveTab('addresses'),
+    //   isActive: activeTab === 'addresses',
+    //   disabled: !selectedClientId
+    // },
+    // ...(type === 'customer'
+    //   ? [
+    //       {
+    //         label: 'Tasks',
+    //         icon: DocumentIcon,
+    //         onClick: () => setActiveTab('tasks'),
+    //         isActive: activeTab === 'tasks',
+    //         disabled: !selectedClientId
+    //       },
+    //       {
+    //         label: 'Estimates',
+    //         icon: DocumentIcon,
+    //         onClick: () => setActiveTab('estimates'),
+    //         isActive: activeTab === 'estimates',
+    //         disabled: !selectedClientId
+    //       },
+    //       {
+    //         label: 'Invoices',
+    //         icon: DocumentIcon,
+    //         onClick: () => setActiveTab('invoices'),
+    //         isActive: activeTab === 'invoices',
+    //         disabled: !selectedClientId
+    //       },
+    //       {
+    //         label: 'Work Orders',
+    //         icon: DocumentIcon,
+    //         onClick: () => setActiveTab('work-orders'),
+    //         isActive: activeTab === 'work-orders',
+    //         disabled: !selectedClientId
+    //       }
+    //     ]
+    //   : [])
   ]
 
   return (
-    <CommonLayout title={type === 'lead' ? 'Leads' : 'Customers'} buttons={tabs}>
+    <CommonLayout title={`${type === 'lead' ? 'Leads' : 'Customers'}${selectedClient ? ` - ${selectedClient?.first_name + ' ' + selectedClient?.last_name}` : ''}`} buttons={tabs}>
       {activeTab === 'clients' && (
         <CommonTable
           data={{
@@ -590,35 +669,15 @@ const Clients: React.FC<{
           handleRowSelect={handleRowSelect}
         />
       )}
-      {activeTab === 'details' && <ClientDetails type={type} clientId={selectedClientId} />}
-      {activeTab === 'documents' && selectedClientId && <ClientDocuments clientId={selectedClientId || ''} />}
-      {activeTab === 'sms' && selectedClientId && (
-        <ClientSmsView clientId={selectedClientId || ''} client={selectedClient || null} />
-      )}
-      {activeTab === 'emails' && selectedClientId && (
-        <ClientEmails clientId={selectedClientId || ''} client={selectedClient || null} />
-      )}
-      {activeTab === 'notes' && selectedClientId && (
-        <ClientNotes clientId={selectedClientId || ''} noteTypes={noteTypes} />
-      )}
-      {activeTab === 'contacts' && selectedClientId && (
-        <ClientContacts clientId={selectedClientId || ''} countriesWithStatesAndCities={countriesWithStatesAndCities} />
-      )}
-      {activeTab === 'addresses' && selectedClientId && (
-        <ClientAddresses
-          clientId={selectedClientId || ''}
+      {activeTab === 'details' && (
+        <ClientDetails
+          type={type}
+          clientId={selectedClientId}
+          canEditClient={canEditClient}
+          handleEditClient={() => handleOpenEditModal(selectedClientId ?? '')}
+          noteTypes={noteTypes}
           countriesWithStatesAndCities={countriesWithStatesAndCities}
         />
-      )}
-      {activeTab === 'tasks' && selectedClientId && type === 'customer' && <ClientTasks clientId={selectedClientId} />}
-      {activeTab === 'estimates' && selectedClientId && type === 'customer' && (
-        <ClientEstimates clientId={selectedClientId} />
-      )}
-      {activeTab === 'invoices' && selectedClientId && type === 'customer' && (
-        <ClientInvoices clientId={selectedClientId} />
-      )}
-      {activeTab === 'work-orders' && selectedClientId && type === 'customer' && (
-        <ClientWorkOrders clientId={selectedClientId} />
       )}
       <CreateEditClientModal
         type={type}
@@ -637,6 +696,15 @@ const Clients: React.FC<{
         contactTypes={contactTypes}
         countriesWithStatesAndCities={countriesWithStatesAndCities}
       />
+      {type === 'lead' && (
+        <ChangeLeadStageModal
+          open={isStageModalOpen}
+          onOpenChange={handleStageModalOpenChange}
+          clientId={stageClientId}
+          currentStage={stageClientCurrentStage}
+          onSuccess={handleLeadStageUpdateSuccess}
+        />
+      )}
     </CommonLayout>
   )
 }

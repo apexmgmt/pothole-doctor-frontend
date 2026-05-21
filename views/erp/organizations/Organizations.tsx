@@ -15,7 +15,7 @@ import AdvancedCustomerDetails from '@/components/erp/dashboard/crm/customers/Ad
 import { DetailsIcon, FilterIcon, UserIcon } from '@/public/icons'
 import OrganizationService from '@/services/api/organizations.service'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse } from '@/types'
+import { Column, DataTableApiResponse, Organization } from '@/types'
 import OrganizationDetails from '@/views/erp/organizations/OrganizationDetails'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Switch } from '@/components/ui/switch'
@@ -65,7 +65,6 @@ const Organizations: React.FC = () => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
-  const [selectedCompany, setSelectedCompany] = useState<object | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [statusLoading, setStatusLoading] = useState<{ [key: string]: boolean }>({})
   const [canCreateCompany, setCanCreateCompany] = useState<boolean>(false)
@@ -166,20 +165,6 @@ const Organizations: React.FC = () => {
     dispatch(setPageTitle('Manage Companies'))
   }, [filterOptions])
 
-  // Transform API data to match table format
-  const companiesData = apiResponse?.data
-    ? apiResponse.data.map((company: any, index: number) => ({
-        id: company.id,
-        index: (apiResponse?.from || 1) + index,
-        name: `${company.first_name || ''} ${company.last_name || ''}`.trim(),
-        phone: company.userable?.phone || 'N/A',
-        company: company.userable?.company_name || 'N/A',
-        jobAddress: company.userable?.address || 'N/A',
-        email: company.email,
-        status: company.status
-      }))
-    : []
-
   const impersonateUser = async (userId: string) => {
     try {
       AuthService.impersonate(userId)
@@ -217,45 +202,42 @@ const Organizations: React.FC = () => {
   // Column definitions for CommonTable
   const companyColumns: Column[] = [
     {
-      id: 'index',
-      header: '#',
-      cell: row => <span className='text-gray'>{row.index}</span>,
+      id: 'company_name',
+      header: 'Company',
+      cell: (row: Organization) => <span>{row?.userable?.company_name ?? ''}</span>,
       sortable: false
     },
     {
       id: 'first_name',
       header: 'Name',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: (row: Organization) => (
+        <span className='font-medium'>{[row?.first_name, row?.last_name].filter(Boolean).join(' ')}</span>
+      ),
       sortable: true
     },
     {
       id: 'phone',
       header: 'Phone',
-      cell: row => <span>{row.phone}</span>,
+      cell: (row: Organization) => <span>{row?.userable?.phone}</span>,
       sortable: true
     },
+
     {
-      id: 'company_name',
-      header: 'Company',
-      cell: row => <span>{row.company}</span>,
-      sortable: false
-    },
-    {
-      id: 'jobAddress',
+      id: 'address',
       header: 'Job Address',
-      cell: row => <span className='max-w-xs truncate'>{row.jobAddress}</span>,
+      cell: (row: Organization) => <span className='max-w-xs truncate'>{row?.userable?.address ?? '-'}</span>,
       sortable: false
     },
     {
       id: 'email',
       header: 'Email',
-      cell: row => <span className=''>{row.email}</span>,
+      cell: (row: Organization) => <span className=''>{row.email}</span>,
       sortable: true
     },
     {
       id: 'status',
       header: 'Status',
-      cell: row => (
+      cell: (row: Organization) => (
         <div className='flex items-center gap-2'>
           <OrganizationStatusSwitch
             checked={row.status}
@@ -271,7 +253,7 @@ const Organizations: React.FC = () => {
     {
       id: 'actions',
       header: 'Action',
-      cell: row => (
+      cell: (row: Organization) => (
         <div className='flex gap-2'>
           {canEditCompany && (
             <ThreeDotButton
@@ -311,17 +293,30 @@ const Organizations: React.FC = () => {
 
   const handleRowSelect = (company: any) => {
     setSelectedCompanyId(company?.id || null)
+  }
 
-    if (canViewCompany) {
-      OrganizationService.show(company?.id)
-        .then(response => {
-          setSelectedCompany(response.data)
-        })
-        .catch(error => {
-          setSelectedCompany(null)
-          console.error('Error fetching company details:', error)
-        })
-    }
+  const handleCompanyRowUpdate = (updatedCompany: Organization) => {
+    setApiResponse(prev => {
+      if (!prev?.data?.length) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        data: prev.data.map(company =>
+          company.id === updatedCompany.id
+            ? {
+                ...company,
+                ...updatedCompany,
+                userable: {
+                  ...company.userable,
+                  ...updatedCompany.userable
+                }
+              }
+            : company
+        )
+      }
+    })
   }
 
   // Check if filters are active (excluding pagination)
@@ -390,22 +385,37 @@ const Organizations: React.FC = () => {
     try {
       await OrganizationService.changeStatus(companyId)
 
-      // Refetch data after status change
-      fetchData()
+      const updatedCompany = apiResponse?.data?.find(company => company.id === companyId)
+
+      if (updatedCompany) {
+        const company = {
+          ...updatedCompany,
+          status: !updatedCompany.status
+        }
+
+        handleCompanyRowUpdate(company as Organization)
+      }
     } catch (error) {
-      // Optionally show error
       console.error('Failed to change status', error)
     }
 
     setStatusLoading(prev => ({ ...prev, [companyId]: false }))
   }
 
+  const selectedCompany = selectedCompanyId && apiResponse?.data?.find(company => company.id === selectedCompanyId)
+
+  const companyDisplayName = selectedCompany
+    ? selectedCompany.userable?.company_name || `${selectedCompany.first_name} ${selectedCompany.last_name}`.trim()
+    : ''
+
+  const pageTitle = `Companies${selectedCompany ? ` - ${companyDisplayName}` : ''}`
+
   return (
-    <CommonLayout title='Companies' buttons={tabs}>
-      {activeTab === 'companies' && (
+    <CommonLayout title={pageTitle} buttons={tabs}>
+      <div className={activeTab === 'companies' ? 'block' : 'hidden'}>
         <CommonTable
           data={{
-            data: companiesData,
+            data: (apiResponse?.data as Organization[]) || [],
             per_page: apiResponse?.per_page || 10,
             total: apiResponse?.total || 0,
             from: apiResponse?.from || 1,
@@ -422,11 +432,18 @@ const Organizations: React.FC = () => {
           emptyMessage='No companies found'
           handleRowSelect={handleRowSelect}
         />
-      )}
+      </div>
 
-      {activeTab === 'details' && (
-        <OrganizationDetails companyData={selectedCompany} setCompanyData={setSelectedCompany} fetchData={fetchData} />
-      )}
+      <div className={activeTab === 'details' ? 'block' : 'hidden'}>
+        <OrganizationDetails
+          companyId={selectedCompanyId}
+          onCompanyUpdated={handleCompanyRowUpdate}
+          impersonateUser={impersonateUser}
+          isImpersonating={selectedCompanyId ? statusLoading[selectedCompanyId] : false}
+          onStatusToggle={handleStatusToggle}
+          statusLoading={selectedCompanyId ? statusLoading[selectedCompanyId] : false}
+        />
+      </div>
     </CommonLayout>
   )
 }

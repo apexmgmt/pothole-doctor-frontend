@@ -198,7 +198,10 @@ const CreateOrEditInvoiceModal = ({
   // When client changes, auto-select default address and client's business location
   useEffect(() => {
     form.setValue('address_id', defaultAddressId)
-    form.setValue('location_id', selectedClient?.location_id ?? '')
+
+    if (mode === 'create') {
+      form.setValue('location_id', selectedClient?.location_id ?? '')
+    }
   }, [form.watch('client_id')])
 
   // Auto-populate tax_rate from selected business location's sales_tax if tax_rate is empty
@@ -237,7 +240,6 @@ const CreateOrEditInvoiceModal = ({
             onClick={form.handleSubmit(onSubmit)}
             disabled={form.formState.isSubmitting}
             className='flex-1'
-            
           >
             {form.formState.isSubmitting
               ? 'Saving...'
@@ -311,7 +313,10 @@ const CreateOrEditInvoiceModal = ({
                     onValueChange={value => {
                       field.onChange(value)
                       form.setValue('address_id', '')
-                      form.setValue('location_id', '')
+
+                      if (mode === 'create') {
+                        form.setValue('location_id', '')
+                      }
                     }}
                   >
                     <SelectTrigger className='w-full'>
@@ -527,7 +532,7 @@ const CreateOrEditInvoiceModal = ({
               <FormItem className='col-span-1 sm:col-span-2'>
                 <FormLabel>Business Location</FormLabel>
                 <FormControl>
-                  <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                  <Select value={field.value ?? ''} onValueChange={field.onChange} disabled={mode === 'edit'}>
                     <SelectTrigger className='w-full'>
                       <SelectValue placeholder='Select Business Location' />
                     </SelectTrigger>

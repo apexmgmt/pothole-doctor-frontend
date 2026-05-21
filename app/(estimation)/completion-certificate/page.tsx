@@ -16,7 +16,9 @@ export const generateMetadata = async ({ searchParams }: { searchParams: any }):
       return { title: 'Work Order Not Found' }
     }
 
-    const workOrderNumber = workOrder.work_order_number?.toString().padStart(6, '0') ?? ''
+    const workOrderNumber =
+      (workOrder.invoice_number_prefix ? `${workOrder.invoice_number_prefix}-` : '') +
+      (workOrder.invoice_number?.toString() ?? '')
 
     const clientName = [workOrder.client?.first_name, workOrder.client?.last_name].filter(Boolean).join(' ')
 

@@ -7,9 +7,9 @@ import { ServiceType } from '../service_types'
 import { Staff } from '../staff'
 import { User } from '../user'
 import { ClientAddress } from './clients_addresses'
+import { Model } from '..'
 
-export interface Client {
-  id: string
+export interface Client extends Model {
   company_id: string | null
   interest_level_id: string
   clientable_id: string
@@ -25,8 +25,6 @@ export interface Client {
   source_id: string
   lead_cost: number
   status: number | 0 | 1
-  created_at: string
-  updated_at: string
   deleted_at?: string | null
   contact_type_id: string | null
   location_id: string | null
@@ -42,8 +40,7 @@ export interface Client {
   source?: ClientSource
 }
 
-export interface ClientAble {
-  id: string
+export interface ClientAble extends Model {
   spouse_name: string
   spouse_phone: string
   cell_phone: string
@@ -51,10 +48,9 @@ export interface ClientAble {
   pre_qualified_amount: number
   is_tax_exempt: number | 0 | 1
   is_quick_book: number | 0 | 1
-  created_at: string
-  updated_at: string
   deleted_at: string | null
   best_time: string | null
+  stage?: 'prospect' | 'open' | 'working' | 'meeting-set' | 'opportunity' | 'closed-won' | 'closed-lost' | null
 }
 
 export interface ClientPayload {
@@ -89,6 +85,7 @@ export interface ClientPayload {
   location_id: string
   contact_type_id: string
   service_type_ids: string[]
+  address_search?: string // Don't send this to backend, this is only for google place search field
 }
 
 export * from './clients_notes'

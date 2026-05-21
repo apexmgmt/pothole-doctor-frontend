@@ -136,9 +136,9 @@ const CreateOrEditProposalModal = ({
 
   const totalCost = allLines.reduce((sum, line) => {
     if (line.type !== 'deduction' && line.type !== 'comment') {
-      return sum + (line.unit_cost * line.qty) + (line.freight_charge ?? 0)
+      return sum + line.unit_cost * line.qty + (line.freight_charge ?? 0)
     }
-    
+
     return sum
   }, 0)
 
@@ -398,9 +398,7 @@ const CreateOrEditProposalModal = ({
       <>
         <div className='flex justify-between mb-4'>
           <div className='flex gap-4 items-center'>
-            <p className='text-lg font-bold'>
-              Estimate #{estimateDetails?.estimate_number?.toString().padStart(6, '0')}
-            </p>
+            <p className='text-lg font-bold'>Estimate #{estimateDetails?.estimate_number?.toString()}</p>
             <p className='text-sm font-semibold text-zinc-200'>
               <span>
                 <UserIcon className='h-4 w-4 inline-block mr-2' />

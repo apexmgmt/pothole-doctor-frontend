@@ -15,7 +15,7 @@ export const generateMetadata = async ({ searchParams }: { searchParams: any }):
       return { title: 'Proposal Not Found' }
     }
 
-    const proposalNumber = proposal.proposal_number?.toString().padStart(6, '0') ?? ''
+    const proposalNumber = proposal.proposal_number?.toString() ?? ''
 
     const clientName = [proposal.estimate?.client?.first_name, proposal.estimate?.client?.last_name]
       .filter(Boolean)

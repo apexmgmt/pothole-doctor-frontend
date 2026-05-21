@@ -227,8 +227,11 @@ const CreateOrEditEstimateModal = ({
   // When client changes, auto-select default address and client's business location
   useEffect(() => {
     form.setValue('address_id', defaultAddressId)
-    form.setValue('location_id', selectedClient?.location_id ?? '')
-  }, [form.watch('client_id')])
+
+    if (mode === 'create') {
+      form.setValue('location_id', selectedClient?.location_id ?? '')
+    }
+  }, [form.watch('client_id'), mode, selectedClient, defaultAddressId])
 
   // Auto-populate tax_rate from selected business location's sales_tax if tax_rate is empty
   useEffect(() => {
@@ -344,7 +347,10 @@ const CreateOrEditEstimateModal = ({
 
                       // Reset address and location when customer changes (useEffect will auto-set defaults)
                       form.setValue('address_id', '')
-                      form.setValue('location_id', '')
+
+                      if (mode === 'create') {
+                        form.setValue('location_id', '')
+                      }
                     }}
                   >
                     <SelectTrigger className='w-full'>
@@ -585,7 +591,7 @@ const CreateOrEditEstimateModal = ({
               <FormItem className=' sm:col-span-2'>
                 <FormLabel>Business Location</FormLabel>
                 <FormControl>
-                  <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                  <Select value={field.value ?? ''} onValueChange={field.onChange} disabled={mode === 'edit'}>
                     <SelectTrigger className='w-full'>
                       <SelectValue placeholder='Select Business Location' />
                     </SelectTrigger>

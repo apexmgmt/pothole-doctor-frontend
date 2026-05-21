@@ -3,19 +3,22 @@ import React from 'react'
 import { Switch } from '@/components/ui/switch'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 import OrganizationService from '@/services/api/organizations.service'
+import { Badge } from '@/components/ui/badge'
 
 interface OrganizationStatusSwitchProps {
   checked: boolean
   loading?: boolean
   companyId: string
   fetchData?: () => void // optional
+  variant?: 'switch' | 'button'
 }
 
 const OrganizationStatusSwitch: React.FC<OrganizationStatusSwitchProps> = ({
   checked,
   loading = false,
   companyId,
-  fetchData
+  fetchData,
+  variant = 'switch'
 }) => {
   const [open, setOpen] = React.useState(false)
   const [internalChecked, setInternalChecked] = React.useState(checked)
@@ -49,15 +52,28 @@ const OrganizationStatusSwitch: React.FC<OrganizationStatusSwitchProps> = ({
       onOpenChange={setOpen}
       trigger={
         <span>
-          <Switch
-            checked={internalChecked}
-            disabled={loading || isLoading}
-            onClick={e => {
-              e.stopPropagation()
-              setOpen(true)
-            }}
-            onCheckedChange={() => {}}
-          />
+          {variant === 'switch' && (
+            <Switch
+              checked={internalChecked}
+              disabled={loading || isLoading}
+              onClick={e => {
+                e.stopPropagation()
+                setOpen(true)
+              }}
+              onCheckedChange={() => {}}
+            />
+          )}
+          {variant === 'button' && (
+            <Badge              variant={internalChecked ? 'success' : 'destructive'}
+              onClick={e => {
+                e.stopPropagation()
+                setOpen(true)
+              }}
+              className='cursor-pointer'
+            >
+              {internalChecked ? 'Active' : 'Inactive'}
+            </Badge>
+          )}
         </span>
       }
       title={internalChecked ? 'Deactivate Company?' : 'Activate Company?'}

@@ -15,7 +15,7 @@ import CommonTable from '@/components/erp/common/table'
 import { DetailsIcon, UserIcon } from '@/public/icons'
 import StaffService from '@/services/api/staff.service'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse } from '@/types'
+import { Column, DataTableApiResponse, Staff } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -36,7 +36,7 @@ const Staffs: React.FC = () => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null)
-  const [selectedStaff, setSelectedStaff] = useState<object | null>(null)
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
   const [canCreateStaff, setCanCreateStaff] = useState<boolean>(false)
@@ -220,7 +220,7 @@ const Staffs: React.FC = () => {
   }
 
   const handleRowSelect = (staff: any) => {
-    if (canCreateStaff) {
+    if (canViewStaff) {
       StaffService.show(staff?.id)
         .then(response => {
           setSelectedStaff(response.data)
@@ -293,8 +293,12 @@ const Staffs: React.FC = () => {
       : [])
   ]
 
+  const selectedUser = selectedStaffId && apiResponse?.data?.find(staff => staff.id === selectedStaffId)
+
+  const pageTitle = `Staffs${selectedUser ? ` - ${selectedUser.first_name} ${selectedUser.last_name}` : ''}`
+
   return (
-    <CommonLayout title='Staffs' buttons={tabs}>
+    <CommonLayout title={pageTitle} buttons={tabs}>
       {activeTab === 'staffs' && (
         <CommonTable
           data={{

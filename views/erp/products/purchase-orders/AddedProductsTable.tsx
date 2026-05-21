@@ -16,10 +16,10 @@ const AddedProductsTable = ({ addedProducts, onRemove, onFieldChange }: AddedPro
 
   return (
     <div className='border border-border rounded-lg overflow-hidden'>
-      <table className='w-full text-sm'>
+      <table className='w-full text-xs'>
         <thead>
           <tr className='border-b border-border bg-border/20'>
-            <th className='text-left px-3 py-2 font-medium text-muted-foreground'>Mat. #</th>
+            <th className='text-left px-3 py-2 font-medium text-muted-foreground'>#</th>
             <th className='text-left px-3 py-2 font-medium text-muted-foreground'>SKU</th>
             <th className='text-left px-3 py-2 font-medium text-muted-foreground'>Product Name</th>
             <th className='text-left px-3 py-2 font-medium text-muted-foreground'>Description</th>

@@ -60,10 +60,21 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+
+  const [filterOptions, setFilterOptions] = useState<any>(() => {
+    const filters = getInitialFilters(searchParams)
+
+    // These are navigation params, not list filters.
+    delete filters.open_po_modal
+    delete filters.po_product_id
+
+    return filters
+  })
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedPurchaseOrderId, setSelectedPurchaseOrderId] = useState<string | undefined>(undefined)
+  const [preselectedProductId, setPreselectedProductId] = useState<string | undefined>(undefined)
   const [isShipmentModalOpen, setIsShipmentModalOpen] = useState<boolean>(false)
   const [shipmentPurchaseOrderId, setShipmentPurchaseOrderId] = useState<string | undefined>(undefined)
   const [isShipmentViewOnly, setIsShipmentViewOnly] = useState<boolean>(false)
@@ -79,6 +90,28 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
     hasPermission('Update Purchase Order').then(result => setCanEdit(result))
     hasPermission('Delete Purchase Order').then(result => setCanDelete(result))
   }, [])
+
+  useEffect(() => {
+    const openPoModal = searchParams.get('open_po_modal')
+    const poProductId = searchParams.get('po_product_id')
+
+    if (openPoModal === 'create' && poProductId) {
+      setModalMode('create')
+      setSelectedPurchaseOrderId(undefined)
+      setPreselectedProductId(poProductId)
+      setIsModalOpen(true)
+
+      const params = new URLSearchParams(searchParams.toString())
+
+      params.delete('open_po_modal')
+      params.delete('po_product_id')
+
+      const newQuery = params.toString()
+      const cleanUrl = newQuery ? `?${newQuery}` : window.location.pathname
+
+      router.replace(cleanUrl, { scroll: false })
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -181,7 +214,7 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
       id: 'purchase_order_number',
       header: 'PO #',
       cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>PO-{row.purchase_order_number?.toString().padStart(6, '0') ?? 'N/A'}</span>
+        <span className='font-medium'>PO-{row.purchase_order_number?.toString() ?? 'N/A'}</span>
       ),
       sortable: true
     },
@@ -430,9 +463,16 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
       <CreateOrEditPurchaseOrderModal
         mode={modalMode}
         open={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={open => {
+          setIsModalOpen(open)
+
+          if (!open) {
+            setPreselectedProductId(undefined)
+          }
+        }}
         onSuccess={fetchData}
         purchaseOrderId={selectedPurchaseOrderId}
+        preselectedProductId={preselectedProductId}
         vendors={vendors}
         warehouses={warehouses}
         businessLocations={businessLocations}

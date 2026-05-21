@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { useForm } from 'react-hook-form'
+import { Path, RegisterOptions, useForm } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -23,10 +23,19 @@ import {
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import ClientService from '@/services/api/clients/clients.service'
 import ClientAddressService from '@/services/api/clients/client-addresses.service'
-import BasicClientReferenceFields from './BasicClientReferenceFields'
 import { Separator } from '@/components/ui/separator'
-import BasicClientFields from './BasicClientFields'
-import AddressFields from './AddressFileds'
+import { InputType, SelectOption } from '@/components/form/fields/types'
+import CustomFormField from '@/components/form/CustomFormField'
+import GooglePlaceField from '@/components/form/fields/GooglePlaceField'
+
+type FormField = {
+  name: Path<ClientPayload>
+  type: InputType | 'google-place'
+  label: string
+  placeholder?: string
+  rules?: RegisterOptions<ClientPayload, Path<ClientPayload>>
+  selectOptions?: SelectOption[]
+}
 
 interface CreateEditClientModalProps {
   type: 'lead' | 'customer'
@@ -102,9 +111,13 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const {
-    handleSubmit,
     reset,
-    formState: { isSubmitting }
+    watch,
+    setValue,
+    register,
+    control,
+    handleSubmit,
+    formState: { errors }
   } = methods
 
   // Populate form data when editing
@@ -180,9 +193,12 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     }
   }, [mode, clientData, isOpen, reset])
 
-  const onSubmit = async (data: ClientPayload) => {
+  const onSubmit = async (formData: ClientPayload) => {
     try {
       setIsLoading(true)
+
+      // Remove address_search from data as it's only used for GooglePlaceField and not needed in payload
+      const { address_search, ...data } = formData
 
       // separate address, state_id, city_id and zip_code from data
       const {
@@ -259,6 +275,303 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     }
   }
 
+  // Watch country and state selection
+  const selectedCountryId = watch('country_id')
+  const selectedStateId = watch('state_id')
+
+  // Get available states based on selected country
+  const availableStates = useMemo(() => {
+    if (!selectedCountryId) return []
+    const country = countriesWithStatesAndCities.find(c => c.id.toString() === selectedCountryId)
+
+    return country?.states || []
+  }, [selectedCountryId, countriesWithStatesAndCities])
+
+  // Get available cities based on selected state
+  const availableCities = useMemo(() => {
+    if (!selectedStateId) return []
+    const state = availableStates.find(s => s.id.toString() === selectedStateId)
+
+    return state?.cities || []
+  }, [selectedStateId, availableStates])
+
+  // Reset state when country changes
+  useEffect(() => {
+    if (selectedCountryId) {
+      const stateExists = availableStates.some(s => s.id.toString() === watch('state_id'))
+
+      if (!stateExists) {
+        setValue('state_id', '')
+        setValue('city_id', '')
+      }
+    }
+  }, [selectedCountryId, availableStates, setValue, watch])
+
+  // Reset city when state changes
+  useEffect(() => {
+    if (selectedStateId) {
+      const cityExists = availableCities.some(c => c.id.toString() === watch('city_id'))
+
+      if (!cityExists) {
+        setValue('city_id', '')
+      }
+    }
+  }, [selectedStateId, availableCities, setValue, watch])
+
+  // Basic client reference fields
+  const basicClientReferenceFields: FormField[] = [
+    {
+      name: 'location_id',
+      type: 'select',
+      label: 'Location',
+      placeholder: 'Select Location',
+      rules: { required: 'Location is required' },
+      selectOptions: businessLocations.map(location => ({
+        value: location.id,
+        label: location.name
+      }))
+    },
+    {
+      name: 'reference_id',
+      type: 'select',
+      label: 'Sales Rep',
+      placeholder: 'Select sales rep',
+      rules: { required: 'Sales Representative is required' },
+      selectOptions: staffs
+        ? staffs.map(staff => ({
+            value: staff.id,
+            label: `${staff.first_name} ${staff.last_name}`
+          }))
+        : []
+    },
+    {
+      name: 'source_id',
+      type: 'select',
+      label: 'Lead Source',
+      placeholder: 'Select Lead Source',
+      rules: { required: 'Lead Source is required' },
+      selectOptions: clientSources.map(source => ({
+        value: source.id,
+        label: source.name
+      }))
+    },
+    {
+      name: 'contact_type_id',
+      type: 'select',
+      label: 'Contact Type',
+      placeholder: 'Select type',
+      rules: { required: 'Contact Type is required' },
+      selectOptions: contactTypes.map(type => ({
+        value: type.id,
+        label: type.name
+      }))
+    }
+  ]
+
+  // Basic client info fields
+  const basicClientFields: FormField[] = [
+    {
+      name: 'first_name',
+      type: 'text',
+      label: 'First Name',
+      placeholder: 'Enter first name',
+      rules: {
+        required: 'First Name is required'
+      }
+    },
+    {
+      name: 'last_name',
+      type: 'text',
+      label: 'Last Name',
+      placeholder: 'Enter last name',
+      rules: {
+        required: 'Last Name is required'
+      }
+    },
+    {
+      name: 'company_name',
+      type: 'combobox',
+      label: 'Company Name',
+      placeholder: 'Select or create company',
+      selectOptions: companies.map(company => ({
+        value: company.name,
+        label: company.name
+      }))
+    },
+    {
+      name: 'display_name',
+      type: 'text',
+      label: 'Display Name',
+      placeholder: 'Enter display name'
+    },
+    {
+      name: 'interest_level_id',
+      type: 'select',
+      label: 'Interest Level',
+      placeholder: 'Select interest level',
+      rules: {
+        required: 'Interest Level is required'
+      },
+      selectOptions: interestLevels.map(level => ({
+        value: level.id,
+        label: level.name
+      }))
+    },
+    {
+      name: 'lead_cost',
+      type: 'number',
+      label: 'Lead Cost',
+      placeholder: 'Enter lead cost'
+    },
+    {
+      name: 'phone',
+      type: 'tel',
+      label: 'Main Phone',
+      placeholder: '10 digit phone number',
+      rules: {
+        required: 'Main Phone is required'
+      }
+    },
+    {
+      name: 'cell_phone',
+      type: 'tel',
+      label: 'Cell Phone',
+      placeholder: '10 digit phone number'
+    },
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Email',
+      placeholder: 'Enter email',
+      rules: {
+        required: 'Email is required',
+        pattern: {
+          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+          message: 'Invalid email address'
+        }
+      }
+    },
+    {
+      name: 'spouse_name',
+      type: 'text',
+      label: 'Spouse Name',
+      placeholder: 'Enter spouse name'
+    },
+    {
+      name: 'cc_email',
+      type: 'email',
+      label: 'CC Email',
+      placeholder: 'Enter CC email',
+      rules: {
+        pattern: {
+          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+          message: 'Invalid email address'
+        }
+      }
+    },
+    {
+      name: 'spouse_phone',
+      type: 'tel',
+      label: 'Spouse Phone',
+      placeholder: '10 digit phone number'
+    },
+    {
+      name: 'best_time',
+      type: 'text',
+      label: 'Best Time to Reach',
+      placeholder: 'Enter best time'
+    },
+    {
+      name: 'service_type_ids',
+      type: 'multiselect-searchable',
+      label: 'Desired Service(s)',
+      placeholder: 'Select service types...',
+      selectOptions: serviceTypes.map(service => ({
+        value: service.id,
+        label: service.name
+      }))
+    },
+    {
+      name: 'pre_qualified_amount',
+      type: 'number',
+      label: 'Pre-qualified Financing Amount',
+      placeholder: 'Enter amount'
+    },
+    {
+      name: 'is_tax_exempt',
+      type: 'checkbox',
+      label: 'Tax Exempt'
+    }
+  ]
+
+  // Address fields
+  const addressFields: FormField[] = [
+    {
+      name: 'address_title',
+      type: 'text',
+      label: 'Address Title',
+      placeholder: 'e.g. Home, Office',
+      rules: { required: 'Address Title is required' }
+    },
+    {
+      name: 'address_search',
+      type: 'google-place',
+      label: 'Search Location',
+      placeholder: 'Search for an address...'
+    },
+    {
+      name: 'country_id',
+      type: 'select',
+      label: 'Country',
+      placeholder: 'Select a country',
+      rules: {
+        required: 'Country is required'
+      },
+      selectOptions: countriesWithStatesAndCities.map(country => ({
+        value: country.id.toString(),
+        label: country.name
+      }))
+    },
+    {
+      name: 'state_id',
+      type: 'select',
+      label: 'State',
+      placeholder: 'Select a state',
+      rules: {
+        required: 'State is required'
+      },
+      selectOptions: availableStates.map(state => ({
+        value: state.id.toString(),
+        label: state.name
+      }))
+    },
+    {
+      name: 'city_id',
+      type: 'select',
+      label: 'City',
+      placeholder: 'Select a city',
+      rules: {
+        required: 'City is required'
+      },
+      selectOptions: availableCities.map(city => ({
+        value: city.id.toString(),
+        label: city.name
+      }))
+    },
+    {
+      name: 'zip_code',
+      type: 'text',
+      label: 'Zip Code',
+      placeholder: 'Enter zip code'
+    },
+    {
+      name: 'address',
+      type: 'text',
+      label: 'Street Address',
+      placeholder: 'Enter address'
+    }
+  ]
+
   const dialogActions = (
     <>
       <Button type='button' variant='outline' onClick={onClose} disabled={isLoading}>
@@ -291,26 +604,93 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       }
       actions={dialogActions}
       disableClose={true}
+      className='sm:max-w-252!'
     >
-      <form id='client-form' onSubmit={handleSubmit(onSubmit)} className='space-y-6 mr-0.5'>
-        <BasicClientReferenceFields
-          type={type}
-          methods={methods}
-          clientSources={clientSources}
-          staffs={staffs}
-          businessLocations={businessLocations}
-          contactTypes={contactTypes}
-        />
-        <Separator />
-        <BasicClientFields
-          type={type}
-          methods={methods}
-          companies={companies}
-          interestLevels={interestLevels}
-          serviceTypes={serviceTypes}
-        />
-        <Separator />
-        <AddressFields methods={methods} countriesWithStatesAndCities={countriesWithStatesAndCities} />
+      <form id='client-form' onSubmit={handleSubmit(onSubmit)} className='space-y-3'>
+        {[basicClientReferenceFields, basicClientFields, addressFields].map((fieldGroup, index) => (
+          <React.Fragment key={index}>
+            {index !== 0 && <Separator />}
+
+            <div className='grid grid-cols-1 md:grid-cols-2 items-start gap-x-9 gap-y-1.5'>
+              {fieldGroup.map(({ name, type, label, placeholder, rules, selectOptions }) => {
+                if (type === 'google-place') {
+                  return (
+                    <GooglePlaceField
+                      key={name}
+                      name={name}
+                      label={label}
+                      placeholder={placeholder}
+                      rules={rules}
+                      control={control}
+                      errors={errors}
+                      onPlaceSelect={data => {
+                        const { city, state, country, postalCode } = data
+
+                        // Set zip code
+                        if (postalCode) {
+                          setValue('zip_code', postalCode)
+                        }
+
+                        // Match country
+                        if (country) {
+                          const matchedCountry = countriesWithStatesAndCities.find(
+                            item => item.name.toLowerCase() === country.toLowerCase()
+                          )
+
+                          if (matchedCountry) {
+                            setValue('country_id', matchedCountry.id.toString())
+
+                            // Match state
+                            if (state) {
+                              const matchedState = matchedCountry.states.find(
+                                item => item.name.toLowerCase() === state.toLowerCase()
+                              )
+
+                              if (matchedState) {
+                                setValue('state_id', matchedState.id.toString())
+
+                                // Match city
+                                if (city) {
+                                  const matchedCity = matchedState.cities.find(
+                                    item => item.name.toLowerCase() === city.toLowerCase()
+                                  )
+
+                                  if (matchedCity) {
+                                    setValue('city_id', matchedCity.id.toString())
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }}
+                      fieldClassName='grid grid-cols-[128px_auto]'
+                      labelClassName='justify-end self-start text-right pt-px'
+                    />
+                  )
+                }
+
+                return (
+                  <CustomFormField
+                    key={name}
+                    name={name}
+                    type={type}
+                    label={label}
+                    placeholder={placeholder}
+                    selectOptions={selectOptions}
+                    rules={rules}
+                    register={register}
+                    control={control}
+                    errors={errors}
+                    fieldClassName={type === 'checkbox' ? 'mt-3 md:mt-6' : 'grid grid-cols-[128px_auto]'}
+                    labelClassName={type === 'checkbox' ? 'text-nowrap' : 'justify-end self-start text-right pt-px'}
+                    className={type === 'checkbox' ? 'col-span-2 ps-34' : ''}
+                  />
+                )
+              })}
+            </div>
+          </React.Fragment>
+        ))}
       </form>
     </CommonDialog>
   )
