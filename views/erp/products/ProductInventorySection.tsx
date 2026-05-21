@@ -88,7 +88,7 @@ const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
     {
       id: 'warehouse',
       header: 'Warehouse',
-      cell: (row: PurchaseOrder) => <span className='font-medium'>{(row.warehouse as any)?.name ?? '—'}</span>,
+      cell: (row: PurchaseOrder) => <span className='font-medium'>{(row.warehouse as any)?.title  ?? (row.warehouse as any)?.name ?? '—'}</span>,
       sortable: false
     },
     {

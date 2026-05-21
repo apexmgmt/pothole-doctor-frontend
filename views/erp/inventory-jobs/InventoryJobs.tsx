@@ -27,6 +27,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import MaterialJobService from '@/services/api/products/material-jobs.service'
 import AddInventoryJobActionModal from './AddInventoryJobActionModal'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
+import { formatCurrency } from '@/utils/currency'
 
 interface InventoryJobsProps {
   staffs: Staff[]
@@ -259,19 +260,19 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
     {
       id: 'allocated_quantity',
       header: 'Allocated Qty',
-      cell: (row: MaterialJob) => <span>{row.allocated_quantity ?? '—'}</span>,
+      cell: (row: MaterialJob) => <span>{row.allocated_quantity ?? '—'} {row?.product?.purchase_uom?.name ?? row?.product?.purchase_unit?.name ?? ''}</span>,
       sortable: true
     },
     {
       id: 'picked_up_quantity',
       header: 'Picked-up Qty',
-      cell: (row: MaterialJob) => <span>{row.picked_up_quantity ?? '—'}</span>,
+      cell: (row: MaterialJob) => <span>{row.picked_up_quantity ?? '—'} {row?.product?.purchase_uom?.name ?? row?.product?.purchase_unit?.name ?? ''}</span>,
       sortable: true
     },
     {
       id: 'on_hand_quantity',
       header: 'On-Hand Qty',
-      cell: (row: MaterialJob) => <span>{row.on_hand_quantity ?? '—'}</span>,
+      cell: (row: MaterialJob) => <span>{row.on_hand_quantity ?? '—'} {row?.product?.purchase_uom?.name ?? row?.product?.purchase_unit?.name ?? ''}</span>,
       sortable: true
     },
     {
@@ -292,7 +293,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
       id: 'total_material_cost',
       header: 'Total Material',
       cell: (row: MaterialJob) => (
-        <span>${row.total_material_cost != null ? Number(row.total_material_cost).toFixed(2) : '0.00'}</span>
+        <span>{formatCurrency(row.total_material_cost ?? 0)}</span>
       ),
       sortable: true
     },
