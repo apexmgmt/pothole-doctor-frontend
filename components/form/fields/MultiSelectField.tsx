@@ -45,7 +45,7 @@ const MultiSelectField = <T extends FieldValues>({
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant='outline' className={cn('w-full justify-between', className, 'h-auto!')}>
+          <Button variant='outline' className={cn('w-full justify-between', className, 'h-auto! min-h-7!')}>
             <div className='flex flex-1 flex-wrap items-center gap-1 text-left'>
               {!(selectedValues.length > 0) ? (
                 <span className='text-[#a7a7ae]'>{placeholder}</span>
