@@ -12,6 +12,7 @@ const SelectField = <T extends FieldValues>({
   control,
   rules,
   selectOptions,
+  disabled = false,
   value,
   onChange,
   onBlur,
@@ -27,7 +28,7 @@ const SelectField = <T extends FieldValues>({
       }}
       value={selectedValue}
     >
-      <SelectTrigger className={`w-full ${className}`}>
+      <SelectTrigger disabled={disabled} className={`w-full ${className}`}>
         <SelectValue placeholder={placeholder ?? ''} />
       </SelectTrigger>
       <SelectContent position='popper' className='bg-[#09090B]'>

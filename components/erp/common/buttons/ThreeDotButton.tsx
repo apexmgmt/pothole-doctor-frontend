@@ -20,7 +20,7 @@ const ThreeDotButton: React.FC<ThreeDotButtonProps> = ({ title, buttons }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className='outline-none cursor-pointer text-[#A7A7AE] hover:text-white'>
-        <EllipsisVertical className='size-6' />
+        <EllipsisVertical className='size-5' />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         {title && (

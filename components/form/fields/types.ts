@@ -30,6 +30,7 @@ export type BaseFieldProps<T extends FieldValues> = {
   selectOptions?: SelectOption[]
   value?: unknown
   readonly?: boolean
+  disabled?: boolean
   rules?: RegisterOptions<T, Path<T>>
   control?: Control<T>
   register?: UseFormRegister<T>

@@ -14,6 +14,7 @@ const CheckboxField = <T extends FieldValues>({
   control,
   rules,
   value,
+  disabled = false,
   onChange,
   onBlur,
   className,
@@ -25,6 +26,7 @@ const CheckboxField = <T extends FieldValues>({
     <div className={`flex items-center gap-3 ${className ?? ''}`}>
       <Checkbox
         id={checkboxId}
+        disabled={disabled}
         checked={checked}
         onCheckedChange={nextValue => {
           const isChecked = nextValue === true
