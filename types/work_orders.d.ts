@@ -16,7 +16,8 @@ import {
 } from '.'
 
 export interface WorkOrder extends Model {
-  work_order_number: number
+  invoice_number_prefix: string
+  invoice_number: number
   invoice_id: string
   invoice?: Invoice
   estimate_id: string | null
@@ -76,7 +77,7 @@ export interface WorkOrder extends Model {
   location_id?: string | null
   commissions: number
   custom_commissions: number
-  is_custom_commission_percentage: boolean
+  is_custom_commission_percent: boolean
 }
 
 export interface WorkOrderPayload {

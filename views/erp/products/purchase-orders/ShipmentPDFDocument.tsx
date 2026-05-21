@@ -149,9 +149,7 @@ const ShipmentPDFDocument = ({
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
           <View>
             <Text style={s.titleLarge}>Shipment Details</Text>
-            <Text style={[s.label, { marginTop: 2 }]}>
-              PO-{po.purchase_order_number?.toString().padStart(6, '0') ?? '—'}
-            </Text>
+            <Text style={[s.label, { marginTop: 2 }]}>PO-{po.purchase_order_number?.toString() ?? '—'}</Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <Text style={[s.label, { marginBottom: 2 }]}>Status</Text>
@@ -166,7 +164,7 @@ const ShipmentPDFDocument = ({
         <View style={s.infoRow}>
           <View style={s.infoField}>
             <Text style={s.infoLabel}>PO #</Text>
-            <Text style={s.infoValue}>PO-{po.purchase_order_number?.toString().padStart(6, '0') ?? '—'}</Text>
+            <Text style={s.infoValue}>PO-{po.purchase_order_number?.toString() ?? '—'}</Text>
           </View>
           <View style={s.infoField}>
             <Text style={s.infoLabel}>Reference Number</Text>

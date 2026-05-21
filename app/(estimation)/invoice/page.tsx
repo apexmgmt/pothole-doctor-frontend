@@ -15,7 +15,9 @@ export const generateMetadata = async ({ searchParams }: { searchParams: any }):
       return { title: 'Invoice Not Found' }
     }
 
-    const invoiceNumber = invoice.invoice_number?.toString().padStart(6, '0') ?? ''
+    const invoiceNumber =
+      (invoice?.invoice_number_prefix ? `${invoice.invoice_number_prefix}-` : '') +
+      (invoice?.invoice_number?.toString() ?? '')
 
     const clientName = [invoice.client?.first_name, invoice.client?.last_name].filter(Boolean).join(' ')
 

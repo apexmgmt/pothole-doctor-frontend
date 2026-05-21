@@ -16,7 +16,10 @@ const CertificateBasicInfo = ({ workOrder }: { workOrder: WorkOrder }) => {
       {/* Invoice Info */}
       <div className='flex flex-col sm:text-right text-sm'>
         <h6 className='semibold text-2xl'>COMPLETION CERTIFICATE</h6>
-        <p>Invoice #{String(workOrder?.invoice?.invoice_number).padStart(6, '0')}</p>
+        <p>
+          Invoice #{workOrder?.invoice?.invoice_number_prefix ? `${workOrder.invoice.invoice_number_prefix}-` : ''}
+          {String(workOrder?.invoice?.invoice_number)}
+        </p>
         {workOrder?.invoice?.issue_date && <p>Issue Date: {formatDate(new Date(workOrder.invoice.issue_date))}</p>}
         {workOrder?.invoice?.due_date && <p>Due Date: {formatDate(new Date(workOrder.invoice.due_date))}</p>}
       </div>
