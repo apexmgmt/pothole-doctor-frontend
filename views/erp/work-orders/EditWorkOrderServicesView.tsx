@@ -70,7 +70,7 @@ const EditWorkOrderServicesView = ({
   const [customCommission, setCustomCommission] = useState<number>(Number(initialWorkOrder?.custom_commissions ?? 0))
 
   const [isCustomCommissionPercentage, setIsCustomCommissionPercentage] = useState<boolean>(
-    initialWorkOrder?.is_custom_commission_percentage ?? false
+    initialWorkOrder?.is_custom_commission_percent ?? false
   )
 
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
@@ -364,7 +364,7 @@ const EditWorkOrderServicesView = ({
           <div>
             <h1 className='text-xl font-bold'>
               Work Order #{currentWorkOrder?.invoice_number_prefix ? `${currentWorkOrder.invoice_number_prefix}-` : ''}
-              {currentWorkOrder?.invoice_number?.toString().padStart(6, '0') || 'N/A'}
+              {currentWorkOrder?.invoice_number?.toString() || 'N/A'}
             </h1>
             <p className='text-sm text-zinc-400'>Edit Work Order Services</p>
           </div>

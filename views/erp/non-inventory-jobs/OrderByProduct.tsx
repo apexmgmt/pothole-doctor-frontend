@@ -158,7 +158,7 @@ const OrderByProduct: React.FC = () => {
       cell: (row: MaterialJob) => (
         <span className='font-medium'>
           {row.work_order?.invoice_number_prefix ? `${row.work_order.invoice_number_prefix}-` : ''}
-          {row.work_order?.invoice_number?.toString().padStart(6, '0') || '—'}
+          {row.work_order?.invoice_number?.toString() || '—'}
         </span>
       ),
       sortable: false

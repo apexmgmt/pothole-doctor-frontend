@@ -77,7 +77,7 @@ export interface WorkOrder extends Model {
   location_id?: string | null
   commissions: number
   custom_commissions: number
-  is_custom_commission_percentage: boolean
+  is_custom_commission_percent: boolean
 }
 
 export interface WorkOrderPayload {

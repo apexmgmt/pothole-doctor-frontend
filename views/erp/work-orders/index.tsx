@@ -219,7 +219,8 @@ const WorkOrders: React.FC<{
       header: 'WO #',
       cell: (row: WorkOrder) => (
         <span className='font-medium hover:underline' onClick={() => handleOpenEditModal(row.id)}>
-          {row?.invoice_number_prefix ? `${row.invoice_number_prefix}-` : ''}{row.invoice_number?.toString().padStart(6, '0') || 'N/A'}
+          {row?.invoice_number_prefix ? `${row.invoice_number_prefix}-` : ''}
+          {row.invoice_number?.toString() || 'N/A'}
         </span>
       ),
       sortable: false
@@ -288,11 +289,7 @@ const WorkOrders: React.FC<{
       cell: (row: WorkOrder) => {
         const commission = row.commissions ?? 0
 
-        return (
-          <span className={`font-medium`}>
-            {formatCurrency(commission)}
-          </span>
-        )
+        return <span className={`font-medium`}>{formatCurrency(commission)}</span>
       },
       sortable: true
     },

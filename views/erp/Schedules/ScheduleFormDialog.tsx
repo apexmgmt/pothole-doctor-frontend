@@ -163,7 +163,7 @@ export default function ScheduleFormDialog({
         if (wo) {
           createDefaults.salesman_id = wo.assign_id || ''
           createDefaults.client_id = wo.client_id || ''
-          createDefaults.title = `#${wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}${wo.invoice_number?.toString().padStart(6, '0') || '—'} - ${wo.title}`
+          createDefaults.title = `#${wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}${wo.invoice_number?.toString() || '—'} - ${wo.title}`
         }
       }
 
@@ -211,7 +211,9 @@ export default function ScheduleFormDialog({
 
     const currentWoId = form.getValues('work_order_id')
     const wo = workOrders.find(w => w.id === currentWoId)
-    const baseTitle = wo ? `#${wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}${wo.invoice_number?.toString().padStart(6, '0') || '—'} - ${wo.title}` : ''
+    const baseTitle = wo
+      ? `#${wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}${wo.invoice_number?.toString() || '—'} - ${wo.title}`
+      : ''
     const serviceTypeName = svc.service_type?.name ?? ''
 
     setValue('title', serviceTypeName ? `${baseTitle} - ${serviceTypeName}` : baseTitle)
@@ -230,7 +232,10 @@ export default function ScheduleFormDialog({
     if (basic) {
       setValue('salesman_id', basic.assign_id || '')
       setValue('client_id', basic.client_id || '')
-      setValue('title', `#${basic.invoice_number_prefix ? `${basic.invoice_number_prefix}-` : ''}${basic.invoice_number?.toString().padStart(6, '0') || '—'} - ${basic.title}`)
+      setValue(
+        'title',
+        `#${basic.invoice_number_prefix ? `${basic.invoice_number_prefix}-` : ''}${basic.invoice_number?.toString() || '—'} - ${basic.title}`
+      )
     }
 
     await fetchWOServices(workOrderId)
@@ -247,7 +252,9 @@ export default function ScheduleFormDialog({
       // Auto-update title with service type name
       const currentWoId = form.getValues('work_order_id')
       const wo = workOrders.find(w => w.id === currentWoId)
-      const baseTitle = wo ? `#${wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}${wo.invoice_number?.toString().padStart(6, '0') || '—'} - ${wo.title}` : ''
+      const baseTitle = wo
+        ? `#${wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}${wo.invoice_number?.toString() || '—'} - ${wo.title}`
+        : ''
       const serviceTypeName = svc.service_type?.name ?? ''
 
       setValue('title', serviceTypeName ? `${baseTitle} - ${serviceTypeName}` : baseTitle)
@@ -353,7 +360,8 @@ export default function ScheduleFormDialog({
                         <SelectContent>
                           {workOrders.map(wo => (
                             <SelectItem key={wo.id} value={wo.id}>
-                              #{wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}{wo.invoice_number?.toString().padStart(6, '0') || '—'} - {wo.title}
+                              #{wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}
+                              {wo.invoice_number?.toString() || '—'} - {wo.title}
                             </SelectItem>
                           ))}
                         </SelectContent>

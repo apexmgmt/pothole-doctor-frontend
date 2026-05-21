@@ -16,7 +16,10 @@ const InvoiceBasicInfo = ({ invoice }: { invoice: Invoice }) => {
       {/* Invoice Info */}
       <div className='flex flex-col sm:text-right text-sm'>
         <h6 className='semibold text-2xl'>INVOICE</h6>
-        <p>Invoice #{invoice?.invoice_number_prefix ? `${invoice.invoice_number_prefix}-` : ''}{String(invoice?.invoice_number).padStart(6, '0')}</p>
+        <p>
+          Invoice #{invoice?.invoice_number_prefix ? `${invoice.invoice_number_prefix}-` : ''}
+          {String(invoice?.invoice_number)}
+        </p>
         {invoice?.issue_date && <p>Issue Date: {formatDate(new Date(invoice.issue_date))}</p>}
         {invoice?.due_date && <p>Due Date: {formatDate(new Date(invoice.due_date))}</p>}
       </div>

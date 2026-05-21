@@ -10,7 +10,8 @@ import {
   Product,
   User,
   Model,
-  Staff
+  Staff,
+  WorkOrder
 } from '.'
 
 export interface Invoice extends Model {
@@ -55,6 +56,7 @@ export interface Invoice extends Model {
   sale_tax: number
   total: number
   total_cost: number
+  total_profit: number
   total_freight_charge: number
   total_material_cost: number
   total_material_sale: number
@@ -72,6 +74,7 @@ export interface Invoice extends Model {
   is_down_payment_materials: boolean
   down_payment_amount: number
   down_payment_percentage: number
+  work_order?: WorkOrder
 }
 
 export interface InvoicePayload {

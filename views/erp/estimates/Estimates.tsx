@@ -162,7 +162,7 @@ const Estimates: React.FC<{
       header: 'Estimate#',
       cell: row => (
         <Link href={`/erp/estimates/${row.id}`} prefetch>
-          <span className='font-medium hover:underline'>{row.estimate_number?.toString().padStart(6, '0')}</span>
+          <span className='font-medium hover:underline'>{row.estimate_number?.toString()}</span>
         </Link>
       ),
       sortable: false
@@ -170,19 +170,31 @@ const Estimates: React.FC<{
     {
       id: 'title',
       header: 'Title',
-      cell: (row: Estimate) => <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>{row.title}</Link>,
+      cell: (row: Estimate) => (
+        <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>
+          {row.title}
+        </Link>
+      ),
       sortable: true
     },
     {
       id: 'biding_date',
       header: 'Date',
-      cell: (row: Estimate) => <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>{formatDate(row?.biding_date) || ''}</Link>,
+      cell: (row: Estimate) => (
+        <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>
+          {formatDate(row?.biding_date) || ''}
+        </Link>
+      ),
       sortable: true
     },
     {
       id: 'company',
       header: 'Company',
-      cell: (row: Estimate) => <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>{row?.client?.company?.name || ''}</Link>,
+      cell: (row: Estimate) => (
+        <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>
+          {row?.client?.company?.name || ''}
+        </Link>
+      ),
       sortable: false
     },
     {
@@ -191,7 +203,11 @@ const Estimates: React.FC<{
       cell: (row: Estimate) => {
         const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
 
-        return <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>{parts.join(' ') || ''}</Link>
+        return (
+          <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>
+            {parts.join(' ') || ''}
+          </Link>
+        )
       },
       sortable: false
     },

@@ -402,7 +402,8 @@ const AddInvoiceServicesModal = ({
         <div className='flex justify-between mb-4'>
           <div className='flex gap-4 items-center'>
             <p className='text-lg font-bold'>
-              Invoice #{invoice?.invoice_number_prefix ? `${invoice.invoice_number_prefix}-` : ''}{invoice?.invoice_number?.toString().padStart(6, '0') || 'N/A'}
+              Invoice #{invoice?.invoice_number_prefix ? `${invoice.invoice_number_prefix}-` : ''}
+              {invoice?.invoice_number?.toString() || 'N/A'}
             </p>
             <p className='text-sm font-semibold text-zinc-200'>
               <span>

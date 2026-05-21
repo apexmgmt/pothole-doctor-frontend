@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Description } from '@/components/ui/description'
 import { Column, Invoice, ProposalService } from '@/types'
 import { formatDate } from '@/utils/date'
+import { formatCurrency } from '@/utils/currency'
 
 export const getInvoiceStatusVariant = (
   status: string
@@ -34,7 +35,8 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
     header: 'Invoice #',
     cell: (row: Invoice) => (
       <span className='font-medium hover:underline cursor-pointer' onClick={() => onOpenInvoice(row)}>
-        {row?.invoice_number_prefix ? `${row.invoice_number_prefix}-` : ''}{row.invoice_number?.toString().padStart(6, '0') || 'N/A'}
+        {row?.invoice_number_prefix ? `${row.invoice_number_prefix}-` : ''}
+        {row.invoice_number?.toString() || 'N/A'}
       </span>
     ),
     sortable: false
@@ -56,11 +58,15 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
     sortable: true
   },
   {
-    id: 'issue_date',
-    header: 'Invoice Date',
-    cell: (row: Invoice) => <span className='font-medium'>{formatDate(row.issue_date || '') || '—'}</span>,
+    id: 'invoice_confirmation_date',
+    header: 'Invoice Confirmation Date',
+    cell: (row: Invoice) => (
+      <span className='font-medium'>{formatDate(row.invoice_confirmation_date || '') || '—'}</span>
+    ),
     sortable: true
   },
+
+  // final invoice sent date
   {
     id: 'company',
     header: 'Company',
@@ -112,16 +118,19 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
     id: 'service_site_contact',
     header: 'Service Site Contact',
     cell: (row: Invoice) => {
-      const contactParts = [row?.address?.email, row?.address?.phone].filter(Boolean)
+      const contactParts = [
+        row?.address?.email ?? row?.client?.email,
+        row?.address?.phone ?? row?.client?.phone
+      ].filter(Boolean)
 
-      return <Description description={contactParts.join(' | ') || '—'} />
+      return <Description description={contactParts.join('\n') || '—'} />
     },
     sortable: false
   },
   {
     id: 'title',
     header: 'Job Name',
-    cell: (row: Invoice) => <span className='font-medium'>{row.title || '—'}</span>,
+    cell: (row: Invoice) => <span className='font-medium'>{row?.title || '—'}</span>,
     sortable: true
   },
   {
@@ -141,33 +150,74 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
     sortable: false
   },
   {
-    id: 'due_date',
-    header: 'Due Date',
-    cell: (row: Invoice) => <span className='font-medium'>{formatDate(row.due_date || '') || '—'}</span>,
+    id: 'total_material_sale',
+    header: 'Material Sale',
+    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(row?.total_material_sale ?? 0)}</span>,
+    sortable: true
+  },
+  {
+    id: 'total_labor_sale',
+    header: 'Labor Sale',
+    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(row?.total_labor_sale ?? 0)}</span>,
     sortable: true
   },
   {
     id: 'discount',
     header: 'Discount',
-    cell: (row: Invoice) => (
-      <span className='font-medium'>${row.discount != null ? Number(row.discount).toFixed(2) : '0.00'}</span>
-    ),
+    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(row?.discount ?? 0)}</span>,
     sortable: true
   },
   {
     id: 'total',
     header: 'Total',
-    cell: (row: Invoice) => (
-      <span className='font-medium'>${row.total != null ? Number(row.total).toFixed(2) : '0.00'}</span>
-    ),
+    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(row?.total ?? 0)}</span>,
     sortable: true
   },
   {
     id: 'sale_tax',
     header: 'Total Tax',
-    cell: (row: Invoice) => (
-      <span className='font-medium'>${row.sale_tax != null ? Number(row.sale_tax).toFixed(2) : '0.00'}</span>
-    ),
+    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(row?.sale_tax ?? 0)}</span>,
     sortable: true
+  },
+  {
+    id: 'total_payment',
+    header: 'Total Payment',
+    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(0)}</span>,
+    sortable: false
+  },
+  {
+    id: 'due_amount',
+    header: 'Customer Balance',
+    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(0)}</span>,
+    sortable: false
+  },
+  {
+    id: 'work_order_total_cost',
+    header: 'WO Total Cost',
+    cell: (row: Invoice) => (
+      <span className='font-medium'>{formatCurrency(row?.work_order?.total_cost ?? row?.total_cost ?? 0)}</span>
+    ),
+    sortable: false
+  },
+  {
+    id: 'work_order_profit',
+    header: 'WO Profit',
+    cell: (row: Invoice) => (
+      <span className='font-medium'>{formatCurrency(row?.work_order?.total_profit ?? row?.total_profit ?? 0)}</span>
+    ),
+    sortable: false
   }
+
+  // {
+  //   id: 'work_order_profit_percentage',
+  //   header: 'WO Profit %',
+  //   cell: (row: Invoice) => {
+  //     const subtotal = row?.subtotal ?? 0
+  //     const totalProfit = row?.work_order?.total_profit ?? row?.total_profit ?? 0
+  //     const profitPercentage = subtotal ? (totalProfit / subtotal) * 100 : 0
+
+  //     return <span className='font-medium'>{profitPercentage?.toFixed(2)}%</span>
+  //   },
+  //   sortable: false
+  // },
 ]

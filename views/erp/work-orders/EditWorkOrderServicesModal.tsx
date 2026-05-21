@@ -262,7 +262,7 @@ const EditWorkOrderServicesModal = ({
           note: item.note || ''
         }))
       }))
-      
+
       setServiceTypeLineItems(newServiceTypeLineItems)
     }
   }, [open, workOrder])
@@ -295,7 +295,8 @@ const EditWorkOrderServicesModal = ({
         <div className='flex justify-between mb-4'>
           <div className='flex gap-4 items-center'>
             <p className='text-lg font-bold'>
-              Work Order #{workOrder?.invoice_number_prefix ? `${workOrder.invoice_number_prefix}-` : ''}{workOrder?.invoice_number?.toString().padStart(6, '0') || 'N/A'}
+              Work Order #{workOrder?.invoice_number_prefix ? `${workOrder.invoice_number_prefix}-` : ''}
+              {workOrder?.invoice_number?.toString() || 'N/A'}
             </p>
             <p className='text-sm font-semibold text-zinc-200'>
               <UserIcon className='h-4 w-4 inline-block mr-2' />

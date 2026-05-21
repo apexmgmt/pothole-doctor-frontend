@@ -67,7 +67,7 @@ const EstimateSection = ({
           <div className='flex flex-col gap-2 text-zinc-200 text-sm'>
             <div className='flex gap-1 items-start'>
               <span className='font-semibold text-base text-white min-w-40'>Estimate number : </span>
-              <div className='flex-1'>{estimate.estimate_number?.toString().padStart(6, '0') || 'N/A'}</div>
+              <div className='flex-1'>{estimate.estimate_number?.toString() || 'N/A'}</div>
             </div>
             <div className='flex gap-1 items-start'>
               <span className='font-semibold text-base text-white min-w-40'>Estimate title : </span>

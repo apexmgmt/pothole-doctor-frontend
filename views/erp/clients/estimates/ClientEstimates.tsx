@@ -180,7 +180,7 @@ const ClientEstimates = ({ clientId }: { clientId: string }) => {
       header: 'Estimate #',
       cell: (row: Estimate) => (
         <Link href={`/erp/estimates/${row.id}`}>
-          <span className='font-medium hover:underline'>{row.estimate_number?.toString().padStart(6, '0')}</span>
+          <span className='font-medium hover:underline'>{row.estimate_number?.toString()}</span>
         </Link>
       ),
       sortable: false

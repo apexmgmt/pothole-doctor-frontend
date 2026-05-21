@@ -347,17 +347,16 @@ const InvoicePDFDocument = ({
         {/* ── BASIC INFO: company left, invoice meta right ── */}
         <View style={[s.spaceBetween, { marginBottom: 10, alignItems: 'flex-start' }]}>
           <View style={s.companyInfo}>
-            {invoice?.assign_user?.userable?.address && (
-              <Text>{invoice.assign_user.userable.address}</Text>
-            )}
+            {invoice?.assign_user?.userable?.address && <Text>{invoice.assign_user.userable.address}</Text>}
             {invoice?.assign_user?.email && <Text>Email: {invoice.assign_user.email}</Text>}
-            {invoice?.assign_user?.userable?.phone && (
-              <Text>Phone: {invoice.assign_user.userable.phone}</Text>
-            )}
+            {invoice?.assign_user?.userable?.phone && <Text>Phone: {invoice.assign_user.userable.phone}</Text>}
           </View>
           <View>
             <Text style={s.invoiceTitle}>INVOICE</Text>
-            <Text style={s.invoiceMeta}>Invoice #{invoice?.invoice_number_prefix ? `${invoice.invoice_number_prefix}-` : ''}{String(invoice?.invoice_number ?? '').padStart(6, '0')}</Text>
+            <Text style={s.invoiceMeta}>
+              Invoice #{invoice?.invoice_number_prefix ? `${invoice.invoice_number_prefix}-` : ''}
+              {String(invoice?.invoice_number ?? '')}
+            </Text>
             {invoice?.issue_date && (
               <Text style={s.invoiceMeta}>Issue Date: {formatDate(new Date(invoice.issue_date))}</Text>
             )}
@@ -516,7 +515,10 @@ const InvoicePDFDocument = ({
 
         {/* ── FOOTER: page numbers ── */}
         <View style={s.footer} fixed>
-          <Text style={s.footerText}>Invoice #{invoice?.invoice_number_prefix ? `${invoice.invoice_number_prefix}-` : ''}{String(invoice?.invoice_number ?? '').padStart(6, '0')}</Text>
+          <Text style={s.footerText}>
+            Invoice #{invoice?.invoice_number_prefix ? `${invoice.invoice_number_prefix}-` : ''}
+            {String(invoice?.invoice_number ?? '')}
+          </Text>
           <Text style={s.footerText} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
         </View>
       </Page>
