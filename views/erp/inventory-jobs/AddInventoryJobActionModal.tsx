@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { DatePicker } from '@/components/ui/datePicker'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import MaterialJobService from '@/services/api/products/material-jobs.service'
+import { mathRoundFixed } from '@/utils/utility'
 
 interface AddInventoryJobActionModalProps {
   open: boolean
@@ -39,11 +40,33 @@ interface FormValues {
   location_notes: string
 }
 
+type ActionStage = 'allocated' | 'prepared' | 'picked_up'
+
 const ACTION_STATUS_OPTIONS = [
   { value: 'allocated', label: 'Allocated' },
   { value: 'prepared', label: 'Prepared' },
   { value: 'picked_up', label: 'Picked Up' }
 ]
+
+const normalizeActionStatus = (status?: string | null): ActionStage | null => {
+  if (!status) return null
+
+  const normalized = status.toLowerCase().replace(/\s+/g, '_')
+
+  if (normalized === 'allocated' || normalized === 'prepared' || normalized === 'picked_up') {
+    return normalized
+  }
+
+  return null
+}
+
+const getNextActionStatus = (lastStatus: ActionStage | null): ActionStage => {
+  if (!lastStatus) return 'allocated'
+  if (lastStatus === 'allocated') return 'prepared'
+  if (lastStatus === 'prepared') return 'picked_up'
+
+  return 'picked_up'
+}
 
 const AddInventoryJobActionModal = ({
   open,
@@ -57,14 +80,63 @@ const AddInventoryJobActionModal = ({
   const purchaseUnit =
     materialJob?.product?.purchase_unit?.name ?? materialJob?.product?.purchase_uom?.name ?? 'Each(s)'
 
-  const maxQuantity = materialJob?.quantity ?? 0
+  const actions = materialJob?.actions ?? []
+
+  const actionTotals = actions.reduce(
+    (acc, action) => {
+      const status = normalizeActionStatus(action.action_status)
+      const qty = Number(action.quantity ?? 0)
+
+      if (!status || Number.isNaN(qty) || qty <= 0) return acc
+
+      acc[status] += qty
+
+      return acc
+    },
+    { allocated: 0, prepared: 0, picked_up: 0 }
+  )
+
+  const getLatestActionStatus = (): ActionStage | null => {
+    if (actions.length === 0) return null
+
+    const latest = actions.reduce((latestAction, currentAction) => {
+      const latestTime = new Date(latestAction.action_date || (latestAction as any).created_at || 0).getTime()
+
+      const currentTime = new Date(currentAction.action_date || (currentAction as any).created_at || 0).getTime()
+
+      return currentTime > latestTime ? currentAction : latestAction
+    })
+
+    return normalizeActionStatus(latest.action_status)
+  }
+
+  const defaultActionStatus = getNextActionStatus(getLatestActionStatus())
+  const jobQuantity = Number(materialJob?.purchase_quantity ?? 0)
+
+  const getAllowedQuantityForStatus = (statusValue?: string): number => {
+    const status = normalizeActionStatus(statusValue)
+
+    if (!status) return 0
+
+    if (status === 'allocated') {
+      return mathRoundFixed(Math.max(0, jobQuantity - actionTotals.allocated), 4)
+    }
+
+    if (status === 'prepared') {
+      return mathRoundFixed(Math.max(0, actionTotals.allocated - actionTotals.prepared), 4)
+    }
+
+    return mathRoundFixed(Math.max(0, actionTotals.prepared - actionTotals.picked_up), 4)
+  }
+
+  const defaultQuantity = getAllowedQuantityForStatus(defaultActionStatus)
 
   const form = useForm<FormValues>({
     defaultValues: {
-      action_status: '',
+      action_status: defaultActionStatus,
       action_date: new Date(),
       employee_id: materialJob?.sale_representative?.id ?? '',
-      quantity: materialJob?.quantity ?? '',
+      quantity: defaultQuantity > 0 ? defaultQuantity : '',
       warehouse_type: 'warehouse',
       warehouse_id: '',
       stock_area: '',
@@ -74,14 +146,19 @@ const AddInventoryJobActionModal = ({
   })
 
   const warehouseType = form.watch('warehouse_type')
+  const selectedActionStatus = form.watch('action_status')
+  const maxAllowedQuantity = getAllowedQuantityForStatus(selectedActionStatus)
 
   useEffect(() => {
     if (open) {
+      const nextDefaultStatus = getNextActionStatus(getLatestActionStatus())
+      const nextDefaultQuantity = getAllowedQuantityForStatus(nextDefaultStatus)
+
       form.reset({
-        action_status: '',
+        action_status: nextDefaultStatus,
         action_date: new Date(),
         employee_id: materialJob?.sale_representative?.id ?? '',
-        quantity: materialJob?.quantity ?? '',
+        quantity: nextDefaultQuantity > 0 ? nextDefaultQuantity : '',
         warehouse_type: 'warehouse',
         warehouse_id: '',
         stock_area: '',
@@ -96,12 +173,43 @@ const AddInventoryJobActionModal = ({
     form.setValue('warehouse_id', '')
   }, [warehouseType])
 
+  useEffect(() => {
+    const currentQuantity = Number(form.getValues('quantity'))
+
+    if (Number.isNaN(currentQuantity)) return
+
+    if (maxAllowedQuantity <= 0) {
+      form.setValue('quantity', '', { shouldValidate: true })
+
+      return
+    }
+
+    if (currentQuantity > maxAllowedQuantity) {
+      form.setValue('quantity', maxAllowedQuantity, { shouldValidate: true })
+    }
+  }, [selectedActionStatus, maxAllowedQuantity])
+
   const onSubmit = async (values: FormValues) => {
     if (!materialJob) return
 
+    const quantity = Number(values.quantity)
+    const allowedQuantity = getAllowedQuantityForStatus(values.action_status)
+
+    if (Number.isNaN(quantity) || quantity <= 0) {
+      toast.error('Quantity must be greater than 0')
+
+      return
+    }
+
+    if (quantity > allowedQuantity) {
+      toast.error(`Quantity cannot be greater than ${allowedQuantity} ${purchaseUnit}`)
+
+      return
+    }
+
     const payload: MaterialJobActionPayload = {
       action_status: values.action_status,
-      quantity: Number(values.quantity),
+      quantity: mathRoundFixed(quantity * (materialJob?.product?.coverage_per_rate ?? 1), 4),
       action_date: values.action_date ? format(values.action_date, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
       employee_id: values.employee_id,
       vendor_id: materialJob.vendor_id ?? '',
@@ -184,7 +292,11 @@ const AddInventoryJobActionModal = ({
                       </FormControl>
                       <SelectContent>
                         {ACTION_STATUS_OPTIONS.map(opt => (
-                          <SelectItem key={opt.value} value={opt.value}>
+                          <SelectItem
+                            key={opt.value}
+                            value={opt.value}
+                            disabled={getAllowedQuantityForStatus(opt.value) <= 0}
+                          >
                             {opt.label}
                           </SelectItem>
                         ))}
@@ -268,7 +380,19 @@ const AddInventoryJobActionModal = ({
                 name='quantity'
                 rules={{
                   required: 'Quantity is required',
-                  min: { value: 0.01, message: 'Quantity must be greater than 0' }
+                  min: { value: 0.01, message: 'Quantity must be greater than 0' },
+                  validate: value => {
+                    const numericValue = Number(value)
+
+                    if (Number.isNaN(numericValue)) return 'Quantity is required'
+                    if (numericValue <= 0) return 'Quantity must be greater than 0'
+
+                    if (numericValue > maxAllowedQuantity) {
+                      return `Quantity cannot be greater than ${maxAllowedQuantity} ${purchaseUnit}`
+                    }
+
+                    return true
+                  }
                 }}
                 render={({ field }) => (
                   <FormItem>
@@ -361,7 +485,10 @@ const AddInventoryJobActionModal = ({
               />
 
               {/* Max Quantity (read-only) */}
-              {displayField(`Max Quantity to Prepare`, `${maxQuantity} ${purchaseUnit}`)}
+              {displayField(
+                'Max Allowed Quantity',
+                `${maxAllowedQuantity} ${purchaseUnit} (${selectedActionStatus?.replace('_', ' ') || 'action'})`
+              )}
 
               {/* Stock Area & Stock Section */}
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 '>
