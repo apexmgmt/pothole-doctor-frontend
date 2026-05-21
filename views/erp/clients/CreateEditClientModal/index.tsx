@@ -572,12 +572,6 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     }
   ]
 
-  const combinedFields = [
-    { border: true, fields: basicClientReferenceFields },
-    { border: true, fields: basicClientFields },
-    { border: true, fields: addressFields }
-  ]
-
   const dialogActions = (
     <>
       <Button type='button' variant='outline' onClick={onClose} disabled={isLoading}>
@@ -613,12 +607,12 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       className='sm:max-w-252!'
     >
       <form id='client-form' onSubmit={handleSubmit(onSubmit)} className='space-y-3'>
-        {combinedFields.map((fieldGroup, index) => (
+        {[basicClientReferenceFields, basicClientFields, addressFields].map((fieldGroup, index) => (
           <React.Fragment key={index}>
-            {index !== 0 && fieldGroup.border && <Separator />}
+            {index !== 0 && <Separator />}
 
             <div className='grid grid-cols-1 md:grid-cols-2 items-start gap-x-9 gap-y-1.5'>
-              {fieldGroup.fields.map(({ name, type, label, placeholder, rules, selectOptions }) => {
+              {fieldGroup.map(({ name, type, label, placeholder, rules, selectOptions }) => {
                 if (type === 'google-place') {
                   return (
                     <GooglePlaceField
