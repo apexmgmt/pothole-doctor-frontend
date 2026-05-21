@@ -9,6 +9,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 import { FieldComponentProps } from './types'
+import { cn } from '@/lib/utils'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 type MultiSelectSearchFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
 
@@ -44,15 +46,15 @@ const MultiSelectSearchField = <T extends FieldValues>({
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant='outline' className={`w-full h-auto! justify-between ${className ?? ''}`}>
+          <Button variant='outline' className={cn('w-full justify-between', className, 'h-auto!')}>
             <div className='flex flex-1 flex-wrap items-center gap-1 text-left'>
               {!(selectedValues.length > 0) ? (
-                <span className='text-muted-foreground'>{placeholder}</span>
+                <span className='text-[#a7a7ae]'>{placeholder}</span>
               ) : (
                 selectedValues.map((valueItem, i) => (
                   <span
                     key={`${valueItem}-${i}`}
-                    className='flex items-center gap-1.5 pl-2 pr-1 py-0.5 rounded-sm text-white/80 bg-muted-background/80'
+                    className='flex items-center gap-1.5 pl-2 pr-1 py-px rounded-sm text-xs leading-none text-[#f4f4f5] bg-white/10'
                   >
                     {selectOptions?.find(opt => opt.value === valueItem)?.label}
                     <span
@@ -60,9 +62,9 @@ const MultiSelectSearchField = <T extends FieldValues>({
                         event.stopPropagation()
                         handleToggle(valueItem)
                       }}
-                      className='p-1 hover:text-red-500 hover:bg-white/20 rounded-sm cursor-pointer'
+                      className='p-1 hover:text-red-500 hover:bg-red-500/15 rounded-sm cursor-pointer'
                     >
-                      <XIcon className='size-4' />
+                      <XIcon className='size-3' />
                     </span>
                   </span>
                 ))
@@ -72,27 +74,35 @@ const MultiSelectSearchField = <T extends FieldValues>({
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent align='start' className='p-0' style={{ width: 'var(--radix-popover-trigger-width)' }}>
-          <Command>
-            <CommandInput placeholder='Search...' />
+        <PopoverContent
+          align='start'
+          onWheel={e => e.stopPropagation()}
+          className='w-[var(--radix-popover-trigger-width)] bg-[#09090B] p-0'
+        >
+          <Command className='bg-transparent'>
+            <CommandInput placeholder='Search...' className='py-1' />
             <CommandEmpty>No results found.</CommandEmpty>
 
-            <CommandList className='[scrollbar-width:thin]'>
+            <ScrollArea className='max-h-[calc(var(--radix-popover-content-available-height)-42px)]'>
               <CommandGroup>
-                {selectOptions.map(opt => (
-                  <CommandItem
-                    key={opt.value}
-                    value={opt.label}
-                    disabled={!!opt.disabled}
-                    onSelect={() => handleToggle(opt.value)}
-                    className='flex items-center gap-2'
-                  >
-                    <Checkbox checked={selectedValues.includes(opt.value) ?? false} className='pointer-events-none' />
-                    {opt.label}
-                  </CommandItem>
-                ))}
+                {selectOptions.map(opt => {
+                  const isSelected = selectedValues.includes(opt.value)
+
+                  return (
+                    <CommandItem
+                      key={opt.value}
+                      value={opt.label}
+                      disabled={!!opt.disabled}
+                      onSelect={() => handleToggle(opt.value)}
+                      className='flex items-center gap-2 py-1 hover:bg-[#1F1F1F] data-[selected=true]:bg-[#1F1F1F]'
+                    >
+                      <Checkbox checked={isSelected} className='size-4 [&_span_svg]:size-3.25 pointer-events-none' />
+                      {opt.label}
+                    </CommandItem>
+                  )
+                })}
               </CommandGroup>
-            </CommandList>
+            </ScrollArea>
           </Command>
         </PopoverContent>
       </Popover>

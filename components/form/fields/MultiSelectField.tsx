@@ -8,6 +8,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 import { FieldComponentProps } from './types'
+import { cn } from '@/lib/utils'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 type MultiSelectFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
 
@@ -43,15 +45,15 @@ const MultiSelectField = <T extends FieldValues>({
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant='outline' className={`w-full h-auto! justify-between ${className ?? ''}`}>
+          <Button variant='outline' className={cn('w-full justify-between', className, 'h-auto!')}>
             <div className='flex flex-1 flex-wrap items-center gap-1 text-left'>
               {!(selectedValues.length > 0) ? (
-                <span className='text-muted-foreground'>{placeholder}</span>
+                <span className='text-[#a7a7ae]'>{placeholder}</span>
               ) : (
                 selectedValues.map((valueItem, i) => (
                   <span
                     key={`${valueItem}-${i}`}
-                    className='flex items-center gap-1.5 pl-2 pr-1 py-0.5 rounded-sm text-white/80 bg-muted-background/80'
+                    className='flex items-center gap-1.5 pl-2 pr-1 py-px rounded-sm text-xs leading-none text-[#f4f4f5] bg-white/10'
                   >
                     {selectOptions?.find(opt => opt.value === valueItem)?.label}
                     <span
@@ -59,9 +61,9 @@ const MultiSelectField = <T extends FieldValues>({
                         event.stopPropagation()
                         handleToggle(valueItem)
                       }}
-                      className='p-1 hover:text-red-500 hover:bg-white/20 rounded-sm cursor-pointer'
+                      className='p-1 hover:text-red-500 hover:bg-red-500/15 rounded-sm cursor-pointer'
                     >
-                      <XIcon className='size-4' />
+                      <XIcon className='size-3' />
                     </span>
                   </span>
                 ))
@@ -73,21 +75,22 @@ const MultiSelectField = <T extends FieldValues>({
 
         <PopoverContent
           align='start'
-          className='flex flex-col gap-1 p-2'
-          style={{ width: 'var(--radix-popover-trigger-width)' }}
+          onWheel={e => e.stopPropagation()}
+          className='w-[var(--radix-popover-trigger-width)] bg-[#09090B] p-0'
         >
-          {selectOptions.map(opt => (
-            <label
-              key={opt.value}
-              className='flex items-center gap-2 px-2 py-1 bg-muted-background/20 hover:bg-muted-background/40 rounded-sm'
-            >
-              <Checkbox
-                checked={selectedValues.includes(opt.value) ?? false}
-                onCheckedChange={() => handleToggle(opt.value)}
-              />
-              {opt.label}
-            </label>
-          ))}
+          <ScrollArea className='max-h-[var(--radix-popover-content-available-height)]'>
+            <div className='flex flex-col gap-1 p-2'>
+              {selectOptions.map(opt => (
+                <label key={opt.value} className='flex items-center gap-2 px-2 py-1 hover:bg-[#1F1F1F] rounded-sm'>
+                  <Checkbox
+                    checked={selectedValues.includes(opt.value) ?? false}
+                    onCheckedChange={() => handleToggle(opt.value)}
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          </ScrollArea>
         </PopoverContent>
       </Popover>
     )

@@ -624,19 +624,19 @@ input[type='time']::-webkit-calendar-picker-indicator {
 
 /* Google dropdown container */
 .pac-container {
-  @apply bg-popover text-white rounded-lg shadow-lg overflow-hidden;
+  @apply bg-[#09090B]! text-white rounded-lg shadow-lg overflow-hidden;
   font-family: var(--font-inter), sans-serif;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   z-index: 9999 !important;
   pointer-events: auto !important;
-  border: 1px solid var(--border);
+  border: 1px solid #4d4d4d;
   padding-block: 0.25rem 0;
   padding-inline: 0.25rem;
 }
 
 /* each suggestion item */
 .pac-item {
-  @apply px-2 py-0.5;
+  @apply px-2 py-0.25 leading-none;
   transition: background-color 0.2s;
   border-radius: 0.5rem;
   border: none;
@@ -645,7 +645,7 @@ input[type='time']::-webkit-calendar-picker-indicator {
 /* hovered / selected item */
 .pac-item:hover,
 .pac-item.pac-item-selected {
-  @apply bg-accent text-white;
+  @apply bg-[#1F1F1F] text-white;
 }
 
 /* bolded matched part */

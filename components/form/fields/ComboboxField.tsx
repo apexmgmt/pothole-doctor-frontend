@@ -6,10 +6,11 @@ import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 import { FieldComponentProps } from './types'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 type ComboboxFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
 
@@ -35,9 +36,7 @@ const ComboboxField = <T extends FieldValues>({
           variant='outline'
           role='combobox'
           onClick={e => e.stopPropagation()}
-          className={`w-full justify-between ${
-            selectedValue ? 'text-foreground' : 'text-muted-foreground hover:text-muted-foreground'
-          } ${className}`}
+          className={`w-full justify-between ${selectedValue ? 'text-[#f4f4f5]' : 'text-[#a7a7ae]!'} ${className}`}
         >
           {selectedValue ? selectOptions.find(o => o.value === selectedValue)?.label : placeholder}
           <ChevronsUpDown className='ml-2 size-4 shrink-0 opacity-50' />
@@ -47,14 +46,13 @@ const ComboboxField = <T extends FieldValues>({
       <PopoverContent
         onWheel={e => e.stopPropagation()}
         align='start'
-        className='p-0'
-        style={{ width: 'var(--radix-popover-trigger-width)' }}
+        className='w-[var(--radix-popover-trigger-width)] bg-[#09090B] p-0'
       >
-        <Command>
-          <CommandInput placeholder='Search...' />
+        <Command className='bg-transparent'>
+          <CommandInput placeholder='Search...' className='py-1' />
           <CommandEmpty>No results found.</CommandEmpty>
 
-          <CommandList className='[scrollbar-width:thin]'>
+          <ScrollArea className='max-h-[calc(var(--radix-popover-content-available-height)-42px)]'>
             <CommandGroup>
               {selectOptions.map(opt => (
                 <CommandItem
@@ -65,13 +63,14 @@ const ComboboxField = <T extends FieldValues>({
                     onBlur?.(opt.value)
                     setOpen(false)
                   }}
+                  className='text-sm py-1 hover:bg-[#1F1F1F] data-[selected=true]:bg-[#1F1F1F]'
                 >
-                  <Check className={cn('mr-2 size-4', selectedValue === opt.value ? 'opacity-100' : 'opacity-0')} />
+                  <Check className={`mr-2 size-4 ${selectedValue === opt.value ? 'opacity-100' : 'opacity-0'}`} />
                   {opt.label}
                 </CommandItem>
               ))}
             </CommandGroup>
-          </CommandList>
+          </ScrollArea>
         </Command>
       </PopoverContent>
     </Popover>

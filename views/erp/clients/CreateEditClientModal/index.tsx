@@ -23,12 +23,8 @@ import {
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import ClientService from '@/services/api/clients/clients.service'
 import ClientAddressService from '@/services/api/clients/client-addresses.service'
-import BasicClientReferenceFields from './BasicClientReferenceFields'
 import { Separator } from '@/components/ui/separator'
-import BasicClientFields from './BasicClientFields'
-import AddressFields from './AddressFileds'
 import { InputType, SelectOption } from '@/components/form/fields/types'
-import { useGoogleMaps } from '@/hocs/GoogleMapProvider'
 import CustomFormField from '@/components/form/CustomFormField'
 import GooglePlaceField from '@/components/form/fields/GooglePlaceField'
 
@@ -197,9 +193,12 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     }
   }, [mode, clientData, isOpen, reset])
 
-  const onSubmit = async (data: ClientPayload) => {
+  const onSubmit = async (formData: ClientPayload) => {
     try {
       setIsLoading(true)
+
+      // Remove address_search from data as it's only used for GooglePlaceField and not needed in payload
+      const { address_search, ...data } = formData
 
       // separate address, state_id, city_id and zip_code from data
       const {
@@ -440,7 +439,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       name: 'lead_cost',
       type: 'number',
       label: 'Lead Cost',
-      placeholder: '0.00'
+      placeholder: 'Enter lead cost'
     },
     {
       name: 'phone',
@@ -502,7 +501,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     },
     {
       name: 'service_type_ids',
-      type: 'multiselect',
+      type: 'multiselect-searchable',
       label: 'Desired Service(s)',
       placeholder: 'Select service types...',
       selectOptions: serviceTypes.map(service => ({
@@ -514,7 +513,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       name: 'pre_qualified_amount',
       type: 'number',
       label: 'Pre-qualified Financing Amount',
-      placeholder: '0.00'
+      placeholder: 'Enter amount'
     },
     {
       name: 'is_tax_exempt',
@@ -533,7 +532,8 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       name: 'address_title',
       type: 'text',
       label: 'Address Title',
-      placeholder: 'e.g. Home, Office'
+      placeholder: 'e.g. Home, Office',
+      rules: { required: 'Address Title is required' }
     },
     {
       name: 'address_search',
@@ -628,12 +628,12 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       disableClose={true}
       className='sm:max-w-252!'
     >
-      <form id='client-form' onSubmit={handleSubmit(onSubmit)} className='space-y-6 mr-0.5'>
+      <form id='client-form' onSubmit={handleSubmit(onSubmit)} className='space-y-3'>
         {[basicClientReferenceFields, basicClientFields, addressFields].map((fieldGroup, index) => (
           <React.Fragment key={index}>
-            <Separator />
+            {index !== 0 && <Separator />}
 
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-x-9 gap-y-1.5'>
+            <div className='grid grid-cols-1 md:grid-cols-2 items-start gap-x-9 gap-y-1.5'>
               {fieldGroup.map(({ name, type, label, placeholder, rules, selectOptions }) => {
                 if (type === 'google-place') {
                   return (
@@ -645,8 +645,49 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
                       rules={rules}
                       control={control}
                       errors={errors}
-                      onPlaceSelect={data => {}}
-                      fieldClassName='grid grid-cols-[100px_auto]'
+                      onPlaceSelect={data => {
+                        const { city, state, country, postalCode } = data
+
+                        // Set zip code
+                        if (postalCode) {
+                          setValue('zip_code', postalCode)
+                        }
+
+                        // Match country
+                        if (country) {
+                          const matchedCountry = countriesWithStatesAndCities.find(
+                            item => item.name.toLowerCase() === country.toLowerCase()
+                          )
+
+                          if (matchedCountry) {
+                            setValue('country_id', matchedCountry.id.toString())
+
+                            // Match state
+                            if (state) {
+                              const matchedState = matchedCountry.states.find(
+                                item => item.name.toLowerCase() === state.toLowerCase()
+                              )
+
+                              if (matchedState) {
+                                setValue('state_id', matchedState.id.toString())
+
+                                // Match city
+                                if (city) {
+                                  const matchedCity = matchedState.cities.find(
+                                    item => item.name.toLowerCase() === city.toLowerCase()
+                                  )
+
+                                  if (matchedCity) {
+                                    setValue('city_id', matchedCity.id.toString())
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }}
+                      fieldClassName='grid grid-cols-[128px_auto]'
+                      labelClassName='justify-end self-start text-right pt-px'
                     />
                   )
                 }
@@ -663,32 +704,15 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
                     register={register}
                     control={control}
                     errors={errors}
-                    fieldClassName={type === 'checkbox' ? '' : 'grid grid-cols-[100px_auto]'}
+                    fieldClassName='grid grid-cols-[128px_auto]'
+                    labelClassName={type === 'checkbox' ? 'text-nowrap' : 'justify-end self-start text-right pt-px'}
+                    className={type === 'checkbox' ? 'col-span-2 ps-34' : ''}
                   />
                 )
               })}
             </div>
           </React.Fragment>
         ))}
-
-        {/* <BasicClientReferenceFields
-          type={type}
-          methods={methods}
-          clientSources={clientSources}
-          staffs={staffs}
-          businessLocations={businessLocations}
-          contactTypes={contactTypes}
-        />
-        <Separator />
-        <BasicClientFields
-          type={type}
-          methods={methods}
-          companies={companies}
-          interestLevels={interestLevels}
-          serviceTypes={serviceTypes}
-        />
-        <Separator />
-        <AddressFields methods={methods} countriesWithStatesAndCities={countriesWithStatesAndCities} /> */}
       </form>
     </CommonDialog>
   )

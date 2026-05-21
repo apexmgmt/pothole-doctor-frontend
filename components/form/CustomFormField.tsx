@@ -50,8 +50,8 @@ const CustomFormField = <T extends FieldValues>({
   const fieldError = name ? errors?.[name as Path<T>] : undefined
 
   // Combine base styles
-  const fieldStyle = cn(
-    `text-sm font-normal leading-none px-2.75 py-2.25 ${type === 'textarea' ? 'h-16!' : 'h-8!'} ${fieldError ? 'border-red-500' : ''}`,
+  const inputStyle = cn(
+    `text-sm font-normal leading-none bg-[#1f1f1f] hover:bg-[#1f1f1f] placeholder:text-[#a7a7ae] text-[#f4f4f5] px-2.5 py-2 ${type === 'textarea' ? 'h-16!' : 'h-7!'} ${fieldError ? 'border-red-500' : ''}`,
     className
   )
 
@@ -61,118 +61,120 @@ const CustomFormField = <T extends FieldValues>({
     <Field orientation={orientation} className={cn('gap-2', fieldClassName)}>
       {/* Label */}
       {label && !isCheckbox && (
-        <FieldLabel htmlFor={name} className={cn('text-xs font-normal leading-tight', labelClassName)}>
+        <FieldLabel htmlFor={name} className={cn('text-xs font-normal leading-tight gap-0', labelClassName)}>
           {label}
-          {rules?.required && <span className='text-red-500'>*</span>}
+          {rules?.required && <span className='text-sm text-red-500'>*</span>}
         </FieldLabel>
       )}
 
-      {type === 'combobox' ? (
-        <ComboboxField
-          name={name}
-          placeholder={placeholder}
-          control={control}
-          rules={rules}
-          selectOptions={selectOptions}
-          value={value}
-          onChange={onChange}
-          onBlur={onBlur}
-          className={fieldStyle}
-        />
-      ) : type === 'select' ? (
-        <SelectField
-          name={name}
-          placeholder={placeholder}
-          control={control}
-          rules={rules}
-          selectOptions={selectOptions}
-          value={value}
-          onChange={onChange}
-          onBlur={onBlur}
-          className={fieldStyle}
-        />
-      ) : type === 'multiselect' ? (
-        <MultiSelectField
-          name={name}
-          placeholder={placeholder}
-          selectOptions={selectOptions}
-          value={value}
-          rules={rules}
-          control={control}
-          onChange={onChange}
-          onBlur={onBlur}
-          className={fieldStyle}
-        />
-      ) : type === 'multiselect-searchable' ? (
-        <MultiSelectSearchField
-          name={name}
-          placeholder={placeholder}
-          selectOptions={selectOptions}
-          value={value}
-          rules={rules}
-          control={control}
-          onChange={onChange}
-          onBlur={onBlur}
-          className={fieldStyle}
-        />
-      ) : type === 'checkbox' ? (
-        <CheckboxField
-          name={name}
-          label={label}
-          value={value}
-          rules={rules}
-          control={control}
-          onChange={onChange}
-          onBlur={onBlur}
-          className={className}
-          labelClassName={labelClassName}
-        />
-      ) : type === 'datepicker' ? (
-        <DatePicker
-          name={name}
-          placeholder={placeholder}
-          control={control}
-          minDate={minDate}
-          maxDate={maxDate}
-          rules={rules}
-          lockFutureDate={lockFutureDate}
-          value={value}
-          onChange={onChange}
-          onBlur={onBlur}
-          className={fieldStyle}
-        />
-      ) : type === 'textarea' ? (
-        <TextareaField
-          name={name}
-          placeholder={placeholder}
-          register={register}
-          rules={rules}
-          readonly={readonly}
-          value={value}
-          onChange={onChange}
-          onBlur={onBlur}
-          className={fieldStyle}
-        />
-      ) : (
-        <InputField
-          type={type}
-          name={name}
-          label={label}
-          placeholder={placeholder}
-          register={register}
-          rules={rules}
-          readonly={readonly}
-          value={value}
-          onChange={onChange}
-          onBlur={onBlur}
-          className={fieldStyle}
-        />
-      )}
+      <div>
+        {type === 'combobox' ? (
+          <ComboboxField
+            name={name}
+            placeholder={placeholder}
+            control={control}
+            rules={rules}
+            selectOptions={selectOptions}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            className={inputStyle}
+          />
+        ) : type === 'select' ? (
+          <SelectField
+            name={name}
+            placeholder={placeholder}
+            control={control}
+            rules={rules}
+            selectOptions={selectOptions}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            className={inputStyle}
+          />
+        ) : type === 'multiselect' ? (
+          <MultiSelectField
+            name={name}
+            placeholder={placeholder}
+            selectOptions={selectOptions}
+            value={value}
+            rules={rules}
+            control={control}
+            onChange={onChange}
+            onBlur={onBlur}
+            className={inputStyle}
+          />
+        ) : type === 'multiselect-searchable' ? (
+          <MultiSelectSearchField
+            name={name}
+            placeholder={placeholder}
+            selectOptions={selectOptions}
+            value={value}
+            rules={rules}
+            control={control}
+            onChange={onChange}
+            onBlur={onBlur}
+            className={inputStyle}
+          />
+        ) : type === 'checkbox' ? (
+          <CheckboxField
+            name={name}
+            label={label}
+            value={value}
+            rules={rules}
+            control={control}
+            onChange={onChange}
+            onBlur={onBlur}
+            className={className}
+            labelClassName={labelClassName}
+          />
+        ) : type === 'datepicker' ? (
+          <DatePicker
+            name={name}
+            placeholder={placeholder}
+            control={control}
+            minDate={minDate}
+            maxDate={maxDate}
+            rules={rules}
+            lockFutureDate={lockFutureDate}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            className={inputStyle}
+          />
+        ) : type === 'textarea' ? (
+          <TextareaField
+            name={name}
+            placeholder={placeholder}
+            register={register}
+            rules={rules}
+            readonly={readonly}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            className={inputStyle}
+          />
+        ) : (
+          <InputField
+            type={type}
+            name={name}
+            label={label}
+            placeholder={placeholder}
+            register={register}
+            rules={rules}
+            readonly={readonly}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            className={inputStyle}
+          />
+        )}
 
-      {/* Error */}
-      {fieldError && <FieldError>{String(fieldError?.message) ?? ''}</FieldError>}
-      {/* Description */}
-      {description && <FieldDescription>{description}</FieldDescription>}
+        {/* Error */}
+        {fieldError && <FieldError className='mt-1'>{String(fieldError?.message) ?? ''}</FieldError>}
+        {/* Description */}
+        {description && <FieldDescription className='mt-1'>{description}</FieldDescription>}
+      </div>
     </Field>
   )
 }
