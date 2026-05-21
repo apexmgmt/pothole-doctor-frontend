@@ -1,9 +1,11 @@
 import React from 'react'
 
 import { Badge } from '@/components/ui/badge'
-import { Column, WorkOrder } from '@/types'
+import { Column, ProposalService, WorkOrder } from '@/types'
 import { formatCurrency } from '@/utils/currency'
 import { formatDate } from '@/utils/date'
+import WorkOrderDocumentService from '@/services/api/work-orders/work-order-documents.service'
+import { Description } from '@/components/ui/description'
 
 type SharedWorkOrderColumnsOptions = {
   excludeColumnIds?: string[]
@@ -62,12 +64,9 @@ export const getSharedWorkOrderColumns = (
       ),
       sortable: false
     },
-    {
-      id: 'title',
-      header: 'Title',
-      cell: (row: WorkOrder) => <span className='font-medium'>{row.title}</span>,
-      sortable: true
-    },
+
+    // invoice confirmation date
+    // invoice date
     {
       id: 'company',
       header: 'Company',
@@ -85,58 +84,67 @@ export const getSharedWorkOrderColumns = (
       sortable: false
     },
     {
-      id: 'issue_date',
-      header: 'Issue Date',
-      cell: (row: WorkOrder) => <span className='font-medium'>{formatDate(row.issue_date || '') || '—'}</span>,
+      id: 'service',
+      header: 'Service',
+      cell: (row: WorkOrder) => <span className='font-medium'>{row?.work_order_type?.name || ''}</span>,
+      sortable: false
+    },
+    {
+      id: 'title',
+      header: 'Job Name',
+      cell: (row: WorkOrder) => <span className='font-medium'>{row.title}</span>,
       sortable: true
     },
     {
-      id: 'due_date',
-      header: 'Due Date',
-      cell: (row: WorkOrder) => <span className='font-medium'>{formatDate(row.due_date || '') || '—'}</span>,
-      sortable: true
-    },
-    {
-      id: 'total',
-      header: 'Total',
-      cell: (row: WorkOrder) => <span className='font-medium'>{formatCurrency(getWorkOrderTotal(row))}</span>,
-      sortable: true
-    },
-    {
-      id: 'profit',
-      header: 'Profit',
+      id: 'service_types',
+      header: 'Job Type(s)',
       cell: (row: WorkOrder) => {
-        const profit = getWorkOrderProfit(row)
-        const isPositive = profit >= 0
+        const serviceTypeNames: string[] =
+          row?.services?.map((service: ProposalService) => service?.service_type?.name || '') || []
 
-        return (
-          <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-            {formatCurrency(profit)}
-          </span>
+        const uniqueServiceTypeNames = Array.from(new Set(serviceTypeNames)).filter(name => name)
+
+        return <Description description={uniqueServiceTypeNames.join(', ') || '—'} />
+      },
+      sortable: false
+    },
+    {
+      id: 'address',
+      header: 'Job Address',
+      cell: (row: WorkOrder) => {
+        const addressParts = [row?.address?.street_address, row?.address?.city?.name, row?.address?.state?.name].filter(
+          Boolean
         )
-      },
-      sortable: true
-    },
-    {
-      id: 'commissions',
-      header: 'Commissions',
-      cell: (row: WorkOrder) => {
-        const commission = row.commissions ?? 0
 
-        return <span className='font-medium'>{formatCurrency(commission)}</span>
+        return <Description description={addressParts.join(', ') || '—'} />
       },
-      sortable: true
+      sortable: false
     },
     {
-      id: 'status',
-      header: 'Status',
-      cell: (row: WorkOrder) => (
-        <Badge variant={getWorkOrderStatusVariant(row.status)} className='capitalize'>
-          {row.status || '—'}
-        </Badge>
-      ),
-      sortable: true
+      id: 'contractors',
+      header: 'Contractor(s)',
+      cell: (row: WorkOrder) => {
+        const contractorNames: string[] =
+          row?.services?.map(
+            (service: ProposalService) =>
+              service?.contractor?.userable?.company?.name ??
+              [service?.contractor?.first_name, service?.contractor?.last_name].filter(Boolean).join(' ') ??
+              ''
+          ) || []
+
+        const uniqueContractorNames = contractorNames.filter(name => name)
+
+        return <Description description={uniqueContractorNames.join(', ') || '—'} />
+      },
+      sortable: false
     },
+
+    // job schedule date
+    // material ready for order
+    // material order %
+    // material paid
+    // schedule complete %
+
     {
       id: 'completion_certificates',
       header: 'Completion Certificate Signed',
@@ -173,7 +181,68 @@ export const getSharedWorkOrderColumns = (
         )
       },
       sortable: true
-    }
+    },
+    
+    // contractor paid
+    // salesman paid
+    {
+      id: 'assign_user',
+      header: 'Sales Rep',
+      cell: (row: WorkOrder) => (
+        <span className='font-medium'>
+          {[row?.assign_user?.first_name, row?.assign_user?.last_name].filter(Boolean).join(' ') || '—'}
+        </span>
+      ),
+      sortable: false
+    },
+    {
+      id: 'invoice_total',
+      header: 'Total Sale',
+      cell: (row: WorkOrder) => <span className='font-medium'>{formatCurrency(row?.invoice_total ?? 0)}</span>,
+      sortable: true
+    },
+    {
+      id: 'invoice_total_tax',
+      header: 'Total Tax',
+      cell: (row: WorkOrder) => <span className='font-medium'>{formatCurrency(row?.invoice_total_tax ?? 0)}</span>,
+      sortable: true
+    },
+    {
+      id: 'total_cost',
+      header: 'Total Cost',
+      cell: (row: WorkOrder) => <span className='font-medium'>{formatCurrency(row?.total_cost ?? 0)}</span>,
+      sortable: true
+    },
+    {
+      id: 'total_profit',
+      header: 'Total Profit',
+      cell: (row: WorkOrder) => <span className='font-medium'>{formatCurrency(row?.total_profit ?? 0)}</span>,
+      sortable: true
+    },
+    {
+      id: 'commissions',
+      header: 'Commissions',
+      cell: (row: WorkOrder) => <span className='font-medium'>{formatCurrency(row?.commissions ?? 0)}</span>,
+      sortable: true
+    },
+    {
+      id: 'total_net_profit',
+      header: 'Net Profit',
+      cell: (row: WorkOrder) => <span className='font-medium'>{formatCurrency(row?.total_net_profit ?? 0)}</span>,
+      sortable: true
+    },
+
+    // {
+    //   id: 'status',
+    //   header: 'Status',
+    //   cell: (row: WorkOrder) => (
+    //     <Badge variant={getWorkOrderStatusVariant(row.status)} className='capitalize'>
+    //       {row.status || '—'}
+    //     </Badge>
+    //   ),
+    //   sortable: true
+    // },
+    
   ]
 
   if (!options.excludeColumnIds || options.excludeColumnIds.length === 0) {
