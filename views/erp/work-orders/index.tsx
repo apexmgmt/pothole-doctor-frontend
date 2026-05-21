@@ -215,11 +215,11 @@ const WorkOrders: React.FC<{
 
   const columns: Column[] = [
     {
-      id: 'work_order_number',
+      id: 'invoice_number',
       header: 'WO #',
       cell: (row: WorkOrder) => (
         <span className='font-medium hover:underline' onClick={() => handleOpenEditModal(row.id)}>
-          {row.work_order_number?.toString().padStart(6, '0') || 'N/A'}
+          {row?.invoice_number_prefix ? `${row.invoice_number_prefix}-` : ''}{row.invoice_number?.toString().padStart(6, '0') || 'N/A'}
         </span>
       ),
       sortable: false
@@ -237,7 +237,7 @@ const WorkOrders: React.FC<{
       sortable: false
     },
     {
-      id: 'client',
+      id: 'client_name',
       header: 'Customer',
       cell: (row: WorkOrder) => {
         const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
@@ -544,7 +544,6 @@ const WorkOrders: React.FC<{
               setCertModalWorkOrder(null)
             }
           }}
-          workOrderNumber={certModalWorkOrder.work_order_number}
           certificates={certModalWorkOrder.completion_certificates ?? []}
         />
       )}

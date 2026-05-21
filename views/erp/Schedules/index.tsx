@@ -149,10 +149,15 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
       sortable: true
     },
     {
-      id: 'work_order_number',
+      id: 'invoice_number',
       header: 'WO#',
-      cell: (row: Schedule) => <span className='font-medium'>{row.work_order?.work_order_number || ''}</span>,
-      sortable: true
+      cell: (row: Schedule) => (
+        <span className='font-medium'>
+          {row.work_order?.invoice_number_prefix ? `${row.work_order.invoice_number_prefix}-` : ''}
+          {row.work_order?.invoice_number?.toString().padStart(6, '0') || '—'}
+        </span>
+      ),
+      sortable: false
     },
     {
       id: 'company',

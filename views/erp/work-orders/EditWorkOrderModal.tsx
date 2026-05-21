@@ -176,7 +176,8 @@ const EditWorkOrderModal = ({
   // When client changes, auto-select default address and client's business location
   useEffect(() => {
     form.setValue('address_id', defaultAddressId)
-    form.setValue('location_id', selectedClient?.location_id ?? '')
+
+    // form.setValue('location_id', selectedClient?.location_id ?? '')
   }, [form.watch('client_id')])
 
   return (
@@ -276,7 +277,8 @@ const EditWorkOrderModal = ({
                     onValueChange={value => {
                       field.onChange(value)
                       form.setValue('address_id', '')
-                      form.setValue('location_id', '')
+
+                      // form.setValue('location_id', '')
                     }}
                   >
                     <SelectTrigger className='w-full'>
@@ -489,7 +491,7 @@ const EditWorkOrderModal = ({
               <FormItem className='col-span-2'>
                 <FormLabel>Business Location</FormLabel>
                 <FormControl>
-                  <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                  <Select value={field.value ?? ''} onValueChange={field.onChange} disabled>
                     <SelectTrigger className='w-full'>
                       <SelectValue placeholder='Select Business Location' />
                     </SelectTrigger>

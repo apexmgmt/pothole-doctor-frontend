@@ -16,6 +16,7 @@ import {
 export interface Invoice extends Model {
   inid: string
   icid: string
+  invoice_number_prefix: string
   invoice_number: number
   estimate_id: string | null
   estimate?: Estimate
@@ -47,6 +48,7 @@ export interface Invoice extends Model {
   tax_rate: number
   status: string
   issue_date: string | null
+  invoice_confirmation_date: string | null
   due_date: string | null
   discount: number
   subtotal: number

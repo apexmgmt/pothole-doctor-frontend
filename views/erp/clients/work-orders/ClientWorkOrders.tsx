@@ -110,14 +110,15 @@ const ClientWorkOrders = ({ clientId }: { clientId: string }) => {
 
   const columns: Column[] = [
     {
-      id: 'work_order_number',
+      id: 'invoice_number',
       header: 'WO #',
       cell: (row: WorkOrder) => (
         <span
           className='font-medium hover:underline cursor-pointer'
           onClick={() => router.push(`/erp/work-orders/${row.id}`)}
         >
-          {row.work_order_number?.toString().padStart(6, '0') || 'N/A'}
+          {row.invoice_number_prefix ? `${row.invoice_number_prefix}-` : ''}
+          {row.invoice_number?.toString().padStart(6, '0') || 'N/A'}
         </span>
       ),
       sortable: false
