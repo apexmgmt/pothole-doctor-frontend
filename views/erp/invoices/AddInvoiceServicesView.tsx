@@ -423,7 +423,7 @@ const AddInvoiceServicesView = ({
             Back
           </Button>
           <div>
-            <h1 className='text-xl font-bold'>Invoice #{currentInvoice?.invoice_number?.toString() || 'N/A'}</h1>
+            <h1 className='text-xl font-bold'>Invoice #{currentInvoice?.invoice_number_prefix ? `${currentInvoice.invoice_number_prefix}-` : ''}{currentInvoice?.invoice_number?.toString() || 'N/A'}</h1>
             <p className='text-sm text-zinc-400'>{isEditMode ? 'Edit Invoice Services' : 'Add Invoice Services'}</p>
           </div>
         </div>
