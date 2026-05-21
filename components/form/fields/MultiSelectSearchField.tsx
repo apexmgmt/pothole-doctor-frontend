@@ -23,6 +23,7 @@ const MultiSelectSearchField = <T extends FieldValues>({
   value,
   onChange,
   onBlur,
+  disabled = false,
   className
 }: MultiSelectSearchFieldProps<T>) => {
   const [open, setOpen] = useState(false)
@@ -46,7 +47,11 @@ const MultiSelectSearchField = <T extends FieldValues>({
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant='outline' className={cn('w-full justify-between', className, 'h-auto! min-h-7!')}>
+          <Button
+            variant='outline'
+            disabled={disabled}
+            className={cn('w-full justify-between', className, 'h-auto! min-h-7!')}
+          >
             <div className='flex flex-1 flex-wrap items-center gap-1 text-left'>
               {!(selectedValues.length > 0) ? (
                 <span className='text-[#a7a7ae]'>{placeholder}</span>

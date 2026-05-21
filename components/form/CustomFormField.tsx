@@ -38,6 +38,7 @@ const CustomFormField = <T extends FieldValues>({
   control,
   errors,
   readonly = false,
+  disabled = false,
   minDate,
   maxDate,
   lockFutureDate,
@@ -79,6 +80,7 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : type === 'select' ? (
@@ -91,6 +93,7 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : type === 'multiselect' ? (
@@ -103,6 +106,7 @@ const CustomFormField = <T extends FieldValues>({
             control={control}
             onChange={onChange}
             onBlur={onBlur}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : type === 'multiselect-searchable' ? (
@@ -115,6 +119,7 @@ const CustomFormField = <T extends FieldValues>({
             control={control}
             onChange={onChange}
             onBlur={onBlur}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : type === 'multiselect-creatable' ? (
@@ -127,6 +132,7 @@ const CustomFormField = <T extends FieldValues>({
             control={control}
             onChange={onChange}
             onBlur={onBlur}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : type === 'checkbox' ? (
@@ -138,6 +144,7 @@ const CustomFormField = <T extends FieldValues>({
             control={control}
             onChange={onChange}
             onBlur={onBlur}
+            disabled={disabled}
             className={className}
             labelClassName={labelClassName}
           />
@@ -153,6 +160,7 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : type === 'textarea' ? (
@@ -165,6 +173,7 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : (
@@ -179,6 +188,7 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            disabled={disabled}
             className={inputStyle}
           />
         )}

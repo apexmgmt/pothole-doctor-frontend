@@ -23,6 +23,7 @@ const ComboboxField = <T extends FieldValues>({
   value,
   onChange,
   onBlur,
+  disabled = false,
   className = ''
 }: ComboboxFieldProps<T>) => {
   const [open, setOpen] = useState(false)
@@ -36,6 +37,7 @@ const ComboboxField = <T extends FieldValues>({
           variant='outline'
           role='combobox'
           onClick={e => e.stopPropagation()}
+          disabled={disabled}
           className={`w-full justify-between ${selectedValue ? 'text-[#f4f4f5]' : 'text-[#a7a7ae]!'} ${className}`}
         >
           {selectedValue ? selectOptions.find(o => o.value === selectedValue)?.label : placeholder}

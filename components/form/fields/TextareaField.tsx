@@ -1,8 +1,8 @@
-import { FieldValues, Path } from 'react-hook-form';
+import { FieldValues, Path } from 'react-hook-form'
 
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from '@/components/ui/textarea'
 
-import { FieldComponentProps } from './types';
+import { FieldComponentProps } from './types'
 
 const TextareaField = <T extends FieldValues>({
   name,
@@ -13,31 +13,33 @@ const TextareaField = <T extends FieldValues>({
   value,
   onChange,
   onBlur,
+  disabled = false,
   className = ''
 }: FieldComponentProps<T>) => {
-  const registeredProps = name && register ? register(name as Path<T>, rules) : undefined;
+  const registeredProps = name && register ? register(name as Path<T>, rules) : undefined
 
-  const formattedValue = String(value ?? '') || undefined;
+  const formattedValue = String(value ?? '') || undefined
 
   return (
     <Textarea
       id={name}
       name={typeof name === 'string' ? name : undefined}
+      disabled={disabled}
       placeholder={placeholder}
       {...registeredProps}
       value={formattedValue}
       onChange={e => {
-        registeredProps?.onChange(e);
-        onChange?.(e.target.value);
+        registeredProps?.onChange(e)
+        onChange?.(e.target.value)
       }}
       onBlur={e => {
-        registeredProps?.onBlur(e);
-        onBlur?.();
+        registeredProps?.onBlur(e)
+        onBlur?.()
       }}
       readOnly={readonly}
       className={className}
     />
-  );
-};
+  )
+}
 
-export default TextareaField;
+export default TextareaField

@@ -28,6 +28,7 @@ const DatePicker = <T extends FieldValues>({
   value,
   onChange,
   onBlur,
+  disabled = false,
   className = ''
 }: DatePickerProps<T>) => {
   const [open, setOpen] = useState(false)
@@ -37,8 +38,9 @@ const DatePicker = <T extends FieldValues>({
       <PopoverTrigger asChild>
         <Button
           variant='outline'
+          disabled={disabled}
           onClick={e => e.stopPropagation()}
-          className={`w-full justify-between ${currentValue ? 'text-foreground' : 'text-muted-foreground'} ${className}`}
+          className={`w-full text-sm justify-between pe-1.5! ${currentValue ? 'text-[#f4f4f5]' : 'text-[#a7a7ae]!'} ${className}`}
         >
           {currentValue
             ? new Date(currentValue).toLocaleDateString('en-US', {
@@ -47,7 +49,7 @@ const DatePicker = <T extends FieldValues>({
                 year: 'numeric'
               })
             : placeholder}
-          <CalendarDays className='mr-2 size-4' />
+          <CalendarDays className='size-4' />
         </Button>
       </PopoverTrigger>
 
