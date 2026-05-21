@@ -12,34 +12,10 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CommonTable from '@/components/erp/common/table'
-import { Badge } from '@/components/ui/badge'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Column, DataTableApiResponse, WorkOrder } from '@/types'
-import { formatDate } from '@/utils/date'
 import WorkOrderService from '@/services/api/work-orders/work_orders.service'
-
-const getStatusVariant = (
-  status: string
-): 'default' | 'secondary' | 'destructive' | 'outline' | 'warning' | 'info' | 'success' | 'pending' => {
-  switch (status?.toLowerCase()) {
-    case 'completed':
-      return 'success'
-    case 'in progress':
-    case 'in_progress':
-      return 'info'
-    case 'pending':
-      return 'pending'
-    case 'cancelled':
-    case 'void':
-      return 'destructive'
-    case 'overdue':
-      return 'warning'
-    case 'new':
-      return 'secondary'
-    default:
-      return 'outline'
-  }
-}
+import { getSharedWorkOrderColumns } from '@/views/erp/work-orders/sharedWorkOrderColumns'
 
 const ClientWorkOrders = ({ clientId }: { clientId: string }) => {
   const router = useRouter()
@@ -108,72 +84,12 @@ const ClientWorkOrders = ({ clientId }: { clientId: string }) => {
     }
   }
 
-  const columns: Column[] = [
-    {
-      id: 'invoice_number',
-      header: 'WO #',
-      cell: (row: WorkOrder) => (
-        <span
-          className='font-medium hover:underline cursor-pointer'
-          onClick={() => router.push(`/erp/work-orders/${row.id}`)}
-        >
-          {row.invoice_number_prefix ? `${row.invoice_number_prefix}-` : ''}
-          {row.invoice_number?.toString() || 'N/A'}
-        </span>
-      ),
-      sortable: false
-    },
-    {
-      id: 'title',
-      header: 'Title',
-      cell: (row: WorkOrder) => <span className='font-medium'>{row.title}</span>,
-      sortable: true
-    },
-    {
-      id: 'issue_date',
-      header: 'Issue Date',
-      cell: (row: WorkOrder) => <span className='font-medium'>{formatDate(row.issue_date || '') || '—'}</span>,
-      sortable: true
-    },
-    {
-      id: 'due_date',
-      header: 'Due Date',
-      cell: (row: WorkOrder) => <span className='font-medium'>{formatDate(row.due_date || '') || '—'}</span>,
-      sortable: true
-    },
-    {
-      id: 'status',
-      header: 'Status',
-      cell: (row: WorkOrder) => (
-        <Badge variant={getStatusVariant(row.status)} className='capitalize'>
-          {row.status || '—'}
-        </Badge>
-      ),
-      sortable: true
-    },
-    {
-      id: 'total',
-      header: 'Total',
-      cell: (row: WorkOrder) => (
-        <span className='font-medium'>${row.total != null ? Number(row.total).toFixed(2) : '0.00'}</span>
-      ),
-      sortable: true
-    },
-    {
-      id: 'profit',
-      header: 'Profit',
-      cell: (row: WorkOrder) => {
-        const profit = row.profit ?? 0
-        const isPositive = profit >= 0
+  const excludeColumnIds = ['company', 'client_name', 'commissions', 'completion_certificates']
 
-        return (
-          <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-            ${Number(profit).toFixed(2)}
-          </span>
-        )
-      },
-      sortable: true
-    },
+  const columns: Column[] = [
+    ...getSharedWorkOrderColumns(row => router.push(`/erp/work-orders/${row.id}`)).filter(
+      column => !excludeColumnIds.includes(column.id)
+    ),
     {
       id: 'actions',
       header: 'Action',
