@@ -14,6 +14,7 @@ import {
 import { cn } from '@/lib/utils'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
 
 interface CommonDialogProps {
   open: boolean
@@ -75,7 +76,7 @@ const CommonDialog = ({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className={cn(maxWidthClasses[maxWidth], className)}
+        className={cn('flex flex-col gap-0 p-0!', maxWidthClasses[maxWidth], className)}
         onInteractOutside={e => {
           if (true) {
             e.preventDefault()
@@ -88,29 +89,38 @@ const CommonDialog = ({
         }}
       >
         {(title || description) && (
-          <DialogHeader>
-            {title && <DialogTitle>{title}</DialogTitle>}
-            {description && <DialogDescription>{description}</DialogDescription>}
+          <DialogHeader className='px-5 pt-5 pb-0'>
+            <DialogTitle className={title ? 'text-base font-medium leading-none mb-0' : 'sr-only'}>
+              {title ?? '...'}
+            </DialogTitle>
+
+            <DialogDescription className={description ? 'text-sm font-normal leading-none mt-2 mb-0' : 'sr-only'}>
+              {description ?? '...'}
+            </DialogDescription>
+
+            <Separator className='mt-5' />
           </DialogHeader>
         )}
 
-        <ScrollArea
-          className={cn(
-            'relative max-h-[80vh] pr-2 -mr-2',
-            isLoading && 'pointer-events-none opacity-50',
-            contentClassName
-          )}
-          ref={contentRef}
-        >
-          {isLoading && (
-            <div className='absolute inset-0 backdrop-blur-xs flex items-center justify-center z-10'>
-              <SpinnerCustom size='size-8' />
+        <div className='py-1'>
+          <ScrollArea
+            className={cn('max-h-[calc(90vh-116px)]', isLoading && 'pointer-events-none opacity-50', contentClassName)}
+            ref={contentRef}
+          >
+            <div className='relative px-5 py-4'>
+              {isLoading && (
+                <div className='absolute inset-0 backdrop-blur-xs flex items-center justify-center z-10'>
+                  <SpinnerCustom size='size-8' />
+                </div>
+              )}
+              {children}
             </div>
-          )}
-          {children}
-        </ScrollArea>
+          </ScrollArea>
+        </div>
 
-        {actions && <DialogFooter>{actions}</DialogFooter>}
+        {actions && (
+          <DialogFooter className='bg-[#1F1F1F] border-t border-[#4D4D4D] px-4 py-2.5'>{actions}</DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   )

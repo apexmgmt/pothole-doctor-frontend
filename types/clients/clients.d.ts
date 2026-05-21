@@ -85,6 +85,7 @@ export interface ClientPayload {
   location_id: string
   contact_type_id: string
   service_type_ids: string[]
+  address_search?: string // Don't send this to backend, this is only for google place search field
 }
 
 export * from './clients_notes'
