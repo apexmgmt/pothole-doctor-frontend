@@ -6,7 +6,6 @@ export type InputType =
   | 'password'
   | 'email'
   | 'number'
-  | 'tel'
   | 'time'
   | 'textarea'
   | 'select'
