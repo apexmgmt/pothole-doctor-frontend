@@ -334,7 +334,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     {
       name: 'reference_id',
       type: 'select',
-      label: 'Sales Representative',
+      label: 'Sales Rep',
       placeholder: 'Select sales rep',
       rules: { required: 'Sales Representative is required' },
       selectOptions: staffs
@@ -393,7 +393,6 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       type: 'combobox',
       label: 'Company Name',
       placeholder: 'Select or create company',
-
       selectOptions: companies.map(company => ({
         value: company.name,
         label: company.name
@@ -417,25 +416,6 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
         value: level.id,
         label: level.name
       }))
-    },
-    {
-      name: 'status',
-      type: 'select',
-      label: 'Status',
-      placeholder: 'Select status',
-      rules: {
-        required: 'Status is required'
-      },
-      selectOptions: [
-        {
-          value: '1',
-          label: 'Active'
-        },
-        {
-          value: '0',
-          label: 'Inactive'
-        }
-      ]
     },
     {
       name: 'lead_cost',
@@ -472,6 +452,12 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       }
     },
     {
+      name: 'spouse_name',
+      type: 'text',
+      label: 'Spouse Name',
+      placeholder: 'Enter spouse name'
+    },
+    {
       name: 'cc_email',
       type: 'email',
       label: 'CC Email',
@@ -482,12 +468,6 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
           message: 'Invalid email address'
         }
       }
-    },
-    {
-      name: 'spouse_name',
-      type: 'text',
-      label: 'Spouse Name',
-      placeholder: 'Enter spouse name'
     },
     {
       name: 'spouse_phone',
@@ -521,11 +501,6 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       name: 'is_tax_exempt',
       type: 'checkbox',
       label: 'Tax Exempt'
-    },
-    {
-      name: 'is_quick_book',
-      type: 'checkbox',
-      label: 'QuickBooks'
     }
   ]
 
@@ -597,6 +572,12 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     }
   ]
 
+  const combinedFields = [
+    { border: true, fields: basicClientReferenceFields },
+    { border: true, fields: basicClientFields },
+    { border: true, fields: addressFields }
+  ]
+
   const dialogActions = (
     <>
       <Button type='button' variant='outline' onClick={onClose} disabled={isLoading}>
@@ -632,12 +613,12 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       className='sm:max-w-252!'
     >
       <form id='client-form' onSubmit={handleSubmit(onSubmit)} className='space-y-3'>
-        {[basicClientReferenceFields, basicClientFields, addressFields].map((fieldGroup, index) => (
+        {combinedFields.map((fieldGroup, index) => (
           <React.Fragment key={index}>
-            {index !== 0 && <Separator />}
+            {index !== 0 && fieldGroup.border && <Separator />}
 
             <div className='grid grid-cols-1 md:grid-cols-2 items-start gap-x-9 gap-y-1.5'>
-              {fieldGroup.map(({ name, type, label, placeholder, rules, selectOptions }) => {
+              {fieldGroup.fields.map(({ name, type, label, placeholder, rules, selectOptions }) => {
                 if (type === 'google-place') {
                   return (
                     <GooglePlaceField
@@ -707,7 +688,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
                     register={register}
                     control={control}
                     errors={errors}
-                    fieldClassName='grid grid-cols-[128px_auto]'
+                    fieldClassName={type === 'checkbox' ? 'mt-3 md:mt-6' : 'grid grid-cols-[128px_auto]'}
                     labelClassName={type === 'checkbox' ? 'text-nowrap' : 'justify-end self-start text-right pt-px'}
                     className={type === 'checkbox' ? 'col-span-2 ps-34' : ''}
                   />
