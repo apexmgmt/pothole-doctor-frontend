@@ -214,7 +214,7 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
       id: 'purchase_order_number',
       header: 'PO #',
       cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>PO-{row.purchase_order_number?.toString().padStart(6, '0') ?? 'N/A'}</span>
+        <span className='font-medium'>PO-{row.purchase_order_number?.toString() ?? 'N/A'}</span>
       ),
       sortable: true
     },

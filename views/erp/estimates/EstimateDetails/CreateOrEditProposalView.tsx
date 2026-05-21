@@ -92,7 +92,7 @@ const CreateOrEditProposalView = ({
   const taxRate = estimateDetails?.tax_rate ?? 0
 
   useEffect(() => {
-    const num = estimateDetails?.estimate_number?.toString().padStart(6, '0') ?? ''
+    const num = estimateDetails?.estimate_number?.toString() ?? ''
 
     if (initialMode === 'create') {
       dispatch(setPageTitle(`New Proposal - Estimate #${num}`))
@@ -150,9 +150,9 @@ const CreateOrEditProposalView = ({
 
   const totalCost = allLines.reduce((sum, line) => {
     if (line.type !== 'deduction' && line.type !== 'comment') {
-      return sum + (Number(line.unit_cost) * Number(line.qty)) + (Number(line.freight_charge) ?? 0)
+      return sum + Number(line.unit_cost) * Number(line.qty) + (Number(line.freight_charge) ?? 0)
     }
-    
+
     return sum
   }, 0)
 
@@ -415,7 +415,7 @@ const CreateOrEditProposalView = ({
 
       {/* Estimate info bar */}
       <div className='flex gap-4 items-center'>
-        <p className='text-lg font-bold'>Estimate #{estimateDetails?.estimate_number?.toString().padStart(6, '0')}</p>
+        <p className='text-lg font-bold'>Estimate #{estimateDetails?.estimate_number?.toString()}</p>
         <p className='text-sm font-semibold text-zinc-200'>
           <span>
             <UserIcon className='h-4 w-4 inline-block mr-2' />
@@ -486,7 +486,12 @@ const CreateOrEditProposalView = ({
             toast.success(`Discount applied: ${type === 'percentage' ? `${value}%` : `$${value.toFixed(2)}`}`)
           }}
         />
-        <ProfitDetailsCard profitPercent={profitPercent} profitAmount={profitAmount} totalProfit={profitAmount} totalCost={totalCost} />
+        <ProfitDetailsCard
+          profitPercent={profitPercent}
+          profitAmount={profitAmount}
+          totalProfit={profitAmount}
+          totalCost={totalCost}
+        />
         <TotalCalculationCard subtotal={totalSales} salesTax={salesTax} total={total} />
       </div>
 

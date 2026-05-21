@@ -169,7 +169,8 @@ export default function ScheduleCalendarFilter({
                 <SelectItem value='all'>All Work Orders</SelectItem>
                 {workOrders.map(wo => (
                   <SelectItem key={wo.id} value={wo.id}>
-                    #{wo.work_order_number} – {wo.title}
+                    #{wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}
+                    {wo.invoice_number?.toString() || '—'} - {wo.title}
                   </SelectItem>
                 ))}
               </SelectContent>

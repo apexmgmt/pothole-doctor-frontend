@@ -220,7 +220,7 @@ const ProposalSection = ({
                       <div className='flex justify-between items-start mb-3'>
                         <div>
                           <h3 className='text-white font-semibold text-sm mb-1'>
-                            Proposal: #{proposal.proposal_number?.toString().padStart(6, '0') || 'N/A'}
+                            Proposal: #{proposal.proposal_number?.toString() || 'N/A'}
                           </h3>
                           <p className='text-zinc-300 text-sm font-medium'>{proposal.estimate?.title}</p>
                         </div>

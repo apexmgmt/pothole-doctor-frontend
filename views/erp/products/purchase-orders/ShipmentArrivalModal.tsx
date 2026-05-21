@@ -434,7 +434,7 @@ const ShipmentArrivalModal = ({
       const a = document.createElement('a')
 
       a.href = url
-      a.download = `PO-${purchaseOrder.purchase_order_number?.toString().padStart(6, '0') ?? 'shipment'}-shipment.pdf`
+      a.download = `PO-${purchaseOrder.purchase_order_number?.toString() ?? 'shipment'}-shipment.pdf`
       a.click()
       URL.revokeObjectURL(url)
     } catch {

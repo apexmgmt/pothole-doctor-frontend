@@ -70,7 +70,7 @@ const EditWorkOrderServicesView = ({
   const [customCommission, setCustomCommission] = useState<number>(Number(initialWorkOrder?.custom_commissions ?? 0))
 
   const [isCustomCommissionPercentage, setIsCustomCommissionPercentage] = useState<boolean>(
-    initialWorkOrder?.is_custom_commission_percentage ?? false
+    initialWorkOrder?.is_custom_commission_percent ?? false
   )
 
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
@@ -363,7 +363,8 @@ const EditWorkOrderServicesView = ({
           </Button>
           <div>
             <h1 className='text-xl font-bold'>
-              Work Order #{currentWorkOrder?.work_order_number?.toString().padStart(6, '0') || 'N/A'}
+              Work Order #{currentWorkOrder?.invoice_number_prefix ? `${currentWorkOrder.invoice_number_prefix}-` : ''}
+              {currentWorkOrder?.invoice_number?.toString() || 'N/A'}
             </h1>
             <p className='text-sm text-zinc-400'>Edit Work Order Services</p>
           </div>
@@ -427,7 +428,12 @@ const EditWorkOrderServicesView = ({
           total={materialTotal}
         />
         <TotalCalculationCard title='Labor' subtotal={laborSubtotal} salesTax={laborTax} total={laborTotal} />
-        <TotalCalculationCard title='Total' subtotal={currentWorkOrder?.invoice_subtotal ?? 0} salesTax={currentWorkOrder?.invoice_total_tax ?? 0} total={currentWorkOrder?.invoice_total ?? 0} />
+        <TotalCalculationCard
+          title='Total'
+          subtotal={currentWorkOrder?.invoice_subtotal ?? 0}
+          salesTax={currentWorkOrder?.invoice_total_tax ?? 0}
+          total={currentWorkOrder?.invoice_total ?? 0}
+        />
       </div>
 
       {/* Service Type Sections */}

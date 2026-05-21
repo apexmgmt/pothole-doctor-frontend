@@ -13,12 +13,10 @@ import { useState } from 'react'
 const CompletionCertificatesModal = ({
   open,
   onOpenChange,
-  workOrderNumber,
   certificates
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  workOrderNumber?: number | string | null
   certificates: CompletionCertificate[]
 }) => {
   return (
@@ -26,7 +24,7 @@ const CompletionCertificatesModal = ({
       <CommonDialog
         open={open}
         onOpenChange={onOpenChange}
-        title={`Completion Certificate — WO #${workOrderNumber?.toString().padStart(6, '0') ?? 'N/A'}`}
+        title={`Completion Certificate${certificates.length !== 1 ? 's' : ''}`}
         description={`${certificates.length} certificate${certificates.length !== 1 ? 's' : ''} found for this work order`}
         maxWidth='sm'
         disableClose={false}

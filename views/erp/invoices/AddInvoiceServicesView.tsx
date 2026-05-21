@@ -100,9 +100,9 @@ const AddInvoiceServicesView = ({
 
   const totalCost = allLines.reduce((sum, line) => {
     if (line.type !== 'deduction' && line.type !== 'comment') {
-      return sum + (Number(line.unit_cost) * Number(line.qty)) + (Number(line.freight_charge) ?? 0)
+      return sum + Number(line.unit_cost) * Number(line.qty) + (Number(line.freight_charge) ?? 0)
     }
-    
+
     return sum
   }, 0)
 
@@ -423,9 +423,7 @@ const AddInvoiceServicesView = ({
             Back
           </Button>
           <div>
-            <h1 className='text-xl font-bold'>
-              Invoice #{currentInvoice?.invoice_number?.toString().padStart(6, '0') || 'N/A'}
-            </h1>
+            <h1 className='text-xl font-bold'>Invoice #{currentInvoice?.invoice_number?.toString() || 'N/A'}</h1>
             <p className='text-sm text-zinc-400'>{isEditMode ? 'Edit Invoice Services' : 'Add Invoice Services'}</p>
           </div>
         </div>
@@ -482,7 +480,12 @@ const AddInvoiceServicesView = ({
           totalDiscount={totalDiscount}
           onApplyDiscount={handleApplyDiscount}
         />
-        <ProfitDetailsCard profitPercent={profitPercent} profitAmount={profitAmount} totalProfit={profitAmount} totalCost={totalCost} />
+        <ProfitDetailsCard
+          profitPercent={profitPercent}
+          profitAmount={profitAmount}
+          totalProfit={profitAmount}
+          totalCost={totalCost}
+        />
         <TotalCalculationCard subtotal={totalSales} salesTax={salesTax} total={total} />
       </div>
 
