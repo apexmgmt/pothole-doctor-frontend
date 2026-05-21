@@ -1,20 +1,20 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Controller, FieldValues, Path } from 'react-hook-form'
 
-import { ChevronsUpDown, XIcon } from 'lucide-react'
+import { ChevronsUpDown, Plus, XIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 import { FieldComponentProps } from './types'
 import { cn } from '@/lib/utils'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
-type MultiSelectSearchFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
+type MultiSelectCreatableFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
 
-const MultiSelectSearchField = <T extends FieldValues>({
+const MultiSelectCreatableField = <T extends FieldValues>({
   name,
   placeholder,
   control,
@@ -24,10 +24,34 @@ const MultiSelectSearchField = <T extends FieldValues>({
   onChange,
   onBlur,
   className
-}: MultiSelectSearchFieldProps<T>) => {
+}: MultiSelectCreatableFieldProps<T>) => {
   const [open, setOpen] = useState(false)
+  const [inputValue, setInputValue] = useState('')
 
-  if (!selectOptions) return null
+  const normalizedOptions = useMemo(() => {
+    return (selectOptions ?? []).map(option => ({
+      value: option.value,
+      label: option.label,
+      disabled: option.disabled,
+      key: `${option.value}::${option.label}`
+    }))
+  }, [selectOptions])
+
+  const lookupLabel = (optionValue: string) => {
+    const normalized = optionValue.trim().toLowerCase()
+
+    const match = normalizedOptions.find(option => option.value.toLowerCase() === normalized)
+
+    return match?.label ?? optionValue
+  }
+
+  const isExistingOption = (candidate: string) => {
+    const normalized = candidate.trim().toLowerCase()
+
+    if (!normalized) return false
+
+    return normalizedOptions.some(option => option.value.toLowerCase() === normalized)
+  }
 
   const renderMultiSelect = (selectedValues: string[], setSelectedValues: (nextValue: string[]) => void) => {
     const handleToggle = (option: string) => {
@@ -43,8 +67,30 @@ const MultiSelectSearchField = <T extends FieldValues>({
       onBlur?.(nextValue)
     }
 
+    const handleCreate = () => {
+      const nextValue = inputValue.trim()
+
+      if (!nextValue || isExistingOption(nextValue)) {
+        return
+      }
+
+      handleToggle(nextValue)
+      setInputValue('')
+    }
+
+    const showCreate = inputValue.trim().length > 0 && !isExistingOption(inputValue)
+
     return (
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover
+        open={open}
+        onOpenChange={nextOpen => {
+          setOpen(nextOpen)
+
+          if (!nextOpen) {
+            setInputValue('')
+          }
+        }}
+      >
         <PopoverTrigger asChild>
           <Button variant='outline' className={cn('w-full justify-between', className, 'h-auto! min-h-7!')}>
             <div className='flex flex-1 flex-wrap items-center gap-1 text-left'>
@@ -56,7 +102,7 @@ const MultiSelectSearchField = <T extends FieldValues>({
                     key={`${valueItem}-${i}`}
                     className='flex items-center gap-1.5 pl-2 pr-1 py-px rounded-sm text-xs leading-none text-[#f4f4f5] bg-white/10'
                   >
-                    {selectOptions?.find(opt => opt.value === valueItem)?.label}
+                    {lookupLabel(valueItem)}
                     <span
                       onClick={event => {
                         event.stopPropagation()
@@ -80,24 +126,39 @@ const MultiSelectSearchField = <T extends FieldValues>({
           className='w-[var(--radix-popover-trigger-width)] bg-[#09090B] p-0'
         >
           <Command className='bg-transparent'>
-            <CommandInput placeholder='Search...' className='py-1' />
+            <CommandInput
+              placeholder='Search or create...'
+              className='py-1'
+              value={inputValue}
+              onValueChange={setInputValue}
+            />
             <CommandEmpty>No results found.</CommandEmpty>
 
             <ScrollArea className='max-h-[calc(var(--radix-popover-content-available-height)-42px)]'>
               <CommandGroup>
-                {selectOptions.map(opt => {
-                  const isSelected = selectedValues.includes(opt.value)
+                {showCreate && (
+                  <CommandItem
+                    value={inputValue}
+                    onSelect={handleCreate}
+                    className='flex items-center gap-2 py-1 hover:bg-[#1F1F1F] data-[selected=true]:bg-[#1F1F1F]'
+                  >
+                    <Plus className='size-4' />
+                    Create "{inputValue.trim()}"
+                  </CommandItem>
+                )}
+                {normalizedOptions.map(option => {
+                  const isSelected = selectedValues.includes(option.value)
 
                   return (
                     <CommandItem
-                      key={opt.value}
-                      value={opt.label}
-                      disabled={!!opt.disabled}
-                      onSelect={() => handleToggle(opt.value)}
+                      key={option.key}
+                      value={option.label}
+                      disabled={!!option.disabled}
+                      onSelect={() => handleToggle(option.value)}
                       className='flex items-center gap-2 py-1 hover:bg-[#1F1F1F] data-[selected=true]:bg-[#1F1F1F]'
                     >
                       <Checkbox checked={isSelected} className='size-4 [&_span_svg]:size-3.25 pointer-events-none' />
-                      {opt.label}
+                      {option.label}
                     </CommandItem>
                   )
                 })}
@@ -134,4 +195,4 @@ const MultiSelectSearchField = <T extends FieldValues>({
   )
 }
 
-export default MultiSelectSearchField
+export default MultiSelectCreatableField

@@ -14,6 +14,7 @@ import TextareaField from './fields/TextareaField'
 import MultiSelectField from './fields/MultiSelectField'
 import MultiSelectSearchField from './fields/MultiSelectSearchField'
 import CheckboxField from './fields/CheckboxField'
+import MultiSelectCreatableField from './fields/MultiSelectCreatableField'
 
 type FormFieldProps<T extends FieldValues> = BaseFieldProps<T> & {
   orientation?: 'horizontal' | 'vertical'
@@ -51,7 +52,7 @@ const CustomFormField = <T extends FieldValues>({
 
   // Combine base styles
   const inputStyle = cn(
-    `text-sm font-normal leading-none bg-[#1f1f1f] hover:bg-[#1f1f1f] placeholder:text-[#a7a7ae] text-[#f4f4f5] px-2.5 py-2 ${type === 'textarea' ? 'h-16!' : 'h-7!'} ${fieldError ? 'border-red-500' : ''}`,
+    `text-sm font-normal leading-none bg-[#1f1f1f] hover:bg-[#1f1f1f] placeholder:text-[#a7a7ae] text-[#f4f4f5] px-2.5 py-1.25 ${type === 'textarea' ? 'h-16!' : 'h-7!'} ${fieldError ? 'border-red-500' : ''}`,
     className
   )
 
@@ -106,6 +107,18 @@ const CustomFormField = <T extends FieldValues>({
           />
         ) : type === 'multiselect-searchable' ? (
           <MultiSelectSearchField
+            name={name}
+            placeholder={placeholder}
+            selectOptions={selectOptions}
+            value={value}
+            rules={rules}
+            control={control}
+            onChange={onChange}
+            onBlur={onBlur}
+            className={inputStyle}
+          />
+        ) : type === 'multiselect-creatable' ? (
+          <MultiSelectCreatableField
             name={name}
             placeholder={placeholder}
             selectOptions={selectOptions}

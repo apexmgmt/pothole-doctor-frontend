@@ -69,7 +69,7 @@ const MultiSelectField = <T extends FieldValues>({
                 ))
               )}
             </div>
-            <ChevronsUpDown className='ml-2 size-4 shrink-0 opacity-50' />
+            <ChevronsUpDown className='ml-2 size-3.5 shrink-0 opacity-50' />
           </Button>
         </PopoverTrigger>
 

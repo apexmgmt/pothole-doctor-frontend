@@ -318,6 +318,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     }
   }, [selectedStateId, availableCities, setValue, watch])
 
+  // Basic client reference fields
   const basicClientReferenceFields: FormField[] = [
     {
       name: 'location_id',
@@ -367,18 +368,8 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     }
   ]
 
+  // Basic client info fields
   const basicClientFields: FormField[] = [
-    {
-      name: 'company_name',
-      type: 'combobox',
-      label: 'Company Name',
-      placeholder: 'Select or create company',
-
-      selectOptions: companies.map(company => ({
-        value: company.name,
-        label: company.name
-      }))
-    },
     {
       name: 'first_name',
       type: 'text',
@@ -396,6 +387,17 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       rules: {
         required: 'Last Name is required'
       }
+    },
+    {
+      name: 'company_name',
+      type: 'combobox',
+      label: 'Company Name',
+      placeholder: 'Select or create company',
+
+      selectOptions: companies.map(company => ({
+        value: company.name,
+        label: company.name
+      }))
     },
     {
       name: 'display_name',
@@ -527,6 +529,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     }
   ]
 
+  // Address fields
   const addressFields: FormField[] = [
     {
       name: 'address_title',
@@ -540,12 +543,6 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       type: 'google-place',
       label: 'Search Location',
       placeholder: 'Search for an address...'
-    },
-    {
-      name: 'address',
-      type: 'text',
-      label: 'Street Address',
-      placeholder: 'Enter address'
     },
     {
       name: 'country_id',
@@ -591,6 +588,12 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       type: 'text',
       label: 'Zip Code',
       placeholder: 'Enter zip code'
+    },
+    {
+      name: 'address',
+      type: 'text',
+      label: 'Street Address',
+      placeholder: 'Enter address'
     }
   ]
 

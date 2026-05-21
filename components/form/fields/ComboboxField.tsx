@@ -39,7 +39,7 @@ const ComboboxField = <T extends FieldValues>({
           className={`w-full justify-between ${selectedValue ? 'text-[#f4f4f5]' : 'text-[#a7a7ae]!'} ${className}`}
         >
           {selectedValue ? selectOptions.find(o => o.value === selectedValue)?.label : placeholder}
-          <ChevronsUpDown className='ml-2 size-4 shrink-0 opacity-50' />
+          <ChevronsUpDown className='ml-2 size-3.5 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
 
