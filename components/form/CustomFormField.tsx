@@ -65,7 +65,7 @@ const CustomFormField = <T extends FieldValues>({
       {label && !isCheckbox && (
         <FieldLabel htmlFor={name} className={cn('text-xs font-normal leading-tight gap-0', labelClassName)}>
           {label}
-          {rules?.required && <span className='text-sm text-red-500'>*</span>}
+          {rules?.required && <span className='text-sm leading-none text-red-500'>*</span>}
         </FieldLabel>
       )}
 

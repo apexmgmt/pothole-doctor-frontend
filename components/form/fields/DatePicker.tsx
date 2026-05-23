@@ -77,6 +77,7 @@ const DatePicker = <T extends FieldValues>({
             onBlur?.(formattedDate)
             setOpen(false)
           }}
+          className='rounded-md'
         />
       </PopoverContent>
     </Popover>

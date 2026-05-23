@@ -22,19 +22,25 @@ export function Description({
   ...props
 }: DescriptionProps) {
   const [isExpanded, setIsExpanded] = React.useState(false)
+  const [isClamped, setIsClamped] = React.useState(false)
 
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded)
-  }
+  const textRef = React.useRef<HTMLParagraphElement>(null)
 
-  const shouldShowMore = isShowMore && description && description.length > length
+  React.useEffect(() => {
+    const el = textRef.current
+
+    if (!el) return
+
+    setIsClamped(el.scrollHeight > el.clientHeight)
+  }, [description, lines])
 
   return (
     <div className={cn('flex flex-col gap-1', className)}>
       <p
+        ref={textRef}
         {...props}
         className={cn(
-          'text-sm font-medium whitespace-normal overflow-hidden',
+          'overflow-hidden text-sm font-medium whitespace-normal',
           isTable && 'max-w-72',
           !isExpanded && 'line-clamp'
         )}
@@ -46,12 +52,12 @@ export function Description({
       >
         {description}
       </p>
-      {shouldShowMore && (
+      {isShowMore && isClamped && (
         <Button
           variant='link'
           size='sm'
           className='h-auto p-0 w-fit justify-start text-primary hover:no-underline'
-          onClick={toggleExpand}
+          onClick={() => setIsExpanded(prev => !prev)}
         >
           {isExpanded ? 'Show Less' : 'Show More'}
         </Button>
