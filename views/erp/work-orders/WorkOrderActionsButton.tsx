@@ -31,6 +31,18 @@ const WorkOrderActionsButton = ({
             View Invoice
           </Link>
         </DropdownMenuItem>
+        {workOrder?.proposal_id && workOrder?.estimate_id && (
+          <DropdownMenuItem asChild>
+            <Link
+              href={`/erp/estimates/${workOrder?.estimate_id}/proposals/${workOrder?.proposal_id}`}
+              prefetch={false}
+              target='_blank'
+            >
+              <DocumentIcon className='mr-2 h-4 w-4' />
+              View Original Proposal
+            </Link>
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
