@@ -60,7 +60,11 @@ const ServiceTypeSection = ({
   onAddSchedule,
   lineErrors,
   hideTaxOption = false,
-  hideDiscountOption = false
+  hideDiscountOption = false,
+  isOrderActionVisible,
+  onOrderActionClick,
+  isPurchaseOrderActionVisible,
+  onPurchaseOrderActionClick
 }: {
   mode: 'create' | 'edit' | 'view'
   serviceTypeId: string
@@ -89,6 +93,10 @@ const ServiceTypeSection = ({
   lineErrors?: Record<number, Record<string, string>>
   hideDiscountOption?: boolean
   hideTaxOption?: boolean
+  isOrderActionVisible?: (line: ProposalServiceItemPayload) => boolean
+  onOrderActionClick?: (line: ProposalServiceItemPayload) => void
+  isPurchaseOrderActionVisible?: (line: ProposalServiceItemPayload) => boolean
+  onPurchaseOrderActionClick?: (line: ProposalServiceItemPayload) => void
 }) => {
   const resolvedLineErrors = lineErrors ?? {}
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
@@ -239,6 +247,16 @@ const ServiceTypeSection = ({
                         vendors={vendors}
                         updateLineFields={updateLineFields}
                         clampProductQty={clampProductQty}
+                        showOrderAction={Boolean(isOrderActionVisible?.(line))}
+                        onOrderActionClick={
+                          isOrderActionVisible?.(line) && onOrderActionClick ? () => onOrderActionClick(line) : undefined
+                        }
+                        showPurchaseOrderAction={Boolean(isPurchaseOrderActionVisible?.(line))}
+                        onPurchaseOrderClick={
+                          isPurchaseOrderActionVisible?.(line) && onPurchaseOrderActionClick
+                            ? () => onPurchaseOrderActionClick(line)
+                            : undefined
+                        }
                       />
                     )
                   })}
@@ -335,6 +353,16 @@ const ServiceTypeSection = ({
                           vendors={vendors}
                           updateLineFields={updateLineFields}
                           clampProductQty={clampProductQty}
+                          showOrderAction={Boolean(isOrderActionVisible?.(line))}
+                          onOrderActionClick={
+                            isOrderActionVisible?.(line) && onOrderActionClick ? () => onOrderActionClick(line) : undefined
+                          }
+                          showPurchaseOrderAction={Boolean(isPurchaseOrderActionVisible?.(line))}
+                          onPurchaseOrderClick={
+                            isPurchaseOrderActionVisible?.(line) && onPurchaseOrderActionClick
+                              ? () => onPurchaseOrderActionClick(line)
+                              : undefined
+                          }
                         />
                       )
                     })}

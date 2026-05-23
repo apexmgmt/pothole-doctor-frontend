@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import {
   ProductCategory,
+  MaterialJob,
   ProposalServiceItemPayload,
   ServiceType,
   Unit,
@@ -24,7 +25,9 @@ import {
   Partner
 } from '@/types'
 import WorkOrderService from '@/services/api/work-orders/work_orders.service'
+import MaterialJobService from '@/services/api/products/material-jobs.service'
 import EditWorkOrderModal from './EditWorkOrderModal'
+import UpdateMaterialJobModal from '@/views/erp/non-inventory-jobs/UpdateMaterialJobModal'
 import ServiceTypeSection from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ServiceTypeSection'
 import AddServiceButton from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/AddServiceButton'
 import ClientDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ClientDetailsCard'
@@ -75,6 +78,8 @@ const EditWorkOrderServicesView = ({
 
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
   const [selectedServiceType, setSelectedServiceType] = useState<{ id: string; name: string }[]>([])
+  const [updateMaterialJobOpen, setUpdateMaterialJobOpen] = useState(false)
+  const [selectedMaterialJob, setSelectedMaterialJob] = useState<MaterialJob | null>(null)
 
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
     {
@@ -164,6 +169,8 @@ const EditWorkOrderServicesView = ({
             item_id: item.id,
             product_id: item.product_id,
             labor_cost_id: item.labor_cost_id,
+            material_job_id: item.material_job_id ?? null,
+            material_job: (item as any).material_job ?? null,
             name: item.name,
             description: item.description,
             type: item.type,
@@ -253,6 +260,7 @@ const EditWorkOrderServicesView = ({
       contractor_notes: st.contractorNotes ?? null,
       items: st.lines.map(line => ({
         item_id: line.item_id ?? null,
+        material_job_id: line.material_job_id ?? null,
         product_id: line.product_id,
         vendor_id: line.vendor_id,
         labor_cost_id: line.labor_cost_id,
@@ -325,6 +333,97 @@ const EditWorkOrderServicesView = ({
     const success = await saveWorkOrder()
 
     // if (success) router.push('/erp/work-orders')
+  }
+
+  const isNonInventoryMaterialLine = (line: ProposalServiceItemPayload) => {
+    if (line.type !== 'product') return false
+
+    const materialJobId = line.material_job_id
+
+    if (!materialJobId) return false
+
+    const isExplicitNonInventory = (line as any)?.product?.type === 'non_inventory'
+    const isLegacyNonInventory = !line.product_id && !(line as any)?.product
+
+    return isExplicitNonInventory || isLegacyNonInventory
+  }
+
+  const handleOpenMaterialJob = async (line: ProposalServiceItemPayload) => {
+    const materialJobId = line.material_job_id
+
+    if (!materialJobId) {
+      toast.error('Material job id is missing for this line item.')
+
+      return
+    }
+
+    try {
+      const response = await MaterialJobService.show(materialJobId)
+      const materialJob = response?.data ?? response
+
+      if (!materialJob) {
+        toast.error('Material job not found.')
+
+        return
+      }
+
+      setSelectedMaterialJob(materialJob)
+      setUpdateMaterialJobOpen(true)
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to load material job details.')
+    }
+  }
+
+  const shouldShowPurchaseOrderAction = (line: ProposalServiceItemPayload) => {
+    if (line.type !== 'product') return false
+
+    const product = (line as any)?.product
+
+    if (!product?.id) return false
+    if (String(product.type ?? '').toLowerCase() !== 'inventory') return false
+    if ((line.material_job_actions?.length ?? 0) > 0) return false
+
+    const qty = Number(line.qty ?? 0)
+    const availableStock = Number(product.available_stock ?? 0)
+    const coveragePerRate = Number(product.coverage_per_rate ?? 1)
+    const stockCapacity = availableStock * coveragePerRate
+
+    return qty > stockCapacity
+  }
+
+  const handleOpenPurchaseOrder = (line: ProposalServiceItemPayload) => {
+    const productId = (line as any)?.product?.id
+
+    if (!productId) {
+      toast.error('Product id is missing for this line item.')
+
+      return
+    }
+
+    const purchaseOrderUrl = `/erp/products/purchase-orders?open_po_modal=create&po_product_id=${encodeURIComponent(productId)}`
+
+    window.open(purchaseOrderUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  const applyUpdatedMaterialJob = (updatedMaterialJob: MaterialJob) => {
+    setServiceTypeLineItems(prev =>
+      prev.map(serviceGroup => ({
+        ...serviceGroup,
+        lines: serviceGroup.lines.map(line =>
+          line.material_job_id === updatedMaterialJob.id ? { ...line, material_job: updatedMaterialJob } : line
+        )
+      }))
+    )
+
+    setCurrentWorkOrder(prev => ({
+      ...prev,
+      services: prev.services?.map(service => ({
+        ...service,
+        items: (service.items || []).map(item =>
+          item.material_job_id === updatedMaterialJob.id ? ({ ...item, material_job: updatedMaterialJob } as any) : item
+        )
+      }))
+    }))
   }
 
   const handleAddSchedule = async (
@@ -507,6 +606,10 @@ const EditWorkOrderServicesView = ({
             }
             documentTypeName={currentWorkOrder?.work_order_type?.name ?? null}
             lineErrors={serviceFieldErrors[idx]}
+            isOrderActionVisible={isNonInventoryMaterialLine}
+            onOrderActionClick={handleOpenMaterialJob}
+            isPurchaseOrderActionVisible={shouldShowPurchaseOrderAction}
+            onPurchaseOrderActionClick={handleOpenPurchaseOrder}
           />
         ))}
       </div>
@@ -541,6 +644,28 @@ const EditWorkOrderServicesView = ({
         businessLocations={businessLocations}
         onSuccess={() => {
           setIsWorkOrderDetailsOpen(false)
+        }}
+      />
+
+      <UpdateMaterialJobModal
+        open={updateMaterialJobOpen}
+        onOpenChange={(open: boolean) => {
+          setUpdateMaterialJobOpen(open)
+
+          if (!open) setSelectedMaterialJob(null)
+        }}
+        materialJob={selectedMaterialJob}
+        onSuccess={updatedData => {
+          const updatedMaterialJob = updatedData ?? null
+
+          if (updatedMaterialJob) {
+            applyUpdatedMaterialJob(updatedMaterialJob)
+          } else {
+            toast.error('Material job was updated, but material_job data was missing in response.')
+          }
+
+          setUpdateMaterialJobOpen(false)
+          setSelectedMaterialJob(null)
         }}
       />
     </div>
