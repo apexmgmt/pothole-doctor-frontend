@@ -20,6 +20,7 @@ export default async function TasksPage() {
   const clients: Client[] = clientsRes.status === 'fulfilled' ? clientsRes.value.data || [] : []
   const taskTypes: TaskType[] = taskTypesRes.status === 'fulfilled' ? taskTypesRes.value.data || [] : []
   const taskReminders: TaskReminder[] = taskRemindersRes.status === 'fulfilled' ? taskRemindersRes.value.data || [] : []
+
   const taskReminderChannels: TaskReminderChannel[] =
     taskReminderChannelsRes.status === 'fulfilled' ? taskReminderChannelsRes.value.data || [] : []
 

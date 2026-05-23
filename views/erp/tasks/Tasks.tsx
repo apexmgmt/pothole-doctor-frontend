@@ -21,7 +21,7 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import TaskService from '@/services/api/tasks/tasks.service'
-import { formatDate } from '@/utils/date'
+import { convert24hTo12h, formatDate } from '@/utils/date'
 import { Badge } from '@/components/ui/badge'
 import CreateOrEditTaskModal from './CreateOrEditTaskModal'
 import { hasPermission } from '@/utils/role-permission'
@@ -163,6 +163,12 @@ const Tasks: React.FC<{
   // Column definitions for CommonTable
   const columns: Column[] = [
     {
+      id: 'name',
+      header: 'Task Name',
+      cell: (row: Task) => <span className='font-medium'>{row?.name || ''}</span>,
+      sortable: true
+    },
+    {
       id: 'status',
       header: 'Status',
       cell: row => {
@@ -197,13 +203,12 @@ const Tasks: React.FC<{
     {
       id: 'start_date',
       header: 'Start Date',
-      cell: (row: Task) => <span className='font-medium'>{formatDate(row?.start_date) || ''}</span>,
-      sortable: true
-    },
-    {
-      id: 'start_time',
-      header: 'Start Time',
-      cell: (row: Task) => <span className='font-medium'>{row?.start_time || ''}</span>,
+      cell: (row: Task) => (
+        <div>
+          <p className='font-medium'>{formatDate(row?.start_date) || ''}</p>
+          <p className='font-medium mt-1'>{row?.start_time ? convert24hTo12h(row.start_time) : ''}</p>
+        </div>
+      ),
       sortable: true
     },
     {
@@ -214,7 +219,7 @@ const Tasks: React.FC<{
 
         return <span className='font-medium'>{parts.join(' ') || ''}</span>
       },
-      sortable: true
+      sortable: false
     },
     {
       id: 'created_at',
@@ -225,26 +230,24 @@ const Tasks: React.FC<{
     {
       id: 'employees',
       header: 'Assigned To',
-      cell: (row: Task) => (
-        <div className='flex flex-wrap gap-1'>
-          {row.employees && row.employees.length > 0 ? (
-            row.employees.map(emp => (
-              <Badge key={emp.id} variant='outline' className='mr-1 mb-1'>
-                {emp.first_name} {emp.last_name}
-              </Badge>
-            ))
-          ) : (
-            <span className='text-gray-400'>-</span>
-          )}
-        </div>
-      ),
+      cell: (row: Task) => {
+        const employeesArr = Array.isArray(row.employees) ? row.employees : []
+
+        return employeesArr.length > 0 ? (
+          <p className='whitespace-normal'>
+            {employeesArr.map(emp => `${emp.first_name} ${emp.last_name}`).join(', ')}
+          </p>
+        ) : (
+          <span className='text-gray-400'>-</span>
+        )
+      },
       sortable: false
     },
     {
       id: 'company',
       header: 'Company Name',
       cell: (row: Task) => <span className='font-medium'>{row?.client?.company?.name || ''}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'client',
@@ -254,18 +257,12 @@ const Tasks: React.FC<{
 
         return <span className='font-medium'>{parts.join(' ') || ''}</span>
       },
-      sortable: true
-    },
-    {
-      id: 'name',
-      header: 'Task Name',
-      cell: (row: Task) => <span className='font-medium'>{row?.name || ''}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'location',
       header: 'Event Location',
-      cell: (row: Task) => <Description description={row.location} />,
+      cell: (row: Task) => <p className='whitespace-normal'>{row?.location ?? '-'}</p>,
       sortable: true
     },
     {

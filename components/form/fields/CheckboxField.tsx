@@ -14,8 +14,10 @@ const CheckboxField = <T extends FieldValues>({
   control,
   rules,
   value,
+  disabled = false,
   onChange,
   onBlur,
+  autoFocus,
   className,
   labelClassName
 }: CheckboxFieldProps<T>) => {
@@ -25,6 +27,8 @@ const CheckboxField = <T extends FieldValues>({
     <div className={`flex items-center gap-3 ${className ?? ''}`}>
       <Checkbox
         id={checkboxId}
+        disabled={disabled}
+        autoFocus={autoFocus}
         checked={checked}
         onCheckedChange={nextValue => {
           const isChecked = nextValue === true

@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { FieldValues, Path } from 'react-hook-form';
+import { useState } from 'react'
+import { FieldValues, Path } from 'react-hook-form'
 
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react'
 
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/input'
 
-import { FieldComponentProps } from './types';
+import { FieldComponentProps } from './types'
 
 const InputField = <T extends FieldValues>({
   type,
@@ -18,9 +18,11 @@ const InputField = <T extends FieldValues>({
   value,
   onChange,
   onBlur,
+  autoFocus,
+  disabled = false,
   className = ''
 }: FieldComponentProps<T>) => {
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false)
 
   const registeredProps =
     name && register
@@ -34,25 +36,27 @@ const InputField = <T extends FieldValues>({
                 }
               : undefined
         })
-      : undefined;
+      : undefined
 
   return (
-    <div className="relative">
+    <div className='relative'>
       <Input
         type={type !== 'password' ? type : showPassword ? 'text' : type}
         id={name}
         name={typeof name === 'string' ? name : undefined}
-        step="any"
+        disabled={disabled}
+        step='any'
         placeholder={placeholder}
+        autoFocus={autoFocus}
         {...registeredProps}
         value={value as string | number | readonly string[] | undefined}
         onChange={e => {
-          registeredProps?.onChange(e);
-          onChange?.(e.target.value);
+          registeredProps?.onChange(e)
+          onChange?.(e.target.value)
         }}
         onBlur={e => {
-          registeredProps?.onBlur(e);
-          onBlur?.();
+          registeredProps?.onBlur(e)
+          onBlur?.()
         }}
         readOnly={readonly}
         className={className}
@@ -60,15 +64,15 @@ const InputField = <T extends FieldValues>({
 
       {type === 'password' && (
         <button
-          type="button"
+          type='button'
           onClick={() => setShowPassword(show => !show)}
-          className="absolute right-3 bottom-1/2 translate-y-1/2"
+          className='absolute right-3 bottom-1/2 translate-y-1/2'
         >
-          {showPassword ? <Eye className="w-4" /> : <EyeOff className="w-4" />}
+          {showPassword ? <Eye className='w-4' /> : <EyeOff className='w-4' />}
         </button>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default InputField;
+export default InputField

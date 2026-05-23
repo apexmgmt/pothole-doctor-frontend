@@ -6,35 +6,18 @@ import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
-import {
-  Client,
-  CommissionType,
-  CommissionTypePayload,
-  ReminderPayload,
-  Staff,
-  Task,
-  TaskPayload,
-  TaskReminder,
-  TaskReminderChannel,
-  TaskType
-} from '@/types'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Client, ReminderPayload, Staff, Task, TaskPayload, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
+import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import TaskService from '@/services/api/tasks/tasks.service'
 import ProposalTaskService from '@/services/api/estimates/proposal-tasks.service'
 import InvoiceTaskService from '@/services/api/invoices/invoice-tasks.service'
-import { MultiSelect, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { TaskDateTimeFields } from './CreateOrEditTaskModal/TaskDateTimeFields'
-import { Textarea } from '@/components/ui/textarea'
-import { TaskLocationAndCommentFields } from './CreateOrEditTaskModal/TaskLocationAndCommentFields'
-import { Checkbox } from '@/components/ui/checkbox'
 import { TaskReminderFields } from './CreateOrEditTaskModal/TaskReminderFields'
-import { DatePicker } from '@/components/ui/datePicker'
 import TipTapRichTextEditor from '@/components/erp/common/editor/TipTapRichTextEditor'
+import CustomFormField from '@/components/form/CustomFormField'
+import { addDays } from '@/utils/formatTime'
 
 interface CreateOrEditTaskModalProps {
   mode?: 'create' | 'edit'
@@ -126,6 +109,17 @@ const CreateOrEditTaskModal = ({
       close_comment: taskDetails?.close_comment || ''
     }
   })
+
+  const {
+    watch,
+    setValue,
+    register,
+    control,
+    formState: { errors }
+  } = form
+
+  const startDate = watch('start_date')
+  const endDate = watch('end_date')
 
   // Reset form when taskDetails changes or modal opens
   useEffect(() => {
@@ -473,209 +467,205 @@ const CreateOrEditTaskModal = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mr-0.5'>
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3'>
             {/* Task Name Field */}
-            <div className='space-y-2 sm:col-span-2'>
-              <FormField
-                control={form.control}
-                name='name'
-                rules={{
-                  required: 'Task name is required',
-                  minLength: { value: 2, message: 'Task name must be at least 2 characters' }
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Task Name <span className='text-red-500'>*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter task name' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <CustomFormField
+              name='name'
+              type='text'
+              label='Task Name'
+              placeholder='Enter task name'
+              control={control}
+              register={register}
+              rules={{
+                required: 'Task name is required',
+                minLength: { value: 2, message: 'Task name must be at least 2 characters' }
+              }}
+              errors={errors}
+            />
+            {/* Task type field */}
+            <CustomFormField
+              name='task_type_id'
+              type='select'
+              label='Task Type'
+              placeholder='Select Task Type'
+              control={control}
+              register={register}
+              rules={{
+                required: 'Task type is required'
+              }}
+              selectOptions={taskTypes?.map(taskType => ({
+                value: taskType.id,
+                label: taskType.name
+              }))}
+              errors={errors}
+            />
 
             {/* Description Field */}
-            <div className='space-y-2 sm:col-span-2'>
-              <label className='text-sm font-medium'>Description</label>
+            <div className='sm:col-span-2'>
+              <label className='block text-xs font-medium mb-2'>Description</label>
               <TipTapRichTextEditor
                 value={descriptionHtml}
                 onChange={setDescriptionHtml}
                 placeholder='Enter task description'
               />
             </div>
+
             {/* Customer field */}
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='client_id'
+              type='select'
+              label='Customer'
+              placeholder='Select Customer'
+              control={control}
+              register={register}
               rules={{
                 required: 'Customer is required'
               }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Customer <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={value => {
-                        field.onChange(value)
-
-                        // Reset location when customer changes
-                        form.setValue('location', '')
-                      }}
-                      disabled={!!defaultClientId}
-                    >
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select Customer' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clients?.map(client => (
-                          <SelectItem key={client.id} value={client.id}>
-                            {client.first_name} {client.last_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              selectOptions={clients.map(client => ({
+                value: client.id,
+                label: `${client.first_name} ${client.last_name}`
+              }))}
+              onChange={() => setValue('location', '')}
+              disabled={!!defaultClientId}
+              errors={errors}
             />
 
-            {/* Task type field */}
-            <FormField
-              control={form.control}
-              name='task_type_id'
+            {/* Employees field */}
+            <CustomFormField
+              name='employee_ids'
+              type='multiselect-searchable'
+              label='Employees'
+              placeholder='Select Employees...'
+              control={control}
+              register={register}
               rules={{
-                required: 'Task type is required'
+                required: 'Employees are required',
+                minLength: { value: 1, message: 'Select at least one employee' }
               }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Task Type <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select Task Type' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {taskTypes?.map(taskType => (
-                          <SelectItem key={taskType.id} value={taskType.id}>
-                            {taskType.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              selectOptions={staffs?.map(staff => ({
+                value: staff.id,
+                label: staff.first_name + ' ' + staff.last_name
+              }))}
+              errors={errors}
+            />
+
+            {/* Start date field */}
+            <CustomFormField
+              name='start_date'
+              type='datepicker'
+              label='Start Date'
+              placeholder='Select start date'
+              maxDate={endDate ? addDays(endDate, -1) : undefined}
+              control={control}
+              register={register}
+              errors={errors}
+            />
+
+            {/* Start time field */}
+            <CustomFormField
+              name='start_time'
+              type='time'
+              label='Start Time'
+              placeholder='Select start time'
+              control={control}
+              register={register}
+              errors={errors}
+            />
+
+            {/* End Date field */}
+            <CustomFormField
+              name='end_date'
+              type='datepicker'
+              label='End Date'
+              placeholder='Select end date'
+              minDate={startDate ? addDays(startDate, 1) : undefined}
+              control={control}
+              register={register}
+              errors={errors}
+            />
+
+            {/* End time field */}
+            <CustomFormField
+              name='end_time'
+              type='time'
+              label='End Time'
+              placeholder='Select end time'
+              control={control}
+              register={register}
+              errors={errors}
             />
           </div>
-          {/* Employees field */}
-          <FormField
-            control={form.control}
-            name='employee_ids'
-            rules={{
-              required: 'Employees are required',
-              minLength: { value: 1, message: 'Select at least one employee' }
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Employees <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <MultiSelect
-                    options={staffs?.map(staff => ({
-                      value: staff.id,
-                      label: staff.first_name + ' ' + staff.last_name
-                    }))}
-                    selected={field.value || []}
-                    onChange={field.onChange}
-                    placeholder='Select employees...'
-                    className='w-full'
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* time fields */}
-          <TaskDateTimeFields form={form} />
 
           <TaskReminderFields form={form} taskReminderChannels={taskReminderChannels} />
-          <TaskLocationAndCommentFields form={form} selectedClient={selectedClient} addressOptions={addressOptions} />
+
+          <CustomFormField
+            name='location'
+            label='Event Location'
+            type='select'
+            placeholder={selectedClient ? 'Select Address' : 'Select Customer first'}
+            control={control}
+            register={register}
+            selectOptions={
+              addressOptions.length === 0
+                ? [{ value: '_', label: 'No addresses found', disabled: true }]
+                : addressOptions.map(address => {
+                    const value = [address.street_address, address.city?.name, address.state?.name, address.zip_code]
+                      .filter(Boolean)
+                      .join(', ')
+
+                    return {
+                      label: `${address.title} - ${value}`,
+                      value: value
+                    }
+                  })
+            }
+            disabled={!selectedClient}
+            errors={errors}
+          />
 
           {/* Edit Mode Only Fields */}
           {mode === 'edit' && (
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 pt-4 border-t border-border'>
               {/* Status field */}
-              <FormField
-                control={form.control}
+              <CustomFormField
                 name='status'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <FormControl>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select Status' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value='backlog'>Backlog</SelectItem>
-                          <SelectItem value='to-do'>To Do</SelectItem>
-                          <SelectItem value='overdue'>Overdue</SelectItem>
-                          <SelectItem value='in-progress'>In Progress</SelectItem>
-                          <SelectItem value='completed'>Completed</SelectItem>
-                          <SelectItem value='cancelled'>Cancelled</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                type='select'
+                label='Status'
+                placeholder='Select Status'
+                control={control}
+                register={register}
+                selectOptions={[
+                  { value: 'backlog', label: 'Backlog' },
+                  { value: 'to-do', label: 'To Do' },
+                  { value: 'overdue', label: 'Overdue' },
+                  { value: 'in-progress', label: 'In Progress' },
+                  { value: 'completed', label: 'Completed' },
+                  { value: 'cancelled', label: 'Cancelled' }
+                ]}
+                errors={errors}
               />
 
               {/* Completed Date field */}
-              <FormField
-                control={form.control}
+              <CustomFormField
                 name='completed_date'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date Completed</FormLabel>
-                    <FormControl>
-                      <DatePicker
-                        value={field.value ? new Date(field.value) : null}
-                        onChange={val => {
-                          field.onChange(val ? val.toISOString().slice(0, 10) : '')
-                        }}
-                        placeholder='Select completed date'
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                type='datepicker'
+                label='Date Completed'
+                placeholder='Select completed date'
+                register={register}
+                control={control}
+                errors={errors}
               />
 
               {/* Close Comment field */}
-              <FormField
-                control={form.control}
+              <CustomFormField
                 name='close_comment'
-                render={({ field }) => (
-                  <FormItem className='col-span-1 lg:col-span-2'>
-                    <FormLabel>Close Comments</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder='Enter close comments' rows={4} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                type='textarea'
+                label='Close Comments'
+                placeholder='Enter close comments'
+                register={register}
+                control={control}
+                errors={errors}
+                fieldClassName='col-span-1 lg:col-span-2'
               />
             </div>
           )}

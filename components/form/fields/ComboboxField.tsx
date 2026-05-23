@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, FieldValues, Path } from 'react-hook-form'
 
 import { Check, ChevronsUpDown } from 'lucide-react'
@@ -23,19 +23,37 @@ const ComboboxField = <T extends FieldValues>({
   value,
   onChange,
   onBlur,
+  onOpenChange,
+  autoFocus,
+  disabled = false,
   className = ''
 }: ComboboxFieldProps<T>) => {
   const [open, setOpen] = useState(false)
 
+  useEffect(() => {
+    if (autoFocus && !disabled) {
+      setOpen(true)
+      onOpenChange?.(true)
+    }
+  }, [autoFocus, disabled, onOpenChange])
+
   if (!selectOptions) return null
 
   const renderCombobox = (selectedValue: string | undefined, setSelectedValue: (nextValue: string) => void) => (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={nextOpen => {
+        setOpen(nextOpen)
+        onOpenChange?.(nextOpen)
+      }}
+    >
       <PopoverTrigger asChild>
         <Button
           variant='outline'
           role='combobox'
           onClick={e => e.stopPropagation()}
+          disabled={disabled}
+          autoFocus={autoFocus}
           className={`w-full justify-between ${selectedValue ? 'text-[#f4f4f5]' : 'text-[#a7a7ae]!'} ${className}`}
         >
           {selectedValue ? selectOptions.find(o => o.value === selectedValue)?.label : placeholder}

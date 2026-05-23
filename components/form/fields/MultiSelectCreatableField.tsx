@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Controller, FieldValues, Path } from 'react-hook-form'
 
 import { ChevronsUpDown, Plus, XIcon } from 'lucide-react'
@@ -23,10 +23,20 @@ const MultiSelectCreatableField = <T extends FieldValues>({
   value,
   onChange,
   onBlur,
+  onOpenChange,
+  autoFocus,
+  disabled = false,
   className
 }: MultiSelectCreatableFieldProps<T>) => {
   const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState('')
+
+  useEffect(() => {
+    if (autoFocus && !disabled) {
+      setOpen(true)
+      onOpenChange?.(true)
+    }
+  }, [autoFocus, disabled, onOpenChange])
 
   const normalizedOptions = useMemo(() => {
     return (selectOptions ?? []).map(option => ({
@@ -85,6 +95,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
         open={open}
         onOpenChange={nextOpen => {
           setOpen(nextOpen)
+          onOpenChange?.(nextOpen)
 
           if (!nextOpen) {
             setInputValue('')
@@ -92,7 +103,12 @@ const MultiSelectCreatableField = <T extends FieldValues>({
         }}
       >
         <PopoverTrigger asChild>
-          <Button variant='outline' className={cn('w-full justify-between', className, 'h-auto! min-h-7!')}>
+          <Button
+            variant='outline'
+            disabled={disabled}
+            autoFocus={autoFocus}
+            className={cn('w-full justify-between', className, 'h-auto! min-h-7!')}
+          >
             <div className='flex flex-1 flex-wrap items-center gap-1 text-left'>
               {!(selectedValues.length > 0) ? (
                 <span className='text-[#a7a7ae]'>{placeholder}</span>
@@ -131,6 +147,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
               className='py-1'
               value={inputValue}
               onValueChange={setInputValue}
+              autoFocus={autoFocus}
             />
             <CommandEmpty>No results found.</CommandEmpty>
 

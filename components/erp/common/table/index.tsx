@@ -226,7 +226,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
           <table className='w-full'>
             <thead className='bg-border/40'>
               <tr>
-                {expandableRow && <th className='w-8 px-2 py-3 rounded-l-lg' />}
+                {expandableRow && <th className='w-8 px-2 py-1.5 rounded-l-lg' />}
                 {columns.map((column, index) => {
                   const canSort = column.sortable !== false && column.enableSorting !== false
                   const headerFlexAlign = getFlexAlignmentClass(column?.headerAlign)
@@ -236,7 +236,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
                     <th
                       key={column.id}
                       style={columnWidth}
-                      className={`px-4 py-3 text-light text-sm font-medium whitespace-nowrap ${
+                      className={`px-4 py-1.5 text-light text-[13px] font-medium whitespace-nowrap ${
                         canSort ? 'cursor-pointer select-none hover:text-light/80' : ''
                       } ${index === 0 && !expandableRow ? 'rounded-l-lg' : ''} ${index === columns.length - 1 ? 'rounded-r-lg' : ''}`}
                       onClick={() => handleSorting(column.id, canSort)}
@@ -293,7 +293,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
                             <td
                               key={column.id}
                               style={columnWidth}
-                              className={`px-4 py-3 text-light text-sm whitespace-nowrap min-w-25`}
+                              className={`px-4 py-2.5 text-light text-[13px] whitespace-nowrap min-w-25`}
                               onClick={e => {
                                 // Stop propagation if clicked element is a button, link, or inside one
                                 const target = e.target as HTMLElement
