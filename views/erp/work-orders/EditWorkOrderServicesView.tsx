@@ -651,7 +651,12 @@ const EditWorkOrderServicesView = ({
         staffs={staffs}
         paymentTerms={paymentTerms}
         businessLocations={businessLocations}
-        onSuccess={() => {
+        onSuccess={(updatedWorkOrder: WorkOrder) => {
+          setCurrentWorkOrder(prevWorkOrder => ({
+            ...prevWorkOrder,
+            ...updatedWorkOrder,
+            services: prevWorkOrder.services
+          }))
           setIsWorkOrderDetailsOpen(false)
         }}
       />
