@@ -14,6 +14,8 @@ import { mathRoundFixed } from '@/utils/utility'
 interface MaterialJobActionsRowProps {
   actions: MaterialJobAction[]
   onActionsChange: (actions: MaterialJobAction[]) => void
+  orderStatus?: string | null
+  orderNumber?: string | null
 }
 
 /**
@@ -44,9 +46,13 @@ const getStatusVariant = (
   }
 }
 
-const MaterialJobActionsRow = ({ actions, onActionsChange }: MaterialJobActionsRowProps) => {
+const MaterialJobActionsRow = ({ actions, onActionsChange, orderStatus, orderNumber }: MaterialJobActionsRowProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  const normalizedOrderStatus = String(orderStatus ?? '').toLowerCase()
+  const showOrderStatusBadge = !!normalizedOrderStatus && !['new', 'pending'].includes(normalizedOrderStatus)
+  const orderStatusLabel = normalizedOrderStatus ? normalizedOrderStatus.replace(/_/g, ' ') : ''
 
   // Sort ascending so oldest shows first and newest (latest) shows last
   const sortedActions = [...actions].sort((a, b) => {
@@ -80,6 +86,12 @@ const MaterialJobActionsRow = ({ actions, onActionsChange }: MaterialJobActionsR
       <tr className='bg-zinc-950 border-b border-zinc-800'>
         <td colSpan={15} className='p-2'>
           <div className='flex flex-wrap items-center gap-1'>
+            {showOrderStatusBadge && (
+              <Badge variant='secondary' className='text-xs capitalize'>
+                {orderStatusLabel} {orderNumber ? `- (#${orderNumber})` : ''}
+              </Badge>
+            )}
+
             {sortedActions.map((action, aIdx) => {
               const initials = action.employee
                 ? `${action.employee.first_name?.[0] ?? ''}${action.employee.last_name?.[0] ?? ''}`.toUpperCase()

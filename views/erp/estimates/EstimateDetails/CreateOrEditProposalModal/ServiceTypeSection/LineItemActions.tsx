@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ProposalServiceItemPayload } from '@/types'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from '@/components/ui/dropdown-menu'
-import { Truck, BadgeDollarSign, ClipboardPlus, Trash2 } from 'lucide-react'
+import { Truck, BadgeDollarSign, ClipboardPlus, ShoppingCart, Trash2, ShoppingBag } from 'lucide-react'
 
 interface LineItemActionsProps {
   line: ProposalServiceItemPayload
@@ -13,14 +13,32 @@ interface LineItemActionsProps {
   updateLine: (idx: number, field: keyof ProposalServiceItemPayload, value: any) => void
   removeLine: (idx: number) => void
   hideDiscountOption?: boolean
+  showOrderAction?: boolean
+  onOrderActionClick?: () => void
+  showPurchaseOrderAction?: boolean
+  onPurchaseOrderClick?: () => void
 }
 
-const LineItemActions = ({ line, idx, mode, locked = false, updateLine, removeLine, hideDiscountOption = false }: LineItemActionsProps) => {
+const LineItemActions = ({
+  line,
+  idx,
+  mode,
+  locked = false,
+  updateLine,
+  removeLine,
+  hideDiscountOption = false,
+  showOrderAction = false,
+  onOrderActionClick,
+  showPurchaseOrderAction = false,
+  onPurchaseOrderClick
+}: LineItemActionsProps) => {
   const isDisabled = mode === 'view' || locked
 
   const hasFreight = (line.freight_charge ?? 0) > 0
   const hasDiscount = (line.discount ?? 0) > 0
   const hasNote = !!(line.note && line.note.trim() !== '')
+  const materialJobStatus = String((line as any)?.material_job?.order_status ?? '').toLowerCase()
+  const hasProgressedMaterialJob = !!materialJobStatus && !['new', 'pending'].includes(materialJobStatus)
 
   return (
     <td className='px-2 py-1 flex gap-1 justify-end'>
@@ -133,6 +151,20 @@ const LineItemActions = ({ line, idx, mode, locked = false, updateLine, removeLi
           />
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Order Material Job */}
+      {showOrderAction && onOrderActionClick && (
+        <Button size='icon' variant='ghost' onClick={onOrderActionClick} title='Update Material Order'>
+          <ShoppingCart className={`h-4 w-4 ${hasProgressedMaterialJob ? 'text-primary' : 'text-zinc-400'}`} />
+        </Button>
+      )}
+
+      {/* Create Purchase Order */}
+      {showPurchaseOrderAction && onPurchaseOrderClick && (
+        <Button size='icon' variant='ghost' onClick={onPurchaseOrderClick} title='Create Purchase Order'>
+          <ShoppingBag className='h-4 w-4' />
+        </Button>
+      )}
 
       {/* Delete Button */}
       {!isDisabled && (

@@ -26,7 +26,7 @@ interface UpdateMaterialJobModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   materialJob: MaterialJob | null
-  onSuccess: () => void
+  onSuccess: (updatedData?: any) => void
 }
 
 interface FormValues {
@@ -369,10 +369,12 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
     }
 
     try {
-      await MaterialJobService.update(materialJob.id, payload)
+      const response = await MaterialJobService.update(materialJob.id, payload)
+      const responseData = response?.data ?? response
+
       toast.success('Material job updated successfully')
       onOpenChange(false)
-      onSuccess()
+      onSuccess(responseData)
     } catch (error: any) {
       if (error?.errors && typeof error.errors === 'object') {
         Object.values(error.errors).forEach((errMsg: any) => {
@@ -458,7 +460,10 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
                 {displayField('Product Name', serviceItemName)}
                 {displayField('Color', productColor)}
                 {displayField('Description', serviceItemDescription)}
-                {displayField('Quantity', materialJob?.quantity ?? '—')}
+                {displayField(
+                  'Quantity',
+                  `${materialJob?.quantity} ${materialJob?.selling_unit?.name || materialJob?.service_item?.unit?.name || 'Unit'}${materialJob?.quantity !== materialJob?.purchase_quantity ? ` (${materialJob?.purchase_quantity} ${materialJob?.purchase_unit?.name || 'Unit'})` : ''}`
+                )}
                 {displayField(
                   'Unit Cost',
                   materialJob?.service_item?.unit_cost != null
@@ -547,6 +552,9 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
               <FormField
                 control={form.control}
                 name='order_number'
+                rules={{
+                  required: "Order Number Is Required"
+                }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Order Number</FormLabel>

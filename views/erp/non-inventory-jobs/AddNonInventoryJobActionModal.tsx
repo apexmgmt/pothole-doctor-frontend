@@ -68,7 +68,7 @@ const AddNonInventoryJobActionModal = ({
   const purchaseUnit =
     materialJob?.product?.purchase_unit?.name ?? materialJob?.product?.purchase_uom?.name ?? 'Each(s)'
 
-  const maxQuantity = materialJob?.quantity ?? 0
+  const maxQuantity = materialJob?.purchase_quantity ?? materialJob?.quantity ?? 0
 
   const [vendorAddresses, setVendorAddresses] = useState<VendorPickupAddress[]>([])
   const [clientAddresses, setClientAddresses] = useState<ClientAddress[]>([])
@@ -79,7 +79,7 @@ const AddNonInventoryJobActionModal = ({
       action_status: '',
       action_date: new Date(),
       employee_id: materialJob?.sale_representative?.id ?? '',
-      quantity: materialJob?.quantity ?? '',
+      quantity: materialJob?.purchase_quantity ?? materialJob?.quantity ?? '',
       warehouse_type: 'warehouse',
       warehouse_id: '',
       location_notes: ''
@@ -94,7 +94,7 @@ const AddNonInventoryJobActionModal = ({
         action_status: '',
         action_date: new Date(),
         employee_id: materialJob?.sale_representative?.id ?? '',
-        quantity: materialJob?.quantity ?? '',
+        quantity: materialJob?.purchase_quantity ?? materialJob?.quantity ?? '',
         warehouse_type: 'warehouse',
         warehouse_id: '',
         location_notes: ''
