@@ -317,7 +317,7 @@ const EditWorkOrderServicesView = ({
   const onSubmit = async () => {
     const success = await saveWorkOrder()
 
-    if (success) router.push('/erp/work-orders')
+    // if (success) router.push('/erp/work-orders')
   }
 
   const handleAddSchedule = async (
