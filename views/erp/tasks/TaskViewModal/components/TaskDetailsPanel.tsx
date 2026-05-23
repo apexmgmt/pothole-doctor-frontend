@@ -1,18 +1,15 @@
 'use client'
 
-import { format } from 'date-fns'
+import { ReactNode } from 'react'
+import { PencilLine } from 'lucide-react'
 
+import CustomFormField from '@/components/form/CustomFormField'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { DatePicker } from '@/components/ui/datePicker'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { MultiSelect } from '@/components/ui/select'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { Client, Staff, Task, TaskType } from '@/types'
 import { cn } from '@/lib/utils'
-import { formatDateTime, getStatusMeta, parseDateString, STATUS_OPTIONS } from '../helpers'
+import { formatDateTime, getStatusMeta, STATUS_OPTIONS } from '../helpers'
 import { InlineEditableField } from '../types'
 import { formatDate } from '@/utils/date'
 
@@ -57,9 +54,444 @@ export default function TaskDetailsPanel({
   const selectedClient = clients.find(client => client.id === task?.client_id)
   const addressOptions = selectedClient?.addresses || task?.client?.addresses || []
 
+  const addressSelectOptions = addressOptions.map(address => {
+    const value = [address.street_address, address.city?.name, address.state?.name, address.zip_code]
+      .filter(Boolean)
+      .join(', ')
+
+    return {
+      value,
+      label: `${address.title} - ${value}`
+    }
+  })
+
+  const staffSelectOptions = staffs.map(staff => ({ value: staff.id, label: `${staff.first_name} ${staff.last_name}` }))
+  const taskTypeSelectOptions = taskTypes.map(taskType => ({ value: taskType.id, label: taskType.name }))
+
+  const clientSelectOptions = clients.map(client => ({
+    value: client.id,
+    label: `${client.first_name} ${client.last_name}`.trim()
+  }))
+
+  const statusSelectOptions = STATUS_OPTIONS.map(option => ({ value: option.value, label: option.label }))
+
+  type RowConfig = {
+    field: InlineEditableField
+    label: string
+    align?: 'items-center' | 'items-start'
+    renderDisplay: () => ReactNode
+    renderEditor: () => ReactNode
+  }
+
+  const renderEditableDisplay = (
+    field: InlineEditableField,
+    content: ReactNode,
+    startValue?: string,
+    align: 'items-center' | 'items-start' = 'items-center'
+  ) => (
+    <div
+      className={cn(
+        'group flex justify-between gap-2 hover:bg-muted px-2.5 py-1.5 rounded-md transition-colors duration-100',
+        align,
+        canEditTask && 'cursor-pointer'
+      )}
+      onClick={() => startInlineEdit(field, startValue)}
+    >
+      <div className='flex-1'>{content}</div>
+      {canEditTask && (
+        <PencilLine
+          className={cn(
+            'size-4 text-white opacity-0 transition-opacity group-hover:opacity-100',
+            align === 'items-start' && 'mt-0.5'
+          )}
+        />
+      )}
+    </div>
+  )
+
+  const rows: RowConfig[] = [
+    {
+      field: 'status',
+      label: 'Status',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='select'
+            name='status'
+            placeholder='Select status'
+            value={editingValue || task?.status || ''}
+            autoFocus
+            selectOptions={statusSelectOptions}
+            onOpenChange={open => {
+              if (!open) cancelInlineEdit()
+            }}
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('status', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'status',
+          <Badge variant={statusMeta.variant}>{statusMeta.label}</Badge>,
+          task?.status || ''
+        )
+    },
+    {
+      field: 'task_type_id',
+      label: 'Task Type',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='select'
+            name='task_type_id'
+            placeholder='Select Task Type'
+            value={editingValue || task?.task_type_id || ''}
+            autoFocus
+            selectOptions={taskTypeSelectOptions}
+            onOpenChange={open => {
+              if (!open) cancelInlineEdit()
+            }}
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('task_type_id', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'task_type_id',
+          <p className='text-sm leading-none'>{task?.task_type?.name || '-'}</p>,
+          task?.task_type_id || ''
+        )
+    },
+    {
+      field: 'client_id',
+      label: 'Customer',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='select'
+            name='client_id'
+            placeholder='Select Customer'
+            value={editingValue || task?.client_id || ''}
+            autoFocus
+            selectOptions={clientSelectOptions}
+            onOpenChange={open => {
+              if (!open) cancelInlineEdit()
+            }}
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('client_id', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'client_id',
+          <p className='text-sm leading-none'>
+            {[task?.client?.first_name, task?.client?.last_name].filter(Boolean).join(' ') || '-'}
+          </p>,
+          task?.client_id || ''
+        )
+    },
+    {
+      field: 'location',
+      label: 'Location',
+      align: 'items-start',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='select'
+            name='location'
+            placeholder={addressSelectOptions.length ? 'Select Address' : 'No addresses found'}
+            value={editingValue || task?.location || ''}
+            autoFocus
+            selectOptions={addressSelectOptions}
+            disabled={addressSelectOptions.length === 0}
+            onOpenChange={open => {
+              if (!open) cancelInlineEdit()
+            }}
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('location', nextValue)
+            }}
+            className='whitespace-normal text-left leading-snug h-auto!'
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'location',
+          <p className='text-sm'>{task?.location || '-'}</p>,
+          task?.location || '',
+          'items-start'
+        )
+    },
+    {
+      field: 'start_date',
+      label: 'Start Date',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='datepicker'
+            name='start_date'
+            placeholder='Select start date'
+            value={editingValue || task?.start_date || ''}
+            autoFocus
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('start_date', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'start_date',
+          <p className='text-sm leading-none'>{formatDate(task?.start_date ?? null) || '-'}</p>,
+          task?.start_date || ''
+        )
+    },
+    {
+      field: 'start_time',
+      label: 'Start Time',
+      renderEditor: () => (
+        <div
+          data-inline-editor
+          onKeyDown={event => {
+            if (event.key === 'Enter') {
+              event.preventDefault()
+              saveInlineField('start_time')
+            }
+
+            if (event.key === 'Escape') {
+              event.preventDefault()
+              cancelInlineEdit()
+            }
+          }}
+        >
+          <CustomFormField
+            type='time'
+            name='start_time'
+            value={editingValue || task?.start_time || ''}
+            autoFocus
+            onChange={value => setEditingValue(String(value ?? ''))}
+            onBlur={() => {
+              saveInlineField('start_time')
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'start_time',
+          <p className='text-sm leading-none'>{task?.start_time || '-'}</p>,
+          task?.start_time || ''
+        )
+    },
+    {
+      field: 'end_date',
+      label: 'End Date',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='datepicker'
+            name='end_date'
+            placeholder='Select end date'
+            value={editingValue || task?.end_date || ''}
+            autoFocus
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('end_date', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'end_date',
+          <p className='text-sm leading-none'>{formatDate(task?.end_date ?? null) || '-'}</p>,
+          task?.end_date || ''
+        )
+    },
+    {
+      field: 'end_time',
+      label: 'End Time',
+      renderEditor: () => (
+        <div
+          data-inline-editor
+          onKeyDown={event => {
+            if (event.key === 'Enter') {
+              event.preventDefault()
+              saveInlineField('end_time')
+            }
+
+            if (event.key === 'Escape') {
+              event.preventDefault()
+              cancelInlineEdit()
+            }
+          }}
+        >
+          <CustomFormField
+            type='time'
+            name='end_time'
+            value={editingValue || task?.end_time || ''}
+            autoFocus
+            onChange={value => setEditingValue(String(value ?? ''))}
+            onBlur={() => {
+              saveInlineField('end_time')
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'end_time',
+          <p className='text-sm leading-none'>{task?.end_time || '-'}</p>,
+          task?.end_time || ''
+        )
+    },
+    {
+      field: 'employee_ids',
+      label: 'Assigned To',
+      align: 'items-start',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='multiselect'
+            name='employee_ids'
+            placeholder='Select employees...'
+            selectOptions={staffSelectOptions}
+            value={editingEmployeeIds}
+            autoFocus
+            onChange={value => {
+              const nextValue = Array.isArray(value) ? value.map(item => String(item)) : []
+
+              setEditingEmployeeIds(nextValue)
+            }}
+          />
+          <div className='mt-2 flex justify-end gap-2'>
+            <Button type='button' variant='outline' size='sm' onClick={cancelInlineEdit} className='text-xs h-6 px-2'>
+              Cancel
+            </Button>
+            <Button
+              type='button'
+              size='sm'
+              onClick={() => {
+                saveInlineField('employee_ids', editingEmployeeIds)
+              }}
+              className='text-xs h-6 px-2'
+            >
+              Save
+            </Button>
+          </div>
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'employee_ids',
+          <div className='flex flex-wrap items-center gap-1'>
+            {task?.employees?.length ? (
+              task.employees.map(employee => (
+                <Badge key={employee.id} variant='outline' className={cn(canEditTask && 'cursor-pointer')}>
+                  {employee.first_name} {employee.last_name}
+                </Badge>
+              ))
+            ) : (
+              <p className='text-sm leading-none'>-</p>
+            )}
+          </div>,
+          undefined,
+          'items-start'
+        )
+    },
+    {
+      field: 'completed_date',
+      label: 'Completed Date',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='datepicker'
+            name='completed_date'
+            placeholder='Select completed date'
+            value={editingValue || task?.completed_date || ''}
+            autoFocus
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('completed_date', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'completed_date',
+          <p className='text-sm leading-none'>{formatDate(task?.completed_date ?? null) || '-'}</p>,
+          task?.completed_date || ''
+        )
+    },
+    {
+      field: 'close_comment',
+      label: 'Close Comment',
+      renderEditor: () => (
+        <div
+          data-inline-editor
+          onKeyDown={event => {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+              event.preventDefault()
+              saveInlineField('close_comment')
+            }
+
+            if (event.key === 'Escape') {
+              event.preventDefault()
+              cancelInlineEdit()
+            }
+          }}
+        >
+          <CustomFormField
+            type='textarea'
+            name='close_comment'
+            value={editingValue}
+            className='min-h-20'
+            autoFocus
+            onChange={value => setEditingValue(String(value ?? ''))}
+            onBlur={() => {
+              saveInlineField('close_comment')
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'close_comment',
+          <p className='text-sm leading-none whitespace-pre-wrap'>{task?.close_comment || '-'}</p>,
+          task?.close_comment || ''
+        )
+    }
+  ]
+
   return (
     <div className='space-y-4'>
-      <div className='rounded-md border border-border p-4 space-y-3'>
+      <div className='rounded-md border border-border p-4'>
         <div className='flex items-center justify-between gap-2'>
           <h4 className='text-sm font-semibold'>Details</h4>
           {canEditTask && taskId && onEditTask ? (
@@ -75,419 +507,35 @@ export default function TaskDetailsPanel({
           ) : null}
         </div>
 
-        <div className='flex items-center gap-3 flex-row '>
-          <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Status : </Label>
-          {editingField === 'status' ? (
-            <div className='flex-1' data-inline-editor>
-              <Select
-                value={editingValue || task?.status || ''}
-                onOpenChange={open => {
-                  if (!open) cancelInlineEdit()
-                }}
-                onValueChange={value => {
-                  setEditingValue(value)
-                  saveInlineField('status', value)
-                }}
-              >
-                <SelectTrigger className='w-full'>
-                  <SelectValue placeholder='Select status' />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ) : (
-            <Badge
-              variant={statusMeta.variant}
-              className={cn(canEditTask && 'cursor-pointer')}
-              onClick={() => startInlineEdit('status', task?.status || '')}
+        <div className='flex flex-col gap-1 mt-3'>
+          {rows.map(row => (
+            <div
+              key={row.field}
+              className={cn('grid grid-cols-[100px_minmax(0,_1fr)] gap-2', row.align ?? 'items-center')}
             >
-              {statusMeta.label}
-            </Badge>
-          )}
-        </div>
-
-        <div className='flex items-center gap-3 flex-row '>
-          <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Task Type : </Label>
-          {editingField === 'task_type_id' ? (
-            <div className='flex-1' data-inline-editor>
-              <Select
-                value={editingValue || task?.task_type_id || ''}
-                onOpenChange={open => {
-                  if (!open) cancelInlineEdit()
-                }}
-                onValueChange={value => {
-                  setEditingValue(value)
-                  saveInlineField('task_type_id', value)
-                }}
-              >
-                <SelectTrigger className='w-full'>
-                  <SelectValue placeholder='Select Task Type' />
-                </SelectTrigger>
-                <SelectContent>
-                  {taskTypes.map(taskType => (
-                    <SelectItem key={taskType.id} value={taskType.id}>
-                      {taskType.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label className='text-xs text-muted-foreground'>{row.label} : </Label>
+              {editingField === row.field ? row.renderEditor() : row.renderDisplay()}
             </div>
-          ) : (
-            <p
-              className={cn('text-sm flex-1', canEditTask && 'cursor-pointer')}
-              onClick={() => startInlineEdit('task_type_id', task?.task_type_id || '')}
-            >
-              {task?.task_type?.name || '-'}
-            </p>
-          )}
-        </div>
+          ))}
 
-        <div className='flex items-center gap-3 flex-row '>
-          <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Customer : </Label>
-          {editingField === 'client_id' ? (
-            <div className='flex-1' data-inline-editor>
-              <Select
-                value={editingValue || task?.client_id || ''}
-                onOpenChange={open => {
-                  if (!open) cancelInlineEdit()
-                }}
-                onValueChange={value => {
-                  setEditingValue(value)
-                  saveInlineField('client_id', value)
-                }}
-              >
-                <SelectTrigger className='w-full'>
-                  <SelectValue placeholder='Select Customer' />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map(client => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.first_name} {client.last_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ) : (
-            <p
-              className={cn('text-sm flex-1', canEditTask && 'cursor-pointer')}
-              onClick={() => startInlineEdit('client_id', task?.client_id || '')}
-            >
-              {[task?.client?.first_name, task?.client?.last_name].filter(Boolean).join(' ') || '-'}
-            </p>
-          )}
-        </div>
-
-        <div className='flex items-start gap-3 flex-row '>
-          <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Location : </Label>
-          {editingField === 'location' ? (
-            <div className='flex-1' data-inline-editor>
-              <Select
-                value={editingValue || task?.location || ''}
-                onOpenChange={open => {
-                  if (!open) cancelInlineEdit()
-                }}
-                onValueChange={value => {
-                  setEditingValue(value)
-                  saveInlineField('location', value)
-                }}
-                disabled={addressOptions.length === 0}
-              >
-                <SelectTrigger className='w-full'>
-                  <SelectValue placeholder='Select Address' />
-                </SelectTrigger>
-                <SelectContent className='w-(--radix-select-trigger-width) max-w-[calc(100vw-2rem)]'>
-                  {addressOptions.length === 0 ? (
-                    <div className='px-3 py-2 text-muted-foreground text-sm'>No addresses found</div>
-                  ) : (
-                    addressOptions.map(address => {
-                      const value = [address.street_address, address.city?.name, address.state?.name, address.zip_code]
-                        .filter(Boolean)
-                        .join(', ')
-
-                      return (
-                        <SelectItem key={address.id} value={value} className='whitespace-normal wrap-break-words'>
-                          {address.title} - {value}
-                        </SelectItem>
-                      )
-                    })
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-          ) : (
-            <p
-              className={cn('text-sm flex-1', canEditTask && 'cursor-pointer')}
-              onClick={() => startInlineEdit('location', task?.location || '')}
-            >
-              {task?.location || '-'}
-            </p>
-          )}
-        </div>
-
-        <div className='flex items-center gap-3 flex-row '>
-          <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Start Date : </Label>
-          <div className='flex-1'>
-            {editingField === 'start_date' ? (
-              <div data-inline-editor>
-                <DatePicker
-                  value={editingValue ? parseDateString(editingValue) : parseDateString(task?.start_date) || null}
-                  onChange={value => {
-                    const next = value ? format(value, 'yyyy-MM-dd') : ''
-
-                    saveInlineField('start_date', next)
-                  }}
-                  placeholder='Select start date'
-                />
-              </div>
-            ) : (
-              <p
-                className={cn('text-sm', canEditTask && 'cursor-pointer')}
-                onClick={() => startInlineEdit('start_date', task?.start_date || '')}
-              >
-                {formatDate(task?.start_date ?? null) || '-'}
+          {task?.created_by?.first_name && (
+            <div className='grid grid-cols-[100px_minmax(0,_1fr)] gap-2 items-center'>
+              <Label className='text-xs text-muted-foreground'>Created By : </Label>
+              <p className='text-sm leading-none px-2.5 py-1.5'>
+                {[task?.created_by?.first_name, task?.created_by?.last_name].filter(Boolean).join(' ') || '-'}
               </p>
-            )}
-          </div>
-        </div>
-
-        <div className='flex items-center gap-3 flex-row '>
-          <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Start Time : </Label>
-          <div className='flex-1'>
-            {editingField === 'start_time' ? (
-              <Input
-                data-inline-editor
-                type='time'
-                step='1'
-                value={editingValue || task?.start_time || ''}
-                autoFocus
-                onChange={event => setEditingValue(event.target.value)}
-                onBlur={() => {
-                  saveInlineField('start_time')
-                }}
-                onKeyDown={event => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault()
-                    saveInlineField('start_time')
-                  }
-
-                  if (event.key === 'Escape') {
-                    event.preventDefault()
-                    cancelInlineEdit()
-                  }
-                }}
-              />
-            ) : (
-              <p
-                className={cn('text-sm', canEditTask && 'cursor-pointer')}
-                onClick={() => startInlineEdit('start_time', task?.start_time || '')}
-              >
-                {task?.start_time || '-'}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className='flex items-center gap-3 flex-row '>
-          <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>End Date : </Label>
-          <div className='flex-1'>
-            {editingField === 'end_date' ? (
-              <div data-inline-editor>
-                <DatePicker
-                  value={editingValue ? parseDateString(editingValue) : parseDateString(task?.end_date) || null}
-                  onChange={value => {
-                    const next = value ? format(value, 'yyyy-MM-dd') : ''
-
-                    saveInlineField('end_date', next)
-                  }}
-                  placeholder='Select end date'
-                />
-              </div>
-            ) : (
-              <p
-                className={cn('text-sm', canEditTask && 'cursor-pointer')}
-                onClick={() => startInlineEdit('end_date', task?.end_date || '')}
-              >
-                {formatDate(task?.end_date ?? null) || '-'}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className='flex items-center gap-3 flex-row '>
-          <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>End Time : </Label>
-          <div className='flex-1'>
-            {editingField === 'end_time' ? (
-              <Input
-                data-inline-editor
-                type='time'
-                step='1'
-                value={editingValue || task?.end_time || ''}
-                autoFocus
-                onChange={event => setEditingValue(event.target.value)}
-                onBlur={() => {
-                  saveInlineField('end_time')
-                }}
-                onKeyDown={event => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault()
-                    saveInlineField('end_time')
-                  }
-
-                  if (event.key === 'Escape') {
-                    event.preventDefault()
-                    cancelInlineEdit()
-                  }
-                }}
-              />
-            ) : (
-              <p
-                className={cn('text-sm', canEditTask && 'cursor-pointer')}
-                onClick={() => startInlineEdit('end_time', task?.end_time || '')}
-              >
-                {task?.end_time || '-'}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className='flex items-center gap-3 flex-row '>
-          <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Assigned To : </Label>
-          {editingField === 'employee_ids' ? (
-            <div className='flex-1' data-inline-editor>
-              <MultiSelect
-                options={staffs.map(staff => ({ value: staff.id, label: `${staff.first_name} ${staff.last_name}` }))}
-                selected={editingEmployeeIds}
-                onChange={setEditingEmployeeIds}
-                placeholder='Select employees...'
-                className='w-full'
-              />
-              <div className='mt-2 flex justify-end gap-2'>
-                <Button type='button' variant='outline' size='sm' onClick={cancelInlineEdit}>
-                  Cancel
-                </Button>
-                <Button
-                  type='button'
-                  size='sm'
-                  onClick={() => {
-                    saveInlineField('employee_ids', editingEmployeeIds)
-                  }}
-                >
-                  Save
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className='flex flex-1 flex-wrap gap-1'>
-              {task?.employees?.length ? (
-                task.employees.map(employee => (
-                  <Badge
-                    key={employee.id}
-                    variant='outline'
-                    className={cn(canEditTask && 'cursor-pointer')}
-                    onClick={() => startInlineEdit('employee_ids')}
-                  >
-                    {employee.first_name} {employee.last_name}
-                  </Badge>
-                ))
-              ) : (
-                <p
-                  className={cn('text-sm', canEditTask && 'cursor-pointer')}
-                  onClick={() => startInlineEdit('employee_ids')}
-                >
-                  -
-                </p>
-              )}
             </div>
           )}
-        </div>
 
-        {task?.created_by?.first_name && (
-          <div className='flex items-center gap-3 flex-row '>
-            <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Created By : </Label>
-            <p
-              className={cn('text-sm flex-1', '')}
-            >
-              {[task?.created_by?.first_name, task?.created_by?.last_name].filter(Boolean).join(' ') || '-'}
-            </p>
+          <div className='grid grid-cols-[100px_minmax(0,_1fr)] gap-2 items-center'>
+            <Label className='text-xs text-muted-foreground'>Created At : </Label>
+            <p className='text-sm leading-none px-2.5 py-1.5'>{formatDateTime(task?.created_at)}</p>
           </div>
-        )}
 
-        <div className='flex items-center gap-3 flex-row '>
-          <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Created At : </Label>
-          <p className='text-sm flex-1'>{formatDateTime(task?.created_at)}</p>
-        </div>
-
-        <div className='flex items-center gap-3 flex-row '>
-          <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Updated At : </Label>
-          <p className='text-sm flex-1'>{formatDateTime(task?.updated_at)}</p>
-        </div>
-
-        <div className='flex items-center gap-3 flex-row '>
-          <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Completed Date : </Label>
-          <div className='flex-1'>
-            {editingField === 'completed_date' ? (
-              <div data-inline-editor>
-                <DatePicker
-                  value={editingValue ? parseDateString(editingValue) : parseDateString(task?.completed_date) || null}
-                  onChange={value => {
-                    const next = value ? format(value, 'yyyy-MM-dd') : ''
-
-                    saveInlineField('completed_date', next)
-                  }}
-                  placeholder='Select completed date'
-                />
-              </div>
-            ) : (
-              <p
-                className={cn('text-sm', canEditTask && 'cursor-pointer')}
-                onClick={() => startInlineEdit('completed_date', task?.completed_date || '')}
-              >
-                {formatDate(task?.completed_date ?? null) || '-'}
-              </p>
-            )}
+          <div className='grid grid-cols-[100px_minmax(0,_1fr)] gap-2 items-center'>
+            <Label className='text-xs text-muted-foreground'>Updated At : </Label>
+            <p className='text-sm leading-none px-2.5 py-1.5'>{formatDateTime(task?.updated_at)}</p>
           </div>
-        </div>
-
-        <div className='flex items-center gap-3 flex-row '>
-          <Label className='text-xs text-muted-foreground min-w-25 lg:min-w-20'>Close Comment : </Label>
-          {editingField === 'close_comment' ? (
-            <div className='flex-1' data-inline-editor>
-              <Textarea
-                value={editingValue}
-                autoFocus
-                onChange={event => setEditingValue(event.target.value)}
-                onBlur={event => {
-                  saveInlineField('close_comment', event.target.value)
-                }}
-                onKeyDown={event => {
-                  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-                    event.preventDefault()
-                    saveInlineField('close_comment')
-                  }
-
-                  if (event.key === 'Escape') {
-                    event.preventDefault()
-                    cancelInlineEdit()
-                  }
-                }}
-                className='min-h-20'
-              />
-            </div>
-          ) : (
-            <p
-              className={cn('text-sm flex-1 whitespace-pre-wrap', canEditTask && 'cursor-pointer')}
-              onClick={() => startInlineEdit('close_comment', task?.close_comment || '')}
-            >
-              {task?.close_comment || '-'}
-            </p>
-          )}
         </div>
       </div>
     </div>

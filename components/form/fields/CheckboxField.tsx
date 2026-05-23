@@ -17,6 +17,7 @@ const CheckboxField = <T extends FieldValues>({
   disabled = false,
   onChange,
   onBlur,
+  autoFocus,
   className,
   labelClassName
 }: CheckboxFieldProps<T>) => {
@@ -27,6 +28,7 @@ const CheckboxField = <T extends FieldValues>({
       <Checkbox
         id={checkboxId}
         disabled={disabled}
+        autoFocus={autoFocus}
         checked={checked}
         onCheckedChange={nextValue => {
           const isChecked = nextValue === true

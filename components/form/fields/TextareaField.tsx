@@ -13,6 +13,7 @@ const TextareaField = <T extends FieldValues>({
   value,
   onChange,
   onBlur,
+  autoFocus,
   disabled = false,
   className = ''
 }: FieldComponentProps<T>) => {
@@ -26,6 +27,7 @@ const TextareaField = <T extends FieldValues>({
       name={typeof name === 'string' ? name : undefined}
       disabled={disabled}
       placeholder={placeholder}
+      autoFocus={autoFocus}
       {...registeredProps}
       value={formattedValue}
       onChange={e => {

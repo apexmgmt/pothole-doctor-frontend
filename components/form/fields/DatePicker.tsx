@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, FieldValues, Path } from 'react-hook-form'
 
 import { CalendarDays } from 'lucide-react'
@@ -10,6 +10,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 import { FieldComponentProps } from './types'
+import { format } from 'date-fns'
 
 type DatePickerProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'> & {
   minDate?: string
@@ -28,10 +29,17 @@ const DatePicker = <T extends FieldValues>({
   value,
   onChange,
   onBlur,
+  autoFocus,
   disabled = false,
   className = ''
 }: DatePickerProps<T>) => {
   const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    if (autoFocus && !disabled) {
+      setOpen(true)
+    }
+  }, [autoFocus, disabled])
 
   const renderDatePicker = (currentValue: string | undefined, setCurrentValue: (nextValue: string) => void) => (
     <Popover open={open} onOpenChange={setOpen}>
@@ -40,15 +48,10 @@ const DatePicker = <T extends FieldValues>({
           variant='outline'
           disabled={disabled}
           onClick={e => e.stopPropagation()}
-          className={`w-full text-sm justify-between pe-1.5! ${currentValue ? 'text-[#f4f4f5]' : 'text-[#a7a7ae]!'} ${className}`}
+          autoFocus={autoFocus}
+          className={`w-full text-sm justify-between p-2.5! pe-1.5! py-1.5! ${currentValue ? 'text-[#f4f4f5]' : 'text-[#a7a7ae]!'} ${className}`}
         >
-          {currentValue
-            ? new Date(currentValue).toLocaleDateString('en-US', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric'
-              })
-            : placeholder}
+          {currentValue ? format(new Date(currentValue), 'MM/dd/yyyy') : placeholder}
           <CalendarDays className='size-4' />
         </Button>
       </PopoverTrigger>

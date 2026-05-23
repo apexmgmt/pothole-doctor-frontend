@@ -18,6 +18,7 @@ const InputField = <T extends FieldValues>({
   value,
   onChange,
   onBlur,
+  autoFocus,
   disabled = false,
   className = ''
 }: FieldComponentProps<T>) => {
@@ -46,6 +47,7 @@ const InputField = <T extends FieldValues>({
         disabled={disabled}
         step='any'
         placeholder={placeholder}
+        autoFocus={autoFocus}
         {...registeredProps}
         value={value as string | number | readonly string[] | undefined}
         onChange={e => {
