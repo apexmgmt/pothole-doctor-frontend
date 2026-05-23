@@ -651,7 +651,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
     return (
       <div
         className={cn(
-          'flex w-full flex-col rounded-md border border-border bg-transparent text-base shadow-sm transition-colors focus-within:ring-1 focus-within:ring-ring md:text-sm',
+          'flex w-full flex-col rounded-md border border-border bg-transparent text-base shadow-sm transition-colors md:text-sm',
           disabled && 'cursor-not-allowed opacity-50',
           className
         )}
