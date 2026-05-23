@@ -27,6 +27,7 @@ import {
 import WorkOrderService from '@/services/api/work-orders/work_orders.service'
 import MaterialJobService from '@/services/api/products/material-jobs.service'
 import EditWorkOrderModal from './EditWorkOrderModal'
+import WorkOrderActionsButton from './WorkOrderActionsButton'
 import UpdateMaterialJobModal from '@/views/erp/non-inventory-jobs/UpdateMaterialJobModal'
 import ServiceTypeSection from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ServiceTypeSection'
 import AddServiceButton from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/AddServiceButton'
@@ -486,9 +487,10 @@ const EditWorkOrderServicesView = ({
       {/* Action Bar */}
       <div className='flex justify-between items-center'>
         <div className='flex gap-2'>
-          <Button type='button' variant='outline' onClick={() => setIsWorkOrderDetailsOpen(true)} disabled={isLoading}>
-            Work Order Details
-          </Button>
+          <WorkOrderActionsButton
+            workOrder={currentWorkOrder}
+            onViewEditDetails={() => setIsWorkOrderDetailsOpen(true)}
+          />
           <AddServiceButton
             serviceTypes={serviceTypes}
             selectedServiceTypeIds={selectedServiceType.map(st => st.id)}
