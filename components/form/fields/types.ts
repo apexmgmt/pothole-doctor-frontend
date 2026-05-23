@@ -31,11 +31,13 @@ export type BaseFieldProps<T extends FieldValues> = {
   value?: unknown
   readonly?: boolean
   disabled?: boolean
+  autoFocus?: boolean
   rules?: RegisterOptions<T, Path<T>>
   control?: Control<T>
   register?: UseFormRegister<T>
   onChange?: (value: unknown) => void
   onBlur?: (value?: unknown) => void
+  onOpenChange?: (open: boolean) => void
   className?: string
   labelClassName?: string
   fieldClassName?: string

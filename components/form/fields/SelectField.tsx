@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Controller, FieldValues, Path } from 'react-hook-form'
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -16,19 +17,35 @@ const SelectField = <T extends FieldValues>({
   value,
   onChange,
   onBlur,
+  onOpenChange,
+  autoFocus,
   className = ''
 }: SelectFieldProps<T>) => {
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    if (autoFocus && !disabled) {
+      setOpen(true)
+      onOpenChange?.(true)
+    }
+  }, [autoFocus, disabled, onOpenChange])
+
   if (!selectOptions) return null
 
   const renderSelect = (selectedValue: string, setSelectedValue: (nextValue: string) => void) => (
     <Select
+      open={open}
+      onOpenChange={nextOpen => {
+        setOpen(nextOpen)
+        onOpenChange?.(nextOpen)
+      }}
       onValueChange={nextValue => {
         setSelectedValue(nextValue)
         onBlur?.(nextValue)
       }}
       value={selectedValue}
     >
-      <SelectTrigger disabled={disabled} className={`w-full ${className}`}>
+      <SelectTrigger disabled={disabled} autoFocus={autoFocus} className={`w-full ${className}`}>
         <SelectValue placeholder={placeholder ?? ''} />
       </SelectTrigger>
       <SelectContent position='popper' className='bg-[#09090B]'>

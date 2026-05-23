@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, FieldValues, Path } from 'react-hook-form'
 
 import { ChevronsUpDown, XIcon } from 'lucide-react'
@@ -23,10 +23,19 @@ const MultiSelectSearchField = <T extends FieldValues>({
   value,
   onChange,
   onBlur,
+  onOpenChange,
+  autoFocus,
   disabled = false,
   className
 }: MultiSelectSearchFieldProps<T>) => {
   const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    if (autoFocus && !disabled) {
+      setOpen(true)
+      onOpenChange?.(true)
+    }
+  }, [autoFocus, disabled, onOpenChange])
 
   if (!selectOptions) return null
 
@@ -45,11 +54,18 @@ const MultiSelectSearchField = <T extends FieldValues>({
     }
 
     return (
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover
+        open={open}
+        onOpenChange={nextOpen => {
+          setOpen(nextOpen)
+          onOpenChange?.(nextOpen)
+        }}
+      >
         <PopoverTrigger asChild>
           <Button
             variant='outline'
             disabled={disabled}
+            autoFocus={autoFocus}
             className={cn('w-full justify-between', className, 'h-auto! min-h-7!')}
           >
             <div className='flex flex-1 flex-wrap items-center gap-1 text-left'>
@@ -85,7 +101,7 @@ const MultiSelectSearchField = <T extends FieldValues>({
           className='w-[var(--radix-popover-trigger-width)] bg-[#09090B] p-0'
         >
           <Command className='bg-transparent'>
-            <CommandInput placeholder='Search...' className='py-1' />
+            <CommandInput placeholder='Search...' className='py-1' autoFocus={autoFocus} />
             <CommandEmpty>No results found.</CommandEmpty>
 
             <ScrollArea className='max-h-[calc(var(--radix-popover-content-available-height)-42px)]'>

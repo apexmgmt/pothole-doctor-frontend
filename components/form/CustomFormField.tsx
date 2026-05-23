@@ -45,6 +45,8 @@ const CustomFormField = <T extends FieldValues>({
   value,
   onChange,
   onBlur,
+  onOpenChange,
+  autoFocus,
   className = '',
   labelClassName = '',
   fieldClassName = ''
@@ -80,6 +82,8 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
             disabled={disabled}
             className={inputStyle}
           />
@@ -93,6 +97,8 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
             disabled={disabled}
             className={inputStyle}
           />
@@ -106,6 +112,8 @@ const CustomFormField = <T extends FieldValues>({
             control={control}
             onChange={onChange}
             onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
             disabled={disabled}
             className={inputStyle}
           />
@@ -119,6 +127,8 @@ const CustomFormField = <T extends FieldValues>({
             control={control}
             onChange={onChange}
             onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
             disabled={disabled}
             className={inputStyle}
           />
@@ -132,6 +142,8 @@ const CustomFormField = <T extends FieldValues>({
             control={control}
             onChange={onChange}
             onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
             disabled={disabled}
             className={inputStyle}
           />
@@ -144,6 +156,7 @@ const CustomFormField = <T extends FieldValues>({
             control={control}
             onChange={onChange}
             onBlur={onBlur}
+            autoFocus={autoFocus}
             disabled={disabled}
             className={className}
             labelClassName={labelClassName}
@@ -160,6 +173,7 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            autoFocus={autoFocus}
             disabled={disabled}
             className={inputStyle}
           />
@@ -173,6 +187,7 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            autoFocus={autoFocus}
             disabled={disabled}
             className={inputStyle}
           />
@@ -188,6 +203,7 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            autoFocus={autoFocus}
             disabled={disabled}
             className={inputStyle}
           />
