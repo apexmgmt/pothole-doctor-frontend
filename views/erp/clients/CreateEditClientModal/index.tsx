@@ -611,7 +611,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
           <React.Fragment key={index}>
             {index !== 0 && <Separator />}
 
-            <div className='grid grid-cols-1 md:grid-cols-2 items-start gap-x-9 gap-y-1.5'>
+            <div className='grid grid-cols-1 md:grid-cols-2 items-start gap-x-9 gap-y-2'>
               {fieldGroup.map(({ name, type, label, placeholder, rules, selectOptions }) => {
                 if (type === 'google-place') {
                   return (

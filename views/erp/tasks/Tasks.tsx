@@ -225,19 +225,19 @@ const Tasks: React.FC<{
     {
       id: 'employees',
       header: 'Assigned To',
-      cell: (row: Task) => (
-        <div className='flex flex-wrap gap-1'>
-          {row.employees && row.employees.length > 0 ? (
-            row.employees.map(emp => (
-              <Badge key={emp.id} variant='outline' className='mr-1 mb-1'>
-                {emp.first_name} {emp.last_name}
-              </Badge>
-            ))
-          ) : (
-            <span className='text-gray-400'>-</span>
-          )}
-        </div>
-      ),
+      cell: (row: Task) => {
+        const employeesArr = Array.isArray(row.employees) ? row.employees : []
+
+        return (
+          <div className='flex flex-wrap gap-1'>
+            {employeesArr.length > 0 ? (
+              <Description description={employeesArr.map(emp => `${emp.first_name} ${emp.last_name}`).join(', ')} />
+            ) : (
+              <span className='text-gray-400'>-</span>
+            )}
+          </div>
+        )
+      },
       sortable: false
     },
     {

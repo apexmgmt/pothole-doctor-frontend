@@ -6,37 +6,18 @@ import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
-import {
-  Client,
-  CommissionType,
-  CommissionTypePayload,
-  ReminderPayload,
-  Staff,
-  Task,
-  TaskPayload,
-  TaskReminder,
-  TaskReminderChannel,
-  TaskType
-} from '@/types'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Client, ReminderPayload, Staff, Task, TaskPayload, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
+import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import TaskService from '@/services/api/tasks/tasks.service'
 import ProposalTaskService from '@/services/api/estimates/proposal-tasks.service'
 import InvoiceTaskService from '@/services/api/invoices/invoice-tasks.service'
-import { MultiSelect, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { TaskDateTimeFields } from './CreateOrEditTaskModal/TaskDateTimeFields'
-import { Textarea } from '@/components/ui/textarea'
-import { TaskLocationAndCommentFields } from './CreateOrEditTaskModal/TaskLocationAndCommentFields'
-import { Checkbox } from '@/components/ui/checkbox'
 import { TaskReminderFields } from './CreateOrEditTaskModal/TaskReminderFields'
-import { DatePicker } from '@/components/ui/datePicker'
 import TipTapRichTextEditor from '@/components/erp/common/editor/TipTapRichTextEditor'
 import CustomFormField from '@/components/form/CustomFormField'
-import { SelectOption } from '@/components/form/fields/types'
+import { addDays } from '@/utils/formatTime'
 
 interface CreateOrEditTaskModalProps {
   mode?: 'create' | 'edit'
@@ -136,6 +117,9 @@ const CreateOrEditTaskModal = ({
     control,
     formState: { errors }
   } = form
+
+  const startDate = watch('start_date')
+  const endDate = watch('end_date')
 
   // Reset form when taskDetails changes or modal opens
   useEffect(() => {
@@ -483,33 +467,49 @@ const CreateOrEditTaskModal = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mr-0.5'>
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3'>
             {/* Task Name Field */}
-            <div className='sm:col-span-2'>
-              <CustomFormField
-                name='name'
-                type='text'
-                label='Task Name'
-                placeholder='Enter task name'
-                control={control}
-                register={register}
-                rules={{
-                  required: 'Task name is required',
-                  minLength: { value: 2, message: 'Task name must be at least 2 characters' }
-                }}
-                errors={errors}
-              />
-            </div>
+            <CustomFormField
+              name='name'
+              type='text'
+              label='Task Name'
+              placeholder='Enter task name'
+              control={control}
+              register={register}
+              rules={{
+                required: 'Task name is required',
+                minLength: { value: 2, message: 'Task name must be at least 2 characters' }
+              }}
+              errors={errors}
+            />
+            {/* Task type field */}
+            <CustomFormField
+              name='task_type_id'
+              type='select'
+              label='Task Type'
+              placeholder='Select Task Type'
+              control={control}
+              register={register}
+              rules={{
+                required: 'Task type is required'
+              }}
+              selectOptions={taskTypes?.map(taskType => ({
+                value: taskType.id,
+                label: taskType.name
+              }))}
+              errors={errors}
+            />
 
             {/* Description Field */}
-            <div className='space-y-2 sm:col-span-2'>
-              <label className='text-sm font-medium'>Description</label>
+            <div className='sm:col-span-2'>
+              <label className='block text-xs font-medium mb-2'>Description</label>
               <TipTapRichTextEditor
                 value={descriptionHtml}
                 onChange={setDescriptionHtml}
                 placeholder='Enter task description'
               />
             </div>
+
             {/* Customer field */}
             <CustomFormField
               name='client_id'
@@ -530,52 +530,32 @@ const CreateOrEditTaskModal = ({
               errors={errors}
             />
 
-            {/* Task type field */}
+            {/* Employees field */}
             <CustomFormField
-              name='task_type_id'
-              type='select'
-              label='Task Type'
-              placeholder='Select Task Type'
+              name='employee_ids'
+              type='multiselect-searchable'
+              label='Employees'
+              placeholder='Select Employees...'
               control={control}
               register={register}
               rules={{
-                required: 'Task type is required'
+                required: 'Employees are required',
+                minLength: { value: 1, message: 'Select at least one employee' }
               }}
-              selectOptions={taskTypes?.map(taskType => ({
-                value: taskType.id,
-                label: taskType.name
+              selectOptions={staffs?.map(staff => ({
+                value: staff.id,
+                label: staff.first_name + ' ' + staff.last_name
               }))}
               errors={errors}
             />
-          </div>
 
-          {/* Employees field */}
-          <CustomFormField
-            name='employee_ids'
-            type='multiselect-searchable'
-            label='Employees'
-            placeholder='Select Employees...'
-            control={control}
-            register={register}
-            rules={{
-              required: 'Employees are required',
-              minLength: { value: 1, message: 'Select at least one employee' }
-            }}
-            selectOptions={staffs?.map(staff => ({
-              value: staff.id,
-              label: staff.first_name + ' ' + staff.last_name
-            }))}
-            errors={errors}
-          />
-
-          {/* time fields */}
-          <div className='grid gap-4 sm:grid-cols-2'>
             {/* Start date field */}
             <CustomFormField
               name='start_date'
               type='datepicker'
               label='Start Date'
               placeholder='Select start date'
+              maxDate={endDate ? addDays(endDate, -1) : undefined}
               control={control}
               register={register}
               errors={errors}
@@ -591,15 +571,14 @@ const CreateOrEditTaskModal = ({
               register={register}
               errors={errors}
             />
-          </div>
-          <div className='grid gap-4 mt-4 sm:grid-cols-2'>
+
             {/* End Date field */}
             <CustomFormField
               name='end_date'
               type='datepicker'
               label='End Date'
               placeholder='Select end date'
-              rules={{}}
+              minDate={startDate ? addDays(startDate, 1) : undefined}
               control={control}
               register={register}
               errors={errors}
@@ -618,8 +597,6 @@ const CreateOrEditTaskModal = ({
           </div>
 
           <TaskReminderFields form={form} taskReminderChannels={taskReminderChannels} />
-
-          {/* <TaskLocationAndCommentFields form={form} selectedClient={selectedClient} addressOptions={addressOptions} /> */}
 
           <CustomFormField
             name='location'
@@ -647,9 +624,8 @@ const CreateOrEditTaskModal = ({
           />
 
           {/* Edit Mode Only Fields */}
-
           {mode === 'edit' && (
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 pt-4 border-t border-border'>
               {/* Status field */}
               <CustomFormField
                 name='status'
