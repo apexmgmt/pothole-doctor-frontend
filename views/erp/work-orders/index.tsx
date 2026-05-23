@@ -9,7 +9,6 @@ import { toast } from 'sonner'
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
@@ -30,7 +29,6 @@ import {
   Vendor,
   WorkOrder
 } from '@/types'
-import { formatDate } from '@/utils/date'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
 import WorkOrderService from '@/services/api/work-orders/work_orders.service'
@@ -39,7 +37,7 @@ import EditWorkOrderModal from './EditWorkOrderModal'
 import CompletionCertificatesModal from './CompletionCertificatesModal'
 import WorkOrderDocuments from './documents/WorkOrderDocuments'
 import InvoiceJobImages from '../invoices/job-images/InvoiceJobImages'
-import { formatCurrency } from '@/utils/currency'
+import { getSharedWorkOrderColumns } from './sharedWorkOrderColumns'
 
 const WorkOrders: React.FC<{
   workOrderTypes: EstimateType[]
@@ -190,156 +188,8 @@ const WorkOrders: React.FC<{
     }
   }
 
-  const getStatusVariant = (
-    status: string
-  ): 'default' | 'secondary' | 'destructive' | 'outline' | 'warning' | 'info' | 'success' | 'pending' => {
-    switch (status?.toLowerCase()) {
-      case 'completed':
-        return 'success'
-      case 'in progress':
-      case 'in_progress':
-        return 'info'
-      case 'pending':
-        return 'pending'
-      case 'cancelled':
-      case 'void':
-        return 'destructive'
-      case 'overdue':
-        return 'warning'
-      case 'new':
-        return 'secondary'
-      default:
-        return 'outline'
-    }
-  }
-
   const columns: Column[] = [
-    {
-      id: 'invoice_number',
-      header: 'WO #',
-      cell: (row: WorkOrder) => (
-        <span className='font-medium hover:underline' onClick={() => handleOpenEditModal(row.id)}>
-          {row?.invoice_number_prefix ? `${row.invoice_number_prefix}-` : ''}
-          {row.invoice_number?.toString() || 'N/A'}
-        </span>
-      ),
-      sortable: false
-    },
-    {
-      id: 'title',
-      header: 'Title',
-      cell: (row: WorkOrder) => <span className='font-medium'>{row.title}</span>,
-      sortable: true
-    },
-    {
-      id: 'company',
-      header: 'Company',
-      cell: (row: WorkOrder) => <span className='font-medium'>{row?.client?.company?.name || ''}</span>,
-      sortable: false
-    },
-    {
-      id: 'client_name',
-      header: 'Customer',
-      cell: (row: WorkOrder) => {
-        const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
-
-        return <span className='font-medium'>{parts.join(' ') || ''}</span>
-      },
-      sortable: false
-    },
-    {
-      id: 'issue_date',
-      header: 'Issue Date',
-      cell: (row: WorkOrder) => <span className='font-medium'>{formatDate(row.issue_date || '') || '—'}</span>,
-      sortable: true
-    },
-    {
-      id: 'due_date',
-      header: 'Due Date',
-      cell: (row: WorkOrder) => <span className='font-medium'>{formatDate(row.due_date || '') || '—'}</span>,
-      sortable: true
-    },
-
-    {
-      id: 'invoice_total',
-      header: 'Total',
-      cell: (row: WorkOrder) => (
-        <span className='font-medium'>{formatCurrency(row.invoice_total != null ? Number(row.invoice_total) : 0)}</span>
-      ),
-      sortable: true
-    },
-    {
-      id: 'total_profit',
-      header: 'Profit',
-      cell: (row: WorkOrder) => {
-        const total_profit = row.total_profit ?? 0
-        const isPositive = total_profit >= 0
-
-        return (
-          <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-            {formatCurrency(total_profit)}
-          </span>
-        )
-      },
-      sortable: true
-    },
-    {
-      id: 'commissions',
-      header: 'Commissions',
-      cell: (row: WorkOrder) => {
-        const commission = row.commissions ?? 0
-
-        return <span className={`font-medium`}>{formatCurrency(commission)}</span>
-      },
-      sortable: true
-    },
-    {
-      id: 'status',
-      header: 'Status',
-      cell: (row: WorkOrder) => (
-        <Badge variant={getStatusVariant(row.status)} className='capitalize'>
-          {row.status || '—'}
-        </Badge>
-      ),
-      sortable: true
-    },
-    {
-      id: 'completion_certificates',
-      header: 'Completion Certificate Signed',
-      cell: (row: WorkOrder) => {
-        const certs = row.completion_certificates
-
-        if (certs && certs.length > 0) {
-          const completed = certs.filter(c => c.is_completed).length
-          const total = certs.length
-          const allDone = completed === total
-
-          const pct = Math.round((completed / total) * 100)
-
-          return (
-            <div className='w-28 h-5 rounded overflow-hidden relative'>
-              <div
-                className={`h-full transition-all ${allDone ? 'bg-green-500' : 'bg-blue-400'}`}
-                style={{ width: `${pct}%` }}
-              />
-              <span className='absolute inset-0 flex items-center justify-center text-xs font-medium text-white mix-blend-difference'>
-                {pct}%
-              </span>
-            </div>
-          )
-        }
-
-        return (
-          <div className='w-28 h-5 rounded bg-muted overflow-hidden relative'>
-            <div className={`h-full transition-all bg-blue-400`} style={{ width: `0%` }} />
-            <span className='absolute inset-0 flex items-center justify-center text-xs font-medium text-white mix-blend-difference'>
-              0%
-            </span>
-          </div>
-        )
-      },
-      sortable: true
-    },
+    ...getSharedWorkOrderColumns(row => handleOpenEditModal(row.id)),
     {
       id: 'actions',
       header: 'Action',

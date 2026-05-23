@@ -49,6 +49,7 @@ export interface MaterialJob extends Model {
   available_date: string
   scheduled_date: string
   quantity: number
+  purchase_quantity: number
   received_quantity: number
   remaining_quantity: number
   picked_up_quantity: number
