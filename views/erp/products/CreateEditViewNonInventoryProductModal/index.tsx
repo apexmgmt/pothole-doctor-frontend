@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
-import { ProductPayload, ProductsProps, Product } from '@/types'
+import { ProductPayload, ProductsProps, Product, ProductGallery } from '@/types'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 
@@ -17,6 +17,10 @@ import { BasicProductFields } from '../CreateEditViewProductModal/BasicProductFi
 import { UOMFields } from '../CreateEditViewProductModal/UOMFields'
 import { PricingFields } from '../CreateEditViewProductModal/PricingFields'
 import { AdditionalInfoFields } from '../CreateEditViewProductModal/AdditionalInfoFields'
+import { QrCodeSection } from '../CreateEditViewProductModal/QrCodeSection'
+import { BarCodeSection } from '../CreateEditViewProductModal/BarCodeSection'
+import { ProductGallerySection } from '../CreateEditViewProductModal/ProductGallerySection'
+import ProductGalleryService from '@/services/api/products/product-galleries.service'
 
 interface CreateEditViewNonInventoryProductModalProps extends ProductsProps {
   mode?: 'create' | 'edit' | 'view'
@@ -118,8 +122,25 @@ const CreateEditViewNonInventoryProductModal = ({
   vendors
 }: CreateEditViewNonInventoryProductModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [galleries, setGalleries] = useState<ProductGallery[]>(productDetails?.galleries || [])
+  const [isLoadingGalleries, setIsLoadingGalleries] = useState<boolean>(false)
 
   const form = useForm<FormValues>({ defaultValues })
+
+  // Fetch galleries when in edit or view mode
+  const fetchGalleries = async (prodId: string) => {
+    setIsLoadingGalleries(true)
+
+    try {
+      const response = await ProductGalleryService.index(prodId)
+
+      setGalleries(response.data || [])
+    } catch (error) {
+      toast.error('Failed to fetch product galleries')
+    } finally {
+      setIsLoadingGalleries(false)
+    }
+  }
 
   useEffect(() => {
     if (!open) {
@@ -168,9 +189,33 @@ const CreateEditViewNonInventoryProductModal = ({
         sku: productDetails.sku ?? ''
       })
     } else if (open && mode === 'create') {
+      setGalleries([])
       form.reset(defaultValues)
     }
   }, [open, productDetails, mode, productId, form])
+
+  const handleApiError = (error: any, fallbackMessage: string) => {
+    if (error?.errors && typeof error.errors === 'object') {
+      const formValues = form.getValues()
+
+      Object.entries(error.errors).forEach(([field, messages]) => {
+        const normalizedField = field.split('.')[0] as keyof FormValues
+        const message = Array.isArray(messages) ? String(messages[0]) : String(messages)
+
+        if (normalizedField in formValues) {
+          form.setError(normalizedField, { type: 'server', message })
+        } else {
+          toast.error(message)
+        }
+      })
+
+      if (error.message) {
+        toast.error(error.message)
+      }
+    } else {
+      toast.error(error?.message || fallbackMessage)
+    }
+  }
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true)
@@ -228,13 +273,7 @@ const CreateEditViewNonInventoryProductModal = ({
         onSuccess?.()
       }
     } catch (error: any) {
-      if (error?.errors && typeof error.errors === 'object') {
-        Object.values(error.errors).forEach((errMsg: any) => {
-          errMsg?.map((msg: string) => toast.error(msg))
-        })
-      } else {
-        toast.error(error?.message || 'Something went wrong')
-      }
+      handleApiError(error, mode === 'create' ? 'Failed to create product' : 'Failed to update product')
     } finally {
       setIsLoading(false)
     }
@@ -268,6 +307,12 @@ const CreateEditViewNonInventoryProductModal = ({
         return 'View non-inventory product details'
       default:
         return ''
+    }
+  }
+
+  const handleGalleryUpdate = () => {
+    if (productId) {
+      fetchGalleries(productId)
     }
   }
 
@@ -317,7 +362,7 @@ const CreateEditViewNonInventoryProductModal = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mb-4'>
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+          <div className={`grid grid-cols-1 ${mode !== 'create' ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-6`}>
             {/* Basic Product Information */}
             <div className='space-y-4'>
               <h3 className='text-lg font-semibold'>Product Information</h3>
@@ -339,6 +384,22 @@ const CreateEditViewNonInventoryProductModal = ({
               <Separator />
               <AdditionalInfoFields form={form} disabled={mode === 'view'} />
             </div>
+
+            {/* Gallery Section - Only show in edit/view mode */}
+            {mode !== 'create' && productId && (
+              <div className='space-y-4'>
+                <QrCodeSection qrCodePath={productDetails?.qr_code} />
+                <BarCodeSection barCodePath={productDetails?.bar_code} />
+                <h3 className='text-lg font-semibold'>Product Gallery</h3>
+                <ProductGallerySection
+                  productId={productId}
+                  galleries={galleries}
+                  isLoading={isLoadingGalleries}
+                  onUpdate={handleGalleryUpdate}
+                  disabled={mode === 'view'}
+                />
+              </div>
+            )}
           </div>
         </form>
       </Form>

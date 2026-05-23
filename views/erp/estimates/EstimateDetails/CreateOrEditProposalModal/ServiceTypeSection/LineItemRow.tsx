@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import { getDiscountedUnitPrice } from '@/utils/business-calculation'
 import LineItemActions from './LineItemActions'
 import MaterialJobActionsRow from './MaterialJobActionsRow'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 
 interface LineItemRowProps {
   line: ProposalServiceItemPayload
@@ -32,6 +33,10 @@ interface LineItemRowProps {
   clampProductQty: (qty: number, line: ProposalServiceItemPayload) => number
   hideTaxOption?: boolean
   hideDiscountOption?: boolean
+  showOrderAction?: boolean
+  onOrderActionClick?: () => void
+  showPurchaseOrderAction?: boolean
+  onPurchaseOrderClick?: () => void
 }
 
 const LineItemRow = ({
@@ -55,11 +60,17 @@ const LineItemRow = ({
   removeLine,
   clampProductQty,
   hideTaxOption = false,
-  hideDiscountOption = false
+  hideDiscountOption = false,
+  showOrderAction = false,
+  onOrderActionClick,
+  showPurchaseOrderAction = false,
+  onPurchaseOrderClick
 }: LineItemRowProps) => {
   const totalCost = line.unit_cost * line.qty
   const unitPrice = getDiscountedUnitPrice(line)
   const totalPrice = unitPrice * line.qty
+  const materialJobOrderStatus = String((line as any)?.material_job?.order_status ?? '').toLowerCase()
+  const showMaterialJobStatusRow = !!materialJobOrderStatus && !['new', 'pending'].includes(materialJobOrderStatus)
 
   return (
     <Fragment>
@@ -141,18 +152,21 @@ const LineItemRow = ({
         {/* Unit Cost */}
         <td className='px-2 py-1'>
           {line.type !== 'deduction' && (
-            <Input
-              type='number'
-              value={getEditValue(idx, 'unit_cost', String(line.unit_cost ?? 0))}
-              onChange={e => setEditValue(idx, 'unit_cost', e.target.value)}
-              onBlur={e => {
-                updateLine(idx, 'unit_cost', parseFloat(e.target.value) || 0)
-                clearEditValue(idx, 'unit_cost')
-              }}
-              className={cn('w-28', fieldErrors?.unit_cost && 'border-red-500 focus-visible:ring-red-500')}
-              min={0}
-              disabled={isLocked}
-            />
+            <InputGroup className='max-w-28'>
+              <InputGroupAddon>$</InputGroupAddon>
+              <InputGroupInput
+                type='number'
+                value={getEditValue(idx, 'unit_cost', String(line.unit_cost ?? 0))}
+                onChange={e => setEditValue(idx, 'unit_cost', e.target.value)}
+                onBlur={e => {
+                  updateLine(idx, 'unit_cost', parseFloat(e.target.value) || 0)
+                  clearEditValue(idx, 'unit_cost')
+                }}
+                className={cn('', fieldErrors?.unit_cost && 'border-red-500 focus-visible:ring-red-500')}
+                min={0}
+                disabled={isLocked}
+              />
+            </InputGroup>
           )}
         </td>
 
@@ -219,28 +233,35 @@ const LineItemRow = ({
 
         {/* Total Cost */}
         <td className='px-2 py-1'>
-          {line.type !== 'deduction' && <Input value={totalCost.toFixed(2)} readOnly className='w-28' />}
+          {line.type !== 'deduction' && (
+            <InputGroup className='max-w-28'>
+              <InputGroupAddon>$</InputGroupAddon>
+              <InputGroupInput value={totalCost.toFixed(2)} readOnly className='w-28' />
+            </InputGroup>
+          )}
         </td>
 
         {/* Margin */}
         {!hideMargin && (
-          <td className='px-2 py-1 flex items-start gap-1'>
+          <td className='px-2 py-1'>
             {line.type !== 'deduction' && (
               <>
-                <Input
-                  type='number'
-                  value={getEditValue(idx, 'margin', String(line.margin ?? 0))}
-                  onChange={e => setEditValue(idx, 'margin', e.target.value)}
-                  onBlur={e => {
-                    updateLine(idx, 'margin', parseFloat(e.target.value) || 0)
-                    clearEditValue(idx, 'margin')
-                  }}
-                  className={cn('w-28', fieldErrors?.margin && 'border-red-500 focus-visible:ring-red-500')}
-                  min={0}
-                  max={100}
-                  disabled={isLocked}
-                />
-                <span className='mt-2'>%</span>
+                <InputGroup className='max-w-28'>
+                  <InputGroupInput
+                    type='number'
+                    value={getEditValue(idx, 'margin', String(line.margin ?? 0))}
+                    onChange={e => setEditValue(idx, 'margin', e.target.value)}
+                    onBlur={e => {
+                      updateLine(idx, 'margin', parseFloat(e.target.value) || 0)
+                      clearEditValue(idx, 'margin')
+                    }}
+                    className={cn('w-28', fieldErrors?.margin && 'border-red-500 focus-visible:ring-red-500')}
+                    min={0}
+                    max={100}
+                    disabled={isLocked}
+                  />
+                  <InputGroupAddon align='inline-end'>%</InputGroupAddon>
+                </InputGroup>
               </>
             )}
           </td>
@@ -250,26 +271,37 @@ const LineItemRow = ({
           <>
             {/* Unit Price */}
             <td className='px-2 py-1'>
-              {line.type !== 'deduction' && <Input value={unitPrice.toFixed(2)} readOnly className='w-28' />}
+              {line.type !== 'deduction' && (
+                <InputGroup className='max-w-28'>
+                  <InputGroupAddon>$</InputGroupAddon>
+                  <InputGroupInput value={unitPrice.toFixed(2)} readOnly className='w-28' />
+                </InputGroup>
+              )}
             </td>
 
             {/* Total Price */}
             <td className='px-2 py-1'>
               {line.type === 'deduction' ? (
-                <Input
-                  disabled={isLocked}
-                  type='number'
-                  min={0}
-                  value={getEditValue(idx, 'total_price', Number(line.total_price)?.toFixed(2) ?? '')}
-                  onChange={e => setEditValue(idx, 'total_price', e.target.value)}
-                  onBlur={e => {
-                    updateLine(idx, 'total_price', parseFloat(e.target.value) || 0)
-                    clearEditValue(idx, 'total_price')
-                  }}
-                  className={cn('w-28', fieldErrors?.total_price && 'border-red-500 focus-visible:ring-red-500')}
-                />
+                <InputGroup className='max-w-28'>
+                  <InputGroupAddon>$</InputGroupAddon>
+                  <InputGroupInput
+                    disabled={isLocked}
+                    type='number'
+                    min={0}
+                    value={getEditValue(idx, 'total_price', Number(line.total_price)?.toFixed(2) ?? '')}
+                    onChange={e => setEditValue(idx, 'total_price', e.target.value)}
+                    onBlur={e => {
+                      updateLine(idx, 'total_price', parseFloat(e.target.value) || 0)
+                      clearEditValue(idx, 'total_price')
+                    }}
+                    className={cn('w-28', fieldErrors?.total_price && 'border-red-500 focus-visible:ring-red-500')}
+                  />
+                </InputGroup>
               ) : (
-                <Input value={totalPrice.toFixed(2)} readOnly className='w-28' />
+                <InputGroup className='max-w-28'>
+                  <InputGroupAddon>$</InputGroupAddon>
+                  <InputGroupInput value={totalPrice.toFixed(2)} readOnly className='w-28' />
+                </InputGroup>
               )}
             </td>
           </>
@@ -284,9 +316,10 @@ const LineItemRow = ({
                 disabled={isLocked}
                 checked={line.is_sale ? true : false}
                 onCheckedChange={checked => updateLine(idx, 'is_sale', checked ? 1 : 0)}
-            />
-          )}
-        </td>)}
+              />
+            )}
+          </td>
+        )}
 
         {/* Actions dropdown */}
         <LineItemActions
@@ -297,6 +330,10 @@ const LineItemRow = ({
           updateLine={updateLine}
           removeLine={removeLine}
           hideDiscountOption={hideDiscountOption}
+          showOrderAction={showOrderAction}
+          onOrderActionClick={onOrderActionClick}
+          showPurchaseOrderAction={showPurchaseOrderAction}
+          onPurchaseOrderClick={onPurchaseOrderClick}
         />
 
         <td className='hidden'>
@@ -304,10 +341,12 @@ const LineItemRow = ({
         </td>
       </tr>
 
-      {hasActions && (
+      {(hasActions || showMaterialJobStatusRow) && (
         <MaterialJobActionsRow
           actions={line.material_job_actions ?? []}
           onActionsChange={updated => updateLine(idx, 'material_job_actions', updated)}
+          orderStatus={(line as any)?.material_job?.order_status ?? null}
+          orderNumber={(line as any)?.material_job?.order_number ?? null}
         />
       )}
     </Fragment>

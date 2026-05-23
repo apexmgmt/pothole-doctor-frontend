@@ -61,7 +61,7 @@ export interface WorkOrder extends Model {
   total_labor_cost: number
   invoice_total: number
   invoice_subtotal: number
-  invoice_total_tax: number 
+  invoice_total_tax: number
   message: string | null
   reason: string | null
   take_off_data: TakeoffData | null
@@ -123,6 +123,7 @@ export interface ServicePayload {
 
 export interface WorkOrderServiceItemPayload {
   item_id?: string | null
+  material_job_id?: string | null
   product_id?: string
   vendor_id?: string
   sku?: string

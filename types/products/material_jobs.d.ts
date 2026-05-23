@@ -50,6 +50,13 @@ export interface MaterialJob extends Model {
   scheduled_date: string
   quantity: number
   purchase_quantity: number
+  purchase_unit_id: string
+  purchase_unit?: Unit
+  selling_unit_id: string
+  selling_unit?: Unit
+  coverage_rate: number
+  coverage_unit_id: string | null
+  coverage_unit?: Unit | null
   received_quantity: number
   remaining_quantity: number
   picked_up_quantity: number
