@@ -1,3 +1,5 @@
+import { format, parse } from 'date-fns'
+
 /**
  * Utility function to format a timestamp into a specified date format.
  * @param timestamp - The timestamp to format.
@@ -61,4 +63,18 @@ export function formatDate(timestamp: Date | string | number | null, format: str
   }
 
   return format.replace(/YYYY|MM|DD/g, matched => map[matched])
+}
+
+/**
+ * Converts a 24-hour time string (HH:mm) to a 12-hour time string (hh:mm a).
+ * Returns null when the input is not a valid 24-hour time.
+ */
+export function convert24hTo12h(time24: string): string | null {
+  if (!time24) return null
+
+  const parsedTime = parse(time24, 'HH:mm', new Date())
+
+  if (Number.isNaN(parsedTime.getTime())) return null
+
+  return format(parsedTime, 'hh:mm a')
 }
