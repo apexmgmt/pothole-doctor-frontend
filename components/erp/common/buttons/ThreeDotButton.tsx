@@ -17,8 +17,10 @@ type ThreeDotButtonProps = {
 }
 
 const ThreeDotButton: React.FC<ThreeDotButtonProps> = ({ title, buttons }) => {
+  const [isOpen, setIsOpen] = React.useState(false)
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger className='outline-none cursor-pointer text-[#A7A7AE] hover:text-white'>
         <EllipsisVertical className='size-5' />
       </DropdownMenuTrigger>
@@ -30,7 +32,7 @@ const ThreeDotButton: React.FC<ThreeDotButtonProps> = ({ title, buttons }) => {
           </>
         )}
         {buttons.map((button, idx) => (
-          <DropdownMenuItem key={idx} asChild>
+          <DropdownMenuItem key={idx} onClick={() => setIsOpen(false)} asChild>
             {button}
           </DropdownMenuItem>
         ))}

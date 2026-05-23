@@ -14,6 +14,7 @@ import DescriptionAndCommentsSection from './components/DescriptionAndCommentsSe
 import TaskDetailsPanel from './components/TaskDetailsPanel'
 import { buildTaskPayload, sortCommentsByUpdatedAt } from './helpers'
 import { InlineEditableField, TaskViewModalProps } from './types'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 export default function TaskViewModal({
   open,
@@ -374,34 +375,36 @@ export default function TaskViewModal({
         </Button>
       }
     >
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-        <DescriptionAndCommentsSection
-          task={task}
-          taskId={taskId}
-          canEditTask={canEditTask}
-          commentHtml={commentHtml}
-          setCommentHtml={setCommentHtml}
-          comments={sortedComments}
-          setComments={setComments}
-          setTask={setTask}
-          descriptionHtml={descriptionHtml}
-          setDescriptionHtml={setDescriptionHtml}
-          isEditingDescription={isEditingDescription}
-          setIsEditingDescription={setIsEditingDescription}
-          saveDescription={saveDescription}
-          isSavingDescription={isSavingDescription}
-          isAddingComment={isAddingComment}
-          setIsAddingComment={setIsAddingComment}
-          currentUserId={currentUserId}
-          editingField={editingField}
-          editingValue={editingValue}
-          setEditingValue={setEditingValue}
-          startInlineEdit={startInlineEdit}
-          saveInlineField={saveInlineField}
-          cancelInlineEdit={cancelInlineEdit}
-        />
+      <div className='grid grid-cols-1 lg:grid-cols-3 items-start gap-6'>
+        <ScrollArea className='lg:col-span-2 pr-2 max-h-[calc(90vh-154px)]' scrollbarClassName='w-2'>
+          <DescriptionAndCommentsSection
+            task={task}
+            taskId={taskId}
+            canEditTask={canEditTask}
+            commentHtml={commentHtml}
+            setCommentHtml={setCommentHtml}
+            comments={sortedComments}
+            setComments={setComments}
+            setTask={setTask}
+            descriptionHtml={descriptionHtml}
+            setDescriptionHtml={setDescriptionHtml}
+            isEditingDescription={isEditingDescription}
+            setIsEditingDescription={setIsEditingDescription}
+            saveDescription={saveDescription}
+            isSavingDescription={isSavingDescription}
+            isAddingComment={isAddingComment}
+            setIsAddingComment={setIsAddingComment}
+            currentUserId={currentUserId}
+            editingField={editingField}
+            editingValue={editingValue}
+            setEditingValue={setEditingValue}
+            startInlineEdit={startInlineEdit}
+            saveInlineField={saveInlineField}
+            cancelInlineEdit={cancelInlineEdit}
+          />
+        </ScrollArea>
 
-        <div>
+        <ScrollArea className='max-h-[calc(90vh-154px)]' scrollbarClassName='w-2'>
           <TaskDetailsPanel
             task={task}
             taskId={taskId}
@@ -422,7 +425,7 @@ export default function TaskViewModal({
           />
 
           <TaskDocuments taskId={taskId} />
-        </div>
+        </ScrollArea>
       </div>
     </CommonDialog>
   )

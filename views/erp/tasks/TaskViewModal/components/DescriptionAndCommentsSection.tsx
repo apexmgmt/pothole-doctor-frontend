@@ -125,7 +125,7 @@ export default function DescriptionAndCommentsSection({
   }
 
   return (
-    <div className='lg:col-span-2 space-y-5'>
+    <div className='py-px space-y-5'>
       <div className='space-y-2'>
         {editingField === 'name' ? (
           <Input
@@ -225,7 +225,7 @@ export default function DescriptionAndCommentsSection({
 
       <div className='space-y-3'>
         <Label>Add Comment</Label>
-        <div className='space-y-2'>
+        <div className='px-px space-y-2'>
           <TipTapRichTextEditor
             value={commentHtml}
             onChange={setCommentHtml}

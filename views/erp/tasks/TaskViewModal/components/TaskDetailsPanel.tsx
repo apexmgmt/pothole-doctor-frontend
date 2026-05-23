@@ -116,7 +116,7 @@ export default function TaskDetailsPanel({
       renderEditor: () => (
         <div data-inline-editor>
           <CustomFormField
-            type='select'
+            type='combobox'
             name='status'
             placeholder='Select status'
             value={editingValue || task?.status || ''}
@@ -147,7 +147,7 @@ export default function TaskDetailsPanel({
       renderEditor: () => (
         <div data-inline-editor>
           <CustomFormField
-            type='select'
+            type='combobox'
             name='task_type_id'
             placeholder='Select Task Type'
             value={editingValue || task?.task_type_id || ''}
@@ -178,7 +178,7 @@ export default function TaskDetailsPanel({
       renderEditor: () => (
         <div data-inline-editor>
           <CustomFormField
-            type='select'
+            type='combobox'
             name='client_id'
             placeholder='Select Customer'
             value={editingValue || task?.client_id || ''}
@@ -375,7 +375,7 @@ export default function TaskDetailsPanel({
       renderEditor: () => (
         <div data-inline-editor>
           <CustomFormField
-            type='multiselect'
+            type='multiselect-searchable'
             name='employee_ids'
             placeholder='Select employees...'
             selectOptions={staffSelectOptions}
@@ -494,46 +494,35 @@ export default function TaskDetailsPanel({
       <div className='rounded-md border border-border p-4'>
         <div className='flex items-center justify-between gap-2'>
           <h4 className='text-sm font-semibold'>Details</h4>
-          {canEditTask && taskId && onEditTask ? (
-            <Button
-              type='button'
-              variant='outline'
-              size='sm'
-              onClick={() => onEditTask(taskId)}
-              disabled={isLoadingTask}
-            >
-              Edit
-            </Button>
-          ) : null}
         </div>
 
         <div className='flex flex-col gap-1 mt-3'>
           {rows.map(row => (
             <div
               key={row.field}
-              className={cn('grid grid-cols-[100px_minmax(0,_1fr)] gap-2', row.align ?? 'items-center')}
+              className={cn('grid grid-cols-[116px_minmax(0,_1fr)] gap-2', row.align ?? 'items-center')}
             >
-              <Label className='text-xs text-muted-foreground'>{row.label} : </Label>
+              <Label className='text-sm text-muted-foreground'>{row.label}:</Label>
               {editingField === row.field ? row.renderEditor() : row.renderDisplay()}
             </div>
           ))}
 
           {task?.created_by?.first_name && (
-            <div className='grid grid-cols-[100px_minmax(0,_1fr)] gap-2 items-center'>
-              <Label className='text-xs text-muted-foreground'>Created By : </Label>
+            <div className='grid grid-cols-[116px_minmax(0,_1fr)] gap-2 items-center'>
+              <Label className='text-sm text-muted-foreground'>Created By:</Label>
               <p className='text-sm leading-none px-2.5 py-1.5'>
                 {[task?.created_by?.first_name, task?.created_by?.last_name].filter(Boolean).join(' ') || '-'}
               </p>
             </div>
           )}
 
-          <div className='grid grid-cols-[100px_minmax(0,_1fr)] gap-2 items-center'>
-            <Label className='text-xs text-muted-foreground'>Created At : </Label>
+          <div className='grid grid-cols-[116px_minmax(0,_1fr)] gap-2 items-center'>
+            <Label className='text-sm text-muted-foreground'>Created At:</Label>
             <p className='text-sm leading-none px-2.5 py-1.5'>{formatDateTime(task?.created_at)}</p>
           </div>
 
-          <div className='grid grid-cols-[100px_minmax(0,_1fr)] gap-2 items-center'>
-            <Label className='text-xs text-muted-foreground'>Updated At : </Label>
+          <div className='grid grid-cols-[116px_minmax(0,_1fr)] gap-2 items-center'>
+            <Label className='text-sm text-muted-foreground'>Updated At:</Label>
             <p className='text-sm leading-none px-2.5 py-1.5'>{formatDateTime(task?.updated_at)}</p>
           </div>
         </div>
