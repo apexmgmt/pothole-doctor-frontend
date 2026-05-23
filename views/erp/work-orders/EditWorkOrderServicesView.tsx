@@ -144,7 +144,7 @@ const EditWorkOrderServicesView = ({
 
   const laborTotal = laborSubtotal + laborTax
 
-  // Populate from existing work order services on mount
+  // Keep editable sections in sync with the latest work order response.
   useEffect(() => {
     if (currentWorkOrder?.services && currentWorkOrder.services.length > 0) {
       setSelectedServiceType(
@@ -189,8 +189,14 @@ const EditWorkOrderServicesView = ({
           }))
         }))
       )
+    } else {
+      setSelectedServiceType([])
+      setServiceTypeLineItems([])
     }
-  }, [])
+
+    setCustomCommission(Number(currentWorkOrder?.custom_commissions ?? 0))
+    setIsCustomCommissionPercentage(Boolean(currentWorkOrder?.is_custom_commission_percent ?? false))
+  }, [currentWorkOrder])
 
   const handleAddServiceType = (serviceTypeId: string) => {
     const found = serviceTypes.find(st => st.id === serviceTypeId)
@@ -284,12 +290,13 @@ const EditWorkOrderServicesView = ({
     setServiceFieldErrors({})
 
     try {
-      const hasExistingServices = currentWorkOrder?.services && currentWorkOrder.services.length > 0
+      // const hasExistingServices = currentWorkOrder?.services && currentWorkOrder.services.length > 0
 
-      if (hasExistingServices) {
-        await WorkOrderService.updateServices(currentWorkOrder.id, buildPayload())
-      } else {
-        await WorkOrderService.storeServices(currentWorkOrder.id, buildPayload())
+      // if (hasExistingServices) {
+      const response = await WorkOrderService.updateServices(currentWorkOrder.id, buildPayload())
+
+      if (response?.data !== null) {
+        setCurrentWorkOrder(response.data)
       }
 
       toast.success('Work order services saved successfully')
