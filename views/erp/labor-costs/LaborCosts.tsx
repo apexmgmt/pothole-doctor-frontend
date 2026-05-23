@@ -24,6 +24,7 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { hasPermission } from '@/utils/role-permission'
+import { formatCurrency } from '@/utils/currency'
 
 const LaborCosts: React.FC<{
   serviceTypes: ServiceType[]
@@ -225,19 +226,19 @@ const LaborCosts: React.FC<{
     {
       id: 'cost',
       header: 'Cost',
-      cell: (row: LaborCost) => <span className='font-medium'>{row.cost}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{formatCurrency(row.cost)}</span>,
       sortable: true
     },
     {
       id: 'margin',
       header: 'Margin',
-      cell: (row: LaborCost) => <span className='font-medium'>{row.margin}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{row.margin}%</span>,
       sortable: true
     },
     {
       id: 'price',
       header: 'Labor Price',
-      cell: (row: LaborCost) => <span className='font-medium'>{row.price}</span>,
+      cell: (row: LaborCost) => <span className='font-medium'>{formatCurrency(row.price)}</span>,
       sortable: true
     },
     {
