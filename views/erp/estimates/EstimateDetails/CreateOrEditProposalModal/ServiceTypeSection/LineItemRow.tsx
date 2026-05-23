@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import { getDiscountedUnitPrice } from '@/utils/business-calculation'
 import LineItemActions from './LineItemActions'
 import MaterialJobActionsRow from './MaterialJobActionsRow'
+import { StylePopover, ColorPopover } from './StyleColorPopover'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 
 interface LineItemRowProps {
@@ -37,6 +38,7 @@ interface LineItemRowProps {
   onOrderActionClick?: () => void
   showPurchaseOrderAction?: boolean
   onPurchaseOrderClick?: () => void
+  showSkuStyleColor?: boolean
 }
 
 const LineItemRow = ({
@@ -53,6 +55,7 @@ const LineItemRow = ({
   units,
   vendors,
   getEditValue,
+  showSkuStyleColor = false,
   setEditValue,
   clearEditValue,
   updateLine,
@@ -147,6 +150,53 @@ const LineItemRow = ({
               </Select>
             )}
           </td>
+        )}
+        {showSkuStyleColor && line.type === 'product' ? (
+          <>
+            <td className='px-2 py-1'>{line?.sku ?? 'N/A'}</td>
+            <td className='px-2 py-1'>
+              {!line.product_id && !(line as any)?.product && !isLocked ? (
+                <StylePopover
+                  value={line?.style ?? ''}
+                  onSave={style => {
+                    updateLineFields(idx, { style })
+                  }}
+                  trigger={
+                    <button className='text-left text-blue-400 hover:text-blue-500 cursor-pointer underline'>
+                      {line?.style || 'N/A'}
+                    </button>
+                  }
+                />
+              ) : (
+                <span>{line?.style ?? 'N/A'}</span>
+              )}
+            </td>
+            <td className='px-2 py-1'>
+              {!line.product_id && !(line as any)?.product && !isLocked ? (
+                <ColorPopover
+                  value={line?.color ?? ''}
+                  onSave={color => {
+                    updateLineFields(idx, { color })
+                  }}
+                  trigger={
+                    <button className='text-left text-blue-400 hover:text-blue-500 cursor-pointer underline'>
+                      {line?.color || 'N/A'}
+                    </button>
+                  }
+                />
+              ) : (
+                <span>{line?.color ?? 'N/A'}</span>
+              )}
+            </td>
+          </>
+        ) : (
+          showSkuStyleColor && (
+            <>
+              <td className='px-2 py-1'></td>
+              <td className='px-2 py-1'></td>
+              <td className='px-2 py-1'></td>
+            </>
+          )
         )}
 
         {/* Unit Cost */}

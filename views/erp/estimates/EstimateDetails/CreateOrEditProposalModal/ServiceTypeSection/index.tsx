@@ -64,7 +64,8 @@ const ServiceTypeSection = ({
   isOrderActionVisible,
   onOrderActionClick,
   isPurchaseOrderActionVisible,
-  onPurchaseOrderActionClick
+  onPurchaseOrderActionClick,
+  showSkuStyleColor = false
 }: {
   mode: 'create' | 'edit' | 'view'
   serviceTypeId: string
@@ -97,6 +98,7 @@ const ServiceTypeSection = ({
   onOrderActionClick?: (line: ProposalServiceItemPayload) => void
   isPurchaseOrderActionVisible?: (line: ProposalServiceItemPayload) => boolean
   onPurchaseOrderActionClick?: (line: ProposalServiceItemPayload) => void
+  showSkuStyleColor?: boolean
 }) => {
   const resolvedLineErrors = lineErrors ?? {}
   const [openLaborCostModal, setOpenLaborCostModal] = useState(false)
@@ -197,6 +199,14 @@ const ServiceTypeSection = ({
                     <th className='px-2 py-1 whitespace-nowrap'>Item Name</th>
                     <th className='px-2 py-1 whitespace-nowrap'>Description</th>
                     {showVendor && <th className='px-2 py-1 whitespace-nowrap'>Vendor</th>}
+                    {showSkuStyleColor && (
+                      <>
+                        <th className='px-2 py-1 whitespace-nowrap'>SKU</th>
+                        <th className='px-2 py-1 whitespace-nowrap'>Style</th>
+                        <th className='px-2 py-1 whitespace-nowrap'>Color</th>
+                      </>
+                    )}
+
                     <th className='px-2 py-1 whitespace-nowrap'>Unit Cost</th>
                     <th className='px-2 py-1 whitespace-nowrap'>Quantity</th>
                     <th className='px-2 py-1 whitespace-nowrap'>Total Cost</th>
@@ -223,6 +233,7 @@ const ServiceTypeSection = ({
                           showVendor={showVendor}
                           hideMargin={hideMargin}
                           hidePriceColumns={hidePriceColumns}
+                          showSkuStyleColor={showSkuStyleColor}
                         />
                       )
                     }
@@ -249,7 +260,9 @@ const ServiceTypeSection = ({
                         clampProductQty={clampProductQty}
                         showOrderAction={Boolean(isOrderActionVisible?.(line))}
                         onOrderActionClick={
-                          isOrderActionVisible?.(line) && onOrderActionClick ? () => onOrderActionClick(line) : undefined
+                          isOrderActionVisible?.(line) && onOrderActionClick
+                            ? () => onOrderActionClick(line)
+                            : undefined
                         }
                         showPurchaseOrderAction={Boolean(isPurchaseOrderActionVisible?.(line))}
                         onPurchaseOrderClick={
@@ -257,6 +270,7 @@ const ServiceTypeSection = ({
                             ? () => onPurchaseOrderActionClick(line)
                             : undefined
                         }
+                        showSkuStyleColor={showSkuStyleColor}
                       />
                     )
                   })}
@@ -355,7 +369,9 @@ const ServiceTypeSection = ({
                           clampProductQty={clampProductQty}
                           showOrderAction={Boolean(isOrderActionVisible?.(line))}
                           onOrderActionClick={
-                            isOrderActionVisible?.(line) && onOrderActionClick ? () => onOrderActionClick(line) : undefined
+                            isOrderActionVisible?.(line) && onOrderActionClick
+                              ? () => onOrderActionClick(line)
+                              : undefined
                           }
                           showPurchaseOrderAction={Boolean(isPurchaseOrderActionVisible?.(line))}
                           onPurchaseOrderClick={
