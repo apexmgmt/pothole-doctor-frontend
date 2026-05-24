@@ -171,3 +171,16 @@ export interface InvoiceHistory extends Model {
   sent_at: string
   viewed_at: string | null
 }
+
+
+export interface InvoiceSummary {
+  total_material_sale: number
+  total_labor_sale: number
+  total_discount: number
+  total_sale: number
+  total_tax: number
+  total_work_order_cost: number
+  total_work_order_profit: number 
+  total_work_order_net_profit: number
+  invoices_count: number 
+}
