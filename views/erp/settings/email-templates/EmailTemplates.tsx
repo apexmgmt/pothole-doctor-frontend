@@ -15,11 +15,14 @@ import EditEmailTemplateDialog from './EditEmailTemplateDialog'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { hasPermission } from '@/utils/role-permission'
+import { useAppDispatch } from '@/lib/hooks'
+import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
 export default function EmailTemplates({ templates: initialTemplates }: { templates: EmailTemplate[] }) {
   const [templates, setTemplates] = useState(initialTemplates)
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const dispatch = useAppDispatch()
 
   // Message template permissions
   const [canManageMessageTemplates, setCanManageMessageTemplates] = useState<boolean>(false)
@@ -28,6 +31,8 @@ export default function EmailTemplates({ templates: initialTemplates }: { templa
   const router = useRouter()
 
   useEffect(() => {
+    dispatch(setPageTitle('Email & SMS Templates'))
+
     // Check permissions for message templates
     hasPermission('Manage Message Template').then(result => {
       setCanManageMessageTemplates(result)
