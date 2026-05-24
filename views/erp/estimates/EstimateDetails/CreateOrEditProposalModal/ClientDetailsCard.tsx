@@ -13,15 +13,15 @@ const ClientDetailsCard = ({ estimateDetails }: { estimateDetails?: Estimate }) 
             </span>
             {estimateDetails?.client?.first_name + ' ' + estimateDetails?.client?.last_name}
           </h6>
-          {estimateDetails?.address && (
+          {estimateDetails?.client?.address && (
             <p className='text-sm font-semibold text-zinc-400 flex items-start'>
               <span>
                 <LocationEditIcon className='h-4 w-4 inline-block mr-2' />
               </span>
-              {estimateDetails?.address?.street_address},
-              {estimateDetails?.address?.city?.name ? estimateDetails?.address?.city?.name : ''}
-              {estimateDetails?.address?.state?.name ? ', ' + estimateDetails?.address?.state?.name : ''}
-              {estimateDetails?.address?.zip_code ? ' ' + estimateDetails?.address?.zip_code : ''}
+              {estimateDetails?.client?.address?.street_address},
+              {estimateDetails?.client?.address?.city?.name ? estimateDetails?.client?.address?.city?.name : ''}
+              {estimateDetails?.client?.address?.state?.name ? ', ' + estimateDetails?.client?.address?.state?.name : ''}
+              {estimateDetails?.client?.address?.zip_code ? ' ' + estimateDetails?.client?.address?.zip_code : ''}
             </p>
           )}
           {estimateDetails?.client?.email && (
