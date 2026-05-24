@@ -85,6 +85,9 @@ export interface ProposalServiceItem extends Model {
   service_type_id: string
   name: string
   description: string
+  sku?: string
+  style?: string 
+  color?: string 
   type: 'invoice' | 'product' | 'labor' | 'expense' | 'comment' | 'deduction'
   unit_cost: number
   qty: number
@@ -137,6 +140,9 @@ export interface ProposalServiceItemPayload {
   labor_cost?: LaborCost
   name: string
   description: string
+  sku?: string
+  style?: string
+  color?: string
   type: 'invoice' | 'product' | 'labor' | 'expense' | 'comment' | 'deduction'
   unit_cost: number
   qty: number

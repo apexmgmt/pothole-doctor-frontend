@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DocumentIcon } from '@/public/icons'
 import { WorkOrder } from '@/types'
 import { ChevronDownIcon, Eye } from 'lucide-react'
+import Link from 'next/link'
 
 const WorkOrderActionsButton = ({
   workOrder,
@@ -23,6 +25,24 @@ const WorkOrderActionsButton = ({
           <Eye className='mr-2 h-4 w-4' />
           View/Edit Work Order Details
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`/erp/invoices/${workOrder?.invoice_id}`} prefetch={false} target='_blank'>
+            <DocumentIcon className='mr-2 h-4 w-4' />
+            View Invoice
+          </Link>
+        </DropdownMenuItem>
+        {workOrder?.proposal_id && workOrder?.estimate_id && (
+          <DropdownMenuItem asChild>
+            <Link
+              href={`/erp/estimates/${workOrder?.estimate_id}/proposals/${workOrder?.proposal_id}`}
+              prefetch={false}
+              target='_blank'
+            >
+              <DocumentIcon className='mr-2 h-4 w-4' />
+              View Original Proposal
+            </Link>
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )

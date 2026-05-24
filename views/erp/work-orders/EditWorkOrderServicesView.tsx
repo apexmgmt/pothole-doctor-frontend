@@ -174,6 +174,9 @@ const EditWorkOrderServicesView = ({
             material_job: (item as any).material_job ?? null,
             name: item.name,
             description: item.description,
+            sku: item.sku,
+            style: item.style,
+            color: item.color,
             type: item.type,
             unit_cost: item.unit_cost,
             qty: item.qty,
@@ -267,6 +270,9 @@ const EditWorkOrderServicesView = ({
         labor_cost_id: line.labor_cost_id,
         name: line.name,
         description: line.description,
+        sku: line.sku ?? '',
+        style: line.style ?? '',
+        color: line.color ?? '',
         type: line.type,
         unit_cost: line.unit_cost,
         qty: line.qty,
@@ -588,6 +594,7 @@ const EditWorkOrderServicesView = ({
             hideMargin={true}
             hidePriceColumns={true}
             showVendor={true}
+            showSkuStyleColor={true}
             showPurchaseQty={true}
             hideDiscountOption={true}
             hideTaxOption={true}
@@ -644,7 +651,12 @@ const EditWorkOrderServicesView = ({
         staffs={staffs}
         paymentTerms={paymentTerms}
         businessLocations={businessLocations}
-        onSuccess={() => {
+        onSuccess={(updatedWorkOrder: WorkOrder) => {
+          setCurrentWorkOrder(prevWorkOrder => ({
+            ...prevWorkOrder,
+            ...updatedWorkOrder,
+            services: prevWorkOrder.services
+          }))
           setIsWorkOrderDetailsOpen(false)
         }}
       />
