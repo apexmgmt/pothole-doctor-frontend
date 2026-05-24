@@ -367,8 +367,8 @@ export default function TaskViewModal({
       onOpenChange={onOpenChange}
       title='Task Details'
       description={subtitle}
-      maxWidth='7xl'
       isLoading={isLoadingTask}
+      className='sm:max-w-[1440px]'
       actions={
         <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
           Close
