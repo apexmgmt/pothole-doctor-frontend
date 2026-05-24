@@ -5,10 +5,12 @@ import {
   WORK_ORDERS,
   WORK_ORDERS_ALL,
   WORK_ORDERS_RESTORE,
-  WORK_ORDERS_SERVICES
+  WORK_ORDERS_SERVICES,
+  WORK_ORDERS_SUMMARY
 } from '@/constants/api'
 import apiInterceptor from '../api.interceptor'
 import { CompletionCertificatePayload, WorkOrderPayload, WorkOrderServicePayload } from '@/types'
+import { revalidate } from '@/services/app/cache.service'
 
 export default class WorkOrderService {
   /**
@@ -25,7 +27,7 @@ export default class WorkOrderService {
       const response = await apiInterceptor(API_URL + WORK_ORDERS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['work_orders'] } // Cache for 60 seconds
+        next: { revalidate: 60, tags: ['work_orders', 'login'] } // Cache for 60 seconds
       })
 
       if (!response.ok) {
@@ -57,6 +59,9 @@ export default class WorkOrderService {
         throw errorData
       }
 
+      await revalidate('work-orders')
+      await revalidate('work-orders-summary')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -83,6 +88,9 @@ export default class WorkOrderService {
 
         throw errorData
       }
+
+      await revalidate('work-orders')
+      await revalidate('work-orders-summary')
 
       return await response.json()
     } catch (error) {
@@ -138,6 +146,9 @@ export default class WorkOrderService {
         throw errorData
       }
 
+      await revalidate('work-orders')
+      await revalidate('work-orders-summary')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -166,6 +177,10 @@ export default class WorkOrderService {
         throw errorData
       }
 
+      await revalidate('work-orders')
+      await revalidate('work-orders-summary')
+      await revalidate('invoices-summary')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -192,6 +207,10 @@ export default class WorkOrderService {
         throw new Error(errorData.message || 'Failed to delete work order')
       }
 
+      await revalidate('work-orders')
+      await revalidate('work-orders-summary')
+      await revalidate('invoices-summary')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -217,6 +236,10 @@ export default class WorkOrderService {
 
         throw new Error(errorData.message || 'Failed to restore work order')
       }
+
+      await revalidate('work-orders')
+      await revalidate('work-orders-summary')
+      await revalidate('invoices-summary')
 
       return await response.json()
     } catch (error) {
@@ -294,6 +317,29 @@ export default class WorkOrderService {
         const errorData = await response.json()
 
         throw new Error(errorData.message || 'Failed to submit completion certificate')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Get work orders summary
+   */
+  static getSummary = async () => {
+    try {
+      const response = await apiInterceptor(API_URL + WORK_ORDERS_SUMMARY, {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 60, tags: ['work-orders-summary', 'login'] } // Cache for 60 seconds
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to fetch work orders summary')
       }
 
       return await response.json()
