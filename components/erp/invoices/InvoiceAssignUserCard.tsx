@@ -3,6 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Commission, Invoice } from '@/types'
+import { formatCurrency } from '@/utils/currency'
 import { InfoIcon, UserIcon } from 'lucide-react'
 
 function formatRuleLabel(c: Commission): string {
@@ -149,7 +150,7 @@ const InvoiceAssignUserCard = ({ invoice, profit = 0, total = 0 }: InvoiceAssign
 
           <div className='flex justify-between mt-4'>
             <div className='text-sm font-semibold text-blue-200'>{effectivePercent.toFixed(2)}%</div>
-            <div className='text-sm font-semibold text-zinc-200'>${effectiveCommission.toFixed(2)}</div>
+            <div className='text-sm font-semibold text-zinc-200'>{formatCurrency(effectiveCommission)}</div>
           </div>
         </CardContent>
       </Card>

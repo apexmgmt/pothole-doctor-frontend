@@ -433,7 +433,7 @@ const CreateOrEditProposalView = ({
       {/* Summary cards */}
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-4'>
         <ClientDetailsCard estimateDetails={estimateDetails} />
-        <SalesRepresentativeCard estimateDetails={estimateDetails} />
+        <SalesRepresentativeCard estimateDetails={estimateDetails} profit={profitAmount} total={totalSales} />
         <DiscountDetailsCard
           mode={effectiveMode}
           estimateDetails={estimateDetails}

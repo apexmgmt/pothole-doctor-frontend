@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Commission, WorkOrder } from '@/types'
 import { EditIcon, InfoIcon, UserIcon } from 'lucide-react'
+import { formatCurrency } from '@/utils/currency'
 
 function formatRuleLabel(c: Commission): string {
   const rate =
@@ -191,7 +192,7 @@ const AssignUserCard = ({
 
           <div className='flex justify-between mt-4'>
             <div className='text-sm font-semibold text-blue-200'>{effectivePercent.toFixed(2)}%</div>
-            <div className='text-sm font-semibold text-zinc-200'>${effectiveCommission.toFixed(2)}</div>
+            <div className='text-sm font-semibold text-zinc-200'>{formatCurrency(effectiveCommission)}</div>
           </div>
 
           <Popover open={popoverOpen} onOpenChange={handlePopoverOpenChange}>
