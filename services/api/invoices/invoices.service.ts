@@ -7,11 +7,13 @@ import {
   INVOICES_MARKED_SIGNED,
   INVOICES_RESTORE,
   INVOICES_SERVICES,
+  INVOICES_SUMMARY,
   SEND_INVOICE_EMAIL,
   VIEW_INVOICE
 } from '@/constants/api'
 import apiInterceptor from '../api.interceptor'
 import { InvoicePayload } from '@/types'
+import { revalidate } from '@/services/app/cache.service'
 
 export default class InvoiceService {
   /**
@@ -60,6 +62,9 @@ export default class InvoiceService {
         throw errorData
       }
 
+      await revalidate('invoices')
+      await revalidate('invoices-summary')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -86,6 +91,10 @@ export default class InvoiceService {
 
         throw errorData
       }
+
+      await revalidate('invoices')
+      await revalidate('invoices-summary')
+      await revalidate('work-orders-summary')
 
       return await response.json()
     } catch (error) {
@@ -141,6 +150,9 @@ export default class InvoiceService {
         throw errorData
       }
 
+      await revalidate('invoices')
+      await revalidate('invoices-summary')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -169,6 +181,9 @@ export default class InvoiceService {
         throw errorData
       }
 
+      await revalidate('invoices')
+      await revalidate('invoices-summary')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -195,6 +210,9 @@ export default class InvoiceService {
         throw new Error(errorData.message || 'Failed to delete invoice')
       }
 
+      await revalidate('invoices')
+      await revalidate('invoices-summary')
+
       return await response.json()
     } catch (error) {
       throw error
@@ -220,6 +238,9 @@ export default class InvoiceService {
 
         throw new Error(errorData.message || 'Failed to restore invoice')
       }
+
+      await revalidate('invoices')
+      await revalidate('invoices-summary')
 
       return await response.json()
     } catch (error) {
@@ -350,6 +371,29 @@ export default class InvoiceService {
         const errorData = await response.json()
 
         throw new Error(errorData.message || 'Failed to fetch invoice history')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Get invoices summary
+   */
+  static getSummary = async () => {
+    try {
+      const response = await apiInterceptor(API_URL + INVOICES_SUMMARY, {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 60, tags: ['invoices-summary', 'login'] } // Cache for 60 seconds
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to fetch invoices summary')
       }
 
       return await response.json()

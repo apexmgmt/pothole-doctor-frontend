@@ -21,12 +21,10 @@ import {
   DataTableApiResponse,
   EstimateType,
   Invoice,
+  InvoiceSummary as Summary,
   PaymentTerm,
-  ProductCategory,
   ServiceType,
-  Staff,
-  Unit,
-  Vendor
+  Staff
 } from '@/types'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
@@ -40,6 +38,7 @@ import InvoiceNotesModal from './InvoiceNotesModal'
 import InvoiceAddNoteModal from './InvoiceAddNoteModal'
 import InvoiceDocuments from './documents/InvoiceDocuments'
 import InvoiceJobImages from './job-images/InvoiceJobImages'
+import InvoiceSummary from './InvoiceSummary'
 import { getSharedInvoiceColumns } from './sharedInvoiceColumns'
 
 const Invoices: React.FC<{
@@ -49,6 +48,7 @@ const Invoices: React.FC<{
   staffs: Staff[]
   paymentTerms: PaymentTerm[]
   businessLocations: BusinessLocation[]
+  invoicesSummary: Summary
 
   // units: Unit[]
   // productCategories: ProductCategory[]
@@ -60,7 +60,8 @@ const Invoices: React.FC<{
   clients,
   staffs,
   paymentTerms,
-  businessLocations
+  businessLocations,
+  invoicesSummary
 
   // units,
   // productCategories,
@@ -376,6 +377,8 @@ const Invoices: React.FC<{
 
   return (
     <>
+      {/* Invoice summary cards */}
+      <InvoiceSummary invoiceSummary={invoicesSummary} />
       <CommonLayout
         title='Invoices'
         buttons={[

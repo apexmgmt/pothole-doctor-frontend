@@ -22,12 +22,10 @@ import {
   DataTableApiResponse,
   EstimateType,
   PaymentTerm,
-  ProductCategory,
   ServiceType,
   Staff,
-  Unit,
-  Vendor,
-  WorkOrder
+  WorkOrder,
+  WorkOrderSummary as Summary
 } from '@/types'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
@@ -38,6 +36,7 @@ import CompletionCertificatesModal from './CompletionCertificatesModal'
 import WorkOrderDocuments from './documents/WorkOrderDocuments'
 import InvoiceJobImages from '../invoices/job-images/InvoiceJobImages'
 import { getSharedWorkOrderColumns } from './sharedWorkOrderColumns'
+import WorkOrderSummary from './WorkOrderSummary'
 
 const WorkOrders: React.FC<{
   workOrderTypes: EstimateType[]
@@ -46,22 +45,8 @@ const WorkOrders: React.FC<{
   staffs: Staff[]
   paymentTerms: PaymentTerm[]
   businessLocations: BusinessLocation[]
-  units: Unit[]
-  productCategories: ProductCategory[]
-  uomUnits: Unit[]
-  vendors: Vendor[]
-}> = ({
-  workOrderTypes,
-  serviceTypes,
-  clients,
-  staffs,
-  paymentTerms,
-  businessLocations,
-  units,
-  productCategories,
-  uomUnits,
-  vendors
-}) => {
+  workOrderSummary: Summary
+}> = ({ workOrderTypes, serviceTypes, clients, staffs, paymentTerms, businessLocations, workOrderSummary }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -296,6 +281,8 @@ const WorkOrders: React.FC<{
 
   return (
     <>
+      {/* Work Order Summary Cards */}
+      <WorkOrderSummary workOrderSummary={workOrderSummary} />
       <CommonLayout
         title='Work Orders'
         buttons={[

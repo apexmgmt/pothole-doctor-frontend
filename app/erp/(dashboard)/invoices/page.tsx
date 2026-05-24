@@ -1,4 +1,5 @@
 import ClientService from '@/services/api/clients/clients.service'
+import InvoiceService from '@/services/api/invoices/invoices.service'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
 import ProductCategoryService from '@/services/api/products/product_categories.service'
 import EstimateTypeService from '@/services/api/settings/estimate_types.service'
@@ -11,6 +12,7 @@ import {
   BusinessLocation,
   Client,
   EstimateType,
+  InvoiceSummary,
   PaymentTerm,
   ProductCategory,
   ServiceType,
@@ -29,7 +31,8 @@ export default async function InvoicesPage() {
     clientsRes,
     staffsRes,
     paymentTermsRes,
-    businessLocationsRes
+    businessLocationsRes,
+    invoicesSummaryRes
 
     // unitsRes,
     // productCategoriesRes,
@@ -41,7 +44,8 @@ export default async function InvoicesPage() {
     ClientService.getAll('customer'),
     StaffService.getAll(),
     PaymentTermsService.getAllPaymentTerms(),
-    BusinessLocationService.getAll()
+    BusinessLocationService.getAll(),
+    InvoiceService.getSummary()
 
     // UnitService.getAll(),
     // ProductCategoryService.getAll(),
@@ -57,6 +61,20 @@ export default async function InvoicesPage() {
 
   const businessLocations: BusinessLocation[] =
     businessLocationsRes.status === 'fulfilled' ? businessLocationsRes.value.data || [] : []
+
+    const initialSummary: InvoiceSummary = {
+      total_material_sale: 0,
+      total_labor_sale: 0,
+      total_discount: 0,
+      total_sale: 0,
+      total_tax: 0,
+      total_work_order_cost: 0,
+      total_work_order_profit: 0,
+      total_work_order_net_profit: 0,
+      invoices_count: 0
+    }
+
+  const invoicesSummary = invoicesSummaryRes.status === 'fulfilled' ? invoicesSummaryRes.value.data || initialSummary : initialSummary
 
   // const units: Unit[] = unitsRes.status === 'fulfilled' ? unitsRes.value.data || [] : []
 
@@ -74,6 +92,7 @@ export default async function InvoicesPage() {
       staffs={staffs}
       paymentTerms={paymentTerms}
       businessLocations={businessLocations}
+      invoicesSummary={invoicesSummary}
 
       // units={units}
       // productCategories={productCategories}
