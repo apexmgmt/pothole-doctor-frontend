@@ -7,6 +7,7 @@ import ServiceTypeService from '@/services/api/settings/service_types.service'
 import UnitService from '@/services/api/settings/units.service'
 import StaffService from '@/services/api/staff.service'
 import VendorService from '@/services/api/vendors/vendors.service'
+import WorkOrderService from '@/services/api/work-orders/work_orders.service'
 import {
   BusinessLocation,
   Client,
@@ -16,7 +17,8 @@ import {
   ServiceType,
   Staff,
   Unit,
-  Vendor
+  Vendor,
+  WorkOrderSummary
 } from '@/types'
 import WorkOrders from '@/views/erp/work-orders'
 
@@ -30,10 +32,7 @@ export default async function WorkOrdersPage() {
     staffsRes,
     paymentTermsRes,
     businessLocationsRes,
-    unitsRes,
-    productCategoriesRes,
-    uomUnitsRes,
-    vendorsRes
+    workOrderSummaryRes
   ] = await Promise.allSettled([
     EstimateTypeService.getAll(),
     ServiceTypeService.getAll(),
@@ -41,10 +40,7 @@ export default async function WorkOrdersPage() {
     StaffService.getAll(),
     PaymentTermsService.getAllPaymentTerms(),
     BusinessLocationService.getAll(),
-    UnitService.getAll(),
-    ProductCategoryService.getAll(),
-    UnitService.getAll('uom'),
-    VendorService.getAll()
+    WorkOrderService.getSummary()
   ])
 
   const workOrderTypes: EstimateType[] =
@@ -58,13 +54,22 @@ export default async function WorkOrdersPage() {
   const businessLocations: BusinessLocation[] =
     businessLocationsRes.status === 'fulfilled' ? businessLocationsRes.value.data || [] : []
 
-  const units: Unit[] = unitsRes.status === 'fulfilled' ? unitsRes.value.data || [] : []
+  const initialSummary: WorkOrderSummary = {
+    total_invoice_total: 0,
+    total_invoice_subtotal: 0,
+    total_invoice_total_tax: 0,
+    total_commissions: 0,
+    total_cost: 0,
+    total_expenses: 0,
+    total_profit: 0,
+    total_material_cost: 0,
+    total_freight_charge: 0,
+    total_labor_cost: 0,
+    total_net_profit: 0,
+    total_profit_percentage: 0
+  }
 
-  const productCategories: ProductCategory[] =
-    productCategoriesRes.status === 'fulfilled' ? productCategoriesRes.value.data || [] : []
-
-  const uomUnits: Unit[] = uomUnitsRes.status === 'fulfilled' ? uomUnitsRes.value.data || [] : []
-  const vendors: Vendor[] = vendorsRes.status === 'fulfilled' ? vendorsRes.value.data || [] : []
+  const workOrderSummary: WorkOrderSummary  = workOrderSummaryRes.status === 'fulfilled' ? workOrderSummaryRes.value.data || initialSummary : initialSummary
 
   return (
     <WorkOrders
@@ -74,10 +79,7 @@ export default async function WorkOrdersPage() {
       staffs={staffs}
       paymentTerms={paymentTerms}
       businessLocations={businessLocations}
-      units={units}
-      productCategories={productCategories}
-      uomUnits={uomUnits}
-      vendors={vendors}
+      workOrderSummary={workOrderSummary}
     />
   )
 }
