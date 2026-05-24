@@ -7,6 +7,7 @@ import { Estimate, ProposalServiceItemPayload } from '@/types'
 import { DollarSign, PercentIcon, X } from 'lucide-react'
 import { useState } from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { formatCurrency } from '@/utils/currency'
 
 const DiscountDetailsCard = ({
   mode,
@@ -45,7 +46,7 @@ const DiscountDetailsCard = ({
       <CardContent className='p-4'>
         <h6 className='flex justify-end text-sm font-semibold text-zinc-200 mb-4'>Discount</h6>
         <div className='flex justify-end mb-3'>
-          <p className='text-sm font-semibold text-red-400'>${totalDiscount.toFixed(2)}</p>
+          <p className='text-sm font-semibold text-red-400'>{formatCurrency(totalDiscount)}</p>
         </div>
         <Separator className='mb-4' />
         {mode !== 'view' && (

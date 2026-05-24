@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { formatCurrency } from '@/utils/currency'
 
 interface ServiceTypeSummaryProps {
   materialCost: number
@@ -38,21 +39,21 @@ const ServiceTypeSummary = ({
         <div className='space-y-1'>
           <div className='flex justify-between'>
             <span className='text-zinc-400'>Material Cost:</span>
-            <span className='text-white font-medium'>${materialCost.toFixed(2)}</span>
+            <span className='text-white font-medium'>{formatCurrency(materialCost)}</span>
           </div>
           <div className='flex justify-between'>
             <span className='text-zinc-400'>Labor Cost:</span>
-            <span className='text-white font-medium'>${laborCost.toFixed(2)}</span>
+            <span className='text-white font-medium'>{formatCurrency(laborCost)}</span>
           </div>
         </div>
         <div className='space-y-1'>
           <div className='flex justify-between'>
             <span className='text-zinc-400'>Freight:</span>
-            <span className='text-white font-medium'>${Number(totalFreight).toFixed(2)}</span>
+            <span className='text-white font-medium'>{formatCurrency(totalFreight)}</span>
           </div>
           <div className='flex justify-between'>
             <span className='text-zinc-400'>Sales Tax:</span>
-            <span className='text-white font-medium'>${salesTax.toFixed(2)}</span>
+            <span className='text-white font-medium'>{formatCurrency(salesTax)}</span>
           </div>
         </div>
       </div>
@@ -66,58 +67,58 @@ const ServiceTypeSummary = ({
           <div className='space-y-1'>
             <div className='flex justify-between'>
               <span className='text-zinc-400'>Material Cost:</span>
-              <span className='text-white font-medium'>${materialCost.toFixed(2)}</span>
+              <span className='text-white font-medium'>{formatCurrency(materialCost)}</span>
             </div>
             <div className='flex justify-between'>
               <span className='text-zinc-400'>Material Sales:</span>
-              <span className='text-white font-medium'>${materialSales.toFixed(2)}</span>
+              <span className='text-white font-medium'>{formatCurrency(materialSales)}</span>
             </div>
             <div className='flex justify-between'>
               <span className='text-zinc-400'>Material Tax:</span>
-              <span className='text-white font-medium'>${materialTax.toFixed(2)}</span>
+              <span className='text-white font-medium'>{formatCurrency(materialTax)}</span>
             </div>
             <div className='flex justify-between'>
               <span className='text-zinc-400'>Labor Cost:</span>
-              <span className='text-white font-medium'>${laborCost.toFixed(2)}</span>
+              <span className='text-white font-medium'>{formatCurrency(laborCost)}</span>
             </div>
             <div className='flex justify-between pt-1 border-t border-zinc-700'>
               <span className='text-zinc-300 font-medium'>Total Costs:</span>
-              <span className='text-white font-semibold'>${totalCosts.toFixed(2)}</span>
+              <span className='text-white font-semibold'>{formatCurrency(totalCosts)}</span>
             </div>
           </div>
 
           <div className='space-y-1'>
             <div className='flex justify-between'>
               <span className='text-zinc-400'>Expenses:</span>
-              <span className='text-white font-medium'>${totalExpense.toFixed(2)}</span>
+              <span className='text-white font-medium'>{formatCurrency(totalExpense)}</span>
             </div>
             <div className='flex justify-between'>
               <span className='text-zinc-400'>Freight:</span>
-              <span className='text-white font-medium'>${Number(totalFreight).toFixed(2)}</span>
+              <span className='text-white font-medium'>{formatCurrency(totalFreight)}</span>
             </div>
             <div className='flex justify-between'>
               <span className='text-zinc-400'>Sales Tax:</span>
-              <span className='text-white font-medium'>${salesTax.toFixed(2)}</span>
+              <span className='text-white font-medium'>{formatCurrency(salesTax)}</span>
             </div>
           </div>
 
           <div className='space-y-1'>
             <div className='flex justify-between'>
               <span className='text-zinc-400'>Total Sales:</span>
-              <span className='text-white font-medium'>${totalSales.toFixed(2)}</span>
+              <span className='text-white font-medium'>{formatCurrency(totalSales)}</span>
             </div>
             <div className='flex justify-between'>
               <span className='text-zinc-400'>Material Sales:</span>
-              <span className='text-white font-medium'>${materialSales.toFixed(2)}</span>
+              <span className='text-white font-medium'>{formatCurrency(materialSales)}</span>
             </div>
             <div className='flex justify-between'>
               <span className='text-zinc-400'>Labor Sales:</span>
-              <span className='text-white font-medium'>${laborSales.toFixed(2)}</span>
+              <span className='text-white font-medium'>{formatCurrency(laborSales)}</span>
             </div>
             <div className='flex justify-between'>
               <span className='text-zinc-400'>Profit:</span>
               <span className='text-white font-medium flex items-center gap-2'>
-                ${profitAmount.toFixed(2)}
+                {formatCurrency(profitAmount)}
                 <Badge variant='outline'>{profitPercent.toFixed(2)}%</Badge>
               </span>
             </div>
