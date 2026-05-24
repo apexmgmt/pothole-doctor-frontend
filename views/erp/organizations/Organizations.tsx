@@ -65,7 +65,7 @@ const Organizations: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
-  const [statusLoading, setStatusLoading] = useState<{ [key: string]: boolean }>({})
+
   const [canCreateCompany, setCanCreateCompany] = useState<boolean>(false)
   const [canViewCompany, setCanViewCompany] = useState<boolean>(false)
   const [canEditCompany, setCanEditCompany] = useState<boolean>(false)
@@ -240,10 +240,7 @@ const Organizations: React.FC = () => {
         <div className='flex items-center gap-2'>
           <OrganizationStatusSwitch
             checked={row.status}
-            loading={statusLoading[row.id]}
             companyId={row.id}
-
-            // fetchData={fetchData} // pass only if you want to refetch after change
           />
         </div>
       ),
@@ -378,28 +375,7 @@ const Organizations: React.FC = () => {
       : [])
   ]
 
-  const handleStatusToggle = async (companyId: string) => {
-    setStatusLoading(prev => ({ ...prev, [companyId]: true }))
 
-    try {
-      await OrganizationService.changeStatus(companyId)
-
-      const updatedCompany = apiResponse?.data?.find(company => company.id === companyId)
-
-      if (updatedCompany) {
-        const company = {
-          ...updatedCompany,
-          status: !updatedCompany.status
-        }
-
-        handleCompanyRowUpdate(company as Organization)
-      }
-    } catch (error) {
-      console.error('Failed to change status', error)
-    }
-
-    setStatusLoading(prev => ({ ...prev, [companyId]: false }))
-  }
 
   const selectedCompany = selectedCompanyId && apiResponse?.data?.find(company => company.id === selectedCompanyId)
 
@@ -435,12 +411,9 @@ const Organizations: React.FC = () => {
 
       <div className={activeTab === 'details' ? 'block' : 'hidden'}>
         <OrganizationDetails
-          companyId={selectedCompanyId}
-          onCompanyUpdated={handleCompanyRowUpdate}
-          impersonateUser={impersonateUser}
-          isImpersonating={selectedCompanyId ? statusLoading[selectedCompanyId] : false}
-          onStatusToggle={handleStatusToggle}
-          statusLoading={selectedCompanyId ? statusLoading[selectedCompanyId] : false}
+          companyData={selectedCompany || null}
+          setCompanyData={handleCompanyRowUpdate}
+          fetchData={fetchData}
         />
       </div>
     </CommonLayout>
