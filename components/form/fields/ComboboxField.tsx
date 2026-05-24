@@ -56,7 +56,9 @@ const ComboboxField = <T extends FieldValues>({
           autoFocus={autoFocus}
           className={`w-full justify-between ${selectedValue ? 'text-[#f4f4f5]' : 'text-[#a7a7ae]!'} ${className}`}
         >
-          {selectedValue ? selectOptions.find(o => o.value === selectedValue)?.label : placeholder}
+          <span className='overflow-hidden'>
+            {selectedValue ? selectOptions.find(o => o.value === selectedValue)?.label : placeholder}
+          </span>
           <ChevronsUpDown className='ml-2 size-3.5 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
@@ -84,6 +86,7 @@ const ComboboxField = <T extends FieldValues>({
                   className='text-sm py-1 hover:bg-[#1F1F1F] data-[selected=true]:bg-[#1F1F1F]'
                 >
                   <Check className={`mr-2 size-4 ${selectedValue === opt.value ? 'opacity-100' : 'opacity-0'}`} />
+                  {opt.labelPrefix && <span className='mr-2'>{opt.labelPrefix}</span>}
                   {opt.label}
                 </CommandItem>
               ))}

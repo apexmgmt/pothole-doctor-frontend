@@ -433,6 +433,9 @@ const CreateOrEditTaskModal = ({
     onOpenChange(false)
   }
 
+  const fieldStyle = 'grid grid-cols-[100px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
+
   return (
     <CommonDialog
       isLoading={form.formState.isSubmitting}
@@ -441,8 +444,8 @@ const CreateOrEditTaskModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create New Task' : 'Edit Task'}
       description={mode === 'create' ? 'Add a new task to the system' : 'Update task information'}
-      maxWidth='4xl'
       disableClose={form.formState.isSubmitting}
+      className='sm:max-w-252!'
       actions={
         <div className='flex gap-3'>
           <Button
@@ -481,6 +484,8 @@ const CreateOrEditTaskModal = ({
                 minLength: { value: 2, message: 'Task name must be at least 2 characters' }
               }}
               errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
             {/* Task type field */}
             <CustomFormField
@@ -498,11 +503,13 @@ const CreateOrEditTaskModal = ({
                 label: taskType.name
               }))}
               errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
 
             {/* Description Field */}
-            <div className='sm:col-span-2'>
-              <label className='block text-xs font-medium mb-2'>Description</label>
+            <div className={`sm:col-span-2 gap-x-2 ${fieldStyle}`}>
+              <label className={`w-full text-xs font-medium flex ${labelStyle}`}>Description</label>
               <TipTapRichTextEditor
                 value={descriptionHtml}
                 onChange={setDescriptionHtml}
@@ -528,6 +535,8 @@ const CreateOrEditTaskModal = ({
               onChange={() => setValue('location', '')}
               disabled={!!defaultClientId}
               errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
 
             {/* Employees field */}
@@ -547,6 +556,8 @@ const CreateOrEditTaskModal = ({
                 label: staff.first_name + ' ' + staff.last_name
               }))}
               errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
 
             {/* Start date field */}
@@ -559,6 +570,8 @@ const CreateOrEditTaskModal = ({
               control={control}
               register={register}
               errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
 
             {/* Start time field */}
@@ -570,6 +583,8 @@ const CreateOrEditTaskModal = ({
               control={control}
               register={register}
               errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
 
             {/* End Date field */}
@@ -582,6 +597,8 @@ const CreateOrEditTaskModal = ({
               control={control}
               register={register}
               errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
 
             {/* End time field */}
@@ -593,10 +610,14 @@ const CreateOrEditTaskModal = ({
               control={control}
               register={register}
               errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
           </div>
 
-          <TaskReminderFields form={form} taskReminderChannels={taskReminderChannels} />
+          <div className='ps-27'>
+            <TaskReminderFields form={form} taskReminderChannels={taskReminderChannels} />
+          </div>
 
           <CustomFormField
             name='location'
@@ -621,6 +642,8 @@ const CreateOrEditTaskModal = ({
             }
             disabled={!selectedClient}
             errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
 
           {/* Edit Mode Only Fields */}
@@ -643,6 +666,8 @@ const CreateOrEditTaskModal = ({
                   { value: 'cancelled', label: 'Cancelled' }
                 ]}
                 errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
               />
 
               {/* Completed Date field */}
@@ -654,6 +679,8 @@ const CreateOrEditTaskModal = ({
                 register={register}
                 control={control}
                 errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
               />
 
               {/* Close Comment field */}
@@ -665,7 +692,8 @@ const CreateOrEditTaskModal = ({
                 register={register}
                 control={control}
                 errors={errors}
-                fieldClassName='col-span-1 lg:col-span-2'
+                fieldClassName={`col-span-1 lg:col-span-2 ${fieldStyle}`}
+                labelClassName={labelStyle}
               />
             </div>
           )}

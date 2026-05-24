@@ -1,6 +1,6 @@
 'use client'
 
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
 
 import { toast } from 'sonner'
 
@@ -8,13 +8,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
-import TipTapRichTextEditor from '@/components/erp/common/editor/TipTapRichTextEditor'
+import TipTapRichTextEditor, { TipTapRichTextEditorRef } from '@/components/erp/common/editor/TipTapRichTextEditor'
 import TaskCommentService from '@/services/api/tasks/task-comments.service'
 import { Task, TaskComment } from '@/types'
 import { getAuthUser } from '@/utils/auth'
 import { generateFileUrl } from '@/utils/utility'
-import { cn } from '@/lib/utils'
 import {
   formatDateTime,
   getAvatarUrl,
@@ -24,6 +22,8 @@ import {
   sortCommentsByUpdatedAt
 } from '../helpers'
 import { InlineEditableField } from '../types'
+import { useAppSelector } from '@/lib/hooks'
+import { formatTimeAgo } from '@/utils/date'
 
 interface DescriptionAndCommentsSectionProps {
   task: Task | null
@@ -76,7 +76,66 @@ export default function DescriptionAndCommentsSection({
   saveInlineField,
   cancelInlineEdit
 }: DescriptionAndCommentsSectionProps) {
-  const sortedComments = sortCommentsByUpdatedAt(comments)
+  const commentEditorRef = useRef<TipTapRichTextEditorRef>(null)
+  const [isCommentEditorOpen, setIsCommentEditorOpen] = useState(false)
+  const sortedComments = useMemo(() => sortCommentsByUpdatedAt(comments), [comments])
+
+  const orderedComments = useMemo(
+    () =>
+      [...sortedComments].sort(
+        (a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime()
+      ),
+    [sortedComments]
+  )
+
+  const renderedComments = useMemo(
+    () =>
+      orderedComments.map(comment => {
+        const displayName = getDisplayName(comment)
+        const avatarUrl = getAvatarUrl(comment, generateFileUrl)
+        const updatedAt = comment.updated_at || comment.created_at
+
+        return (
+          <div key={comment.id} className='flex gap-3'>
+            <Avatar className='size-9'>
+              {avatarUrl ? <AvatarImage src={avatarUrl} alt={displayName} referrerPolicy='no-referrer' /> : null}
+              <AvatarFallback className='bg-primary text-sm'>{getInitials(displayName)}</AvatarFallback>
+            </Avatar>
+            <div className='flex-1 px-3'>
+              <div>
+                <p className='text-sm font-bold'>{displayName}</p>
+                <p className='mt-1.5 text-xs text-muted-foreground'>{formatTimeAgo(updatedAt)}</p>
+              </div>
+              <div className='mt-3 rounded-md'>
+                <div
+                  className='text-sm wrap-break-word [&_h1]:text-lg [&_h1]:font-semibold [&_h2]:text-base [&_h2]:font-semibold [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-2 [&_p:last-child]:mb-0'
+                  dangerouslySetInnerHTML={{ __html: comment.comment || '' }}
+                />
+              </div>
+            </div>
+          </div>
+        )
+      }),
+    [orderedComments]
+  )
+
+  const user = useAppSelector(state => state.auth.user)
+  const firstName = user?.first_name ?? ''
+  const lastName = user?.last_name ?? ''
+  const avatarUrl = user?.userable?.profile_picture ? generateFileUrl(user.userable.profile_picture) : undefined
+
+  const initials = `${firstName} ${lastName}`
+    .split(' ')
+    .slice(0, 2)
+    .map(part => part[0])
+    .join('')
+    .toUpperCase()
+
+  useEffect(() => {
+    if (commentHtml === '') {
+      commentEditorRef.current?.collapse()
+    }
+  }, [commentHtml])
 
   const addComment = async () => {
     if (!taskId) return
@@ -108,15 +167,16 @@ export default function DescriptionAndCommentsSection({
 
       const createdComment = response?.data as TaskComment | undefined
 
+      setCommentHtml('')
+      commentEditorRef.current?.clear()
+      toast.success('Comment added successfully')
+
       if (createdComment?.id) {
         setComments(prev => sortCommentsByUpdatedAt([...prev, createdComment]))
         setTask(prev =>
           prev ? { ...prev, comments: sortCommentsByUpdatedAt([...(prev.comments || []), createdComment]) } : prev
         )
       }
-
-      setCommentHtml('')
-      toast.success('Comment added successfully')
     } catch (error: any) {
       toast.error(typeof error?.message === 'string' ? error.message : 'Failed to add comment')
     } finally {
@@ -151,7 +211,7 @@ export default function DescriptionAndCommentsSection({
           />
         ) : (
           <p
-            className={cn('text-lg', canEditTask && 'cursor-pointer')}
+            className={`text-lg leading-tight hover:bg-accent/40 px-2.5 py-1.5 rounded-md transition-colors duration-100 ${canEditTask ? 'cursor-pointer' : ''}`}
             onClick={() => startInlineEdit('name', task?.name || '')}
           >
             {task?.name || '-'}
@@ -161,7 +221,7 @@ export default function DescriptionAndCommentsSection({
 
       {/* Description */}
       <div className='space-y-2'>
-        <Label className='text-sm text-muted-foreground'>Description</Label>
+        <Label className='px-2.5 text-sm text-muted-foreground'>Description</Label>
 
         {isEditingDescription ? (
           <div className='rounded-md border border-border p-2 space-y-2'>
@@ -191,7 +251,7 @@ export default function DescriptionAndCommentsSection({
           </div>
         ) : (
           <div
-            className={task ? 'cursor-pointer transition-colors border-border' : ''}
+            className='hover:bg-accent/40 px-2.5 py-1.5 rounded-md transition-colors duration-100 cursor-pointer'
             onClick={() => {
               setDescriptionHtml(task?.description || '')
               setIsEditingDescription(true)
@@ -220,64 +280,53 @@ export default function DescriptionAndCommentsSection({
         )}
       </div>
 
-      {/* Add Comment */}
-      <div className='space-y-3'>
-        <Label className='text-sm text-muted-foreground'>Add Comment</Label>
-        <div className='px-px space-y-2'>
-          <TipTapRichTextEditor
-            value={commentHtml}
-            onChange={setCommentHtml}
-            placeholder='Write a comment...'
-            disabled={isAddingComment || !task}
-          />
-          <div className='flex justify-end gap-2'>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={() => setCommentHtml('')}
+      {/* Comments */}
+      <div className='px-2.5'>
+        <Label className='text-sm text-muted-foreground mb-3'>Comments</Label>
+        <div className='flex items-start gap-4 sticky top-0 bg-card z-10'>
+          <Avatar className='size-7.5'>
+            {avatarUrl ? (
+              <AvatarImage src={avatarUrl} alt={firstName + ' ' + lastName} referrerPolicy='no-referrer' />
+            ) : null}
+            <AvatarFallback className='bg-primary text-xs'>{initials}</AvatarFallback>
+          </Avatar>
+
+          <div className='flex-1 space-y-2 px-px pb-3'>
+            <TipTapRichTextEditor
+              ref={commentEditorRef}
+              value={commentHtml}
+              onChange={setCommentHtml}
+              placeholder='Write a comment...'
               disabled={isAddingComment || !task}
-              className='text-xs h-7'
-            >
-              Cancel
-            </Button>
-            <Button type='button' onClick={addComment} disabled={isAddingComment || !task} className='text-xs h-7'>
-              {isAddingComment ? 'Adding...' : 'Add Comment'}
-            </Button>
+              onExpandedChange={setIsCommentEditorOpen}
+              inputClassName='min-h-16'
+            />
+            {isCommentEditorOpen && (
+              <div className='flex justify-end gap-2'>
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={() => {
+                    setCommentHtml('')
+                    commentEditorRef.current?.collapse()
+                  }}
+                  disabled={isAddingComment || !task}
+                  className='text-xs h-7'
+                >
+                  Cancel
+                </Button>
+                <Button type='button' onClick={addComment} disabled={isAddingComment || !task} className='text-xs h-7'>
+                  {isAddingComment ? 'Saving...' : 'Save'}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
-      </div>
 
-      <div className='space-y-3'>
-        <Label>Comments</Label>
-        <div className='rounded-md border border-border p-3 space-y-4'>
-          {sortedComments.length === 0 && <p className='text-sm text-muted-foreground'>No comments yet.</p>}
-
-          {sortedComments.map(comment => {
-            const displayName = getDisplayName(comment)
-            const avatarUrl = getAvatarUrl(comment, generateFileUrl)
-            const updatedAt = comment.updated_at || comment.created_at
-
-            return (
-              <div key={comment.id} className='flex gap-3'>
-                <Avatar className='h-9 w-9'>
-                  {avatarUrl ? <AvatarImage src={avatarUrl} alt={displayName} referrerPolicy='no-referrer' /> : null}
-                  <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
-                </Avatar>
-                <div className='flex-1 px-3'>
-                  <div className='flex flex-wrap items-center justify-between gap-2'>
-                    <p className='text-sm font-bold'>{displayName}</p>
-                    <p className='text-xs text-muted-foreground'>{formatDateTime(updatedAt)}</p>
-                  </div>
-                  <div className='mt-1 rounded-md py-2'>
-                    <div
-                      className='text-sm wrap-break-word [&_h1]:text-lg [&_h1]:font-semibold [&_h2]:text-base [&_h2]:font-semibold [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-2 [&_p:last-child]:mb-0'
-                      dangerouslySetInnerHTML={{ __html: comment.comment || '' }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )
-          })}
+        {/* Comments List */}
+        <div className='space-y-6 mt-6'>
+          {orderedComments.length === 0 && <p className='text-sm text-muted-foreground'>No comments yet.</p>}
+          {renderedComments}
         </div>
       </div>
     </div>

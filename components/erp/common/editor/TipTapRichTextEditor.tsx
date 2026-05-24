@@ -48,11 +48,15 @@ interface TipTapRichTextEditorProps {
   className?: string
   disabled?: boolean
   onUploadMedia?: (file: File) => Promise<string>
+  onExpandedChange?: (isExpanded: boolean) => void
+  inputClassName?: string
 }
 
 export interface TipTapRichTextEditorRef {
   insertText: (text: string) => void
   focus: () => void
+  collapse: (force?: boolean) => void
+  clear: () => void
 }
 
 type MediaAlign = 'left' | 'center' | 'right'
@@ -419,7 +423,9 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
       placeholder = 'Type here...',
       className,
       disabled = false,
-      onUploadMedia
+      onUploadMedia,
+      onExpandedChange,
+      inputClassName
     }: TipTapRichTextEditorProps,
     ref
   ) {
@@ -427,6 +433,11 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
     const [isDragOver, setIsDragOver] = useState(false)
     const fileInputRef = useRef<HTMLInputElement | null>(null)
     const dragCounterRef = useRef(0)
+    const suppressNextExpandRef = useRef(false)
+
+    const setExpanded = useCallback((nextExpanded: boolean) => {
+      setIsExpanded(prev => (prev === nextExpanded ? prev : nextExpanded))
+    }, [])
 
     const editor = useEditor({
       immediatelyRender: false,
@@ -463,7 +474,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
 
         if (supportedFiles.length === 0) return
 
-        setIsExpanded(true)
+        setExpanded(true)
 
         for (const file of supportedFiles) {
           try {
@@ -593,19 +604,25 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
 
       const incomingHtml = value || ''
       const currentHtml = editor.getHTML()
+      const incomingHasText = hasVisibleText(incomingHtml)
+      const currentHasText = hasVisibleText(currentHtml)
 
-      if (incomingHtml && incomingHtml !== currentHtml) {
+      if (incomingHtml !== currentHtml && (incomingHasText || currentHasText)) {
         editor.commands.setContent(incomingHtml, { emitUpdate: false })
       }
 
-      if (!incomingHtml && !editor.isEmpty) {
-        editor.commands.clearContent(false)
-      }
+      if (!isExpanded && incomingHasText) {
+        if (!suppressNextExpandRef.current) {
+          setExpanded(true)
+        }
 
-      if (!isExpanded && hasVisibleText(incomingHtml)) {
-        setIsExpanded(true)
+        suppressNextExpandRef.current = false
       }
-    }, [editor, value, isExpanded])
+    }, [editor, value, isExpanded, setExpanded])
+
+    useEffect(() => {
+      onExpandedChange?.(isExpanded)
+    }, [isExpanded, onExpandedChange])
 
     useImperativeHandle(
       ref,
@@ -619,9 +636,29 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           if (!editor) return
 
           editor.chain().focus().run()
+        },
+        collapse: (force = true) => {
+          if (!editor) return
+
+          if (disabled && !force) return
+
+          const currentHtml = editor.getHTML()
+
+          if (!force && hasVisibleText(currentHtml)) {
+            return
+          }
+
+          suppressNextExpandRef.current = true
+          setExpanded(false)
+        },
+        clear: () => {
+          if (!editor) return
+
+          suppressNextExpandRef.current = true
+          editor.commands.clearContent(false)
         }
       }),
-      [editor]
+      [editor, disabled, setExpanded]
     )
 
     const toggleLink = () => {
@@ -644,7 +681,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
     const expandEditor = () => {
       if (disabled) return
 
-      setIsExpanded(true)
+      setExpanded(true)
       editor?.chain().focus().run()
     }
 
@@ -928,7 +965,8 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
               ? '[&_.ProseMirror]:min-h-24 [&_.ProseMirror_h1]:text-2xl [&_.ProseMirror_h1]:font-semibold [&_.ProseMirror_h2]:text-xl [&_.ProseMirror_h2]:font-semibold [&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:pl-3 [&_.ProseMirror_blockquote]:italic [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-5 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-5 [&_.ProseMirror_img]:my-2 [&_.ProseMirror_img]:max-h-80 [&_.ProseMirror_img]:max-w-full [&_.ProseMirror_img]:rounded-md [&_.ProseMirror_video]:my-2 [&_.ProseMirror_video]:max-h-80 [&_.ProseMirror_video]:max-w-full [&_.ProseMirror_video]:rounded-md'
               : '[&_.ProseMirror]:min-h-10 [&_.ProseMirror]:cursor-text',
             isDragOver &&
-              '[&_.ProseMirror]:bg-accent/20 [&_.ProseMirror]:outline-2 [&_.ProseMirror]:outline-dashed [&_.ProseMirror]:outline-primary/60'
+              '[&_.ProseMirror]:bg-accent/20 [&_.ProseMirror]:outline-2 [&_.ProseMirror]:outline-dashed [&_.ProseMirror]:outline-primary/60',
+            inputClassName
           )}
         />
         {isDragOver && !disabled ? (

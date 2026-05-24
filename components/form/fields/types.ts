@@ -19,6 +19,7 @@ export type InputType =
 export type SelectOption = {
   value: string
   label: string
+  labelPrefix?: React.ReactNode
   disabled?: boolean
 }
 

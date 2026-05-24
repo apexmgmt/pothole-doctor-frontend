@@ -91,7 +91,7 @@ export default function TaskDetailsPanel({
   ) => (
     <div
       className={cn(
-        'group flex justify-between gap-2 hover:bg-muted px-2.5 py-1.5 rounded-md transition-colors duration-100',
+        'group flex justify-between gap-2 hover:bg-accent/40 px-2.5 py-1.5 rounded-md transition-colors duration-100',
         align,
         canEditTask && 'cursor-pointer'
       )}

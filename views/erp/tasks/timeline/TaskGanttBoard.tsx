@@ -382,25 +382,24 @@ export default function TaskGanttBoard({
               </button>
             </div>
 
-            <div ref={scrollAreaRef}>
-              <ScrollArea className='w-full' style={{ maxHeight: 'calc(100vh - 260px)' }}>
+            <div ref={scrollAreaRef} className=''>
+              <ScrollArea
+                className='w-full max-h-[calc(100vh-312px)]'
+                scrollbarClassName='max-h-[calc(100vh-362px)] top-10! -right-px!'
+              >
                 <div style={{ width: LABEL_COL + gridWidth, minWidth: LABEL_COL + gridWidth }}>
                   {/* ── Day header ─────────────────────────────────────────── */}
                   <div
-                    className='flex border-b border-zinc-700 bg-zinc-800/90'
-                    style={{ position: 'sticky', top: 0, zIndex: 20, height: HDR_DAY }}
+                    className='flex sticky top-0 z-30 border-b border-zinc-700 bg-zinc-800/90'
+                    style={{ height: HDR_DAY }}
                   >
                     {/* Label spacer — sticky left */}
                     <div
                       style={{
                         width: LABEL_COL,
-                        minWidth: LABEL_COL,
-                        position: 'sticky',
-                        left: 0,
-                        zIndex: 30,
-                        background: 'rgb(39 39 42 / 1)'
+                        minWidth: LABEL_COL
                       }}
-                      className='bg-zinc-800 z-50! shrink-0 border-r border-zinc-700 flex items-center px-3 font-bold text-background'
+                      className='sticky left-0 top-0 z-20 flex items-center shrink-0 bg-zinc-800 border-r border-zinc-700 px-3 font-bold text-background'
                     >
                       Tasks
                     </div>
@@ -415,7 +414,7 @@ export default function TaskGanttBoard({
                           key={i}
                           style={{ width: DAY_W, minWidth: DAY_W }}
                           className={[
-                            'shrink-0 flex flex-col items-center justify-center border-r border-zinc-800 last:border-r-0 select-none',
+                            'shrink-0 flex flex-col items-center justify-center backdrop-blur-sm border-r border-zinc-800 last:border-r-0 select-none',
                             isWeekend ? 'bg-zinc-800/60 text-zinc-500' : 'text-zinc-400',
                             isToday ? 'bg-blue-900/50! text-blue-300! font-bold' : ''
                           ].join(' ')}
@@ -428,44 +427,40 @@ export default function TaskGanttBoard({
                   </div>
 
                   {/* ── Task rows ──────────────────────────────────────────── */}
-                  {ganttTasks.length === 0 && (
+                  {ganttTasks.length < 1 ? (
                     <div className='flex' style={{ height: ROW_H }}>
                       <div
                         style={{
                           width: LABEL_COL,
-                          minWidth: LABEL_COL,
-                          position: 'sticky',
-                          left: 0,
-                          zIndex: 10,
-                          background: 'rgb(24 24 27)'
+                          minWidth: LABEL_COL
                         }}
-                        className='shrink-0 border-r border-zinc-700 flex items-center px-3'
+                        className='sticky left-0 z-10 flex items-center shrink-0 bg-[#18181b] border-r border-zinc-700 px-3'
                       >
                         <p className='text-xs text-zinc-500'>No tasks</p>
                       </div>
-                      <div className='relative flex-1' style={{ background: 'rgb(24 24 27)' }} />
+                      <div className='relative flex-1 bg-[#18181b]' />
                     </div>
+                  ) : (
+                    ganttTasks.map((task, rowIdx) => (
+                      <GanttTaskRow
+                        key={task.id}
+                        task={task}
+                        rowIdx={rowIdx}
+                        labelCol={LABEL_COL}
+                        gridWidth={gridWidth}
+                        dayW={DAY_W}
+                        rowH={ROW_H}
+                        days={days}
+                        barLeft={barLeft(task)}
+                        barWidth={barWidth(task)}
+                        todayOffset={todayOffset}
+                        showToday={showToday}
+                        onEdit={handleEdit}
+                      />
+                    ))
                   )}
-                  {ganttTasks.map((task, rowIdx) => (
-                    <GanttTaskRow
-                      key={task.id}
-                      task={task}
-                      rowIdx={rowIdx}
-                      labelCol={LABEL_COL}
-                      gridWidth={gridWidth}
-                      dayW={DAY_W}
-                      rowH={ROW_H}
-                      days={days}
-                      barLeft={barLeft(task)}
-                      barWidth={barWidth(task)}
-                      todayOffset={todayOffset}
-                      showToday={showToday}
-                      onEdit={handleEdit}
-                    />
-                  ))}
                 </div>
-                <ScrollBar orientation='horizontal' className='mt-1' />
-                <ScrollBar orientation='vertical' />
+                <ScrollBar orientation='horizontal' className='max-w-[calc(100%-260px)] left-65!' />
               </ScrollArea>
             </div>
 
