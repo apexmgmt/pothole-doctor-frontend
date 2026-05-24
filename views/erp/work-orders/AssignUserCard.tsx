@@ -125,10 +125,12 @@ const AssignUserCard = ({
 
   // When custom commission is active, show the stored backend value (already reflects the override).
   // When cleared (customCommission === 0), recalculate live from the user's commission rules.
-  const storedProfit = Number(workOrder?.profit ?? 0)
+  const storedProfit = Number(workOrder?.total_profit ?? 0)
 
   const effectiveCommission = isCustomActive
-    ? Number(workOrder?.commissions ?? 0)
+    ? isCustomCommissionPercentage
+      ? (storedProfit * customCommission) / 100
+      : customCommission
     : calculateRuleCommission(commissions, profit, total)
 
   const effectivePercent = storedProfit > 0 ? (effectiveCommission / storedProfit) * 100 : 0
