@@ -68,14 +68,16 @@ const MultiSelectSearchField = <T extends FieldValues>({
             autoFocus={autoFocus}
             className={cn('w-full justify-between', className, 'h-auto! min-h-7!')}
           >
-            <div className='flex flex-1 flex-wrap items-center gap-1 text-left'>
+            <div
+              className={`flex flex-1 flex-wrap items-center gap-1 text-left ${selectedValues.length === 0 ? 'text-[#a7a7ae] overflow-hidden' : 'text-[#f4f4f5]'}`}
+            >
               {!(selectedValues.length > 0) ? (
-                <span className='text-[#a7a7ae]'>{placeholder}</span>
+                <span>{placeholder}</span>
               ) : (
                 selectedValues.map((valueItem, i) => (
                   <span
                     key={`${valueItem}-${i}`}
-                    className='flex items-center gap-1.5 pl-2 pr-1 py-px rounded-sm text-xs leading-none text-[#f4f4f5] bg-white/10'
+                    className='flex items-center gap-1.5 pl-2 pr-1 py-px rounded-sm text-xs leading-none bg-white/10'
                   >
                     {selectOptions?.find(opt => opt.value === valueItem)?.label}
                     <span
@@ -118,6 +120,7 @@ const MultiSelectSearchField = <T extends FieldValues>({
                       className='flex items-center gap-2 py-1 hover:bg-[#1F1F1F] data-[selected=true]:bg-[#1F1F1F]'
                     >
                       <Checkbox checked={isSelected} className='size-4 [&_span_svg]:size-3.25 pointer-events-none' />
+                      {opt.labelPrefix && <span className='mr-2'>{opt.labelPrefix}</span>}
                       {opt.label}
                     </CommandItem>
                   )

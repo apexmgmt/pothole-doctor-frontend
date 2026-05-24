@@ -36,14 +36,14 @@ export function DateTimePicker({
         <Button
           variant='outline'
           className={cn(
-            'w-full bg-transparent justify-start text-left font-normal h-10 px-3 py-2 min-w-0 overflow-hidden',
+            'w-full bg-transparent justify-between text-left font-normal h-7 ps-2.5! pr-1.25! py-1.25! text-sm min-w-0 overflow-hidden',
             !value && 'text-muted-foreground',
             className
           )}
           disabled={disabled}
         >
-          <CalendarIcon className='mr-2 h-4 w-4' />
           {dateValue ? dateValue.toLocaleString() : <span>{placeholder}</span>}
+          <CalendarIcon className='size-4' />
         </Button>
       </PopoverTrigger>
       <PopoverContent className='w-auto p-0' align='start'>
