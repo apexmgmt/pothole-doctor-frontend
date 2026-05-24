@@ -297,6 +297,7 @@ const ServiceTypeSection = ({
                     <div className='flex items-center gap-1'>
                       <span className='text-sm font-medium text-zinc-200'>
                         {[selectedContractor.first_name, selectedContractor.last_name].filter(Boolean).join(' ') ||
+                          selectedContractor?.userable?.company?.name ||
                           'Contractor'}
                       </span>
                       {mode !== 'view' && (
