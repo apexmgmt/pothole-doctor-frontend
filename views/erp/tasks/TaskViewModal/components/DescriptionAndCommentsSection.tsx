@@ -125,7 +125,8 @@ export default function DescriptionAndCommentsSection({
   }
 
   return (
-    <div className='lg:col-span-2 space-y-5'>
+    <div className='py-px space-y-5'>
+      {/* Heading */}
       <div className='space-y-2'>
         {editingField === 'name' ? (
           <Input
@@ -150,19 +151,17 @@ export default function DescriptionAndCommentsSection({
           />
         ) : (
           <p
-            className={cn('text-xl', canEditTask && 'cursor-pointer')}
+            className={cn('text-lg', canEditTask && 'cursor-pointer')}
             onClick={() => startInlineEdit('name', task?.name || '')}
           >
             {task?.name || '-'}
           </p>
         )}
-        <Separator />
       </div>
 
+      {/* Description */}
       <div className='space-y-2'>
-        <div className='flex items-center justify-between gap-2'>
-          <Label>Description</Label>
-        </div>
+        <Label className='text-sm text-muted-foreground'>Description</Label>
 
         {isEditingDescription ? (
           <div className='rounded-md border border-border p-2 space-y-2'>
@@ -181,20 +180,18 @@ export default function DescriptionAndCommentsSection({
                   setIsEditingDescription(false)
                 }}
                 disabled={isSavingDescription}
+                className='text-xs h-7'
               >
                 Cancel
               </Button>
-              <Button type='button' onClick={saveDescription} disabled={isSavingDescription}>
+              <Button type='button' onClick={saveDescription} disabled={isSavingDescription} className='text-xs h-7'>
                 {isSavingDescription ? 'Saving...' : 'Save'}
               </Button>
             </div>
           </div>
         ) : (
           <div
-            className={cn(
-              'p-4 rounded-md border border-transparent',
-              task && 'cursor-pointer transition-colors border-border'
-            )}
+            className={task ? 'cursor-pointer transition-colors border-border' : ''}
             onClick={() => {
               setDescriptionHtml(task?.description || '')
               setIsEditingDescription(true)
@@ -211,7 +208,7 @@ export default function DescriptionAndCommentsSection({
               }
             }}
           >
-            {task?.description ? (
+            {task?.description && task.description !== '<p></p>' ? (
               <div
                 className='text-sm wrap-break-word [&_h1]:text-lg [&_h1]:font-semibold [&_h2]:text-base [&_h2]:font-semibold [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_img]:my-2 [&_img]:max-w-full [&_img]:rounded-md [&_video]:my-2 [&_video]:max-w-full [&_video]:rounded-md'
                 dangerouslySetInnerHTML={{ __html: task.description }}
@@ -223,17 +220,27 @@ export default function DescriptionAndCommentsSection({
         )}
       </div>
 
+      {/* Add Comment */}
       <div className='space-y-3'>
-        <Label>Add Comment</Label>
-        <div className='space-y-2'>
+        <Label className='text-sm text-muted-foreground'>Add Comment</Label>
+        <div className='px-px space-y-2'>
           <TipTapRichTextEditor
             value={commentHtml}
             onChange={setCommentHtml}
             placeholder='Write a comment...'
             disabled={isAddingComment || !task}
           />
-          <div className='flex justify-end'>
-            <Button type='button' onClick={addComment} disabled={isAddingComment || !task}>
+          <div className='flex justify-end gap-2'>
+            <Button
+              type='button'
+              variant='outline'
+              onClick={() => setCommentHtml('')}
+              disabled={isAddingComment || !task}
+              className='text-xs h-7'
+            >
+              Cancel
+            </Button>
+            <Button type='button' onClick={addComment} disabled={isAddingComment || !task} className='text-xs h-7'>
               {isAddingComment ? 'Adding...' : 'Add Comment'}
             </Button>
           </div>

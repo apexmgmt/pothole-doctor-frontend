@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, FieldValues, Path } from 'react-hook-form'
 
 import { ChevronsUpDown, XIcon } from 'lucide-react'
@@ -19,12 +19,22 @@ const MultiSelectField = <T extends FieldValues>({
   control,
   rules,
   selectOptions,
+  disabled = false,
   value,
   onChange,
   onBlur,
+  onOpenChange,
+  autoFocus,
   className
 }: MultiSelectFieldProps<T>) => {
   const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    if (autoFocus && !disabled) {
+      setOpen(true)
+      onOpenChange?.(true)
+    }
+  }, [autoFocus, disabled, onOpenChange])
 
   if (!selectOptions) return null
 
@@ -43,9 +53,20 @@ const MultiSelectField = <T extends FieldValues>({
     }
 
     return (
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover
+        open={open}
+        onOpenChange={nextOpen => {
+          setOpen(nextOpen)
+          onOpenChange?.(nextOpen)
+        }}
+      >
         <PopoverTrigger asChild>
-          <Button variant='outline' className={cn('w-full justify-between', className, 'h-auto!')}>
+          <Button
+            variant='outline'
+            disabled={disabled}
+            autoFocus={autoFocus}
+            className={cn('w-full justify-between', className, 'h-auto! min-h-7!')}
+          >
             <div className='flex flex-1 flex-wrap items-center gap-1 text-left'>
               {!(selectedValues.length > 0) ? (
                 <span className='text-[#a7a7ae]'>{placeholder}</span>

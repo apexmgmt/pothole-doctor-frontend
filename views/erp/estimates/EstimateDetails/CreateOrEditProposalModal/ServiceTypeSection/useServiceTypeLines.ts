@@ -30,7 +30,7 @@ export const useServiceTypeLines = ({ lines, onLinesChange, taxRate, hideMargin 
   const clampProductQty = (qty: number, line: ProposalServiceItemPayload): number => {
     if (!line.product_id || !line.product) return qty
 
-    const minQty = Number(line.product.minimum_qty ?? line.product.coverage_per_rate ?? 0)
+    const minQty = Number(line.product.coverage_per_rate ?? line.product.minimum_qty ?? 0)
     const roundUp = !!line.product.round_up_quantity
     let adjusted = qty
 
@@ -139,11 +139,14 @@ export const useServiceTypeLines = ({ lines, onLinesChange, taxRate, hideMargin 
         //     : product?.coverage_per_unit_id === product?.selling_unit_id
         //       ? product.product_cost / (product?.coverage_per_rate ?? 1)
         //       : product?.product_cost).toFixed(2) as unknown as number,
-        qty: product.minimum_qty || product?.coverage_per_rate || 0,
+        qty: product?.coverage_per_rate || product.minimum_qty || 0,
         unit_id: product.selling_unit_id ?? '',
         unit_name: product.selling_unit?.name ?? product.selling_uom?.name ?? '',
         vendor_id: product.vendor_id ?? '',
         margin: hideMargin ? 0 : product.margin,
+        sku: product.sku ?? '',
+        style: product.vendor_style ?? product?.private_style ?? '',
+        color: product.vendor_color ?? product?.private_color ?? '',
         unit_price: 0,
         discount: 0,
         discount_type: 'percentage',

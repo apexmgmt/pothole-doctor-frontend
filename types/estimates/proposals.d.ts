@@ -1,4 +1,4 @@
-import { Client, Estimate, LaborCost, MaterialJobAction, Model, Partner, Product, ServiceType, User } from '@/types'
+import { Client, Estimate, LaborCost, MaterialJob, MaterialJobAction, Model, Partner, Product, ServiceType, User } from '@/types'
 export interface Proposal extends Model {
   proposal_number: number
   estimate_id: string
@@ -85,6 +85,9 @@ export interface ProposalServiceItem extends Model {
   service_type_id: string
   name: string
   description: string
+  sku?: string
+  style?: string 
+  color?: string 
   type: 'invoice' | 'product' | 'labor' | 'expense' | 'comment' | 'deduction'
   unit_cost: number
   qty: number
@@ -96,7 +99,7 @@ export interface ProposalServiceItem extends Model {
   unit?: Unit
   vendor_id?: string | null
   total_price: number
-  
+
   discount: number
   discount_type: 'percentage' | 'fixed'
   total_discount: number
@@ -106,9 +109,11 @@ export interface ProposalServiceItem extends Model {
   note: string | null
   is_sale: number | 1 | 0
   tax_amount: number // note: just for calculation, not stored in db
-  total_tax: number 
+  total_tax: number
   freight_charge: number
   material_job_actions?: MaterialJobAction[]
+  material_job_id: string | null
+  material_job?: MaterialJob | null
 }
 export interface ProposalPayload {
   estimate_id: string
@@ -135,6 +140,9 @@ export interface ProposalServiceItemPayload {
   labor_cost?: LaborCost
   name: string
   description: string
+  sku?: string
+  style?: string
+  color?: string
   type: 'invoice' | 'product' | 'labor' | 'expense' | 'comment' | 'deduction'
   unit_cost: number
   qty: number
@@ -154,4 +162,6 @@ export interface ProposalServiceItemPayload {
   total_price?: number
   note: string
   material_job_actions?: MaterialJobAction[]
+  material_job_id?: string | null
+  material_job?: MaterialJob | null
 }

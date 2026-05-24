@@ -31,6 +31,7 @@ import TotalCalculationCard from '@/views/erp/estimates/EstimateDetails/CreateOr
 import ClientDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ClientDetailsCard'
 import DiscountDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/DiscountDetailsCard'
 import ProfitDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ProfitDetailsCard'
+import InvoiceAssignUserCard from '@/components/erp/invoices/InvoiceAssignUserCard'
 import { getDiscountedUnitPrice } from '@/utils/business-calculation'
 import { extractServiceLineErrors, hasServiceLineErrors, ServiceLineErrors } from '@/utils/service-line-validation'
 
@@ -149,6 +150,9 @@ const AddInvoiceServicesView = ({
             labor_cost_id: item.labor_cost_id,
             name: item.name,
             description: item.description,
+            sku: item.sku ?? '',
+            style: item.style ?? '',
+            color: item.color ?? '',
             type: item.type,
             unit_cost: item.unit_cost,
             qty: item.qty,
@@ -215,6 +219,9 @@ const AddInvoiceServicesView = ({
           name: line.name,
           description: line.description,
           type: line.type,
+          sku: line.sku ?? '',
+          style: line.style ?? '',
+          color: line.color ?? '',
           unit_cost: line.unit_cost,
           qty: line.qty,
           unit_name: line.unit_name,
@@ -423,7 +430,10 @@ const AddInvoiceServicesView = ({
             Back
           </Button>
           <div>
-            <h1 className='text-xl font-bold'>Invoice #{currentInvoice?.invoice_number_prefix ? `${currentInvoice.invoice_number_prefix}-` : ''}{currentInvoice?.invoice_number?.toString() || 'N/A'}</h1>
+            <h1 className='text-xl font-bold'>
+              Invoice #{currentInvoice?.invoice_number_prefix ? `${currentInvoice.invoice_number_prefix}-` : ''}
+              {currentInvoice?.invoice_number?.toString() || 'N/A'}
+            </h1>
             <p className='text-sm text-zinc-400'>{isEditMode ? 'Edit Invoice Services' : 'Add Invoice Services'}</p>
           </div>
         </div>
@@ -470,8 +480,9 @@ const AddInvoiceServicesView = ({
       </div>
 
       {/* Detail Cards */}
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4'>
         <ClientDetailsCard estimateDetails={currentInvoice as any} />
+        <InvoiceAssignUserCard invoice={currentInvoice} profit={profitAmount} total={totalSales} />
         <DiscountDetailsCard
           mode='create'
           estimateDetails={currentInvoice as any}

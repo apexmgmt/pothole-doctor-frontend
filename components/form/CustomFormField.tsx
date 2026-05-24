@@ -38,12 +38,15 @@ const CustomFormField = <T extends FieldValues>({
   control,
   errors,
   readonly = false,
+  disabled = false,
   minDate,
   maxDate,
   lockFutureDate,
   value,
   onChange,
   onBlur,
+  onOpenChange,
+  autoFocus,
   className = '',
   labelClassName = '',
   fieldClassName = ''
@@ -64,7 +67,7 @@ const CustomFormField = <T extends FieldValues>({
       {label && !isCheckbox && (
         <FieldLabel htmlFor={name} className={cn('text-xs font-normal leading-tight gap-0', labelClassName)}>
           {label}
-          {rules?.required && <span className='text-sm text-red-500'>*</span>}
+          {rules?.required && <span className='text-sm leading-none text-red-500'>*</span>}
         </FieldLabel>
       )}
 
@@ -79,6 +82,9 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : type === 'select' ? (
@@ -91,6 +97,9 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : type === 'multiselect' ? (
@@ -103,6 +112,9 @@ const CustomFormField = <T extends FieldValues>({
             control={control}
             onChange={onChange}
             onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : type === 'multiselect-searchable' ? (
@@ -115,6 +127,9 @@ const CustomFormField = <T extends FieldValues>({
             control={control}
             onChange={onChange}
             onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : type === 'multiselect-creatable' ? (
@@ -127,6 +142,9 @@ const CustomFormField = <T extends FieldValues>({
             control={control}
             onChange={onChange}
             onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : type === 'checkbox' ? (
@@ -138,6 +156,8 @@ const CustomFormField = <T extends FieldValues>({
             control={control}
             onChange={onChange}
             onBlur={onBlur}
+            autoFocus={autoFocus}
+            disabled={disabled}
             className={className}
             labelClassName={labelClassName}
           />
@@ -153,6 +173,8 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            autoFocus={autoFocus}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : type === 'textarea' ? (
@@ -165,6 +187,8 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            autoFocus={autoFocus}
+            disabled={disabled}
             className={inputStyle}
           />
         ) : (
@@ -179,6 +203,8 @@ const CustomFormField = <T extends FieldValues>({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            autoFocus={autoFocus}
+            disabled={disabled}
             className={inputStyle}
           />
         )}

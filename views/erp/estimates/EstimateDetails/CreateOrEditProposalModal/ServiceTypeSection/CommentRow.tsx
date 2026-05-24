@@ -17,6 +17,7 @@ interface CommentRowProps {
   clearEditValue: (idx: number, field: string) => void
   updateLine: (idx: number, field: keyof ProposalServiceItemPayload, value: any) => void
   removeLine: (idx: number) => void
+  showSkuStyleColor?: boolean
 }
 
 const CommentRow = ({
@@ -30,9 +31,10 @@ const CommentRow = ({
   setEditValue,
   clearEditValue,
   updateLine,
-  removeLine
+  removeLine,
+  showSkuStyleColor=false
 }: CommentRowProps) => {
-  const totalColumns = 8 + (showVendor ? 1 : 0) + (hideMargin ? 0 : 1) + (hidePriceColumns ? 0 : 2)
+  const totalColumns = 8 + (showVendor ? 1 : 0) + (hideMargin ? 0 : 1) + (hidePriceColumns ? 0 : 2) + (showSkuStyleColor ? 3 : 0)
 
   return (
     <tr className={cn('border-b border-zinc-800 bg-muted align-top')}>

@@ -33,7 +33,7 @@ const InvoiceActionsButton = ({
             <ChevronDownIcon className='h-4 w-4 ml-2' />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align='end'>
+        <DropdownMenuContent align='start'>
           <DropdownMenuItem onClick={onViewEditDetails}>
             <Eye className='mr-2 h-4 w-4' />
             View/Edit Invoice Details
