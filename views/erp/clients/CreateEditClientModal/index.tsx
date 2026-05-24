@@ -213,7 +213,15 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
         ...rest
       } = data
 
-      const payload = { ...rest }
+      const payload = {
+        ...rest,
+        cc_email:
+          rest.cc_email
+            ?.split(/[,\s]+/)
+            .map(email => email.trim())
+            .filter(Boolean)
+            .join(',') || ''
+      }
 
       const addressPayload: ClientAddressPayload = {
         client_id: clientId || '',
@@ -459,13 +467,13 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     },
     {
       name: 'cc_email',
-      type: 'email',
+      type: 'text',
       label: 'CC Email',
       placeholder: 'Enter CC email',
       rules: {
         pattern: {
-          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-          message: 'Invalid email address'
+          value: /^([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})([\s,]+[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})*$/i,
+          message: 'Invalid email address list'
         }
       }
     },

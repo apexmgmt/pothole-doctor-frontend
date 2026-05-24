@@ -61,8 +61,6 @@ const CreateOrEditEstimateModal = ({
   businessLocations,
   defaultClientId
 }: CreateOrEditEstimateModalProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-
   const form = useForm<EstimatePayload>({
     defaultValues: {
       title: estimateDetails?.title || '',
@@ -87,8 +85,6 @@ const CreateOrEditEstimateModal = ({
   })
 
   const {
-    watch,
-    setValue,
     register,
     control,
     formState: { errors }
@@ -251,8 +247,6 @@ const CreateOrEditEstimateModal = ({
       form.setValue('tax_rate', selectedLocation.sales_tax)
     }
   }, [form.watch('location_id'), businessLocations])
-
-  console.log(watch())
 
   const fieldStyle = 'grid grid-cols-[152px_minmax(0,_1fr)]'
   const labelStyle = 'justify-end self-start text-right pt-1'
