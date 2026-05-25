@@ -66,7 +66,7 @@ const ProposalScope = ({
         {hasReview && existingReview && (
           <div className='rounded-md border border-yellow-500/40 bg-yellow-500/10 p-4 text-sm print:hidden'>
             <p className='font-semibold text-yellow-400 mb-1'>Your Revision Request</p>
-            <p className='text-primary-foreground/80 whitespace-pre-wrap'>{existingReview}</p>
+            <p className='text-accent whitespace-pre-wrap'>{existingReview}</p>
           </div>
         )}
 
