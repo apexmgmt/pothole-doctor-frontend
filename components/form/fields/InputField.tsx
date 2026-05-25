@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 
 import { FieldComponentProps } from './types'
 
+export type InputFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
+
 const InputField = <T extends FieldValues>({
   type,
   name,

@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 
 import { FieldComponentProps } from './types'
 
-type SelectFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
+export type SelectFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
 
 const SelectField = <T extends FieldValues>({
   name,

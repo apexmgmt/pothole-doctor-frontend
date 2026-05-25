@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { FieldComponentProps } from './types'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
-type ComboboxFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
+export type ComboboxFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
 
 const ComboboxField = <T extends FieldValues>({
   name,

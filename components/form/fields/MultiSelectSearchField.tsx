@@ -12,7 +12,7 @@ import { FieldComponentProps } from './types'
 import { cn } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
-type MultiSelectSearchFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
+export type MultiSelectSearchFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
 
 const MultiSelectSearchField = <T extends FieldValues>({
   name,
