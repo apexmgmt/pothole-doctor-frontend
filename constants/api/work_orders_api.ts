@@ -9,6 +9,12 @@ export const WORK_ORDERS: string = '/v1/tenant/work-orders/'
 export const WORK_ORDERS_ALL: string = '/v1/tenant/get-work-orders/'
 
 /**
+ * This contains the API endpoint to get a summary of work orders for tenant
+ * @method GET
+ */
+export const WORK_ORDERS_SUMMARY: string = '/v1/tenant/get-work-orders-summary/'
+
+/**
  * This contains the API endpoint to manage services related to a specific work order.
  * @param workOrderId string (uuid)
  * @method POST - To add a service to a work order

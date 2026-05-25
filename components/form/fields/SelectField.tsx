@@ -58,6 +58,7 @@ const SelectField = <T extends FieldValues>({
                 disabled={!!opt?.disabled}
                 className='py-1 data-[highlighted]:bg-[#1F1F1F]'
               >
+                {opt.labelPrefix && <span className='mr-2'>{opt.labelPrefix}</span>}
                 {opt.label}
               </SelectItem>
             ))}

@@ -10,6 +10,12 @@
 export const INVOICES: string = '/v1/tenant/invoices/'
 
 /**
+ * This contains the API endpoint to get a summary of invoices for tenant.
+ * @method GET 
+ */
+export const INVOICES_SUMMARY: string = '/v1/tenant/get-invoices-summary'
+
+/**
  * This contains all the API endpoints related to invoice services.
  * @param invoiceId string (uuid)
  * @method POST - To add a service to an invoice

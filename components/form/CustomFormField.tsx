@@ -55,7 +55,7 @@ const CustomFormField = <T extends FieldValues>({
 
   // Combine base styles
   const inputStyle = cn(
-    `text-sm font-normal leading-none bg-[#1f1f1f] hover:bg-[#1f1f1f] placeholder:text-[#a7a7ae] text-[#f4f4f5] px-2.5 py-1.25 ${type === 'textarea' ? 'h-16!' : 'h-7!'} ${fieldError ? 'border-red-500' : ''}`,
+    `text-sm font-normal leading-none bg-[#1f1f1f] hover:bg-[#1f1f1f] placeholder:text-[#a7a7ae] text-[#f4f4f5] px-2.5 py-1.25 ${type === 'textarea' ? '' : 'h-7!'} ${fieldError ? 'border-red-500' : ''}`,
     className
   )
 

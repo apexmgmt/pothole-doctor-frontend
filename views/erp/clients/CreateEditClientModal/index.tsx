@@ -213,7 +213,15 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
         ...rest
       } = data
 
-      const payload = { ...rest }
+      const payload = {
+        ...rest,
+        cc_email:
+          rest.cc_email
+            ?.split(/[,\s]+/)
+            .map(email => email.trim())
+            .filter(Boolean)
+            .join(',') || ''
+      }
 
       const addressPayload: ClientAddressPayload = {
         client_id: clientId || '',
@@ -459,13 +467,13 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     },
     {
       name: 'cc_email',
-      type: 'email',
+      type: 'text',
       label: 'CC Email',
       placeholder: 'Enter CC email',
       rules: {
         pattern: {
-          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-          message: 'Invalid email address'
+          value: /^([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})([\s,]+[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})*$/i,
+          message: 'Invalid email address list'
         }
       }
     },
@@ -664,7 +672,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
                           }
                         }
                       }}
-                      fieldClassName='grid grid-cols-[128px_auto]'
+                      fieldClassName='grid grid-cols-[128px_minmax(0,_1fr)]'
                       labelClassName='justify-end self-start text-right pt-px'
                     />
                   )
@@ -682,7 +690,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
                     register={register}
                     control={control}
                     errors={errors}
-                    fieldClassName={type === 'checkbox' ? 'mt-3 md:mt-6' : 'grid grid-cols-[128px_auto]'}
+                    fieldClassName={type === 'checkbox' ? 'mt-3 md:mt-6' : 'grid grid-cols-[128px_minmax(0,_1fr)]'}
                     labelClassName={type === 'checkbox' ? 'text-nowrap' : 'justify-end self-start text-right pt-px'}
                     className={type === 'checkbox' ? 'col-span-2 ps-34' : ''}
                   />

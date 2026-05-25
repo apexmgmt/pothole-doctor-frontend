@@ -58,8 +58,8 @@ export default function GanttTaskRow({
     >
       {/* Task label — sticky left */}
       <div
-        style={{ width: labelCol, minWidth: labelCol, position: 'sticky', left: 0, zIndex: 20, background: rowBg }}
-        className='shrink-0 flex items-center gap-2 px-3 border-r border-zinc-700 h-full'
+        style={{ width: labelCol, minWidth: labelCol, background: rowBg }}
+        className='shrink-0 flex items-center gap-2 sticky left-0 z-20 px-3 border-r border-zinc-700 h-full'
       >
         <button type='button' className='flex-1 text-left min-w-0' onClick={() => onEdit(task)}>
           <p className='text-base font-medium text-zinc-100 truncate' title={task.name}>

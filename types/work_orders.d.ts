@@ -153,3 +153,18 @@ export interface WorkOrderServiceItemPayload {
   note: string
   material_job_actions?: MaterialJobAction[]
 }
+
+export interface WorkOrderSummary {
+  total_invoice_total: number
+  total_invoice_subtotal: number
+  total_invoice_total_tax: number
+  total_commissions: number
+  total_cost: number
+  total_expenses: number
+  total_profit: number
+  total_material_cost: number
+  total_freight_charge: number
+  total_labor_cost: number
+  total_net_profit: number
+  total_profit_percentage: number
+}

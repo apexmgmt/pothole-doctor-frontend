@@ -42,6 +42,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
     return (selectOptions ?? []).map(option => ({
       value: option.value,
       label: option.label,
+      labelPrefix: option.labelPrefix,
       disabled: option.disabled,
       key: `${option.value}::${option.label}`
     }))
@@ -90,7 +91,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
 
     const showCreate = inputValue.trim().length > 0 && !isExistingOption(inputValue)
 
-    return (
+    return (https://github.com/blackdevs-soft/pothole-doctor-frontend/pull/195/conflict?name=components%252Fform%252Ffields%252FMultiSelectCreatableField.tsx&ancestor_oid=c1b56d60d21a9fb4d6fdd39a7919b0bd207a3db3&base_oid=cfd288f8e5917a7948a68d93fd9ba10314f84b83&head_oid=301b913167ef5c54fd2696ea9562a18f3787e03f
       <Popover
         open={open}
         onOpenChange={nextOpen => {
@@ -109,14 +110,16 @@ const MultiSelectCreatableField = <T extends FieldValues>({
             autoFocus={autoFocus}
             className={cn('w-full justify-between', className, 'h-auto! min-h-7!')}
           >
-            <div className='flex flex-1 flex-wrap items-center gap-1 text-left'>
+            <div
+              className={`flex flex-1 flex-wrap items-center gap-1 text-left ${selectedValues.length === 0 ? 'text-[#a7a7ae] overflow-hidden' : 'text-[#f4f4f5]'}`}
+            >
               {!(selectedValues.length > 0) ? (
-                <span className='text-[#a7a7ae]'>{placeholder}</span>
+                <span>{placeholder}</span>
               ) : (
                 selectedValues.map((valueItem, i) => (
                   <span
                     key={`${valueItem}-${i}`}
-                    className='flex items-center gap-1.5 pl-2 pr-1 py-px rounded-sm text-xs leading-none text-[#f4f4f5] bg-white/10'
+                    className='flex items-center gap-1.5 pl-2 pr-1 py-px rounded-sm text-xs leading-none bg-white/10'
                   >
                     {lookupLabel(valueItem)}
                     <span
@@ -175,6 +178,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
                       className='flex items-center gap-2 py-1 hover:bg-[#1F1F1F] data-[selected=true]:bg-[#1F1F1F]'
                     >
                       <Checkbox checked={isSelected} className='size-4 [&_span_svg]:size-3.25 pointer-events-none' />
+                      {option.labelPrefix && <span className='mr-2'>{option.labelPrefix}</span>}
                       {option.label}
                     </CommandItem>
                   )

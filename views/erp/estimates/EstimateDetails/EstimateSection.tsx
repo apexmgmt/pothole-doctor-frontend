@@ -1,11 +1,27 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { BusinessLocation, Client, Estimate, EstimateType, PaymentTerm, ServiceType, Staff } from '@/types'
+import { Label } from '@/components/ui/label'
+import { DateTimePicker } from '@/components/ui/datetime-picker'
+import {
+  BusinessLocation,
+  Client,
+  Estimate,
+  EstimatePayload,
+  EstimateType,
+  PaymentTerm,
+  ServiceType,
+  Staff
+} from '@/types'
 import { formatDate, formatDateTime } from '@/utils/date'
 import CreateOrEditEstimateModal from '../CreateOrEditEstimateModal'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { hasPermission } from '@/utils/role-permission'
+import { PencilLine } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import CustomFormField from '@/components/form/CustomFormField'
+import EstimateService from '@/services/api/estimates/estimates.service'
+import { toast } from 'sonner'
 
 const EstimateSection = ({
   estimateId,
@@ -29,11 +45,22 @@ const EstimateSection = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const router = useRouter()
   const [canEditEstimate, setCanEditEstimate] = useState<boolean>(false)
+  const [currentEstimate, setCurrentEstimate] = useState<Estimate>(estimate)
+  const estimateRef = useRef<Estimate>(estimate)
+  const [editingField, setEditingField] = useState<InlineEditableField | null>(null)
+  const [editingValue, setEditingValue] = useState('')
+  const saveQueueRef = useRef<Promise<void>>(Promise.resolve())
+  const lastInlineSaveRequestIdRef = useRef(0)
 
   // Check permissions
   useEffect(() => {
     hasPermission('Update Estimate').then(result => setCanEditEstimate(result))
   }, [])
+
+  useEffect(() => {
+    setCurrentEstimate(estimate)
+    estimateRef.current = estimate
+  }, [estimate])
 
   // This function will be called after a successful edit
   const handleModalChange = (open: boolean) => {
@@ -44,6 +71,888 @@ const EstimateSection = ({
       router.refresh()
     }
   }
+
+  const startInlineEdit = (field: InlineEditableField, value?: string) => {
+    if (!canEditEstimate) return
+
+    setEditingField(field)
+    setEditingValue(value ?? '')
+  }
+
+  const cancelInlineEdit = () => {
+    setEditingField(null)
+    setEditingValue('')
+  }
+
+  const enqueueSave = (executor: () => Promise<void>) => {
+    saveQueueRef.current = saveQueueRef.current.then(executor).catch(() => {
+      // Keep queue alive for later updates.
+    })
+  }
+
+  const loadEstimateDetails = async () => {
+    if (!estimateId) return
+
+    try {
+      const response = await EstimateService.show(estimateId)
+      const estimateData = response?.data as Estimate
+
+      setCurrentEstimate(estimateData)
+      estimateRef.current = estimateData
+      cancelInlineEdit()
+    } catch (error: any) {
+      toast.error(typeof error?.message === 'string' ? error.message : 'Failed to load estimate details')
+    }
+  }
+
+  const formatDeliveryDatetime = (value: string | number | null | undefined) => {
+    if (!value) return null
+
+    const d = typeof value === 'number' ? new Date(value) : new Date(String(value).replace(' ', 'T'))
+
+    if (Number.isNaN(d.getTime())) return String(value)
+
+    const pad = (n: number) => String(n).padStart(2, '0')
+
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(
+      d.getMinutes()
+    )}:${pad(d.getSeconds())}`
+  }
+
+  const buildEstimatePayload = (sourceEstimate: Estimate, overrides: Partial<Estimate> = {}): EstimatePayload => {
+    const mergedEstimate = { ...sourceEstimate, ...overrides }
+
+    const estimateTypeName =
+      estimateTypes.find(type => type.id === mergedEstimate.estimate_type_id)?.name ||
+      mergedEstimate.estimate_type?.name ||
+      ''
+
+    const isMaterialOnly = estimateTypeName === 'Material Only'
+
+    const payload: EstimatePayload = {
+      title: mergedEstimate.title || '',
+      service_type_id: mergedEstimate.service_type_id || '',
+      estimate_type_id: mergedEstimate.estimate_type_id || '',
+      client_id: mergedEstimate.client_id || '',
+      assign_id: mergedEstimate.assign_id || '',
+      payment_term_id: mergedEstimate.payment_term_id || '',
+      address_id: mergedEstimate.address_id ?? '',
+      location_id: mergedEstimate.location_id ?? '',
+      expiration_date: mergedEstimate.expiration_date || '',
+      biding_date: mergedEstimate.biding_date || '',
+      tax_rate: mergedEstimate.tax_rate ?? 0
+    }
+
+    if (isMaterialOnly) {
+      payload.interaction = mergedEstimate.interaction || ''
+
+      if (mergedEstimate.interaction === 'cash_and_pickup') {
+        payload.pickup_date = mergedEstimate.pickup_date || ''
+        payload.pickup_location_id = mergedEstimate.pickup_location_id || ''
+        payload.pickup_notes = mergedEstimate.pickup_notes || ''
+      }
+
+      if (mergedEstimate.interaction === 'cash_and_delivery') {
+        payload.delivery_datetime = formatDeliveryDatetime(mergedEstimate.delivery_datetime)
+        payload.delivery_location = mergedEstimate.delivery_location || ''
+        payload.delivery_notes = mergedEstimate.delivery_notes || ''
+      }
+    }
+
+    return payload
+  }
+
+  const saveInlineField = async (field: InlineEditableField, explicitValue?: string | number | null) => {
+    if (!estimateId) return
+
+    const baseEstimate = estimateRef.current
+
+    if (!baseEstimate) return
+
+    const rawValue = explicitValue ?? editingValue
+
+    const nextValue =
+      field === 'tax_rate'
+        ? Number(rawValue ?? 0)
+        : field === 'delivery_datetime'
+          ? rawValue
+            ? String(rawValue)
+            : ''
+          : String(rawValue ?? '')
+
+    const currentValue =
+      field === 'tax_rate'
+        ? Number(baseEstimate.tax_rate ?? 0)
+        : field === 'delivery_datetime'
+          ? String(baseEstimate.delivery_datetime ?? '')
+          : String((baseEstimate as any)[field] ?? '')
+
+    if (nextValue === currentValue) {
+      cancelInlineEdit()
+
+      return
+    }
+
+    const queuedRequestId = ++lastInlineSaveRequestIdRef.current
+
+    const selectedClient = field === 'client_id' ? clients.find(client => client.id === String(nextValue)) : undefined
+
+    const selectedEstimateType =
+      field === 'estimate_type_id' ? estimateTypes.find(type => type.id === String(nextValue)) : undefined
+
+    const selectedAssignUser = field === 'assign_id' ? staffs.find(staff => staff.id === String(nextValue)) : undefined
+
+    const selectedPaymentTerm =
+      field === 'payment_term_id' ? paymentTerms.find(term => term.id === String(nextValue)) : undefined
+
+    const selectedLocation =
+      field === 'location_id' ? businessLocations.find(loc => loc.id === String(nextValue)) : undefined
+
+    const selectedPickupLocation =
+      field === 'pickup_location_id' ? businessLocations.find(loc => loc.id === String(nextValue)) : undefined
+
+    const selectedClientAddresses = selectedClient?.addresses || []
+    const defaultAddressId = selectedClientAddresses.find(addr => addr.is_default === 1)?.id ?? ''
+
+    const selectedAddress =
+      field === 'address_id'
+        ? selectedClientAddresses.find(addr => addr.id === String(nextValue))
+        : selectedClientAddresses.find(addr => addr.id === defaultAddressId)
+
+    const nextOverrides: Partial<Estimate> = {
+      [field]: nextValue
+    }
+
+    if (field === 'client_id') {
+      nextOverrides.client_id = String(nextValue)
+      nextOverrides.client = selectedClient || baseEstimate.client
+      nextOverrides.address_id = defaultAddressId
+      nextOverrides.address = selectedAddress || null
+    }
+
+    if (field === 'address_id') {
+      nextOverrides.address_id = String(nextValue)
+      nextOverrides.address = selectedAddress || baseEstimate.address || null
+    }
+
+    if (field === 'location_id') {
+      nextOverrides.location_id = String(nextValue)
+      nextOverrides.location = selectedLocation || baseEstimate.location || null
+
+      if (selectedLocation?.sales_tax) {
+        nextOverrides.tax_rate = selectedLocation.sales_tax
+      }
+    }
+
+    if (field === 'estimate_type_id') {
+      nextOverrides.estimate_type_id = String(nextValue)
+      nextOverrides.estimate_type = selectedEstimateType || baseEstimate.estimate_type
+    }
+
+    if (field === 'assign_id') {
+      nextOverrides.assign_id = String(nextValue)
+      nextOverrides.assign_user = selectedAssignUser || baseEstimate.assign_user
+    }
+
+    if (field === 'payment_term_id') {
+      nextOverrides.payment_term_id = String(nextValue)
+      nextOverrides.payment_term = selectedPaymentTerm || baseEstimate.payment_term
+    }
+
+    if (field === 'pickup_location_id') {
+      nextOverrides.pickup_location_id = String(nextValue)
+      nextOverrides.pickup_location = selectedPickupLocation || baseEstimate.pickup_location || null
+    }
+
+    if (field === 'delivery_datetime') {
+      nextOverrides.delivery_datetime = nextValue ? String(nextValue) : null
+    }
+
+    if (field === 'interaction') {
+      nextOverrides.interaction = String(nextValue) as Estimate['interaction']
+      nextOverrides.pickup_date = ''
+      nextOverrides.pickup_location_id = ''
+      nextOverrides.pickup_location = null
+      nextOverrides.pickup_notes = ''
+      nextOverrides.delivery_datetime = null
+      nextOverrides.delivery_location = ''
+      nextOverrides.delivery_notes = ''
+    }
+
+    cancelInlineEdit()
+
+    setCurrentEstimate(prev => {
+      const nextEstimate = { ...prev, ...nextOverrides }
+
+      estimateRef.current = nextEstimate
+
+      return nextEstimate
+    })
+
+    enqueueSave(async () => {
+      const latestEstimate = estimateRef.current
+
+      if (!latestEstimate) return
+
+      try {
+        const payload = buildEstimatePayload(latestEstimate, nextOverrides)
+        const response = await EstimateService.update(estimateId, payload)
+        const updatedEstimate = response?.data as Estimate | undefined
+        const isLatestInlineRequest = queuedRequestId === lastInlineSaveRequestIdRef.current
+
+        if (updatedEstimate?.id && isLatestInlineRequest) {
+          setCurrentEstimate(updatedEstimate)
+          estimateRef.current = updatedEstimate
+        }
+      } catch (error: any) {
+        const isLatestInlineRequest = queuedRequestId === lastInlineSaveRequestIdRef.current
+
+        if (isLatestInlineRequest) {
+          toast.error(typeof error?.message === 'string' ? error.message : 'Failed to update estimate')
+          await loadEstimateDetails()
+        }
+      }
+    })
+  }
+
+  useEffect(() => {
+    if (!editingField) return
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null
+
+      if (!target) return
+
+      const isInsideInlineEditor = target.closest('[data-inline-editor]')
+      const isInsideFloatingLayer = target.closest('[data-radix-popper-content-wrapper], [data-radix-portal]')
+
+      if (isInsideInlineEditor || isInsideFloatingLayer) return
+
+      const shouldSaveOnOutsideClick: InlineEditableField[] = [
+        'title',
+        'pickup_notes',
+        'delivery_location',
+        'delivery_notes',
+        'tax_rate'
+      ]
+
+      if (shouldSaveOnOutsideClick.includes(editingField)) {
+        void saveInlineField(editingField)
+
+        return
+      }
+
+      cancelInlineEdit()
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown, true)
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown, true)
+    }
+  }, [editingField, cancelInlineEdit, saveInlineField])
+
+  type InlineEditableField =
+    | 'title'
+    | 'estimate_type_id'
+    | 'interaction'
+    | 'pickup_date'
+    | 'pickup_location_id'
+    | 'pickup_notes'
+    | 'delivery_datetime'
+    | 'delivery_location'
+    | 'delivery_notes'
+    | 'location_id'
+    | 'address_id'
+    | 'client_id'
+    | 'assign_id'
+    | 'payment_term_id'
+    | 'expiration_date'
+    | 'biding_date'
+    | 'tax_rate'
+
+  const statuslessTitle = useMemo(() => currentEstimate.title || '-', [currentEstimate.title])
+  const selectedClient = clients.find(client => client.id === currentEstimate.client_id)
+  const addressOptions = selectedClient?.addresses || currentEstimate.client?.addresses || []
+
+  const addressSelectOptions = addressOptions.map(address => {
+    const value = [address.street_address, address.city?.name, address.state?.name, address.zip_code]
+      .filter(Boolean)
+      .join(', ')
+
+    return {
+      value: address.id,
+      label: `${address.title} - ${value}`
+    }
+  })
+
+  const staffSelectOptions = staffs.map(staff => ({ value: staff.id, label: `${staff.first_name} ${staff.last_name}` }))
+  const estimateTypeSelectOptions = estimateTypes.map(type => ({ value: type.id, label: type.name }))
+
+  const clientSelectOptions = clients.map(client => ({
+    value: client.id,
+    label: `${client.first_name} ${client.last_name}`.trim()
+  }))
+
+  const paymentTermOptions = paymentTerms.map(term => ({ value: term.id, label: term.name }))
+  const businessLocationOptions = businessLocations.map(location => ({ value: location.id, label: location.name }))
+
+  const isMaterialOnly =
+    estimateTypes.find(type => type.id === currentEstimate.estimate_type_id)?.name === 'Material Only'
+
+  const renderEditableDisplay = (
+    field: InlineEditableField,
+    content: ReactNode,
+    startValue?: string,
+    align: 'items-center' | 'items-start' = 'items-center'
+  ) => (
+    <div
+      className={cn(
+        'group flex justify-between gap-2 hover:bg-accent/40 px-2.5 py-1.5 rounded-md transition-colors duration-100',
+        align,
+        canEditEstimate && 'cursor-pointer'
+      )}
+      onClick={() => startInlineEdit(field, startValue)}
+    >
+      <div className='flex-1'>{content}</div>
+      {canEditEstimate && (
+        <PencilLine
+          className={cn(
+            'size-4 text-white opacity-0 transition-opacity group-hover:opacity-100',
+            align === 'items-start' && 'mt-0.5'
+          )}
+        />
+      )}
+    </div>
+  )
+
+  type RowConfig = {
+    field: InlineEditableField
+    label: string
+    align?: 'items-center' | 'items-start'
+    renderDisplay: () => ReactNode
+    renderEditor: () => ReactNode
+    visible?: boolean
+  }
+
+  const rows: RowConfig[] = [
+    {
+      field: 'title',
+      label: 'Estimate Title',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='text'
+            name='title'
+            value={editingValue || currentEstimate.title || ''}
+            autoFocus
+            onChange={value => setEditingValue(String(value ?? ''))}
+            onBlur={() => saveInlineField('title')}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay('title', <p className='text-sm leading-none'>{statuslessTitle}</p>, currentEstimate.title)
+    },
+    {
+      field: 'estimate_type_id',
+      label: 'Estimate Type',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='select'
+            name='estimate_type_id'
+            placeholder='Select estimate type'
+            value={editingValue || currentEstimate.estimate_type_id || ''}
+            autoFocus
+            selectOptions={estimateTypeSelectOptions}
+            onOpenChange={open => {
+              if (!open) cancelInlineEdit()
+            }}
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('estimate_type_id', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'estimate_type_id',
+          <p className='text-sm leading-none'>{currentEstimate.estimate_type?.name || '-'}</p>,
+          currentEstimate.estimate_type_id || ''
+        )
+    },
+    {
+      field: 'interaction',
+      label: 'Interaction',
+      visible: isMaterialOnly,
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='select'
+            name='interaction'
+            placeholder='Select interaction'
+            value={editingValue || currentEstimate.interaction || ''}
+            autoFocus
+            selectOptions={[
+              { value: 'cash_and_pickup', label: 'Cash and Pickup' },
+              { value: 'cash_and_delivery', label: 'Cash and Delivery' }
+            ]}
+            onOpenChange={open => {
+              if (!open) cancelInlineEdit()
+            }}
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('interaction', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'interaction',
+          <p className='text-sm leading-none'>
+            {currentEstimate.interaction === 'cash_and_pickup'
+              ? 'Cash and Pickup'
+              : currentEstimate.interaction === 'cash_and_delivery'
+                ? 'Cash and Delivery'
+                : '-'}
+          </p>,
+          currentEstimate.interaction || ''
+        )
+    },
+    {
+      field: 'pickup_date',
+      label: 'Pickup Date',
+      visible: isMaterialOnly && currentEstimate.interaction === 'cash_and_pickup',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='datepicker'
+            name='pickup_date'
+            placeholder='Select pickup date'
+            value={editingValue || currentEstimate.pickup_date || ''}
+            autoFocus
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('pickup_date', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'pickup_date',
+          <p className='text-sm leading-none'>{formatDate(currentEstimate.pickup_date ?? null) || '-'}</p>,
+          currentEstimate.pickup_date || ''
+        )
+    },
+    {
+      field: 'pickup_location_id',
+      label: 'Pickup Location',
+      visible: isMaterialOnly && currentEstimate.interaction === 'cash_and_pickup',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='select'
+            name='pickup_location_id'
+            placeholder='Select pickup location'
+            value={editingValue || currentEstimate.pickup_location_id || ''}
+            autoFocus
+            selectOptions={businessLocationOptions}
+            onOpenChange={open => {
+              if (!open) cancelInlineEdit()
+            }}
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('pickup_location_id', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'pickup_location_id',
+          <p className='text-sm leading-none'>{currentEstimate.pickup_location?.name || '-'}</p>,
+          currentEstimate.pickup_location_id || ''
+        )
+    },
+    {
+      field: 'pickup_notes',
+      label: 'Pickup Notes',
+      align: 'items-start',
+      visible: isMaterialOnly && currentEstimate.interaction === 'cash_and_pickup',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='textarea'
+            name='pickup_notes'
+            value={editingValue || currentEstimate.pickup_notes || ''}
+            className='min-h-20'
+            autoFocus
+            onChange={value => setEditingValue(String(value ?? ''))}
+            onBlur={() => saveInlineField('pickup_notes')}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'pickup_notes',
+          <p className='text-sm leading-none whitespace-pre-wrap'>{currentEstimate.pickup_notes || '-'}</p>,
+          currentEstimate.pickup_notes || '',
+          'items-start'
+        )
+    },
+    {
+      field: 'delivery_datetime',
+      label: 'Delivery Datetime',
+      visible: isMaterialOnly && currentEstimate.interaction === 'cash_and_delivery',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <DateTimePicker
+            value={
+              editingValue
+                ? new Date(editingValue.replace(' ', 'T')).getTime()
+                : currentEstimate.delivery_datetime
+                  ? new Date(String(currentEstimate.delivery_datetime).replace(' ', 'T')).getTime()
+                  : null
+            }
+            onChange={value => {
+              if (value === null) {
+                setEditingValue('')
+                saveInlineField('delivery_datetime', '')
+
+                return
+              }
+
+              const formatted = formatDeliveryDatetime(value)
+
+              setEditingValue(formatted || '')
+              saveInlineField('delivery_datetime', formatted || '')
+            }}
+            placeholder='Select delivery date & time'
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'delivery_datetime',
+          <p className='text-sm leading-none'>
+            {currentEstimate.delivery_datetime ? formatDateTime(currentEstimate.delivery_datetime) : '-'}
+          </p>,
+          currentEstimate.delivery_datetime || ''
+        )
+    },
+    {
+      field: 'delivery_location',
+      label: 'Delivery Location',
+      visible: isMaterialOnly && currentEstimate.interaction === 'cash_and_delivery',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='text'
+            name='delivery_location'
+            value={editingValue || currentEstimate.delivery_location || ''}
+            autoFocus
+            onChange={value => setEditingValue(String(value ?? ''))}
+            onBlur={() => saveInlineField('delivery_location')}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'delivery_location',
+          <p className='text-sm leading-none'>{currentEstimate.delivery_location || '-'}</p>,
+          currentEstimate.delivery_location || ''
+        )
+    },
+    {
+      field: 'delivery_notes',
+      label: 'Delivery Notes',
+      align: 'items-start',
+      visible: isMaterialOnly && currentEstimate.interaction === 'cash_and_delivery',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='textarea'
+            name='delivery_notes'
+            value={editingValue || currentEstimate.delivery_notes || ''}
+            className='min-h-20'
+            autoFocus
+            onChange={value => setEditingValue(String(value ?? ''))}
+            onBlur={() => saveInlineField('delivery_notes')}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'delivery_notes',
+          <p className='text-sm leading-none whitespace-pre-wrap'>{currentEstimate.delivery_notes || '-'}</p>,
+          currentEstimate.delivery_notes || '',
+          'items-start'
+        )
+    },
+    {
+      field: 'client_id',
+      label: 'Customer',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='combobox'
+            name='client_id'
+            placeholder='Select customer'
+            value={editingValue || currentEstimate.client_id || ''}
+            autoFocus
+            selectOptions={clientSelectOptions}
+            onOpenChange={open => {
+              if (!open) cancelInlineEdit()
+            }}
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('client_id', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'client_id',
+          <p className='text-sm leading-none'>
+            {[currentEstimate.client?.first_name, currentEstimate.client?.last_name].filter(Boolean).join(' ') || '-'}
+          </p>,
+          currentEstimate.client_id || ''
+        )
+    },
+    {
+      field: 'location_id',
+      label: 'Business Location',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='select'
+            name='location_id'
+            placeholder='Select business location'
+            value={editingValue || currentEstimate.location_id || ''}
+            autoFocus
+            selectOptions={businessLocationOptions}
+            onOpenChange={open => {
+              if (!open) cancelInlineEdit()
+            }}
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('location_id', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'location_id',
+          <p className='text-sm leading-tight'>{currentEstimate.location?.name}</p>,
+          currentEstimate.location_id || ''
+        )
+    },
+    {
+      field: 'address_id',
+      label: 'Event Location',
+      align: 'items-start',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='select'
+            name='address_id'
+            placeholder={addressSelectOptions.length ? 'Select address' : 'No addresses found'}
+            value={editingValue || currentEstimate.address_id || ''}
+            autoFocus
+            selectOptions={addressSelectOptions}
+            disabled={addressSelectOptions.length === 0}
+            onOpenChange={open => {
+              if (!open) cancelInlineEdit()
+            }}
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('address_id', nextValue)
+            }}
+            className='whitespace-normal text-left leading-snug h-auto!'
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'address_id',
+          <p className='text-sm'>
+            {estimateRef.current.address?.title}
+            {' - '}
+            {[
+              currentEstimate.address?.street_address,
+              currentEstimate.address?.city?.name,
+              [currentEstimate.address?.state?.name, currentEstimate.address?.zip_code].filter(Boolean).join(' ')
+            ]
+              .filter(Boolean)
+              .join(', ') || '-'}
+          </p>,
+          currentEstimate.address_id || '',
+          'items-start'
+        )
+    },
+    {
+      field: 'assign_id',
+      label: 'Assigned Estimator',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='combobox'
+            name='assign_id'
+            placeholder='Select estimator'
+            value={editingValue || currentEstimate.assign_id || ''}
+            autoFocus
+            selectOptions={staffSelectOptions}
+            onOpenChange={open => {
+              if (!open) cancelInlineEdit()
+            }}
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('assign_id', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'assign_id',
+          <p className='text-sm leading-none'>
+            {[currentEstimate.assign_user?.first_name, currentEstimate.assign_user?.last_name]
+              .filter(Boolean)
+              .join(' ') || '-'}
+          </p>,
+          currentEstimate.assign_id || ''
+        )
+    },
+    {
+      field: 'payment_term_id',
+      label: 'Payment Terms',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='select'
+            name='payment_term_id'
+            placeholder='Select payment term'
+            value={editingValue || currentEstimate.payment_term_id || ''}
+            autoFocus
+            selectOptions={paymentTermOptions}
+            onOpenChange={open => {
+              if (!open) cancelInlineEdit()
+            }}
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('payment_term_id', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'payment_term_id',
+          <p className='text-sm leading-none'>{currentEstimate.payment_term?.name || '-'}</p>,
+          currentEstimate.payment_term_id || ''
+        )
+    },
+    {
+      field: 'expiration_date',
+      label: 'Expiration Date',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='datepicker'
+            name='expiration_date'
+            placeholder='Select expiration date'
+            value={editingValue || currentEstimate.expiration_date || ''}
+            autoFocus
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('expiration_date', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'expiration_date',
+          <p className='text-sm leading-none'>{formatDate(currentEstimate.expiration_date ?? null) || '-'}</p>,
+          currentEstimate.expiration_date || ''
+        )
+    },
+    {
+      field: 'biding_date',
+      label: 'Bidding Date',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='datepicker'
+            name='biding_date'
+            placeholder='Select bidding date'
+            value={editingValue || currentEstimate.biding_date || ''}
+            autoFocus
+            onChange={value => {
+              const nextValue = String(value ?? '')
+
+              setEditingValue(nextValue)
+              saveInlineField('biding_date', nextValue)
+            }}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'biding_date',
+          <p className='text-sm leading-none'>{formatDate(currentEstimate.biding_date ?? null) || '-'}</p>,
+          currentEstimate.biding_date || ''
+        )
+    },
+    {
+      field: 'tax_rate',
+      label: 'Tax Rate (%)',
+      renderEditor: () => (
+        <div data-inline-editor>
+          <CustomFormField
+            type='number'
+            name='tax_rate'
+            value={editingValue || String(currentEstimate.tax_rate ?? 0)}
+            autoFocus
+            onChange={value => setEditingValue(String(value ?? ''))}
+            onBlur={() => saveInlineField('tax_rate')}
+          />
+        </div>
+      ),
+      renderDisplay: () =>
+        renderEditableDisplay(
+          'tax_rate',
+          <p className='text-sm leading-none'>{currentEstimate.tax_rate ?? 0}</p>,
+          String(currentEstimate.tax_rate ?? 0)
+        )
+    }
+  ]
 
   return (
     <>
@@ -64,145 +973,33 @@ const EstimateSection = ({
           )}
         </CardHeader>
         <CardContent>
-          <div className='flex flex-col gap-2 text-zinc-200 text-sm'>
-            <div className='flex gap-1 items-start'>
-              <span className='font-semibold text-base text-white min-w-40'>Estimate number : </span>
-              <div className='flex-1'>{estimate.estimate_number?.toString() || 'N/A'}</div>
+          <div className='flex flex-col gap-1 mt-2'>
+            <div className='grid grid-cols-[136px_minmax(0,_1fr)] gap-2 items-center'>
+              <Label className='text-sm text-muted-foreground'>Estimate Number:</Label>
+              <p className='text-sm leading-none px-2.5 py-1.5'>{currentEstimate.estimate_number?.toString() || '-'}</p>
             </div>
-            <div className='flex gap-1 items-start'>
-              <span className='font-semibold text-base text-white min-w-40'>Estimate title : </span>
-              <div className='flex-1'>{estimate.title || ''}</div>
-            </div>
-            <div className='flex gap-1 items-start'>
-              <span className='font-semibold text-base text-white min-w-40'>Estimate type : </span>
-              <div className='flex-1'>{estimate.estimate_type?.name || 'N/A'}</div>
-            </div>
-            {estimate.estimate_type?.name === 'Material Only' && estimate?.interaction && (
-              <>
-                {estimate.interaction === 'cash_and_pickup' ? (
-                  <>
-                    <div className='flex gap-1 items-start'>
-                      <span className='font-semibold text-base text-white min-w-40'>Interaction : </span>
-                      <div className='flex-1'>Cash and Pickup</div>
-                    </div>
-                    {estimate?.pickup_date && (
-                      <div className='flex gap-1 items-start'>
-                        <span className='font-semibold text-base text-white min-w-40'>Pickup date : </span>
-                        <div className='flex-1'>{formatDate(estimate.pickup_date)}</div>
-                      </div>
-                    )}
-                    {estimate?.pickup_location && (
-                      <div className='flex gap-1 items-start'>
-                        <span className='font-semibold text-base text-white min-w-40'>Pickup location : </span>
-                        <div className='flex-1'>{estimate.pickup_location?.name || 'N/A'}</div>
-                      </div>
-                    )}
-                    {estimate?.pickup_notes && (
-                      <div className='flex gap-1 items-start'>
-                        <span className='font-semibold text-base text-white min-w-40'>Pickup notes : </span>
-                        <div className='flex-1'>{estimate.pickup_notes || 'N/A'}</div>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <div className='flex gap-1 items-start'>
-                      <span className='font-semibold text-base text-white min-w-40'>Interaction : </span>
-                      <div className='flex-1'>Cash and Delivery</div>
-                    </div>
-                    {estimate?.delivery_datetime && (
-                      <div className='flex gap-1 items-start'>
-                        <span className='font-semibold text-base text-white min-w-40'>Delivery datetime : </span>
-                        <div className='flex-1'>{formatDateTime(estimate.delivery_datetime)}</div>
-                      </div>
-                    )}
-                    {estimate?.delivery_location && (
-                      <div className='flex gap-1 items-start'>
-                        <span className='font-semibold text-base text-white min-w-40'>Delivery location : </span>
-                        <div className='flex-1'>{estimate.delivery_location || 'N/A'}</div>
-                      </div>
-                    )}
-                    {estimate?.delivery_notes && (
-                      <div className='flex gap-1 items-start'>
-                        <span className='font-semibold text-base text-white min-w-40'>Delivery notes : </span>
-                        <div className='flex-1'>{estimate.delivery_notes || 'N/A'}</div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </>
-            )}
-            {estimate.location && (
-              <div className='flex gap-1 items-start'>
-                <span className='font-semibold text-base text-white min-w-40'>Location :</span>
 
-                <div className='flex-1'>
-                  {[
-                    estimate.location?.name,
-                    estimate.location?.street_address,
-                    estimate.location?.city?.name,
-                    [estimate.location?.state?.name, estimate.location?.zip_code].filter(Boolean).join(' ')
-                  ]
-                    .filter(Boolean)
-                    .join(', ') || 'N/A'}
+            {rows
+              .filter(row => row.visible !== false)
+              .map(row => (
+                <div
+                  key={row.field}
+                  className={cn('grid grid-cols-[136px_minmax(0,_1fr)] gap-2', row.align ?? 'items-center')}
+                >
+                  <Label className='text-sm text-muted-foreground'>{row.label}:</Label>
+                  {editingField === row.field ? row.renderEditor() : row.renderDisplay()}
                 </div>
-              </div>
-            )}
-            {estimate.address && (
-              <div className='flex gap-1 items-start'>
-                <span className='font-semibold text-base text-white min-w-40'>Job Location :</span>
+              ))}
 
-                <div>
-                  {[
-                    estimate.address?.street_address,
-                    estimate.address?.city?.name,
-                    [estimate.address?.state?.name, estimate.address?.zip_code].filter(Boolean).join(' ')
-                  ]
-                    .filter(Boolean)
-                    .join(', ') || 'N/A'}
-                </div>
-              </div>
-            )}
-            {estimate.biding_date && (
-              <div className='flex gap-1 items-start'>
-                <span className='font-semibold text-base text-white min-w-40'>Select bid date : </span>
-                <div className='flex-1'>{formatDate(estimate.biding_date)}</div>
-              </div>
-            )}
-            {estimate.expiration_date && (
-              <div className='flex gap-1 items-start'>
-                <span className='font-semibold text-base text-white min-w-40'>Expiration date : </span>
-                <div className='flex-1'>{formatDate(estimate.expiration_date)}</div>
-              </div>
-            )}
-            {estimate.client && (
-              <div className='flex gap-1 items-start'>
-                <span className='font-semibold text-base text-white min-w-40'>Customer : </span>
-                <div className='flex-1'>
-                  {estimate.client?.first_name} {estimate.client?.last_name}
-                </div>
-              </div>
-            )}
-            {estimate.payment_term && (
-              <div className='flex gap-1 items-start'>
-                <span className='font-semibold text-base text-white min-w-40'>Payment terms : </span>
-                <div className='flex-1'>{estimate.payment_term?.name ?? estimate.payment_term_id}</div>
-              </div>
-            )}
-            {estimate.assign_user && (
-              <div className='flex gap-1 items-start'>
-                <span className='font-semibold text-base text-white min-w-40'>Assigned estimator : </span>{' '}
-                <div className='flex-1'>
-                  {estimate.assign_user?.first_name} {estimate.assign_user?.last_name}
-                </div>
-              </div>
-            )}
-            {estimate.tax_rate && (
-              <div className='flex gap-1 items-start'>
-                <span className='font-semibold text-base text-white min-w-40'>Tax Rate : </span>
-                <div className='flex-1'>{estimate.tax_rate}</div>
-              </div>
-            )}
+            <div className='grid grid-cols-[136px_minmax(0,_1fr)] gap-2 items-center'>
+              <Label className='text-sm text-muted-foreground'>Created At:</Label>
+              <p className='text-sm leading-none px-2.5 py-1.5'>{formatDateTime(currentEstimate.created_at)}</p>
+            </div>
+
+            <div className='grid grid-cols-[136px_minmax(0,_1fr)] gap-2 items-center'>
+              <Label className='text-sm text-muted-foreground'>Updated At:</Label>
+              <p className='text-sm leading-none px-2.5 py-1.5'>{formatDateTime(currentEstimate.updated_at)}</p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -212,7 +1009,7 @@ const EstimateSection = ({
         open={isModalOpen}
         onOpenChange={handleModalChange}
         estimateId={estimateId || undefined}
-        estimateDetails={estimate || undefined}
+        estimateDetails={currentEstimate || undefined}
         serviceTypes={serviceTypes}
         estimateTypes={estimateTypes}
         clients={clients}
