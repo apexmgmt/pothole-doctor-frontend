@@ -63,7 +63,7 @@ const InventoryAdjustmentSection: React.FC<InventoryAdjustmentSectionProps> = ({
     {
       id: 'previous_quantity',
       header: 'Previous Qty',
-      cell: (row: InventoryAdjustment) => <span className='font-medium'>{row.previous_quantity}</span>,
+      cell: (row: InventoryAdjustment) => <span>{row.previous_quantity}</span>,
       sortable: false
     },
     {
@@ -80,28 +80,28 @@ const InventoryAdjustmentSection: React.FC<InventoryAdjustmentSectionProps> = ({
     {
       id: 'new_quantity',
       header: 'New Qty',
-      cell: (row: InventoryAdjustment) => <span className='font-medium'>{row.new_quantity}</span>,
+      cell: (row: InventoryAdjustment) => <span>{row.new_quantity}</span>,
       sortable: false
     },
     {
       id: 'reason',
       header: 'Reason / Comments',
-      cell: (row: InventoryAdjustment) => <span className='font-medium'>{row.reason || '—'}</span>,
+      cell: (row: InventoryAdjustment) => <span>{row.reason || '—'}</span>,
       sortable: false
     },
     {
       id: 'adjusted_by',
       header: 'Adjusted By',
       cell: (row: InventoryAdjustment) => {
-        if (!row.adjusted_by) return <span className='font-medium'>—</span>
+        if (!row.adjusted_by) return <span>—</span>
 
         if (typeof row.adjusted_by === 'string') {
-          return <span className='font-medium'>{row.adjusted_by}</span>
+          return <span>{row.adjusted_by}</span>
         }
 
         const name = `${(row.adjusted_by as any).first_name ?? ''} ${(row.adjusted_by as any).last_name ?? ''}`.trim()
 
-        return <span className='font-medium'>{name || '—'}</span>
+        return <span>{name || '—'}</span>
       },
       sortable: false
     },
@@ -109,7 +109,7 @@ const InventoryAdjustmentSection: React.FC<InventoryAdjustmentSectionProps> = ({
       id: 'created_at',
       header: 'Date',
       cell: (row: InventoryAdjustment) => (
-        <span className='font-medium'>{row.created_at ? new Date(row.created_at).toLocaleDateString() : '—'}</span>
+        <span>{row.created_at ? new Date(row.created_at).toLocaleDateString() : '—'}</span>
       ),
       sortable: true
     }

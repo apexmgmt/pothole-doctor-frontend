@@ -102,13 +102,13 @@ const ProposalNotesModal = ({
     {
       id: 'note_type',
       header: 'Note Type',
-      cell: (row: ClientNote) => <span className='font-medium'>{row.note_type?.name || '—'}</span>,
+      cell: (row: ClientNote) => <span>{row.note_type?.name || '—'}</span>,
       sortable: false
     },
     {
       id: 'subject',
       header: 'Subject',
-      cell: (row: ClientNote) => <span className='font-medium'>{row.subject || '—'}</span>,
+      cell: (row: ClientNote) => <span>{row.subject || '—'}</span>,
       sortable: true
     },
     {

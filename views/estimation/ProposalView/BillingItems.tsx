@@ -10,7 +10,7 @@ const BillingItems = ({ proposal }: { proposal: Proposal }) => {
       <ScrollArea className='w-full whitespace-nowrap'>
         <table className='w-full border-collapse min-w-[600px]'>
           <thead className='bg-[#f3f4f6] text-black'>
-            <tr className=''>
+            <tr>
               <th className='px-4 py-3 text-left text-sm font-medium'>Item</th>
               <th className='px-4 py-3 text-left text-sm font-medium'>Description</th>
               <th className='px-4 py-3 text-right text-sm font-medium'>Amount</th>
@@ -27,14 +27,18 @@ const BillingItems = ({ proposal }: { proposal: Proposal }) => {
                   </tr>
                   {service?.items?.length > 0 &&
                     service?.items?.map((item, itemIndex) => (
-                      <tr key={index + '-' + itemIndex} className={`hover:bg-gray-100 print:bg-white transition-colors ${item.type === 'deduction' ? 'text-red-700!' : ''}`}>
+                      <tr
+                        key={index + '-' + itemIndex}
+                        className={`hover:bg-gray-100 print:bg-white transition-colors ${item.type === 'deduction' ? 'text-red-700!' : ''}`}
+                      >
                         <td className='px-4 py-2 text-sm text-light  print:text-black align-top'>{item?.name || ''}</td>
 
                         <td className='px-4 py-2 text-sm text-light/80 print:text-black/80 align-top max-w-md whitespace-normal'>
                           {item.description}
                         </td>
                         <td className='px-4 py-2 text-sm text-light print:text-black text-right align-top'>
-                          {item.type === 'deduction' ? '- ' : ''}{formatCurrency(item.total_price)}
+                          {item.type === 'deduction' ? '- ' : ''}
+                          {formatCurrency(item.total_price)}
                         </td>
                       </tr>
                     ))}
@@ -51,7 +55,9 @@ const BillingItems = ({ proposal }: { proposal: Proposal }) => {
           {' '}
           <div className='flex justify-between text-sm'>
             <span className='text-light/60 print:text-black/80'>Subtotal</span>
-            <span className='text-light font-medium print:text-black'>{formatCurrency(Number(proposal?.subtotal ?? 0) + Number(proposal?.discount ?? 0))}</span>
+            <span className='text-light font-medium print:text-black'>
+              {formatCurrency(Number(proposal?.subtotal ?? 0) + Number(proposal?.discount ?? 0))}
+            </span>
           </div>
           {proposal?.discount > 0 && (
             <div className='flex justify-between text-sm'>

@@ -142,7 +142,7 @@ const Roles: React.FC = () => {
     {
       id: 'name',
       header: 'Name',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {

@@ -146,7 +146,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
     {
       id: 'name',
       header: 'File Name',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
@@ -159,7 +159,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
               href={row.full_path}
               target='_blank'
               rel='noopener noreferrer'
-              className='font-medium relative h-20 w-20 inline-block'
+              className='relative h-20 w-20 inline-block'
             >
               <Image
                 src={row.full_path}
@@ -170,14 +170,14 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
               />
             </Link>
           ) : getFileType(row.full_path) === 'video' ? (
-            <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
+            <Link href={row.full_path} target='_blank' rel='noopener noreferrer'>
               <video width={100} height={50} controls className='rounded-md'>
                 <source src={row.full_path} type='video/mp4' />
                 Your browser does not support the video tag.
               </video>
             </Link>
           ) : (
-            <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
+            <Link href={row.full_path} target='_blank' rel='noopener noreferrer'>
               <DocumentIcon className='w-7 h-7' />{' '}
             </Link>
           )}

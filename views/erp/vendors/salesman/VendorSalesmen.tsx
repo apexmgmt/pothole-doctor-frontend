@@ -141,31 +141,31 @@ const VendorSalesmen = ({ vendorId }: { vendorId: string }) => {
     {
       id: 'name',
       header: 'Name',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'email',
       header: 'Email',
-      cell: row => <span className='font-medium'>{row.email}</span>,
+      cell: row => <span>{row.email}</span>,
       sortable: true
     },
     {
       id: 'phone',
       header: 'Phone',
-      cell: row => <span className='font-medium'>{row.phone}</span>,
+      cell: row => <span>{row.phone}</span>,
       sortable: true
     },
     {
       id: 'ext',
       header: 'Ext',
-      cell: row => <span className='font-medium'>{row.ext}</span>,
+      cell: row => <span>{row.ext}</span>,
       sortable: true
     },
     {
       id: 'comment',
       header: 'Comment',
-      cell: row => <span className='font-medium'>{row.comment}</span>,
+      cell: row => <span>{row.comment}</span>,
       sortable: true
     },
     {

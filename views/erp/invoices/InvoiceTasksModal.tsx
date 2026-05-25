@@ -113,7 +113,7 @@ const InvoiceTasksModal = ({
     {
       id: 'name',
       header: 'Task Name',
-      cell: (row: Task) => <span className='font-medium'>{row.name || '—'}</span>,
+      cell: (row: Task) => <span>{row.name || '—'}</span>,
       sortable: true
     },
     {

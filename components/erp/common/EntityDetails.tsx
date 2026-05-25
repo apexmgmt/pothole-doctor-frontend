@@ -424,7 +424,7 @@ const EntityDetails: React.FC<EntityDetailsProps> = ({
       </div>
 
       {/* Tab Navigation */}
-      <div className=''>
+      <div>
         <div className='flex flex-wrap gap-2 p-1 bg-border/40 rounded-lg'>
           {tabs.map(tab => (
             <button
@@ -445,14 +445,8 @@ const EntityDetails: React.FC<EntityDetailsProps> = ({
         </div>
 
         {/* Tab Content */}
-        <div className=''>
+        <div>
           {activeTab === 'documents' ? (
-            // <DocumentsGallery
-            //   entityData={entityData}
-            //   onUpload={() => handleActionButtonClick('upload_document')}
-            //   onDownload={(doc: any) => console.log('Download:', doc)}
-            //   onDelete={(doc: any) => console.log('Delete:', doc)}
-            // />
             <div className='p-6 border border-border rounded-lg text-center text-gray'>
               Documents Gallery Component Placeholder
             </div>

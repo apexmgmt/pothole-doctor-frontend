@@ -209,9 +209,7 @@ const Organizations: React.FC = () => {
     {
       id: 'first_name',
       header: 'Name',
-      cell: (row: Organization) => (
-        <span className='font-medium'>{[row?.first_name, row?.last_name].filter(Boolean).join(' ')}</span>
-      ),
+      cell: (row: Organization) => <span>{[row?.first_name, row?.last_name].filter(Boolean).join(' ')}</span>,
       sortable: true
     },
     {
@@ -230,7 +228,7 @@ const Organizations: React.FC = () => {
     {
       id: 'email',
       header: 'Email',
-      cell: (row: Organization) => <span className=''>{row.email}</span>,
+      cell: (row: Organization) => <span>{row.email}</span>,
       sortable: true
     },
     {

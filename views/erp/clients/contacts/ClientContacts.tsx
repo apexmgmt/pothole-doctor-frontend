@@ -132,19 +132,19 @@ const ClientContacts = ({
     {
       id: 'name',
       header: 'Name',
-      cell: row => <span className='font-medium'>{row?.name || ''}</span>,
+      cell: row => <span>{row?.name || ''}</span>,
       sortable: false
     },
     {
       id: 'email',
       header: 'Email',
-      cell: row => <span className='font-medium'>{row?.email || ''}</span>,
+      cell: row => <span>{row?.email || ''}</span>,
       sortable: false
     },
     {
       id: 'phone',
       header: 'Phone',
-      cell: row => <span className='font-medium'>{row.phone || ''}</span>,
+      cell: row => <span>{row.phone || ''}</span>,
       sortable: true
     },
     {
@@ -153,14 +153,14 @@ const ClientContacts = ({
       cell: row => {
         const parts = [row.address, row?.city?.name, row?.state?.name, row?.country?.name].filter(Boolean)
 
-        return <span className='font-medium'>{parts.join(', ')}</span>
+        return <span>{parts.join(', ')}</span>
       },
       sortable: true
     },
     {
       id: 'created_at',
       header: 'Created At',
-      cell: row => <span className='font-medium'>{formatDate(row.created_at)}</span>,
+      cell: row => <span>{formatDate(row.created_at)}</span>,
       sortable: true
     },
     {

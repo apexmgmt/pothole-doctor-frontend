@@ -228,7 +228,7 @@ const ShipmentProductCard = ({
                         value={r.received_quantity}
                         disabled={locked || viewOnly}
                         onChange={e => onUpdateReceipt(p.id, rIdx, { received_quantity: Number(e.target.value) })}
-                        className=' w-20'
+                        className='w-20'
                       />
                     </td>
                     <td className='px-2 py-2'>
@@ -237,7 +237,6 @@ const ShipmentProductCard = ({
                         onChange={v => onUpdateReceipt(p.id, rIdx, { received_date: v })}
                         placeholder='Date'
                         disabled={locked || viewOnly}
-                        className=''
                       />
                     </td>
                     <td className='px-2 py-2'>
@@ -290,7 +289,7 @@ const ShipmentProductCard = ({
                         disabled={locked}
                         onChange={e => onUpdateReceipt(p.id, rIdx, { stock_area: e.target.value })}
                         placeholder='Stock Area'
-                        className=''
+                        
                       /> */}
                     </td>
                     <td className='px-2 py-2'>
@@ -299,7 +298,7 @@ const ShipmentProductCard = ({
                         disabled={locked}
                         onChange={e => onUpdateReceipt(p.id, rIdx, { stock_section_id: e.target.value })}
                         placeholder='Section'
-                        className=''
+                        
                       /> */}
                     </td>
                     <td className='px-2 py-2'>
@@ -308,7 +307,6 @@ const ShipmentProductCard = ({
                         disabled={locked || viewOnly}
                         onChange={e => onUpdateReceipt(p.id, rIdx, { dye_lot: e.target.value })}
                         placeholder='Dye Lot'
-                        className=''
                       />
                     </td>
                     <td className='px-2 py-2 text-center'>

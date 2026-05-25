@@ -332,7 +332,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       name: 'location_id',
       type: 'select',
       label: 'Location',
-      placeholder: 'Select Location',
+      placeholder: 'Select location',
       rules: { required: 'Location is required' },
       selectOptions: businessLocations.map(location => ({
         value: location.id,
@@ -354,9 +354,9 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     },
     {
       name: 'source_id',
-      type: 'select',
+      type: 'combobox',
       label: 'Lead Source',
-      placeholder: 'Select Lead Source',
+      placeholder: 'Select lead source',
       rules: { required: 'Lead Source is required' },
       selectOptions: clientSources.map(source => ({
         value: source.id,
@@ -367,7 +367,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       name: 'contact_type_id',
       type: 'select',
       label: 'Contact Type',
-      placeholder: 'Select type',
+      placeholder: 'Select contact type',
       rules: { required: 'Contact Type is required' },
       selectOptions: contactTypes.map(type => ({
         value: type.id,
@@ -469,7 +469,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
       name: 'cc_email',
       type: 'text',
       label: 'CC Email',
-      placeholder: 'Enter CC email',
+      placeholder: 'Enter cc email',
       rules: {
         pattern: {
           value: /^([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})([\s,]+[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})*$/i,
@@ -491,7 +491,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     },
     {
       name: 'service_type_ids',
-      type: 'multiselect-searchable',
+      type: 'multiselect-creatable',
       label: 'Desired Service(s)',
       placeholder: 'Select service types...',
       selectOptions: serviceTypes.map(service => ({

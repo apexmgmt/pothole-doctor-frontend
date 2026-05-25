@@ -111,7 +111,7 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit }) => {
           <AvatarImage src={''} alt={fullName} />
           <AvatarFallback className='text-lg font-semibold'>{initials || 'V'}</AvatarFallback>
         </Avatar>
-        <div className=''>
+        <div>
           <h4 className='text-lg/[1.1] font-medium text-light'>{fullName}</h4>
           <p className='text-gray text-sm/tight break-all'>{vendorData.email}</p>
           <Badge variant={vendorData.status ? 'default' : 'destructive'}>

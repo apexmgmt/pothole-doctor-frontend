@@ -163,7 +163,7 @@ const BusinessLocationEmployees: React.FC<{ locationId: string }> = ({ locationI
       id: 'first_name',
       header: 'Full Name',
       cell: (row: Partner) => (
-        <span className='font-medium'>
+        <span>
           {row.first_name} {row.last_name || ''}
         </span>
       ),
@@ -172,32 +172,32 @@ const BusinessLocationEmployees: React.FC<{ locationId: string }> = ({ locationI
     {
       id: 'company',
       header: 'Company',
-      cell: (row: Partner) => <span className='font-medium'>{row.userable?.company?.name || '—'}</span>,
+      cell: (row: Partner) => <span>{row.userable?.company?.name || '—'}</span>,
       sortable: false
     },
     {
       id: 'email',
       header: 'Email',
-      cell: (row: Partner) => <span className='font-medium'>{row.email || '—'}</span>,
+      cell: (row: Partner) => <span>{row.email || '—'}</span>,
       sortable: true
     },
     {
       id: 'phone',
       header: 'Phone',
-      cell: (row: Partner) => <span className='font-medium'>{row.userable?.phone || '—'}</span>,
+      cell: (row: Partner) => <span>{row.userable?.phone || '—'}</span>,
       sortable: false
     },
     {
       id: 'partner_type',
       header: 'Partner Type',
-      cell: (row: Partner) => <span className='font-medium'>{row.userable?.partner_type?.name || '—'}</span>,
+      cell: (row: Partner) => <span>{row.userable?.partner_type?.name || '—'}</span>,
       sortable: false
     },
     {
       id: 'skills',
       header: 'Skills',
       cell: (row: Partner) => (
-        <span className='font-medium'>
+        <span>
           {row.userable?.skills && row.userable.skills.length > 0
             ? row.userable.skills.map((s: Skill) => s.name).join(', ')
             : '—'}
@@ -208,17 +208,13 @@ const BusinessLocationEmployees: React.FC<{ locationId: string }> = ({ locationI
     {
       id: 'insurance_expiration',
       header: 'Insurance Expiration',
-      cell: (row: Partner) => (
-        <span className='font-medium'>{formatDateTime(row.userable?.insurance_expiration ?? null)}</span>
-      ),
+      cell: (row: Partner) => <span>{formatDateTime(row.userable?.insurance_expiration ?? null)}</span>,
       sortable: false
     },
     {
       id: 'w9_expiration',
       header: 'W9 Expiration',
-      cell: (row: Partner) => (
-        <span className='font-medium'>{formatDateTime(row.userable?.w9_expiration ?? null)}</span>
-      ),
+      cell: (row: Partner) => <span>{formatDateTime(row.userable?.w9_expiration ?? null)}</span>,
       sortable: false
     },
     {

@@ -293,6 +293,8 @@ const CreateOrEditProposalView = ({
     setIsLoading(true)
     setServiceFieldErrors({})
 
+    let newlyCreatedId: string | null = null
+
     try {
       let savedId = proposalId
 
@@ -301,6 +303,11 @@ const CreateOrEditProposalView = ({
 
         savedId = response?.data?.id || proposalId
         toast.success(initialMode === 'create' ? 'Proposal created successfully' : 'Proposal updated successfully')
+
+        if (initialMode === 'create' && savedId) {
+          newlyCreatedId = savedId
+          window.history.replaceState(null, '', `/erp/estimates/${estimateId}/proposals/${savedId}`)
+        }
       }
 
       if (!savedId) throw new Error('Proposal ID not found')
@@ -325,6 +332,10 @@ const CreateOrEditProposalView = ({
       toast.error(error?.message || 'Failed to save and send proposal.')
     } finally {
       setIsLoading(false)
+
+      if (newlyCreatedId) {
+        router.replace(`/erp/estimates/${estimateId}/proposals/${newlyCreatedId}`)
+      }
     }
   }
 
@@ -433,7 +444,11 @@ const CreateOrEditProposalView = ({
       {/* Summary cards */}
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-4'>
         <ClientDetailsCard estimateDetails={proposalDetails?.estimate ?? estimateDetails} />
-        <SalesRepresentativeCard estimateDetails={proposalDetails?.estimate ?? estimateDetails} profit={profitAmount} total={totalSales} />
+        <SalesRepresentativeCard
+          estimateDetails={proposalDetails?.estimate ?? estimateDetails}
+          profit={profitAmount}
+          total={totalSales}
+        />
         <DiscountDetailsCard
           mode={effectiveMode}
           estimateDetails={proposalDetails?.estimate ?? estimateDetails}

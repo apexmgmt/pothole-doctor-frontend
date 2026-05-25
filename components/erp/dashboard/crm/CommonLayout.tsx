@@ -76,7 +76,7 @@ const CommonLayout: React.FC<CommonLayoutProps> = ({
       </div>
 
       {/* Content Area */}
-      <div className=''>{children}</div>
+      <div>{children}</div>
     </div>
   )
 }

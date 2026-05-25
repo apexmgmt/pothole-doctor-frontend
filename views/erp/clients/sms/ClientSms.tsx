@@ -135,7 +135,7 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
       id: 'status',
       header: 'Status',
       cell: row => (
-        <span className={row.status === 1 ? 'text-green-600 font-medium' : 'text-gray-400'}>
+        <span className={row.status === 1 ? 'text-green-600' : 'text-gray-400'}>
           {row.status === 1 ? 'Sent' : 'Failed'}
         </span>
       ),
@@ -144,7 +144,7 @@ const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client 
     {
       id: 'to',
       header: 'To',
-      cell: row => <span className='font-medium'>{row.to}</span>,
+      cell: row => <span>{row.to}</span>,
       sortable: true
     },
     {

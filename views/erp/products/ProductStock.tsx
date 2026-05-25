@@ -166,83 +166,79 @@ const ProductStock: React.FC<ProductsProps> = ({
     {
       id: 'vendor',
       header: 'Vendor',
-      cell: (row: Product) => <span className='font-medium'>{row?.vendor?.first_name ?? ''}</span>,
+      cell: (row: Product) => <span>{row?.vendor?.first_name ?? ''}</span>,
       sortable: false
     },
     {
       id: 'category',
       header: 'Category',
-      cell: (row: Product) => <span className='font-medium'>{row?.category?.name ?? ''}</span>,
+      cell: (row: Product) => <span>{row?.category?.name ?? ''}</span>,
       sortable: false
     },
     {
       id: 'sku',
       header: 'SKU',
-      cell: (row: Product) => <span className='font-medium'>{row.sku}</span>,
+      cell: (row: Product) => <span>{row.sku}</span>,
       sortable: true
     },
     {
       id: 'product_name',
       header: 'Product Name',
-      cell: (row: Product) => (
-        <span className='font-medium'>{row.vendor_product_name || row.private_product_name}</span>
-      ),
+      cell: (row: Product) => <span>{row.vendor_product_name || row.private_product_name}</span>,
       sortable: false
     },
     {
       id: 'description',
       header: 'Description',
-      cell: (row: Product) => <span className='font-medium'>{row.description}</span>,
+      cell: (row: Product) => <span>{row.description}</span>,
       sortable: false
     },
     {
       id: 'style',
       header: 'Style',
-      cell: (row: Product) => <span className='font-medium'>{row.vendor_style || row.private_style}</span>,
+      cell: (row: Product) => <span>{row.vendor_style || row.private_style}</span>,
       sortable: false
     },
     {
       id: 'color',
       header: 'Color',
-      cell: (row: Product) => <span className='font-medium'>{row.vendor_color || row.private_color}</span>,
+      cell: (row: Product) => <span>{row.vendor_color || row.private_color}</span>,
       sortable: false
     },
     {
       id: 'uom',
       header: 'UOM',
-      cell: (row: Product) => (
-        <span className='font-medium'>{row.purchase_unit?.name ?? row.purchase_uom?.name ?? '—'}</span>
-      ),
+      cell: (row: Product) => <span>{row.purchase_unit?.name ?? row.purchase_uom?.name ?? '—'}</span>,
       sortable: false
     },
     {
       id: 'on_hand_stock',
       header: 'On Hand',
-      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.on_hand_stock ?? 0)}</span>,
+      cell: (row: Product) => <span>{mathRoundFixed(row.on_hand_stock ?? 0)}</span>,
       sortable: true
     },
     {
       id: 'allocated_stock',
       header: 'Allocated',
-      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.allocated_stock ?? 0)}</span>,
+      cell: (row: Product) => <span>{mathRoundFixed(row.allocated_stock ?? 0)}</span>,
       sortable: true
     },
     {
       id: 'prepared_stock',
       header: 'Prepared',
-      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.prepared_stock ?? 0)}</span>,
+      cell: (row: Product) => <span>{mathRoundFixed(row.prepared_stock ?? 0)}</span>,
       sortable: true
     },
     {
       id: 'available_stock',
       header: 'Available',
-      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.available_stock ?? 0)}</span>,
+      cell: (row: Product) => <span>{mathRoundFixed(row.available_stock ?? 0)}</span>,
       sortable: true
     },
     {
       id: 'picked_up_stock',
       header: 'Picked Up',
-      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.picked_up_stock ?? 0)}</span>,
+      cell: (row: Product) => <span>{mathRoundFixed(row.picked_up_stock ?? 0)}</span>,
       sortable: true
     },
     {
@@ -259,7 +255,7 @@ const ProductStock: React.FC<ProductsProps> = ({
 
         return (
           <div className='flex flex-col leading-tight'>
-            <span className='font-medium'>
+            <span>
               {row.available_stock != null ? mathRoundFixed(row.available_stock) : '0'}{' '}
               {purchaseUnitName && <span className='text-muted-foreground text-xs'>({purchaseUnitName})</span>}
             </span>
@@ -276,16 +272,14 @@ const ProductStock: React.FC<ProductsProps> = ({
     {
       id: 'product_cost',
       header: 'Company Cost',
-      cell: (row: Product) => (
-        <span className='font-medium'>{row.product_cost != null ? formatCurrency(row.product_cost) : '—'}</span>
-      ),
+      cell: (row: Product) => <span>{row.product_cost != null ? formatCurrency(row.product_cost) : '—'}</span>,
       sortable: true
     },
     {
       id: 'work_order_cost',
       header: 'Work Order Cost',
       cell: (row: Product) => (
-        <span className='font-medium'>
+        <span>
           {row.work_order_cost != null
             ? formatCurrency(row.work_order_cost)
             : row.product_cost != null
@@ -298,27 +292,25 @@ const ProductStock: React.FC<ProductsProps> = ({
     {
       id: 'cost_uom',
       header: 'Cost UOM',
-      cell: (row: Product) => (
-        <span className='font-medium'>{row.purchase_unit?.name ?? row.purchase_uom?.name ?? '—'}</span>
-      ),
+      cell: (row: Product) => <span>{row.purchase_unit?.name ?? row.purchase_uom?.name ?? '—'}</span>,
       sortable: false
     },
     {
       id: 'required_stock',
       header: 'Required',
-      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.required_stock ?? 0)}</span>,
+      cell: (row: Product) => <span>{mathRoundFixed(row.required_stock ?? 0)}</span>,
       sortable: true
     },
     {
       id: 'shortage_stock',
       header: 'Shortage',
-      cell: (row: Product) => <span className='font-medium'>{mathRoundFixed(row.shortage_stock ?? 0)}</span>,
+      cell: (row: Product) => <span>{mathRoundFixed(row.shortage_stock ?? 0)}</span>,
       sortable: true
     },
     {
       id: 'location_notes',
       header: 'Location Notes',
-      cell: (row: Product) => <span className='font-medium'>{row.location_notes ?? '—'}</span>,
+      cell: (row: Product) => <span>{row.location_notes ?? '—'}</span>,
       sortable: true
     },
     {

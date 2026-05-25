@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 
 import { FieldComponentProps } from './types'
 
-type SelectFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
+export type SelectFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
 
 const SelectField = <T extends FieldValues>({
   name,
@@ -48,16 +48,11 @@ const SelectField = <T extends FieldValues>({
       <SelectTrigger disabled={disabled} autoFocus={autoFocus} className={`w-full ${className}`}>
         <SelectValue placeholder={placeholder ?? ''} />
       </SelectTrigger>
-      <SelectContent position='popper' className='bg-[#09090B]'>
+      <SelectContent position='popper'>
         {selectOptions.length > 0 && (
           <SelectGroup>
             {selectOptions.map((opt, idx) => (
-              <SelectItem
-                key={idx}
-                value={opt.value}
-                disabled={!!opt?.disabled}
-                className='py-1 data-[highlighted]:bg-[#1F1F1F]'
-              >
+              <SelectItem key={idx} value={opt.value} disabled={!!opt?.disabled}>
                 {opt.labelPrefix && <span className='mr-2'>{opt.labelPrefix}</span>}
                 {opt.label}
               </SelectItem>

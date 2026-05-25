@@ -178,7 +178,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
       id: 'invoice_number',
       header: 'WO #',
       cell: (row: MaterialJob) => (
-        <span className='font-medium'>
+        <span>
           {row.work_order?.invoice_number_prefix ? `${row.work_order.invoice_number_prefix}-` : ''}
           {row.work_order?.invoice_number?.toString() || '—'}
         </span>
@@ -188,7 +188,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
     {
       id: 'job_name',
       header: 'Job Name',
-      cell: (row: MaterialJob) => <span className='font-medium'>{row.work_order?.title || '—'}</span>,
+      cell: (row: MaterialJob) => <span>{row.work_order?.title || '—'}</span>,
       sortable: false
     },
     {
@@ -260,19 +260,31 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
     {
       id: 'allocated_quantity',
       header: 'Allocated Qty',
-      cell: (row: MaterialJob) => <span>{row.allocated_quantity ?? '—'} {row?.product?.purchase_uom?.name ?? row?.product?.purchase_unit?.name ?? ''}</span>,
+      cell: (row: MaterialJob) => (
+        <span>
+          {row.allocated_quantity ?? '—'} {row?.product?.purchase_uom?.name ?? row?.product?.purchase_unit?.name ?? ''}
+        </span>
+      ),
       sortable: true
     },
     {
       id: 'picked_up_quantity',
       header: 'Picked-up Qty',
-      cell: (row: MaterialJob) => <span>{row.picked_up_quantity ?? '—'} {row?.product?.purchase_uom?.name ?? row?.product?.purchase_unit?.name ?? ''}</span>,
+      cell: (row: MaterialJob) => (
+        <span>
+          {row.picked_up_quantity ?? '—'} {row?.product?.purchase_uom?.name ?? row?.product?.purchase_unit?.name ?? ''}
+        </span>
+      ),
       sortable: true
     },
     {
       id: 'on_hand_quantity',
       header: 'On-Hand Qty',
-      cell: (row: MaterialJob) => <span>{row.on_hand_quantity ?? '—'} {row?.product?.purchase_uom?.name ?? row?.product?.purchase_unit?.name ?? ''}</span>,
+      cell: (row: MaterialJob) => (
+        <span>
+          {row.on_hand_quantity ?? '—'} {row?.product?.purchase_uom?.name ?? row?.product?.purchase_unit?.name ?? ''}
+        </span>
+      ),
       sortable: true
     },
     {
@@ -292,9 +304,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
     {
       id: 'total_material_cost',
       header: 'Total Material',
-      cell: (row: MaterialJob) => (
-        <span>{formatCurrency(row.total_material_cost ?? 0)}</span>
-      ),
+      cell: (row: MaterialJob) => <span>{formatCurrency(row.total_material_cost ?? 0)}</span>,
       sortable: true
     },
     {

@@ -19,7 +19,7 @@ const InvoiceBillingItems = ({ invoice }: { invoice: Invoice }) => {
           {invoice?.services && invoice.services.length > 0 && (
             <tbody className='divide-y divide-[#e5e7eb]'>
               {invoice.services.map((service, index) => (
-                <React.Fragment key={index}>
+                <React.Fragment key={service.id}>
                   <tr className='bg-[#f9fafb] transition-colors'>
                     <td className='px-4 py-2 text-sm font-semibold text-black align-top' colSpan={3}>
                       {service?.service_type?.name || ''}
@@ -27,9 +27,8 @@ const InvoiceBillingItems = ({ invoice }: { invoice: Invoice }) => {
                   </tr>
                   {service?.items?.length > 0 &&
                     service.items.map((item, itemIndex) => (
-                      <>
                       <tr
-                        key={index + '-' + itemIndex}
+                        key={service.id + '-' + item.id}
                         className={`hover:bg-gray-100 print:bg-white transition-colors ${item.type === 'deduction' ? 'text-red-700!' : ''}`}
                       >
                         <td className='px-4 py-2 text-sm text-light  print:text-black align-top'>{item?.name || ''}</td>
@@ -41,7 +40,7 @@ const InvoiceBillingItems = ({ invoice }: { invoice: Invoice }) => {
                           {item.type === 'deduction' ? '- ' : ''}
                           {formatCurrency(item.total_price)}
                         </td>
-                      </tr></>
+                      </tr>
                     ))}
                 </React.Fragment>
               ))}

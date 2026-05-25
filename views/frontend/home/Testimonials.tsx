@@ -1,12 +1,14 @@
 'use client'
-import { useRef, useEffect, useState, MutableRefObject } from 'react'
+
+import { useRef, useEffect, useState } from 'react'
+
+import Image from 'next/image'
 
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Autoplay } from 'swiper/modules'
 
 import 'swiper/css'
 import 'swiper/css/navigation'
-import Image from 'next/image'
 
 interface Testimonial {
   title: string
@@ -110,7 +112,7 @@ export default function TestimonialsSection() {
                           className='h-full w-full object-cover !relative'
                         />
                       </figure>
-                      <div className=''>
+                      <div>
                         <h4 className='font-medium text-title text-body-text'>{testimonial.name}</h4>
                         <p className='text-text-color text-sm md:text-base'>{testimonial.bio}</p>
                       </div>

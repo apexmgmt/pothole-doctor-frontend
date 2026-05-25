@@ -160,7 +160,7 @@ const MaterialJobs: React.FC = () => {
       id: 'invoice_number',
       header: 'WO #',
       cell: (row: MaterialJob) => (
-        <span className='font-medium'>
+        <span>
           {row.work_order?.invoice_number_prefix ? `${row.work_order.invoice_number_prefix}-` : ''}
           {row.work_order?.invoice_number?.toString() || '—'}
         </span>
@@ -170,7 +170,7 @@ const MaterialJobs: React.FC = () => {
     {
       id: 'job_name',
       header: 'Job Name',
-      cell: (row: MaterialJob) => <span className='font-medium'>{row.work_order?.title || '—'}</span>,
+      cell: (row: MaterialJob) => <span>{row.work_order?.title || '—'}</span>,
       sortable: false
     },
     {
@@ -179,14 +179,14 @@ const MaterialJobs: React.FC = () => {
       cell: (row: MaterialJob) => {
         const name = [row.sale_representative?.first_name, row.sale_representative?.last_name].filter(Boolean).join(' ')
 
-        return <span className='font-medium'>{name || '—'}</span>
+        return <span>{name || '—'}</span>
       },
       sortable: false
     },
     {
       id: 'company',
       header: 'Company',
-      cell: (row: MaterialJob) => <span className='font-medium'>{row.company?.name || '—'}</span>,
+      cell: (row: MaterialJob) => <span>{row.company?.name || '—'}</span>,
       sortable: false
     },
     {
@@ -195,7 +195,7 @@ const MaterialJobs: React.FC = () => {
       cell: (row: MaterialJob) => {
         const name = [row.client?.first_name, row.client?.last_name].filter(Boolean).join(' ')
 
-        return <span className='font-medium'>{name || '—'}</span>
+        return <span>{name || '—'}</span>
       },
       sortable: false
     },
@@ -205,32 +205,32 @@ const MaterialJobs: React.FC = () => {
       cell: (row: MaterialJob) => {
         const name = [row.vendor?.first_name, row.vendor?.last_name].filter(Boolean).join(' ')
 
-        return <span className='font-medium'>{name || '—'}</span>
+        return <span>{name || '—'}</span>
       },
       sortable: false
     },
     {
       id: 'product',
       header: 'Product',
-      cell: (row: MaterialJob) => <span className='font-medium'>{row.product?.name || '—'}</span>,
+      cell: (row: MaterialJob) => <span>{row.product?.name || '—'}</span>,
       sortable: false
     },
     {
       id: 'sku',
       header: 'SKU',
-      cell: (row: MaterialJob) => <span className='font-medium'>{row.product?.sku || '—'}</span>,
+      cell: (row: MaterialJob) => <span>{row.product?.sku || '—'}</span>,
       sortable: false
     },
     {
       id: 'style',
       header: 'Style',
-      cell: (row: MaterialJob) => <span className='font-medium'>{row.product?.vendor_style || '—'}</span>,
+      cell: (row: MaterialJob) => <span>{row.product?.vendor_style || '—'}</span>,
       sortable: false
     },
     {
       id: 'color',
       header: 'Color',
-      cell: (row: MaterialJob) => <span className='font-medium'>{row.product?.vendor_color || '—'}</span>,
+      cell: (row: MaterialJob) => <span>{row.product?.vendor_color || '—'}</span>,
       sortable: false
     },
     {
@@ -240,7 +240,7 @@ const MaterialJobs: React.FC = () => {
         const unit = row.actions?.[0]?.quantity_unit?.name
 
         return (
-          <span className='font-medium'>
+          <span>
             {row.quantity ?? '—'}
             {unit && <span className='text-zinc-400 ml-1 text-xs'>{unit}</span>}
           </span>
@@ -252,7 +252,7 @@ const MaterialJobs: React.FC = () => {
       id: 'scheduled_date',
       header: 'Scheduled Date',
       cell: (row: MaterialJob) => (
-        <span className='font-medium whitespace-nowrap'>{formatDate(row.scheduled_date || '') || '—'}</span>
+        <span className='whitespace-nowrap'>{formatDate(row.scheduled_date || '') || '—'}</span>
       ),
       sortable: true
     },
@@ -260,7 +260,7 @@ const MaterialJobs: React.FC = () => {
       id: 'shipped_date',
       header: 'Ship Date',
       cell: (row: MaterialJob) => (
-        <span className='font-medium whitespace-nowrap'>{formatDate(row.shipped_date || '') || '—'}</span>
+        <span className='whitespace-nowrap'>{formatDate(row.shipped_date || '') || '—'}</span>
       ),
       sortable: true
     },
@@ -268,7 +268,7 @@ const MaterialJobs: React.FC = () => {
       id: 'estimate_received_date',
       header: 'Est. Receive Date',
       cell: (row: MaterialJob) => (
-        <span className='font-medium whitespace-nowrap'>{formatDate(row.estimate_received_date || '') || '—'}</span>
+        <span className='whitespace-nowrap'>{formatDate(row.estimate_received_date || '') || '—'}</span>
       ),
       sortable: true
     },
@@ -276,7 +276,7 @@ const MaterialJobs: React.FC = () => {
       id: 'actual_received_date',
       header: 'Act. Received Date',
       cell: (row: MaterialJob) => (
-        <span className='font-medium whitespace-nowrap'>{formatDate(row.actual_received_date || '') || '—'}</span>
+        <span className='whitespace-nowrap'>{formatDate(row.actual_received_date || '') || '—'}</span>
       ),
       sortable: true
     },
@@ -284,9 +284,7 @@ const MaterialJobs: React.FC = () => {
       id: 'total_material_cost',
       header: 'Total Material',
       cell: (row: MaterialJob) => (
-        <span className='font-medium'>
-          ${row.total_material_cost != null ? Number(row.total_material_cost).toFixed(2) : '0.00'}
-        </span>
+        <span>${row.total_material_cost != null ? Number(row.total_material_cost).toFixed(2) : '0.00'}</span>
       ),
       sortable: true
     },

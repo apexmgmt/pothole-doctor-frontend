@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label'
 import { FieldComponentProps } from './types'
 import { cn } from '@/lib/utils'
 
-type CheckboxFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
+export type CheckboxFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
 
 const CheckboxField = <T extends FieldValues>({
   name,

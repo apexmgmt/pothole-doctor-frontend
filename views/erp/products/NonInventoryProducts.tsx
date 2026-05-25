@@ -237,52 +237,50 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
     {
       id: 'vendor',
       header: 'Vendor',
-      cell: (row: Product) => <span className='font-medium'>{row?.vendor?.first_name ?? ''}</span>,
+      cell: (row: Product) => <span>{row?.vendor?.first_name ?? ''}</span>,
       sortable: true
     },
     {
       id: 'category',
       header: 'Category',
-      cell: (row: Product) => <span className='font-medium'>{row?.category?.name ?? ''}</span>,
+      cell: (row: Product) => <span>{row?.category?.name ?? ''}</span>,
       sortable: true
     },
     {
       id: 'sku',
       header: 'SKU',
-      cell: (row: Product) => <span className='font-medium'>{row.sku}</span>,
+      cell: (row: Product) => <span>{row.sku}</span>,
       sortable: true
     },
     {
       id: 'product_name',
       header: 'Product Name',
-      cell: (row: Product) => (
-        <span className='font-medium'>{row.vendor_product_name || row.private_product_name}</span>
-      ),
+      cell: (row: Product) => <span>{row.vendor_product_name || row.private_product_name}</span>,
       sortable: true
     },
     {
       id: 'description',
       header: 'Description',
-      cell: (row: Product) => <span className='font-medium'>{row.description}</span>,
+      cell: (row: Product) => <span>{row.description}</span>,
       sortable: true
     },
     {
       id: 'style',
       header: 'Style',
-      cell: (row: Product) => <span className='font-medium'>{row.vendor_style || row.private_style}</span>,
+      cell: (row: Product) => <span>{row.vendor_style || row.private_style}</span>,
       sortable: true
     },
     {
       id: 'color',
       header: 'Color',
-      cell: (row: Product) => <span className='font-medium'>{row.vendor_color || row.private_color}</span>,
+      cell: (row: Product) => <span>{row.vendor_color || row.private_color}</span>,
       sortable: true
     },
     {
       id: 'product_price',
       header: 'Product Price',
       cell: (row: Product) => (
-        <span className='font-medium'>
+        <span>
           {Number(row?.selling_price ?? 0).toFixed(2)}/{row.selling_unit?.name}
         </span>
       ),

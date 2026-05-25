@@ -88,52 +88,50 @@ const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
     {
       id: 'warehouse',
       header: 'Warehouse',
-      cell: (row: PurchaseOrder) => <span className='font-medium'>{(row.warehouse as any)?.title  ?? (row.warehouse as any)?.name ?? '—'}</span>,
+      cell: (row: PurchaseOrder) => <span>{(row.warehouse as any)?.title ?? (row.warehouse as any)?.name ?? '—'}</span>,
       sortable: false
     },
     {
       id: 'purchase_order_number',
       header: 'PO#',
-      cell: (row: PurchaseOrder) => <span className='font-medium'>PO-{row.purchase_order_number}</span>,
+      cell: (row: PurchaseOrder) => <span>PO-{row.purchase_order_number}</span>,
       sortable: true
     },
     {
       id: 'po_quantity',
       header: 'PO Quantity',
-      cell: (row: PurchaseOrder) => <span className='font-medium'>{row.purchase_products?.[0]?.quantity ?? '—'}</span>,
+      cell: (row: PurchaseOrder) => <span>{row.purchase_products?.[0]?.quantity ?? '—'}</span>,
       sortable: false
     },
     {
       id: 'lot_number',
       header: 'Lot Number',
-      cell: (row: PurchaseOrder) => <span className='font-medium'>{row.lot_number || '—'}</span>,
+      cell: (row: PurchaseOrder) => <span>{row.lot_number || '—'}</span>,
       sortable: false
     },
     {
       id: 'adjusted_quantity',
       header: 'Adj. Quantity',
-      cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>{row.purchase_products?.[0]?.adjusted_quantity ?? '—'}</span>
-      ),
+      cell: (row: PurchaseOrder) => <span>{row.purchase_products?.[0]?.adjusted_quantity ?? '—'}</span>,
       sortable: false
     },
     {
       id: 'added_date',
       header: 'Date Added',
-      cell: (row: PurchaseOrder) => <span className='font-medium'>{row.added_date || '—'}</span>,
+      cell: (row: PurchaseOrder) => <span>{row.added_date || '—'}</span>,
       sortable: true
     },
     {
       id: 'avail_quantity',
       header: 'Avail. Quantity',
-      cell: (row: PurchaseOrder) => <span className='font-medium'>{row.purchase_products?.[0]?.quantity ?? '—'}</span>,
+      cell: (row: PurchaseOrder) => <span>{row.purchase_products?.[0]?.quantity ?? '—'}</span>,
       sortable: false
     },
     {
       id: 'work_order_cost',
       header: 'WO Cost',
       cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>
+        <span>
           {row.purchase_products?.[0]?.work_order_cost != null
             ? Number(row.purchase_products[0].work_order_cost).toFixed(2)
             : '—'}
@@ -145,7 +143,7 @@ const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
       id: 'customer_price',
       header: 'Customer Price',
       cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>
+        <span>
           {row.purchase_products?.[0]?.customer_price != null
             ? Number(row.purchase_products[0].customer_price).toFixed(2)
             : '—'}

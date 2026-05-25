@@ -172,25 +172,25 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
     {
       id: 'commission_type',
       header: 'Commission Name',
-      cell: row => <span className='font-medium'>{row.commission_type}</span>,
+      cell: row => <span>{row.commission_type}</span>,
       sortable: true
     },
     {
       id: 'based_on',
       header: 'Based On',
-      cell: row => <span className='font-medium'>{row.based_on}</span>,
+      cell: row => <span>{row.based_on}</span>,
       sortable: true
     },
     {
       id: 'per',
       header: 'Commission Per',
-      cell: row => <span className='font-medium'>{row.per}</span>,
+      cell: row => <span>{row.per}</span>,
       sortable: true
     },
     {
       id: 'filter_type_value',
       header: 'Selection',
-      cell: row => <span className='font-medium'>{row.filter_type_value}</span>,
+      cell: row => <span>{row.filter_type_value}</span>,
       sortable: false
     },
     {
@@ -200,7 +200,7 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
         switch (row.filter_type) {
           case 'between':
             return (
-              <span className='font-medium'>
+              <span>
                 {row.filter_percent ? '' : '$'}
                 {row.min_amount}
                 {row.filter_percent ? '%' : ''} - {row.filter_percent ? '' : '$'}
@@ -210,7 +210,7 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
             )
           case 'greater-than':
             return (
-              <span className='font-medium'>
+              <span>
                 {row.filter_percent ? '' : '$'}
                 {row.min_amount}
                 {row.filter_percent ? '%' : ''}
@@ -218,16 +218,16 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
             )
           case 'less-than':
             return (
-              <span className='font-medium'>
+              <span>
                 {row.filter_percent ? '' : '$'}
                 {row.max_amount}
                 {row.filter_percent ? '%' : ''}
               </span>
             )
           case 'same-as-store':
-            return <span className='font-medium'>0</span>
+            return <span>0</span>
           default:
-            return <span className='font-medium'>0</span>
+            return <span>0</span>
         }
       },
       sortable: false
@@ -236,7 +236,7 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
       id: 'amount',
       header: 'Commission Value',
       cell: row => (
-        <span className='font-medium'>
+        <span>
           {row.commission_percent ? '' : '$'}
           {row.amount}
           {row.commission_percent ? '%' : ''}

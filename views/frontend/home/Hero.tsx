@@ -95,7 +95,7 @@ export default function HeroSection() {
 
                 <button
                   type='submit'
-                  className=' bg-primary hover:bg-primary/85 text-white font-semibold py-3 lg:py-[18px] px-5 rounded-lg transition-colors duration-200 flex items-center gap-1.5 text-sm/[1] w-max cursor-pointer'
+                  className='bg-primary hover:bg-primary/85 text-white font-semibold py-3 lg:py-[18px] px-5 rounded-lg transition-colors duration-200 flex items-center gap-1.5 text-sm/[1] w-max cursor-pointer'
                 >
                   GET STARTED
                   <svg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'>

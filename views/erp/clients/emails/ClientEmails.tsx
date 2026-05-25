@@ -112,26 +112,26 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
       cell: row => {
         const parts = [row?.user?.first_name, row?.user?.last_name].filter(Boolean)
 
-        return <span className='font-medium'>{parts.join(' ')}</span>
+        return <span>{parts.join(' ')}</span>
       },
       sortable: true
     },
     {
       id: 'source',
       header: 'Source',
-      cell: row => <span className='font-medium'>{row.source}</span>,
+      cell: row => <span>{row.source}</span>,
       sortable: false
     },
     {
       id: 'subject',
       header: 'Subject',
-      cell: row => <span className='font-medium'>{row.subject || ''}</span>,
+      cell: row => <span>{row.subject || ''}</span>,
       sortable: false
     },
     {
       id: 'created_at',
       header: 'Date Sent',
-      cell: row => <span className='font-medium'>{formatDate(row.created_at)}</span>,
+      cell: row => <span>{formatDate(row.created_at)}</span>,
       sortable: true
     },
     {

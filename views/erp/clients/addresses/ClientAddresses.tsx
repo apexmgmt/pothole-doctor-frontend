@@ -131,25 +131,25 @@ const ClientAddresses = ({
     {
       id: 'contact_name',
       header: 'Contact Name',
-      cell: row => <span className='font-medium'>{''}</span>,
+      cell: row => <span>{''}</span>,
       sortable: false
     },
     {
       id: 'title',
       header: 'Address Title',
-      cell: row => <span className='font-medium'>{row?.title || ''}</span>,
+      cell: row => <span>{row?.title || ''}</span>,
       sortable: true
     },
     {
       id: 'email',
       header: 'Email',
-      cell: row => <span className='font-medium'>{row.email || ''}</span>,
+      cell: row => <span>{row.email || ''}</span>,
       sortable: true
     },
     {
       id: 'phone',
       header: 'Phone',
-      cell: row => <span className='font-medium'>{row.phone || ''}</span>,
+      cell: row => <span>{row.phone || ''}</span>,
       sortable: true
     },
     {
@@ -158,14 +158,14 @@ const ClientAddresses = ({
       cell: row => {
         const parts = [row.street_address, row?.city?.name, row?.state?.name].filter(Boolean)
 
-        return <span className='font-medium'>{parts.join(', ')}</span>
+        return <span>{parts.join(', ')}</span>
       },
       sortable: true
     },
     {
       id: 'is_default',
       header: 'Default',
-      cell: row => <span className='font-medium'>{row.is_default ? 'Yes' : 'No'}</span>,
+      cell: row => <span>{row.is_default ? 'Yes' : 'No'}</span>,
       sortable: true
     },
     {

@@ -225,52 +225,50 @@ const Products: React.FC<ProductsProps> = ({
     {
       id: 'vendor',
       header: 'Vendor',
-      cell: (row: Product) => <span className='font-medium'>{row?.vendor?.first_name ?? ''}</span>,
+      cell: (row: Product) => <span>{row?.vendor?.first_name ?? ''}</span>,
       sortable: false
     },
     {
       id: 'category',
       header: 'Category',
-      cell: (row: Product) => <span className='font-medium'>{row?.category?.name ?? ''}</span>,
+      cell: (row: Product) => <span>{row?.category?.name ?? ''}</span>,
       sortable: false
     },
     {
       id: 'sku',
       header: 'SKU',
-      cell: (row: Product) => <span className='font-medium'>{row.sku}</span>,
+      cell: (row: Product) => <span>{row.sku}</span>,
       sortable: true
     },
     {
       id: 'product_name',
       header: 'Product Name',
-      cell: (row: Product) => (
-        <span className='font-medium'>{row.vendor_product_name || row.private_product_name}</span>
-      ),
+      cell: (row: Product) => <span>{row.vendor_product_name || row.private_product_name}</span>,
       sortable: false
     },
     {
       id: 'description',
       header: 'Description',
-      cell: (row: Product) => <span className='font-medium'>{row.description}</span>,
+      cell: (row: Product) => <span>{row.description}</span>,
       sortable: false
     },
     {
       id: 'style',
       header: 'Style',
-      cell: (row: Product) => <span className='font-medium'>{row.vendor_style || row.private_style}</span>,
+      cell: (row: Product) => <span>{row.vendor_style || row.private_style}</span>,
       sortable: false
     },
     {
       id: 'color',
       header: 'Color',
-      cell: (row: Product) => <span className='font-medium'>{row.vendor_color || row.private_color}</span>,
+      cell: (row: Product) => <span>{row.vendor_color || row.private_color}</span>,
       sortable: false
     },
     {
       id: 'coverage',
       header: 'Coverage',
       cell: (row: Product) => (
-        <span className='font-medium'>
+        <span>
           {row.available_stock && row.coverage_per_rate && (
             <>
               {mathRoundFixed((row.available_stock ?? 0) * (row.coverage_per_rate ?? 0))} (
@@ -285,7 +283,7 @@ const Products: React.FC<ProductsProps> = ({
       id: 'selling_price',
       header: 'Customer Price',
       cell: (row: Product) => (
-        <span className='font-medium'>
+        <span>
           {row?.selling_price != null ? formatCurrency(row.selling_price) : '—'}/{row.selling_unit?.name}
         </span>
       ),

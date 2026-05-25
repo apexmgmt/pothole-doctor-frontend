@@ -159,25 +159,25 @@ const ServiceTypes: React.FC = () => {
     {
       id: 'name',
       header: 'Title',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'wasted_percent',
       header: 'Wasted Percent',
-      cell: row => <span className='font-medium'>{row.wasted_percent}</span>,
+      cell: row => <span>{row.wasted_percent}</span>,
       sortable: true
     },
     {
       id: 'abbreviation',
       header: 'Abbreviation',
-      cell: row => <span className='font-medium'>{row.abbreviation}</span>,
+      cell: row => <span>{row.abbreviation}</span>,
       sortable: true
     },
     {
       id: 'is_editable',
       header: 'Is Editable',
-      cell: row => <span className='font-medium'>{row.is_editable ? 'Yes' : 'No'}</span>,
+      cell: row => <span>{row.is_editable ? 'Yes' : 'No'}</span>,
       sortable: false
     },
     {

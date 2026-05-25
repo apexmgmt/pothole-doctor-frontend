@@ -216,7 +216,7 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({
   ]
 
   return (
-    <div className=''>
+    <div>
       <ClientDetailsContent clientData={clientData} canEditClient={canEditClient} handleEditClient={handleEditClient} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className='my-4'>
