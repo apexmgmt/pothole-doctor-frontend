@@ -107,42 +107,38 @@ const WarehousePurchaseOrders: React.FC<WarehousePurchaseOrdersProps> = ({ wareh
     {
       id: 'purchase_order_number',
       header: 'PO #',
-      cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>PO-{row.purchase_order_number?.toString() ?? 'N/A'}</span>
-      ),
+      cell: (row: PurchaseOrder) => <span>PO-{row.purchase_order_number?.toString() ?? 'N/A'}</span>,
       sortable: true
     },
     {
       id: 'vendor',
       header: 'Vendor',
-      cell: (row: PurchaseOrder) => <span className='font-medium'>{row.vendor?.first_name ?? '-'}</span>,
+      cell: (row: PurchaseOrder) => <span>{row.vendor?.first_name ?? '-'}</span>,
       sortable: false
     },
     {
       id: 'carrier',
       header: 'Carrier',
-      cell: (row: PurchaseOrder) => <span className='font-medium'>{row.courier?.name ?? '-'}</span>,
+      cell: (row: PurchaseOrder) => <span>{row.courier?.name ?? '-'}</span>,
       sortable: false
     },
     {
       id: 'reference_number',
       header: 'Ref. Number',
-      cell: (row: PurchaseOrder) => <span className='font-medium'>{row.reference_number || '-'}</span>,
+      cell: (row: PurchaseOrder) => <span>{row.reference_number || '-'}</span>,
       sortable: false
     },
     {
       id: 'ordered_date',
       header: 'Ordered Date',
-      cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>{formatDate((row as any).ordered_date || '') || '-'}</span>
-      ),
+      cell: (row: PurchaseOrder) => <span>{formatDate((row as any).ordered_date || '') || '-'}</span>,
       sortable: false
     },
     {
       id: 'arrival_date',
       header: 'Arrival Date',
       cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>{formatDate(row.actual_arrival_date || row.est_arrival_date || '') || '-'}</span>
+        <span>{formatDate(row.actual_arrival_date || row.est_arrival_date || '') || '-'}</span>
       ),
       sortable: true
     }

@@ -111,7 +111,7 @@ const ProposalTasksModal = ({
     {
       id: 'name',
       header: 'Task Name',
-      cell: (row: Task) => <span className='font-medium'>{row.name || '—'}</span>,
+      cell: (row: Task) => <span>{row.name || '—'}</span>,
       sortable: true
     },
     {
@@ -173,11 +173,7 @@ const ProposalTasksModal = ({
       sortable: false,
       cell: (row: Task) => (
         <div className='flex items-center justify-center gap-2'>
-          <EditButton
-            tooltip='Edit Task'
-            variant='icon'
-            onClick={() => handleOpenEdit(row)}
-          />
+          <EditButton tooltip='Edit Task' variant='icon' onClick={() => handleOpenEdit(row)} />
           <DeleteButton
             tooltip='Delete Task'
             variant='icon'

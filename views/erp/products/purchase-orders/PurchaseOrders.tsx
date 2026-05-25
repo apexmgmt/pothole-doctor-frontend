@@ -213,28 +213,26 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
     {
       id: 'purchase_order_number',
       header: 'PO #',
-      cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>PO-{row.purchase_order_number?.toString() ?? 'N/A'}</span>
-      ),
+      cell: (row: PurchaseOrder) => <span>PO-{row.purchase_order_number?.toString() ?? 'N/A'}</span>,
       sortable: true
     },
     {
       id: 'vendor',
       header: 'Vendor',
-      cell: (row: PurchaseOrder) => <span className='font-medium'>{row.vendor?.first_name ?? '—'}</span>,
+      cell: (row: PurchaseOrder) => <span>{row.vendor?.first_name ?? '—'}</span>,
       sortable: false
     },
     {
       id: 'courier',
       header: 'Carrier',
-      cell: (row: PurchaseOrder) => <span className='font-medium'>{(row.courier as Courier)?.name ?? '—'}</span>,
+      cell: (row: PurchaseOrder) => <span>{(row.courier as Courier)?.name ?? '—'}</span>,
       sortable: false
     },
     {
       id: 'warehouse',
       header: 'Warehouse',
       cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>
+        <span>
           {row.warehouse_type === 'warehouse'
             ? ((row.warehouse as Warehouse)?.title ?? '—')
             : ((row.warehouse as BusinessLocation)?.name ?? '—')}
@@ -245,56 +243,44 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
     {
       id: 'reference_number',
       header: 'Ref. Number',
-      cell: (row: PurchaseOrder) => <span className='font-medium'>{row.reference_number || '—'}</span>,
+      cell: (row: PurchaseOrder) => <span>{row.reference_number || '—'}</span>,
       sortable: false
     },
     {
       id: 'est_departure_date',
       header: 'Departure Date',
-      cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>{formatDate(row.est_departure_date || '') || '—'}</span>
-      ),
+      cell: (row: PurchaseOrder) => <span>{formatDate(row.est_departure_date || '') || '—'}</span>,
       sortable: true
     },
     {
       id: 'est_arrival_date',
       header: 'Arrival Date',
-      cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>{formatDate(row.est_arrival_date || '') || '—'}</span>
-      ),
+      cell: (row: PurchaseOrder) => <span>{formatDate(row.est_arrival_date || '') || '—'}</span>,
       sortable: true
     },
     {
       id: 'ordered_date',
       header: 'Ordered Date',
-      cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>{formatDate((row as any).ordered_date || '') || '—'}</span>
-      ),
+      cell: (row: PurchaseOrder) => <span>{formatDate((row as any).ordered_date || '') || '—'}</span>,
       sortable: false
     },
     {
       id: 'received_date',
       header: 'Received Date',
-      cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>{formatDate(row.actual_arrival_date || '') || '—'}</span>
-      ),
+      cell: (row: PurchaseOrder) => <span>{formatDate(row.actual_arrival_date || '') || '—'}</span>,
       sortable: false
     },
     {
       id: 'moved_to_inventory_date',
       header: 'Moved to Inventory',
-      cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>{formatDate((row as any).moved_to_inventory_date || '') || '—'}</span>
-      ),
+      cell: (row: PurchaseOrder) => <span>{formatDate((row as any).moved_to_inventory_date || '') || '—'}</span>,
       sortable: false
     },
     {
       id: 'total_cost',
       header: 'Total Cost',
       cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>
-          {(row as any).total_cost != null ? Number((row as any).total_cost).toFixed(2) : '—'}
-        </span>
+        <span>{(row as any).total_cost != null ? Number((row as any).total_cost).toFixed(2) : '—'}</span>
       ),
       sortable: false
     },
@@ -302,9 +288,7 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
       id: 'paid_amount',
       header: 'Paid Amount',
       cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>
-          {(row as any).paid_amount != null ? Number((row as any).paid_amount).toFixed(2) : '—'}
-        </span>
+        <span>{(row as any).paid_amount != null ? Number((row as any).paid_amount).toFixed(2) : '—'}</span>
       ),
       sortable: false
     },
@@ -312,9 +296,7 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
       id: 'balance_amount',
       header: 'Balance',
       cell: (row: PurchaseOrder) => (
-        <span className='font-medium'>
-          {(row as any).balance_amount != null ? Number((row as any).balance_amount).toFixed(2) : '—'}
-        </span>
+        <span>{(row as any).balance_amount != null ? Number((row as any).balance_amount).toFixed(2) : '—'}</span>
       ),
       sortable: false
     },

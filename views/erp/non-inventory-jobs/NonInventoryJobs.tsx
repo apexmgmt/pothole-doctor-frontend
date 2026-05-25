@@ -187,7 +187,7 @@ const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses,
       id: 'invoice_number',
       header: 'WO #',
       cell: (row: MaterialJob) => (
-        <span className='font-medium'>
+        <span>
           {row.work_order?.invoice_number_prefix ? `${row.work_order.invoice_number_prefix}-` : ''}
           {row.work_order?.invoice_number?.toString() || '—'}
         </span>
@@ -197,7 +197,7 @@ const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses,
     {
       id: 'job_name',
       header: 'Job Name',
-      cell: (row: MaterialJob) => <span className='font-medium'>{row.work_order?.title || '—'}</span>,
+      cell: (row: MaterialJob) => <span>{row.work_order?.title || '—'}</span>,
       sortable: false
     },
     {

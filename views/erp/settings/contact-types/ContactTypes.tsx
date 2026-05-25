@@ -161,31 +161,31 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
     {
       id: 'name',
       header: 'Title',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'payment_term',
       header: 'Payment Term',
-      cell: row => <span className='font-medium'>{row.payment_term}</span>,
+      cell: row => <span>{row.payment_term}</span>,
       sortable: true
     },
     {
       id: 'material_labor_down_payment',
       header: 'Material & Labor Down Payment',
-      cell: row => <span className='font-medium'>{row.material_labor_down_payment}</span>,
+      cell: row => <span>{row.material_labor_down_payment}</span>,
       sortable: true
     },
     {
       id: 'material_down_payment',
       header: 'Material Down Payment',
-      cell: row => <span className='font-medium'>{row.material_down_payment}</span>,
+      cell: row => <span>{row.material_down_payment}</span>,
       sortable: true
     },
     {
       id: 'labor_down_payment',
       header: 'Labor Down Payment',
-      cell: row => <span className='font-medium'>{row.labor_down_payment}</span>,
+      cell: row => <span>{row.labor_down_payment}</span>,
       sortable: true
     },
     {

@@ -34,7 +34,7 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
     id: 'invoice_number',
     header: 'Invoice #',
     cell: (row: Invoice) => (
-      <span className='font-medium hover:underline cursor-pointer' onClick={() => onOpenInvoice(row)}>
+      <span className='hover:underline cursor-pointer' onClick={() => onOpenInvoice(row)}>
         {row?.invoice_number_prefix ? `${row.invoice_number_prefix}-` : ''}
         {row.invoice_number?.toString() || 'N/A'}
       </span>
@@ -54,15 +54,13 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
   {
     id: 'created_at',
     header: 'Created Date',
-    cell: (row: Invoice) => <span className='font-medium'>{formatDate(row.created_at || '') || '—'}</span>,
+    cell: (row: Invoice) => <span>{formatDate(row.created_at || '') || '—'}</span>,
     sortable: true
   },
   {
     id: 'invoice_confirmation_date',
     header: 'Invoice Confirmation Date',
-    cell: (row: Invoice) => (
-      <span className='font-medium'>{formatDate(row.invoice_confirmation_date || '') || '—'}</span>
-    ),
+    cell: (row: Invoice) => <span>{formatDate(row.invoice_confirmation_date || '') || '—'}</span>,
     sortable: true
   },
 
@@ -70,7 +68,7 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
   {
     id: 'company',
     header: 'Company',
-    cell: (row: Invoice) => <span className='font-medium'>{row?.client?.company?.name || '—'}</span>,
+    cell: (row: Invoice) => <span>{row?.client?.company?.name || '—'}</span>,
     sortable: false
   },
   {
@@ -79,7 +77,7 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
     cell: (row: Invoice) => {
       const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
 
-      return <span className='font-medium'>{parts.join(' ') || '—'}</span>
+      return <span>{parts.join(' ') || '—'}</span>
     },
     sortable: false
   },
@@ -111,7 +109,7 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
   {
     id: 'invoice_type',
     header: 'Invoice Type',
-    cell: (row: Invoice) => <span className='font-medium'>{row?.invoice_type?.name || '—'}</span>,
+    cell: (row: Invoice) => <span>{row?.invoice_type?.name || '—'}</span>,
     sortable: false
   },
   {
@@ -130,94 +128,75 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
   {
     id: 'title',
     header: 'Job Name',
-    cell: (row: Invoice) => <span className='font-medium'>{row?.title || '—'}</span>,
+    cell: (row: Invoice) => <span>{row?.title || '—'}</span>,
     sortable: true
   },
   {
     id: 'location',
     header: 'Location',
-    cell: (row: Invoice) => <span className='font-medium'>{row?.location?.name || '—'}</span>,
+    cell: (row: Invoice) => <span>{row?.location?.name || '—'}</span>,
     sortable: false
   },
   {
     id: 'assign_user',
     header: 'Sales Rep',
     cell: (row: Invoice) => (
-      <span className='font-medium'>
-        {[row?.assign_user?.first_name, row?.assign_user?.last_name].filter(Boolean).join(' ') || '—'}
-      </span>
+      <span>{[row?.assign_user?.first_name, row?.assign_user?.last_name].filter(Boolean).join(' ') || '—'}</span>
     ),
     sortable: false
   },
   {
     id: 'total_material_sale',
     header: 'Material Sale',
-    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(row?.total_material_sale ?? 0)}</span>,
+    cell: (row: Invoice) => <span>{formatCurrency(row?.total_material_sale ?? 0)}</span>,
     sortable: true
   },
   {
     id: 'total_labor_sale',
     header: 'Labor Sale',
-    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(row?.total_labor_sale ?? 0)}</span>,
+    cell: (row: Invoice) => <span>{formatCurrency(row?.total_labor_sale ?? 0)}</span>,
     sortable: true
   },
   {
     id: 'discount',
     header: 'Discount',
-    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(row?.discount ?? 0)}</span>,
+    cell: (row: Invoice) => <span>{formatCurrency(row?.discount ?? 0)}</span>,
     sortable: true
   },
   {
     id: 'total',
     header: 'Total',
-    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(row?.total ?? 0)}</span>,
+    cell: (row: Invoice) => <span>{formatCurrency(row?.total ?? 0)}</span>,
     sortable: true
   },
   {
     id: 'sale_tax',
     header: 'Total Tax',
-    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(row?.sale_tax ?? 0)}</span>,
+    cell: (row: Invoice) => <span>{formatCurrency(row?.sale_tax ?? 0)}</span>,
     sortable: true
   },
   {
     id: 'total_payment',
     header: 'Total Payment',
-    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(0)}</span>,
+    cell: (row: Invoice) => <span>{formatCurrency(0)}</span>,
     sortable: false
   },
   {
     id: 'due_amount',
     header: 'Customer Balance',
-    cell: (row: Invoice) => <span className='font-medium'>{formatCurrency(0)}</span>,
+    cell: (row: Invoice) => <span>{formatCurrency(0)}</span>,
     sortable: false
   },
   {
     id: 'work_order_total_cost',
     header: 'WO Total Cost',
-    cell: (row: Invoice) => (
-      <span className='font-medium'>{formatCurrency(row?.work_order?.total_cost ?? row?.total_cost ?? 0)}</span>
-    ),
+    cell: (row: Invoice) => <span>{formatCurrency(row?.work_order?.total_cost ?? row?.total_cost ?? 0)}</span>,
     sortable: false
   },
   {
     id: 'work_order_profit',
     header: 'WO Profit',
-    cell: (row: Invoice) => (
-      <span className='font-medium'>{formatCurrency(row?.work_order?.total_profit ?? row?.total_profit ?? 0)}</span>
-    ),
+    cell: (row: Invoice) => <span>{formatCurrency(row?.work_order?.total_profit ?? row?.total_profit ?? 0)}</span>,
     sortable: false
   }
-
-  // {
-  //   id: 'work_order_profit_percentage',
-  //   header: 'WO Profit %',
-  //   cell: (row: Invoice) => {
-  //     const subtotal = row?.subtotal ?? 0
-  //     const totalProfit = row?.work_order?.total_profit ?? row?.total_profit ?? 0
-  //     const profitPercentage = subtotal ? (totalProfit / subtotal) * 100 : 0
-
-  //     return <span className='font-medium'>{profitPercentage?.toFixed(2)}%</span>
-  //   },
-  //   sortable: false
-  // },
 ]

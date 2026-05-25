@@ -162,7 +162,7 @@ const Estimates: React.FC<{
       header: 'Estimate#',
       cell: row => (
         <Link href={`/erp/estimates/${row.id}`} prefetch>
-          <span className='font-medium hover:underline'>{row.estimate_number?.toString()}</span>
+          <span className='hover:underline'>{row.estimate_number?.toString()}</span>
         </Link>
       ),
       sortable: false
@@ -171,7 +171,7 @@ const Estimates: React.FC<{
       id: 'title',
       header: 'Title',
       cell: (row: Estimate) => (
-        <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>
+        <Link href={`/erp/estimates/${row.id}`} prefetch>
           {row.title}
         </Link>
       ),
@@ -181,7 +181,7 @@ const Estimates: React.FC<{
       id: 'biding_date',
       header: 'Date',
       cell: (row: Estimate) => (
-        <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>
+        <Link href={`/erp/estimates/${row.id}`} prefetch>
           {formatDate(row?.biding_date) || ''}
         </Link>
       ),
@@ -191,7 +191,7 @@ const Estimates: React.FC<{
       id: 'company',
       header: 'Company',
       cell: (row: Estimate) => (
-        <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>
+        <Link href={`/erp/estimates/${row.id}`} prefetch>
           {row?.client?.company?.name || ''}
         </Link>
       ),
@@ -204,7 +204,7 @@ const Estimates: React.FC<{
         const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
 
         return (
-          <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>
+          <Link href={`/erp/estimates/${row.id}`} prefetch>
             {parts.join(' ') || ''}
           </Link>
         )
@@ -215,7 +215,7 @@ const Estimates: React.FC<{
       id: 'address',
       header: 'Job Address',
       cell: (row: Estimate) => (
-        <Link href={`/erp/estimates/${row.id}`} prefetch className='font-medium'>
+        <Link href={`/erp/estimates/${row.id}`} prefetch>
           <Description
             description={
               row.address
@@ -231,7 +231,7 @@ const Estimates: React.FC<{
     // {
     //   id: 'service_type',
     //   header: 'Service Type',
-    //   cell: (row: Estimate) => <span className='font-medium'>{row?.service_type?.name || ''}</span>,
+    //   cell: (row: Estimate) => <span>{row?.service_type?.name || ''}</span>,
     //   sortable: true
     // },
 

@@ -160,31 +160,31 @@ const BusinessLocations: React.FC = () => {
     {
       id: 'name',
       header: 'Location Title',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'phone',
       header: 'Phone Number',
-      cell: row => <span className='font-medium'>{row.phone}</span>,
+      cell: row => <span>{row.phone}</span>,
       sortable: true
     },
     {
       id: 'invoice_prefix',
       header: 'Invoice Prefix',
-      cell: row => <span className='font-medium'>{row.invoice_prefix}</span>,
+      cell: row => <span>{row.invoice_prefix}</span>,
       sortable: true
     },
     {
       id: 'email',
       header: 'Email',
-      cell: row => <span className='font-medium'>{row.email}</span>,
+      cell: row => <span>{row.email}</span>,
       sortable: true
     },
     {
       id: 'street_address',
       header: 'Address',
-      cell: row => <span className='font-medium'>{row.street_address}</span>,
+      cell: row => <span>{row.street_address}</span>,
       sortable: true
     },
     {

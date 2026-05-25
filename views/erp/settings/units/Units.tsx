@@ -165,13 +165,13 @@ const Units: React.FC<{ group?: string | 'uom' | 'measure' }> = ({ group }) => {
     {
       id: 'name',
       header: 'Title',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'group',
       header: 'Group',
-      cell: row => <span className='font-medium capitalize'>{row.group}</span>,
+      cell: row => <span className='capitalize'>{row.group}</span>,
       sortable: true
     },
     {

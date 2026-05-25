@@ -39,7 +39,7 @@ export default function Header() {
   }
 
   return (
-    <header className=' z-50 relative'>
+    <header className='z-50 relative'>
       {/* Top Utility Bar */}
       {/* <div
         className="py-2 z-20 hidden md:block"

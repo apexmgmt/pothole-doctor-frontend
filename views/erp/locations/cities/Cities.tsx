@@ -174,19 +174,19 @@ const Cities: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = (
     {
       id: 'name',
       header: 'Name',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'state',
       header: 'State',
-      cell: row => <span className='font-medium'>{row.state}</span>,
+      cell: row => <span>{row.state}</span>,
       sortable: true
     },
     {
       id: 'country',
       header: 'Country',
-      cell: row => <span className='font-medium'>{row.country}</span>,
+      cell: row => <span>{row.country}</span>,
       sortable: true
     },
     {

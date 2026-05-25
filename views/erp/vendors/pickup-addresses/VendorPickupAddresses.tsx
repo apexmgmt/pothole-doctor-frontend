@@ -153,13 +153,13 @@ const VendorPickupAddresses = ({
     {
       id: 'title',
       header: 'Title',
-      cell: row => <span className='font-medium'>{row.title}</span>,
+      cell: row => <span>{row.title}</span>,
       sortable: true
     },
     {
       id: 'address',
       header: 'Address',
-      cell: row => <span className='font-medium'>{row.address}</span>,
+      cell: row => <span>{row.address}</span>,
       sortable: false
     },
     {

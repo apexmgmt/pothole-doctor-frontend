@@ -145,14 +145,14 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
     {
       id: 'title',
       header: 'Job Name',
-      cell: (row: Schedule) => <span className='font-medium'>{row.title || ''}</span>,
+      cell: (row: Schedule) => <span>{row.title || ''}</span>,
       sortable: true
     },
     {
       id: 'invoice_number',
       header: 'WO#',
       cell: (row: Schedule) => (
-        <span className='font-medium'>
+        <span>
           {row.work_order?.invoice_number_prefix ? `${row.work_order.invoice_number_prefix}-` : ''}
           {row.work_order?.invoice_number?.toString() || '—'}
         </span>
@@ -162,13 +162,13 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
     {
       id: 'company',
       header: 'Company',
-      cell: (row: Schedule) => <span className='font-medium'>{row.client?.company?.name || ''}</span>,
+      cell: (row: Schedule) => <span>{row.client?.company?.name || ''}</span>,
       sortable: true
     },
     {
       id: 'job_type',
       header: 'Job Type',
-      cell: (row: Schedule) => <span className='font-medium'>{row.service_type?.name || ''}</span>,
+      cell: (row: Schedule) => <span>{row.service_type?.name || ''}</span>,
       sortable: true
     },
     {
@@ -177,32 +177,32 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
       cell: (row: Schedule) => {
         const parts = [row.contractor?.first_name, row.contractor?.last_name].filter(Boolean)
 
-        return <span className='font-medium'>{parts.join(' ') || ''}</span>
+        return <span>{parts.join(' ') || ''}</span>
       },
       sortable: true
     },
     {
       id: 'starting_date',
       header: 'Start Date',
-      cell: (row: Schedule) => <span className='font-medium'>{formatDate(row.starting_date) || ''}</span>,
+      cell: (row: Schedule) => <span>{formatDate(row.starting_date) || ''}</span>,
       sortable: true
     },
     {
       id: 'ending_date',
       header: 'End Date',
-      cell: (row: Schedule) => <span className='font-medium'>{formatDate(row.ending_date) || ''}</span>,
+      cell: (row: Schedule) => <span>{formatDate(row.ending_date) || ''}</span>,
       sortable: true
     },
     {
       id: 'starting_time',
       header: 'Start Time',
-      cell: (row: Schedule) => <span className='font-medium'>{row.starting_time || ''}</span>,
+      cell: (row: Schedule) => <span>{row.starting_time || ''}</span>,
       sortable: true
     },
     {
       id: 'ending_time',
       header: 'End Time',
-      cell: (row: Schedule) => <span className='font-medium'>{row.ending_time || ''}</span>,
+      cell: (row: Schedule) => <span>{row.ending_time || ''}</span>,
       sortable: true
     },
     {
@@ -214,10 +214,10 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
           const end = new Date(row.ending_date)
           const diff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
 
-          return <span className='font-medium'>{diff}</span>
+          return <span>{diff}</span>
         }
 
-        return <span className='font-medium'>-</span>
+        return <span>-</span>
       },
       sortable: false
     },
