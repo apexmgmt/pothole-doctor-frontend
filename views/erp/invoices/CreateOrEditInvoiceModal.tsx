@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -15,15 +15,12 @@ import {
   Staff
 } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import InvoiceService from '@/services/api/invoices/invoices.service'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { DatePicker } from '@/components/ui/datePicker'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Textarea } from '@/components/ui/textarea'
 import { DateTimePicker } from '@/components/ui/datetime-picker'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface CreateOrEditInvoiceModalProps {
   mode?: 'create' | 'edit'
@@ -80,6 +77,12 @@ const CreateOrEditInvoiceModal = ({
       tax_rate: 0
     }
   })
+
+  const {
+    control,
+    register,
+    formState: { errors }
+  } = form
 
   useEffect(() => {
     if (open) {
@@ -214,6 +217,9 @@ const CreateOrEditInvoiceModal = ({
     }
   }, [form.watch('location_id'), businessLocations])
 
+  const fieldStyle = 'grid grid-cols-[152px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
+
   return (
     <CommonDialog
       isLoading={form.formState.isSubmitting}
@@ -222,7 +228,7 @@ const CreateOrEditInvoiceModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create New Invoice' : 'Edit Invoice'}
       description={mode === 'create' ? 'Add a new invoice to the system' : 'Update invoice information'}
-      maxWidth='4xl'
+      className='max-w-264!'
       disableClose={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
@@ -251,90 +257,67 @@ const CreateOrEditInvoiceModal = ({
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2'>
           {/* Title */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='title'
-            rules={{ required: 'Invoice title is required', minLength: { value: 2, message: 'Min 2 characters' } }}
-            render={({ field }) => (
-              <FormItem className='col-span-1 sm:col-span-2'>
-                <FormLabel>
-                  Title <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter invoice title' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='Title'
+            placeholder='Enter invoice title'
+            rules={{
+              required: 'Invoice title is required',
+              minLength: { value: 2, message: 'Min 2 characters' }
+            }}
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          {/* Invoice Type */}
-          <FormField
-            control={form.control}
-            name='invoice_type_id'
-            rules={{ required: 'Invoice type is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Invoice Type <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Invoice Type' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {invoiceTypes.map(type => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Customer */}
-          <FormField
-            control={form.control}
-            name='client_id'
-            rules={{ required: 'Customer is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Customer <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select
-                    value={field.value}
-                    onValueChange={value => {
-                      field.onChange(value)
-                      form.setValue('address_id', '')
 
-                      if (mode === 'create') {
-                        form.setValue('location_id', '')
-                      }
-                    }}
-                  >
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Customer' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clients.map(client => (
-                        <SelectItem key={client.id} value={client.id}>
-                          {client.first_name} {client.last_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          {/* Invoice Type */}
+          <CustomFormField
+            name='invoice_type_id'
+            label='Invoice Type'
+            type='select'
+            placeholder='Select invoice type'
+            rules={{
+              required: 'Invoice type is required'
+            }}
+            selectOptions={invoiceTypes.map(type => ({
+              label: type.name,
+              value: type.id
+            }))}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
+
+          {/* Customer */}
+          <CustomFormField
+            name='client_id'
+            label='Customer'
+            type='combobox'
+            placeholder='Select customer'
+            rules={{
+              required: 'Customer is required'
+            }}
+            selectOptions={clients.map(client => ({
+              label: `${client.first_name} ${client.last_name}`,
+              value: client.id
+            }))}
+            onChange={() => {
+              form.setValue('address_id', '')
+
+              if (mode === 'create') {
+                form.setValue('location_id', '')
+              }
+            }}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+          />
+
           {/* Material Only: Interaction */}
           {isMaterialOnly && (
             <FormField
@@ -342,8 +325,8 @@ const CreateOrEditInvoiceModal = ({
               name='interaction'
               rules={{ required: 'Interaction type is required' }}
               render={({ field }) => (
-                <FormItem className='col-span-1 sm:col-span-2'>
-                  <FormLabel>
+                <FormItem className={`sm:col-span-2 py-3 ${fieldStyle}`}>
+                  <FormLabel className={`text-xs ${labelStyle}`}>
                     Interaction <span className='text-red-500'>*</span>
                   </FormLabel>
                   <FormControl>
@@ -385,75 +368,51 @@ const CreateOrEditInvoiceModal = ({
               )}
             />
           )}
+
           {/* Cash and Pickup sub-fields */}
           {isMaterialOnly && interactionValue === 'cash_and_pickup' && (
             <>
-              <FormField
-                control={form.control}
+              <CustomFormField
                 name='pickup_date'
+                label='Date of Pickup'
+                type='datepicker'
+                placeholder='Select pickup date'
                 rules={{ required: 'Date of pickup is required' }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Date of Pickup <span className='text-red-500'>*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <DatePicker
-                        value={field.value ? new Date(field.value) : null}
-                        onChange={val => field.onChange(val ? val.toISOString().slice(0, 10) : '')}
-                        placeholder='Select pickup date'
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                control={control}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
               />
-              <FormField
-                control={form.control}
+
+              <CustomFormField
                 name='pickup_location_id'
+                label='Pickup Location'
+                type='select'
+                placeholder='Select pickup location'
                 rules={{ required: 'Pickup location is required' }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Pickup Location <span className='text-red-500'>*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select Pickup Location' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {businessLocations.length === 0 ? (
-                            <div className='px-3 py-2 text-muted-foreground text-sm'>No locations found</div>
-                          ) : (
-                            businessLocations.map(loc => (
-                              <SelectItem key={loc.id} value={loc.id}>
-                                {loc.name}
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                selectOptions={businessLocations.map(loc => ({
+                  label: loc.name,
+                  value: loc.id
+                }))}
+                control={control}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
               />
-              <FormField
-                control={form.control}
+
+              <CustomFormField
                 name='pickup_notes'
-                render={({ field }) => (
-                  <FormItem className='col-span-1 sm:col-span-2'>
-                    <FormLabel>Notes</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder='Enter notes...' rows={3} {...field} value={field.value ?? ''} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label='Notes'
+                type='textarea'
+                placeholder='Enter notes...'
+                register={register}
+                errors={errors}
+                fieldClassName={`sm:col-span-2 ${fieldStyle}`}
+                labelClassName={labelStyle}
               />
             </>
           )}
+
           {/* Cash and Delivery sub-fields */}
           {isMaterialOnly && interactionValue === 'cash_and_delivery' && (
             <>
@@ -462,8 +421,8 @@ const CreateOrEditInvoiceModal = ({
                 name='delivery_datetime'
                 rules={{ required: 'Date & time of delivery is required' }}
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
+                  <FormItem className={fieldStyle}>
+                    <FormLabel className={`text-xs ${labelStyle}`}>
                       Date &amp; Time of Delivery <span className='text-red-500'>*</span>
                     </FormLabel>
                     <FormControl>
@@ -493,248 +452,138 @@ const CreateOrEditInvoiceModal = ({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
+
+              <CustomFormField
                 name='delivery_location'
+                label='Delivery Location'
+                placeholder='Enter delivery location'
                 rules={{ required: 'Delivery location is required' }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Delivery Location <span className='text-red-500'>*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter delivery location' {...field} value={field.value ?? ''} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                register={register}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
               />
-              <FormField
-                control={form.control}
+
+              <CustomFormField
                 name='delivery_notes'
-                render={({ field }) => (
-                  <FormItem className='col-span-1 sm:col-span-2'>
-                    <FormLabel>Notes</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder='Enter notes...' rows={3} {...field} value={field.value ?? ''} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label='Notes'
+                type='textarea'
+                placeholder='Enter notes...'
+                register={register}
+                control={control}
+                errors={errors}
+                fieldClassName={`sm:col-span-2 ${fieldStyle}`}
+                labelClassName={labelStyle}
               />
             </>
           )}
-          {/* Business Location */}
-          <FormField
-            control={form.control}
-            name='location_id'
-            render={({ field }) => (
-              <FormItem className='col-span-1 sm:col-span-2'>
-                <FormLabel>Business Location</FormLabel>
-                <FormControl>
-                  <Select value={field.value ?? ''} onValueChange={field.onChange} disabled={mode === 'edit'}>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Business Location' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {businessLocations.length === 0 ? (
-                        <div className='px-3 py-2 text-muted-foreground text-sm'>No locations found</div>
-                      ) : (
-                        businessLocations.map(loc => (
-                          <SelectItem key={loc.id} value={loc.id}>
-                            {loc.name}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Event Location (Client Address) */}
-          <FormField
-            control={form.control}
-            name='address_id'
-            render={({ field }) => (
-              <FormItem className='col-span-1 sm:col-span-2'>
-                <FormLabel>Event Location</FormLabel>
-                <FormControl>
-                  <Select value={field.value ?? ''} onValueChange={field.onChange} disabled={!selectedClient}>
-                    <SelectTrigger className='w-full h-auto! text-left whitespace-normal'>
-                      <SelectValue placeholder={selectedClient ? 'Select Address' : 'Select Customer first'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {addressOptions.length === 0 ? (
-                        <div className='px-3 py-2 text-muted-foreground text-sm'>No addresses found</div>
-                      ) : (
-                        addressOptions.map(address => {
-                          const label = [
-                            address.street_address,
-                            address.city?.name,
-                            address.state?.name,
-                            address.zip_code
-                          ]
-                            .filter(Boolean)
-                            .join(', ')
 
-                          return (
-                            <SelectItem key={address.id} value={address.id}>
-                              {address.title} - {label}
-                            </SelectItem>
-                          )
-                        })
-                      )}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          {/* Business Location */}
+          <CustomFormField
+            name='location_id'
+            label='Business Location'
+            type='select'
+            placeholder='Select business location'
+            selectOptions={businessLocations.map(loc => ({ value: loc.id, label: loc.name }))}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
+
+          {/* Event Location (Client Address) */}
+          <CustomFormField
+            name='address_id'
+            label='Event Location'
+            type='select'
+            placeholder={selectedClient ? 'Select address' : 'Select customer first'}
+            disabled={!selectedClient}
+            selectOptions={addressOptions.map(address => {
+              const label = [address.street_address, address.city?.name, address.state?.name, address.zip_code]
+                .filter(Boolean)
+                .join(', ')
+
+              return { value: address.id, label: `${address.title} - ${label}` }
+            })}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+          />
+
           {/* Assigned Staff */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='assign_id'
-            rules={{ required: 'Assigned staff is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Assigned To <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Staff' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {staffs.map(staff => (
-                        <SelectItem key={staff.id} value={staff.id}>
-                          {staff.first_name} {staff.last_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='Assigned To'
+            type='combobox'
+            placeholder='Select assigned staff'
+            rules={{
+              required: 'Assigned staff is required'
+            }}
+            selectOptions={staffs.map(staff => ({
+              value: staff.id,
+              label: `${staff.first_name} ${staff.last_name}`
+            }))}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          {/* Service Type */}
-          {/* <FormField
-            control={form.control}
-            name='service_type_id'
-            rules={{ required: 'Service type is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Service Type <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Service Type' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {serviceTypes.map(type => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
+
           {/* Payment Term */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='payment_term_id'
-            rules={{ required: 'Payment term is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Payment Term <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Payment Term' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {paymentTerms.map(term => (
-                        <SelectItem key={term.id} value={term.id}>
-                          {term.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='Payment Term'
+            type='select'
+            placeholder='Select payment term'
+            rules={{
+              required: 'Payment term is required'
+            }}
+            selectOptions={paymentTerms.map(term => ({
+              value: term.id,
+              label: term.name
+            }))}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
+
           {/* Issue Date */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='issue_date'
+            label='Issue Date'
+            type='datepicker'
+            placeholder='Select issue date'
             rules={{ required: 'Issue date is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Issue Date <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <DatePicker
-                    value={field.value ? new Date(field.value) : null}
-                    onChange={val => field.onChange(val ? val.toISOString().slice(0, 10) : '')}
-                    placeholder='Select issue date'
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
+
           {/* Due Date */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='due_date'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Due Date</FormLabel>
-                <FormControl>
-                  <DatePicker
-                    value={field.value ? new Date(field.value) : null}
-                    onChange={val => field.onChange(val ? val.toISOString().slice(0, 10) : '')}
-                    placeholder='Select due date'
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='Due Date'
+            type='datepicker'
+            placeholder='Select due date'
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
+
           {/* Tax Rate */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='tax_rate'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tax Rate (%)</FormLabel>
-                <FormControl>
-                  <Input
-                    type='number'
-                    step='0.01'
-                    placeholder='0'
-                    {...field}
-                    onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='Tax Rate (%)'
+            type='number'
+            placeholder='Enter tax rate'
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
         </form>
       </Form>

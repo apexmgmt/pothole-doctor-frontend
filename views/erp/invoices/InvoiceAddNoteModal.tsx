@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { SpinnerCustom } from '@/components/ui/spinner'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface InvoiceAddNoteModalProps {
   open: boolean
@@ -48,6 +49,15 @@ const InvoiceAddNoteModal = ({
     }
   })
 
+  const {
+    reset,
+    watch,
+    control,
+    register,
+    handleSubmit,
+    formState: { isSubmitting, errors }
+  } = form
+
   useEffect(() => {
     if (!open || hasFetched) return
 
@@ -71,7 +81,7 @@ const InvoiceAddNoteModal = ({
 
   useEffect(() => {
     if (open) {
-      form.reset({
+      reset({
         client_id: clientId || noteDetails?.client_id || '',
         note_type_id: noteDetails?.note_type_id || '',
         subject: noteDetails?.subject || '',
@@ -90,7 +100,7 @@ const InvoiceAddNoteModal = ({
         toast.success('Note created successfully')
       }
 
-      form.reset()
+      reset()
       onSuccess?.()
       onOpenChange(false)
     } catch (e: any) {
@@ -99,7 +109,7 @@ const InvoiceAddNoteModal = ({
   }
 
   const onCancel = () => {
-    form.reset()
+    reset()
     onOpenChange(false)
   }
 
@@ -121,6 +131,9 @@ const InvoiceAddNoteModal = ({
     )
   }
 
+  const fieldStyle = 'grid grid-cols-[72px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
+
   return (
     <CommonDialog
       open={open}
@@ -129,94 +142,67 @@ const InvoiceAddNoteModal = ({
       }}
       title={title}
       maxWidth='xl'
-      isLoading={form.formState.isSubmitting}
+      isLoading={isSubmitting}
       actions={
         <div className='flex gap-3'>
           <Button
             type='button'
+            size='sm'
             variant='outline'
             onClick={onCancel}
-            disabled={form.formState.isSubmitting}
+            disabled={isSubmitting}
             className='flex-1'
           >
             Cancel
           </Button>
           <Button
             type='submit'
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={
-              form.formState.isSubmitting ||
-              !form.watch('note_type_id') ||
-              !form.watch('subject') ||
-              !form.watch('comment')
-            }
+            size='sm'
+            onClick={handleSubmit(onSubmit)}
+            disabled={isSubmitting || !watch('note_type_id') || !watch('subject') || !watch('comment')}
             className='flex-1'
           >
-            {form.formState.isSubmitting ? 'Saving...' : mode === 'edit' ? 'Update' : 'Save'}
+            {isSubmitting ? 'Saving...' : mode === 'edit' ? 'Update' : 'Save'}
           </Button>
         </div>
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <FormField
-            control={form.control}
+        <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-y-2'>
+          <CustomFormField
             name='note_type_id'
+            label='Note Type'
+            type='select'
+            placeholder='Select note type'
             rules={{ required: 'Note type is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Note Type <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange} disabled={form.formState.isSubmitting}>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select note type' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {noteTypes.map(nt => (
-                        <SelectItem key={nt.id} value={nt.id}>
-                          {nt.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            selectOptions={noteTypes.map(nt => ({ value: nt.id, label: nt.name }))}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          <FormField
-            control={form.control}
+
+          <CustomFormField
             name='subject'
+            label='Subject'
+            placeholder='Enter subject'
             rules={{ required: 'Subject is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Subject <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Subject' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          <FormField
-            control={form.control}
+
+          <CustomFormField
             name='comment'
+            label='Comment'
+            type='textarea'
+            placeholder='Type your note here...'
             rules={{ required: 'Comment is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Comment <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Textarea rows={4} placeholder='Type your note here...' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
         </form>
       </Form>

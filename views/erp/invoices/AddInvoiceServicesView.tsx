@@ -34,6 +34,7 @@ import ProfitDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEdi
 import InvoiceAssignUserCard from '@/components/erp/invoices/InvoiceAssignUserCard'
 import { getDiscountedUnitPrice } from '@/utils/business-calculation'
 import { extractServiceLineErrors, hasServiceLineErrors, ServiceLineErrors } from '@/utils/service-line-validation'
+import CustomFormField from '@/components/form/CustomFormField'
 
 const AddInvoiceServicesView = ({
   invoice: initialInvoice,
@@ -547,16 +548,14 @@ const AddInvoiceServicesView = ({
       {/* Custom Message */}
       <Card className='bg-zinc-900 border-zinc-800'>
         <CardContent className='p-4'>
-          <label htmlFor='inv-custom-message' className='block text-sm font-medium text-zinc-200 mb-2'>
-            Message / Notes
-          </label>
-          <Textarea
-            id='inv-custom-message'
-            className='w-full'
+          <CustomFormField
+            name='inv-custom-message'
+            type='textarea'
+            label='Message / Notes'
             placeholder='Enter a message or notes for this invoice...'
             value={customMessage}
-            onChange={e => {
-              setCustomMessage(e.target.value)
+            onChange={value => {
+              setCustomMessage(value as string)
               setHasUnsavedChanges(true)
             }}
           />

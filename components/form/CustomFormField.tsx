@@ -1,50 +1,20 @@
-import dynamic from 'next/dynamic'
-
-import type { ReactElement, ReactNode } from 'react'
+import { ReactNode } from 'react'
 import { FieldErrors, FieldValues, Path } from 'react-hook-form'
 
 import { cn } from '@/lib/utils'
 
-import { BaseFieldProps, FieldComponentProps } from '@/components/form/fields/types'
+import ComboboxField from '@/components/form/fields/ComboboxField'
+import InputField from '@/components/form/fields/InputField'
+import SelectField from '@/components/form/fields/SelectField'
+import { BaseFieldProps } from '@/components/form/fields/types'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 
-import type { CheckboxFieldProps } from './fields/CheckboxField'
-import type { ComboboxFieldProps } from './fields/ComboboxField'
-import type { DatePickerProps } from './fields/DatePicker'
-import type { MultiSelectCreatableFieldProps } from './fields/MultiSelectCreatableField'
-import type { MultiSelectFieldProps } from './fields/MultiSelectField'
-import type { MultiSelectSearchFieldProps } from './fields/MultiSelectSearchField'
-import type { SelectFieldProps } from './fields/SelectField'
-
-const DynamicFields = {
-  SelectField: dynamic(() => import('./fields/SelectField')) as <T extends FieldValues>(
-    props: SelectFieldProps<T>
-  ) => ReactElement,
-  ComboboxField: dynamic(() => import('./fields/ComboboxField')) as <T extends FieldValues>(
-    props: ComboboxFieldProps<T>
-  ) => ReactElement,
-  MultiSelectField: dynamic(() => import('./fields/MultiSelectField')) as <T extends FieldValues>(
-    props: MultiSelectFieldProps<T>
-  ) => ReactElement,
-  MultiSelectSearchField: dynamic(() => import('./fields/MultiSelectSearchField')) as <T extends FieldValues>(
-    props: MultiSelectSearchFieldProps<T>
-  ) => ReactElement,
-  MultiSelectCreatableField: dynamic(() => import('./fields/MultiSelectCreatableField')) as <T extends FieldValues>(
-    props: MultiSelectCreatableFieldProps<T>
-  ) => ReactElement,
-  DatePicker: dynamic(() => import('./fields/DatePicker')) as <T extends FieldValues>(
-    props: DatePickerProps<T>
-  ) => ReactElement,
-  TextareaField: dynamic(() => import('./fields/TextareaField')) as <T extends FieldValues>(
-    props: FieldComponentProps<T>
-  ) => ReactElement,
-  InputField: dynamic(() => import('./fields/InputField')) as <T extends FieldValues>(
-    props: FieldComponentProps<T>
-  ) => ReactElement,
-  CheckboxField: dynamic(() => import('./fields/CheckboxField')) as <T extends FieldValues>(
-    props: CheckboxFieldProps<T>
-  ) => ReactElement
-}
+import DatePicker from './fields/DatePicker'
+import TextareaField from './fields/TextareaField'
+import MultiSelectField from './fields/MultiSelectField'
+import MultiSelectSearchField from './fields/MultiSelectSearchField'
+import CheckboxField from './fields/CheckboxField'
+import MultiSelectCreatableField from './fields/MultiSelectCreatableField'
 
 type FormFieldProps<T extends FieldValues> = BaseFieldProps<T> & {
   orientation?: 'horizontal' | 'vertical'
@@ -103,7 +73,7 @@ const CustomFormField = <T extends FieldValues>({
 
       <div>
         {type === 'combobox' ? (
-          <DynamicFields.ComboboxField
+          <ComboboxField
             name={name}
             placeholder={placeholder}
             control={control}
@@ -118,7 +88,7 @@ const CustomFormField = <T extends FieldValues>({
             className={inputStyle}
           />
         ) : type === 'select' ? (
-          <DynamicFields.SelectField
+          <SelectField
             name={name}
             placeholder={placeholder}
             control={control}
@@ -133,7 +103,7 @@ const CustomFormField = <T extends FieldValues>({
             className={inputStyle}
           />
         ) : type === 'multiselect' ? (
-          <DynamicFields.MultiSelectField
+          <MultiSelectField
             name={name}
             placeholder={placeholder}
             selectOptions={selectOptions}
@@ -148,7 +118,7 @@ const CustomFormField = <T extends FieldValues>({
             className={inputStyle}
           />
         ) : type === 'multiselect-searchable' ? (
-          <DynamicFields.MultiSelectSearchField
+          <MultiSelectSearchField
             name={name}
             placeholder={placeholder}
             selectOptions={selectOptions}
@@ -163,7 +133,7 @@ const CustomFormField = <T extends FieldValues>({
             className={inputStyle}
           />
         ) : type === 'multiselect-creatable' ? (
-          <DynamicFields.MultiSelectCreatableField
+          <MultiSelectCreatableField
             name={name}
             placeholder={placeholder}
             selectOptions={selectOptions}
@@ -178,7 +148,7 @@ const CustomFormField = <T extends FieldValues>({
             className={inputStyle}
           />
         ) : type === 'checkbox' ? (
-          <DynamicFields.CheckboxField
+          <CheckboxField
             name={name}
             label={label}
             value={value}
@@ -192,7 +162,7 @@ const CustomFormField = <T extends FieldValues>({
             labelClassName={labelClassName}
           />
         ) : type === 'datepicker' ? (
-          <DynamicFields.DatePicker
+          <DatePicker
             name={name}
             placeholder={placeholder}
             control={control}
@@ -208,7 +178,7 @@ const CustomFormField = <T extends FieldValues>({
             className={inputStyle}
           />
         ) : type === 'textarea' ? (
-          <DynamicFields.TextareaField
+          <TextareaField
             name={name}
             placeholder={placeholder}
             register={register}
@@ -222,7 +192,7 @@ const CustomFormField = <T extends FieldValues>({
             className={inputStyle}
           />
         ) : (
-          <DynamicFields.InputField
+          <InputField
             type={type}
             name={name}
             label={label}
