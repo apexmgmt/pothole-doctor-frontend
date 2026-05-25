@@ -134,6 +134,8 @@ const CreateOrEditBusinessLocationModal = ({
 
     if (businessLocationDetails?.logo) {
       setLogoPreview(generateFileUrl(businessLocationDetails.logo))
+    } else {
+      setLogoPreview(null)
     }
   }, [mode, businessLocationDetails, dispatch])
 
@@ -460,7 +462,7 @@ const CreateOrEditBusinessLocationModal = ({
                               <img
                                 src={logoPreview}
                                 alt='Logo preview'
-                                className='h-20 w-20 object-contain rounded border group-hover:opacity-70 transition-opacity'
+                                className='h-20 w-20 object-contain rounded group-hover:opacity-70 transition-opacity'
                               />
                               <div className='absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'>
                                 <span className='text-xs text-foreground bg-background/80 rounded px-1 py-0.5'>
