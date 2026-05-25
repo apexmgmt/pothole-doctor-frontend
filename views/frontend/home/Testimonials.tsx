@@ -1,12 +1,14 @@
 'use client'
-import { useRef, useEffect, useState, MutableRefObject } from 'react'
+
+import { useRef, useEffect, useState } from 'react'
+
+import Image from 'next/image'
 
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Autoplay } from 'swiper/modules'
 
 import 'swiper/css'
 import 'swiper/css/navigation'
-import Image from 'next/image'
 
 interface Testimonial {
   title: string
