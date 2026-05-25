@@ -61,7 +61,7 @@ const CustomFormField = <T extends FieldValues>({
   const isHorizontalField = type === 'checkbox' || type === 'switch'
 
   return (
-    <Field orientation={isHorizontalField ? 'horizontal' : undefined} className={cn('gap-2', fieldClassName)}>
+    <Field className={cn('gap-2', isHorizontalField ? '' : fieldClassName)}>
       {/* Label */}
       {label && !isHorizontalField && (
         <FieldLabel htmlFor={name} className={cn('text-xs font-normal leading-tight gap-0', labelClassName)}>
@@ -70,9 +70,8 @@ const CustomFormField = <T extends FieldValues>({
         </FieldLabel>
       )}
 
-      {/* Checkbox or Switch */}
-      {isHorizontalField ? (
-        type === 'switch' ? (
+      <div>
+        {type === 'switch' ? (
           <SwitchField
             name={name}
             label={label}
@@ -83,9 +82,10 @@ const CustomFormField = <T extends FieldValues>({
             onBlur={onBlur}
             disabled={disabled}
             className={className}
+            fieldClassName={fieldClassName}
             labelClassName={labelClassName}
           />
-        ) : (
+        ) : type === 'checkbox' ? (
           <CheckboxField
             name={name}
             label={label}
@@ -97,141 +97,137 @@ const CustomFormField = <T extends FieldValues>({
             autoFocus={autoFocus}
             disabled={disabled}
             className={className}
+            fieldClassName={fieldClassName}
             labelClassName={labelClassName}
           />
-        )
-      ) : (
-        <div>
-          {/* Input fields - (except checkbox and switch) */}
-          {type === 'combobox' ? (
-            <ComboboxField
-              name={name}
-              placeholder={placeholder}
-              control={control}
-              rules={rules}
-              selectOptions={selectOptions}
-              value={value}
-              onChange={onChange}
-              onBlur={onBlur}
-              onOpenChange={onOpenChange}
-              autoFocus={autoFocus}
-              disabled={disabled}
-              className={inputStyle}
-            />
-          ) : type === 'select' ? (
-            <SelectField
-              name={name}
-              placeholder={placeholder}
-              control={control}
-              rules={rules}
-              selectOptions={selectOptions}
-              value={value}
-              onChange={onChange}
-              onBlur={onBlur}
-              onOpenChange={onOpenChange}
-              autoFocus={autoFocus}
-              disabled={disabled}
-              className={inputStyle}
-            />
-          ) : type === 'multiselect' ? (
-            <MultiSelectField
-              name={name}
-              placeholder={placeholder}
-              selectOptions={selectOptions}
-              value={value}
-              rules={rules}
-              control={control}
-              onChange={onChange}
-              onBlur={onBlur}
-              onOpenChange={onOpenChange}
-              autoFocus={autoFocus}
-              disabled={disabled}
-              className={inputStyle}
-            />
-          ) : type === 'multiselect-searchable' ? (
-            <MultiSelectSearchField
-              name={name}
-              placeholder={placeholder}
-              selectOptions={selectOptions}
-              value={value}
-              rules={rules}
-              control={control}
-              onChange={onChange}
-              onBlur={onBlur}
-              onOpenChange={onOpenChange}
-              autoFocus={autoFocus}
-              disabled={disabled}
-              className={inputStyle}
-            />
-          ) : type === 'multiselect-creatable' ? (
-            <MultiSelectCreatableField
-              name={name}
-              placeholder={placeholder}
-              selectOptions={selectOptions}
-              value={value}
-              rules={rules}
-              control={control}
-              onChange={onChange}
-              onBlur={onBlur}
-              onOpenChange={onOpenChange}
-              autoFocus={autoFocus}
-              disabled={disabled}
-              className={inputStyle}
-            />
-          ) : type === 'datepicker' ? (
-            <DatePicker
-              name={name}
-              placeholder={placeholder}
-              control={control}
-              minDate={minDate}
-              maxDate={maxDate}
-              rules={rules}
-              lockFutureDate={lockFutureDate}
-              value={value}
-              onChange={onChange}
-              onBlur={onBlur}
-              autoFocus={autoFocus}
-              disabled={disabled}
-              className={inputStyle}
-            />
-          ) : type === 'textarea' ? (
-            <TextareaField
-              name={name}
-              placeholder={placeholder}
-              register={register}
-              rules={rules}
-              readonly={readonly}
-              value={value}
-              onChange={onChange}
-              onBlur={onBlur}
-              autoFocus={autoFocus}
-              disabled={disabled}
-              className={inputStyle}
-            />
-          ) : (
-            <InputField
-              type={type}
-              name={name}
-              label={label}
-              placeholder={placeholder}
-              register={register}
-              rules={rules}
-              readonly={readonly}
-              value={value}
-              onChange={onChange}
-              onBlur={onBlur}
-              autoFocus={autoFocus}
-              disabled={disabled}
-              className={inputStyle}
-            />
-          )}
+        ) : type === 'combobox' ? (
+          <ComboboxField
+            name={name}
+            placeholder={placeholder}
+            control={control}
+            rules={rules}
+            selectOptions={selectOptions}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
+            disabled={disabled}
+            className={inputStyle}
+          />
+        ) : type === 'select' ? (
+          <SelectField
+            name={name}
+            placeholder={placeholder}
+            control={control}
+            rules={rules}
+            selectOptions={selectOptions}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
+            disabled={disabled}
+            className={inputStyle}
+          />
+        ) : type === 'multiselect' ? (
+          <MultiSelectField
+            name={name}
+            placeholder={placeholder}
+            selectOptions={selectOptions}
+            value={value}
+            rules={rules}
+            control={control}
+            onChange={onChange}
+            onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
+            disabled={disabled}
+            className={inputStyle}
+          />
+        ) : type === 'multiselect-searchable' ? (
+          <MultiSelectSearchField
+            name={name}
+            placeholder={placeholder}
+            selectOptions={selectOptions}
+            value={value}
+            rules={rules}
+            control={control}
+            onChange={onChange}
+            onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
+            disabled={disabled}
+            className={inputStyle}
+          />
+        ) : type === 'multiselect-creatable' ? (
+          <MultiSelectCreatableField
+            name={name}
+            placeholder={placeholder}
+            selectOptions={selectOptions}
+            value={value}
+            rules={rules}
+            control={control}
+            onChange={onChange}
+            onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
+            disabled={disabled}
+            className={inputStyle}
+          />
+        ) : type === 'datepicker' ? (
+          <DatePicker
+            name={name}
+            placeholder={placeholder}
+            control={control}
+            minDate={minDate}
+            maxDate={maxDate}
+            rules={rules}
+            lockFutureDate={lockFutureDate}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            autoFocus={autoFocus}
+            disabled={disabled}
+            className={inputStyle}
+          />
+        ) : type === 'textarea' ? (
+          <TextareaField
+            name={name}
+            placeholder={placeholder}
+            register={register}
+            rules={rules}
+            readonly={readonly}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            autoFocus={autoFocus}
+            disabled={disabled}
+            className={inputStyle}
+          />
+        ) : (
+          <InputField
+            type={type}
+            name={name}
+            label={label}
+            placeholder={placeholder}
+            register={register}
+            rules={rules}
+            readonly={readonly}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            autoFocus={autoFocus}
+            disabled={disabled}
+            className={inputStyle}
+          />
+        )}
 
-          {/* Error */}
-          {fieldError && <FieldError className='mt-1'>{String(fieldError?.message) ?? ''}</FieldError>}
-          {/* Description */}
-          {description && <FieldDescription className='mt-1'>{description}</FieldDescription>}
-        </div>
-      )}
+        {/* Error */}
+        {fieldError && <FieldError className='mt-1'>{String(fieldError?.message) ?? ''}</FieldError>}
+        {/* Description */}
+        {description && <FieldDescription className='mt-1'>{description}</FieldDescription>}
+      </div>
     </Field>
   )
 }

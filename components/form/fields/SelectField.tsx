@@ -49,16 +49,20 @@ const SelectField = <T extends FieldValues>({
         <SelectValue placeholder={placeholder ?? ''} />
       </SelectTrigger>
       <SelectContent position='popper'>
-        {selectOptions.length > 0 && (
-          <SelectGroup>
-            {selectOptions.map((opt, idx) => (
+        <SelectGroup>
+          {selectOptions.length < 1 ? (
+            <SelectItem value='_' disabled>
+              No options available
+            </SelectItem>
+          ) : (
+            selectOptions.map((opt, idx) => (
               <SelectItem key={idx} value={opt.value} disabled={!!opt?.disabled}>
                 {opt.labelPrefix && <span className='mr-2'>{opt.labelPrefix}</span>}
                 {opt.label}
               </SelectItem>
-            ))}
-          </SelectGroup>
-        )}
+            ))
+          )}
+        </SelectGroup>
       </SelectContent>
     </Select>
   )

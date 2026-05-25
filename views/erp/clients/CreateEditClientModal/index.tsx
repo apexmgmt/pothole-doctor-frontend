@@ -690,9 +690,10 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
                     register={register}
                     control={control}
                     errors={errors}
-                    fieldClassName={type === 'checkbox' ? 'mt-3 md:mt-6' : 'grid grid-cols-[128px_minmax(0,_1fr)]'}
+                    fieldClassName={
+                      type === 'checkbox' ? 'ps-34 mt-3 md:mt-6' : 'grid grid-cols-[128px_minmax(0,_1fr)]'
+                    }
                     labelClassName={type === 'checkbox' ? 'text-nowrap' : 'justify-end self-start text-right pt-px'}
-                    className={type === 'checkbox' ? 'col-span-2 ps-34' : ''}
                   />
                 )
               })}

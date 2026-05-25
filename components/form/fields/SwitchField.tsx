@@ -21,12 +21,13 @@ const SwitchField = <T extends FieldValues>({
   onBlur,
   autoFocus,
   className,
+  fieldClassName,
   labelClassName
 }: SwitchFieldProps<T>) => {
   const switchId = typeof name === 'string' ? name : undefined
 
   const renderSwitch = (checked: boolean, setChecked: (nextValue: boolean) => void) => (
-    <>
+    <div className={cn(`flex items-center gap-2 ${disabled ? 'cursor-not-allowed opacity-50' : ''}`, fieldClassName)}>
       <Switch
         id={switchId}
         disabled={disabled}
@@ -45,7 +46,7 @@ const SwitchField = <T extends FieldValues>({
           {label}
         </Label>
       )}
-    </>
+    </div>
   )
 
   if (!control || !name) {

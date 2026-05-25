@@ -19,12 +19,13 @@ const CheckboxField = <T extends FieldValues>({
   onBlur,
   autoFocus,
   className,
+  fieldClassName,
   labelClassName
 }: CheckboxFieldProps<T>) => {
   const checkboxId = typeof name === 'string' ? name : undefined
 
   const renderCheckbox = (checked: boolean, setChecked: (nextValue: boolean) => void) => (
-    <div className={`flex items-center gap-3 ${className ?? ''}`}>
+    <div className={cn(`flex items-center gap-2 ${disabled ? 'cursor-not-allowed opacity-50' : ''}`, fieldClassName)}>
       <Checkbox
         id={checkboxId}
         disabled={disabled}
@@ -36,6 +37,7 @@ const CheckboxField = <T extends FieldValues>({
           setChecked(isChecked)
           onBlur?.(isChecked)
         }}
+        className={className}
       />
       {label && (
         <Label htmlFor={checkboxId} className={cn('text-sm font-normal text-popover-foreground', labelClassName)}>
