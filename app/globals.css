@@ -5,6 +5,10 @@
 
 @custom-variant dark (&:is(.dark *)); */
 
+.dk {
+  color: #929292;
+}
+
 @theme {
   --color-bg: #ffffff;
   --color-background: #ffffff;
@@ -26,6 +30,7 @@
   --color-title: #3b3637; /* oklch(0.2392 0.0059 337.75) ≈ #3b3637 */
   --color-text-color: #808080; /* oklch(0.5068 0 0) ≈ #808080 */
   --color-border: #3b3637;
+  --color-ring: #929292;
 
   /* Fonts */
   --font-global: 'inter', sans-serif;

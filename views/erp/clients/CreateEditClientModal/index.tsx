@@ -354,7 +354,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     },
     {
       name: 'source_id',
-      type: 'select',
+      type: 'combobox',
       label: 'Lead Source',
       placeholder: 'Select lead source',
       rules: { required: 'Lead Source is required' },
@@ -491,7 +491,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     },
     {
       name: 'service_type_ids',
-      type: 'multiselect-searchable',
+      type: 'multiselect-creatable',
       label: 'Desired Service(s)',
       placeholder: 'Select service types...',
       selectOptions: serviceTypes.map(service => ({

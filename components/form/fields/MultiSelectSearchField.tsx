@@ -100,7 +100,7 @@ const MultiSelectSearchField = <T extends FieldValues>({
         <PopoverContent
           align='start'
           onWheel={e => e.stopPropagation()}
-          className='w-[var(--radix-popover-trigger-width)] bg-[#09090B] p-0'
+          className='w-[var(--radix-popover-trigger-width)] p-0'
         >
           <Command className='bg-transparent'>
             <CommandInput placeholder='Search...' className='py-1' autoFocus={autoFocus} />
@@ -117,7 +117,7 @@ const MultiSelectSearchField = <T extends FieldValues>({
                       value={opt.label}
                       disabled={!!opt.disabled}
                       onSelect={() => handleToggle(opt.value)}
-                      className='flex items-center gap-2 py-1 hover:bg-[#1F1F1F] data-[selected=true]:bg-[#1F1F1F]'
+                      className='flex items-center gap-2'
                     >
                       <Checkbox checked={isSelected} className='size-4 [&_span_svg]:size-3.25 pointer-events-none' />
                       {opt.labelPrefix && <span className='mr-2'>{opt.labelPrefix}</span>}
