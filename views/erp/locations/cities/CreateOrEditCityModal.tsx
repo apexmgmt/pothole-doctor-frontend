@@ -1,16 +1,12 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
-
-import { zodResolver } from '@hookform/resolvers/zod'
-
-import * as z from 'zod'
+import { useEffect, useMemo } from 'react'
 
 import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
-import { State, StatePayload, Location, City, CityPayload, CountryWithStates } from '@/types'
+import { City, CityPayload, CountryWithStates } from '@/types'
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -18,9 +14,8 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import StateService from '@/services/api/locations/state.service'
-import LocationService from '@/services/api/locations/location.service'
 import CityService from '@/services/api/locations/city.service'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface CreateOrEditCityModalProps {
   mode?: 'create' | 'edit'
@@ -32,14 +27,6 @@ interface CreateOrEditCityModalProps {
   countriesWithStateAndCities: CountryWithStates[]
 }
 
-const formSchema = z.object({
-  name: z.string().min(2, { message: 'City name must be at least 2 characters' }),
-  country_id: z.string().min(1, { message: 'Please select a country' }),
-  state_id: z.string().min(1, { message: 'Please select a state' })
-})
-
-type FormValues = z.infer<typeof formSchema>
-
 const CreateOrEditCityModal = ({
   mode = 'create',
   open,
@@ -49,28 +36,7 @@ const CreateOrEditCityModal = ({
   onSuccess,
   countriesWithStateAndCities
 }: CreateOrEditCityModalProps) => {
-  // const [countriesWithStateAndCities, setCountriesWithStateAndCities] = useState<Location['countries']>([])
-
-  // const fetchCountriesWithStateAndCities = async () => {
-  //   try {
-  //     setIsLoading(true)
-  //     LocationService.index()
-  //       .then(response => {
-  //         setCountriesWithStateAndCities(response.data || [])
-  //         setIsLoading(false)
-  //       })
-  //       .catch(error => {
-  //         toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch locations')
-  //         setIsLoading(false)
-  //       })
-  //   } catch (error) {
-  //     toast.error('Something went wrong while fetching locations!')
-  //     setIsLoading(false)
-  //   }
-  // }
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<CityPayload>({
     defaultValues: {
       name: cityDetails?.name || '',
       country_id: cityDetails?.state?.country?.id?.toString() || '',
@@ -78,8 +44,19 @@ const CreateOrEditCityModal = ({
     }
   })
 
+  const {
+    watch,
+    reset,
+    getValues,
+    setValue,
+    register,
+    control,
+    handleSubmit,
+    formState: { isSubmitting, errors }
+  } = form
+
   // Watch country_id to filter states
-  const selectedCountryId = form.watch('country_id')
+  const selectedCountryId = watch('country_id')
 
   // Get states based on selected country
   const availableStates = useMemo(() => {
@@ -92,12 +69,12 @@ const CreateOrEditCityModal = ({
   // Reset state_id when country changes
   useEffect(() => {
     if (selectedCountryId) {
-      const currentStateId = form.getValues('state_id')
+      const currentStateId = getValues('state_id')
       const isStateInCountry = availableStates.some(state => state.id.toString() === currentStateId)
 
       // Only reset if the current state is not in the newly selected country
       if (!isStateInCountry && !cityDetails) {
-        form.setValue('state_id', '')
+        setValue('state_id', '')
       }
     }
   }, [selectedCountryId, availableStates, form, cityDetails])
@@ -106,7 +83,7 @@ const CreateOrEditCityModal = ({
   useEffect(() => {
     if (open) {
       // fetchCountriesWithStateAndCities()
-      form.reset({
+      reset({
         name: cityDetails?.name || '',
         country_id: cityDetails?.state?.country?.id?.toString() || '',
         state_id: cityDetails?.state?.id?.toString() || ''
@@ -114,19 +91,13 @@ const CreateOrEditCityModal = ({
     }
   }, [cityDetails, open, form])
 
-  const onSubmit = async (values: FormValues) => {
-    const payload: CityPayload = {
-      name: values.name,
-      country_id: values.country_id,
-      state_id: values.state_id
-    }
-
+  const onSubmit = async (formData: CityPayload) => {
     if (mode === 'create') {
       try {
-        await CityService.store(payload)
+        await CityService.store(formData)
           .then(response => {
             toast.success('City created successfully')
-            form.reset()
+            reset()
             onOpenChange(false)
             onSuccess?.()
           })
@@ -138,7 +109,7 @@ const CreateOrEditCityModal = ({
       }
     } else if (mode === 'edit' && cityId) {
       try {
-        await CityService.update(cityId, payload)
+        await CityService.update(cityId, formData)
           .then(response => {
             toast.success('City updated successfully')
             onOpenChange(false)
@@ -154,13 +125,16 @@ const CreateOrEditCityModal = ({
   }
 
   const onCancel = () => {
-    form.reset({
+    reset({
       name: cityDetails?.name || '',
       country_id: cityDetails?.state?.country?.id?.toString() || '',
       state_id: cityDetails?.state?.id?.toString() || ''
     })
     onOpenChange(false)
   }
+
+  const fieldStyle = 'grid grid-cols-[88px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
 
   return (
     <CommonDialog
@@ -169,120 +143,93 @@ const CreateOrEditCityModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create New City' : 'Edit City'}
       description={mode === 'create' ? 'Add a new city to the system' : 'Update city information'}
-      maxWidth='sm'
-      disableClose={form.formState.isSubmitting}
-      isLoading={form.formState.isSubmitting}
+      maxWidth='md'
+      disableClose={isSubmitting}
+      isLoading={isSubmitting}
       actions={
         <div className='flex gap-3'>
           <Button
             type='button'
             variant='outline'
+            size='sm'
             onClick={onCancel}
-            disabled={form.formState.isSubmitting}
+            disabled={isSubmitting}
             className='flex-1'
           >
             Cancel
           </Button>
-          <Button
-            type='submit'
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={form.formState.isSubmitting}
-            className='flex-1'
-          >
-            {form.formState.isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
+          <Button type='submit' size='sm' onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className='flex-1'>
+            {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
           </Button>
         </div>
       }
     >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          {/* Country Select Field */}
-          <FormField
-            control={form.control}
-            name='country_id'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Country <span className='text-red-600'>*</span>
-                </FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select a country' />
-                    </SelectTrigger>
-                  </FormControl>
-                  {countriesWithStateAndCities.length > 0 && (
-                    <SelectContent>
-                      {countriesWithStateAndCities.map(country => (
-                        <SelectItem key={country.id} value={country.id.toString()}>
-                          {country.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  )}
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-2'>
+        {/* Country Select Field */}
+        <CustomFormField
+          name='country_id'
+          type='combobox'
+          label='Country'
+          placeholder='Select a country'
+          control={control}
+          rules={{
+            required: 'Please select a country',
+            minLength: {
+              value: 1,
+              message: 'Please select a country'
+            }
+          }}
+          selectOptions={countriesWithStateAndCities.map(country => ({
+            label: country.name,
+            value: country.id.toString()
+          }))}
+          errors={errors}
+          fieldClassName={fieldStyle}
+          labelClassName={labelStyle}
+        />
 
-          {/* State Select Field */}
-          <FormField
-            control={form.control}
-            name='state_id'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  State <span className='text-red-600'>*</span>
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  value={field.value}
-                  disabled={!selectedCountryId || availableStates.length === 0}
-                >
-                  <FormControl>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select a state' />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {availableStates.length === 0 ? (
-                      <div className='px-2 py-1.5 text-sm text-muted-foreground'>
-                        {!selectedCountryId ? 'Please select a country first' : 'No states available'}
-                      </div>
-                    ) : (
-                      availableStates.map(state => (
-                        <SelectItem key={state.id} value={state.id.toString()}>
-                          {state.name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* State Select Field */}
+        <CustomFormField
+          name='state_id'
+          type='combobox'
+          label='State'
+          disabled={!selectedCountryId || availableStates.length === 0}
+          placeholder='Select a state'
+          control={control}
+          rules={{
+            required: 'Please select a state',
+            minLength: {
+              value: 1,
+              message: 'Please select a state'
+            }
+          }}
+          selectOptions={availableStates.map(state => ({
+            label: state.name,
+            value: state.id.toString()
+          }))}
+          errors={errors}
+          fieldClassName={fieldStyle}
+          labelClassName={labelStyle}
+        />
 
-          {/* City Name Field */}
-          <FormField
-            control={form.control}
-            name='name'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  City Name <span className='text-red-600'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter city name' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </form>
-      </Form>
+        {/* City Name Field */}
+        <CustomFormField
+          name='name'
+          label='City Name'
+          placeholder='Enter city name'
+          register={register}
+          rules={{
+            required: 'Please enter a city name',
+            minLength: {
+              value: 2,
+              message: 'City name must be at least 2 characters'
+            }
+          }}
+          errors={errors}
+          fieldClassName={fieldStyle}
+          labelClassName={labelStyle}
+        />
+      </form>
     </CommonDialog>
   )
 }

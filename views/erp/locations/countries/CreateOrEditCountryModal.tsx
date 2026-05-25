@@ -2,23 +2,18 @@
 
 import { useEffect } from 'react'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-
-import * as z from 'zod'
-
 import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
 import { Country, CountryPayload } from '@/types'
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 import CountryService from '@/services/api/locations/country.service'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface CreateOrEditCountryModalProps {
   mode?: 'create' | 'edit'
@@ -29,17 +24,6 @@ interface CreateOrEditCountryModalProps {
   onSuccess?: () => void
 }
 
-const formSchema = z.object({
-  name: z.string().min(2, { message: 'Country name must be at least 2 characters' }),
-  code: z
-    .string()
-    .min(2, { message: 'Country code must be at least 2 characters' })
-    .max(3, { message: 'Country code must not exceed 3 characters' })
-    .toUpperCase()
-})
-
-type FormValues = z.infer<typeof formSchema>
-
 const CreateOrEditCountryModal = ({
   mode = 'create',
   open,
@@ -48,36 +32,38 @@ const CreateOrEditCountryModal = ({
   countryDetails,
   onSuccess
 }: CreateOrEditCountryModalProps) => {
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<CountryPayload>({
     defaultValues: {
       name: countryDetails?.name || '',
       code: countryDetails?.code || ''
     }
   })
 
+  const {
+    reset,
+    setValue,
+    register,
+    handleSubmit,
+    formState: { isSubmitting, errors }
+  } = form
+
   // Reset form when countryDetails changes or modal opens
   useEffect(() => {
     if (open) {
-      form.reset({
+      reset({
         name: countryDetails?.name || '',
         code: countryDetails?.code || ''
       })
     }
   }, [countryDetails, open, form])
 
-  const onSubmit = async (values: FormValues) => {
-    const payload: CountryPayload = {
-      name: values.name,
-      code: values.code
-    }
-
+  const onSubmit = async (values: CountryPayload) => {
     if (mode === 'create') {
       try {
-        await CountryService.store(payload)
+        await CountryService.store(values)
           .then(response => {
             toast.success('Country created successfully')
-            form.reset()
+            reset()
             onOpenChange(false)
             onSuccess?.()
           })
@@ -89,7 +75,7 @@ const CreateOrEditCountryModal = ({
       }
     } else if (mode === 'edit' && countryId) {
       try {
-        await CountryService.update(countryId, payload)
+        await CountryService.update(countryId, values)
           .then(response => {
             toast.success('Country updated successfully')
             onOpenChange(false)
@@ -105,12 +91,15 @@ const CreateOrEditCountryModal = ({
   }
 
   const onCancel = () => {
-    form.reset({
+    reset({
       name: countryDetails?.name || '',
       code: countryDetails?.code || ''
     })
     onOpenChange(false)
   }
+
+  const fieldStyle = 'grid grid-cols-[96px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
 
   return (
     <CommonDialog
@@ -118,73 +107,69 @@ const CreateOrEditCountryModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create New Country' : 'Edit Country'}
       description={mode === 'create' ? 'Add a new country to the system' : 'Update country information'}
-      maxWidth='sm'
-      disableClose={form.formState.isSubmitting}
-      isLoading={form.formState.isSubmitting}
+      maxWidth='md'
+      disableClose={isSubmitting}
+      isLoading={isSubmitting}
       actions={
         <div className='flex gap-3'>
           <Button
             type='button'
             variant='outline'
+            size='sm'
             onClick={onCancel}
-            disabled={form.formState.isSubmitting}
+            disabled={isSubmitting}
             className='flex-1'
           >
             Cancel
           </Button>
-          <Button
-            type='submit'
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={form.formState.isSubmitting}
-            className='flex-1'
-          >
-            {form.formState.isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
+          <Button type='submit' size='sm' onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className='flex-1'>
+            {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
           </Button>
         </div>
       }
     >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          {/* Country Name Field */}
-          <FormField
-            control={form.control}
-            name='name'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Country Name<span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter country name' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-2'>
+        {/* Country Name Field */}
+        <CustomFormField
+          name='name'
+          label='Country Name'
+          placeholder='Enter country name'
+          register={register}
+          rules={{
+            required: 'Country name is required',
+            minLength: {
+              value: 2,
+              message: 'Country name must be at least 2 characters'
+            }
+          }}
+          errors={errors}
+          fieldClassName={fieldStyle}
+          labelClassName={labelStyle}
+        />
 
-          {/* Country Code Field */}
-          <FormField
-            control={form.control}
-            name='code'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Country Code <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder='Enter country code (e.g., US, UK)'
-                    maxLength={3}
-                    {...field}
-                    onChange={e => field.onChange(e.target.value.toUpperCase())}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </form>
-      </Form>
+        {/* Country Code Field */}
+        <CustomFormField
+          name='code'
+          label='Country Code'
+          placeholder='Enter country code (e.g., US, UK)'
+          onChange={value => setValue('code', (value as string)?.toUpperCase(), { shouldDirty: true })}
+          register={register}
+          rules={{
+            required: 'Country code is required',
+            minLength: {
+              value: 2,
+              message: 'Country code must be at least 2 characters'
+            },
+            maxLength: {
+              value: 3,
+              message: 'Country code must not exceed 3 characters'
+            }
+          }}
+          errors={errors}
+          fieldClassName={fieldStyle}
+          labelClassName={labelStyle}
+        />
+      </form>
     </CommonDialog>
   )
 }
