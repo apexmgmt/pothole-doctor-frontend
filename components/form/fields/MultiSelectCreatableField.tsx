@@ -91,7 +91,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
 
     const showCreate = inputValue.trim().length > 0 && !isExistingOption(inputValue)
 
-    return (https://github.com/blackdevs-soft/pothole-doctor-frontend/pull/195/conflict?name=components%252Fform%252Ffields%252FMultiSelectCreatableField.tsx&ancestor_oid=c1b56d60d21a9fb4d6fdd39a7919b0bd207a3db3&base_oid=cfd288f8e5917a7948a68d93fd9ba10314f84b83&head_oid=301b913167ef5c54fd2696ea9562a18f3787e03f
+    return (
       <Popover
         open={open}
         onOpenChange={nextOpen => {
