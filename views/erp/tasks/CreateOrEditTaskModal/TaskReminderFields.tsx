@@ -7,9 +7,11 @@ import { TaskReminderChannel } from '@/types'
 interface TaskReminderFieldsProps {
   form: any
   taskReminderChannels: TaskReminderChannel[]
+  fieldStyle: string
+  labelStyle: string
 }
 
-export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderFieldsProps) {
+export function TaskReminderFields({ form, taskReminderChannels, fieldStyle, labelStyle }: TaskReminderFieldsProps) {
   const smsChannel = taskReminderChannels.find(channel => channel.type === 'sms')
   const emailChannel = taskReminderChannels.find(channel => channel.type === 'email')
 
@@ -119,17 +121,17 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
           control={form.control}
           name='sms_reminder'
           render={({ field }) => (
-            <FormItem className='flex flex-row items-center space-x-2 space-y-0'>
+            <FormItem className={fieldStyle}>
+              <FormLabel className={`text-xs pt-0! ${labelStyle}`}>SMS Reminder</FormLabel>
               <FormControl>
                 <Checkbox checked={!!field.value} onCheckedChange={checked => field.onChange(checked ? 1 : 0)} />
               </FormControl>
-              <FormLabel className='font-normal cursor-pointer'>SMS Reminder</FormLabel>
             </FormItem>
           )}
         />
 
         {smsReminderEnabled === 1 && smsChannel && (
-          <div className='ml-6 space-y-3'>
+          <div className='ps-27 space-y-3'>
             {/* Customer SMS Times */}
             <div>
               <p className='text-sm font-medium mb-2'>Customer:</p>
@@ -204,17 +206,17 @@ export function TaskReminderFields({ form, taskReminderChannels }: TaskReminderF
           control={form.control}
           name='email_reminder'
           render={({ field }) => (
-            <FormItem className='flex flex-row items-center space-x-2 space-y-0'>
+            <FormItem className={fieldStyle}>
+              <FormLabel className={`text-xs pt-0! ${labelStyle}`}>Email Reminder</FormLabel>
               <FormControl>
                 <Checkbox checked={!!field.value} onCheckedChange={checked => field.onChange(checked ? 1 : 0)} />
               </FormControl>
-              <FormLabel className='font-normal cursor-pointer'>Email Reminder</FormLabel>
             </FormItem>
           )}
         />
 
         {emailReminderEnabled === 1 && emailChannel && (
-          <div className='ml-6 space-y-3'>
+          <div className='ps-27 space-y-3'>
             {/* Customer Email Times */}
             <div>
               <p className='text-sm font-medium mb-2'>Customer:</p>

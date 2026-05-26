@@ -1,7 +1,7 @@
 'use client'
 
-import { ReactNode } from 'react'
-import { PencilLine } from 'lucide-react'
+import { KeyboardEventHandler, ReactNode } from 'react'
+import { Check, PencilLine, X } from 'lucide-react'
 
 import CustomFormField from '@/components/form/CustomFormField'
 import { Badge } from '@/components/ui/badge'
@@ -83,6 +83,42 @@ export default function TaskDetailsPanel({
     renderEditor: () => ReactNode
   }
 
+  const renderInlineActions = (onSave: () => void) => (
+    <div className='absolute -bottom-6 right-1 z-10 flex gap-2'>
+      <Button
+        type='button'
+        variant='primary'
+        size='icon'
+        className='size-6 rounded-xs shadow-sm shadow-[#929292]/40 bg-white hover:bg-white/90 text-black'
+        onClick={onSave}
+        aria-label='Save'
+      >
+        <Check className='size-4' />
+      </Button>
+      <Button
+        type='button'
+        variant='outline'
+        size='icon'
+        className='size-6 rounded-xs shadow-sm shadow-[#929292]/40'
+        onClick={cancelInlineEdit}
+        aria-label='Cancel'
+      >
+        <X className='size-4' />
+      </Button>
+    </div>
+  )
+
+  const renderInlineEditor = (
+    content: ReactNode,
+    onSave: () => void,
+    options?: { className?: string; onKeyDown?: KeyboardEventHandler<HTMLDivElement> }
+  ) => (
+    <div data-inline-editor className={cn('relative', options?.className)} onKeyDown={options?.onKeyDown}>
+      {content}
+      {renderInlineActions(onSave)}
+    </div>
+  )
+
   const renderEditableDisplay = (
     field: InlineEditableField,
     content: ReactNode,
@@ -113,8 +149,8 @@ export default function TaskDetailsPanel({
     {
       field: 'status',
       label: 'Status',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='combobox'
             name='status'
@@ -122,18 +158,14 @@ export default function TaskDetailsPanel({
             value={editingValue || task?.status || ''}
             autoFocus
             selectOptions={statusSelectOptions}
-            onOpenChange={open => {
-              if (!open) cancelInlineEdit()
-            }}
             onChange={value => {
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('status', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('status')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'status',
@@ -144,8 +176,8 @@ export default function TaskDetailsPanel({
     {
       field: 'task_type_id',
       label: 'Task Type',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='combobox'
             name='task_type_id'
@@ -153,18 +185,14 @@ export default function TaskDetailsPanel({
             value={editingValue || task?.task_type_id || ''}
             autoFocus
             selectOptions={taskTypeSelectOptions}
-            onOpenChange={open => {
-              if (!open) cancelInlineEdit()
-            }}
             onChange={value => {
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('task_type_id', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('task_type_id')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'task_type_id',
@@ -175,8 +203,8 @@ export default function TaskDetailsPanel({
     {
       field: 'client_id',
       label: 'Customer',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='combobox'
             name='client_id'
@@ -184,18 +212,14 @@ export default function TaskDetailsPanel({
             value={editingValue || task?.client_id || ''}
             autoFocus
             selectOptions={clientSelectOptions}
-            onOpenChange={open => {
-              if (!open) cancelInlineEdit()
-            }}
             onChange={value => {
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('client_id', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('client_id')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'client_id',
@@ -209,8 +233,8 @@ export default function TaskDetailsPanel({
       field: 'location',
       label: 'Location',
       align: 'items-start',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='select'
             name='location'
@@ -219,19 +243,15 @@ export default function TaskDetailsPanel({
             autoFocus
             selectOptions={addressSelectOptions}
             disabled={addressSelectOptions.length === 0}
-            onOpenChange={open => {
-              if (!open) cancelInlineEdit()
-            }}
             onChange={value => {
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('location', nextValue)
             }}
             className='whitespace-normal text-left leading-snug h-auto!'
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('location')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'location',
@@ -243,8 +263,8 @@ export default function TaskDetailsPanel({
     {
       field: 'start_date',
       label: 'Start Date',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='datepicker'
             name='start_date'
@@ -255,11 +275,10 @@ export default function TaskDetailsPanel({
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('start_date', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('start_date')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'start_date',
@@ -270,33 +289,30 @@ export default function TaskDetailsPanel({
     {
       field: 'start_time',
       label: 'Start Time',
-      renderEditor: () => (
-        <div
-          data-inline-editor
-          onKeyDown={event => {
-            if (event.key === 'Enter') {
-              event.preventDefault()
-              saveInlineField('start_time')
-            }
-
-            if (event.key === 'Escape') {
-              event.preventDefault()
-              cancelInlineEdit()
-            }
-          }}
-        >
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='time'
             name='start_time'
             value={editingValue || task?.start_time || ''}
             autoFocus
             onChange={value => setEditingValue(String(value ?? ''))}
-            onBlur={() => {
-              saveInlineField('start_time')
-            }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('start_time'),
+          {
+            onKeyDown: event => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                saveInlineField('start_time')
+              }
+
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                cancelInlineEdit()
+              }
+            }
+          }
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'start_time',
@@ -307,8 +323,8 @@ export default function TaskDetailsPanel({
     {
       field: 'end_date',
       label: 'End Date',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='datepicker'
             name='end_date'
@@ -319,11 +335,10 @@ export default function TaskDetailsPanel({
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('end_date', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('end_date')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'end_date',
@@ -334,33 +349,30 @@ export default function TaskDetailsPanel({
     {
       field: 'end_time',
       label: 'End Time',
-      renderEditor: () => (
-        <div
-          data-inline-editor
-          onKeyDown={event => {
-            if (event.key === 'Enter') {
-              event.preventDefault()
-              saveInlineField('end_time')
-            }
-
-            if (event.key === 'Escape') {
-              event.preventDefault()
-              cancelInlineEdit()
-            }
-          }}
-        >
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='time'
             name='end_time'
             value={editingValue || task?.end_time || ''}
             autoFocus
             onChange={value => setEditingValue(String(value ?? ''))}
-            onBlur={() => {
-              saveInlineField('end_time')
-            }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('end_time'),
+          {
+            onKeyDown: event => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                saveInlineField('end_time')
+              }
+
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                cancelInlineEdit()
+              }
+            }
+          }
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'end_time',
@@ -372,8 +384,8 @@ export default function TaskDetailsPanel({
       field: 'employee_ids',
       label: 'Assigned To',
       align: 'items-start',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='multiselect-searchable'
             name='employee_ids'
@@ -386,24 +398,9 @@ export default function TaskDetailsPanel({
 
               setEditingEmployeeIds(nextValue)
             }}
-          />
-          <div className='mt-2 flex justify-end gap-2'>
-            <Button type='button' variant='outline' size='sm' onClick={cancelInlineEdit} className='text-xs h-6 px-2'>
-              Cancel
-            </Button>
-            <Button
-              type='button'
-              size='sm'
-              onClick={() => {
-                saveInlineField('employee_ids', editingEmployeeIds)
-              }}
-              className='text-xs h-6 px-2'
-            >
-              Save
-            </Button>
-          </div>
-        </div>
-      ),
+          />,
+          () => saveInlineField('employee_ids', editingEmployeeIds)
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'employee_ids',
@@ -425,8 +422,8 @@ export default function TaskDetailsPanel({
     {
       field: 'completed_date',
       label: 'Completed Date',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='datepicker'
             name='completed_date'
@@ -437,11 +434,10 @@ export default function TaskDetailsPanel({
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('completed_date', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('completed_date')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'completed_date',
@@ -452,21 +448,8 @@ export default function TaskDetailsPanel({
     {
       field: 'close_comment',
       label: 'Close Comment',
-      renderEditor: () => (
-        <div
-          data-inline-editor
-          onKeyDown={event => {
-            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-              event.preventDefault()
-              saveInlineField('close_comment')
-            }
-
-            if (event.key === 'Escape') {
-              event.preventDefault()
-              cancelInlineEdit()
-            }
-          }}
-        >
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='textarea'
             name='close_comment'
@@ -474,12 +457,22 @@ export default function TaskDetailsPanel({
             className='min-h-20'
             autoFocus
             onChange={value => setEditingValue(String(value ?? ''))}
-            onBlur={() => {
-              saveInlineField('close_comment')
-            }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('close_comment'),
+          {
+            onKeyDown: event => {
+              if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                event.preventDefault()
+                saveInlineField('close_comment')
+              }
+
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                cancelInlineEdit()
+              }
+            }
+          }
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'close_comment',

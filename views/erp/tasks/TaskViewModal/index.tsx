@@ -333,7 +333,7 @@ export default function TaskViewModal({
 
       if (isInsideInlineEditor || isInsideFloatingLayer) return
 
-      const shouldSaveOnOutsideClick: InlineEditableField[] = ['name', 'start_time', 'end_time', 'close_comment']
+      const shouldSaveOnOutsideClick: InlineEditableField[] = ['name']
 
       if (shouldSaveOnOutsideClick.includes(editingField)) {
         void saveInlineField(editingField)

@@ -12,13 +12,14 @@ import {
   Staff
 } from '@/types'
 import { formatDate, formatDateTime } from '@/utils/date'
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { KeyboardEventHandler, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { hasPermission } from '@/utils/role-permission'
-import { PencilLine } from 'lucide-react'
+import { Check, PencilLine, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import CustomFormField from '@/components/form/CustomFormField'
 import EstimateService from '@/services/api/estimates/estimates.service'
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
 
 const EstimateSection = ({
   estimateId,
@@ -313,13 +314,7 @@ const EstimateSection = ({
 
       if (isInsideInlineEditor || isInsideFloatingLayer) return
 
-      const shouldSaveOnOutsideClick: InlineEditableField[] = [
-        'title',
-        'pickup_notes',
-        'delivery_location',
-        'delivery_notes',
-        'tax_rate'
-      ]
+      const shouldSaveOnOutsideClick: InlineEditableField[] = []
 
       if (shouldSaveOnOutsideClick.includes(editingField)) {
         void saveInlineField(editingField)
@@ -411,6 +406,42 @@ const EstimateSection = ({
     </div>
   )
 
+  const renderInlineActions = (onSave: () => void) => (
+    <div className='absolute -bottom-6 right-1 z-10 flex gap-2'>
+      <Button
+        type='button'
+        variant='primary'
+        size='icon'
+        className='size-6 rounded-xs shadow-sm shadow-[#929292]/40 bg-white hover:bg-white/90 text-black'
+        onClick={onSave}
+        aria-label='Save'
+      >
+        <Check className='size-4' />
+      </Button>
+      <Button
+        type='button'
+        variant='outline'
+        size='icon'
+        className='size-6 rounded-xs shadow-sm shadow-[#929292]/40'
+        onClick={cancelInlineEdit}
+        aria-label='Cancel'
+      >
+        <X className='size-4' />
+      </Button>
+    </div>
+  )
+
+  const renderInlineEditor = (
+    content: ReactNode,
+    onSave: () => void,
+    options?: { className?: string; onKeyDown?: KeyboardEventHandler<HTMLDivElement> }
+  ) => (
+    <div data-inline-editor className={cn('relative', options?.className)} onKeyDown={options?.onKeyDown}>
+      {content}
+      {renderInlineActions(onSave)}
+    </div>
+  )
+
   type RowConfig = {
     field: InlineEditableField
     label: string
@@ -424,26 +455,38 @@ const EstimateSection = ({
     {
       field: 'title',
       label: 'Estimate Title',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='text'
             name='title'
             value={editingValue || currentEstimate.title || ''}
             autoFocus
             onChange={value => setEditingValue(String(value ?? ''))}
-            onBlur={() => saveInlineField('title')}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('title'),
+          {
+            onKeyDown: event => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                saveInlineField('title')
+              }
+
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                cancelInlineEdit()
+              }
+            }
+          }
+        ),
       renderDisplay: () =>
         renderEditableDisplay('title', <p className='text-sm leading-none'>{statuslessTitle}</p>, currentEstimate.title)
     },
     {
       field: 'estimate_type_id',
       label: 'Estimate Type',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='select'
             name='estimate_type_id'
@@ -451,18 +494,14 @@ const EstimateSection = ({
             value={editingValue || currentEstimate.estimate_type_id || ''}
             autoFocus
             selectOptions={estimateTypeSelectOptions}
-            onOpenChange={open => {
-              if (!open) cancelInlineEdit()
-            }}
             onChange={value => {
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('estimate_type_id', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('estimate_type_id')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'estimate_type_id',
@@ -474,8 +513,8 @@ const EstimateSection = ({
       field: 'interaction',
       label: 'Interaction',
       visible: isMaterialOnly,
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='select'
             name='interaction'
@@ -486,18 +525,14 @@ const EstimateSection = ({
               { value: 'cash_and_pickup', label: 'Cash and Pickup' },
               { value: 'cash_and_delivery', label: 'Cash and Delivery' }
             ]}
-            onOpenChange={open => {
-              if (!open) cancelInlineEdit()
-            }}
             onChange={value => {
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('interaction', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('interaction')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'interaction',
@@ -515,8 +550,8 @@ const EstimateSection = ({
       field: 'pickup_date',
       label: 'Pickup Date',
       visible: isMaterialOnly && currentEstimate.interaction === 'cash_and_pickup',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='datepicker'
             name='pickup_date'
@@ -527,11 +562,10 @@ const EstimateSection = ({
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('pickup_date', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('pickup_date')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'pickup_date',
@@ -543,8 +577,8 @@ const EstimateSection = ({
       field: 'pickup_location_id',
       label: 'Pickup Location',
       visible: isMaterialOnly && currentEstimate.interaction === 'cash_and_pickup',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='select'
             name='pickup_location_id'
@@ -552,18 +586,14 @@ const EstimateSection = ({
             value={editingValue || currentEstimate.pickup_location_id || ''}
             autoFocus
             selectOptions={businessLocationOptions}
-            onOpenChange={open => {
-              if (!open) cancelInlineEdit()
-            }}
             onChange={value => {
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('pickup_location_id', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('pickup_location_id')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'pickup_location_id',
@@ -576,8 +606,8 @@ const EstimateSection = ({
       label: 'Pickup Notes',
       align: 'items-start',
       visible: isMaterialOnly && currentEstimate.interaction === 'cash_and_pickup',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='textarea'
             name='pickup_notes'
@@ -585,10 +615,22 @@ const EstimateSection = ({
             className='min-h-20'
             autoFocus
             onChange={value => setEditingValue(String(value ?? ''))}
-            onBlur={() => saveInlineField('pickup_notes')}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('pickup_notes'),
+          {
+            onKeyDown: event => {
+              if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                event.preventDefault()
+                saveInlineField('pickup_notes')
+              }
+
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                cancelInlineEdit()
+              }
+            }
+          }
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'pickup_notes',
@@ -601,8 +643,8 @@ const EstimateSection = ({
       field: 'delivery_datetime',
       label: 'Delivery Datetime',
       visible: isMaterialOnly && currentEstimate.interaction === 'cash_and_delivery',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <DateTimePicker
             value={
               editingValue
@@ -614,7 +656,6 @@ const EstimateSection = ({
             onChange={value => {
               if (value === null) {
                 setEditingValue('')
-                saveInlineField('delivery_datetime', '')
 
                 return
               }
@@ -622,12 +663,11 @@ const EstimateSection = ({
               const formatted = formatDeliveryDatetime(value)
 
               setEditingValue(formatted || '')
-              saveInlineField('delivery_datetime', formatted || '')
             }}
             placeholder='Select delivery date & time'
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('delivery_datetime')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'delivery_datetime',
@@ -641,18 +681,30 @@ const EstimateSection = ({
       field: 'delivery_location',
       label: 'Delivery Location',
       visible: isMaterialOnly && currentEstimate.interaction === 'cash_and_delivery',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='text'
             name='delivery_location'
             value={editingValue || currentEstimate.delivery_location || ''}
             autoFocus
             onChange={value => setEditingValue(String(value ?? ''))}
-            onBlur={() => saveInlineField('delivery_location')}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('delivery_location'),
+          {
+            onKeyDown: event => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                saveInlineField('delivery_location')
+              }
+
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                cancelInlineEdit()
+              }
+            }
+          }
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'delivery_location',
@@ -665,8 +717,8 @@ const EstimateSection = ({
       label: 'Delivery Notes',
       align: 'items-start',
       visible: isMaterialOnly && currentEstimate.interaction === 'cash_and_delivery',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='textarea'
             name='delivery_notes'
@@ -674,10 +726,22 @@ const EstimateSection = ({
             className='min-h-20'
             autoFocus
             onChange={value => setEditingValue(String(value ?? ''))}
-            onBlur={() => saveInlineField('delivery_notes')}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('delivery_notes'),
+          {
+            onKeyDown: event => {
+              if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                event.preventDefault()
+                saveInlineField('delivery_notes')
+              }
+
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                cancelInlineEdit()
+              }
+            }
+          }
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'delivery_notes',
@@ -689,8 +753,8 @@ const EstimateSection = ({
     {
       field: 'client_id',
       label: 'Customer',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='combobox'
             name='client_id'
@@ -698,18 +762,14 @@ const EstimateSection = ({
             value={editingValue || currentEstimate.client_id || ''}
             autoFocus
             selectOptions={clientSelectOptions}
-            onOpenChange={open => {
-              if (!open) cancelInlineEdit()
-            }}
             onChange={value => {
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('client_id', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('client_id')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'client_id',
@@ -722,8 +782,8 @@ const EstimateSection = ({
     {
       field: 'location_id',
       label: 'Business Location',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='select'
             name='location_id'
@@ -731,18 +791,14 @@ const EstimateSection = ({
             value={editingValue || currentEstimate.location_id || ''}
             autoFocus
             selectOptions={businessLocationOptions}
-            onOpenChange={open => {
-              if (!open) cancelInlineEdit()
-            }}
             onChange={value => {
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('location_id', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('location_id')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'location_id',
@@ -754,8 +810,8 @@ const EstimateSection = ({
       field: 'address_id',
       label: 'Event Location',
       align: 'items-start',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='select'
             name='address_id'
@@ -764,19 +820,15 @@ const EstimateSection = ({
             autoFocus
             selectOptions={addressSelectOptions}
             disabled={addressSelectOptions.length === 0}
-            onOpenChange={open => {
-              if (!open) cancelInlineEdit()
-            }}
             onChange={value => {
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('address_id', nextValue)
             }}
             className='whitespace-normal text-left leading-snug h-auto!'
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('address_id')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'address_id',
@@ -798,8 +850,8 @@ const EstimateSection = ({
     {
       field: 'assign_id',
       label: 'Assigned Estimator',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='combobox'
             name='assign_id'
@@ -807,18 +859,14 @@ const EstimateSection = ({
             value={editingValue || currentEstimate.assign_id || ''}
             autoFocus
             selectOptions={staffSelectOptions}
-            onOpenChange={open => {
-              if (!open) cancelInlineEdit()
-            }}
             onChange={value => {
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('assign_id', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('assign_id')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'assign_id',
@@ -833,8 +881,8 @@ const EstimateSection = ({
     {
       field: 'payment_term_id',
       label: 'Payment Terms',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='select'
             name='payment_term_id'
@@ -842,18 +890,14 @@ const EstimateSection = ({
             value={editingValue || currentEstimate.payment_term_id || ''}
             autoFocus
             selectOptions={paymentTermOptions}
-            onOpenChange={open => {
-              if (!open) cancelInlineEdit()
-            }}
             onChange={value => {
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('payment_term_id', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('payment_term_id')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'payment_term_id',
@@ -864,8 +908,8 @@ const EstimateSection = ({
     {
       field: 'expiration_date',
       label: 'Expiration Date',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='datepicker'
             name='expiration_date'
@@ -876,11 +920,10 @@ const EstimateSection = ({
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('expiration_date', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('expiration_date')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'expiration_date',
@@ -891,8 +934,8 @@ const EstimateSection = ({
     {
       field: 'biding_date',
       label: 'Bidding Date',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='datepicker'
             name='biding_date'
@@ -903,11 +946,10 @@ const EstimateSection = ({
               const nextValue = String(value ?? '')
 
               setEditingValue(nextValue)
-              saveInlineField('biding_date', nextValue)
             }}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('biding_date')
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'biding_date',
@@ -918,18 +960,30 @@ const EstimateSection = ({
     {
       field: 'tax_rate',
       label: 'Tax Rate (%)',
-      renderEditor: () => (
-        <div data-inline-editor>
+      renderEditor: () =>
+        renderInlineEditor(
           <CustomFormField
             type='number'
             name='tax_rate'
             value={editingValue || String(currentEstimate.tax_rate ?? 0)}
             autoFocus
             onChange={value => setEditingValue(String(value ?? ''))}
-            onBlur={() => saveInlineField('tax_rate')}
-          />
-        </div>
-      ),
+          />,
+          () => saveInlineField('tax_rate'),
+          {
+            onKeyDown: event => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                saveInlineField('tax_rate')
+              }
+
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                cancelInlineEdit()
+              }
+            }
+          }
+        ),
       renderDisplay: () =>
         renderEditableDisplay(
           'tax_rate',
