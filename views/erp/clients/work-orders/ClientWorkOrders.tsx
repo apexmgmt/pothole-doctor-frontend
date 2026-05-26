@@ -86,10 +86,12 @@ const ClientWorkOrders = ({ clientId }: { clientId: string }) => {
 
   const excludeColumnIds = ['company', 'client_name', 'commissions', 'completion_certificates']
 
+  const sharedColumns = getSharedWorkOrderColumns(row => router.push(`/erp/work-orders/${row.id}`)).filter(
+    column => !excludeColumnIds.includes(column.id)
+  )
+
   const columns: Column[] = [
-    ...getSharedWorkOrderColumns(row => router.push(`/erp/work-orders/${row.id}`)).filter(
-      column => !excludeColumnIds.includes(column.id)
-    ),
+    sharedColumns[0],
     {
       id: 'actions',
       header: 'Action',
@@ -116,7 +118,8 @@ const ClientWorkOrders = ({ clientId }: { clientId: string }) => {
       sortable: false,
       headerAlign: 'center',
       size: 30
-    }
+    },
+    ...sharedColumns.slice(1)
   ]
 
   const customFilters = (
