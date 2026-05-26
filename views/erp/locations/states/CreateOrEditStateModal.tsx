@@ -1,25 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
-import { zodResolver } from '@hookform/resolvers/zod'
-
-import * as z from 'zod'
+import { useEffect } from 'react'
 
 import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
-import { State, StatePayload, Location, Country } from '@/types'
+import { State, StatePayload, Country } from '@/types'
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import StateService from '@/services/api/locations/state.service'
-import LocationService from '@/services/api/locations/location.service'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface CreateOrEditStateModalProps {
   mode?: 'create' | 'edit'
@@ -31,13 +24,6 @@ interface CreateOrEditStateModalProps {
   onSuccess?: () => void
 }
 
-const formSchema = z.object({
-  name: z.string().min(2, { message: 'State name must be at least 2 characters' }),
-  country_id: z.string().min(1, { message: 'Please select a country' })
-})
-
-type FormValues = z.infer<typeof formSchema>
-
 const CreateOrEditStateModal = ({
   mode = 'create',
   open,
@@ -47,59 +33,40 @@ const CreateOrEditStateModal = ({
   countries,
   onSuccess
 }: CreateOrEditStateModalProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [countriesWithStateAndCities, setCountriesWithStateAndCities] = useState<Location['countries']>([])
-
-  const fetchCountriesWithStateAndCities = async () => {
-    try {
-      setIsLoading(true)
-      LocationService.index()
-        .then(response => {
-          setCountriesWithStateAndCities(response.data || [])
-          setIsLoading(false)
-        })
-        .catch(error => {
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch locations')
-          setIsLoading(false)
-        })
-    } catch (error) {
-      toast.error('Something went wrong while fetching locations!')
-      setIsLoading(false)
-    }
-  }
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<StatePayload>({
     defaultValues: {
       name: stateDetails?.name || '',
       country_id: stateDetails?.country?.id?.toString() || ''
     }
   })
 
+  const {
+    reset,
+    register,
+    control,
+    handleSubmit,
+    formState: { isSubmitting, errors }
+  } = form
+
   // Reset form when stateDetails changes or modal opens
   useEffect(() => {
     if (open) {
       // fetchCountriesWithStateAndCities()
-      form.reset({
+      reset({
         name: stateDetails?.name || '',
         country_id: stateDetails?.country?.id?.toString() || ''
       })
     }
-  }, [stateDetails, open, form])
+  }, [stateDetails, open])
 
-  const onSubmit = async (values: FormValues) => {
-    const payload: StatePayload = {
-      name: values.name,
-      country_id: values.country_id
-    }
-
+  const onSubmit = async (formValues: StatePayload) => {
     if (mode === 'create') {
       try {
-        await StateService.store(payload)
+        await StateService.store(formValues)
           .then(response => {
             console.log('State created:', response)
             toast.success('State created successfully')
-            form.reset()
+            reset()
             onOpenChange(false)
             onSuccess?.()
           })
@@ -111,7 +78,7 @@ const CreateOrEditStateModal = ({
       }
     } else if (mode === 'edit' && stateId) {
       try {
-        await StateService.update(stateId, payload)
+        await StateService.update(stateId, formValues)
           .then(response => {
             console.log('State updated:', response)
             toast.success('State updated successfully')
@@ -128,12 +95,15 @@ const CreateOrEditStateModal = ({
   }
 
   const onCancel = () => {
-    form.reset({
+    reset({
       name: stateDetails?.name || '',
       country_id: stateDetails?.country?.id?.toString() || ''
     })
     onOpenChange(false)
   }
+
+  const fieldStyle = 'grid grid-cols-[88px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
 
   return (
     <CommonDialog
@@ -142,81 +112,66 @@ const CreateOrEditStateModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create New State' : 'Edit State'}
       description={mode === 'create' ? 'Add a new state to the system' : 'Update state information'}
-      maxWidth='sm'
-      disableClose={form.formState.isSubmitting}
-      isLoading={form.formState.isSubmitting}
+      maxWidth='md'
+      disableClose={isSubmitting}
+      isLoading={isSubmitting}
       actions={
         <div className='flex gap-3'>
           <Button
             type='button'
             variant='outline'
+            size='sm'
             onClick={onCancel}
-            disabled={form.formState.isSubmitting}
+            disabled={isSubmitting}
             className='flex-1'
           >
             Cancel
           </Button>
-          <Button
-            type='submit'
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={form.formState.isSubmitting}
-            className='flex-1'
-          >
-            {form.formState.isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
+          <Button type='submit' size='sm' onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className='flex-1'>
+            {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
           </Button>
         </div>
       }
     >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          {/* Country Select Field */}
-          <FormField
-            control={form.control}
-            name='country_id'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Country <span className='text-red-600'>*</span>
-                </FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select a country' />
-                    </SelectTrigger>
-                  </FormControl>
-                  {countries.length > 0 && (
-                    <SelectContent>
-                      {countries?.map(country => (
-                        <SelectItem key={country.id} value={country.id.toString()}>
-                          {country.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  )}
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-2'>
+        {/* Country Select Field */}
+        <CustomFormField
+          name='country_id'
+          type='combobox'
+          label='Country'
+          placeholder='Select a country'
+          control={control}
+          rules={{
+            required: 'Country is required',
+            minLength: {
+              value: 1,
+              message: 'Please select a country'
+            }
+          }}
+          selectOptions={countries.map(country => ({ label: country.name, value: country.id.toString() }))}
+          errors={errors}
+          fieldClassName={fieldStyle}
+          labelClassName={labelStyle}
+        />
 
-          {/* State Name Field */}
-          <FormField
-            control={form.control}
-            name='name'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  State Name <span className='text-red-600'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter state name' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </form>
-      </Form>
+        {/* State Name Field */}
+        <CustomFormField
+          name='name'
+          label='State Name'
+          placeholder='Enter state name'
+          register={register}
+          rules={{
+            required: 'State name is required',
+            minLength: {
+              value: 2,
+              message: 'State name must be at least 2 characters'
+            }
+          }}
+          errors={errors}
+          fieldClassName={fieldStyle}
+          labelClassName={labelStyle}
+        />
+      </form>
     </CommonDialog>
   )
 }

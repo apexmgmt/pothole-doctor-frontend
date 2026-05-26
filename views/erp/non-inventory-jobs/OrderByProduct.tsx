@@ -156,7 +156,7 @@ const OrderByProduct: React.FC = () => {
       id: 'invoice_number',
       header: 'WO #',
       cell: (row: MaterialJob) => (
-        <span className='font-medium'>
+        <span>
           {row.work_order?.invoice_number_prefix ? `${row.work_order.invoice_number_prefix}-` : ''}
           {row.work_order?.invoice_number?.toString() || '—'}
         </span>

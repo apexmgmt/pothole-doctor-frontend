@@ -25,7 +25,6 @@ import { convert24hTo12h, formatDate } from '@/utils/date'
 import { Badge } from '@/components/ui/badge'
 import CreateOrEditTaskModal from './CreateOrEditTaskModal'
 import { hasPermission } from '@/utils/role-permission'
-import { Description } from '@/components/ui/description'
 import TaskViewModal from './TaskViewModal'
 
 const Tasks: React.FC<{
