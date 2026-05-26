@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
+import { formatCurrency } from '@/utils/currency'
 
 export interface PaymentSettingValues {
   isDownPaymentMaterials: boolean
@@ -44,7 +45,7 @@ const PaymentSettingModal = ({
 
     setIsMaterials(initMaterials)
     setAmountStr(Number(initAmount).toFixed(2))
-    setPercentStr(Number(initPercent).toFixed(4))
+    setPercentStr(Number(initPercent).toFixed(2))
   }, [open])
 
   // Percentage is always relative to total, regardless of isMaterials.
@@ -52,7 +53,7 @@ const PaymentSettingModal = ({
   const handleMaterialsToggle = (checked: boolean) => {
     setIsMaterials(checked)
 
-    let newAmount = checked ? materialTotal : total
+    let newAmount = checked ? Number(Number(materialTotal).toFixed(2)) : total
     let newPercent = total > 0 ? (newAmount / total) * 100 : 0
 
     if (newPercent > 100) {
@@ -61,14 +62,14 @@ const PaymentSettingModal = ({
     }
 
     setAmountStr(Number(newAmount).toFixed(2))
-    setPercentStr(Number(newPercent).toFixed(4))
+    setPercentStr(Number(newPercent).toFixed(2))
   }
 
   const handleAmountChange = (value: string) => {
     let num = parseFloat(value) || 0
 
     if (total > 0 && num > total) {
-      num = total
+      num = Number(Number(total).toFixed(2))
       value = num.toString()
     }
 
@@ -76,7 +77,7 @@ const PaymentSettingModal = ({
     setIsMaterials(false)
     const newPercent = total > 0 ? (num / total) * 100 : 0
 
-    setPercentStr(Number(newPercent).toFixed(4))
+    setPercentStr(Number(newPercent).toFixed(2))
   }
 
   const handlePercentChange = (value: string) => {
@@ -128,7 +129,7 @@ const PaymentSettingModal = ({
         </div>
         {isMaterials && (
           <p className='text-xs text-muted-foreground'>
-            Base: material items total — <span className='font-semibold'>${Number(materialTotal).toFixed(2)}</span>
+            Base: material items total: <span className='font-semibold'>{formatCurrency(Number(materialTotal))}</span>
           </p>
         )}
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>

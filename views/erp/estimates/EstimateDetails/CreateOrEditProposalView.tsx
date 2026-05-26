@@ -174,7 +174,7 @@ const CreateOrEditProposalView = ({
 
   const materialTotal = allLines
     .filter(line => line.type === 'product')
-    .reduce((sum, line) => sum + (line.total_price ?? 0), 0)
+    .reduce((sum, line) => Number(sum) + Number(line.total_price ?? 0), 0)
 
   const totalDiscount = allLines.reduce((sum, line) => {
     if (line.type === 'comment' || line.type === 'deduction') return sum
