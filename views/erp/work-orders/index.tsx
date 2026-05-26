@@ -173,8 +173,10 @@ const WorkOrders: React.FC<{
     }
   }
 
+  const sharedColumns = getSharedWorkOrderColumns(row => handleOpenEditModal(row.id))
+
   const columns: Column[] = [
-    ...getSharedWorkOrderColumns(row => handleOpenEditModal(row.id)),
+    sharedColumns[0],
     {
       id: 'actions',
       header: 'Action',
@@ -242,7 +244,8 @@ const WorkOrders: React.FC<{
       sortable: false,
       headerAlign: 'center',
       size: 30
-    }
+    },
+    ...sharedColumns.slice(1)
   ]
 
   const handleClearFilters = () => {
