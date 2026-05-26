@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { EstimateNote, EstimateNotePayload } from '@/types'
 import EstimateNoteService from '@/services/api/estimates/estimate-notes.service'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface CreteEditNoteModalProps {
   mode?: 'create' | 'edit'
@@ -104,21 +105,14 @@ const CreteEditNoteModal: React.FC<CreteEditNoteModalProps> = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='comment'
+            label='Comment'
+            type='textarea'
+            placeholder='Type your note here...'
             rules={{ required: 'Comment is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Comment <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Textarea rows={4} placeholder='Type your note here...' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            register={form.register}
+            errors={form.formState.errors}
           />
         </form>
       </Form>

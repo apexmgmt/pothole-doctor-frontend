@@ -382,7 +382,7 @@ export default function TaskGanttBoard({
               </button>
             </div>
 
-            <div ref={scrollAreaRef} className=''>
+            <div ref={scrollAreaRef}>
               <ScrollArea
                 className='w-full max-h-[calc(100vh-312px)]'
                 scrollbarClassName='max-h-[calc(100vh-362px)] top-10! -right-px!'

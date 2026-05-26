@@ -175,32 +175,32 @@ const Clients: React.FC<{
           {
             id: 'status',
             header: 'Status',
-            cell: (row: Client) => <span className='font-medium'>{''}</span>,
+            cell: (row: Client) => '',
             sortable: true
           }
         ]),
     {
       id: 'company',
       header: 'Company',
-      cell: (row: Client) => <span className='font-medium'>{row?.company?.name || ''}</span>,
+      cell: (row: Client) => <span>{row?.company?.name || ''}</span>,
       sortable: false
     },
     {
       id: 'first_name',
       header: 'First Name',
-      cell: (row: Client) => <span className='font-medium'>{row.first_name}</span>,
+      cell: (row: Client) => <span>{row.first_name}</span>,
       sortable: true
     },
     {
       id: 'last_name',
       header: 'Last Name',
-      cell: (row: Client) => <span className='font-medium'>{row.last_name}</span>,
+      cell: (row: Client) => <span>{row.last_name}</span>,
       sortable: true
     },
     {
       id: 'name',
       header: 'Full Name',
-      cell: (row: Client) => <span className='font-medium'>{`${row.first_name} ${row.last_name}`}</span>,
+      cell: (row: Client) => <span>{`${row.first_name} ${row.last_name}`}</span>,
       sortable: false
     },
     ...(type === 'lead'
@@ -208,14 +208,14 @@ const Clients: React.FC<{
           {
             id: 'created_at',
             header: 'Date Created',
-            cell: (row: Client) => <span className='font-medium'>{formatDate(row.created_at)}</span>,
+            cell: (row: Client) => <span>{formatDate(row.created_at)}</span>,
             sortable: true
           },
           {
             id: 'days_since_created',
             header: 'Days Since Created',
             cell: (row: Client) => (
-              <span className='font-medium'>
+              <span>
                 {Math.floor((new Date().getTime() - new Date(row.created_at).getTime()) / (1000 * 60 * 60 * 24))}
               </span>
             ),
@@ -224,19 +224,19 @@ const Clients: React.FC<{
           {
             id: 'contact_type',
             header: 'Contact Type',
-            cell: (row: Client) => <span className='font-medium'>{row?.contact_type?.name || ''}</span>,
+            cell: (row: Client) => <span>{row?.contact_type?.name || ''}</span>,
             sortable: false
           },
           {
             id: 'current_status',
             header: 'Current Status',
-            cell: (row: Client) => <span className='font-medium'>{''}</span>,
+            cell: (row: Client) => <span></span>,
             sortable: false
           },
           {
             id: 'current_task',
             header: 'Current Task',
-            cell: (row: Client) => <span className='font-medium'>{''}</span>,
+            cell: (row: Client) => <span></span>,
             sortable: false
           },
           {
@@ -256,20 +256,20 @@ const Clients: React.FC<{
           {
             id: 'spouse_name',
             header: 'Spouse Name',
-            cell: (row: Client) => <span className='font-medium'>{row?.clientable?.spouse_name}</span>,
+            cell: (row: Client) => <span>{row?.clientable?.spouse_name}</span>,
             sortable: false
           }
         ]),
     {
       id: 'cell_phone',
       header: 'Cell Phone',
-      cell: (row: Client) => <span className='font-medium'>{row?.clientable?.cell_phone}</span>,
+      cell: (row: Client) => <span>{row?.clientable?.cell_phone}</span>,
       sortable: false
     },
     {
       id: 'email',
       header: 'Email',
-      cell: (row: Client) => <span className='font-medium'>{row?.email}</span>,
+      cell: (row: Client) => <span>{row?.email}</span>,
       sortable: true
     },
     {
@@ -280,7 +280,7 @@ const Clients: React.FC<{
           Boolean
         )
 
-        return <span className='font-medium'>{parts.join(', ')}</span>
+        return <span>{parts.join(', ')}</span>
       },
       sortable: false
     },
@@ -290,16 +290,14 @@ const Clients: React.FC<{
           {
             id: 'location',
             header: 'Location',
-            cell: (row: Client) => <span className='font-medium'>{row?.location?.name}</span>,
+            cell: (row: Client) => <span>{row?.location?.name}</span>,
             sortable: false
           },
           {
             id: 'added_by',
             header: 'Added By',
             cell: (row: Client) => (
-              <span className='font-medium'>
-                {row?.added_by ? `${row.added_by.first_name} ${row.added_by.last_name}` : ''}
-              </span>
+              <span>{row?.added_by ? `${row.added_by.first_name} ${row.added_by.last_name}` : ''}</span>
             ),
             sortable: false
           }
@@ -308,7 +306,7 @@ const Clients: React.FC<{
       id: 'reference',
       header: 'Sales Rep.',
       cell: row => (
-        <span className='font-medium'>
+        <span>
           {row?.reference?.first_name} {row?.reference?.last_name}
         </span>
       ),
@@ -332,25 +330,25 @@ const Clients: React.FC<{
           {
             id: 'interest_level',
             header: 'Interest Level',
-            cell: (row: Client) => <span className='font-medium'>{row?.interest_level?.name || ''}</span>,
+            cell: (row: Client) => <span>{row?.interest_level?.name || ''}</span>,
             sortable: false
           },
           {
             id: 'created_at',
             header: 'Date Added',
-            cell: (row: Client) => <span className='font-medium'>{formatDate(row.created_at)}</span>,
+            cell: (row: Client) => <span>{formatDate(row.created_at)}</span>,
             sortable: true
           },
           {
             id: 'contact_type',
             header: 'Contact Type',
-            cell: (row: Client) => <span className='font-medium'>{row?.contact_type?.name || ''}</span>,
+            cell: (row: Client) => <span>{row?.contact_type?.name || ''}</span>,
             sortable: false
           },
           {
             id: 'opening_balance',
             header: 'Opening Balance',
-            cell: (row: Client) => <span className='font-medium'>{''}</span>,
+            cell: (row: Client) => <span></span>,
             sortable: false
           }
         ]),
@@ -568,86 +566,14 @@ const Clients: React.FC<{
       onClick: () => setActiveTab('details'),
       isActive: activeTab === 'details',
       disabled: !selectedClientId
-    },
-
-    // {
-    //   label: 'Documents',
-    //   icon: DocumentIcon,
-    //   onClick: () => setActiveTab('documents'),
-    //   isActive: activeTab === 'documents',
-    //   disabled: !selectedClientId
-    // },
-    // {
-    //   label: 'SMS',
-    //   icon: MessageIcon,
-    //   onClick: () => setActiveTab('sms'),
-    //   isActive: activeTab === 'sms',
-    //   disabled: !selectedClientId
-    // },
-    // {
-    //   label: 'Emails',
-    //   icon: MessageIcon,
-    //   onClick: () => setActiveTab('emails'),
-    //   isActive: activeTab === 'emails',
-    //   disabled: !selectedClientId
-    // },
-    // {
-    //   label: 'Notes',
-    //   icon: DocumentIcon,
-    //   onClick: () => setActiveTab('notes'),
-    //   isActive: activeTab === 'notes',
-    //   disabled: !selectedClientId
-    // },
-    // {
-    //   label: 'Contacts',
-    //   icon: UserIcon,
-    //   onClick: () => setActiveTab('contacts'),
-    //   isActive: activeTab === 'contacts',
-    //   disabled: !selectedClientId
-    // },
-    // {
-    //   label: 'Addresses',
-    //   icon: UserIcon,
-    //   onClick: () => setActiveTab('addresses'),
-    //   isActive: activeTab === 'addresses',
-    //   disabled: !selectedClientId
-    // },
-    // ...(type === 'customer'
-    //   ? [
-    //       {
-    //         label: 'Tasks',
-    //         icon: DocumentIcon,
-    //         onClick: () => setActiveTab('tasks'),
-    //         isActive: activeTab === 'tasks',
-    //         disabled: !selectedClientId
-    //       },
-    //       {
-    //         label: 'Estimates',
-    //         icon: DocumentIcon,
-    //         onClick: () => setActiveTab('estimates'),
-    //         isActive: activeTab === 'estimates',
-    //         disabled: !selectedClientId
-    //       },
-    //       {
-    //         label: 'Invoices',
-    //         icon: DocumentIcon,
-    //         onClick: () => setActiveTab('invoices'),
-    //         isActive: activeTab === 'invoices',
-    //         disabled: !selectedClientId
-    //       },
-    //       {
-    //         label: 'Work Orders',
-    //         icon: DocumentIcon,
-    //         onClick: () => setActiveTab('work-orders'),
-    //         isActive: activeTab === 'work-orders',
-    //         disabled: !selectedClientId
-    //       }
-    //     ]
-    //   : [])
+    }
   ]
 
   return (
-    <CommonLayout title={`${type === 'lead' ? 'Leads' : 'Customers'}${selectedClient ? ` - ${selectedClient?.first_name + ' ' + selectedClient?.last_name}` : ''}`} buttons={tabs}>
+    <CommonLayout
+      title={`${type === 'lead' ? 'Leads' : 'Customers'}${selectedClient ? ` - ${selectedClient?.first_name + ' ' + selectedClient?.last_name}` : ''}`}
+      buttons={tabs}
+    >
       {activeTab === 'clients' && (
         <CommonTable
           data={{

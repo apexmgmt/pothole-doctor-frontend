@@ -183,32 +183,32 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
     {
       id: 'title',
       header: 'Warehouse Title',
-      cell: row => <span className='font-medium'>{row.title}</span>,
+      cell: row => <span>{row.title}</span>,
       sortable: true
     },
     {
       id: 'phone',
       header: 'Phone',
-      cell: row => <span className='font-medium'>{row.phone}</span>,
+      cell: row => <span>{row.phone}</span>,
       sortable: true
     },
     {
       id: 'email',
       header: 'Email',
-      cell: row => <span className='font-medium'>{row.email}</span>,
+      cell: row => <span>{row.email}</span>,
       sortable: true
     },
     {
       id: 'fax_number',
       header: 'Fax Number',
-      cell: row => <span className='font-medium'>{row.fax_number}</span>,
+      cell: row => <span>{row.fax_number}</span>,
       sortable: true
     },
     {
       id: 'address',
       header: 'Address',
       cell: row => (
-        <span className='font-medium'>
+        <span>
           {row.street ? `${row.street}, ` : ''}
           {row.city}, {row.state}, {row.zip_code}
         </span>

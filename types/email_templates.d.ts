@@ -2,6 +2,7 @@ export interface EmailTemplate {
   id: string
   title: string
   description: string
+  template_name: string
   subject: string
   type: string
   group: string

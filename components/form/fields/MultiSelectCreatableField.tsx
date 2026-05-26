@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { FieldComponentProps } from './types'
 import { cn } from '@/lib/utils'
 
-type MultiSelectCreatableFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
+export type MultiSelectCreatableFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
 
 const MultiSelectCreatableField = <T extends FieldValues>({
   name,
@@ -142,7 +142,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
         <PopoverContent
           align='start'
           onWheel={e => e.stopPropagation()}
-          className='w-[var(--radix-popover-trigger-width)] bg-[#09090B] p-0'
+          className='w-[var(--radix-popover-trigger-width)] p-0'
         >
           <Command className='bg-transparent'>
             <CommandInput
@@ -157,11 +157,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
             <ScrollArea className='max-h-[calc(var(--radix-popover-content-available-height)-42px)]'>
               <CommandGroup>
                 {showCreate && (
-                  <CommandItem
-                    value={inputValue}
-                    onSelect={handleCreate}
-                    className='flex items-center gap-2 py-1 hover:bg-[#1F1F1F] data-[selected=true]:bg-[#1F1F1F]'
-                  >
+                  <CommandItem value={inputValue} onSelect={handleCreate} className='flex items-center gap-2'>
                     <Plus className='size-4' />
                     Create "{inputValue.trim()}"
                   </CommandItem>
@@ -175,7 +171,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
                       value={option.label}
                       disabled={!!option.disabled}
                       onSelect={() => handleToggle(option.value)}
-                      className='flex items-center gap-2 py-1 hover:bg-[#1F1F1F] data-[selected=true]:bg-[#1F1F1F]'
+                      className='flex items-center gap-2'
                     >
                       <Checkbox checked={isSelected} className='size-4 [&_span_svg]:size-3.25 pointer-events-none' />
                       {option.labelPrefix && <span className='mr-2'>{option.labelPrefix}</span>}

@@ -26,11 +26,11 @@ const CertificateCustomerInfo = ({
       {/* Job Site Info */}
       <div className='flex flex-col sm:text-right'>
         <h6 className='font-semibold text-base mb-4'>{completionCertificate?.service_type_name ?? ''}</h6>
-        <p className=''>
+        <p>
           <span className='font-semibold'>Job Title: </span>
           {workOrder?.title}
         </p>
-        <p className=''>
+        <p>
           <span className='font-semibold'>Job Location: </span>
           {workOrder?.address ??
             (workOrder?.address?.street_address ?? '') +

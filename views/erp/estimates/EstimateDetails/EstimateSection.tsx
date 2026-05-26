@@ -1,5 +1,4 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { DateTimePicker } from '@/components/ui/datetime-picker'
 import {
@@ -13,9 +12,7 @@ import {
   Staff
 } from '@/types'
 import { formatDate, formatDateTime } from '@/utils/date'
-import CreateOrEditEstimateModal from '../CreateOrEditEstimateModal'
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { hasPermission } from '@/utils/role-permission'
 import { PencilLine } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -42,8 +39,6 @@ const EstimateSection = ({
   paymentTerms: PaymentTerm[]
   businessLocations: BusinessLocation[]
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const router = useRouter()
   const [canEditEstimate, setCanEditEstimate] = useState<boolean>(false)
   const [currentEstimate, setCurrentEstimate] = useState<Estimate>(estimate)
   const estimateRef = useRef<Estimate>(estimate)
@@ -61,16 +56,6 @@ const EstimateSection = ({
     setCurrentEstimate(estimate)
     estimateRef.current = estimate
   }, [estimate])
-
-  // This function will be called after a successful edit
-  const handleModalChange = (open: boolean) => {
-    setIsModalOpen(open)
-
-    if (!open) {
-      // Modal just closed, so refetch the data
-      router.refresh()
-    }
-  }
 
   const startInlineEdit = (field: InlineEditableField, value?: string) => {
     if (!canEditEstimate) return
@@ -955,69 +940,41 @@ const EstimateSection = ({
   ]
 
   return (
-    <>
-      <Card className='bg-zinc-900 border-zinc-800'>
-        <CardHeader className='flex flex-row items-center justify-between pb-2'>
-          <CardTitle className='text-white text-base'>Details</CardTitle>
-          {canEditEstimate && (
-            <Button
-              onClick={() => {
-                setIsModalOpen(true)
-              }}
-              size='sm'
-              variant='outline'
-              className='text-xs px-3 py-1 bg-white text-black'
-            >
-              Edit
-            </Button>
-          )}
-        </CardHeader>
-        <CardContent>
-          <div className='flex flex-col gap-1 mt-2'>
-            <div className='grid grid-cols-[136px_minmax(0,_1fr)] gap-2 items-center'>
-              <Label className='text-sm text-muted-foreground'>Estimate Number:</Label>
-              <p className='text-sm leading-none px-2.5 py-1.5'>{currentEstimate.estimate_number?.toString() || '-'}</p>
-            </div>
-
-            {rows
-              .filter(row => row.visible !== false)
-              .map(row => (
-                <div
-                  key={row.field}
-                  className={cn('grid grid-cols-[136px_minmax(0,_1fr)] gap-2', row.align ?? 'items-center')}
-                >
-                  <Label className='text-sm text-muted-foreground'>{row.label}:</Label>
-                  {editingField === row.field ? row.renderEditor() : row.renderDisplay()}
-                </div>
-              ))}
-
-            <div className='grid grid-cols-[136px_minmax(0,_1fr)] gap-2 items-center'>
-              <Label className='text-sm text-muted-foreground'>Created At:</Label>
-              <p className='text-sm leading-none px-2.5 py-1.5'>{formatDateTime(currentEstimate.created_at)}</p>
-            </div>
-
-            <div className='grid grid-cols-[136px_minmax(0,_1fr)] gap-2 items-center'>
-              <Label className='text-sm text-muted-foreground'>Updated At:</Label>
-              <p className='text-sm leading-none px-2.5 py-1.5'>{formatDateTime(currentEstimate.updated_at)}</p>
-            </div>
+    <Card className='bg-zinc-900 border-zinc-800'>
+      <CardHeader className='flex flex-row items-center justify-between pb-2'>
+        <CardTitle className='text-white text-base'>Details</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className='flex flex-col gap-1 mt-2'>
+          <div className='grid grid-cols-[136px_minmax(0,_1fr)] gap-2 items-center'>
+            <Label className='text-sm text-muted-foreground'>Estimate Number:</Label>
+            <p className='text-sm leading-none px-2.5 py-1.5'>{currentEstimate.estimate_number?.toString() || '-'}</p>
           </div>
-        </CardContent>
-      </Card>
 
-      <CreateOrEditEstimateModal
-        mode={'edit'}
-        open={isModalOpen}
-        onOpenChange={handleModalChange}
-        estimateId={estimateId || undefined}
-        estimateDetails={currentEstimate || undefined}
-        serviceTypes={serviceTypes}
-        estimateTypes={estimateTypes}
-        clients={clients}
-        staffs={staffs}
-        paymentTerms={paymentTerms}
-        businessLocations={businessLocations}
-      />
-    </>
+          {rows
+            .filter(row => row.visible !== false)
+            .map(row => (
+              <div
+                key={row.field}
+                className={cn('grid grid-cols-[136px_minmax(0,_1fr)] gap-2', row.align ?? 'items-center')}
+              >
+                <Label className='text-sm text-muted-foreground'>{row.label}:</Label>
+                {editingField === row.field ? row.renderEditor() : row.renderDisplay()}
+              </div>
+            ))}
+
+          <div className='grid grid-cols-[136px_minmax(0,_1fr)] gap-2 items-center'>
+            <Label className='text-sm text-muted-foreground'>Created At:</Label>
+            <p className='text-sm leading-none px-2.5 py-1.5'>{formatDateTime(currentEstimate.created_at)}</p>
+          </div>
+
+          <div className='grid grid-cols-[136px_minmax(0,_1fr)] gap-2 items-center'>
+            <Label className='text-sm text-muted-foreground'>Updated At:</Label>
+            <p className='text-sm leading-none px-2.5 py-1.5'>{formatDateTime(currentEstimate.updated_at)}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

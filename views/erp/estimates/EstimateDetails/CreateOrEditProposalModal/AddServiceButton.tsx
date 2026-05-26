@@ -19,10 +19,8 @@ const AddServiceButton = ({
   return (
     <div className='relative'>
       <Button variant='outline' type='button' onClick={() => onOpenChange(true)} id='add-service-btn'>
-        <span>
-          <SettingsIcon className='h-4 w-4 inline-block mr-2' />
-        </span>
-        Add Service
+        <SettingsIcon className='size-4 inline-block' />
+        <span>Add Service</span>
       </Button>
       <Select
         open={open}
@@ -41,12 +39,12 @@ const AddServiceButton = ({
           aria-label='Add Service'
           tabIndex={-1}
         />
-        <SelectContent position='popper' align='end'>
+        <SelectContent position='popper' align='end' className='bg-[#09090B]'>
           {serviceTypes.map(st => {
             const isAlreadyAdded = selectedServiceTypeIds.includes(st.id)
 
             return (
-              <SelectItem key={st.id} value={st.id}>
+              <SelectItem key={st.id} value={st.id} className='py-1 data-[highlighted]:bg-[#1F1F1F]'>
                 {st.name}
               </SelectItem>
             )

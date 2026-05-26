@@ -155,26 +155,26 @@ const BusinessLocationWarehouses: React.FC<{ locationId: string }> = ({ location
     {
       id: 'title',
       header: 'Warehouse Title',
-      cell: (row: Warehouse) => <span className='font-medium'>{row.title}</span>,
+      cell: (row: Warehouse) => <span>{row.title}</span>,
       sortable: true
     },
     {
       id: 'phone',
       header: 'Phone',
-      cell: (row: Warehouse) => <span className='font-medium'>{row.phone}</span>,
+      cell: (row: Warehouse) => <span>{row.phone}</span>,
       sortable: false
     },
     {
       id: 'email',
       header: 'Email',
-      cell: (row: Warehouse) => <span className='font-medium'>{row.email}</span>,
+      cell: (row: Warehouse) => <span>{row.email}</span>,
       sortable: false
     },
     {
       id: 'address',
       header: 'Address',
       cell: (row: Warehouse) => (
-        <span className='font-medium'>
+        <span>
           {row.street ? `${row.street}, ` : ''}
           {row.city ? row.city.name : ''}
           {row.state ? `, ${row.state.name}` : ''}

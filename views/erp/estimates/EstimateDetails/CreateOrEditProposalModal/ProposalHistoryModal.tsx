@@ -63,7 +63,7 @@ const ProposalHistoryModal = ({
       id: 'sent_by',
       header: 'Sent By',
       cell: (row: ProposalHistory) => (
-        <span className='font-medium'>{row.sent_by_user?.first_name + ' ' + row.sent_by_user?.last_name || '—'}</span>
+        <span>{row.sent_by_user?.first_name + ' ' + row.sent_by_user?.last_name || '—'}</span>
       ),
       sortable: false
     },

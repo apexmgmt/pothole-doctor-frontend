@@ -155,13 +155,13 @@ const Staffs: React.FC = () => {
     {
       id: 'first_name',
       header: 'Name',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'email',
       header: 'Email',
-      cell: row => <span className=''>{row.email}</span>,
+      cell: row => <span>{row.email}</span>,
       sortable: true
     },
     {

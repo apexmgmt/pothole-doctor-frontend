@@ -57,7 +57,7 @@ export const getSharedWorkOrderColumns = (
       id: 'invoice_number',
       header: 'WO #',
       cell: (row: WorkOrder) => (
-        <span className='font-medium hover:underline cursor-pointer' onClick={() => onOpenWorkOrder(row)}>
+        <span className='hover:underline cursor-pointer' onClick={() => onOpenWorkOrder(row)}>
           {row?.invoice_number_prefix ? `${row.invoice_number_prefix}-` : ''}
           {row.invoice_number?.toString() || 'N/A'}
         </span>
@@ -70,7 +70,7 @@ export const getSharedWorkOrderColumns = (
     {
       id: 'company',
       header: 'Company',
-      cell: (row: WorkOrder) => <span className='font-medium'>{row?.client?.company?.name || ''}</span>,
+      cell: (row: WorkOrder) => <span>{row?.client?.company?.name || ''}</span>,
       sortable: false
     },
     {
@@ -79,20 +79,20 @@ export const getSharedWorkOrderColumns = (
       cell: (row: WorkOrder) => {
         const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
 
-        return <span className='font-medium'>{parts.join(' ') || ''}</span>
+        return <span>{parts.join(' ') || ''}</span>
       },
       sortable: false
     },
     {
       id: 'service',
       header: 'Service',
-      cell: (row: WorkOrder) => <span className='font-medium'>{row?.work_order_type?.name || ''}</span>,
+      cell: (row: WorkOrder) => <span>{row?.work_order_type?.name || ''}</span>,
       sortable: false
     },
     {
       id: 'title',
       header: 'Job Name',
-      cell: (row: WorkOrder) => <span className='font-medium'>{row.title}</span>,
+      cell: (row: WorkOrder) => <span>{row.title}</span>,
       sortable: true
     },
     {
@@ -182,55 +182,53 @@ export const getSharedWorkOrderColumns = (
       },
       sortable: true
     },
-    
+
     // contractor paid
     // salesman paid
     {
       id: 'assign_user',
       header: 'Sales Rep',
       cell: (row: WorkOrder) => (
-        <span className='font-medium'>
-          {[row?.assign_user?.first_name, row?.assign_user?.last_name].filter(Boolean).join(' ') || '—'}
-        </span>
+        <span>{[row?.assign_user?.first_name, row?.assign_user?.last_name].filter(Boolean).join(' ') || '—'}</span>
       ),
       sortable: false
     },
     {
       id: 'invoice_total',
       header: 'Total Sale',
-      cell: (row: WorkOrder) => <span className='font-medium'>{formatCurrency(row?.invoice_total ?? 0)}</span>,
+      cell: (row: WorkOrder) => <span>{formatCurrency(row?.invoice_total ?? 0)}</span>,
       sortable: true
     },
     {
       id: 'invoice_total_tax',
       header: 'Total Tax',
-      cell: (row: WorkOrder) => <span className='font-medium'>{formatCurrency(row?.invoice_total_tax ?? 0)}</span>,
+      cell: (row: WorkOrder) => <span>{formatCurrency(row?.invoice_total_tax ?? 0)}</span>,
       sortable: true
     },
     {
       id: 'total_cost',
       header: 'Total Cost',
-      cell: (row: WorkOrder) => <span className='font-medium'>{formatCurrency(row?.total_cost ?? 0)}</span>,
+      cell: (row: WorkOrder) => <span>{formatCurrency(row?.total_cost ?? 0)}</span>,
       sortable: true
     },
     {
       id: 'total_profit',
       header: 'Total Profit',
-      cell: (row: WorkOrder) => <span className='font-medium'>{formatCurrency(row?.total_profit ?? 0)}</span>,
+      cell: (row: WorkOrder) => <span>{formatCurrency(row?.total_profit ?? 0)}</span>,
       sortable: true
     },
     {
       id: 'commissions',
       header: 'Commissions',
-      cell: (row: WorkOrder) => <span className='font-medium'>{formatCurrency(row?.commissions ?? 0)}</span>,
+      cell: (row: WorkOrder) => <span>{formatCurrency(row?.commissions ?? 0)}</span>,
       sortable: true
     },
     {
       id: 'total_net_profit',
       header: 'Net Profit',
-      cell: (row: WorkOrder) => <span className='font-medium'>{formatCurrency(row?.total_net_profit ?? 0)}</span>,
+      cell: (row: WorkOrder) => <span>{formatCurrency(row?.total_net_profit ?? 0)}</span>,
       sortable: true
-    },
+    }
 
     // {
     //   id: 'status',
@@ -242,7 +240,6 @@ export const getSharedWorkOrderColumns = (
     //   ),
     //   sortable: true
     // },
-    
   ]
 
   if (!options.excludeColumnIds || options.excludeColumnIds.length === 0) {

@@ -206,19 +206,19 @@ const BusinessLocationClients: React.FC<{
     {
       id: 'company',
       header: 'Company',
-      cell: (row: Client) => <span className='font-medium'>{row?.company?.name || '—'}</span>,
+      cell: (row: Client) => <span>{row?.company?.name || '—'}</span>,
       sortable: false
     },
     {
       id: 'first_name',
       header: 'First Name',
-      cell: (row: Client) => <span className='font-medium'>{row.first_name}</span>,
+      cell: (row: Client) => <span>{row.first_name}</span>,
       sortable: false
     },
     {
       id: 'last_name',
       header: 'Last Name',
-      cell: (row: Client) => <span className='font-medium'>{row.last_name}</span>,
+      cell: (row: Client) => <span>{row.last_name}</span>,
       sortable: false
     },
     ...(type === 'lead'
@@ -226,14 +226,14 @@ const BusinessLocationClients: React.FC<{
           {
             id: 'created_at',
             header: 'Date Created',
-            cell: (row: Client) => <span className='font-medium'>{formatDate(row.created_at)}</span>,
+            cell: (row: Client) => <span>{formatDate(row.created_at)}</span>,
             sortable: true
           },
           {
             id: 'days_since_created',
             header: 'Days Since Created',
             cell: (row: Client) => (
-              <span className='font-medium'>
+              <span>
                 {Math.floor((new Date().getTime() - new Date(row.created_at).getTime()) / (1000 * 60 * 60 * 24))}
               </span>
             ),
@@ -242,7 +242,7 @@ const BusinessLocationClients: React.FC<{
           {
             id: 'contact_type',
             header: 'Contact Type',
-            cell: (row: Client) => <span className='font-medium'>{row?.contact_type?.name || '—'}</span>,
+            cell: (row: Client) => <span>{row?.contact_type?.name || '—'}</span>,
             sortable: false
           },
           {
@@ -262,16 +262,14 @@ const BusinessLocationClients: React.FC<{
           {
             id: 'spouse_name',
             header: 'Spouse Name',
-            cell: (row: Client) => <span className='font-medium'>{row?.clientable?.spouse_name || '—'}</span>,
+            cell: (row: Client) => <span>{row?.clientable?.spouse_name || '—'}</span>,
             sortable: false
           },
           {
             id: 'added_by',
             header: 'Added By',
             cell: (row: Client) => (
-              <span className='font-medium'>
-                {row?.added_by ? `${row.added_by.first_name} ${row.added_by.last_name}` : '—'}
-              </span>
+              <span>{row?.added_by ? `${row.added_by.first_name} ${row.added_by.last_name}` : '—'}</span>
             ),
             sortable: false
           },
@@ -290,41 +288,39 @@ const BusinessLocationClients: React.FC<{
           {
             id: 'interest_level',
             header: 'Interest Level',
-            cell: (row: Client) => <span className='font-medium'>{row?.interest_level?.name || '—'}</span>,
+            cell: (row: Client) => <span>{row?.interest_level?.name || '—'}</span>,
             sortable: false
           },
           {
             id: 'created_at',
             header: 'Date Added',
-            cell: (row: Client) => <span className='font-medium'>{formatDate(row.created_at)}</span>,
+            cell: (row: Client) => <span>{formatDate(row.created_at)}</span>,
             sortable: true
           },
           {
             id: 'contact_type',
             header: 'Contact Type',
-            cell: (row: Client) => <span className='font-medium'>{row?.contact_type?.name || '—'}</span>,
+            cell: (row: Client) => <span>{row?.contact_type?.name || '—'}</span>,
             sortable: false
           }
         ]),
     {
       id: 'cell_phone',
       header: 'Cell Phone',
-      cell: (row: Client) => <span className='font-medium'>{row?.clientable?.cell_phone || '—'}</span>,
+      cell: (row: Client) => <span>{row?.clientable?.cell_phone || '—'}</span>,
       sortable: false
     },
     {
       id: 'email',
       header: 'Email',
-      cell: (row: Client) => <span className='font-medium'>{row?.email || '—'}</span>,
+      cell: (row: Client) => <span>{row?.email || '—'}</span>,
       sortable: true
     },
     {
       id: 'reference',
       header: 'Sales Rep.',
       cell: (row: Client) => (
-        <span className='font-medium'>
-          {row?.reference ? `${row.reference.first_name} ${row.reference.last_name}` : '—'}
-        </span>
+        <span>{row?.reference ? `${row.reference.first_name} ${row.reference.last_name}` : '—'}</span>
       ),
       sortable: false
     },

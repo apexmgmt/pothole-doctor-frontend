@@ -3,11 +3,11 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Estimate, SavedPolygon, TakeoffData } from '@/types'
-import { useLoadScript, GoogleMap, Marker, DrawingManager, Polygon, Autocomplete } from '@react-google-maps/api'
+import { GoogleMap, Marker, DrawingManager, Polygon, Autocomplete } from '@react-google-maps/api'
 import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { toast } from 'sonner'
-import { Trash2, Maximize2, Download, Hand, Search, Scissors, Camera, Pencil } from 'lucide-react'
+import { Maximize2, Minimize2, Search, Camera } from 'lucide-react'
 import html2canvas from 'html2canvas'
 import * as turf from '@turf/turf' // IMPORT TURF
 import { NIGHT_MODE_STYLES, POLYGON_COLORS } from '@/constants/take-off-data'
@@ -512,7 +512,7 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
         </div>
         <div className='flex gap-2'>
           <Button onClick={toggleFullscreen} size='sm' variant='ghost' className='text-xs px-2 py-1'>
-            <Maximize2 className='w-4 h-4' />
+            {isFullscreen ? <Minimize2 className='size-4' /> : <Maximize2 className='size-4' />}
           </Button>
         </div>
       </CardHeader>

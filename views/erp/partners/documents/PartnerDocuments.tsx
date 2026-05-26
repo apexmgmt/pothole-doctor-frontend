@@ -148,7 +148,7 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
     {
       id: 'name',
       header: 'File Name',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
@@ -157,23 +157,18 @@ const PartnerDocuments = ({ userId }: { userId: string }) => {
       cell: row => (
         <>
           {getFileType(row.full_path) === 'image' ? (
-            <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
+            <Link href={row.full_path} target='_blank' rel='noopener noreferrer'>
               <Image src={row.full_path} unoptimized alt={row.name} width={100} height={100} className='rounded-md' />
             </Link>
           ) : getFileType(row.full_path) === 'video' ? (
-            <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='font-medium'>
+            <Link href={row.full_path} target='_blank' rel='noopener noreferrer'>
               <video width={100} height={50} controls className='rounded-md'>
                 <source src={row.full_path} type='video/mp4' />
                 Your browser does not support the video tag.
               </video>
             </Link>
           ) : (
-            <Link
-              href={row.full_path}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='font-medium flex items-center'
-            >
+            <Link href={row.full_path} target='_blank' rel='noopener noreferrer' className='flex items-center'>
               <DocumentIcon className='w-7 h-7' />{' '}
             </Link>
           )}

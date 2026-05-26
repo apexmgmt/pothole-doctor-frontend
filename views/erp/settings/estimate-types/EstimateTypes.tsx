@@ -143,9 +143,10 @@ const EstimateTypes: React.FC = () => {
     {
       id: 'name',
       header: 'Title',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     }
+
     // {
     //   id: 'actions',
     //   header: 'Action',

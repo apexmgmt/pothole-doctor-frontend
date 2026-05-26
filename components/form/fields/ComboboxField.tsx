@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { FieldComponentProps } from './types'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
-type ComboboxFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
+export type ComboboxFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
 
 const ComboboxField = <T extends FieldValues>({
   name,
@@ -66,7 +66,7 @@ const ComboboxField = <T extends FieldValues>({
       <PopoverContent
         onWheel={e => e.stopPropagation()}
         align='start'
-        className='w-[var(--radix-popover-trigger-width)] bg-[#09090B] p-0'
+        className='w-[var(--radix-popover-trigger-width)] p-0'
       >
         <Command className='bg-transparent'>
           <CommandInput placeholder='Search...' className='py-1' />
@@ -83,7 +83,6 @@ const ComboboxField = <T extends FieldValues>({
                     onBlur?.(opt.value)
                     setOpen(false)
                   }}
-                  className='text-sm py-1 hover:bg-[#1F1F1F] data-[selected=true]:bg-[#1F1F1F]'
                 >
                   <Check className={`mr-2 size-4 ${selectedValue === opt.value ? 'opacity-100' : 'opacity-0'}`} />
                   {opt.labelPrefix && <span className='mr-2'>{opt.labelPrefix}</span>}

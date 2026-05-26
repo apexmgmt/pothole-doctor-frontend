@@ -143,37 +143,37 @@ const VendorRebateCredits = ({ vendorId }: { vendorId: string }) => {
     {
       id: 'reference',
       header: 'Reference#',
-      cell: row => <span className='font-medium'>{row.reference}</span>,
+      cell: row => <span>{row.reference}</span>,
       sortable: true
     },
     {
       id: 'work_order',
       header: 'WO. #',
-      cell: row => <span className='font-medium'>{row.work_order}</span>,
+      cell: row => <span>{row.work_order}</span>,
       sortable: false
     },
     {
       id: 'amount',
       header: 'Amount',
-      cell: row => <span className='font-medium'>{row.amount}</span>,
+      cell: row => <span>{row.amount}</span>,
       sortable: true
     },
     {
       id: 'balance',
       header: 'Balance',
-      cell: row => <span className='font-medium'>{row.balance}</span>,
+      cell: row => <span>{row.balance}</span>,
       sortable: false
     },
     {
       id: 'date',
       header: 'Date',
-      cell: row => <span className='font-medium'>{formatDate(row.date)}</span>,
+      cell: row => <span>{formatDate(row.date)}</span>,
       sortable: true
     },
     {
       id: 'note',
       header: 'Note',
-      cell: row => <span className='font-medium'>{row.note}</span>,
+      cell: row => <span>{row.note}</span>,
       sortable: true
     },
     {

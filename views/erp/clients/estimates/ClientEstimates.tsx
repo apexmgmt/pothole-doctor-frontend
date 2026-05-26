@@ -180,7 +180,7 @@ const ClientEstimates = ({ clientId }: { clientId: string }) => {
       header: 'Estimate #',
       cell: (row: Estimate) => (
         <Link href={`/erp/estimates/${row.id}`}>
-          <span className='font-medium hover:underline'>{row.estimate_number?.toString()}</span>
+          <span className='hover:underline'>{row.estimate_number?.toString()}</span>
         </Link>
       ),
       sortable: false
@@ -188,19 +188,19 @@ const ClientEstimates = ({ clientId }: { clientId: string }) => {
     {
       id: 'title',
       header: 'Title',
-      cell: (row: Estimate) => <span className='font-medium'>{row.title}</span>,
+      cell: (row: Estimate) => <span>{row.title}</span>,
       sortable: true
     },
     {
       id: 'biding_date',
       header: 'Date',
-      cell: (row: Estimate) => <span className='font-medium'>{formatDate(row?.biding_date) || ''}</span>,
+      cell: (row: Estimate) => <span>{formatDate(row?.biding_date) || ''}</span>,
       sortable: true
     },
     {
       id: 'service_type',
       header: 'Service Type',
-      cell: (row: Estimate) => <span className='font-medium'>{row?.service_type?.name || ''}</span>,
+      cell: (row: Estimate) => <span>{row?.service_type?.name || ''}</span>,
       sortable: false
     },
     {

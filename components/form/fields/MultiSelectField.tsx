@@ -11,7 +11,7 @@ import { FieldComponentProps } from './types'
 import { cn } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
-type MultiSelectFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
+export type MultiSelectFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
 
 const MultiSelectField = <T extends FieldValues>({
   name,
@@ -99,7 +99,7 @@ const MultiSelectField = <T extends FieldValues>({
         <PopoverContent
           align='start'
           onWheel={e => e.stopPropagation()}
-          className='w-[var(--radix-popover-trigger-width)] bg-[#09090B] p-0'
+          className='w-[var(--radix-popover-trigger-width)] p-0'
         >
           <ScrollArea className='max-h-[var(--radix-popover-content-available-height)]'>
             <div className='flex flex-col gap-1 p-2'>

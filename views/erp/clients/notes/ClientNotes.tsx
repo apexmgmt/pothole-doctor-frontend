@@ -126,33 +126,31 @@ const ClientNotes = ({ clientId, noteTypes }: { clientId: string; noteTypes: Not
     {
       id: 'note_type',
       header: 'Note Type',
-      cell: row => <span className='font-medium'>{row?.note_type?.name || ''}</span>,
+      cell: row => <span>{row?.note_type?.name || ''}</span>,
       sortable: false
     },
     {
       id: 'user',
       header: 'Noted By',
-      cell: row => (
-        <span className='font-medium'>{(row?.user?.first_name || '') + ' ' + (row?.user?.last_name || '')}</span>
-      ),
+      cell: row => <span>{(row?.user?.first_name || '') + ' ' + (row?.user?.last_name || '')}</span>,
       sortable: false
     },
     {
       id: 'subject',
       header: 'Subject',
-      cell: row => <span className='font-medium'>{row.subject || ''}</span>,
+      cell: row => <span>{row.subject || ''}</span>,
       sortable: true
     },
     {
       id: 'comment',
       header: 'Comment',
-      cell: row => <span className='font-medium'>{row.comment || ''}</span>,
+      cell: row => <span>{row.comment || ''}</span>,
       sortable: true
     },
     {
       id: 'created_at',
       header: 'Created At',
-      cell: row => <span className='font-medium'>{formatDate(row.created_at)}</span>,
+      cell: row => <span>{formatDate(row.created_at)}</span>,
       sortable: true
     },
     {

@@ -25,7 +25,6 @@ import { convert24hTo12h, formatDate } from '@/utils/date'
 import { Badge } from '@/components/ui/badge'
 import CreateOrEditTaskModal from './CreateOrEditTaskModal'
 import { hasPermission } from '@/utils/role-permission'
-import { Description } from '@/components/ui/description'
 import TaskViewModal from './TaskViewModal'
 
 const Tasks: React.FC<{
@@ -165,7 +164,7 @@ const Tasks: React.FC<{
     {
       id: 'name',
       header: 'Task Name',
-      cell: (row: Task) => <span className='font-medium'>{row?.name || ''}</span>,
+      cell: (row: Task) => <span>{row?.name || ''}</span>,
       sortable: true
     },
     {
@@ -197,7 +196,7 @@ const Tasks: React.FC<{
     {
       id: 'task_type',
       header: 'Task Type',
-      cell: (row: Task) => <span className='font-medium'>{row?.task_type?.name || ''}</span>,
+      cell: (row: Task) => <span>{row?.task_type?.name || ''}</span>,
       sortable: false
     },
     {
@@ -205,8 +204,8 @@ const Tasks: React.FC<{
       header: 'Start Date',
       cell: (row: Task) => (
         <div>
-          <p className='font-medium'>{formatDate(row?.start_date) || ''}</p>
-          <p className='font-medium mt-1'>{row?.start_time ? convert24hTo12h(row.start_time) : ''}</p>
+          <p>{formatDate(row?.start_date) || ''}</p>
+          <p className='mt-1'>{row?.start_time ? convert24hTo12h(row.start_time) : ''}</p>
         </div>
       ),
       sortable: true
@@ -217,14 +216,14 @@ const Tasks: React.FC<{
       cell: (row: Task) => {
         const parts = [row?.created_by?.first_name, row?.created_by?.last_name].filter(Boolean)
 
-        return <span className='font-medium'>{parts.join(' ') || ''}</span>
+        return <span>{parts.join(' ') || ''}</span>
       },
       sortable: false
     },
     {
       id: 'created_at',
       header: 'Created Date',
-      cell: (row: Task) => <span className='font-medium'>{formatDate(row?.created_at) || ''}</span>,
+      cell: (row: Task) => <span>{formatDate(row?.created_at) || ''}</span>,
       sortable: true
     },
     {
@@ -246,7 +245,7 @@ const Tasks: React.FC<{
     {
       id: 'company',
       header: 'Company Name',
-      cell: (row: Task) => <span className='font-medium'>{row?.client?.company?.name || ''}</span>,
+      cell: (row: Task) => <span>{row?.client?.company?.name || ''}</span>,
       sortable: false
     },
     {
@@ -255,7 +254,7 @@ const Tasks: React.FC<{
       cell: (row: Task) => {
         const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
 
-        return <span className='font-medium'>{parts.join(' ') || ''}</span>
+        return <span>{parts.join(' ') || ''}</span>
       },
       sortable: false
     },

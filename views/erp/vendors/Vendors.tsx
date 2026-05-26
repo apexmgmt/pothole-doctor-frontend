@@ -173,31 +173,31 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
     {
       id: 'name',
       header: 'Vendor Name',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'phone',
       header: 'Phone',
-      cell: row => <span className='font-medium'>{row.phone}</span>,
+      cell: row => <span>{row.phone}</span>,
       sortable: true
     },
     {
       id: 'address',
       header: 'Full Address',
-      cell: row => <span className='font-medium'>{row.address}</span>,
+      cell: row => <span>{row.address}</span>,
       sortable: true
     },
     {
       id: 'profit_margin',
       header: 'Profit Margin (%)',
-      cell: row => <span className='font-medium'>{row.profit_margin}</span>,
+      cell: row => <span>{row.profit_margin}</span>,
       sortable: false
     },
     {
       id: 'is_enable_b2b',
       header: 'B2B Enabled',
-      cell: row => <span className='font-medium'>{row.is_enable_b2b}</span>,
+      cell: row => <span>{row.is_enable_b2b}</span>,
       sortable: false
     },
     {

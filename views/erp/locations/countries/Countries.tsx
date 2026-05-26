@@ -173,13 +173,13 @@ const Countries: React.FC = () => {
     {
       id: 'name',
       header: 'Name',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'code',
       header: 'Code',
-      cell: row => <span className='font-medium'>{row.code}</span>,
+      cell: row => <span>{row.code}</span>,
       sortable: true
     },
     {

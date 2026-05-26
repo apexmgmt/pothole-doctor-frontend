@@ -163,25 +163,25 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
     {
       id: 'name',
       header: 'Title',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'type',
       header: 'Payment Term Type',
-      cell: row => <span className='font-medium'>{row.type}</span>,
+      cell: row => <span>{row.type}</span>,
       sortable: true
     },
     {
       id: 'due_days',
       header: 'Due Days',
-      cell: row => <span className='font-medium'>{row.due_days}</span>,
+      cell: row => <span>{row.due_days}</span>,
       sortable: false
     },
     {
       id: 'day_of_month_due',
       header: 'Day of Month Due',
-      cell: row => <span className='font-medium'>{row.day_of_month_due}</span>,
+      cell: row => <span>{row.day_of_month_due}</span>,
       sortable: false
     },
     {

@@ -208,43 +208,43 @@ const LaborCosts: React.FC<{
     {
       id: 'service_type',
       header: 'Service Type',
-      cell: (row: LaborCost) => <span className='font-medium'>{row?.service_type?.name || ''}</span>,
+      cell: (row: LaborCost) => <span>{row?.service_type?.name || ''}</span>,
       sortable: true
     },
     {
       id: 'name',
       header: 'Labor Name',
-      cell: (row: LaborCost) => <span className='font-medium'>{row.name}</span>,
+      cell: (row: LaborCost) => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'description',
       header: 'Description',
-      cell: (row: LaborCost) => <span className='font-medium'>{row.description}</span>,
+      cell: (row: LaborCost) => <span>{row.description}</span>,
       sortable: true
     },
     {
       id: 'cost',
       header: 'Cost',
-      cell: (row: LaborCost) => <span className='font-medium'>{formatCurrency(row.cost)}</span>,
+      cell: (row: LaborCost) => <span>{formatCurrency(row.cost)}</span>,
       sortable: true
     },
     {
       id: 'margin',
       header: 'Margin',
-      cell: (row: LaborCost) => <span className='font-medium'>{row.margin}%</span>,
+      cell: (row: LaborCost) => <span>{row.margin}%</span>,
       sortable: true
     },
     {
       id: 'price',
       header: 'Labor Price',
-      cell: (row: LaborCost) => <span className='font-medium'>{formatCurrency(row.price)}</span>,
+      cell: (row: LaborCost) => <span>{formatCurrency(row.price)}</span>,
       sortable: true
     },
     {
       id: 'unit',
       header: 'Per',
-      cell: (row: LaborCost) => <span className='font-medium'>{row?.unit?.name || ''}</span>,
+      cell: (row: LaborCost) => <span>{row?.unit?.name || ''}</span>,
       sortable: true
     },
     {

@@ -50,31 +50,45 @@ const PaymentSettingModal = ({
   // Percentage is always relative to total, regardless of isMaterials.
   // isMaterials only affects what the amount sources from when toggled ON.
   const handleMaterialsToggle = (checked: boolean) => {
-    if (checked) {
-      // When switching ON: seed amount from materialTotal at 100%
-      const newAmount = materialTotal
-      const newPercent = total > 0 ? (newAmount / total) * 100 : 0
+    setIsMaterials(checked)
 
-      setAmountStr(Number(newAmount).toFixed(2))
-      setPercentStr(Number(newPercent).toFixed(4))
+    let newAmount = checked ? materialTotal : total
+    let newPercent = total > 0 ? (newAmount / total) * 100 : 0
+
+    if (newPercent > 100) {
+      newPercent = 100
+      newAmount = total
     }
 
-    setIsMaterials(checked)
+    setAmountStr(Number(newAmount).toFixed(2))
+    setPercentStr(Number(newPercent).toFixed(4))
   }
 
   const handleAmountChange = (value: string) => {
+    let num = parseFloat(value) || 0
+
+    if (total > 0 && num > total) {
+      num = total
+      value = num.toString()
+    }
+
     setAmountStr(value)
     setIsMaterials(false)
-    const num = parseFloat(value) || 0
     const newPercent = total > 0 ? (num / total) * 100 : 0
 
     setPercentStr(Number(newPercent).toFixed(4))
   }
 
   const handlePercentChange = (value: string) => {
+    let num = parseFloat(value) || 0
+
+    if (num > 100) {
+      num = 100
+      value = '100'
+    }
+
     setPercentStr(value)
     setIsMaterials(false)
-    const num = parseFloat(value) || 0
     const newAmount = (num / 100) * total
 
     setAmountStr(Number(newAmount).toFixed(2))

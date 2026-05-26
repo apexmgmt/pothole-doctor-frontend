@@ -1,14 +1,16 @@
+'use client'
+
 import { Controller, FieldValues, Path } from 'react-hook-form'
 
-import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-
-import { FieldComponentProps } from './types'
+import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 
-export type CheckboxFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
+import { FieldComponentProps } from './types'
 
-const CheckboxField = <T extends FieldValues>({
+export type SwitchFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
+
+const SwitchField = <T extends FieldValues>({
   name,
   label,
   control,
@@ -21,13 +23,13 @@ const CheckboxField = <T extends FieldValues>({
   className,
   fieldClassName,
   labelClassName
-}: CheckboxFieldProps<T>) => {
-  const checkboxId = typeof name === 'string' ? name : undefined
+}: SwitchFieldProps<T>) => {
+  const switchId = typeof name === 'string' ? name : undefined
 
-  const renderCheckbox = (checked: boolean, setChecked: (nextValue: boolean) => void) => (
+  const renderSwitch = (checked: boolean, setChecked: (nextValue: boolean) => void) => (
     <div className={cn(`flex items-center gap-2 ${disabled ? 'cursor-not-allowed opacity-50' : ''}`, fieldClassName)}>
-      <Checkbox
-        id={checkboxId}
+      <Switch
+        id={switchId}
         disabled={disabled}
         autoFocus={autoFocus}
         checked={checked}
@@ -40,7 +42,7 @@ const CheckboxField = <T extends FieldValues>({
         className={className}
       />
       {label && (
-        <Label htmlFor={checkboxId} className={cn('text-sm font-normal text-popover-foreground', labelClassName)}>
+        <Label htmlFor={switchId} className={cn('text-sm font-normal text-popover-foreground', labelClassName)}>
           {label}
         </Label>
       )}
@@ -48,7 +50,7 @@ const CheckboxField = <T extends FieldValues>({
   )
 
   if (!control || !name) {
-    return renderCheckbox(Boolean(value), nextValue => {
+    return renderSwitch(Boolean(value), nextValue => {
       onChange?.(nextValue)
     })
   }
@@ -59,7 +61,7 @@ const CheckboxField = <T extends FieldValues>({
       control={control}
       rules={rules}
       render={({ field }) =>
-        renderCheckbox(Boolean(field.value ?? value), nextValue => {
+        renderSwitch(Boolean(field.value ?? value), nextValue => {
           field.onChange(nextValue)
           onChange?.(nextValue)
         })
@@ -68,4 +70,4 @@ const CheckboxField = <T extends FieldValues>({
   )
 }
 
-export default CheckboxField
+export default SwitchField

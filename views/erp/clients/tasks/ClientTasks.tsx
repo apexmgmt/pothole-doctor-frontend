@@ -176,25 +176,25 @@ const ClientTasks = ({ clientId }: { clientId: string }) => {
     {
       id: 'task_type',
       header: 'Task Type',
-      cell: (row: Task) => <span className='font-medium'>{row?.task_type?.name || ''}</span>,
+      cell: (row: Task) => <span>{row?.task_type?.name || ''}</span>,
       sortable: false
     },
     {
       id: 'name',
       header: 'Task Name',
-      cell: (row: Task) => <span className='font-medium'>{row?.name || ''}</span>,
+      cell: (row: Task) => <span>{row?.name || ''}</span>,
       sortable: true
     },
     {
       id: 'start_date',
       header: 'Start Date',
-      cell: (row: Task) => <span className='font-medium'>{formatDate(row?.start_date) || ''}</span>,
+      cell: (row: Task) => <span>{formatDate(row?.start_date) || ''}</span>,
       sortable: true
     },
     {
       id: 'start_time',
       header: 'Start Time',
-      cell: (row: Task) => <span className='font-medium'>{row?.start_time || ''}</span>,
+      cell: (row: Task) => <span>{row?.start_time || ''}</span>,
       sortable: false
     },
     {

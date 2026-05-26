@@ -178,49 +178,49 @@ const Partners: React.FC<PartnersProps> = ({
     {
       id: 'first_name',
       header: 'Full Name',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'company',
       header: 'Company Name',
-      cell: row => <span className='font-medium'>{row.company}</span>,
+      cell: row => <span>{row.company}</span>,
       sortable: true
     },
     {
       id: 'email',
       header: 'Email',
-      cell: row => <span className='font-medium'>{row.email}</span>,
+      cell: row => <span>{row.email}</span>,
       sortable: true
     },
     {
       id: 'phone',
       header: 'Phone',
-      cell: row => <span className='font-medium'>{row.phone}</span>,
+      cell: row => <span>{row.phone}</span>,
       sortable: true
     },
     {
       id: 'partner_type',
       header: 'Partner Type',
-      cell: row => <span className='font-medium'>{row.partner_type}</span>,
+      cell: row => <span>{row.partner_type}</span>,
       sortable: false
     },
     {
       id: 'skills',
       header: 'Skills',
-      cell: row => <span className='font-medium wrap-normal'>{row.skills}</span>,
+      cell: row => <span className='wrap-normal'>{row.skills}</span>,
       sortable: false
     },
     {
       id: 'insurance_expiration',
       header: 'Insurance Expiration',
-      cell: row => <span className='font-medium'>{row.insurance_expiration}</span>,
+      cell: row => <span>{row.insurance_expiration}</span>,
       sortable: false
     },
     {
       id: 'w9_expiration',
       header: 'W9 Expiration',
-      cell: row => <span className='font-medium'>{row.w9_expiration}</span>,
+      cell: row => <span>{row.w9_expiration}</span>,
       sortable: false
     },
     {

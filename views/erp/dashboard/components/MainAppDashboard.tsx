@@ -35,7 +35,7 @@ export default function MainAppDashboard({ data, impersonateUser }: MainAppDashb
 
   const companyColumns: Column[] = [
     { id: 'index', header: '#', sortable: false, cell: row => <span className='text-gray'>{row.index}</span> },
-    { id: 'name', header: 'Name', sortable: false, cell: row => <span className='font-medium'>{row.name}</span> },
+    { id: 'name', header: 'Name', sortable: false, cell: row => <span>{row.name}</span> },
     { id: 'phone', header: 'Phone', sortable: false, cell: row => <span>{row.phone}</span> },
     { id: 'company', header: 'Company', sortable: false, cell: row => <span>{row.company}</span> },
     {

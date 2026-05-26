@@ -295,7 +295,6 @@ const CreateOrEditEstimateModal = ({
               minLength: { value: 2, message: 'Estimate title must be at least 2 characters' }
             }}
             register={register}
-            control={control}
             errors={errors}
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}
@@ -314,7 +313,6 @@ const CreateOrEditEstimateModal = ({
               label: type.name,
               value: type.id
             }))}
-            register={register}
             control={control}
             errors={errors}
             fieldClassName={fieldStyle}
@@ -341,7 +339,6 @@ const CreateOrEditEstimateModal = ({
                 form.setValue('location_id', '')
               }
             }}
-            register={register}
             control={control}
             errors={errors}
             fieldClassName={fieldStyle}
@@ -404,7 +401,6 @@ const CreateOrEditEstimateModal = ({
                 type='datepicker'
                 placeholder='Select pickup date'
                 rules={{ required: 'Date of pickup is required' }}
-                register={register}
                 control={control}
                 errors={errors}
                 fieldClassName={fieldStyle}
@@ -415,13 +411,12 @@ const CreateOrEditEstimateModal = ({
                 name='pickup_location_id'
                 label='Pickup Location'
                 type='select'
-                placeholder='Select Pickup Location'
+                placeholder='Select pickup location'
                 rules={{ required: 'Pickup location is required' }}
                 selectOptions={businessLocations.map(loc => ({
                   label: loc.name,
                   value: loc.id
                 }))}
-                register={register}
                 control={control}
                 errors={errors}
                 fieldClassName={fieldStyle}
@@ -434,7 +429,6 @@ const CreateOrEditEstimateModal = ({
                 type='textarea'
                 placeholder='Enter notes...'
                 register={register}
-                control={control}
                 errors={errors}
                 fieldClassName={`sm:col-span-2 ${fieldStyle}`}
                 labelClassName={labelStyle}
@@ -489,7 +483,6 @@ const CreateOrEditEstimateModal = ({
                 placeholder='Enter delivery location'
                 rules={{ required: 'Delivery location is required' }}
                 register={register}
-                control={control}
                 errors={errors}
                 fieldClassName={fieldStyle}
                 labelClassName={labelStyle}
@@ -515,9 +508,8 @@ const CreateOrEditEstimateModal = ({
             name='location_id'
             label='Business Location'
             type='select'
-            placeholder='Select Business Location'
+            placeholder='Select business location'
             selectOptions={businessLocations.map(loc => ({ value: loc.id, label: loc.name }))}
-            register={register}
             control={control}
             errors={errors}
             fieldClassName={fieldStyle}
@@ -529,7 +521,7 @@ const CreateOrEditEstimateModal = ({
             name='address_id'
             label='Event Location'
             type='select'
-            placeholder={selectedClient ? 'Select Address' : 'Select Customer first'}
+            placeholder={selectedClient ? 'Select address' : 'Select customer first'}
             selectOptions={addressOptions.map(address => {
               const label = [address.street_address, address.city?.name, address.state?.name, address.zip_code]
                 .filter(Boolean)
@@ -537,7 +529,6 @@ const CreateOrEditEstimateModal = ({
 
               return { value: address.id, label: `${address.title} - ${label}` }
             })}
-            register={register}
             control={control}
             errors={errors}
             fieldClassName={fieldStyle}
@@ -549,7 +540,7 @@ const CreateOrEditEstimateModal = ({
             name='assign_id'
             label='Assigned Estimator'
             type='combobox'
-            placeholder='Select Assigned Estimator'
+            placeholder='Select assigned estimator'
             rules={{
               required: 'Assigned estimator is required'
             }}
@@ -557,7 +548,6 @@ const CreateOrEditEstimateModal = ({
               value: staff.id,
               label: `${staff.first_name} ${staff.last_name}`
             }))}
-            register={register}
             control={control}
             errors={errors}
             fieldClassName={fieldStyle}
@@ -569,7 +559,7 @@ const CreateOrEditEstimateModal = ({
             name='payment_term_id'
             label='Payment Term'
             type='select'
-            placeholder='Select Payment Term'
+            placeholder='Select payment term'
             rules={{
               required: 'Payment term is required'
             }}
@@ -577,7 +567,6 @@ const CreateOrEditEstimateModal = ({
               value: term.id,
               label: term.name
             }))}
-            register={register}
             control={control}
             errors={errors}
             fieldClassName={fieldStyle}
@@ -590,7 +579,6 @@ const CreateOrEditEstimateModal = ({
             label='Expiration Date'
             type='datepicker'
             placeholder='Select expiration date'
-            register={register}
             control={control}
             errors={errors}
             fieldClassName={fieldStyle}
@@ -606,7 +594,6 @@ const CreateOrEditEstimateModal = ({
             rules={{
               required: 'Bidding date is required'
             }}
-            register={register}
             control={control}
             errors={errors}
             fieldClassName={fieldStyle}
@@ -620,7 +607,6 @@ const CreateOrEditEstimateModal = ({
             type='number'
             placeholder='Enter tax rate'
             register={register}
-            control={control}
             errors={errors}
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}

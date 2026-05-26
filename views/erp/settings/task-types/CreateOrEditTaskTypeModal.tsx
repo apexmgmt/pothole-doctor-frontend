@@ -180,7 +180,7 @@ const CreateOrEditTaskTypeModal = ({
                   <RadioGroup
                     onValueChange={val => field.onChange(val === 'true')}
                     value={field.value ? 'true' : 'false'}
-                    className=' flex flex-row gap-4 items-center'
+                    className='flex flex-row gap-4 items-center'
                   >
                     <div className='flex gap-2 items-center'>
                       <RadioGroupItem value='true' id='yes' />

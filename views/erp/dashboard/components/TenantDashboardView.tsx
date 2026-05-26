@@ -187,7 +187,7 @@ export default function TenantDashboardView({ data }: { data: Record<string, unk
   )
 
   return (
-    <div className=''>
+    <div>
       <div className='rounded-xl bg-card'>
         {/* ── Header: title + stat pills ── */}
         <div className='border-b border-border/20 px-4 py-3 flex items-center justify-between flex-wrap gap-2.5'>

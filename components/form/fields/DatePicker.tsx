@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { FieldComponentProps } from './types'
 import { format } from 'date-fns'
 
-type DatePickerProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'> & {
+export type DatePickerProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'> & {
   minDate?: string
   maxDate?: string
   lockFutureDate?: boolean

@@ -113,7 +113,7 @@ const WorkOrderDocuments = ({ workOrderId }: { workOrderId: string }) => {
     {
       id: 'name',
       header: 'File Name',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {

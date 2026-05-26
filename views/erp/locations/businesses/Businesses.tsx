@@ -4,23 +4,22 @@ import React, { useState, useEffect } from 'react'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
-import Link from 'next/link'
-
-import { PlusIcon, Search, UsersIcon, WarehouseIcon } from 'lucide-react'
+import { PlusIcon, Search } from 'lucide-react'
 
 import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { Column, DataTableApiResponse } from '@/types'
+import { BusinessLocation, Column, DataTableApiResponse, Location } from '@/types'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
-import { DetailsIcon, InvoiceIcon, LocationIcon, UserIcon } from '@/public/icons'
+import LocationService from '@/services/api/locations/location.service'
+import { DetailsIcon, LocationIcon, UserIcon } from '@/public/icons'
 import BusinessLocationDetails from './BusinessLocationDetails'
 import BusinessLocationClients from './BusinessLocationClients'
 import BusinessLocationEstimates from './BusinessLocationEstimates'
@@ -30,6 +29,7 @@ import BusinessLocationEmployees from './BusinessLocationEmployees'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
+import CreateOrEditBusinessLocationModal from './CreateOrEditBusinessLocationModal'
 
 const BusinessLocations: React.FC = () => {
   const router = useRouter()
@@ -41,8 +41,13 @@ const BusinessLocations: React.FC = () => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedBusinessLocationId, setSelectedBusinessLocationId] = useState<string | null>(null)
-  const [selectedBusinessLocation, setSelectedBusinessLocation] = useState<any | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
+
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [modalBusinessLocation, setModalBusinessLocation] = useState<BusinessLocation | null>(null)
+  const [modalLoading, setModalLoading] = useState(false)
+  const [countriesWithStateAndCities, setCountriesWithStateAndCities] = useState<Location['countries']>([])
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
   const [canCreateLocation, setCanCreateLocation] = useState<boolean>(false)
@@ -65,6 +70,20 @@ const BusinessLocations: React.FC = () => {
     hasPermission('Manage Warehouse').then(result => setCanManageWarehouse(result))
     hasPermission('Manage Staff').then(result => setCanManageStaff(result))
     hasPermission('Manage Estimate').then(result => setCanManageEstimate(result))
+  }, [])
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await LocationService.index()
+
+        setCountriesWithStateAndCities(response.data || [])
+      } catch (error) {
+        setCountriesWithStateAndCities([])
+      }
+    }
+
+    fetchLocations()
   }, [])
 
   // Debounced search update
@@ -160,31 +179,31 @@ const BusinessLocations: React.FC = () => {
     {
       id: 'name',
       header: 'Location Title',
-      cell: row => <span className='font-medium'>{row.name}</span>,
+      cell: row => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'phone',
       header: 'Phone Number',
-      cell: row => <span className='font-medium'>{row.phone}</span>,
+      cell: row => <span>{row.phone}</span>,
       sortable: true
     },
     {
       id: 'invoice_prefix',
       header: 'Invoice Prefix',
-      cell: row => <span className='font-medium'>{row.invoice_prefix}</span>,
+      cell: row => <span>{row.invoice_prefix}</span>,
       sortable: true
     },
     {
       id: 'email',
       header: 'Email',
-      cell: row => <span className='font-medium'>{row.email}</span>,
+      cell: row => <span>{row.email}</span>,
       sortable: true
     },
     {
       id: 'street_address',
       header: 'Address',
-      cell: row => <span className='font-medium'>{row.street_address}</span>,
+      cell: row => <span>{row.street_address}</span>,
       sortable: true
     },
     {
@@ -199,7 +218,7 @@ const BusinessLocations: React.FC = () => {
                   ? [
                       <EditButton
                         tooltip='Edit Business Location Information'
-                        link={`/erp/locations/businesses/${row.id}/edit`}
+                        onClick={() => handleEditLocation(row.id)}
                         variant='text'
                       />
                     ]
@@ -249,6 +268,29 @@ const BusinessLocations: React.FC = () => {
     setSelectedBusinessLocationId(businessLocation?.id || null)
   }
 
+  const handleCreateLocation = () => {
+    setModalMode('create')
+    setModalBusinessLocation(null)
+    setIsModalOpen(true)
+  }
+
+  const handleEditLocation = async (id: string) => {
+    setModalMode('edit')
+    setModalLoading(true)
+    setIsModalOpen(true)
+
+    try {
+      const response = await BusinessLocationService.show(id)
+
+      setModalBusinessLocation(response.data || null)
+    } catch (error: any) {
+      toast.error(typeof error?.message === 'string' ? error.message : 'Failed to load business location')
+      setIsModalOpen(false)
+    } finally {
+      setModalLoading(false)
+    }
+  }
+
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
@@ -277,12 +319,10 @@ const BusinessLocations: React.FC = () => {
           </Button>
         )}
       </div>
-      <Link href='/erp/locations/businesses/create'>
-        <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
-          <PlusIcon className='w-4 h-4' />
-          <span className='hidden min-[480px]:block'>Add Business Location</span>
-        </Button>
-      </Link>
+      <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90' onClick={handleCreateLocation}>
+        <PlusIcon className='w-4 h-4' />
+        <span className='hidden min-[480px]:block'>Add Business Location</span>
+      </Button>
     </div>
   )
 
@@ -411,6 +451,27 @@ const BusinessLocations: React.FC = () => {
           <BusinessLocationWarehouses locationId={selectedBusinessLocationId} />
         )}
       </CommonLayout>
+
+      <CreateOrEditBusinessLocationModal
+        open={isModalOpen}
+        onOpenChange={isOpen => {
+          if (!isOpen) {
+            setModalBusinessLocation(null)
+          }
+
+          setIsModalOpen(isOpen)
+        }}
+        mode={modalMode}
+        businessLocationId={modalBusinessLocation?.id?.toString() || null}
+        businessLocationDetails={modalBusinessLocation}
+        countriesWithStateAndCities={countriesWithStateAndCities}
+        isFetching={modalLoading}
+        onSuccess={() => {
+          fetchData()
+          setModalBusinessLocation(null)
+          setIsModalOpen(false)
+        }}
+      />
     </>
   )
 }
