@@ -35,14 +35,13 @@ export function Description({
   }, [description, lines])
 
   return (
-    <div className={cn('flex flex-col gap-1', className)}>
+    <div className='flex flex-col gap-1'>
       <p
         ref={textRef}
         {...props}
         className={cn(
-          'overflow-hidden text-sm font-medium whitespace-normal',
-          isTable && 'max-w-72',
-          !isExpanded && 'line-clamp'
+          `overflow-hidden text-sm whitespace-normal ${isTable ? 'max-w-72' : ''} ${!isExpanded ? 'line-clamp' : ''}`,
+          className
         )}
         style={{
           display: isExpanded ? 'block' : '-webkit-box',

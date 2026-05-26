@@ -13,6 +13,7 @@ export type InputType =
   | 'multiselect-searchable'
   | 'multiselect-creatable'
   | 'checkbox'
+  | 'switch'
   | 'combobox'
   | 'datepicker'
 

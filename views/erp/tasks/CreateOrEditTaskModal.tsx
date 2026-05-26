@@ -80,7 +80,6 @@ const CreateOrEditTaskModal = ({
   invoiceId,
   defaultClientId
 }: CreateOrEditTaskModalProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [descriptionHtml, setDescriptionHtml] = useState<string>('')
 
   // Skip reminder sync on initial edit load so existing task_reminder_setting values are preserved

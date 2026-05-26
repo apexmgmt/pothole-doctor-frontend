@@ -15,9 +15,9 @@ import MultiSelectField from './fields/MultiSelectField'
 import MultiSelectSearchField from './fields/MultiSelectSearchField'
 import CheckboxField from './fields/CheckboxField'
 import MultiSelectCreatableField from './fields/MultiSelectCreatableField'
+import SwitchField from './fields/SwitchField'
 
 type FormFieldProps<T extends FieldValues> = BaseFieldProps<T> & {
-  orientation?: 'horizontal' | 'vertical'
   minDate?: string
   maxDate?: string
   lockFutureDate?: boolean
@@ -29,7 +29,6 @@ const CustomFormField = <T extends FieldValues>({
   type = 'text',
   name,
   label,
-  orientation = 'vertical',
   placeholder = '',
   description,
   register,
@@ -59,12 +58,12 @@ const CustomFormField = <T extends FieldValues>({
     className
   )
 
-  const isCheckbox = type === 'checkbox'
+  const isHorizontalField = type === 'checkbox' || type === 'switch'
 
   return (
-    <Field orientation={orientation} className={cn('gap-2', fieldClassName)}>
+    <Field className={cn('gap-2', isHorizontalField ? '' : fieldClassName)}>
       {/* Label */}
-      {label && !isCheckbox && (
+      {label && !isHorizontalField && (
         <FieldLabel htmlFor={name} className={cn('text-xs font-normal leading-tight gap-0', labelClassName)}>
           {label}
           {rules?.required && <span className='text-sm leading-none text-red-500'>*</span>}
@@ -72,7 +71,36 @@ const CustomFormField = <T extends FieldValues>({
       )}
 
       <div>
-        {type === 'combobox' ? (
+        {type === 'switch' ? (
+          <SwitchField
+            name={name}
+            label={label}
+            value={value}
+            rules={rules}
+            control={control}
+            onChange={onChange}
+            onBlur={onBlur}
+            disabled={disabled}
+            className={className}
+            fieldClassName={fieldClassName}
+            labelClassName={labelClassName}
+          />
+        ) : type === 'checkbox' ? (
+          <CheckboxField
+            name={name}
+            label={label}
+            value={value}
+            rules={rules}
+            control={control}
+            onChange={onChange}
+            onBlur={onBlur}
+            autoFocus={autoFocus}
+            disabled={disabled}
+            className={className}
+            fieldClassName={fieldClassName}
+            labelClassName={labelClassName}
+          />
+        ) : type === 'combobox' ? (
           <ComboboxField
             name={name}
             placeholder={placeholder}
@@ -146,20 +174,6 @@ const CustomFormField = <T extends FieldValues>({
             autoFocus={autoFocus}
             disabled={disabled}
             className={inputStyle}
-          />
-        ) : type === 'checkbox' ? (
-          <CheckboxField
-            name={name}
-            label={label}
-            value={value}
-            rules={rules}
-            control={control}
-            onChange={onChange}
-            onBlur={onBlur}
-            autoFocus={autoFocus}
-            disabled={disabled}
-            className={className}
-            labelClassName={labelClassName}
           />
         ) : type === 'datepicker' ? (
           <DatePicker

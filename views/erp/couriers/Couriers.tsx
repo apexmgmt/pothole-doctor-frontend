@@ -163,31 +163,26 @@ const Couriers: React.FC = () => {
     {
       id: 'name',
       header: 'Name',
-      cell: (row: Courier) => <span className='font-medium'>{row.name}</span>,
+      cell: (row: Courier) => <span>{row.name}</span>,
       sortable: true
     },
     {
       id: 'email',
       header: 'Email',
-      cell: (row: Courier) => <span className='font-medium'>{row.email}</span>,
+      cell: (row: Courier) => <span>{row.email}</span>,
       sortable: true
     },
     {
       id: 'contact_number',
       header: 'Contact Number',
-      cell: (row: Courier) => <span className='font-medium'>{row.contact_number}</span>,
+      cell: (row: Courier) => <span>{row.contact_number}</span>,
       sortable: false
     },
     {
       id: 'website',
       header: 'Website',
       cell: (row: Courier) => (
-        <a
-          href={row.website}
-          target='_blank'
-          rel='noopener noreferrer'
-          className='font-medium text-blue-600 hover:underline'
-        >
+        <a href={row.website} target='_blank' rel='noopener noreferrer' className='text-blue-600 hover:underline'>
           {row.website}
         </a>
       ),
@@ -196,7 +191,7 @@ const Couriers: React.FC = () => {
     {
       id: 'fax',
       header: 'Fax',
-      cell: (row: Courier) => <span className='font-medium'>{row.fax}</span>,
+      cell: (row: Courier) => <span>{row.fax}</span>,
       sortable: false
     },
     {
