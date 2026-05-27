@@ -80,6 +80,7 @@ const CreateOrEditInvoiceModal = ({
 
   const {
     control,
+    setValue,
     register,
     formState: { errors }
   } = form
@@ -286,6 +287,9 @@ const CreateOrEditInvoiceModal = ({
               label: type.name,
               value: type.id
             }))}
+            onChange={() => {
+              setValue('interaction', 'cash_and_pickup')
+            }}
             control={control}
             errors={errors}
             fieldClassName={fieldStyle}
@@ -317,166 +321,6 @@ const CreateOrEditInvoiceModal = ({
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}
           />
-
-          {/* Material Only: Interaction */}
-          {isMaterialOnly && (
-            <FormField
-              control={form.control}
-              name='interaction'
-              rules={{ required: 'Interaction type is required' }}
-              render={({ field }) => (
-                <FormItem className={`sm:col-span-2 py-3 ${fieldStyle}`}>
-                  <FormLabel className={`text-xs ${labelStyle}`}>
-                    Interaction <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      value={field.value ?? ''}
-                      onValueChange={value => {
-                        field.onChange(value)
-                        form.setValue('pickup_date', '')
-                        form.setValue('pickup_location_id', '')
-                        form.setValue('pickup_notes', '')
-                        form.setValue('delivery_datetime', null)
-                        form.setValue('delivery_location', '')
-                        form.setValue('delivery_notes', '')
-                      }}
-                      className='flex flex-row gap-6'
-                    >
-                      <div className='flex items-center space-x-2'>
-                        <RadioGroupItem value='cash_and_pickup' id='inv_cash_and_pickup' />
-                        <label
-                          htmlFor='inv_cash_and_pickup'
-                          className='text-sm font-medium leading-none cursor-pointer'
-                        >
-                          Cash and Pickup
-                        </label>
-                      </div>
-                      <div className='flex items-center space-x-2'>
-                        <RadioGroupItem value='cash_and_delivery' id='inv_cash_and_delivery' />
-                        <label
-                          htmlFor='inv_cash_and_delivery'
-                          className='text-sm font-medium leading-none cursor-pointer'
-                        >
-                          Cash and Delivery
-                        </label>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-          {/* Cash and Pickup sub-fields */}
-          {isMaterialOnly && interactionValue === 'cash_and_pickup' && (
-            <>
-              <CustomFormField
-                name='pickup_date'
-                label='Date of Pickup'
-                type='datepicker'
-                placeholder='Select pickup date'
-                rules={{ required: 'Date of pickup is required' }}
-                control={control}
-                errors={errors}
-                fieldClassName={fieldStyle}
-                labelClassName={labelStyle}
-              />
-
-              <CustomFormField
-                name='pickup_location_id'
-                label='Pickup Location'
-                type='select'
-                placeholder='Select pickup location'
-                rules={{ required: 'Pickup location is required' }}
-                selectOptions={businessLocations.map(loc => ({
-                  label: loc.name,
-                  value: loc.id
-                }))}
-                control={control}
-                errors={errors}
-                fieldClassName={fieldStyle}
-                labelClassName={labelStyle}
-              />
-
-              <CustomFormField
-                name='pickup_notes'
-                label='Notes'
-                type='textarea'
-                placeholder='Enter notes...'
-                register={register}
-                errors={errors}
-                fieldClassName={`sm:col-span-2 ${fieldStyle}`}
-                labelClassName={labelStyle}
-              />
-            </>
-          )}
-
-          {/* Cash and Delivery sub-fields */}
-          {isMaterialOnly && interactionValue === 'cash_and_delivery' && (
-            <>
-              <FormField
-                control={form.control}
-                name='delivery_datetime'
-                rules={{ required: 'Date & time of delivery is required' }}
-                render={({ field }) => (
-                  <FormItem className={fieldStyle}>
-                    <FormLabel className={`text-xs ${labelStyle}`}>
-                      Date &amp; Time of Delivery <span className='text-red-500'>*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <DateTimePicker
-                        value={
-                          typeof field.value === 'number'
-                            ? field.value
-                            : field.value
-                              ? new Date((field.value as string).replace(' ', 'T')).getTime()
-                              : null
-                        }
-                        onChange={val => {
-                          if (val === null) {
-                            field.onChange(null)
-                          } else {
-                            const d = new Date(val)
-                            const pad = (n: number) => String(n).padStart(2, '0')
-                            const formatted = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
-
-                            field.onChange(formatted)
-                          }
-                        }}
-                        placeholder='Select delivery date & time'
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <CustomFormField
-                name='delivery_location'
-                label='Delivery Location'
-                placeholder='Enter delivery location'
-                rules={{ required: 'Delivery location is required' }}
-                register={register}
-                errors={errors}
-                fieldClassName={fieldStyle}
-                labelClassName={labelStyle}
-              />
-
-              <CustomFormField
-                name='delivery_notes'
-                label='Notes'
-                type='textarea'
-                placeholder='Enter notes...'
-                register={register}
-                control={control}
-                errors={errors}
-                fieldClassName={`sm:col-span-2 ${fieldStyle}`}
-                labelClassName={labelStyle}
-              />
-            </>
-          )}
 
           {/* Business Location */}
           <CustomFormField
@@ -585,6 +429,172 @@ const CreateOrEditInvoiceModal = ({
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}
           />
+
+          {/* Material Only: Interaction */}
+          {isMaterialOnly && (
+            <>
+              <FormField
+                control={form.control}
+                name='interaction'
+                rules={{ required: 'Interaction type is required' }}
+                render={({ field }) => (
+                  <FormItem className={`sm:col-span-2 py-3 ${fieldStyle}`}>
+                    <FormLabel className={`text-xs data-[error=true]:text-card-foreground ${labelStyle}`}>
+                      Interaction <span className='text-red-500'>*</span>
+                    </FormLabel>
+                    <div>
+                      <FormControl>
+                        <RadioGroup
+                          value={field.value ?? ''}
+                          onValueChange={value => {
+                            field.onChange(value)
+                            form.setValue('pickup_date', '')
+                            form.setValue('pickup_location_id', '')
+                            form.setValue('pickup_notes', '')
+                            form.setValue('delivery_datetime', null)
+                            form.setValue('delivery_location', '')
+                            form.setValue('delivery_notes', '')
+                          }}
+                          className='flex flex-row gap-6'
+                        >
+                          <div className='flex items-center space-x-2'>
+                            <RadioGroupItem value='cash_and_pickup' id='inv_cash_and_pickup' />
+                            <label
+                              htmlFor='inv_cash_and_pickup'
+                              className='text-sm font-medium leading-none cursor-pointer'
+                            >
+                              Cash and Pickup
+                            </label>
+                          </div>
+                          <div className='flex items-center space-x-2'>
+                            <RadioGroupItem value='cash_and_delivery' id='inv_cash_and_delivery' />
+                            <label
+                              htmlFor='inv_cash_and_delivery'
+                              className='text-sm font-medium leading-none cursor-pointer'
+                            >
+                              Cash and Delivery
+                            </label>
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage className='mt-1.5' />
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {/* Cash and Pickup sub-fields */}
+              {interactionValue === 'cash_and_pickup' && (
+                <>
+                  <CustomFormField
+                    name='pickup_date'
+                    label='Date of Pickup'
+                    type='datepicker'
+                    placeholder='Select pickup date'
+                    rules={{ required: 'Date of pickup is required' }}
+                    control={control}
+                    errors={errors}
+                    fieldClassName={fieldStyle}
+                    labelClassName={labelStyle}
+                  />
+
+                  <CustomFormField
+                    name='pickup_location_id'
+                    label='Pickup Location'
+                    type='select'
+                    placeholder='Select pickup location'
+                    rules={{ required: 'Pickup location is required' }}
+                    selectOptions={businessLocations.map(loc => ({
+                      label: loc.name,
+                      value: loc.id
+                    }))}
+                    control={control}
+                    errors={errors}
+                    fieldClassName={fieldStyle}
+                    labelClassName={labelStyle}
+                  />
+
+                  <CustomFormField
+                    name='pickup_notes'
+                    label='Notes'
+                    type='textarea'
+                    placeholder='Enter notes...'
+                    register={register}
+                    errors={errors}
+                    fieldClassName={`sm:col-span-2 ${fieldStyle}`}
+                    labelClassName={labelStyle}
+                  />
+                </>
+              )}
+
+              {/* Cash and Delivery sub-fields */}
+              {interactionValue === 'cash_and_delivery' && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name='delivery_datetime'
+                    rules={{ required: 'Date & time of delivery is required' }}
+                    render={({ field }) => (
+                      <FormItem className={fieldStyle}>
+                        <FormLabel className={`text-xs data-[error=true]:text-card-foreground ${labelStyle}`}>
+                          Date &amp; Time of Delivery <span className='text-red-500'>*</span>
+                        </FormLabel>
+                        <div>
+                          <FormControl>
+                            <DateTimePicker
+                              value={
+                                typeof field.value === 'number'
+                                  ? field.value
+                                  : field.value
+                                    ? new Date((field.value as string).replace(' ', 'T')).getTime()
+                                    : null
+                              }
+                              onChange={val => {
+                                if (val === null) {
+                                  field.onChange(null)
+                                } else {
+                                  const d = new Date(val)
+                                  const pad = (n: number) => String(n).padStart(2, '0')
+                                  const formatted = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+
+                                  field.onChange(formatted)
+                                }
+                              }}
+                              placeholder='Select delivery date & time'
+                            />
+                          </FormControl>
+                          <FormMessage className='mt-1.5' />
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+
+                  <CustomFormField
+                    name='delivery_location'
+                    label='Delivery Location'
+                    placeholder='Enter delivery location'
+                    rules={{ required: 'Delivery location is required' }}
+                    register={register}
+                    errors={errors}
+                    fieldClassName={fieldStyle}
+                    labelClassName={labelStyle}
+                  />
+
+                  <CustomFormField
+                    name='delivery_notes'
+                    label='Notes'
+                    type='textarea'
+                    placeholder='Enter notes...'
+                    register={register}
+                    control={control}
+                    errors={errors}
+                    fieldClassName={`sm:col-span-2 ${fieldStyle}`}
+                    labelClassName={labelStyle}
+                  />
+                </>
+              )}
+            </>
+          )}
         </form>
       </Form>
     </CommonDialog>

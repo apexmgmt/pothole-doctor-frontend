@@ -382,7 +382,7 @@ const CreateOrEditBusinessLocationModal = ({
         register={register}
         errors={errors}
         fieldClassName={isHorizontalField ? '' : fieldStyle}
-        labelClassName={isHorizontalField ? '' : labelStyle}
+        labelClassName={isHorizontalField ? 'text-xs' : labelStyle}
       />
     )
   }
@@ -415,7 +415,7 @@ const CreateOrEditBusinessLocationModal = ({
           <Separator />
 
           {/* Location Specific Branding Switch */}
-          <div>
+          <div className={groupStyle}>
             <div className='ps-27'>
               {renderFormField({
                 name: 'is_branding',
@@ -425,24 +425,13 @@ const CreateOrEditBusinessLocationModal = ({
             </div>
 
             {isBranding && (
-              <div className={`pt-4 ${groupStyle}`}>
-                {/* Website — only when branding is on */}
-                {renderFormField({
-                  name: 'website',
-                  type: 'text',
-                  label: 'Website',
-                  placeholder: 'Enter website URL',
-                  rules: {
-                    pattern: { value: /^(https?:\/\/)?.+\..+/, message: 'Invalid website URL' }
-                  }
-                })}
-
+              <>
                 {/* Logo Upload — only when branding is on */}
                 <FormField
                   control={control}
                   name='logo'
                   render={() => (
-                    <FormItem className={fieldStyle}>
+                    <FormItem className={`sm:row-span-2 ${fieldStyle}`}>
                       <FormLabel className={`text-xs ${labelStyle}`}>Logo</FormLabel>
                       <FormControl>
                         <div className='space-y-2'>
@@ -484,7 +473,18 @@ const CreateOrEditBusinessLocationModal = ({
                     </FormItem>
                   )}
                 />
-              </div>
+
+                {/* Website — only when branding is on */}
+                {renderFormField({
+                  name: 'website',
+                  type: 'text',
+                  label: 'Website',
+                  placeholder: 'Enter website URL',
+                  rules: {
+                    pattern: { value: /^(https?:\/\/)?.+\..+/, message: 'Invalid website URL' }
+                  }
+                })}
+              </>
             )}
           </div>
 

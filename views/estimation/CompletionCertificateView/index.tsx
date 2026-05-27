@@ -88,14 +88,14 @@ const CompletionCertificateView = ({ workOrder, service, completionCertificate, 
         {/* Customer Checklist and Payment */}
         <CertificateChecklistPayment
           ref={checklistRef}
-          total={workOrder?.invoice?.total ?? workOrder?.total ?? 0}
+          total={workOrder?.invoice?.total ?? workOrder?.invoice_total ?? 0}
           readOnly={!canShowSubmit}
           initialPaymentMethod={completionCertificate?.payment_method ?? workOrder.payment_method ?? null}
           initialPaymentMethodData={
             ((completionCertificate?.payment_method_data ?? workOrder.payment_method_data) as Record<string, any>) ??
             null
           }
-          initialAmountToCharge={completionCertificate?.amount_to_charge ?? workOrder?.total ?? 0}
+          initialAmountToCharge={completionCertificate?.amount_to_charge ?? workOrder?.invoice_total ?? 0}
           initialIsSatisfied={completionCertificate?.is_customer_satisfied ?? null}
           initialRating={completionCertificate?.customer_installation_scale_rate ?? null}
         />

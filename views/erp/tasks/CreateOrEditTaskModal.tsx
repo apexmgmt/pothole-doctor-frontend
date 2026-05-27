@@ -614,9 +614,12 @@ const CreateOrEditTaskModal = ({
             />
           </div>
 
-          <div className='ps-27'>
-            <TaskReminderFields form={form} taskReminderChannels={taskReminderChannels} />
-          </div>
+          <TaskReminderFields
+            form={form}
+            taskReminderChannels={taskReminderChannels}
+            fieldStyle={fieldStyle}
+            labelStyle={labelStyle}
+          />
 
           <CustomFormField
             name='location'
