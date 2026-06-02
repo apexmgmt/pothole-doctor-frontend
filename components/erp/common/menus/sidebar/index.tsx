@@ -267,7 +267,7 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           ],
           exactMatch: false,
           permissions: ['Manage Product', 'Manage Work Order']
-        },
+        }
       ],
       exactMatch: true,
       permissions: ['Manage Product', 'Manage Work Order']
@@ -469,14 +469,15 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
           hasSubItems: true,
           subItems: [
             {
-          id: 'product-categories',
-          label: 'Product Categories',
-          href: '/erp/settings/product-categories',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: true,
-          permissions: ['Manage Category']
-        },{
+              id: 'product-categories',
+              label: 'Product Categories',
+              href: '/erp/settings/product-categories',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: true,
+              permissions: ['Manage Category']
+            },
+            {
               id: 'interest-levels',
               label: 'Interest Levels',
               href: '/erp/settings/interest-levels',
@@ -484,30 +485,30 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
               hasSubItems: false,
               exactMatch: true,
               permissions: ['Manage Interest Level']
+            },
+            {
+              id: 'uom-units',
+              label: 'Uom Units',
+              href: '/erp/settings/uom-units',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: false,
+              permissions: ['Manage Unit']
+            },
+            {
+              id: 'measure-units',
+              label: 'Measure Units',
+              href: '/erp/settings/measure-units',
+              icon: <LocateIcon className='h-4 w-4' />,
+              hasSubItems: false,
+              exactMatch: false,
+              permissions: ['Manage Unit']
             }
           ],
           exactMatch: false,
-          permissions: ['Manage Lead Interest', 'Manage Category']
+          permissions: ['Manage Lead Interest', 'Manage Category', 'Manage Unit']
         },
 
-        {
-          id: 'uom-units',
-          label: 'Uom Units',
-          href: '/erp/settings/uom-units',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: false,
-          permissions: ['Manage Unit']
-        },
-        {
-          id: 'measure-units',
-          label: 'Measure Units',
-          href: '/erp/settings/measure-units',
-          icon: <LocateIcon className='h-4 w-4' />,
-          hasSubItems: false,
-          exactMatch: false,
-          permissions: ['Manage Unit']
-        },
         {
           id: 'service-types',
           label: 'Service Types',
@@ -543,7 +544,13 @@ const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user,
         'Manage Unit',
         'Manage Message Template',
         'Manage Task Reminder',
-        'Manage Service Type'
+        'Manage Service Type',
+        'Manage Interest Level',
+        'Manage Category',
+        'Manage Staff',
+        'Manage Role',
+        'Manage Contractor',
+        'Manage Labor Cost',
       ]
     }
   ]
