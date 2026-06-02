@@ -40,26 +40,42 @@ const LoginActivitySection = () => {
   const handleLogoutAllDevices = async () => {
     setIsLoading(true)
 
+    if (activities) {
+      setActivities({
+        ...activities,
+        previous_activity: []
+      })
+    }
+
     try {
       await AuthService.logoutAllDevices()
       toast.success('Logged out from all devices successfully')
       fetchActivities()
     } catch (error: any) {
       toast.error(error?.message || 'Failed to logout from all devices')
+      fetchActivities()
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleEndSession = async (sessionId: string) => {
-    setEndingSessionId(sessionId)
+  const handleEndSession = async (tokenId: string) => {
+    setEndingSessionId(tokenId)
+
+    if (activities) {
+      setActivities({
+        ...activities,
+        previous_activity: activities.previous_activity.filter(a => a.token_id !== tokenId)
+      })
+    }
 
     try {
-      await AuthService.endSession(sessionId)
+      await AuthService.endSession(tokenId)
       toast.success('Session ended successfully')
       fetchActivities()
     } catch (error: any) {
       toast.error(error?.message || 'Failed to end session')
+      fetchActivities()
     } finally {
       setEndingSessionId(null)
     }
@@ -72,14 +88,21 @@ const LoginActivitySection = () => {
 
   const getTimeAgo = (dateString: string) => {
     try {
-      return formatDistanceToNow(new Date(dateString), { addSuffix: true })
+      let utcString = dateString
+
+      // Append 'Z' to treat as UTC if no timezone is provided
+      if (!utcString.endsWith('Z') && !utcString.match(/[+-]\d{2}:?\d{2}$/)) {
+        utcString = utcString.replace(' ', 'T') + 'Z'
+      }
+
+      return formatDistanceToNow(new Date(utcString), { addSuffix: true })
     } catch {
       return 'Unknown'
     }
   }
 
   const renderActivityCard = (activity: LoginActivity, isCurrent = false, index?: number) => (
-    <div key={activity.login_at + index} className='bg-bg-3 rounded-lg border border-border p-4 space-y-3'>
+    <div key={activity.token_id} className='bg-bg-3 rounded-lg border border-border p-4 space-y-3'>
       <div className='flex items-center justify-between'>
         <h4 className='text-sm font-medium text-light'>
           {isCurrent ? 'Current Session' : `Other active session ${index !== undefined ? `#${index + 1}` : ''}`}
@@ -88,11 +111,11 @@ const LoginActivitySection = () => {
           <Button
             variant='ghost'
             size='sm'
-            onClick={() => handleEndSession(activity.login_at)}
-            disabled={endingSessionId === activity.login_at}
+            onClick={() => handleEndSession(activity.token_id)}
+            disabled={endingSessionId === activity.token_id}
             className='text-primary hover:text-primary'
           >
-            {endingSessionId === activity.login_at ? (
+            {endingSessionId === activity.token_id ? (
               <>
                 <Loader2 className='h-4 w-4 mr-1 animate-spin' />
                 Ending...
@@ -108,7 +131,7 @@ const LoginActivitySection = () => {
         <div className='flex flex-col min-[450px]:flex-row items-start gap-1 min-[450px]:gap-3'>
           <span className='text-gray w-32'>Last accessed:</span>
           <Badge variant='default' className='bg-light text-bg capitalize'>
-            {getTimeAgo(activity.login_at)}
+            {getTimeAgo(activity.last_used_at ?? activity.login_at)}
           </Badge>
         </div>
 
@@ -157,7 +180,7 @@ const LoginActivitySection = () => {
             size='sm'
             onClick={handleLogoutAllDevices}
             disabled={isLoading}
-            className='py-2.5 px-3 h-auto bg-light text-bg hover:text-bg hover:bg-light/90 border-border'
+            className='bg-light text-bg hover:text-bg hover:bg-light/90 border-border'
           >
             {isLoading ? (
               <>
