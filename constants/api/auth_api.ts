@@ -20,8 +20,14 @@ export const PROFILE_UPDATE: string = '/v1/profile-update' // PUT
 export const PROFILE_UPDATE_TENANT: string = '/v1/tenant/profile-update' // PUT
 export const PROFILE_CHANGE_PASSWORD: string = '/v1/change-password' // POST
 export const PROFILE_CHANGE_PASSWORD_TENANT: string = '/v1/tenant/change-password' // POST
-export const PROFILE_LAST_ACTIVITY: string = '/v1/last-activity' // GET
-export const PROFILE_LAST_ACTIVITY_TENANT: string = '/v1/tenant/last-activity' // GET
+
+/**
+ * GET: Last activities of auth user
+ * DELETE: Delete auth user last activity {id}
+ * DELETE: Delete all auth user last activities
+ */
+export const PROFILE_LAST_ACTIVITY: string = '/v1/last-activity/'
+export const PROFILE_LAST_ACTIVITY_TENANT: string = '/v1/tenant/last-activity/'
 
 export const IMPERSONATE: string = '/v1/auth/impersonate/' // POST + {user_id}
 
@@ -31,8 +37,8 @@ export const IMPERSONATE: string = '/v1/auth/impersonate/' // POST + {user_id}
  * @method POST {email}
  * @returns string - isTenant ? '/v1/tenant/auth/forgot-password' : '/v1/auth/forgot-password'
  */
-export const FORGOT_PASSWORD = (isTenant:boolean = false): string => {
-    return isTenant ? '/v1/tenant/auth/forgot-password' : '/v1/auth/forgot-password'
+export const FORGOT_PASSWORD = (isTenant: boolean = false): string => {
+  return isTenant ? '/v1/tenant/auth/forgot-password' : '/v1/auth/forgot-password'
 }
 
 /**
@@ -42,7 +48,7 @@ export const FORGOT_PASSWORD = (isTenant:boolean = false): string => {
  * @returns string - isTenant ? '/v1/tenant/auth/verify-forgot-password-otp' : '/v1/auth/verify-forgot-password-otp'
  */
 export const VERIFY_FORGOT_PASSWORD_OTP = (isTenant: boolean = false): string => {
-    return isTenant ? '/v1/tenant/auth/verify-forgot-password-otp' : '/v1/auth/verify-forgot-password-otp'
+  return isTenant ? '/v1/tenant/auth/verify-forgot-password-otp' : '/v1/auth/verify-forgot-password-otp'
 }
 
 /**
@@ -52,5 +58,5 @@ export const VERIFY_FORGOT_PASSWORD_OTP = (isTenant: boolean = false): string =>
  * @returns string - isTenant ? '/v1/tenant/auth/reset-password' : '/v1/auth/reset-password'
  */
 export const RESET_PASSWORD = (isTenant: boolean = false): string => {
-    return isTenant ? '/v1/tenant/auth/reset-password' : '/v1/auth/reset-password'
+  return isTenant ? '/v1/tenant/auth/reset-password' : '/v1/auth/reset-password'
 }
