@@ -6,9 +6,8 @@ import { toast } from 'sonner'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
+import { Form } from '@/components/ui/form'
+import CustomFormField from '@/components/form/CustomFormField'
 import { Client } from '@/types'
 import ClientSmsService from '@/services/api/clients/client-sms.service'
 
@@ -61,6 +60,9 @@ const CreateOrEditSmsModal: React.FC<{
     onClose()
   }
 
+  const fieldStyle = 'grid grid-cols-[100px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
+
   return (
     <CommonDialog
       open={isOpen}
@@ -94,37 +96,29 @@ const CreateOrEditSmsModal: React.FC<{
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <FormField
-            control={form.control}
+          <CustomFormField
+            type='text'
+            register={form.register}
             name='to'
+            label='To'
+            placeholder='Recipient phone number'
             rules={{ required: 'Recipient phone number is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  To <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Recipient phone number' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          <FormField
-            control={form.control}
+          <CustomFormField
+            type='textarea'
+            register={form.register}
             name='message'
+            label='Message'
+            placeholder='Type your message here...'
             rules={{ required: 'Message is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Message <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Textarea rows={4} placeholder='Type your message here...' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
         </form>
       </Form>
