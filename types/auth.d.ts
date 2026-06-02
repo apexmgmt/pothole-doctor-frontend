@@ -21,7 +21,9 @@ export interface LoginActivities {
 }
 
 export interface LoginActivity {
+  token_id: string
   login_at: string
+  last_used_at?: string
   type: string
   device_type: string
   device_name: string
