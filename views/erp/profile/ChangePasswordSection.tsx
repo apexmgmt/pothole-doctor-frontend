@@ -231,7 +231,7 @@ const ChangePasswordSection = () => {
               variant='outline'
               size='sm'
               disabled={isLoading}
-              className='py-2.5 px-3 inline-block h-auto leading-[1] bg-light text-bg hover:text-bg hover:bg-light/90 border-border'
+              className='inline-block leading-[1] bg-light text-bg hover:text-bg hover:bg-light/90 border-border'
             >
               {isLoading ? 'Updating...' : 'Change Password'}
             </Button>
