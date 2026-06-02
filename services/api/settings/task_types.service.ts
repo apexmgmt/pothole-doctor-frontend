@@ -46,7 +46,7 @@ export default class TaskTypeService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create task type')
+        throw errorData
       }
 
       await revalidate('task-types')
@@ -95,7 +95,7 @@ export default class TaskTypeService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update task type')
+        throw errorData
       }
 
       await revalidate('task-types')
