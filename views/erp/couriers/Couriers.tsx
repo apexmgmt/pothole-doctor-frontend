@@ -183,20 +183,29 @@ const Couriers: React.FC = () => {
         const response = await CourierService.store(values)
         const createdCourier = response?.data as Courier | undefined
 
-        if (createdCourier) {
-          setApiResponse(prev => {
-            if (!prev) {
-              return prev
-            }
+        setApiResponse(prev => {
+          if (!prev || !createdCourier) {
+            return prev
+          }
 
-            return {
-              ...prev,
-              data: [createdCourier, ...(prev.data || [])],
-              total: (prev.total || 0) + 1,
-              to: Math.min((prev.to || 0) + 1, (prev.total || 0) + 1)
-            }
-          })
-        } else {
+          const perPage = prev.per_page || 10
+          const updatedTotal = (prev.total || 0) + 1
+          const nextData = [createdCourier, ...(prev.data || [])].slice(0, perPage)
+
+          return {
+            ...prev,
+            data: nextData,
+            total: updatedTotal,
+            from: 1,
+            to: nextData.length,
+            current_page: 1,
+            last_page: Math.max(1, Math.ceil(updatedTotal / perPage))
+          }
+        })
+
+        goToFirstPage()
+
+        if (!createdCourier) {
           fetchData()
         }
 
@@ -268,6 +277,16 @@ const Couriers: React.FC = () => {
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
     return filterKeys.length > 0
+  }
+
+  const goToFirstPage = () => {
+    setFilterOptions((prev: any) => {
+      const next = { ...prev }
+
+      delete next.page
+
+      return next
+    })
   }
 
   const tableRows: Courier[] =
