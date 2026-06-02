@@ -48,7 +48,7 @@ export default class ServiceTypeService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create service types')
+        throw errorData
       }
 
       await revalidate('service-types')
@@ -102,7 +102,7 @@ export default class ServiceTypeService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update service types')
+        throw errorData
       }
 
       await revalidate('service-types')
