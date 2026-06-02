@@ -6,9 +6,8 @@ import { toast } from 'sonner'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
+import { Form } from '@/components/ui/form'
+import CustomFormField from '@/components/form/CustomFormField'
 import { ClientContact, ClientContactPayload, CountryWithStates } from '@/types'
 
 import ClientContactService from '@/services/api/clients/client-contacts.service'
@@ -144,6 +143,9 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
     onClose()
   }
 
+  const fieldStyle = 'grid grid-cols-[100px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
+
   return (
     <CommonDialog
       open={isOpen}
@@ -186,190 +188,121 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <FormField
-            control={form.control}
+          <CustomFormField
+            type='text'
+            register={form.register}
             name='name'
+            label='Name'
+            placeholder='Full name'
             rules={{ required: 'Name is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Name <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Full name' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-            <FormField
-              control={form.control}
-              name='email'
-              rules={{
-                required: 'Email is required',
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Invalid email address'
-                }
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Email <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input type='email' placeholder='Email' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='phone'
-              rules={{
-                required: 'Phone is required',
-                pattern: {
-                  value: /^[0-9+\-() ]+$/,
-                  message: 'Invalid phone number'
-                }
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Phone <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input type='tel' placeholder='Phone' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <FormField
-            control={form.control}
+          {/* <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'> */}
+          <CustomFormField
+            type='email'
+            register={form.register}
+            name='email'
+            label='Email'
+            placeholder='Email'
+            rules={{
+              required: 'Email is required',
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: 'Invalid email address'
+              }
+            }}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+          />
+          <CustomFormField
+            type='tel'
+            register={form.register}
+            name='phone'
+            label='Phone'
+            placeholder='Phone'
+            rules={{
+              required: 'Phone is required',
+              pattern: {
+                value: /^[0-9+\-() ]+$/,
+                message: 'Invalid phone number'
+              }
+            }}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+          />
+          {/* </div> */}
+          <CustomFormField
+            type='text'
+            register={form.register}
             name='address'
+            label='Address'
+            placeholder='Address'
             rules={{ required: 'Address is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Address <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Address' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
-            {/* Country */}
-            <FormField
-              control={form.control}
-              name='country_id'
-              rules={{ required: 'Country is required' }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Country <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select a country' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {countriesWithStatesAndCities.map(country => (
-                        <SelectItem key={country.id} value={country.id.toString()}>
-                          {country.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* State */}
-            <FormField
-              control={form.control}
-              name='state_id'
-              rules={{ required: 'State is required' }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    State <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={!selectedCountryId || availableStates.length === 0}
-                  >
-                    <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select a state' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {availableStates.length === 0 ? (
-                        <div className='px-2 py-1.5 text-sm text-muted-foreground'>
-                          {!selectedCountryId ? 'Please select a country first' : 'No states available'}
-                        </div>
-                      ) : (
-                        availableStates.map(state => (
-                          <SelectItem key={state.id} value={state.id.toString()}>
-                            {state.name}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* City */}
-            <FormField
-              control={form.control}
-              name='city_id'
-              rules={{ required: 'City is required' }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    City <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={!selectedStateId || availableCities.length === 0}
-                  >
-                    <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select a city' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {availableCities.length === 0 ? (
-                        <div className='px-2 py-1.5 text-sm text-muted-foreground'>
-                          {!selectedStateId ? 'Please select a state first' : 'No cities available'}
-                        </div>
-                      ) : (
-                        availableCities.map(city => (
-                          <SelectItem key={city.id} value={city.id.toString()}>
-                            {city.name}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          {/* <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'> */}
+          {/* Country */}
+          <CustomFormField
+            type='select'
+            control={form.control}
+            name='country_id'
+            label='Country'
+            placeholder='Select a country'
+            rules={{ required: 'Country is required' }}
+            selectOptions={countriesWithStatesAndCities.map(country => ({
+              label: country.name,
+              value: country.id.toString()
+            }))}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+          />
+          {/* State */}
+          <CustomFormField
+            type='select'
+            control={form.control}
+            name='state_id'
+            label='State'
+            placeholder={!selectedCountryId ? 'Select country first' : 'Select a state'}
+            rules={{ required: 'State is required' }}
+            selectOptions={availableStates.map(state => ({
+              label: state.name,
+              value: state.id.toString()
+            }))}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting || !selectedCountryId || availableStates.length === 0}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+          />
+          {/* City */}
+          <CustomFormField
+            type='select'
+            control={form.control}
+            name='city_id'
+            label='City'
+            placeholder={!selectedStateId ? 'Select state first' : 'Select a city'}
+            rules={{ required: 'City is required' }}
+            selectOptions={availableCities.map(city => ({
+              label: city.name,
+              value: city.id.toString()
+            }))}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting || !selectedStateId || availableCities.length === 0}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+          />
+          {/* </div> */}
           {/* <FormField
             control={form.control}
             name='zip_code'
