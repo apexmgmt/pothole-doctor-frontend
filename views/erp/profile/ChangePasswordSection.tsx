@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 
 import { useRouter } from 'next/navigation'
+import { Check } from 'lucide-react'
 
 import { useForm } from 'react-hook-form'
 
@@ -14,9 +15,7 @@ import { Button } from '@/components/ui/button'
 import AuthService from '@/services/api/auth.service'
 import { ProfileChangePasswordPayload } from '@/types'
 import { EyeOpenIcon, EyeCloseIcon } from '@/public/icons'
-import CookieService from '@/services/app/cookie.service'
 import { useAppDispatch } from '@/lib/hooks'
-import { logoutUserSuccess } from '@/lib/features/auth/authSlice'
 
 interface FormValues {
   current_password: string
@@ -39,6 +38,12 @@ const ChangePasswordSection = () => {
       confirm_password: ''
     }
   })
+
+  const newPassword = form.watch('new_password') || ''
+  const hasMinLength = newPassword.length >= 8
+  const hasLowerAndUpper = /(?=.*[a-z])(?=.*[A-Z])/.test(newPassword)
+  const hasNumber = /(?=.*\d)/.test(newPassword)
+  const hasSymbol = /(?=.*[@$!%*?&\s])/.test(newPassword)
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true)
@@ -192,10 +197,30 @@ const ChangePasswordSection = () => {
           <div className='mt-6'>
             <h4 className='text-sm font-medium text-light mb-3'>Password Requirements</h4>
             <ul className='space-y-2 text-sm text-gray'>
-              <li>• Minimum 8 characters long - the more, the better</li>
-              <li>• At least one lowercase & one uppercase character</li>
-              <li>• At least one number</li>
-              <li>• At least one symbol or whitespace character</li>
+              <li className={`flex items-center gap-2 ${hasMinLength ? 'text-green-500' : ''}`}>
+                {hasMinLength ? (
+                  <Check className='w-4 h-4 text-green-500' />
+                ) : (
+                  <span className='w-4 text-center'>•</span>
+                )}{' '}
+                Minimum 8 characters long - the more, the better
+              </li>
+              <li className={`flex items-center gap-2 ${hasLowerAndUpper ? 'text-green-500' : ''}`}>
+                {hasLowerAndUpper ? (
+                  <Check className='w-4 h-4 text-green-500' />
+                ) : (
+                  <span className='w-4 text-center'>•</span>
+                )}{' '}
+                At least one lowercase & one uppercase character
+              </li>
+              <li className={`flex items-center gap-2 ${hasNumber ? 'text-green-500' : ''}`}>
+                {hasNumber ? <Check className='w-4 h-4 text-green-500' /> : <span className='w-4 text-center'>•</span>}{' '}
+                At least one number
+              </li>
+              <li className={`flex items-center gap-2 ${hasSymbol ? 'text-green-500' : ''}`}>
+                {hasSymbol ? <Check className='w-4 h-4 text-green-500' /> : <span className='w-4 text-center'>•</span>}{' '}
+                At least one symbol or whitespace character
+              </li>
             </ul>
           </div>
 
