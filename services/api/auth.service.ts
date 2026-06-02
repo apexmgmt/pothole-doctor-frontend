@@ -252,38 +252,61 @@ export default class AuthService {
     }
   }
 
-  static endSession = async (sessionId: string) => {
-    // try {
-    //   const apiUrl: string = await getApiUrl()
-    //   const response = await apiInterceptor(apiUrl + PROFILE_END_SESSION.replace(':id', sessionId), {
-    //     requiresAuth: true,
-    //     method: 'DELETE'
-    //   })
-    //   if (!response.ok) {
-    //     const errorData = await response.json()
-    //     throw new Error(errorData.message || 'Failed to end session')
-    //   }
-    //   return await response.json()
-    // } catch (error) {
-    //   throw error
-    // }
+  /**
+   * End session by token ID
+   * @param tokenId string - token ID to end
+   * @returns Promise<any>
+   */
+  static endSession = async (tokenId: string) => {
+    try {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PROFILE_LAST_ACTIVITY_TENANT : PROFILE_LAST_ACTIVITY) + tokenId,
+        {
+          requiresAuth: true,
+          method: 'DELETE'
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to end session')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
   }
 
+  /**
+   * Logout from all devices
+   * @returns Promise<any>
+   */
   static logoutAllDevices = async () => {
-    // try {
-    //   const apiUrl: string = await getApiUrl()
-    //   const response = await apiInterceptor(apiUrl + PROFILE_LOGOUT_ALL_DEVICES, {
-    //     requiresAuth: true,
-    //     method: 'POST'
-    //   })
-    //   if (!response.ok) {
-    //     const errorData = await response.json()
-    //     throw new Error(errorData.message || 'Failed to logout from all devices')
-    //   }
-    //   return await response.json()
-    // } catch (error) {
-    //   throw error
-    // }
+    try {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PROFILE_LAST_ACTIVITY_TENANT : PROFILE_LAST_ACTIVITY),
+        {
+          requiresAuth: true,
+          method: 'DELETE'
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to logout from all devices')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
   }
 
   /**
