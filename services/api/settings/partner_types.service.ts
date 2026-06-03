@@ -52,7 +52,7 @@ export default class PartnerTypesService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create partner types')
+        throw errorData
       }
 
       await revalidate('partner-types')
@@ -107,7 +107,7 @@ export default class PartnerTypesService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update partner types')
+        throw errorData
       }
 
       await revalidate('partner-types')
