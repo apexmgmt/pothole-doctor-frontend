@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { useForm } from 'react-hook-form'
+import { Path, RegisterOptions, useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
@@ -21,6 +21,8 @@ import { QrCodeSection } from '../CreateEditViewProductModal/QrCodeSection'
 import { BarCodeSection } from '../CreateEditViewProductModal/BarCodeSection'
 import { ProductGallerySection } from '../CreateEditViewProductModal/ProductGallerySection'
 import ProductGalleryService from '@/services/api/products/product-galleries.service'
+import { InputType, SelectOption } from '@/components/form/fields/types'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface CreateEditViewNonInventoryProductModalProps extends ProductsProps {
   mode?: 'create' | 'edit' | 'view'
@@ -68,6 +70,16 @@ interface FormValues {
   comments: string
   status: number
   sku: string
+}
+
+export type FormFieldType = {
+  name: Path<FormValues>
+  type?: InputType
+  label?: string
+  placeholder?: string
+  rules?: RegisterOptions<FormValues, Path<FormValues>>
+  selectOptions?: SelectOption[]
+  onChange?: (value: any) => void
 }
 
 const defaultValues: FormValues = {
@@ -126,6 +138,12 @@ const CreateEditViewNonInventoryProductModal = ({
   const [isLoadingGalleries, setIsLoadingGalleries] = useState<boolean>(false)
 
   const form = useForm<FormValues>({ defaultValues })
+
+  const {
+    register,
+    control,
+    formState: { errors }
+  } = form
 
   // Fetch galleries when in edit or view mode
   const fetchGalleries = async (prodId: string) => {
@@ -316,6 +334,26 @@ const CreateEditViewNonInventoryProductModal = ({
     }
   }
 
+  const fieldStyle = 'grid grid-cols-[116px_minmax(100px,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
+
+  const renderFormField = (field: FormFieldType) => {
+    const isHorizontalField = field.type === 'switch' || field.type === 'checkbox'
+
+    return (
+      <CustomFormField
+        key={field.name}
+        {...field}
+        register={register}
+        control={control}
+        errors={errors}
+        disabled={mode === 'view'}
+        fieldClassName={`${field?.label ? fieldStyle : ''} ${isHorizontalField ? '[&>button]:order-2 [&>label]:order-1' : ''}`}
+        labelClassName={labelStyle}
+      />
+    )
+  }
+
   return (
     <CommonDialog
       isLoading={isLoading}
@@ -371,18 +409,30 @@ const CreateEditViewNonInventoryProductModal = ({
                 vendors={vendors}
                 productCategories={productCategories}
                 serviceTypes={serviceTypes}
-                disabled={mode === 'view'}
+                renderFormField={renderFormField}
               />
             </div>
 
             {/* UOM and Properties */}
             <div className='space-y-4'>
               <h3 className='text-lg font-semibold'>UOM and Other Properties</h3>
-              <UOMFields form={form} uomUnits={uomUnits} disabled={mode === 'view'} />
+              <UOMFields
+                form={form}
+                uomUnits={uomUnits}
+                fieldStyle={fieldStyle}
+                labelStyle={labelStyle}
+                renderFormField={renderFormField}
+              />
               <Separator />
-              <PricingFields form={form} uomUnits={uomUnits} disabled={mode === 'view'} />
+              <PricingFields
+                form={form}
+                uomUnits={uomUnits}
+                fieldStyle={fieldStyle}
+                labelStyle={labelStyle}
+                renderFormField={renderFormField}
+              />
               <Separator />
-              <AdditionalInfoFields form={form} disabled={mode === 'view'} />
+              <AdditionalInfoFields form={form} renderFormField={renderFormField} />
             </div>
 
             {/* Gallery Section - Only show in edit/view mode */}
