@@ -22,6 +22,7 @@ import CommissionService from '@/services/api/settings/commissions.service'
 import CreateOrEditCommissionModal from './CreateOrEditCommissionModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { hasPermission } from '@/utils/role-permission'
+import { formatCurrency } from '@/utils/currency'
 
 const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionFilters, commissionBases }) => {
   const router = useRouter()
@@ -108,32 +109,6 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
     dispatch(setPageTitle('Manage Commissions'))
   }, [filterOptions])
 
-  // Transform API data to match table format
-  const commissionsData = apiResponse?.data
-    ? apiResponse.data.map((commission: any, index: number) => {
-        const typeObj = commissionTypes?.find(t => t.slug === commission?.commission_type)
-        const filterObj = commissionFilters?.find(f => f.slug === commission?.filter_type)
-        const baseObj = commissionBases?.find(b => b.slug === commission?.based_on)
-
-        return {
-          id: commission.id,
-          index: (apiResponse?.from || 1) + index,
-          commission_type: typeObj ? typeObj.name : commission?.commission_type,
-          based_on: baseObj ? baseObj.name : commission?.based_on,
-          per:
-            commission?.per?.replace(/-/g, ' ').replace(/\b\w/g, (char: string) => char.toUpperCase()) ||
-            commission?.per,
-          filter_type_value: filterObj ? filterObj.type : commission?.filter_type,
-          filter_type: commission?.filter_type,
-          amount: commission?.amount || 0,
-          min_amount: commission?.min_amount || 0,
-          max_amount: commission?.max_amount || 0,
-          commission_percent: commission?.commission_percent,
-          filter_percent: commission?.filter_percent
-        }
-      })
-    : []
-
   const handleOpenCreateModal = () => {
     setModalMode('create')
     setSelectedCommissionId(null)
@@ -172,56 +147,62 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
     {
       id: 'commission_type',
       header: 'Commission Name',
-      cell: row => <span>{row.commission_type}</span>,
+      cell: (row: Commission) => {
+        const typeObj = commissionTypes?.find(t => t.slug === row?.commission_type)
+
+        return <span>{typeObj ? typeObj.name : row?.commission_type}</span>
+      },
       sortable: true
     },
     {
       id: 'based_on',
       header: 'Based On',
-      cell: row => <span>{row.based_on}</span>,
+      cell: (row: Commission) => {
+        const baseObj = commissionBases?.find(b => b.slug === row?.based_on)
+
+        return <span>{baseObj ? baseObj.name : row?.based_on}</span>
+      },
       sortable: true
     },
     {
       id: 'per',
       header: 'Commission Per',
-      cell: row => <span>{row.per}</span>,
+      cell: (row: Commission) => (
+        <span>{row?.per?.replace(/-/g, ' ').replace(/\b\w/g, (char: string) => char.toUpperCase()) || row?.per}</span>
+      ),
       sortable: true
     },
     {
-      id: 'filter_type_value',
+      id: 'filter_type',
       header: 'Selection',
-      cell: row => <span>{row.filter_type_value}</span>,
+      cell: (row: Commission) => {
+        const filterObj = commissionFilters?.find(f => f.slug === row?.filter_type)
+
+        return <span>{filterObj ? filterObj.type : row?.filter_type}</span>
+      },
       sortable: false
     },
     {
       id: 'values',
       header: 'Values',
-      cell: row => {
+      cell: (row: Commission) => {
         switch (row.filter_type) {
           case 'between':
             return (
               <span>
-                {row.filter_percent ? '' : '$'}
-                {row.min_amount}
-                {row.filter_percent ? '%' : ''} - {row.filter_percent ? '' : '$'}
-                {row.max_amount}
-                {row.filter_percent ? '%' : ''}
+                {row.filter_percent ? `${row.min_amount}%` : formatCurrency(row.min_amount)} - {row.filter_percent ? `${row.max_amount}%` : formatCurrency(row.max_amount)}
               </span>
             )
           case 'greater-than':
             return (
               <span>
-                {row.filter_percent ? '' : '$'}
-                {row.min_amount}
-                {row.filter_percent ? '%' : ''}
+                {row.filter_percent ? `${row.min_amount}%` : formatCurrency(row.min_amount)}
               </span>
             )
           case 'less-than':
             return (
               <span>
-                {row.filter_percent ? '' : '$'}
-                {row.max_amount}
-                {row.filter_percent ? '%' : ''}
+                {row.filter_percent ? `${row.max_amount}%` : formatCurrency(row.max_amount)}
               </span>
             )
           case 'same-as-store':
@@ -235,11 +216,9 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
     {
       id: 'amount',
       header: 'Commission Value',
-      cell: row => (
+      cell: (row: Commission) => (
         <span>
-          {row.commission_percent ? '' : '$'}
-          {row.amount}
-          {row.commission_percent ? '%' : ''}
+          {row.commission_percent ? `${row.amount}%` : formatCurrency(row.amount)}
         </span>
       ),
       sortable: true
@@ -247,7 +226,7 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
     {
       id: 'actions',
       header: 'Action',
-      cell: row => (
+      cell: (row: Commission) => (
         <div className='flex items-center justify-center gap-2'>
           {(canEditCommission || canDeleteCommission) && (
             <ThreeDotButton
@@ -333,7 +312,6 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
         <Button
           variant='default'
           size='sm'
-          className='bg-light text-bg hover:bg-light/90'
           onClick={handleOpenCreateModal}
         >
           <PlusIcon className='w-4 h-4' />
@@ -348,7 +326,7 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
       <CommonLayout title='Commissions' noTabs={true}>
         <CommonTable
           data={{
-            data: commissionsData,
+            data: apiResponse?.data || [],
             per_page: apiResponse?.per_page || 10,
             total: apiResponse?.total || 0,
             from: apiResponse?.from || 1,
