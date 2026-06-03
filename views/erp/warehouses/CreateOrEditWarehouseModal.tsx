@@ -205,9 +205,9 @@ const CreateOrEditWarehouseModal = ({
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
           {/* Row 1 */}
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2'>
             <CustomFormField
               name='location_id'
               label='Accessible Locations'
@@ -243,7 +243,7 @@ const CreateOrEditWarehouseModal = ({
           </div>
 
           {/* Row 2 */}
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2'>
             <CustomFormField
               name='phone'
               label='Phone'
@@ -278,7 +278,7 @@ const CreateOrEditWarehouseModal = ({
           </div>
 
           {/* Row 3 */}
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2'>
             <CustomFormField
               name='fax_number'
               label='Fax Number'
@@ -291,7 +291,7 @@ const CreateOrEditWarehouseModal = ({
           </div>
 
           {/* Row 4 */}
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2'>
             <CustomFormField
               name='tax_rate'
               label='Tax Rate (%)'
@@ -311,7 +311,7 @@ const CreateOrEditWarehouseModal = ({
           <Separator />
 
           {/* Row 5 */}
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2'>
             <CustomFormField
               type='textarea'
               name='street'
@@ -338,7 +338,7 @@ const CreateOrEditWarehouseModal = ({
           </div>
 
           {/* Row 6 */}
-          <div className='grid grid-cols-1 lg:grid-cols-[1.3fr_1fr_1fr] gap-4'>
+          <div className='grid grid-cols-1 lg:grid-cols-[1.3fr_1fr_1fr] gap-x-4 gap-y-2'>
             <CustomFormField
               name='country_id'
               label='Country'

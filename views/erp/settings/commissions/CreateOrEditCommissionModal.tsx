@@ -237,7 +237,7 @@ const CreateOrEditCommissionModal = ({
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
           {/* Commission Name Field */}
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
             <CustomFormField
@@ -256,7 +256,7 @@ const CreateOrEditCommissionModal = ({
               labelClassName={labelStyle}
             />
           </div>
-          <Separator />
+          {/* <Separator /> */}
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
             {/* Based on Field */}
             <CustomFormField
