@@ -372,7 +372,7 @@ const CreateOrEditWarehouseModal = ({
               disabled={!selectedCountryId || availableStates.length === 0}
               control={control}
               errors={errors}
-              fieldClassName={`${fieldStyle} grid-cols-[78px_minmax(0,_1fr)]!`}
+              fieldClassName={`${fieldStyle} lg:grid-cols-[78px_minmax(0,_1fr)]!`}
               labelClassName={`${labelStyle}`}
             />
 
@@ -391,7 +391,7 @@ const CreateOrEditWarehouseModal = ({
               disabled={!selectedStateId || availableCities.length === 0}
               control={control}
               errors={errors}
-              fieldClassName={`${fieldStyle} grid-cols-[78px_minmax(0,_1fr)]!`}
+              fieldClassName={`${fieldStyle} lg:grid-cols-[78px_minmax(0,_1fr)]!`}
               labelClassName={`${labelStyle}`}
             />
           </div>
