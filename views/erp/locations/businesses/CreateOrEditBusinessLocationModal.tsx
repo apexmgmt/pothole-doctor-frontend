@@ -37,7 +37,7 @@ interface FormData {
   zip_code: string
 }
 
-type FormField = {
+type FormFieldType = {
   name: Path<FormData>
   type: InputType
   label: string
@@ -255,7 +255,7 @@ const CreateOrEditBusinessLocationModal = ({
     onOpenChange(false)
   }
 
-  const locationInfoFields: FormField[] = [
+  const locationInfoFields: FormFieldType[] = [
     {
       name: 'name',
       type: 'text',
@@ -287,7 +287,7 @@ const CreateOrEditBusinessLocationModal = ({
     }
   ]
 
-  const businessFields: FormField[] = [
+  const businessFields: FormFieldType[] = [
     {
       name: 'invoice_prefix',
       type: 'text',
@@ -315,7 +315,7 @@ const CreateOrEditBusinessLocationModal = ({
     }
   ]
 
-  const locationFields: FormField[] = [
+  const locationFields: FormFieldType[] = [
     {
       name: 'country_id',
       type: 'combobox',
@@ -371,7 +371,7 @@ const CreateOrEditBusinessLocationModal = ({
   const fieldStyle = 'grid grid-cols-[100px_minmax(100px,_1fr)]'
   const labelStyle = 'justify-end self-start text-right pt-1'
 
-  const renderFormField = (field: FormField) => {
+  const renderFormField = (field: FormFieldType) => {
     const isHorizontalField = field.type === 'switch' || field.type === 'checkbox'
 
     return (

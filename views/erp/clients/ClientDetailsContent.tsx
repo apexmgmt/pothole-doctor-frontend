@@ -79,20 +79,18 @@ const ClientDetailsContent: React.FC<ClientDetailsContentProps> = ({ clientData,
             </p>
           </div>
           <div className='flex items-start gap-3'>
-            <div className='flex items-start gap-3'>
-              <UserRound className='h-4 w-4 mt-0.5 text-gray shrink-0' />
-              <p className='text-sm text-light'>
-                <span className='text-gray'>Spouse Name: </span>
-                {clientData?.clientable?.spouse_name || '-'}
-              </p>
-            </div>
-            <div className='flex items-start gap-3'>
-              <Phone className='h-4 w-4 mt-0.5 text-gray shrink-0' />
-              <p className='text-sm text-light'>
-                <span className='text-gray'>Phone: </span>
-                {clientData?.clientable?.spouse_phone || '-'}
-              </p>
-            </div>
+            <UserRound className='h-4 w-4 mt-0.5 text-gray shrink-0' />
+            <p className='text-sm text-light'>
+              <span className='text-gray'>Spouse Name: </span>
+              {clientData?.clientable?.spouse_name || '-'}
+            </p>
+          </div>
+          <div className='flex items-start gap-3'>
+            <Phone className='h-4 w-4 mt-0.5 text-gray shrink-0' />
+            <p className='text-sm text-light'>
+              <span className='text-gray'>Phone: </span>
+              {clientData?.clientable?.spouse_phone || '-'}
+            </p>
           </div>
         </div>
       </div>

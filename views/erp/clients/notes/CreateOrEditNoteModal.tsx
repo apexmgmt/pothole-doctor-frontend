@@ -6,10 +6,8 @@ import { toast } from 'sonner'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
+import { Form } from '@/components/ui/form'
+import CustomFormField from '@/components/form/CustomFormField'
 import { ClientNote, ClientNotePayload, NoteType } from '@/types'
 import ClientNoteService from '@/services/api/clients/client-notes.service'
 
@@ -82,6 +80,9 @@ const CreateOrEditNoteModal: React.FC<CreateOrEditNoteModalProps> = ({
     onClose()
   }
 
+  const fieldStyle = 'grid grid-cols-[100px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
+
   return (
     <CommonDialog
       open={isOpen}
@@ -120,64 +121,42 @@ const CreateOrEditNoteModal: React.FC<CreateOrEditNoteModalProps> = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <FormField
+          <CustomFormField
+            type='select'
             control={form.control}
             name='note_type_id'
+            label='Note Type'
+            placeholder='Select note type'
             rules={{ required: 'Note type is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Note Type <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange} disabled={form.formState.isSubmitting}>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select note type' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {noteTypes.map(nt => (
-                        <SelectItem key={nt.id} value={nt.id}>
-                          {nt.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            selectOptions={noteTypes.map(nt => ({ value: nt.id, label: nt.name }))}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          <FormField
-            control={form.control}
+          <CustomFormField
+            type='text'
+            register={form.register}
             name='subject'
+            label='Subject'
+            placeholder='Subject'
             rules={{ required: 'Subject is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Subject <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Subject' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          <FormField
-            control={form.control}
+          <CustomFormField
+            type='textarea'
+            register={form.register}
             name='comment'
+            label='Comment'
+            placeholder='Type your note here...'
             rules={{ required: 'Comment is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Comment <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Textarea rows={4} placeholder='Type your note here...' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
         </form>
       </Form>

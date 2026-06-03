@@ -164,24 +164,25 @@ const CreateOrEditDocumentModal = ({
             }
             render={({ field: { value, onChange, ...field } }) => (
               <FormItem>
-                <FormLabel>
-                  File <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type='file'
-                    accept='*'
-                    placeholder='Upload file'
-                    
-                    // ref={fileInputRef}
-                    {...field}
-                    onChange={e => {
-                      const file = e.target.files?.[0] || null
+                <div className='grid gap-2 grid-cols-[40px_minmax(0,_1fr)]'>
+                  <FormLabel className='justify-end self-start text-right pt-1'>
+                    File <span className='text-red-500'>*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type='file'
+                      accept='*'
+                      placeholder='Upload file'
+                      // ref={fileInputRef}
+                      {...field}
+                      onChange={e => {
+                        const file = e.target.files?.[0] || null
 
-                      onChange(file)
-                    }}
-                  />
-                </FormControl>
+                        onChange(file)
+                      }}
+                    />
+                  </FormControl>
+                </div>
                 {/* Show current file if editing */}
                 {mode === 'edit' && documentDetails?.full_path && (
                   <div className='mt-2'>

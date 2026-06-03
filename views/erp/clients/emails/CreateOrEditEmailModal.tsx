@@ -6,8 +6,8 @@ import { toast } from 'sonner'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
+import { Form } from '@/components/ui/form'
+import CustomFormField from '@/components/form/CustomFormField'
 import { Client } from '@/types'
 
 import TipTapRichTextEditor from '@/components/erp/common/editor/TipTapRichTextEditor'
@@ -74,6 +74,9 @@ const CreateOrEditEmailModal: React.FC<{
     onClose()
   }
 
+  const fieldStyle = 'grid grid-cols-[100px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
+
   return (
     <CommonDialog
       open={isOpen}
@@ -107,53 +110,46 @@ const CreateOrEditEmailModal: React.FC<{
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <FormField
-            control={form.control}
+          <CustomFormField
+            type='email'
+            register={form.register}
             name='source'
+            label='To'
+            placeholder='Recipient email'
             rules={{ required: 'Recipient email is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  To <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Recipient email' type='email' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          <FormField
-            control={form.control}
+          <CustomFormField
+            type='email'
+            register={form.register}
             name='cc_email'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>CC Email</FormLabel>
-                <FormControl>
-                  <Input placeholder='CC Email' type='email' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='CC Email'
+            placeholder='CC Email'
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          <FormField
-            control={form.control}
+          <CustomFormField
+            type='text'
+            register={form.register}
             name='subject'
+            label='Subject'
+            placeholder='Email subject'
             rules={{ required: 'Subject is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Subject <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Email subject' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            errors={form.formState.errors}
+            disabled={form.formState.isSubmitting}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          <div className='space-y-2'>
-            <label className='text-sm font-medium'>
+          <div className='space-y-2 grid gap-2 grid-cols-[100px_minmax(0,_1fr)]'>
+            <label
+              className='text-sm font-medium 
+justify-end self-start text-right pt-1'
+            >
               Message <span className='text-red-500'>*</span>
             </label>
             <TipTapRichTextEditor
