@@ -19,6 +19,7 @@ import OrderDetailsForm from './OrderDetailsForm'
 import ProductsSection from './ProductsSection'
 import TotalsSection from './TotalsSection'
 import type { AddedProduct, FormValues } from './types'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface CreateOrEditPurchaseOrderModalProps {
   mode: 'create' | 'edit'
@@ -75,7 +76,6 @@ const CreateOrEditPurchaseOrderModal = ({
     formState: { isSubmitting }
   } = form
 
-  const warehouseType = form.watch('warehouse_type')
   const shippingCost = Number(form.watch('est_shipping_cost')) || 0
   const taxAmount = Number(form.watch('tax_amount')) || 0
 
@@ -329,35 +329,19 @@ const CreateOrEditPurchaseOrderModal = ({
     >
       <Form {...form}>
         <form id='purchase-order-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='vendor_id'
-            rules={{ required: 'Vendor is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Select
-                    value={selectedVendorId}
-                    onValueChange={val => {
-                      field.onChange(val)
-                      handleVendorChange(val)
-                    }}
-                  >
-                    <SelectTrigger className='w-72'>
-                      <SelectValue placeholder='Select Vendor' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {vendors.map(v => (
-                        <SelectItem key={v.id} value={v.id}>
-                          {v.first_name} {v.last_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            type='select'
+            label='Vendor'
+            placeholder='Select Vendor'
+            control={form.control}
+            selectOptions={vendors?.map(vendor => ({
+              value: vendor.id,
+              label: `${vendor.first_name ?? ''} ${vendor.last_name ?? ''}`
+            }))}
+            onChange={v => handleVendorChange(v as string)}
+            fieldClassName='flex-row justify-start max-w-100'
+            labelClassName='w-max!'
           />
 
           <ProductsSection
@@ -372,10 +356,10 @@ const CreateOrEditPurchaseOrderModal = ({
 
           <OrderDetailsForm
             form={form}
+            mode={mode}
             couriers={couriers}
             warehouses={warehouses}
             businessLocations={businessLocations}
-            warehouseType={warehouseType}
           />
 
           <AddedProductsTable

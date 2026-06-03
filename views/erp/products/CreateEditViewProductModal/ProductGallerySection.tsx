@@ -140,16 +140,22 @@ export function ProductGallerySection({
             id='gallery-upload'
           />
           <label htmlFor='gallery-upload'>
-            <Button type='button' variant='outline' className='w-full' disabled={uploadingImage} asChild>
+            <Button
+              type='button'
+              variant='outline'
+              className='w-full font-normal text-muted-foreground h-auto! py-3 border-dashed'
+              disabled={uploadingImage}
+              asChild
+            >
               <span className='flex items-center gap-2 cursor-pointer'>
                 {uploadingImage ? (
                   <>
-                    <Loader2 className='h-4 w-4 animate-spin' />
+                    <Loader2 className='size-4 animate-spin' />
                     Uploading...
                   </>
                 ) : (
                   <>
-                    <Upload className='h-4 w-4' />
+                    <Upload className='size-4' />
                     Upload Images
                   </>
                 )}
@@ -183,7 +189,8 @@ export function ProductGallerySection({
                   <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center'>
                     <Button
                       type='button'
-                      variant='destructive'
+                      variant='secondary'
+                      className='bg-white/20! hover:bg-red-500/20! hover:text-red-500 backdrop-blur-sm'
                       size='icon'
                       onClick={() => handleDeleteImage(gallery.id)}
                       disabled={deletingId === gallery.id}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { useForm } from 'react-hook-form'
+import { Path, RegisterOptions, useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import NonInventoryProductService from '@/services/api/products/non-inventory-products.service'
-import { Separator } from '@/components/ui/separator'
 import { BasicProductFields } from '../CreateEditViewProductModal/BasicProductFields'
 import { UOMFields } from '../CreateEditViewProductModal/UOMFields'
 import { PricingFields } from '../CreateEditViewProductModal/PricingFields'
@@ -21,6 +20,8 @@ import { QrCodeSection } from '../CreateEditViewProductModal/QrCodeSection'
 import { BarCodeSection } from '../CreateEditViewProductModal/BarCodeSection'
 import { ProductGallerySection } from '../CreateEditViewProductModal/ProductGallerySection'
 import ProductGalleryService from '@/services/api/products/product-galleries.service'
+import { InputType, SelectOption } from '@/components/form/fields/types'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface CreateEditViewNonInventoryProductModalProps extends ProductsProps {
   mode?: 'create' | 'edit' | 'view'
@@ -68,6 +69,16 @@ interface FormValues {
   comments: string
   status: number
   sku: string
+}
+
+export type FormFieldType = {
+  name: Path<FormValues>
+  type?: InputType
+  label?: string
+  placeholder?: string
+  rules?: RegisterOptions<FormValues, Path<FormValues>>
+  selectOptions?: SelectOption[]
+  onChange?: (value: any) => void
 }
 
 const defaultValues: FormValues = {
@@ -126,6 +137,12 @@ const CreateEditViewNonInventoryProductModal = ({
   const [isLoadingGalleries, setIsLoadingGalleries] = useState<boolean>(false)
 
   const form = useForm<FormValues>({ defaultValues })
+
+  const {
+    register,
+    control,
+    formState: { errors }
+  } = form
 
   // Fetch galleries when in edit or view mode
   const fetchGalleries = async (prodId: string) => {
@@ -316,6 +333,26 @@ const CreateEditViewNonInventoryProductModal = ({
     }
   }
 
+  const fieldStyle = 'grid grid-cols-[116px_minmax(100px,_1fr)]'
+  const labelStyle = 'text-xs font-normal leading-tight justify-end items-start self-start text-right pt-1'
+
+  const renderFormField = (field: FormFieldType) => {
+    const isHorizontalField = field.type === 'switch' || field.type === 'checkbox'
+
+    return (
+      <CustomFormField
+        key={field.name}
+        {...field}
+        register={register}
+        control={control}
+        errors={errors}
+        disabled={mode === 'view'}
+        fieldClassName={`${field?.label ? fieldStyle : ''} ${isHorizontalField ? '[&>button]:order-2 [&>label]:order-1' : ''}`}
+        labelClassName={labelStyle}
+      />
+    )
+  }
+
   return (
     <CommonDialog
       isLoading={isLoading}
@@ -330,7 +367,7 @@ const CreateEditViewNonInventoryProductModal = ({
       onOpenChange={onOpenChange}
       title={getTitle()}
       description={getDescription()}
-      maxWidth='7xl'
+      className='max-w-380!'
       disableClose={form.formState.isSubmitting}
       actions={
         mode !== 'view' ? (
@@ -362,27 +399,43 @@ const CreateEditViewNonInventoryProductModal = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mb-4'>
-          <div className={`grid grid-cols-1 ${mode !== 'create' ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-6`}>
+          <div
+            className={`grid grid-cols-1 items-start ${mode === 'create' ? 'lg:grid-cols-2' : 'lg:grid-cols-[3fr_3fr_2fr]'} gap-2`}
+          >
             {/* Basic Product Information */}
-            <div className='space-y-4'>
-              <h3 className='text-lg font-semibold'>Product Information</h3>
+            <div className='p-4 border border-border rounded-lg'>
+              <h3 className='leading-none font-semibold pb-3.5 mb-3 border-b border-border'>Product Information</h3>
               <BasicProductFields
                 form={form}
                 vendors={vendors}
                 productCategories={productCategories}
                 serviceTypes={serviceTypes}
-                disabled={mode === 'view'}
+                renderFormField={renderFormField}
               />
             </div>
 
             {/* UOM and Properties */}
-            <div className='space-y-4'>
-              <h3 className='text-lg font-semibold'>UOM and Other Properties</h3>
-              <UOMFields form={form} uomUnits={uomUnits} disabled={mode === 'view'} />
-              <Separator />
-              <PricingFields form={form} uomUnits={uomUnits} disabled={mode === 'view'} />
-              <Separator />
-              <AdditionalInfoFields form={form} disabled={mode === 'view'} />
+            <div className='p-4 border border-border rounded-lg'>
+              <h3 className='leading-none font-semibold pb-3.5 mb-3 border-b border-border'>
+                UOM and Other Properties
+              </h3>
+              <div className='flex flex-col gap-y-2 mt-3'>
+                <UOMFields
+                  form={form}
+                  uomUnits={uomUnits}
+                  fieldStyle={fieldStyle}
+                  labelStyle={labelStyle}
+                  renderFormField={renderFormField}
+                />
+                <PricingFields
+                  form={form}
+                  uomUnits={uomUnits}
+                  fieldStyle={fieldStyle}
+                  labelStyle={labelStyle}
+                  renderFormField={renderFormField}
+                />
+                <AdditionalInfoFields form={form} renderFormField={renderFormField} />
+              </div>
             </div>
 
             {/* Gallery Section - Only show in edit/view mode */}
@@ -390,14 +443,17 @@ const CreateEditViewNonInventoryProductModal = ({
               <div className='space-y-4'>
                 <QrCodeSection qrCodePath={productDetails?.qr_code} />
                 <BarCodeSection barCodePath={productDetails?.bar_code} />
-                <h3 className='text-lg font-semibold'>Product Gallery</h3>
-                <ProductGallerySection
-                  productId={productId}
-                  galleries={galleries}
-                  isLoading={isLoadingGalleries}
-                  onUpdate={handleGalleryUpdate}
-                  disabled={mode === 'view'}
-                />
+
+                <div className='p-4 border border-border rounded-lg'>
+                  <h3 className='leading-none font-semibold pb-3.5 mb-3 border-b border-border'>Product Gallery</h3>
+                  <ProductGallerySection
+                    productId={productId}
+                    galleries={galleries}
+                    isLoading={isLoadingGalleries}
+                    onUpdate={handleGalleryUpdate}
+                    disabled={mode === 'view'}
+                  />
+                </div>
               </div>
             )}
           </div>
