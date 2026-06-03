@@ -27,7 +27,7 @@ const ProductsSection = ({
 }: ProductsSectionProps) => {
   return (
     <div className='flex flex-col gap-3'>
-      <div className='border border-border rounded-lg overflow-hidden min-h-[450px] max-h-[450px]'>
+      <div className='border border-border rounded-lg overflow-hidden max-h-[450px]'>
         {selectedVendorId ? (
           <Products
             productCategories={productCategories}
@@ -42,7 +42,7 @@ const ProductsSection = ({
             hideActionButton={true}
           />
         ) : (
-          <div className='flex items-center justify-center h-full min-h-[450px] text-muted-foreground text-sm'>
+          <div className='flex items-center justify-center py-16 text-muted-foreground text-sm'>
             Select a vendor to browse products
           </div>
         )}
