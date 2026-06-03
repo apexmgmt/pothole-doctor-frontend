@@ -238,9 +238,9 @@ const CustomFormField = <T extends FieldValues>({
         )}
 
         {/* Error */}
-        {fieldError && <FieldError className='mt-1 text-xs!    '>{String(fieldError?.message) ?? ''}</FieldError>}
+        {fieldError && <FieldError className='mt-1 text-xs!'>{String(fieldError?.message) ?? ''}</FieldError>}
         {/* Description */}
-        {description && <FieldDescription className='mt-1 text-xs!'>{description}</FieldDescription>}
+        {description && <FieldDescription className='mt-1! text-xs!'>{description}</FieldDescription>}
       </div>
     </Field>
   )
