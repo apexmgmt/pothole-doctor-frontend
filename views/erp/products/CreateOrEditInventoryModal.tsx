@@ -206,7 +206,7 @@ const CreateOrEditInventoryModal = ({
     )
 
     return (
-      <div className={cn('flex flex-col gap-1.25', borderClass)}>
+      <div key={`${label}-${index}`} className={cn('flex flex-col gap-1.25', borderClass)}>
         <span className='text-xs text-muted-foreground font-normal leading-none'>{label}</span>
         <span className='text-[13px] font-medium leading-tight'>{value ?? '-'}</span>
       </div>
@@ -328,7 +328,7 @@ const CreateOrEditInventoryModal = ({
   const renderFormField = (field: FormFieldType) => {
     const formField = (
       <CustomFormField
-        key={field.name}
+        key={field.unit ? undefined : field.name}
         {...field}
         register={register}
         control={control}
@@ -340,7 +340,7 @@ const CreateOrEditInventoryModal = ({
 
     if (field.unit) {
       return (
-        <div className='flex items-start gap-1.5'>
+        <div key={field.name} className='flex items-start gap-1.5'>
           {formField}
 
           <p className='text-xs leading-none text-muted-foreground text-nowrap pt-2'>{field.unit}</p>
