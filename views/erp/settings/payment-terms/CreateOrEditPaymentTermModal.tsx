@@ -2,24 +2,19 @@
 
 import { useEffect, useState } from 'react'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-
-import * as z from 'zod'
-
 import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
 import { PaymentTermType, PaymentTerm, PaymentTermPayload } from '@/types'
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Label } from '@/components/ui/label'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
+import CustomFormField from '@/components/form/CustomFormField'
+import { Separator } from '@/components/ui/separator'
 
 interface CreateOrEditPaymentTermModalProps {
   mode?: 'create' | 'edit'
@@ -31,13 +26,11 @@ interface CreateOrEditPaymentTermModalProps {
   onSuccess?: () => void
 }
 
-const formSchema = z.object({
-  name: z.string().min(2, { message: 'Payment term name must be at least 2 characters' }),
-  type: z.string().min(1, { message: 'Please select a payment term type' }),
-  due_time: z.string().min(1, { message: 'This field is required' })
-})
-
-type FormValues = z.infer<typeof formSchema>
+interface FormValues {
+  name: string
+  type: string
+  due_time: string
+}
 
 const CreateOrEditPaymentTermModal = ({
   mode = 'create',
@@ -51,7 +44,6 @@ const CreateOrEditPaymentTermModal = ({
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
     defaultValues: {
       name: paymentTermDetails?.name || '',
       type: paymentTermDetails?.type || 'day',
@@ -139,6 +131,15 @@ const CreateOrEditPaymentTermModal = ({
     onOpenChange(false)
   }
 
+  const fieldStyle = 'grid grid-cols-[152px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
+
+  const {
+    register,
+    control,
+    formState: { errors }
+  } = form
+
   return (
     <CommonDialog
       isLoading={isLoading}
@@ -147,7 +148,7 @@ const CreateOrEditPaymentTermModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create New Payment Term' : 'Edit Payment Term'}
       description={mode === 'create' ? 'Add a new payment term to the system' : 'Update payment term information'}
-      maxWidth='xl'
+      maxWidth='5xl'
       disableClose={isLoading}
       actions={
         <div className='flex gap-3'>
@@ -162,65 +163,55 @@ const CreateOrEditPaymentTermModal = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          {/* Payment Term Name Field */}
-          <FormField
-            control={form.control}
-            name='name'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Name <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter payment term name' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Payment Term Type Radio Group */}
-          <FormField
-            control={form.control}
-            name='type'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Payment Term Type</FormLabel>
-                <FormControl>
-                  <RadioGroup onValueChange={field.onChange} value={field.value} className='space-y-2'>
-                    {paymentTermTypes.map(type => (
-                      <div key={type.id} className='flex items-center space-x-2'>
-                        <RadioGroupItem value={type.type} id={type.id} />
-                        <Label htmlFor={type.id} className='cursor-pointer'>
-                          {type.name}
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Due Time Field - Label changes based on type */}
-          {selectedType && (
-            <FormField
-              control={form.control}
-              name='due_time'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {getDueTimeLabel()} <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input type='number' placeholder={`Enter ${getDueTimeLabel().toLowerCase()}`} {...field} min='1' />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+            <CustomFormField
+              name='name'
+              label='Name'
+              placeholder='Enter payment term name'
+              rules={{
+                required: 'Payment term name must be at least 2 characters',
+                minLength: { value: 2, message: 'Payment term name must be at least 2 characters' }
+              }}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
-          )}
+
+            {selectedType && (
+              <CustomFormField
+                name='due_time'
+                label={getDueTimeLabel()}
+                type='number'
+                placeholder={`Enter ${getDueTimeLabel().toLowerCase()}`}
+                rules={{ required: `${getDueTimeLabel()} is required` }}
+                register={register}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
+              />
+            )}
+          </div>
+
+          <Separator />
+
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+            <CustomFormField
+              name='type'
+              label='Payment Term Type'
+              type='radio'
+              rules={{ required: 'Please select a payment term type' }}
+              selectOptions={paymentTermTypes.map(type => ({
+                label: type.name,
+                value: type.type
+              }))}
+              control={control}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
+              className='space-y-2'
+            />
+          </div>
         </form>
       </Form>
     </CommonDialog>
