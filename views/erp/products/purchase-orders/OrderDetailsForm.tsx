@@ -24,7 +24,6 @@ type FormFieldType = {
   selectOptions?: SelectOption[]
   onChange?: (value: any) => void
   fieldClassName?: string
-  key?: string
 }
 
 const OrderDetailsForm = ({ form, mode, couriers, warehouses, businessLocations }: OrderDetailsFormProps) => {
@@ -114,8 +113,7 @@ const OrderDetailsForm = ({ form, mode, couriers, warehouses, businessLocations 
       selectOptions:
         warehouseType === 'warehouse'
           ? warehouses.map(w => ({ value: w.id, label: w.title }))
-          : businessLocations.map(l => ({ value: l.id, label: l.name })),
-      key: `warehouse_id-${warehouseType}`
+          : businessLocations.map(l => ({ value: l.id, label: l.name }))
     },
     {
       name: 'payment_due',
@@ -142,7 +140,7 @@ const OrderDetailsForm = ({ form, mode, couriers, warehouses, businessLocations 
   const renderFormField = (field: FormFieldType) => {
     return (
       <CustomFormField
-        key={field.key || field.name}
+        key={field.name}
         {...field}
         register={register}
         control={control}
