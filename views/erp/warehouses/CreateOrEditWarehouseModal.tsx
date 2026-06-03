@@ -7,10 +7,9 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { WarehousePayload, WarehouseFormValues, CreateOrEditWarehouseModalProps } from '@/types'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, MultiSelect } from '@/components/ui/select'
+import CustomFormField from '@/components/form/CustomFormField'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import WarehouseService from '@/services/api/warehouses.service'
@@ -164,6 +163,15 @@ const CreateOrEditWarehouseModal = ({
     onOpenChange(false)
   }
 
+  const fieldStyle = 'grid grid-cols-[152px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
+
+  const {
+    register,
+    control,
+    formState: { errors }
+  } = form
+
   return (
     <CommonDialog
       isLoading={isLoading}
@@ -172,7 +180,7 @@ const CreateOrEditWarehouseModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create Warehouse' : 'Edit Warehouse'}
       description={mode === 'create' ? 'Add a new warehouse' : 'Update warehouse information'}
-      maxWidth='3xl'
+      maxWidth='5xl'
       disableClose={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
@@ -198,62 +206,63 @@ const CreateOrEditWarehouseModal = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          {/* Basic Information */}
+          {/* Row 1 */}
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-            {/* Location Multi-select */}
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='location_id'
+              label='Accessible Locations'
+              type='multiselect'
+              placeholder='Select locations'
               rules={{
                 required: 'At least one location is required',
-                validate: value => value.length > 0 || 'At least one location is required'
+                validate: value => (Array.isArray(value) && value.length > 0) || 'At least one location is required'
               }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Accessible Locations <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <MultiSelect
-                      options={businessLocations.map(loc => ({
-                        value: loc.id.toString(),
-                        label: loc.name
-                      }))}
-                      selected={field.value || []}
-                      onChange={field.onChange}
-                      placeholder='Select locations'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              selectOptions={businessLocations.map(loc => ({
+                value: loc.id.toString(),
+                label: loc.name
+              }))}
+              control={control}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
 
-            {/* Title */}
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='title'
+              label='Warehouse Title'
+              placeholder='Enter warehouse title'
               rules={{
                 required: 'Warehouse title is required',
                 minLength: { value: 2, message: 'Title must be at least 2 characters' }
               }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Warehouse Title <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter warehouse title' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
+            />
+          </div>
+
+          {/* Row 2 */}
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+            <CustomFormField
+              name='phone'
+              label='Phone'
+              type='tel'
+              placeholder='Enter phone'
+              rules={{
+                required: 'Phone number is required'
+              }}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
 
-            {/* Email */}
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='email'
+              label='Email'
+              type='email'
+              placeholder='Enter email'
               rules={{
                 required: 'Email is required',
                 pattern: {
@@ -261,235 +270,130 @@ const CreateOrEditWarehouseModal = ({
                   message: 'Invalid email address'
                 }
               }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Email <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input type='email' placeholder='Enter email' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
+          </div>
 
-            {/* Phone */}
-            <FormField
-              control={form.control}
-              name='phone'
-              rules={{
-                required: 'Phone number is required'
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Phone <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input type='tel' placeholder='Enter phone' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Fax Number */}
-            <FormField
-              control={form.control}
+          {/* Row 3 */}
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+            <CustomFormField
               name='fax_number'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fax Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter fax number' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label='Fax Number'
+              placeholder='Enter fax number'
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
+          </div>
 
-            {/* Tax Rate */}
-            <FormField
-              control={form.control}
+          {/* Row 4 */}
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+            <CustomFormField
               name='tax_rate'
+              label='Tax Rate (%)'
+              type='number'
+              placeholder='0.00'
               rules={{
                 min: { value: 0, message: 'Tax rate must be at least 0' },
                 max: { value: 100, message: 'Tax rate cannot exceed 100' }
               }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tax Rate (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='number'
-                      min={0}
-                      max={100}
-                      step={0.01}
-                      placeholder='0.00'
-                      {...field}
-                      onChange={e => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
           </div>
 
           <Separator />
 
-          {/* Location Information */}
+          {/* Row 5 */}
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-            {/* Country */}
-            <FormField
-              control={form.control}
-              name='country_id'
-              rules={{
-                required: 'Country is required'
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Country <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select a country' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {countriesWithStateAndCities.map(country => (
-                        <SelectItem key={country.id} value={country.id.toString()}>
-                          {country.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <CustomFormField
+              type='textarea'
+              name='street'
+              label='Street Address'
+              placeholder='Enter street address'
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
 
-            {/* State */}
-            <FormField
-              control={form.control}
-              name='state_id'
-              rules={{
-                required: 'State is required'
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    State <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={!selectedCountryId || availableStates.length === 0}
-                  >
-                    <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select a state' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {availableStates.length === 0 ? (
-                        <div className='px-2 py-1.5 text-sm text-muted-foreground'>
-                          {!selectedCountryId ? 'Please select a country first' : 'No states available'}
-                        </div>
-                      ) : (
-                        availableStates.map(state => (
-                          <SelectItem key={state.id} value={state.id.toString()}>
-                            {state.name}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* City */}
-            <FormField
-              control={form.control}
-              name='city_id'
-              rules={{
-                required: 'City is required'
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    City <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={!selectedStateId || availableCities.length === 0}
-                  >
-                    <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select a city' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {availableCities.length === 0 ? (
-                        <div className='px-2 py-1.5 text-sm text-muted-foreground'>
-                          {!selectedStateId ? 'Please select a state first' : 'No cities available'}
-                        </div>
-                      ) : (
-                        availableCities.map(city => (
-                          <SelectItem key={city.id} value={city.id.toString()}>
-                            {city.name}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Zip Code */}
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='zip_code'
+              label='Zip Code'
+              placeholder='Enter zip code'
               rules={{
                 required: 'Zip code is required'
               }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Zip Code <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter zip code' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
+            />
+          </div>
+
+          {/* Row 6 */}
+          <div className='grid grid-cols-1 lg:grid-cols-[1.3fr_1fr_1fr] gap-4'>
+            <CustomFormField
+              name='country_id'
+              label='Country'
+              type='select'
+              placeholder='Select a country'
+              rules={{
+                required: 'Country is required'
+              }}
+              selectOptions={countriesWithStateAndCities.map(country => ({
+                value: country.id.toString(),
+                label: country.name
+              }))}
+              control={control}
+              errors={errors}
+              fieldClassName={`${fieldStyle}`}
+              labelClassName={`${labelStyle}`}
             />
 
-            {/* Street - Full Width */}
-            <div className='md:col-span-2'>
-              <FormField
-                control={form.control}
-                name='street'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Street Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter street address' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <CustomFormField
+              name='state_id'
+              label='State'
+              type='select'
+              placeholder={!selectedCountryId ? 'Please select a country first' : 'Select a state'}
+              rules={{
+                required: 'State is required'
+              }}
+              selectOptions={availableStates.map(state => ({
+                value: state.id.toString(),
+                label: state.name
+              }))}
+              disabled={!selectedCountryId || availableStates.length === 0}
+              control={control}
+              errors={errors}
+              fieldClassName={`${fieldStyle} grid-cols-[78px_minmax(0,_1fr)]!`}
+              labelClassName={`${labelStyle}`}
+            />
+
+            <CustomFormField
+              name='city_id'
+              label='City'
+              type='select'
+              placeholder={!selectedStateId ? 'Please select a state first' : 'Select a city'}
+              rules={{
+                required: 'City is required'
+              }}
+              selectOptions={availableCities.map(city => ({
+                value: city.id.toString(),
+                label: city.name
+              }))}
+              disabled={!selectedStateId || availableCities.length === 0}
+              control={control}
+              errors={errors}
+              fieldClassName={`${fieldStyle} grid-cols-[78px_minmax(0,_1fr)]!`}
+              labelClassName={`${labelStyle}`}
+            />
           </div>
         </form>
       </Form>
