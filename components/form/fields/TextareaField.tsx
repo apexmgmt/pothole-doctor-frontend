@@ -39,7 +39,7 @@ const TextareaField = <T extends FieldValues>({
         onBlur?.()
       }}
       readOnly={readonly}
-      className={className}
+      className={`${className} leading-tight`}
     />
   )
 }
