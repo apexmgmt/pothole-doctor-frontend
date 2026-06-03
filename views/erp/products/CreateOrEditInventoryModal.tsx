@@ -1,22 +1,24 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 
-import { useForm } from 'react-hook-form'
+import { Path, RegisterOptions, useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
+import { ChevronDown } from 'lucide-react'
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
+import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Product } from '@/types'
 import { InventoryPayload, PurchaseOrder } from '@/types/products/purchase_orders'
 import { Warehouse, BusinessLocation } from '@/types'
+import { InputType, SelectOption } from '@/components/form/fields/types'
+import CustomFormField from '@/components/form/CustomFormField'
 import InventoryService from '@/services/api/products/inventories.service'
-import { getCostPrice, getMargin, getSellPrice } from '@/utils/business-calculation'
+import { getMargin, getSellPrice } from '@/utils/business-calculation'
 
 interface FormValues {
   warehouse_type: 'warehouse' | 'location'
@@ -47,6 +49,19 @@ interface CreateOrEditInventoryModalProps {
   businessLocations?: BusinessLocation[]
 }
 
+type FormFieldType = {
+  name: Path<FormValues>
+  type?: InputType
+  label?: string
+  placeholder?: string
+  rules?: RegisterOptions<FormValues, Path<FormValues>>
+  selectOptions?: SelectOption[]
+  onChange?: (value: any) => void
+  onBlur?: () => void
+  unit?: string
+  fieldClassName?: string
+}
+
 const CreateOrEditInventoryModal = ({
   mode,
   open,
@@ -58,11 +73,11 @@ const CreateOrEditInventoryModal = ({
   businessLocations = []
 }: CreateOrEditInventoryModalProps) => {
   const [isLoading, setIsLoading] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
 
   const purchaseProduct = inventoryDetails?.purchase_products?.[0]
 
   const defaultMargin = product.margin ?? ''
-  const defaultCustomerPrice = product.selling_price ?? ''
   const defaultWorkOrderCost = product.work_order_cost ?? product.product_cost ?? 0
 
   const form = useForm<FormValues>({
@@ -85,10 +100,21 @@ const CreateOrEditInventoryModal = ({
     }
   })
 
+  const {
+    watch,
+    setValue,
+    control,
+    register,
+    getValues,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = form
+
   // Reset form when modal opens
   useEffect(() => {
     if (open) {
-      form.reset({
+      reset({
         warehouse_type: (inventoryDetails?.warehouse_type as 'warehouse' | 'location') || 'warehouse',
         warehouse_id: inventoryDetails?.warehouse_id || '',
         stock_area: purchaseProduct?.purchase_product_receipts?.[0]?.stock_area || '',
@@ -147,7 +173,7 @@ const CreateOrEditInventoryModal = ({
 
       onOpenChange(false)
       onSuccess()
-      form.reset()
+      reset()
     } catch (error: any) {
       if (error?.errors && typeof error.errors === 'object') {
         Object.values(error.errors).forEach((errMsg: any) => {
@@ -163,23 +189,203 @@ const CreateOrEditInventoryModal = ({
 
   const onCancel = () => {
     onOpenChange(false)
-    form.reset()
+    reset()
   }
 
-  const displayField = (label: string, value: string | number | null | undefined) => (
-    <div className='flex flex-col gap-1'>
-      <span className='text-xs text-muted-foreground'>{label}</span>
-      <span className='text-sm font-medium rounded-md px-3 py-2 bg-white/5 min-h-9'>{value ?? '—'}</span>
-    </div>
-  )
+  const displayField = (label: string, value: string | number | null | undefined, index?: number) => {
+    const isFirst2 = index !== undefined && index % 2 === 0
+    const isFirst3 = index !== undefined && index % 3 === 0
+    const isFirst4 = index !== undefined && index % 4 === 0
+    const isFirst5 = index !== undefined && index % 5 === 0
+
+    const borderClass = cn(
+      isFirst2 ? 'border-l-0 pl-0' : 'border-l border-border pl-3',
+      isFirst3 ? 'sm:border-l-0 sm:pl-0' : 'sm:border-l sm:border-border sm:pl-3',
+      isFirst4 ? 'md:border-l-0 md:pl-0' : 'md:border-l md:border-border md:pl-3',
+      isFirst5 ? 'lg:border-l-0 lg:pl-0' : 'lg:border-l lg:border-border lg:pl-3'
+    )
+
+    return (
+      <div className={cn('flex flex-col gap-1.25', borderClass)}>
+        <span className='text-xs text-muted-foreground font-normal leading-none'>{label}</span>
+        <span className='text-[13px] font-medium leading-tight'>{value ?? '-'}</span>
+      </div>
+    )
+  }
+
+  const warehouseType = watch('warehouse_type')
+  const isLocation = warehouseType === 'location'
+
+  const uomFields: FormFieldType[] = [
+    {
+      name: 'quantity',
+      type: 'number',
+      label: 'Quantity',
+      rules: { required: 'Quantity is required' },
+      unit: product.purchase_unit?.name ?? product.purchase_uom?.name ?? 'Each'
+    }
+  ]
+
+  const pricingFields: FormFieldType[] = [
+    {
+      name: 'company_cost',
+      type: 'number',
+      label: 'Company Cost',
+      rules: { required: 'Company Cost is required' },
+      unit: product.purchase_unit?.name ?? product.purchase_uom?.name
+    },
+    {
+      name: 'work_order_cost',
+      type: 'number',
+      label: 'Work Order Cost',
+      rules: { required: 'Work Order Cost is required' },
+      onBlur: () => {
+        const newWoCost = Number(getValues('work_order_cost'))
+        const margin = Number(getValues('margin'))
+
+        setValue('customer_price', getSellPrice(newWoCost, margin))
+      }
+    },
+    {
+      name: 'customer_price',
+      type: 'number',
+      label: 'Customer Price',
+      unit: product.selling_unit?.name ?? product.selling_uom?.name,
+      placeholder: '0.00',
+      onBlur: () => {
+        const newSellPrice = Number(getValues('customer_price'))
+        const woCost = Number(getValues('work_order_cost'))
+
+        setValue('margin', getMargin(woCost, newSellPrice))
+      }
+    },
+    {
+      name: 'margin',
+      type: 'number',
+      label: 'Margin (%)',
+      placeholder: '0.00',
+      onBlur: () => {
+        const newMargin = Number(getValues('margin'))
+        const woCost = Number(getValues('work_order_cost'))
+
+        setValue('customer_price', getSellPrice(woCost, newMargin))
+      }
+    }
+  ]
+
+  const poFields: FormFieldType[] = [
+    {
+      name: 'warehouse_type',
+      type: 'select',
+      label: 'Warehouse Type',
+      rules: { required: 'Warehouse type is required' },
+      selectOptions: [
+        { value: 'warehouse', label: 'Warehouse' },
+        { value: 'location', label: 'Location' }
+      ],
+      onChange: () => {
+        setValue('warehouse_id', '')
+      }
+    },
+    {
+      name: 'stock_section_id',
+      type: 'text',
+      label: 'Section',
+      placeholder: 'Section'
+    },
+    {
+      name: 'warehouse_id',
+      type: 'select',
+      label: isLocation ? 'Location' : 'Warehouse',
+      placeholder: isLocation ? 'Select location' : 'Select warehouse',
+      selectOptions: isLocation
+        ? businessLocations.map(loc => ({ value: loc.id, label: loc.name }))
+        : warehouses.map(w => ({ value: w.id, label: w.title }))
+    },
+    {
+      name: 'dye_lot',
+      type: 'text',
+      label: 'Dye Lot',
+      placeholder: 'Dye lot'
+    },
+    {
+      name: 'stock_area',
+      type: 'text',
+      label: 'Stock Area',
+      placeholder: 'Stock area'
+    },
+    {
+      name: 'comments',
+      type: 'textarea',
+      label: 'Comments',
+      placeholder: 'Comments...'
+    }
+  ]
+
+  const sharedFieldClass = 'grid grid-cols-[116px_minmax(0,_1fr)] gap-2'
+  const sharedLabelClass = 'justify-end items-start self-start text-right pt-1.5'
+
+  const renderFormField = (field: FormFieldType) => {
+    const formField = (
+      <CustomFormField
+        key={field.name}
+        {...field}
+        register={register}
+        control={control}
+        errors={errors}
+        fieldClassName={`${sharedFieldClass} ${field.fieldClassName || ''}`}
+        labelClassName={sharedLabelClass}
+      />
+    )
+
+    if (field.unit) {
+      return (
+        <div className='flex items-start gap-1.5'>
+          {formField}
+
+          <p className='text-xs leading-none text-muted-foreground text-nowrap pt-2'>{field.unit}</p>
+        </div>
+      )
+    }
+
+    return formField
+  }
+
+  const renderReadOnlyField = (label: string, value: string | number | null | undefined) => {
+    return (
+      <div className='px-3.75 py-2.25 bg-[#4D4D4D66] border border-border rounded-lg flex items-center gap-2.5'>
+        <p className='text-xs leading-none text-muted-foreground'>{label}</p>
+        <p className='text-[13px] leading-none font-medium'>{value ?? '—'}</p>
+      </div>
+    )
+  }
+
+  const SharedCard = ({
+    title,
+    children,
+    contentClass
+  }: {
+    title: string
+    children: ReactNode
+    contentClass?: string
+  }) => {
+    return (
+      <Card className='p-4 border border-border'>
+        <CardHeader className='p-0'>
+          <CardTitle className='text-base font-medium leading-none mb-0'>{title}</CardTitle>
+        </CardHeader>
+
+        <CardContent className={`mt-4 p-0 ${contentClass}`}>{children}</CardContent>
+      </Card>
+    )
+  }
 
   return (
     <CommonDialog
       open={open}
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Add New Inventory' : 'Edit Inventory'}
-      description=''
-      maxWidth='5xl'
+      className='sm:max-w-[1180px]'
       isLoading={isLoading}
       loadingMessage={mode === 'create' ? 'Creating inventory...' : 'Updating inventory...'}
       disableClose={isLoading}
@@ -195,358 +401,67 @@ const CreateOrEditInventoryModal = ({
       }
     >
       <Form {...form}>
-        <form id='inventory-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+        <form id='inventory-form' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
           {/* Product Information */}
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardTitle>Product Information</CardTitle>
+          <Card className='p-4 border border-border'>
+            <CardHeader
+              className='p-0 flex flex-row items-center justify-between gap-2 cursor-pointer select-none'
+              onClick={() => setIsExpanded(prev => !prev)}
+            >
+              <CardTitle className='text-base font-medium leading-none mb-0'>Product Information</CardTitle>
+              <ChevronDown
+                className={`size-5 text-muted-foreground transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+              />
             </CardHeader>
-            <CardContent>
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 '>
-                {displayField('Vendor', product.vendor?.first_name)}
-                {displayField('Category', product.category?.name)}
-                {displayField('SKU', product.sku)}
-                {displayField('Size/Description', product.description)}
-                {displayField('Vendor Product Name', product.vendor_product_name)}
-                {displayField('Private Product Name', product.private_product_name)}
 
-                {displayField('Vendor Style', product.vendor_style)}
-                {displayField('Private Style', product.private_style)}
-
-                {displayField('Vendor Color', product.vendor_color)}
-                {displayField('Private Color', product.private_color)}
-              </div>
-            </CardContent>
+            {isExpanded && (
+              <CardContent className='mt-4 p-2.5 bg-[#1F1F1F] rounded-lg grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-3 gap-y-6'>
+                {[
+                  { label: 'Vendor', value: product.vendor?.first_name },
+                  { label: 'Category', value: product.category?.name },
+                  { label: 'SKU', value: product.sku },
+                  { label: 'Size/Description', value: product.description },
+                  { label: 'Vendor Product Name', value: product.vendor_product_name },
+                  { label: 'Private Product Name', value: product.private_product_name },
+                  { label: 'Vendor Style', value: product.vendor_style },
+                  {
+                    label: product.vendor_style ? `${product.vendor_style} Private Style` : 'Private Style',
+                    value: product.private_style
+                  },
+                  { label: 'Vendor Color', value: product.vendor_color },
+                  { label: 'Private Color', value: product.private_color }
+                ].map((field, idx) => displayField(field.label, field.value, idx))}
+              </CardContent>
+            )}
           </Card>
 
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
             {/* UOM / Coverage Information */}
-            <Card>
-              <CardHeader className='pb-3'>
-                <CardTitle>UOM/Coverage Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className='space-y-4'>
-                  <FormField
-                    control={form.control}
-                    name='quantity'
-                    rules={{ required: 'Quantity is required', min: { value: 0, message: 'Must be ≥ 0' } }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Quantity <span className='text-destructive'>*</span>
-                        </FormLabel>
-                        <div className='flex items-center gap-2'>
-                          <FormControl>
-                            <Input
-                              type='number'
-                              step='any'
-                              min={0}
-                              {...field}
-                              onChange={e => field.onChange(e.target.value)}
-                            />
-                          </FormControl>
-                          <span className='text-sm text-muted-foreground whitespace-nowrap'>
-                            {product.purchase_unit?.name ?? product.purchase_uom?.name ?? 'Each'}
-                          </span>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {displayField(
-                    'Coverage per UOM',
-                    product.coverage_per_rate != null
-                      ? `${product.coverage_per_rate} (${product.coverage_unit?.name ?? product.coverage_uom?.name ?? 'Each'})`
-                      : '—'
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <SharedCard title='UOM/Coverage Information' contentClass='space-y-3'>
+              {uomFields.map(renderFormField)}
+
+              {renderReadOnlyField(
+                'Coverage per UOM',
+                `${product.coverage_per_rate} (${product.coverage_unit?.name ?? product.coverage_uom?.name ?? 'Each'})`
+              )}
+            </SharedCard>
 
             {/* Product Cost / Pricing */}
-            <Card>
-              <CardHeader className='pb-3'>
-                <CardTitle>Product Cost/Pricing</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className='space-y-3'>
-                  <FormField
-                    control={form.control}
-                    name='company_cost'
-                    rules={{ required: 'Company Cost is required' }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Company Cost <span className='text-destructive'>*</span>
-                        </FormLabel>
-                        <div className='flex items-center gap-2'>
-                          <FormControl>
-                            <Input
-                              type='number'
-                              step='any'
-                              min={0}
-                              {...field}
-                              onChange={e => field.onChange(e.target.value)}
-                            />
-                          </FormControl>
-                          <span className='text-sm text-muted-foreground whitespace-nowrap'>
-                            {product.purchase_unit?.name ?? product.purchase_uom?.name ?? ''}
-                          </span>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name='work_order_cost'
-                    rules={{ required: 'Work Order Cost is required' }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Work Order Cost <span className='text-destructive'>*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type='number'
-                            step='any'
-                            min={0}
-                            {...field}
-                            onChange={e => field.onChange(e.target.value)}
-                            onBlur={() => {
-                              field.onBlur()
-                              const newWoCost = Number(form.getValues('work_order_cost'))
-                              const margin = Number(form.getValues('margin'))
-
-                              form.setValue('customer_price', getSellPrice(newWoCost, margin))
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name='margin'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Margin (%)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type='number'
-                            step='any'
-                            placeholder='0.00'
-                            {...field}
-                            onChange={e => field.onChange(e.target.value)}
-                            onBlur={() => {
-                              field.onBlur()
-                              const newMargin = Number(form.getValues('margin'))
-                              const woCost = Number(form.getValues('work_order_cost'))
-
-                              form.setValue('customer_price', getSellPrice(woCost, newMargin))
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name='customer_price'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Customer Price</FormLabel>
-                        <div className='flex items-center gap-2'>
-                          <FormControl>
-                            <Input
-                              type='number'
-                              step='any'
-                              placeholder='0.00'
-                              {...field}
-                              onChange={e => field.onChange(e.target.value)}
-                              onBlur={() => {
-                                field.onBlur()
-                                const newSellPrice = Number(form.getValues('customer_price'))
-                                const woCost = Number(form.getValues('work_order_cost'))
-
-                                form.setValue('margin', getMargin(woCost, newSellPrice))
-                              }}
-                            />
-                          </FormControl>
-                          <span className='text-sm text-muted-foreground whitespace-nowrap'>
-                            {product.selling_unit?.name ?? product.selling_uom?.name ?? ''}
-                          </span>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <SharedCard title='Product Cost/Pricing' contentClass='grid grid-cols-2 gap-x-4 gap-y-2'>
+              {pricingFields.map(renderFormField)}
+            </SharedCard>
           </div>
 
           {/* Purchase Order Information */}
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardTitle>Purchase Order Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                {/* Left column */}
-                <div className='space-y-4'>
-                  {mode === 'edit' &&
-                    displayField(
-                      'PO#',
-                      inventoryDetails?.purchase_order_number != null
-                        ? `PO-${inventoryDetails.purchase_order_number}`
-                        : '—'
-                    )}
+          <SharedCard title='Purchase Order Information' contentClass='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2'>
+            {mode === 'edit' &&
+              renderReadOnlyField(
+                'PO#',
+                inventoryDetails?.purchase_order_number != null ? `PO-${inventoryDetails.purchase_order_number}` : '—'
+              )}
 
-                  <FormField
-                    control={form.control}
-                    name='warehouse_type'
-                    rules={{ required: 'Warehouse type is required' }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Warehouse Type <span className='text-destructive'>*</span>
-                        </FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={val => {
-                            field.onChange(val)
-                            form.setValue('warehouse_id', '')
-                          }}
-                        >
-                          <FormControl>
-                            <SelectTrigger className='w-full'>
-                              <SelectValue placeholder='Select type' />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value='warehouse'>Warehouse</SelectItem>
-                            <SelectItem value='location'>Location</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name='warehouse_id'
-                    render={({ field }) => {
-                      const warehouseType = form.watch('warehouse_type')
-                      const isLocation = warehouseType === 'location'
-
-                      return (
-                        <FormItem>
-                          <FormLabel>{isLocation ? 'Location' : 'Warehouse'}</FormLabel>
-                          <Select
-                            value={field.value}
-                            onValueChange={val => {
-                              field.onChange(val)
-                            }}
-                          >
-                            <FormControl>
-                              <SelectTrigger className='w-full'>
-                                <SelectValue placeholder={isLocation ? 'Select location' : 'Select warehouse'} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {isLocation
-                                ? businessLocations.map(loc => (
-                                    <SelectItem key={loc.id} value={loc.id}>
-                                      {loc.name}
-                                    </SelectItem>
-                                  ))
-                                : warehouses.map(w => (
-                                    <SelectItem key={w.id} value={w.id}>
-                                      {w.title}
-                                    </SelectItem>
-                                  ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )
-                    }}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name='stock_area'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Stock Area</FormLabel>
-                        <FormControl>
-                          <Input placeholder='Stock area' {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name='stock_section_id'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Section</FormLabel>
-                        <FormControl>
-                          <Input placeholder='Section' {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Right column */}
-                <div className='space-y-4'>
-                  <FormField
-                    control={form.control}
-                    name='dye_lot'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Dye Lot</FormLabel>
-                        <FormControl>
-                          <Input placeholder='Dye lot' {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name='comments'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Comments</FormLabel>
-                        <FormControl>
-                          <textarea
-                            className='flex min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
-                            placeholder='Comments...'
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            {poFields.map(renderFormField)}
+          </SharedCard>
         </form>
       </Form>
     </CommonDialog>
