@@ -5,11 +5,9 @@ import { useEffect, useState, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+import CustomFormField from '@/components/form/CustomFormField'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import LaborCostService from '@/services/api/labor_costs.service'
@@ -148,6 +146,16 @@ const CreateOrEditLaborCostModal = ({
     onOpenChange(false)
   }
 
+  const fieldStyle = 'grid grid-cols-[152px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
+
+  const {
+    register,
+    control,
+    setValue,
+    formState: { errors }
+  } = form
+
   return (
     <CommonDialog
       isLoading={form.formState.isSubmitting}
@@ -156,7 +164,7 @@ const CreateOrEditLaborCostModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create Labor Cost' : 'Edit Labor Cost'}
       description={mode === 'create' ? 'Add a new labor cost' : 'Update labor cost information'}
-      maxWidth='2xl'
+      maxWidth='5xl'
       disableClose={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
@@ -181,232 +189,165 @@ const CreateOrEditLaborCostModal = ({
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
           {/* Name */}
-          <FormField
-            control={form.control}
-            name='name'
-            rules={{
-              required: 'Labor name is required',
-              minLength: { value: 2, message: 'Name must be at least 2 characters' }
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Labor Name <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter labor cost name' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className='grid grid-cols-1 gap-x-4 gap-y-2'>
+            <CustomFormField
+              name='name'
+              label='Labor Name'
+              placeholder='Enter labor cost name'
+              rules={{
+                required: 'Labor name is required',
+                minLength: { value: 2, message: 'Name must be at least 2 characters' }
+              }}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
+            />
+          </div>
 
           {/* Description */}
-          <FormField
-            control={form.control}
-            name='description'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Labor Description</FormLabel>
-                <FormControl>
-                  <Textarea placeholder='Enter description' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className='grid grid-cols-1 gap-x-4 gap-y-2'>
+            <CustomFormField
+              name='description'
+              label='Labor Description'
+              type='textarea'
+              placeholder='Enter description'
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
+            />
+          </div>
 
           {/* Cost, Price, Margin in one line for large screens */}
-          <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>
+          <div className='grid grid-cols-1 gap-x-4 gap-y-2 lg:grid-cols-3'>
             {/* Cost */}
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='cost'
+              label='Cost'
+              type='number'
+              placeholder='0.00'
               rules={{
                 required: 'Cost is required',
                 min: { value: 0, message: 'Cost must be at least 0' }
               }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Cost <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type='number'
-                      min={0}
-                      step={0.01}
-                      placeholder='0.00'
-                      {...field}
-                      onChange={e => {
-                        const cost = Number(e.target.value)
+              onChange={value => {
+                const cost = Number(value)
+                const margin = form.getValues('margin')
 
-                        field.onChange(cost)
-
-                        const margin = form.getValues('margin')
-
-                        form.setValue('price', getSellPrice(cost, margin), { shouldValidate: true })
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+                setValue('cost', cost, { shouldValidate: true })
+                setValue('price', getSellPrice(cost, margin), { shouldValidate: true })
+              }}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
+
             {/* Margin */}
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='margin'
+              label='Margin'
+              type='number'
+              placeholder='0.00'
               rules={{
                 required: 'Margin is required',
-                min: { value: 0, message: 'Margin must be at least 0' }
+                min: { value: 0, message: 'Margin must be at least 0' },
+                max: { value: 100, message: 'Margin cannot be more than 100' }
               }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Margin <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type='number'
-                      min={0}
-                      step={0.01}
-                      placeholder='0.00'
-                      {...field}
-                      onChange={e => {
-                        const margin = Number(e.target.value)
+              onChange={value => {
+                const margin = Number(value)
+                const cost = form.getValues('cost')
 
-                        field.onChange(margin)
-
-                        const cost = form.getValues('cost')
-
-                        form.setValue('price', getSellPrice(cost, margin), { shouldValidate: true })
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+                setValue('margin', margin, { shouldValidate: true })
+                setValue('price', getSellPrice(cost, margin), { shouldValidate: true })
+              }}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
+
             {/* Price */}
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='price'
+              label='Price'
+              type='number'
+              placeholder='0.00'
               rules={{
                 required: 'Price is required',
                 min: { value: 0, message: 'Price must be at least 0' }
               }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Price <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type='number'
-                      min={0}
-                      step={0.01}
-                      placeholder='0.00'
-                      {...field}
-                      onChange={e => {
-                        const price = Number(e.target.value)
+              onChange={value => {
+                const price = Number(value)
+                const cost = form.getValues('cost')
 
-                        field.onChange(price)
-
-                        const cost = form.getValues('cost')
-
-                        form.setValue('margin', getMargin(cost, price), { shouldValidate: true })
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+                setValue('price', price, { shouldValidate: true })
+                setValue('margin', getMargin(cost, price), { shouldValidate: true })
+              }}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
           </div>
 
           {/* Service Type & Unit Group & Unit in one line for large screens, two lines for small screens */}
-          <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>
+          <div className='grid grid-cols-1 gap-x-4 gap-y-2 lg:grid-cols-[3fr_2fr_2fr]'>
             {/* Service Type */}
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='service_type_id'
+              label='Service Type'
+              type='select'
+              placeholder='Select service type'
               rules={{
                 required: 'Service type is required'
               }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Service Type <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select service type' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {serviceTypes.map(serviceType => (
-                        <SelectItem key={serviceType.id} value={serviceType.id}>
-                          {serviceType.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              selectOptions={serviceTypes.map(serviceType => ({
+                value: serviceType.id,
+                label: serviceType.name
+              }))}
+              control={control}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
 
             {/* Unit Group Type (not in payload) */}
-            <FormItem>
-              <FormLabel>
-                Unit Type <span className='text-red-500'>*</span>
-              </FormLabel>
-              <Select value={unitGroup} onValueChange={setUnitGroup}>
-                <FormControl>
-                  <SelectTrigger className='w-full'>
-                    <SelectValue placeholder='Select unit type' />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value='uom'>UOM</SelectItem>
-                  <SelectItem value='measure'>Measure</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormItem>
+            <CustomFormField
+              type='select'
+              name='unit_group_type'
+              label='Unit Type'
+              placeholder='Select unit type'
+              selectOptions={[
+                { value: 'uom', label: 'UOM' },
+                { value: 'measure', label: 'Measure' }
+              ]}
+              value={unitGroup}
+              onChange={value => setUnitGroup(String(value))}
+              fieldClassName={`${fieldStyle} lg:grid-cols-[62px_minmax(0,_1fr)]!`}
+              labelClassName={labelStyle}
+            />
 
             {/* Unit */}
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='unit_id'
+              label='Unit'
+              type='select'
+              placeholder='Select unit'
               rules={{
                 required: 'Unit is required'
               }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Unit <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select unit' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {filteredUnits.map(unit => (
-                        <SelectItem key={unit.id} value={unit.id}>
-                          {unit.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              selectOptions={filteredUnits.map(unit => ({
+                value: unit.id,
+                label: unit.name
+              }))}
+              control={control}
+              errors={errors}
+              fieldClassName={`${fieldStyle} lg:grid-cols-[105px_minmax(0,_1fr)]!`}
+              labelClassName={labelStyle}
             />
           </div>
         </form>
