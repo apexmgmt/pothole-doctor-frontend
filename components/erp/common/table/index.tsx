@@ -218,7 +218,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
   return (
     <div className={`${className}`}>
       {/* Filters Section */}
-      {showFilters && customFilters && <div className='py-4 border-border'>{customFilters}</div>}
+      {showFilters && customFilters && <div className='py-4'>{customFilters}</div>}
 
       {/* Table Section */}
       <div className='relative'>
