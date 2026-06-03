@@ -237,9 +237,9 @@ const CreateOrEditCommissionModal = ({
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
           {/* Commission Name Field */}
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-y-2'>
             <CustomFormField
               name='commission_type'
               label='Commission Name'
@@ -256,8 +256,8 @@ const CreateOrEditCommissionModal = ({
               labelClassName={labelStyle}
             />
           </div>
-          <Separator />
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+          {/* <Separator /> */}
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-y-2'>
             {/* Based on Field */}
             <CustomFormField
               name='based_on'
@@ -299,7 +299,7 @@ const CreateOrEditCommissionModal = ({
           </div>
           <Separator />
 
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-y-2'>
             {/* Filter Field */}
             <CustomFormField
               name='filter_type'
@@ -335,7 +335,7 @@ const CreateOrEditCommissionModal = ({
                     }}
                     register={register}
                     errors={errors}
-                    fieldClassName={`${fieldStyle} grid-cols-[96px_minmax(0,_1fr)]! flex-1`}
+                    fieldClassName={`${fieldStyle} lg:grid-cols-[96px_minmax(0,_1fr)]! flex-1`}
                     labelClassName={`${labelStyle}`}
                   />
                 )}
@@ -357,7 +357,7 @@ const CreateOrEditCommissionModal = ({
                     }}
                     register={register}
                     errors={errors}
-                    fieldClassName={`${fieldStyle} grid-cols-[96px_minmax(0,_1fr)]! flex-1`}
+                    fieldClassName={`${fieldStyle} lg:grid-cols-[96px_minmax(0,_1fr)]! flex-1`}
                     labelClassName={`${labelStyle}`}
                   />
                 )}
