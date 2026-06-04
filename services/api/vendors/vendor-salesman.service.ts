@@ -46,7 +46,7 @@ export default class VendorSalesmanService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to add vendor salesman')
+        throw new errorData
       }
 
       await revalidate('vendor-salesman')
@@ -100,7 +100,7 @@ export default class VendorSalesmanService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update vendor salesman')
+        throw errorData
       }
 
       await revalidate('vendor-salesman')
