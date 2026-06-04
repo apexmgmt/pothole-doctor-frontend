@@ -104,11 +104,11 @@ export const DEFAULT_PRESETS = [
   { label: 'Custom Range', range: () => null }
 ] as const
 
-function formatDateRange(range: DateRange): string {
-  if (!range?.from) return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+function formatDateRange(range: DateRange | undefined): string | null {
+  if (!range?.from || !range.to) return null
+
   const from = range.from.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
-  if (!range.to || range.to.getTime() === range.from.getTime()) return from
   const to = range.to.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
   return `${from} - ${to}`
@@ -191,19 +191,21 @@ export function DateRangePicker({
     setOpen(false)
   }
 
+  const hasValue = value?.from && value.to
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant='outline'
           className={cn(
-            'h-7 flex justify-between items-center gap-1.5 bg-[#1f1f1f] hover:bg-[#1f1f1f] border border-border placeholder:text-[#a7a7ae] text-[#f4f4f5] px-2.5! py-1.25 rounded text-sm font-normal whitespace-nowrap cursor-pointer transition-all',
+            `h-7 flex justify-between items-center gap-1.5 bg-[#1f1f1f]! border border-border  px-2.5! py-1.25 rounded text-sm font-normal whitespace-nowrap cursor-pointer transition-all ${hasValue ? 'text-[#f4f4f5]' : 'text-[#a7a7ae]'}`,
             className
           )}
         >
           <span className='flex items-center gap-1'>
             <CalendarDays className='size-3.5 shrink-0' />
-            {value ? formatDateRange(value) : placeholder}
+            {formatDateRange(value) ?? placeholder}
           </span>
           <ChevronDown className='size-3 text-muted-foreground' />
         </Button>

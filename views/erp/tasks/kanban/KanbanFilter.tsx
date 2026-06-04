@@ -1,13 +1,11 @@
 'use client'
 
 import React, { useState } from 'react'
-import { addMonths, isAfter } from 'date-fns'
-import { X, AlertCircle } from 'lucide-react'
+import { X } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { DateRangePicker, type DateRange } from '@/components/ui/date-range-picker'
-import { toast } from 'sonner'
 
 interface KanbanFilterProps {
   onChange: (filters: { starting_date?: string; ending_date?: string }) => void
@@ -29,21 +27,6 @@ const KanbanFilter: React.FC<KanbanFilterProps> = ({ onChange, initialFilters })
     return `${year}-${month}-${day}`
   }
 
-  // 2. Validation Logic for the 6-month constraint
-  const validateRange = (range: DateRange | undefined) => {
-    if (!range?.from || !range?.to) return { valid: true }
-
-    const sixMonthsFromStart = addMonths(range.from, 6)
-
-    if (isAfter(range.to, sixMonthsFromStart)) {
-      return { valid: false, message: 'Date range cannot exceed 6 months' }
-    }
-
-    return { valid: true }
-  }
-
-  const { valid, message } = validateRange(date)
-
   const handleClear = () => {
     setDate(undefined)
     onChange({
@@ -57,19 +40,11 @@ const KanbanFilter: React.FC<KanbanFilterProps> = ({ onChange, initialFilters })
       <div className='flex gap-2 items-end'>
         <div className='grid gap-1'>
           <label className='text-xs font-medium'>Task Date Range</label>
-          <div className={cn('grid gap-2', !valid && 'border-destructive')}>
+          <div className='grid gap-2'>
             <DateRangePicker
               placeholder='Select date range'
               value={date}
               onChange={newRange => {
-                const validation = validateRange(newRange)
-
-                if (!validation.valid) {
-                  toast.error(validation.message)
-
-                  return
-                }
-
                 setDate(newRange)
                 onChange({
                   starting_date: newRange?.from ? formatDateToString(newRange.from) : undefined,
@@ -77,11 +52,7 @@ const KanbanFilter: React.FC<KanbanFilterProps> = ({ onChange, initialFilters })
                 })
               }}
               align='start'
-              className={cn(
-                'w-[300px]',
-                !date && 'text-muted-foreground',
-                !valid && 'border-destructive text-destructive'
-              )}
+              className={cn('w-[300px]', !date && 'text-muted-foreground')}
             />
           </div>
         </div>
@@ -94,12 +65,6 @@ const KanbanFilter: React.FC<KanbanFilterProps> = ({ onChange, initialFilters })
           )}
         </div>
       </div>
-
-      {!valid && (
-        <p className='text-destructive text-xs mt-2 flex items-center gap-1'>
-          <AlertCircle className='h-3 w-3' /> {message}
-        </p>
-      )}
     </div>
   )
 }
