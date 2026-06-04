@@ -491,7 +491,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     },
     {
       name: 'service_type_ids',
-      type: 'multiselect-creatable',
+      type: 'multiselect-searchable',
       label: 'Desired Service(s)',
       placeholder: 'Select service types...',
       selectOptions: serviceTypes.map(service => ({

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Controller, FieldValues, Path } from 'react-hook-form'
 
 import { ChevronsUpDown, Plus, XIcon } from 'lucide-react'
@@ -91,6 +91,13 @@ const MultiSelectCreatableField = <T extends FieldValues>({
 
     const showCreate = inputValue.trim().length > 0 && !isExistingOption(inputValue)
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && showCreate) {
+        e.preventDefault()
+        handleCreate()
+      }
+    }
+
     return (
       <Popover
         open={open}
@@ -151,6 +158,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
               value={inputValue}
               onValueChange={setInputValue}
               autoFocus={autoFocus}
+              onKeyDown={handleKeyDown}
             />
             <CommandEmpty>No results found.</CommandEmpty>
 
