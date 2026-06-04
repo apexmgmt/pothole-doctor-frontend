@@ -398,7 +398,7 @@ const CreateEditClientModal: React.FC<CreateEditClientModalProps> = ({
     },
     {
       name: 'company_name',
-      type: 'combobox',
+      type: 'select-creatable',
       label: 'Company Name',
       placeholder: 'Select or create company',
       selectOptions: companies.map(company => ({

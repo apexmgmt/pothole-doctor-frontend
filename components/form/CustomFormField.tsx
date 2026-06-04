@@ -15,6 +15,7 @@ import MultiSelectField from './fields/MultiSelectField'
 import MultiSelectSearchField from './fields/MultiSelectSearchField'
 import CheckboxField from './fields/CheckboxField'
 import MultiSelectCreatableField from './fields/MultiSelectCreatableField'
+import SelectCreatableField from './fields/SelectCreatableField'
 import SwitchField from './fields/SwitchField'
 import RadioField from './fields/RadioField'
 
@@ -124,6 +125,21 @@ const CustomFormField = <T extends FieldValues>({
             rules={rules}
             selectOptions={selectOptions}
             value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
+            disabled={disabled}
+            className={inputStyle}
+          />
+        ) : type === 'select-creatable' ? (
+          <SelectCreatableField
+            name={name}
+            placeholder={placeholder}
+            selectOptions={selectOptions}
+            value={value}
+            rules={rules}
+            control={control}
             onChange={onChange}
             onBlur={onBlur}
             onOpenChange={onOpenChange}
