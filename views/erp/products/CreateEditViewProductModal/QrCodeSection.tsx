@@ -20,13 +20,13 @@ export function QrCodeSection({ qrCodePath }: QrCodeSectionProps) {
   const qrCodeSrc = generateFileUrl(qrCodePath) || qrCodePath
 
   return (
-    <Card className='p-4 space-y-3'>
-      <div className='flex items-center gap-2'>
+    <Card className='p-4 border border-border rounded-lg space-y-3'>
+      <div className='flex items-center gap-2 pb-3.5 mb-3 border-b border-border'>
         <QrCode className='h-4 w-4 text-gray-50' />
-        <h4 className='text-sm font-medium'>QR Code</h4>
+        <h4 className='leading-none font-semibold'>QR Code</h4>
       </div>
 
-      <div className='rounded-md border bg-gray-50 p-0 flex items-center justify-center'>
+      <div className='rounded-md bg-gray-100 flex items-center justify-center'>
         <Image
           src={qrCodeSrc}
           alt='Product QR code'

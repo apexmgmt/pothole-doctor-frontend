@@ -8,12 +8,12 @@ import { toast } from 'sonner'
 
 import { Courier, CourierPayload } from '@/types'
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import CourierService from '@/services/api/couriers.service'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface CreateOrEditCourierModalProps {
   mode?: 'create' | 'edit'
@@ -51,6 +51,14 @@ const CreateOrEditCourierModal = ({
       fax: courierDetails?.fax || ''
     }
   })
+
+  const {
+    register,
+    formState: { errors }
+  } = form
+
+  const fieldStyle = 'grid grid-cols-[120px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
 
   useEffect(() => {
     if (open) {
@@ -124,13 +132,14 @@ const CreateOrEditCourierModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create New Courier' : 'Edit Courier'}
       description={mode === 'create' ? 'Add a new courier to the system' : 'Update courier information'}
-      maxWidth='sm'
+      maxWidth='md'
       disableClose={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
           <Button
             type='button'
             variant='outline'
+            size='sm'
             onClick={onCancel}
             disabled={form.formState.isSubmitting}
             className='flex-1'
@@ -139,6 +148,7 @@ const CreateOrEditCourierModal = ({
           </Button>
           <Button
             type='submit'
+            size='sm'
             onClick={form.handleSubmit(onSubmit)}
             disabled={form.formState.isSubmitting}
             className='flex-1'
@@ -149,98 +159,73 @@ const CreateOrEditCourierModal = ({
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
           {/* Name */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='name'
+            label='Name'
+            placeholder='Enter courier name'
             rules={{
               required: 'Name is required',
               minLength: { value: 2, message: 'Name must be at least 2 characters' }
             }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Name <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter courier name' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
 
           {/* Email */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='email'
+            label='Email'
+            type='email'
+            placeholder='Enter email address'
             rules={{
               required: 'Email is required',
               pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email address' }
             }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Email <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input type='email' placeholder='Enter email address' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
 
           {/* Contact Number */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='contact_number'
+            label='Contact Number'
+            placeholder='Enter contact number'
             rules={{ required: 'Contact number is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Contact Number <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter contact number' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
 
           {/* Website */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='website'
+            label='Website'
+            placeholder='https://example.com'
             rules={{
               pattern: { value: /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/, message: 'Enter a valid URL' }
             }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Website</FormLabel>
-                <FormControl>
-                  <Input placeholder='https://example.com' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
 
           {/* Fax */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='fax'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fax</FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter fax number' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='Fax'
+            placeholder='Enter fax number'
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
         </form>
       </Form>

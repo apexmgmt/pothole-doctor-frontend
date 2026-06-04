@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Check } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -28,6 +29,12 @@ const SecurityTab: React.FC<SecurityTabProps> = ({ staffId, canEditStaff = false
       password_confirmation: ''
     }
   })
+
+  const newPassword = form.watch('new_password') || ''
+  const hasMinLength = newPassword.length >= 8
+  const hasLowerAndUpper = /(?=.*[a-z])(?=.*[A-Z])/.test(newPassword)
+  const hasNumber = /(?=.*\d)/.test(newPassword)
+  const hasSymbol = /(?=.*[@$!%*?&\s])/.test(newPassword)
 
   const {
     formState: { isSubmitting },
@@ -151,10 +158,30 @@ const SecurityTab: React.FC<SecurityTabProps> = ({ staffId, canEditStaff = false
           <div className='mt-6'>
             <h4 className='text-sm font-medium text-light mb-3'>Password Requirements</h4>
             <ul className='space-y-2 text-sm text-gray'>
-              <li>• Minimum 8 characters long - the more, the better</li>
-              <li>• At least one lowercase & one uppercase character</li>
-              <li>• At least one number</li>
-              <li>• At least one symbol or whitespace character</li>
+              <li className={`flex items-center gap-2 ${hasMinLength ? 'text-green-500' : ''}`}>
+                {hasMinLength ? (
+                  <Check className='w-4 h-4 text-green-500' />
+                ) : (
+                  <span className='w-4 text-center'>•</span>
+                )}{' '}
+                Minimum 8 characters long - the more, the better
+              </li>
+              <li className={`flex items-center gap-2 ${hasLowerAndUpper ? 'text-green-500' : ''}`}>
+                {hasLowerAndUpper ? (
+                  <Check className='w-4 h-4 text-green-500' />
+                ) : (
+                  <span className='w-4 text-center'>•</span>
+                )}{' '}
+                At least one lowercase & one uppercase character
+              </li>
+              <li className={`flex items-center gap-2 ${hasNumber ? 'text-green-500' : ''}`}>
+                {hasNumber ? <Check className='w-4 h-4 text-green-500' /> : <span className='w-4 text-center'>•</span>}{' '}
+                At least one number
+              </li>
+              <li className={`flex items-center gap-2 ${hasSymbol ? 'text-green-500' : ''}`}>
+                {hasSymbol ? <Check className='w-4 h-4 text-green-500' /> : <span className='w-4 text-center'>•</span>}{' '}
+                At least one symbol or whitespace character
+              </li>
             </ul>
           </div>
           <div className='flex justify-end'>

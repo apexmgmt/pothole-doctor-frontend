@@ -16,6 +16,7 @@ import MultiSelectSearchField from './fields/MultiSelectSearchField'
 import CheckboxField from './fields/CheckboxField'
 import MultiSelectCreatableField from './fields/MultiSelectCreatableField'
 import SwitchField from './fields/SwitchField'
+import RadioField from './fields/RadioField'
 
 type FormFieldProps<T extends FieldValues> = BaseFieldProps<T> & {
   minDate?: string
@@ -191,6 +192,19 @@ const CustomFormField = <T extends FieldValues>({
             disabled={disabled}
             className={inputStyle}
           />
+        ) : type === 'radio' ? (
+          <RadioField
+            name={name}
+            selectOptions={selectOptions}
+            value={value}
+            rules={rules}
+            control={control}
+            onChange={onChange}
+            onBlur={onBlur}
+            autoFocus={autoFocus}
+            disabled={disabled}
+            className={className}
+          />
         ) : type === 'textarea' ? (
           <TextareaField
             name={name}
@@ -224,9 +238,9 @@ const CustomFormField = <T extends FieldValues>({
         )}
 
         {/* Error */}
-        {fieldError && <FieldError className='mt-1'>{String(fieldError?.message) ?? ''}</FieldError>}
+        {fieldError && <FieldError className='mt-1 text-xs!'>{String(fieldError?.message) ?? ''}</FieldError>}
         {/* Description */}
-        {description && <FieldDescription className='mt-1'>{description}</FieldDescription>}
+        {description && <FieldDescription className='mt-1! text-xs!'>{description}</FieldDescription>}
       </div>
     </Field>
   )

@@ -1,232 +1,159 @@
 'use client'
 
-import { UseFormReturn } from 'react-hook-form'
+import { Path, RegisterOptions, UseFormReturn } from 'react-hook-form'
 
-import { DatePicker } from '@/components/ui/datePicker'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { BusinessLocation, Courier, Warehouse } from '@/types'
+import { InputType, SelectOption } from '@/components/form/fields/types'
 import type { FormValues } from './types'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface OrderDetailsFormProps {
   form: UseFormReturn<FormValues>
+  mode: 'create' | 'edit'
   couriers: Courier[]
   warehouses: Warehouse[]
   businessLocations: BusinessLocation[]
-  warehouseType: 'warehouse' | 'location'
 }
 
-const OrderDetailsForm = ({ form, couriers, warehouses, businessLocations, warehouseType }: OrderDetailsFormProps) => {
+type FormFieldType = {
+  name: Path<FormValues>
+  type?: InputType
+  label?: string
+  placeholder?: string
+  rules?: RegisterOptions<FormValues, Path<FormValues>>
+  selectOptions?: SelectOption[]
+  onChange?: (value: any) => void
+  fieldClassName?: string
+}
+
+const OrderDetailsForm = ({ form, mode, couriers, warehouses, businessLocations }: OrderDetailsFormProps) => {
+  const {
+    watch,
+    setValue,
+    control,
+    register,
+    formState: { errors }
+  } = form
+
+  const warehouseType = watch('warehouse_type')
+
+  const fields: FormFieldType[] = [
+    {
+      name: 'status',
+      type: 'select',
+      label: 'Status',
+      placeholder: 'Select Status',
+      rules:
+        mode === 'create'
+          ? {}
+          : {
+              required: 'Status is required',
+              validate: value => (value === 'new' ? `Status can't be changed to new` : true)
+            },
+      selectOptions: [
+        { value: 'new', label: 'New' },
+        { value: 'pending', label: 'Pending' },
+        { value: 'ordered', label: 'Ordered' }
+      ]
+    },
+    {
+      name: 'courier_id',
+      type: 'select',
+      label: 'Carrier',
+      placeholder: 'Select Carrier',
+      selectOptions: couriers.map(c => ({
+        value: c.id,
+        label: c.name
+      }))
+    },
+    {
+      name: 'reference_number',
+      type: 'text',
+      label: 'Reference Number',
+      placeholder: 'Reference Number'
+    },
+    {
+      name: 'est_departure_date',
+      type: 'datepicker',
+      label: 'Est. Departure',
+      placeholder: 'Est. Departure'
+    },
+    {
+      name: 'est_arrival_date',
+      type: 'datepicker',
+      label: 'Est. Arrival',
+      placeholder: 'Est. Arrival'
+    },
+    {
+      name: 'est_shipping_cost',
+      type: 'number',
+      label: 'Est. Shipping Cost',
+      placeholder: '0.00'
+    },
+    {
+      name: 'warehouse_type',
+      type: 'select',
+      label: 'Warehouse Type',
+      placeholder: 'Select Type',
+      rules: { required: 'Warehouse type is required' },
+      selectOptions: [
+        { value: 'warehouse', label: 'Warehouse' },
+        { value: 'location', label: 'Location' }
+      ],
+      onChange: () => {
+        setValue('warehouse_id', '')
+      }
+    },
+    {
+      name: 'warehouse_id',
+      type: 'select',
+      label: 'Warehouse',
+      placeholder: warehouseType === 'warehouse' ? 'Select Warehouse' : 'Select Location',
+      rules: { required: 'Warehouse is required' },
+      selectOptions:
+        warehouseType === 'warehouse'
+          ? warehouses.map(w => ({ value: w.id, label: w.title }))
+          : businessLocations.map(l => ({ value: l.id, label: l.name }))
+    },
+    {
+      name: 'payment_due',
+      type: 'select',
+      label: 'Payment Due',
+      placeholder: 'Select Payment Type',
+      selectOptions: [
+        { value: 'on_arrival', label: 'On Arrival' },
+        { value: 'paid', label: 'Paid' }
+      ]
+    },
+    {
+      name: 'comments',
+      type: 'textarea',
+      label: 'Comments',
+      placeholder: 'Comments...',
+      fieldClassName: 'sm:col-span-2 lg:col-span-3'
+    }
+  ]
+
+  const sharedFieldClass = 'grid grid-cols-[116px_minmax(0,_1fr)]'
+  const sharedLabelClass = 'justify-end items-start self-start text-right pt-1'
+
+  const renderFormField = (field: FormFieldType) => {
+    return (
+      <CustomFormField
+        key={field.name}
+        {...field}
+        register={register}
+        control={control}
+        errors={errors}
+        fieldClassName={`${sharedFieldClass} ${field.fieldClassName || ''}`}
+        labelClassName={sharedLabelClass}
+      />
+    )
+  }
+
   return (
-    <div className='border border-border rounded-lg p-4'>
-      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-        <FormField
-          control={form.control}
-          name='status'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Status</FormLabel>
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className='w-full'>
-                    <SelectValue placeholder='Select Status' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='pending'>Pending</SelectItem>
-                    <SelectItem value='ordered'>Ordered</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name='courier_id'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Carrier</FormLabel>
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className='w-full'>
-                    <SelectValue placeholder='Select Carrier' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {couriers.map(c => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name='reference_number'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Reference Number</FormLabel>
-              <FormControl>
-                <Input placeholder='Reference Number' {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name='est_departure_date'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Est. Departure</FormLabel>
-              <FormControl>
-                <DatePicker value={field.value} onChange={field.onChange} placeholder='Est. Departure' />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name='est_arrival_date'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Est. Arrival</FormLabel>
-              <FormControl>
-                <DatePicker value={field.value} onChange={field.onChange} placeholder='Est. Arrival' />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name='est_shipping_cost'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Est. Shipping Cost</FormLabel>
-              <FormControl>
-                <Input type='number' step='any' min={0} placeholder='0.00' {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name='warehouse_type'
-          rules={{ required: 'Warehouse type is required' }}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Warehouse Type <span className='text-destructive'>*</span>
-              </FormLabel>
-              <FormControl>
-                <Select
-                  value={field.value}
-                  onValueChange={val => {
-                    field.onChange(val)
-                    form.setValue('warehouse_id', '')
-                  }}
-                >
-                  <SelectTrigger className='w-full'>
-                    <SelectValue placeholder='Select Type' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='warehouse'>Warehouse</SelectItem>
-                    <SelectItem value='location'>Location</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          key={`warehouse_id-${warehouseType}`}
-          control={form.control}
-          name='warehouse_id'
-          rules={{ required: 'Warehouse is required' }}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Warehouse <span className='text-destructive'>*</span>
-              </FormLabel>
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className='w-full'>
-                    <SelectValue placeholder={warehouseType === 'warehouse' ? 'Select Warehouse' : 'Select Location'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {warehouseType === 'warehouse'
-                      ? warehouses.map(w => (
-                          <SelectItem key={w.id} value={w.id}>
-                            {w.title}
-                          </SelectItem>
-                        ))
-                      : businessLocations.map(l => (
-                          <SelectItem key={l.id} value={l.id}>
-                            {l.name}
-                          </SelectItem>
-                        ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name='payment_due'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Payment Due</FormLabel>
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className='w-full'>
-                    <SelectValue placeholder='Select Payment Type' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='on_arrival'>On Arrival</SelectItem>
-                    <SelectItem value='paid'>Paid</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name='comments'
-          render={({ field }) => (
-            <FormItem className='sm:col-span-2 lg:col-span-3'>
-              <FormLabel>Comments</FormLabel>
-              <FormControl>
-                <Textarea placeholder='Comments...' rows={2} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 border border-border rounded-lg'>
+      {fields.map(renderFormField)}
     </div>
   )
 }

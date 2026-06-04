@@ -54,7 +54,7 @@ export default class PaymentTermsService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create payment terms')
+        throw errorData
       }
 
       await revalidate('payment-terms')
@@ -109,7 +109,7 @@ export default class PaymentTermsService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update payment terms')
+        throw errorData
       }
 
       await revalidate('payment-terms')

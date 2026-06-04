@@ -43,7 +43,7 @@ export default class NoteTypeService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create note types')
+        throw errorData
       }
 
       await revalidate('note-types')
@@ -91,7 +91,7 @@ export default class NoteTypeService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update note types')
+        throw new errorData
       }
 
       await revalidate('note-types')

@@ -52,7 +52,7 @@ export default class CommissionTypeService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create commission types')
+        throw errorData
       }
 
       await revalidate('commission-types')
@@ -107,7 +107,7 @@ export default class CommissionTypeService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update commission types')
+        throw errorData
       }
 
       await revalidate('commission-types')

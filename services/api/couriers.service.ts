@@ -39,7 +39,7 @@ export default class CourierService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create courier')
+        throw errorData
       }
 
       await revalidate('couriers')
@@ -84,7 +84,7 @@ export default class CourierService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update courier')
+        throw errorData
       }
 
       await revalidate('couriers')

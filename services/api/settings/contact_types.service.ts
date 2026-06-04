@@ -52,7 +52,7 @@ export default class ContactTypeService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create contact types')
+        throw errorData
       }
 
       await revalidate('contact-types')
@@ -106,7 +106,7 @@ export default class ContactTypeService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update contact types')
+        throw errorData
       }
 
       await revalidate('contact-types')

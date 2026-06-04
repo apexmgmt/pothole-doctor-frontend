@@ -1,18 +1,12 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
 import {
-  PaymentTermPayload,
-  PartnerType,
-  PartnerTypePayload,
-  PaymentTerm,
-  ContactType,
-  ContactTypePayload,
   CommissionType,
   CommissionFilter,
   CommissionBase,
@@ -22,13 +16,12 @@ import {
 } from '@/types'
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import CommissionService from '@/services/api/settings/commissions.service'
 import { Separator } from '@/components/ui/separator'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface FormValues {
   commission_type: string
@@ -53,6 +46,8 @@ const CreateOrEditCommissionModal = ({
   commissionId,
   commissionDetails
 }: CreateOrEditCommissionModalProps) => {
+  const skipPerResetRef = useRef(false)
+
   const form = useForm<FormValues>({
     mode: 'onSubmit',
     defaultValues: {
@@ -79,6 +74,8 @@ const CreateOrEditCommissionModal = ({
   // Reset form when commissionDetails changes or modal opens
   useEffect(() => {
     if (open) {
+      skipPerResetRef.current = true
+
       form.reset({
         commission_type: commissionDetails?.commission_type || '',
         based_on: commissionDetails?.based_on || '',
@@ -176,6 +173,12 @@ const CreateOrEditCommissionModal = ({
 
   // Reset per when based_on changes to avoid stale selection
   useEffect(() => {
+    if (skipPerResetRef.current) {
+      skipPerResetRef.current = false
+
+      return
+    }
+
     form.setValue('per', '')
   }, [basedOn, form])
 
@@ -192,6 +195,15 @@ const CreateOrEditCommissionModal = ({
     }
   }, [filterType, form])
 
+  const fieldStyle = 'grid grid-cols-[152px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
+
+  const {
+    register,
+    control,
+    formState: { errors }
+  } = form
+
   return (
     <CommonDialog
       isLoading={form.formState.isSubmitting}
@@ -200,7 +212,7 @@ const CreateOrEditCommissionModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create New Commission' : 'Edit Commission'}
       description={mode === 'create' ? 'Add a new commission to the system' : 'Update commission information'}
-      maxWidth='3xl'
+      maxWidth='5xl'
       disableClose={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
@@ -225,201 +237,138 @@ const CreateOrEditCommissionModal = ({
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
           {/* Commission Name Field */}
-          <div className='grid grid-cols-1 gap-4'>
-            <FormField
-              control={form.control}
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-y-2'>
+            <CustomFormField
               name='commission_type'
+              label='Commission Name'
+              type='select'
+              placeholder='Select a commission type'
               rules={{ required: 'Please select a commission type' }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Commission Name <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select a commission type' />
-                      </SelectTrigger>
-                    </FormControl>
-                    {commissionTypes.length > 0 && (
-                      <SelectContent>
-                        {commissionTypes.map(commissionType => (
-                          <SelectItem key={commissionType.id} value={commissionType.slug.toString()}>
-                            {commissionType.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    )}
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              selectOptions={commissionTypes.map((commissionType: CommissionType) => ({
+                label: commissionType.name,
+                value: commissionType.slug.toString()
+              }))}
+              control={control}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
           </div>
-          <Separator />
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+          {/* <Separator /> */}
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-y-2'>
             {/* Based on Field */}
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='based_on'
+              label='Based On'
+              type='select'
+              placeholder='Select a based on'
               rules={{ required: 'Please select what the commission is based on' }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className='text-nowrap'>
-                    Based On <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select a based on' />
-                      </SelectTrigger>
-                    </FormControl>
-                    {commissionBases.length > 0 && (
-                      <SelectContent>
-                        {commissionBases.map(commissionBase => (
-                          <SelectItem key={commissionBase.id} value={commissionBase.slug.toString()}>
-                            {commissionBase.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    )}
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              selectOptions={commissionBases.map((commissionBase: CommissionBase) => ({
+                label: commissionBase.name,
+                value: commissionBase.slug.toString()
+              }))}
+              control={control}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
 
             {/* Per Field */}
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='per'
+              label='Per'
+              type='select'
+              placeholder='Select a per'
               rules={{ required: 'Please select per option' }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Per <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select a per' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {basedOn === 'bonus-by-sales' ? (
-                        <>
-                          <SelectItem value='per-job'>Per Job</SelectItem>
-                          <SelectItem value='per-store-sales'>Per Store Sales</SelectItem>
-                          <SelectItem value='per-company-sales'>Per Company Sales</SelectItem>
-                        </>
-                      ) : (
-                        <SelectItem value='per-job'>Per Job</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              selectOptions={
+                basedOn === 'bonus-by-sales'
+                  ? [
+                      { label: 'Per Job', value: 'per-job' },
+                      { label: 'Per Store Sales', value: 'per-store-sales' },
+                      { label: 'Per Company Sales', value: 'per-company-sales' }
+                    ]
+                  : [{ label: 'Per Job', value: 'per-job' }]
+              }
+              control={control}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
           </div>
           <Separator />
 
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-y-2'>
             {/* Filter Field */}
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='filter_type'
+              label='Filter'
+              type='select'
+              placeholder='Select a filter type'
               rules={{ required: 'Please select a filter type' }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Filter <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select a filter type' />
-                      </SelectTrigger>
-                    </FormControl>
-                    {commissionFilters.length > 0 && (
-                      <SelectContent>
-                        {commissionFilters.map(commissionFilter => (
-                          <SelectItem key={commissionFilter.id} value={commissionFilter.slug.toString()}>
-                            {commissionFilter.type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    )}
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              selectOptions={commissionFilters.map((commissionFilter: CommissionFilter) => ({
+                label: commissionFilter.type,
+                value: commissionFilter.slug.toString()
+              }))}
+              control={control}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
             {filterType !== 'same-as-store' && (
               <div className='lg:col-span-2 flex flex-row gap-2'>
                 {/* Min amount field - shown for 'between' and 'greater-than' */}
                 {(filterType === 'between' || filterType === 'greater-than') && (
-                  <FormField
-                    control={form.control}
+                  <CustomFormField
                     name='min_amount'
+                    label='Min Amount'
+                    type='number'
+                    placeholder='Enter min amount'
                     rules={{
                       validate: value => {
-                        if (form.getValues('filter_percent') && parseFloat(value) > 100)
+                        if (form.getValues('filter_percent') && typeof value === 'string' && parseFloat(value) > 100)
                           return 'Min amount cannot be greater than 100 when using percentage'
 
                         return true
                       }
                     }}
-                    render={({ field }) => (
-                      <FormItem className='flex-1'>
-                        <FormLabel>
-                          Min Amount <span className='text-red-500'>*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input type='number' placeholder='Enter min amount' {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    register={register}
+                    errors={errors}
+                    fieldClassName={`${fieldStyle} lg:grid-cols-[96px_minmax(0,_1fr)]! flex-1`}
+                    labelClassName={`${labelStyle}`}
                   />
                 )}
 
                 {/* Max amount field - shown for 'between' and 'less-than' */}
                 {(filterType === 'between' || filterType === 'less-than') && (
-                  <FormField
-                    control={form.control}
+                  <CustomFormField
                     name='max_amount'
+                    label='Max Amount'
+                    type='number'
+                    placeholder='Enter max amount'
                     rules={{
                       validate: value => {
-                        if (form.getValues('filter_percent') && parseFloat(value) > 100)
+                        if (form.getValues('filter_percent') && typeof value === 'string' && parseFloat(value) > 100)
                           return 'Max amount cannot be greater than 100 when using percentage'
 
                         return true
                       }
                     }}
-                    render={({ field }) => (
-                      <FormItem className='flex-1'>
-                        <FormLabel>
-                          Max Amount <span className='text-red-500'>*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input type='number' placeholder='Enter max amount' {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    register={register}
+                    errors={errors}
+                    fieldClassName={`${fieldStyle} lg:grid-cols-[96px_minmax(0,_1fr)]! flex-1`}
+                    labelClassName={`${labelStyle}`}
                   />
                 )}
 
                 {/* Filter percent field - shown for all except 'same-as-store' */}
                 <FormField
-                  control={form.control}
+                  control={control}
                   name='filter_percent'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='opacity-0 pointer-events-none'>Action</FormLabel>
+                      {/* <FormLabel className='opacity-0 pointer-events-none'>Action</FormLabel> */}
                       <FormControl>
                         <div className='flex gap-1'>
                           <Button
@@ -427,6 +376,7 @@ const CreateOrEditCommissionModal = ({
                             variant={!field.value ? 'default' : 'outline'}
                             size='icon'
                             onClick={() => field.onChange(false)}
+                            className='h-7 w-7'
                           >
                             $
                           </Button>
@@ -435,6 +385,7 @@ const CreateOrEditCommissionModal = ({
                             variant={field.value ? 'default' : 'outline'}
                             size='icon'
                             onClick={() => field.onChange(true)}
+                            className='h-7 w-7'
                           >
                             %
                           </Button>
@@ -450,40 +401,35 @@ const CreateOrEditCommissionModal = ({
           <Separator />
 
           {filterType !== 'same-as-store' && (
-            <div className='grid grid-cols-1 gap-4'>
+            <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
               <div className='flex justify-between gap-2'>
                 {/* Amount field */}
-                <FormField
-                  control={form.control}
+                <CustomFormField
                   name='amount'
+                  label='Commission'
+                  type='number'
+                  placeholder='Enter commission'
                   rules={{
                     validate: value => {
-                      if (form.getValues('commission_percent') && parseFloat(value) > 100)
+                      if (form.getValues('commission_percent') && typeof value === 'string' && parseFloat(value) > 100)
                         return 'Commission cannot be greater than 100 when using percentage'
 
                       return true
                     }
                   }}
-                  render={({ field }) => (
-                    <FormItem className='flex-1'>
-                      <FormLabel>
-                        Commission <span className='text-red-500'>*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input type='number' placeholder='Enter commission' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  register={register}
+                  errors={errors}
+                  fieldClassName={`${fieldStyle} flex-1`}
+                  labelClassName={labelStyle}
                 />
 
                 {/* Commission percent field */}
                 <FormField
-                  control={form.control}
+                  control={control}
                   name='commission_percent'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='opacity-0 pointer-events-none'>Action</FormLabel>
+                      {/* <FormLabel className='opacity-0 pointer-events-none'>Action</FormLabel> */}
                       <FormControl>
                         <div className='flex gap-1'>
                           <Button
@@ -491,6 +437,7 @@ const CreateOrEditCommissionModal = ({
                             variant={!field.value ? 'default' : 'outline'}
                             size='icon'
                             onClick={() => field.onChange(false)}
+                            className='h-7 w-7'
                           >
                             $
                           </Button>
@@ -499,6 +446,7 @@ const CreateOrEditCommissionModal = ({
                             variant={field.value ? 'default' : 'outline'}
                             size='icon'
                             onClick={() => field.onChange(true)}
+                            className='h-7 w-7'
                           >
                             %
                           </Button>
