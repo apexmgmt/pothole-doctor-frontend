@@ -109,7 +109,7 @@ const SelectCreatableField = <T extends FieldValues>({
             disabled={disabled}
             autoFocus={autoFocus}
             className={cn(
-              'w-full justify-between',
+              'w-full pe-1.5! justify-between',
               selectedValue ? 'text-[#f4f4f5]' : 'text-[#a7a7ae]!',
               className,
               'h-auto! min-h-7!'
