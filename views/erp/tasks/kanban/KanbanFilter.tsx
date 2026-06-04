@@ -1,14 +1,12 @@
 'use client'
 
 import React, { useState } from 'react'
-import { addMonths, format, isAfter } from 'date-fns'
-import { Calendar as CalendarIcon, X, AlertCircle } from 'lucide-react'
-import { DateRange } from 'react-day-picker'
+import { addMonths, isAfter } from 'date-fns'
+import { X, AlertCircle } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { DateRangePicker, type DateRange } from '@/components/ui/date-range-picker'
 import { toast } from 'sonner'
 
 interface KanbanFilterProps {
@@ -46,20 +44,6 @@ const KanbanFilter: React.FC<KanbanFilterProps> = ({ onChange, initialFilters })
 
   const { valid, message } = validateRange(date)
 
-  const handleApply = () => {
-    if (!valid) {
-      toast.error(message)
-
-      return
-    }
-
-    // Pass formatted strings back to KanbanBoard[cite: 2]
-    onChange({
-      starting_date: date?.from ? formatDateToString(date.from) : undefined,
-      ending_date: date?.to ? formatDateToString(date.to) : undefined
-    })
-  }
-
   const handleClear = () => {
     setDate(undefined)
     onChange({
@@ -74,53 +58,37 @@ const KanbanFilter: React.FC<KanbanFilterProps> = ({ onChange, initialFilters })
         <div className='grid gap-1'>
           <label className='text-xs font-medium'>Task Date Range</label>
           <div className={cn('grid gap-2', !valid && 'border-destructive')}>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  id='date'
-                  variant={'outline'}
-                  className={cn(
-                    'w-[300px] justify-start text-left font-normal',
-                    !date && 'text-muted-foreground',
-                    !valid && 'border-destructive text-destructive'
-                  )}
-                >
-                  <CalendarIcon className='mr-2 h-4 w-4' />
-                  {date?.from ? (
-                    date.to ? (
-                      <>
-                        {format(date.from, 'LLL dd, y')} - {format(date.to, 'LLL dd, y')}
-                      </>
-                    ) : (
-                      format(date.from, 'LLL dd, y')
-                    )
-                  ) : (
-                    <span>Pick a date range</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className='w-auto p-0' align='start'>
-                <Calendar
-                  initialFocus
-                  mode='range'
-                  defaultMonth={date?.from}
-                  selected={date}
-                  onSelect={setDate}
-                  numberOfMonths={2} // Shows two calendars side-by-side
-                />
-              </PopoverContent>
-            </Popover>
+            <DateRangePicker
+              placeholder='Select date range'
+              value={date}
+              onChange={newRange => {
+                const validation = validateRange(newRange)
+
+                if (!validation.valid) {
+                  toast.error(validation.message)
+
+                  return
+                }
+
+                setDate(newRange)
+                onChange({
+                  starting_date: newRange?.from ? formatDateToString(newRange.from) : undefined,
+                  ending_date: newRange?.to ? formatDateToString(newRange.to) : undefined
+                })
+              }}
+              className={cn(
+                'w-[300px]',
+                !date && 'text-muted-foreground',
+                !valid && 'border-destructive text-destructive'
+              )}
+            />
           </div>
         </div>
 
         <div className='flex gap-2'>
-          <Button type='button' onClick={handleApply} disabled={!valid || !date?.from || !date?.to} size='default'>
-            Apply
-          </Button>
-
           {(date?.from || date?.to) && (
-            <Button type='button' variant='outline' onClick={handleClear} size='default'>
-              <X className='h-4 w-4 mr-1' /> Clear
+            <Button type='button' variant='outline' onClick={handleClear} size='sm' className='h-7 py-1.5'>
+              <X className='size-3 mr-1' /> Clear
             </Button>
           )}
         </div>
