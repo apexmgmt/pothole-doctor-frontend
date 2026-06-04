@@ -146,7 +146,7 @@ const CreateOrEditDocumentModal = ({
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
           <FormField
             control={form.control}
             name='file'
@@ -173,7 +173,6 @@ const CreateOrEditDocumentModal = ({
                       type='file'
                       accept='*'
                       placeholder='Upload file'
-                      // ref={fileInputRef}
                       {...field}
                       onChange={e => {
                         const file = e.target.files?.[0] || null
