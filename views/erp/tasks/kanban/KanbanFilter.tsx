@@ -76,6 +76,7 @@ const KanbanFilter: React.FC<KanbanFilterProps> = ({ onChange, initialFilters })
                   ending_date: newRange?.to ? formatDateToString(newRange.to) : undefined
                 })
               }}
+              align='start'
               className={cn(
                 'w-[300px]',
                 !date && 'text-muted-foreground',

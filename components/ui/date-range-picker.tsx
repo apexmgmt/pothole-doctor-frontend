@@ -121,6 +121,7 @@ export interface DateRangePickerProps {
   className?: string
   showPresets?: boolean
   presets?: Array<{ label: string; range: () => DateRange | null }>
+  align?: 'center' | 'start' | 'end'
 }
 
 export function DateRangePicker({
@@ -129,7 +130,8 @@ export function DateRangePicker({
   onChange,
   className,
   showPresets = true,
-  presets = DEFAULT_PRESETS as any
+  presets = DEFAULT_PRESETS as any,
+  align = 'end'
 }: DateRangePickerProps) {
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState<DateRange | undefined>(value)
@@ -209,7 +211,7 @@ export function DateRangePicker({
 
       <PopoverContent
         className='w-auto p-0 flex rounded-md border border-border bg-[#09090B] shadow-xl overflow-hidden'
-        align='end'
+        align={align}
         sideOffset={4}
       >
         {/* ── Left: calendars ── */}
@@ -230,7 +232,7 @@ export function DateRangePicker({
             <Button
               onClick={handleApply}
               size='sm'
-              className='bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 h-8 transition-colors'
+              className='text-xs font-medium px-4 h-6 rounded-sm transition-colors'
             >
               Apply
             </Button>
@@ -238,7 +240,7 @@ export function DateRangePicker({
               onClick={handleCancel}
               variant='outline'
               size='sm'
-              className='border border-border/40 text-muted-foreground hover:text-card-foreground text-xs px-4 h-8 transition-colors'
+              className='text-xs font-medium px-4 h-6 rounded-sm transition-colors'
             >
               Cancel
             </Button>
@@ -247,12 +249,14 @@ export function DateRangePicker({
 
         {/* ── Right: preset list ── */}
         {showPresets && (
-          <div className='w-40 flex flex-col py-1 overflow-y-auto bg-card/50'>
+          <div className='w-40 flex flex-col p-1.5 overflow-y-auto bg-card/50'>
+            <p className='text-sm text-muted-foreground mb-2'>Select Date Range</p>
+
             {presets.map(preset => (
               <button
                 key={preset.label}
                 onClick={() => applyPreset(preset)}
-                className={`text-left px-4 py-2 text-xs transition-colors cursor-pointer ${
+                className={`text-left p-2 rounded-md text-xs leading-none transition-colors cursor-pointer ${
                   activePreset === preset.label
                     ? 'bg-accent text-white font-semibold'
                     : 'text-accent-foreground hover:bg-[#1F1F1F]'

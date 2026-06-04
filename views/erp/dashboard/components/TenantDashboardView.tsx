@@ -252,7 +252,7 @@ export default function TenantDashboardView({ data }: { data: Record<string, unk
               }))}
               fieldClassName='max-w-[250px]'
             />
-            <DateRangePicker value={dateRange} onChange={setDateRange} />
+            <DateRangePicker value={dateRange} onChange={setDateRange} align='end' />
           </div>
         </div>
       </div>
