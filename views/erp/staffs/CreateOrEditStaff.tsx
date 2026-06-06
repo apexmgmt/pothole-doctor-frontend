@@ -20,6 +20,7 @@ import StaffService from '@/services/api/staff.service'
 import Link from 'next/link'
 import { InputType, SelectOption } from '@/components/form/fields/types'
 import CustomFormField from '@/components/form/CustomFormField'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const defaultValues: StaffPayload = {
   first_name: '',
@@ -228,7 +229,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
     }
   ]
 
-  const sharedFieldClass = 'grid grid-cols-[100px_minmax(0,_1fr)] gap-2'
+  const sharedFieldClass = 'grid grid-cols-[116px_minmax(0,_1fr)] gap-2'
   const sharedLabelClass = 'justify-end items-start self-start text-right pt-1.5'
 
   const renderFormField = (field: FormFieldType) => {
@@ -253,7 +254,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
         <form
           onSubmit={handleSubmit(onSubmit)}
           noValidate
-          className='bg-bg-2 rounded-lg border border-border p-6 w-full max-w-3xl space-y-6 relative mx-auto'
+          className='bg-bg-2 rounded-lg border border-border p-6 w-full max-w-6xl flex flex-col gap-y-6 relative mx-auto'
         >
           {isLoading && <SpinnerCustom />}
 
@@ -262,54 +263,60 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2'>{fields.map(renderFormField)}</div>
 
           {/* Permissions Section */}
-          <Accordion type='single' collapsible className='space-y-6'>
+          <Accordion type='single' collapsible>
             <AccordionItem value='permissions' className='border-none'>
-              <AccordionTrigger className='text-base font-semibold text-light hover:no-underline p-2.5 cursor-pointer bg-primary/10 rounded-lg'>
+              <AccordionTrigger className='text-base font-semibold text-light hover:no-underline p-2.5 cursor-pointer bg-white/10 rounded-lg'>
                 Permissions (Optional)
               </AccordionTrigger>
-              <AccordionContent>
-                <div className='space-y-6 mt-4'>
-                  {modules.map(module => (
-                    <div key={module} className='space-y-3'>
-                      <h3 className='text-base font-medium text-light capitalize border-b border-border pb-2'>
-                        {module}
-                      </h3>
-                      <div className='grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 gap-4 pl-2'>
+
+              <AccordionContent className='p-0 pt-4'>
+                {modules.map((module, idx) => {
+                  const moduleName = module.split(/[-_]+/).join(' ').toLocaleLowerCase()
+
+                  return (
+                    <div
+                      key={`${module}-${idx}`}
+                      className='grid grid-cols-[136px_minmax(0,_1fr)] items-center gap-5 hover:bg-accent/10 p-2.5 border-b last:border-none border-border'
+                    >
+                      <h3 className='text-sm font-medium text-light capitalize'>{moduleName}</h3>
+                      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-3'>
                         {permissions[module]
                           .sort((a, b) => a.id - b.id)
-                          .map(permission => (
-                            <CustomFormField
-                              key={permission.id}
-                              type='checkbox'
-                              name={`permission_${permission.id}`}
-                              label={permission.name}
-                              value={watch('permissions')?.includes(permission.name)}
-                              onChange={checked => {
-                                const currentPermissions = getValues('permissions') || []
+                          .map(permission => {
+                            const label = (permission?.name ?? '').toLocaleLowerCase().replace(moduleName, '').trim()
 
-                                if (checked) {
-                                  setValue('permissions', [...currentPermissions, permission.name])
-                                } else {
-                                  setValue(
-                                    'permissions',
-                                    currentPermissions.filter(p => p !== permission.name)
-                                  )
-                                }
-                              }}
-                            />
-                          ))}
+                            return (
+                              <CustomFormField
+                                key={permission.id}
+                                type='checkbox'
+                                name={`permission_${permission.id}`}
+                                label={label}
+                                value={watch('permissions')?.includes(permission.name)}
+                                onChange={checked => {
+                                  const currentPermissions = getValues('permissions') || []
+
+                                  if (checked) {
+                                    setValue('permissions', [...currentPermissions, permission.name])
+                                  } else {
+                                    setValue(
+                                      'permissions',
+                                      currentPermissions.filter(p => p !== permission.name)
+                                    )
+                                  }
+                                }}
+                                labelClassName='capitalize'
+                              />
+                            )
+                          })}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  )
+                })}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
 
           <div className='flex gap-3 pt-4 border-t border-border'>
-            <Button type='submit' size='sm' disabled={isLoading} className='flex-1 disabled:opacity-50'>
-              {isLoading ? 'Saving...' : mode === 'create' ? 'Create Staff' : 'Update Staff'}
-            </Button>
             <Button
               type='button'
               size='sm'
@@ -320,6 +327,9 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
               <Link href='/erp/staffs/' prefetch>
                 Cancel
               </Link>
+            </Button>
+            <Button type='submit' size='sm' disabled={isLoading} className='flex-1 disabled:opacity-50'>
+              {isLoading ? 'Saving...' : mode === 'create' ? 'Create Staff' : 'Update Staff'}
             </Button>
           </div>
         </form>

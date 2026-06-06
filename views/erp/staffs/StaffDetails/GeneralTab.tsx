@@ -281,7 +281,7 @@ const GeneralTab = ({ staffData, canEditStaff = false, onStaffUpdated, fetchData
     <button
       type='button'
       onClick={onClick}
-      className='group flex-1 min-w-0 min-h-9 py-1 rounded-md flex items-start gap-2 text-left text-light hover:text-primary hover:bg-bg-3/40 transition-colors'
+      className='group flex-1 min-w-0 min-h-9 py-1 rounded-md flex items-start gap-2 text-left text-light hover:text-primary hover:bg-bg-3/40 transition-colors cursor-pointer'
     >
       <span
         className={`${breakAll ? 'break-all' : 'break-words'} ${preserveLineBreaks ? 'whitespace-pre-line' : ''} min-w-0`}
@@ -429,12 +429,15 @@ const GeneralTab = ({ staffData, canEditStaff = false, onStaffUpdated, fetchData
             <button
               type='button'
               onClick={() => openFieldEditor('roles')}
-              className='group flex-1 min-w-0 min-h-9 py-1 rounded-md text-left text-light hover:text-primary hover:bg-bg-3/40 transition-colors'
+              className='group flex-1 min-w-0 min-h-9 py-1 rounded-md text-left text-light hover:text-primary hover:bg-bg-3/40 transition-colors cursor-pointer'
             >
               <div className='flex flex-wrap gap-2'>
                 {staffData.roles && staffData.roles.length > 0 ? (
                   staffData.roles.map(role => (
-                    <Badge key={role.id} className='px-2 py-1 rounded-md'>
+                    <Badge
+                      key={role.id}
+                      className='px-2 py-1 bg-background hover:bg-background text-foreground rounded-sm'
+                    >
                       {role.name}
                     </Badge>
                   ))
@@ -466,26 +469,41 @@ const GeneralTab = ({ staffData, canEditStaff = false, onStaffUpdated, fetchData
                 <div className='space-y-4'>
                   {Object.keys(availablePermissionsByModule)
                     .sort((a, b) => a.localeCompare(b))
-                    .map(moduleName => (
-                      <div key={moduleName} className='space-y-3'>
-                        <h4 className='text-sm font-medium text-light capitalize border-b border-border pb-2'>
-                          {moduleName.replace(/-/g, ' ')}
-                        </h4>
-                        <div className='grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 gap-3 pl-1'>
-                          {availablePermissionsByModule[moduleName]
-                            .sort((a, b) => a.id - b.id)
-                            .map(permission => (
-                              <label key={permission.id} className='flex items-start gap-2 text-light cursor-pointer'>
-                                <Checkbox
-                                  checked={Boolean(draft.permissions?.includes(permission.name))}
-                                  onCheckedChange={checked => togglePermission(permission.name, Boolean(checked))}
-                                />
-                                <span className='text-sm'>{permission.name}</span>
-                              </label>
-                            ))}
+                    .map((module, idx) => {
+                      const moduleName = module.split(/[-_]+/).join(' ').toLocaleLowerCase()
+
+                      return (
+                        <div
+                          key={`${module}-${idx}`}
+                          className='grid grid-cols-[136px_minmax(0,_1fr)] items-center gap-5 hover:bg-accent/10 p-2.5 border-b last:border-none border-border'
+                        >
+                          <h4 className='text-sm font-medium text-light capitalize'>{moduleName}</h4>
+                          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-3'>
+                            {availablePermissionsByModule[module]
+                              .sort((a, b) => a.id - b.id)
+                              .map(permission => {
+                                const label = (permission?.name ?? '')
+                                  .toLocaleLowerCase()
+                                  .replace(moduleName, '')
+                                  .trim()
+
+                                return (
+                                  <label
+                                    key={permission.id}
+                                    className='flex items-start gap-2 text-light cursor-pointer capitalize'
+                                  >
+                                    <Checkbox
+                                      checked={Boolean(draft.permissions?.includes(permission.name))}
+                                      onCheckedChange={checked => togglePermission(permission.name, Boolean(checked))}
+                                    />
+                                    <span className='text-sm'>{label}</span>
+                                  </label>
+                                )
+                              })}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                 </div>
               </ScrollArea>
 
@@ -497,7 +515,7 @@ const GeneralTab = ({ staffData, canEditStaff = false, onStaffUpdated, fetchData
             <button
               type='button'
               onClick={() => openFieldEditor('permissions')}
-              className='group relative flex-1 min-w-0 min-h-9 py-1 rounded-md text-left text-light hover:text-primary hover:bg-bg-3/40 transition-colors'
+              className='group relative flex-1 min-w-0 min-h-9 py-1 rounded-md text-left text-light hover:text-primary hover:bg-bg-3/40 transition-colors cursor-pointer'
             >
               <div className='space-y-3'>
                 {Object.keys(assignedPermissionsByModule).length > 0 ? (
@@ -508,7 +526,10 @@ const GeneralTab = ({ staffData, canEditStaff = false, onStaffUpdated, fetchData
                         <p className='text-xs uppercase text-gray'>{moduleName.replace(/-/g, ' ')}</p>
                         <div className='flex flex-wrap gap-2'>
                           {assignedPermissionsByModule[moduleName].map(permission => (
-                            <Badge key={`${moduleName}-${permission.name}`} className='px-2 py-1 rounded-md'>
+                            <Badge
+                              key={`${moduleName}-${permission.name}`}
+                              className='px-2 py-1 bg-background hover:bg-background text-foreground rounded-sm'
+                            >
                               {permission.name}
                             </Badge>
                           ))}
