@@ -145,12 +145,9 @@ const CreateOrEditEmailModal: React.FC<{
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}
           />
-          <div className='space-y-2 grid gap-2 grid-cols-[100px_minmax(0,_1fr)]'>
-            <label
-              className='text-sm font-medium 
-justify-end self-start text-right pt-1'
-            >
-              Message <span className='text-red-500'>*</span>
+          <div className='space-y-2 grid gap-2 grid-cols-[100px_minmax(0,1fr)]'>
+            <label className='text-xs font-normal justify-end self-start text-right pt-1'>
+              Message<span className='text-red-500'>*</span>
             </label>
             <TipTapRichTextEditor
               value={messageHtml}
