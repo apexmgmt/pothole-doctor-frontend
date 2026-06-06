@@ -1,22 +1,21 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import type { DateRange } from 'react-day-picker'
-import { BarChart2, DollarSign, FileSpreadsheet, FileText, Info, Link2, Search, TrendingUp, Users } from 'lucide-react'
+import { BarChart2, DollarSign, FileText, Info, TrendingUp, Users } from 'lucide-react'
 
 import ReportService from '@/services/api/reports.service'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
 import CommonTable from '@/components/erp/common/table'
-import { MultiSelect } from '@/components/ui/select'
 import { Invoice } from '@/types'
 
 import { formatMoney, getStat, getStatObj, startOf, type LocationOption } from '../utils'
-import DateRangePicker from './DateRangePicker'
+import { type DateRange, DateRangePicker } from '@/components/ui/date-range-picker'
 import SalesmanReportChart, { type SalesmanReportPayload } from './SalesmanReportChart'
 import SalesmanRankingTable, { type RankingItem } from './SalesmanRankingTable'
-import { SidebarStat, StatPill, TabPlaceholder, ToolbarButton } from './shared'
+import { SidebarStat, StatPill, TabPlaceholder } from './shared'
 import { getSharedInvoiceColumns } from '../../invoices/sharedInvoiceColumns'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import CustomFormField from '@/components/form/CustomFormField'
 
 /** Tenant dashboard tab definitions. */
 const TABS = [
@@ -241,16 +240,19 @@ export default function TenantDashboardView({ data }: { data: Record<string, unk
             })}
           </nav>
 
-          <div className='flex items-center gap-2 py-2'>
-            <div className='min-w-[250px]'>
-              <MultiSelect
-                options={locations.map(location => ({ value: location.id, label: location.name }))}
-                selected={selectedLocations}
-                onChange={setSelectedLocations}
-                placeholder='Select locations'
-              />
-            </div>
-            <DateRangePicker value={dateRange} onChange={setDateRange} />
+          <div className='max-w-2xl grid grid-cols-2 items-center gap-2 py-2'>
+            <CustomFormField
+              type='multiselect-searchable'
+              placeholder='Select locations'
+              value={selectedLocations}
+              onChange={value => setSelectedLocations(value as string[])}
+              selectOptions={locations.map(location => ({
+                value: location.id,
+                label: location.name
+              }))}
+              fieldClassName='max-w-[250px]'
+            />
+            <DateRangePicker value={dateRange} onChange={setDateRange} align='end' />
           </div>
         </div>
       </div>

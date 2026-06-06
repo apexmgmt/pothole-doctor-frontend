@@ -54,7 +54,7 @@ export default class ProductCategoryService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create product category')
+        throw errorData
       }
 
       await revalidate('product-categories')
@@ -109,7 +109,7 @@ export default class ProductCategoryService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update product category')
+        throw errorData
       }
 
       await revalidate('product-categories')

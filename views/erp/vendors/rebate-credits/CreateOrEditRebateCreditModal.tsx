@@ -7,13 +7,12 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { VendorRebateCredit, VendorRebateCreditPayload } from '@/types'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
+import CustomFormField from '@/components/form/CustomFormField'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import VendorRebateCreditService from '@/services/api/vendors/vendor-rebate-credits.service'
-import { DatePicker } from '@/components/ui/datePicker'
 
 interface CreateOrEditRebateCreditModalProps {
   mode?: 'create' | 'edit'
@@ -52,16 +51,25 @@ const CreateOrEditRebateCreditModal = ({
     }
   })
 
+  const {
+    reset,
+    setError,
+    register,
+    control,
+    handleSubmit,
+    formState: { isSubmitting, errors }
+  } = form
+
   useEffect(() => {
     if (open) {
-      form.reset({
+      reset({
         amount: rebateCreditDetails?.amount ?? 0,
         date: rebateCreditDetails?.date ?? '',
         reference: rebateCreditDetails?.reference ?? '',
         note: rebateCreditDetails?.note ?? ''
       })
     }
-  }, [rebateCreditDetails, open, form])
+  }, [rebateCreditDetails, open, reset])
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true)
@@ -78,7 +86,7 @@ const CreateOrEditRebateCreditModal = ({
       if (mode === 'create') {
         await VendorRebateCreditService.store(payload)
         toast.success('Rebate credit added successfully')
-        form.reset()
+        reset()
         onOpenChange(false)
         onSuccess?.()
       } else if (mode === 'edit' && rebateCreditId) {
@@ -88,6 +96,19 @@ const CreateOrEditRebateCreditModal = ({
         onSuccess?.()
       }
     } catch (error: any) {
+      const serverErrors = error?.errors || {}
+
+      if (serverErrors && typeof serverErrors === 'object') {
+        Object.entries(serverErrors).forEach(([field, messages]) => {
+          const errMessage = (messages as string[])?.[0]
+
+          setError(field as keyof FormValues, {
+            type: 'server',
+            message: typeof errMessage === 'string' ? errMessage : ''
+          })
+        })
+      }
+
       toast.error(error?.message || 'Failed to save rebate credit')
     } finally {
       setIsLoading(false)
@@ -95,9 +116,12 @@ const CreateOrEditRebateCreditModal = ({
   }
 
   const onCancel = () => {
-    form.reset()
+    reset()
     onOpenChange(false)
   }
+
+  const fieldStyle = 'grid grid-cols-[104px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
 
   return (
     <CommonDialog
@@ -107,107 +131,73 @@ const CreateOrEditRebateCreditModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Add Rebate Credit' : 'Edit Rebate Credit'}
       description={mode === 'create' ? 'Add a new rebate credit for this vendor.' : 'Update rebate credit details.'}
-      maxWidth='sm'
-      disableClose={form.formState.isSubmitting}
+      maxWidth='xl'
+      disableClose={isSubmitting}
       actions={
         <div className='flex gap-3'>
-          <Button
-            type='button'
-            variant='outline'
-            onClick={onCancel}
-            disabled={form.formState.isSubmitting}
-            className='flex-1'
-          >
+          <Button type='button' variant='outline' onClick={onCancel} disabled={isSubmitting} className='flex-1'>
             Cancel
           </Button>
-          <Button
-            type='submit'
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={form.formState.isSubmitting}
-            className='flex-1'
-          >
-            {form.formState.isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
+          <Button type='submit' onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className='flex-1'>
+            {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
           </Button>
         </div>
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <FormField
-            control={form.control}
-            name='amount'
-            rules={{
-              required: 'Amount is required',
-              min: { value: 0, message: 'Amount must be at least 0' }
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Amount <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input type='number' min={0} step={0.01} placeholder='Enter amount' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='date'
-            rules={{
-              required: 'Date is required'
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Date <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <DatePicker
-                    value={field.value ? new Date(field.value) : null}
-                    onChange={val => {
-                      // val is a Date or null
-                      field.onChange(val ? val.toISOString().slice(0, 10) : '')
-                    }}
-                    placeholder='Select date'
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
+        <form onSubmit={handleSubmit(onSubmit)} className='grid grid-cols-1 gap-x-4 gap-y-2'>
+          <CustomFormField
             name='reference'
+            label='Reference'
+            placeholder='Enter reference'
             rules={{
               required: 'Reference is required',
               minLength: { value: 2, message: 'Reference must be at least 2 characters' }
             }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Reference <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter reference' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          <FormField
-            control={form.control}
+
+          <CustomFormField
+            name='amount'
+            label='Amount'
+            type='number'
+            placeholder='Enter amount'
+            rules={{
+              required: 'Amount is required',
+              min: { value: 0, message: 'Amount must be at least 0' }
+            }}
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+          />
+
+          <CustomFormField
+            name='date'
+            label='Date'
+            type='datepicker'
+            placeholder='Select date'
+            rules={{
+              required: 'Date is required'
+            }}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+          />
+
+          <CustomFormField
             name='note'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Note</FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter note (optional)' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='Note'
+            type='textarea'
+            placeholder='Enter note (optional)'
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
         </form>
       </Form>

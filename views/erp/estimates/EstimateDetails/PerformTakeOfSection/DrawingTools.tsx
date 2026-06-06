@@ -6,7 +6,6 @@ const DrawingTools = ({
   activeTool,
   setActiveTool,
   setSelectedPolygonForCut,
-  drawingManager,
   setMapDraggable,
   selectedColorIndex = 0,
   selectedPolygonForCut
@@ -14,7 +13,6 @@ const DrawingTools = ({
   activeTool: string | null
   setActiveTool: (tool: 'polygon' | 'cut' | 'hand' | null) => void
   setSelectedPolygonForCut: (polygonId: string | null) => void
-  drawingManager: google.maps.drawing.DrawingManager | null
   setMapDraggable: (draggable: boolean) => void
   selectedColorIndex: number
   selectedPolygonForCut: string | null
@@ -24,11 +22,6 @@ const DrawingTools = ({
     if (activeTool === tool) {
       setActiveTool(null)
       setSelectedPolygonForCut(null)
-
-      if (drawingManager) {
-        drawingManager.setDrawingMode(null)
-      }
-
       setMapDraggable(true)
 
       return
@@ -37,28 +30,9 @@ const DrawingTools = ({
     setActiveTool(tool)
 
     if (tool === 'polygon') {
-      if (drawingManager) {
-        drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON)
-        drawingManager.setOptions({
-          polygonOptions: {
-            fillColor: POLYGON_COLORS[selectedColorIndex].fill,
-            fillOpacity: 0.3,
-            strokeWeight: 2,
-            strokeColor: POLYGON_COLORS[selectedColorIndex].stroke,
-            editable: false,
-            draggable: false
-          }
-        })
-      }
-
       setMapDraggable(false)
     } else if (tool === 'hand') {
       setMapDraggable(true)
-
-      if (drawingManager) {
-        drawingManager.setDrawingMode(null)
-      }
-
       setSelectedPolygonForCut(null)
     } else if (tool === 'cut') {
       toast.info('Select a polygon from the right panel, then draw the cut area')

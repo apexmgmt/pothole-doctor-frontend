@@ -15,7 +15,6 @@ interface MeasurementsPanelProps {
   clearAllPolygons: () => void
   savePolygons: () => Promise<void>
   isSaving: boolean
-  drawingManager: google.maps.drawing.DrawingManager | null
 }
 
 export const MeasurementsPanel = ({
@@ -29,8 +28,7 @@ export const MeasurementsPanel = ({
   deletePolygon,
   clearAllPolygons,
   savePolygons,
-  isSaving,
-  drawingManager
+  isSaving
 }: MeasurementsPanelProps) => {
   return (
     <div className='w-full lg:w-80 bg-zinc-800 rounded-lg border border-zinc-700 overflow-hidden flex flex-col min-w-92 max-h-[calc(100vh-200px)]'>
@@ -85,21 +83,6 @@ export const MeasurementsPanel = ({
                   onClick={() => {
                     if (activeTool === 'cut') {
                       setSelectedPolygonForCut(polygon.id)
-
-                      // Only allow cut tool if a polygon is selected
-                      if (drawingManager) {
-                        drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON)
-                        drawingManager.setOptions({
-                          polygonOptions: {
-                            fillColor: '#ef4444',
-                            fillOpacity: 0.3,
-                            strokeWeight: 2,
-                            strokeColor: '#dc2626',
-                            editable: false,
-                            draggable: false
-                          }
-                        })
-                      }
                     }
                   }}
                 >

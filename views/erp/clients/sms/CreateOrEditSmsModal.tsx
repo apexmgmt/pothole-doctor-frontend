@@ -60,7 +60,7 @@ const CreateOrEditSmsModal: React.FC<{
     onClose()
   }
 
-  const fieldStyle = 'grid grid-cols-[100px_minmax(0,_1fr)]'
+  const fieldStyle = 'grid grid-cols-[72px_minmax(0,_1fr)]'
   const labelStyle = 'justify-end self-start text-right pt-1'
 
   return (
@@ -95,7 +95,7 @@ const CreateOrEditSmsModal: React.FC<{
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
           <CustomFormField
             type='text'
             register={form.register}

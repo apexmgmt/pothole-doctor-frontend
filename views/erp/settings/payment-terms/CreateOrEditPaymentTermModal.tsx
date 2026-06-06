@@ -195,7 +195,7 @@ const CreateOrEditPaymentTermModal = ({
 
           <Separator />
 
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+          <div className=''>
             <CustomFormField
               name='type'
               label='Payment Term Type'
@@ -209,7 +209,7 @@ const CreateOrEditPaymentTermModal = ({
               errors={errors}
               fieldClassName={fieldStyle}
               labelClassName={labelStyle}
-              className='space-y-2'
+              className='flex-col'
             />
           </div>
         </form>

@@ -20,6 +20,7 @@ import { ContractorDetailsFields } from './ContractorDetailsFields'
 import { EntityInformationFields } from './EntityInformationFields'
 import { BasicInformationFields } from './BasicInformationFields'
 import { formatDateTime } from '@/utils/date'
+import { Demo } from '@/components/ui/color-picker'
 
 interface FormValues {
   first_name: string
@@ -194,11 +195,7 @@ const CreateOrEditPartnerModal = ({
       if (error?.errors && typeof error.errors === 'object') {
         Object.entries(error.errors).forEach(([fieldName, errMsg]) => {
           const message =
-            Array.isArray(errMsg) && errMsg.length > 0
-              ? String(errMsg[0])
-              : typeof errMsg === 'string'
-                ? errMsg
-                : ''
+            Array.isArray(errMsg) && errMsg.length > 0 ? String(errMsg[0]) : typeof errMsg === 'string' ? errMsg : ''
 
           if (!message) return
 
@@ -324,9 +321,9 @@ const CreateOrEditPartnerModal = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mb-4 mr-0.5'>
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'>
-            <BasicInformationFields 
-              form={form} 
-              businessLocations={businessLocations} 
+            <BasicInformationFields
+              form={form}
+              businessLocations={businessLocations}
               companies={companies}
               entity={entity}
             />
@@ -339,6 +336,7 @@ const CreateOrEditPartnerModal = ({
                 <Separator />
               </div>
             )}
+
             {/* Contractor Details section */}
             <ContractorDetailsFields form={form} skills={skills} partnerTypes={partnerTypes} />
             <div className='sm:col-span-2 md:col-span-3'>

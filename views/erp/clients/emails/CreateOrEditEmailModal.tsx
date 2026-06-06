@@ -84,7 +84,7 @@ const CreateOrEditEmailModal: React.FC<{
         if (!open) onCancel()
       }}
       title='Send Email'
-      maxWidth='4xl'
+      maxWidth='xl'
       isLoading={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
@@ -109,7 +109,7 @@ const CreateOrEditEmailModal: React.FC<{
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
           <CustomFormField
             type='email'
             register={form.register}
@@ -145,12 +145,9 @@ const CreateOrEditEmailModal: React.FC<{
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}
           />
-          <div className='space-y-2 grid gap-2 grid-cols-[100px_minmax(0,_1fr)]'>
-            <label
-              className='text-sm font-medium 
-justify-end self-start text-right pt-1'
-            >
-              Message <span className='text-red-500'>*</span>
+          <div className='space-y-2 grid gap-2 grid-cols-[100px_minmax(0,1fr)]'>
+            <label className='text-xs font-normal justify-end self-start text-right pt-1'>
+              Message<span className='text-red-500'>*</span>
             </label>
             <TipTapRichTextEditor
               value={messageHtml}

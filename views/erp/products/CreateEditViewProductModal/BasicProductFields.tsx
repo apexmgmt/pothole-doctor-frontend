@@ -4,7 +4,7 @@ import { UseFormReturn } from 'react-hook-form'
 
 import { ProductCategory, ServiceType, Vendor } from '@/types'
 import { FormFieldType } from '.'
-import { ReactNode } from 'react'
+import { ReactNode, useEffect, useRef } from 'react'
 
 interface BasicProductFieldsProps {
   form: UseFormReturn<any>
@@ -21,6 +21,26 @@ export function BasicProductFields({
   serviceTypes,
   renderFormField
 }: BasicProductFieldsProps) {
+  const vendorProductName = form.watch('vendor_product_name')
+  const vendorStyle = form.watch('vendor_style')
+  const vendorColor = form.watch('vendor_color')
+
+  const prevVendorProductName = useRef(vendorProductName)
+  const prevVendorStyle = useRef(vendorStyle)
+  const prevVendorColor = useRef(vendorColor)
+
+  useEffect(() => {
+    prevVendorProductName.current = vendorProductName
+  }, [vendorProductName])
+
+  useEffect(() => {
+    prevVendorStyle.current = vendorStyle
+  }, [vendorStyle])
+
+  useEffect(() => {
+    prevVendorColor.current = vendorColor
+  }, [vendorColor])
+
   const basicProductFields: FormFieldType[] = [
     {
       name: 'vendor_id',
@@ -69,8 +89,8 @@ export function BasicProductFields({
       onChange: (value: string) => {
         const privateName = form.getValues('private_product_name')
 
-        // If private product name is empty, set it to the same as vendor product name
-        if (!privateName || privateName === value) {
+        // If private product name is empty or same as previous vendor product name, update it
+        if (!privateName || privateName === prevVendorProductName.current) {
           form.setValue('private_product_name', value, { shouldDirty: true })
         }
       }
@@ -83,8 +103,8 @@ export function BasicProductFields({
       onChange: (value: string) => {
         const privateStyle = form.getValues('private_style')
 
-        // If private style is empty, set it to the same as vendor style
-        if (!privateStyle || privateStyle === value) {
+        // If private style is empty or same as previous vendor style, update it
+        if (!privateStyle || privateStyle === prevVendorStyle.current) {
           form.setValue('private_style', value, { shouldDirty: true })
         }
       }
@@ -97,8 +117,8 @@ export function BasicProductFields({
       onChange: (value: string) => {
         const privateColor = form.getValues('private_color')
 
-        // If private_color is empty or same as previous vendor_color, update it
-        if (!privateColor || privateColor === value) {
+        // If private color is empty or same as previous vendor color, update it
+        if (!privateColor || privateColor === prevVendorColor.current) {
           form.setValue('private_color', value, { shouldDirty: true })
         }
       }

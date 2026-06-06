@@ -65,7 +65,7 @@ const MultiSelectField = <T extends FieldValues>({
             variant='outline'
             disabled={disabled}
             autoFocus={autoFocus}
-            className={cn('w-full justify-between', className, 'h-auto! min-h-7!')}
+            className={cn('w-full pe-1.5! justify-between', className, 'h-auto! min-h-7!')}
           >
             <div
               className={`flex flex-1 flex-wrap items-center gap-1 text-left ${selectedValues.length === 0 ? 'text-[#a7a7ae] overflow-hidden' : 'text-[#f4f4f5]'}`}

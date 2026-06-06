@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Estimate, SavedPolygon, TakeoffData } from '@/types'
-import { GoogleMap, Marker, DrawingManager, Polygon, Autocomplete } from '@react-google-maps/api'
+import { GoogleMap, Polygon, Polyline, OverlayViewF } from '@react-google-maps/api'
 import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { toast } from 'sonner'
@@ -45,16 +45,17 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
   const [activeTool, setActiveTool] = useState<'polygon' | 'cut' | 'hand' | null>(null)
   const [polygons, setPolygons] = useState<SavedPolygon[]>(estimate?.take_off_data?.polygons || [])
   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
-  const [drawingManager, setDrawingManager] = useState<google.maps.drawing.DrawingManager | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null)
   const [mapDraggable, setMapDraggable] = useState(true)
   const [selectedPolygonForCut, setSelectedPolygonForCut] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
-  // Update the TakeoffData interface usage and add zoom state
   const [mapZoom, setMapZoom] = useState(18)
-  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null)
+  const autocompleteContainerRef = useRef<HTMLDivElement>(null)
+  const isCompletingPolygon = useRef(false)
+  const [draftPolygon, setDraftPolygon] = useState<google.maps.LatLngLiteral[]>([])
+  const [mousePosition, setMousePosition] = useState<google.maps.LatLngLiteral | null>(null)
 
   const address = useMemo(() => {
     return estimate?.address
@@ -267,17 +268,26 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
     }
   }
 
+  // Helper to ensure proper winding order (Outer CW, Inner CCW) for cutting holes
+  const ensureOppositeWinding = (rings: google.maps.LatLngLiteral[][]) => {
+    if (rings.length <= 1) return rings
+    const isOuterCW = google.maps.geometry.spherical.computeSignedArea(rings[0]) < 0
+
+    return rings.map((ring, idx) => {
+      if (idx === 0) return ring // keep outer as is
+      const isInnerCW = google.maps.geometry.spherical.computeSignedArea(ring) < 0
+
+      if (isOuterCW === isInnerCW) {
+        return [...ring].reverse() // reverse if same
+      }
+
+      return ring
+    })
+  }
+
   // Handle polygon completion
-  const onPolygonComplete = useCallback(
-    (polygon: google.maps.Polygon) => {
-      // Get the path drawn by the user
-      const paths = polygon.getPath().getArray()
-
-      const coordinates = paths.map(latLng => ({
-        lat: latLng.lat(),
-        lng: latLng.lng()
-      }))
-
+  const handlePolygonComplete = useCallback(
+    (coordinates: google.maps.LatLngLiteral[]) => {
       // If cut tool is active and a polygon is selected
       if (activeTool === 'cut' && selectedPolygonForCut) {
         const targetPolygon = polygons.find(p => p.id === selectedPolygonForCut)
@@ -288,20 +298,24 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
             const resultPaths = subtractPolygon(targetPolygon.paths, coordinates)
 
             if (!resultPaths) {
-              // Subtraction failed or removed everything
-              polygon.setMap(null)
-
               return
             }
 
-            const { area, perimeter } = calculateAreaAndPerimeter(resultPaths)
+            // Ensure proper winding order for holes so Maps API renders them
+            let finalPaths = resultPaths
+
+            if (Array.isArray((resultPaths as any)[0])) {
+              finalPaths = ensureOppositeWinding(resultPaths as google.maps.LatLngLiteral[][])
+            }
+
+            const { area, perimeter } = calculateAreaAndPerimeter(finalPaths)
 
             setPolygons(prev =>
               prev.map(p =>
                 p.id === selectedPolygonForCut
                   ? {
                       ...p,
-                      paths: resultPaths, // Now supports holes
+                      paths: finalPaths, // Now supports holes
                       area,
                       perimeter
                     }
@@ -319,18 +333,13 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
 
           setSelectedPolygonForCut(null)
           setActiveTool(null)
-          polygon.setMap(null)
-
-          if (drawingManager) {
-            drawingManager.setDrawingMode(null)
-          }
         }
       } else {
         // Normal polygon creation
         const { area, perimeter } = calculateAreaAndPerimeter(coordinates)
 
         const newPolygon: SavedPolygon = {
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
           paths: coordinates, // Simple array for new polygon
           color: POLYGON_COLORS[selectedColorIndex],
           area,
@@ -343,19 +352,59 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
         toast.success(`Polygon added! Area: ${area.squareFeet.toFixed(2)} sq ft`)
       }
 
-      polygon.setMap(null)
       setActiveTool(null)
-
-      if (drawingManager) {
-        drawingManager.setDrawingMode(null)
-      }
     },
-    [drawingManager, selectedColorIndex, polygons, activeTool, selectedPolygonForCut]
+    [selectedColorIndex, polygons, activeTool, selectedPolygonForCut]
   )
 
-  const onDrawingManagerLoad = useCallback((manager: google.maps.drawing.DrawingManager) => {
-    setDrawingManager(manager)
-  }, [])
+  const onMapClick = useCallback(
+    (e: google.maps.MapMouseEvent) => {
+      if (!e.latLng) return
+
+      if (activeTool === 'polygon' || (activeTool === 'cut' && selectedPolygonForCut)) {
+        const lat = e.latLng.lat()
+        const lng = e.latLng.lng()
+
+        // If they click very close to the first point, close it natively
+        if (draftPolygon.length >= 3) {
+          const first = draftPolygon[0]
+
+          // Very simple quick distance check
+          const dLat = first.lat - lat
+          const dLng = first.lng - lng
+          const distSq = dLat * dLat + dLng * dLng
+
+          // small threshold depending on zoom ~ approx a few meters
+          if (distSq < 0.00000005) {
+            if (isCompletingPolygon.current) return
+            isCompletingPolygon.current = true
+            handlePolygonComplete(draftPolygon)
+            setDraftPolygon([])
+            setMousePosition(null)
+            setTimeout(() => {
+              isCompletingPolygon.current = false
+            }, 100)
+
+            return
+          }
+        }
+
+        setDraftPolygon(prev => [...prev, { lat, lng }])
+      }
+    },
+    [activeTool, selectedPolygonForCut, draftPolygon, handlePolygonComplete]
+  )
+
+  const onMapMouseMove = useCallback(
+    (e: google.maps.MapMouseEvent) => {
+      if (!e.latLng) return
+
+      if ((activeTool === 'polygon' || activeTool === 'cut') && draftPolygon.length > 0) {
+        setMousePosition({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+      }
+    },
+    [activeTool, draftPolygon.length]
+  )
 
   // Delete polygon
   const deletePolygon = (id: string) => {
@@ -473,31 +522,49 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
     }
   }, [estimate?.take_off_data])
 
-  const onAutocompleteLoad = useCallback((autocompleteInstance: google.maps.places.Autocomplete) => {
-    setAutocomplete(autocompleteInstance)
-  }, [])
+  useEffect(() => {
+    if (!isLoaded || !window.google || !window.google.maps.places || !autocompleteContainerRef.current) return
 
-  const onPlaceChanged = useCallback(() => {
-    if (autocomplete) {
-      const place = autocomplete.getPlace()
+    autocompleteContainerRef.current.innerHTML = ''
 
-      if (place.formatted_address) {
-        const coordinates = {
-          lat: place.geometry?.location?.lat() || mapCenter.lat,
-          lng: place.geometry?.location?.lng() || mapCenter.lng
+    try {
+      // PlaceAutocompleteElement is the modern non-deprecated way
+      const autocompleteElement = new window.google.maps.places.PlaceAutocompleteElement({})
+
+      // Styling the web component internally if needed, or rely on external CSS
+      autocompleteElement.style.width = '100%'
+      autocompleteElement.style.height = '100%'
+
+      // @ts-ignore - The gmp-placeselect event might not be typed in standard Google Maps types
+      autocompleteElement.addEventListener('gmp-placeselect', async (e: any) => {
+        const place = e.place
+
+        if (!place) return
+
+        await place.fetchFields({ fields: ['location', 'formattedAddress'] })
+
+        if (place.location) {
+          const coordinates = {
+            lat: place.location.lat(),
+            lng: place.location.lng()
+          }
+
+          setMapCenter(coordinates)
+          setMarkerPosition(coordinates)
+
+          if (searchInputRef.current) {
+            searchInputRef.current.value = place.formattedAddress || ''
+          }
+
+          toast.success('Location found')
         }
+      })
 
-        setMapCenter(coordinates)
-        setMarkerPosition(coordinates)
-
-        if (searchInputRef.current) {
-          searchInputRef.current.value = place.formatted_address
-        }
-
-        toast.success('Location found')
-      }
+      autocompleteContainerRef.current.appendChild(autocompleteElement)
+    } catch (err) {
+      console.error('Failed to initialize PlaceAutocompleteElement', err)
     }
-  }, [autocomplete, mapCenter])
+  }, [isLoaded, mapCenter])
 
   if (!address) {
     return null
@@ -532,6 +599,8 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                 onLoad={onMapLoad}
                 onUnmount={onMapUnmount}
                 onZoomChanged={onZoomChanged}
+                onClick={onMapClick}
+                onMouseMove={onMapMouseMove}
                 mapContainerStyle={{
                   width: '100%',
                   height: '100%'
@@ -549,23 +618,43 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                   gestureHandling: mapDraggable ? 'auto' : 'none'
                 }}
               >
-                <Marker position={markerPosition} />
+                <OverlayViewF
+                  position={markerPosition}
+                  mapPaneName={'overlayMouseTarget'}
+                  getPixelPositionOffset={(width, height) => ({ x: -(width / 2), y: -height })}
+                >
+                  <div
+                    className='flex items-center justify-center'
+                    style={{ width: 32, height: 32, transform: 'translate(0, 16px)' }}
+                  >
+                    <svg viewBox='0 0 24 36' fill='#ea4335' width='28' height='42' xmlns='http://www.w3.org/2000/svg'>
+                      <path d='M12 0C5.372 0 0 5.373 0 12c0 8.5 12 24 12 24s12-15.5 12-24c0-6.627-5.372-12-12-12zm0 17c-2.761 0-5-2.239-5-5s2.239-5 5-5 5 2.239 5 5-2.239 5-5 5z' />
+                    </svg>
+                  </div>
+                </OverlayViewF>
 
-                <DrawingManager
-                  onLoad={onDrawingManagerLoad}
-                  onPolygonComplete={onPolygonComplete}
-                  options={{
-                    drawingControl: false,
-                    polygonOptions: {
-                      fillColor: POLYGON_COLORS[selectedColorIndex].fill,
-                      fillOpacity: 1,
-                      strokeWeight: 5,
-                      strokeColor: POLYGON_COLORS[selectedColorIndex].stroke,
-                      editable: false,
-                      draggable: false
-                    }
-                  }}
-                />
+                {draftPolygon.length > 0 && (
+                  <>
+                    <Polygon
+                      paths={mousePosition ? [...draftPolygon, mousePosition] : draftPolygon}
+                      options={{
+                        fillColor: activeTool === 'cut' ? '#ef4444' : POLYGON_COLORS[selectedColorIndex].fill,
+                        fillOpacity: 0.2,
+                        strokeWeight: 0,
+                        clickable: false
+                      }}
+                    />
+                    <Polyline
+                      path={mousePosition ? [...draftPolygon, mousePosition] : draftPolygon}
+                      options={{
+                        strokeColor: activeTool === 'cut' ? '#dc2626' : POLYGON_COLORS[selectedColorIndex].stroke,
+                        strokeOpacity: 1,
+                        strokeWeight: activeTool === 'cut' ? 2 : 4,
+                        clickable: false
+                      }}
+                    />
+                  </>
+                )}
 
                 {polygons.map(polygon => (
                   <Polygon
@@ -577,7 +666,8 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                       strokeWeight: hoveredPolygonId === polygon.id ? 3 : 2,
                       strokeColor: polygon.color.stroke,
                       editable: false,
-                      draggable: false
+                      draggable: false,
+                      clickable: false
                     }}
                   />
                 ))}
@@ -594,7 +684,6 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                     activeTool={activeTool}
                     setActiveTool={setActiveTool}
                     setSelectedPolygonForCut={setSelectedPolygonForCut}
-                    drawingManager={drawingManager}
                     setMapDraggable={setMapDraggable}
                     selectedColorIndex={selectedColorIndex}
                     selectedPolygonForCut={selectedPolygonForCut}
@@ -632,15 +721,10 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                   className='absolute top-16 lg:top-2.5 left-2 lg:left-48 right-4 flex gap-2 z-10'
                 >
                   {isLoaded ? (
-                    <Autocomplete className='w-full h-10' onLoad={onAutocompleteLoad} onPlaceChanged={onPlaceChanged}>
-                      <input
-                        ref={searchInputRef}
-                        type='text'
-                        placeholder='Search location...'
-                        onKeyPress={e => e.key === 'Enter' && searchLocation()}
-                        className='w-full h-full flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                      />
-                    </Autocomplete>
+                    <div
+                      ref={autocompleteContainerRef}
+                      className='flex-1 h-10 bg-zinc-800 rounded text-white overflow-hidden'
+                    />
                   ) : (
                     <input
                       ref={searchInputRef}
@@ -694,7 +778,6 @@ const PerformTakeOfSection = ({ estimate }: { estimate: Estimate }) => {
                 clearAllPolygons={clearAllPolygons}
                 savePolygons={savePolygons}
                 isSaving={isSaving}
-                drawingManager={drawingManager}
               />
             )}
           </div>

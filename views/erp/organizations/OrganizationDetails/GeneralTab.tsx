@@ -162,11 +162,11 @@ const GeneralTab = ({
       </div>
 
       <div className='space-y-5'>
-        <div className='grid grid-cols-1 gap-6'>
+        <div className='grid grid-cols-2 gap-6'>
           <div className='flex min-[480px]:items-center items-start gap-2.5 flex-col min-[480px]:flex-row'>
             <label className='text-xs text-gray uppercase block w-25'>Name : </label>
             {editingField === 'name' ? (
-              <div className='flex w-full items-center gap-2'>
+              <div className='w-full flex items-center gap-2'>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1'>
                   <Input
                     value={draft.first_name}
