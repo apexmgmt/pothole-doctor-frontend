@@ -14,7 +14,7 @@ export function useGoogleMaps() {
   return useContext(GoogleMapsContext)
 }
 
-const libraries: Libraries = ['places', 'drawing', 'geometry']
+const libraries: Libraries = ['places', 'drawing', 'geometry', 'marker']
 
 export function GoogleMapsProvider({ children }: { children: ReactNode }) {
   const { isLoaded, loadError } = useLoadScript({
