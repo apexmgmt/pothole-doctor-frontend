@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { PlusIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import EditButton from '@/components/erp/common/buttons/EditButton'
+
+// import EditButton from '@/components/erp/common/buttons/EditButton'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { DocumentIcon } from '@/public/icons'
@@ -13,16 +14,12 @@ import { Column, DataTableApiResponse, Document } from '@/types'
 import { generateFileUrl, getFileType } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import InvoiceDocumentService from '@/services/api/invoices/invoice-documents.service'
-import CreateOrEditInvoiceDocumentModal from './CreateOrEditInvoiceDocumentModal'
 
 const InvoiceDocuments = ({ invoiceId }: { invoiceId: string }) => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: invoiceId })
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const fetchData = async () => {
     setIsLoading(true)
@@ -61,30 +58,34 @@ const InvoiceDocuments = ({ invoiceId }: { invoiceId: string }) => {
     : []
 
   const handleOpenCreateModal = () => {
-    setModalMode('create')
-    setSelectedDocumentId(null)
-    setSelectedDocument(null)
-    setIsModalOpen(true)
+    fileInputRef.current?.click()
   }
 
-  const handleOpenEditModal = async (id: string) => {
-    setModalMode('edit')
-    setSelectedDocumentId(id)
+  const handleUploadDocument = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+
+    if (!file) return
+
+    const formData = new FormData()
+
+    formData.append('invoice_id', invoiceId)
+    formData.append('file', file)
 
     try {
-      const response = await InvoiceDocumentService.show(id)
-
-      setSelectedDocument(response.data)
-      setIsModalOpen(true)
-    } catch {
-      toast.error('Failed to fetch document details')
+      await InvoiceDocumentService.store(formData)
+      toast.success('Document added successfully')
+      fetchData()
+    } catch (error: any) {
+      if (error?.errors && typeof error.errors === 'object') {
+        Object.values(error.errors).forEach((errMsg: any) => {
+          errMsg?.map((msg: string) => toast.error(msg))
+        })
+      } else {
+        toast.error(error?.message || 'Something went wrong')
+      }
+    } finally {
+      event.target.value = ''
     }
-  }
-
-  const handleModalClose = () => {
-    setIsModalOpen(false)
-    setSelectedDocumentId(null)
-    setSelectedDocument(null)
   }
 
   const handleDeleteDocument = async (id: string) => {
@@ -147,7 +148,7 @@ const InvoiceDocuments = ({ invoiceId }: { invoiceId: string }) => {
       cell: row => (
         <ThreeDotButton
           buttons={[
-            <EditButton tooltip='Edit Document' onClick={() => handleOpenEditModal(row.id)} variant='text' />,
+            // <EditButton tooltip='Edit Document' onClick={() => handleOpenEditModal(row.id)} variant='text' />,
             <DeleteButton tooltip='Delete Document' variant='text' onClick={() => handleDeleteDocument(row.id)} />
           ]}
         />
@@ -174,6 +175,8 @@ const InvoiceDocuments = ({ invoiceId }: { invoiceId: string }) => {
 
   return (
     <>
+      <input ref={fileInputRef} type='file' className='hidden' onChange={handleUploadDocument} />
+
       <CommonTable
         data={{
           data: documentData,
@@ -191,19 +194,6 @@ const InvoiceDocuments = ({ invoiceId }: { invoiceId: string }) => {
         pagination={true}
         isLoading={isLoading}
         emptyMessage='No documents found'
-      />
-
-      <CreateOrEditInvoiceDocumentModal
-        invoiceId={invoiceId}
-        mode={modalMode}
-        open={isModalOpen}
-        onOpenChange={handleModalClose}
-        documentId={selectedDocumentId || undefined}
-        documentDetails={selectedDocument || undefined}
-        onSuccess={() => {
-          fetchData()
-          handleModalClose()
-        }}
       />
     </>
   )
