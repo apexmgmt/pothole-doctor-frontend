@@ -8,15 +8,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import * as z from 'zod'
 
-import { useForm } from 'react-hook-form'
+import { Path, RegisterOptions, useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
 import { PermissionsByModule, Role } from '@/types'
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Form, FormLabel } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 
 import RoleService from '@/services/api/role.service'
@@ -24,6 +22,8 @@ import RoleService from '@/services/api/role.service'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import Link from 'next/link'
+import { InputType, SelectOption } from '@/components/form/fields/types'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface CreateOrEditRoleProps {
   mode?: 'create' | 'edit'
@@ -56,6 +56,16 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
       permissions: roleDetails && 'permissions' in roleDetails ? roleDetails.permissions.map(p => p.name) : []
     }
   })
+
+  const {
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    getValues,
+    register,
+    formState: { errors }
+  } = form
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true)
@@ -109,91 +119,80 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
     <div>
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className='bg-bg-2 rounded-lg border border-border p-6 w-full max-w-5xl space-y-6 mx-auto'
+          onSubmit={handleSubmit(onSubmit)}
+          className='bg-bg-2 rounded-lg border border-border p-6 w-full max-w-6xl space-y-6 mx-auto'
         >
           <h2 className='text-xl font-semibold text-light'>{mode === 'create' ? 'Create New Role' : 'Edit Role'}</h2>
 
           {/* Role Name Field */}
-          <FormField
-            control={form.control}
+          <CustomFormField
+            type='text'
             name='name'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Role Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder='Enter role name'
-                    className='bg-bg-3 border-border text-light placeholder:text-gray'
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='Role Name'
+            placeholder='Enter role name'
+            register={register}
+            errors={errors}
+            fieldClassName='grid grid-cols-[70px_minmax(0,_1fr)]'
           />
 
           {/* Permissions Section */}
-          <div className='space-y-6'>
+          <div>
             <div className='space-y-1'>
               <FormLabel className='text-base font-semibold text-light'>Permissions</FormLabel>
-              {form.formState.errors.permissions && (
-                <p className='text-sm text-destructive'>{form.formState.errors.permissions.message}</p>
-              )}
+              {errors.permissions && <p className='text-sm text-destructive'>{errors.permissions.message}</p>}
             </div>
 
             {modules
               .sort((a, b) => a.localeCompare(b))
-              .map(module => (
-                <div key={module} className='space-y-3'>
-                  <h3 className='text-base font-medium text-light capitalize border-b border-border pb-2'>
-                    {module?.replace(/-/g, ' ')}
-                  </h3>
-                  <div className='grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 gap-4 pl-2'>
-                    {permissions[module]
-                      .sort((a, b) => a.id - b.id)
-                      .map(permission => (
-                        <FormField
-                          key={permission.id}
-                          control={form.control}
-                          name='permissions'
-                          render={({ field }) => {
-                            return (
-                              <FormItem className='flex flex-row items-start space-y-0'>
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(permission.name)}
-                                    onCheckedChange={checked => {
-                                      return checked
-                                        ? field.onChange([...field.value, permission.name])
-                                        : field.onChange(field.value?.filter(value => value !== permission.name))
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className='text-sm font-normal cursor-pointer text-light'>
-                                  {permission.name}
-                                </FormLabel>
-                              </FormItem>
-                            )
-                          }}
-                        />
-                      ))}
+              .map((module, idx) => {
+                const moduleName = module.split(/[-_]+/).join(' ').toLocaleLowerCase()
+
+                return (
+                  <div
+                    key={`${module}-${idx}`}
+                    className='grid grid-cols-[136px_minmax(0,_1fr)] items-center gap-5 hover:bg-accent/10 p-2.5 border-b last:border-none border-border'
+                  >
+                    <h3 className='text-sm font-medium text-light capitalize'>{moduleName}</h3>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-3'>
+                      {permissions[module]
+                        .sort((a, b) => a.id - b.id)
+                        .map(permission => {
+                          const label = (permission?.name ?? '').toLocaleLowerCase().replace(moduleName, '').trim()
+
+                          return (
+                            <CustomFormField
+                              key={permission.id}
+                              type='checkbox'
+                              name={`permission_${permission.id}`}
+                              label={label}
+                              value={watch('permissions')?.includes(permission.name)}
+                              onChange={checked => {
+                                const currentPermissions = getValues('permissions') || []
+
+                                if (checked) {
+                                  setValue('permissions', [...currentPermissions, permission.name])
+                                } else {
+                                  setValue(
+                                    'permissions',
+                                    currentPermissions.filter(p => p !== permission.name)
+                                  )
+                                }
+                              }}
+                              labelClassName='capitalize'
+                            />
+                          )
+                        })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
           </div>
 
           {/* Submit Buttons */}
           <div className='flex gap-3 pt-4 border-t border-border'>
             <Button
-              type='submit'
-              disabled={form.formState.isSubmitting || isLoading}
-              className='flex-1 disabled:opacity-50'
-            >
-              {isLoading ? 'Saving...' : mode === 'create' ? 'Create Role' : 'Update Role'}
-            </Button>
-            <Button
               type='button'
+              size='sm'
               variant='outline'
               className='flex-1 border-border text-light disabled:opacity-50'
               asChild
@@ -201,6 +200,14 @@ const CreateOrEditRole = ({ mode = 'create', permissions = {}, roleId, roleDetai
               <Link href='/erp/roles' prefetch>
                 Cancel
               </Link>
+            </Button>
+            <Button
+              type='submit'
+              size='sm'
+              disabled={form.formState.isSubmitting || isLoading}
+              className='flex-1 disabled:opacity-50'
+            >
+              {isLoading ? 'Saving...' : mode === 'create' ? 'Create Role' : 'Update Role'}
             </Button>
           </div>
         </form>
