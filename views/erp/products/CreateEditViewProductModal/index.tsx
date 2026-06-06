@@ -460,7 +460,7 @@ const CreateEditViewProductModal = ({
             className={`grid grid-cols-1 items-start ${mode === 'create' ? 'lg:grid-cols-2' : 'lg:grid-cols-[3fr_3fr_2fr]'} gap-2`}
           >
             {/* Basic Product Information */}
-            <div className='p-4 border border-border rounded-lg'>
+            <div className='sticky top-4 p-4 border border-border rounded-lg'>
               <h3 className='leading-none font-semibold pb-3.5 mb-3 border-b border-border'>Product Information</h3>
 
               <BasicProductFields
@@ -473,7 +473,7 @@ const CreateEditViewProductModal = ({
             </div>
 
             {/* UOM and Properties */}
-            <div className='p-4 border border-border rounded-lg'>
+            <div className='sticky top-4 p-4 border border-border rounded-lg'>
               <h3 className='leading-none font-semibold pb-3.5 mb-3 border-b border-border'>
                 UOM and Other Properties
               </h3>
@@ -502,7 +502,7 @@ const CreateEditViewProductModal = ({
 
             {/* Gallery Section - Only show in edit/view mode */}
             {mode !== 'create' && productId && (
-              <div className='space-y-4'>
+              <div className='sticky top-4 space-y-4'>
                 <QrCodeSection qrCodePath={productDetails?.qr_code} />
                 <BarCodeSection barCodePath={productDetails?.bar_code} />
 

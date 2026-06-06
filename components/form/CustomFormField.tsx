@@ -15,6 +15,7 @@ import MultiSelectField from './fields/MultiSelectField'
 import MultiSelectSearchField from './fields/MultiSelectSearchField'
 import CheckboxField from './fields/CheckboxField'
 import MultiSelectCreatableField from './fields/MultiSelectCreatableField'
+import SelectCreatableField from './fields/SelectCreatableField'
 import SwitchField from './fields/SwitchField'
 import RadioField from './fields/RadioField'
 
@@ -55,7 +56,7 @@ const CustomFormField = <T extends FieldValues>({
 
   // Combine base styles
   const inputStyle = cn(
-    `text-sm font-normal leading-none bg-[#1f1f1f] hover:bg-[#1f1f1f] placeholder:text-[#a7a7ae] text-[#f4f4f5] px-2.5 py-1.25 ${type === 'textarea' ? '' : 'h-7!'} ${fieldError ? 'border-red-500' : ''}`,
+    `text-sm font-normal leading-none bg-[#1f1f1f] hover:bg-[#1f1f1f] placeholder:text-[#a7a7ae] text-[#f4f4f5] px-2.5! py-1.25 ${type === 'textarea' ? '' : 'h-7!'} ${fieldError ? 'border-red-500' : ''}`,
     className
   )
 
@@ -124,6 +125,21 @@ const CustomFormField = <T extends FieldValues>({
             rules={rules}
             selectOptions={selectOptions}
             value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            onOpenChange={onOpenChange}
+            autoFocus={autoFocus}
+            disabled={disabled}
+            className={inputStyle}
+          />
+        ) : type === 'select-creatable' ? (
+          <SelectCreatableField
+            name={name}
+            placeholder={placeholder}
+            selectOptions={selectOptions}
+            value={value}
+            rules={rules}
+            control={control}
             onChange={onChange}
             onBlur={onBlur}
             onOpenChange={onOpenChange}

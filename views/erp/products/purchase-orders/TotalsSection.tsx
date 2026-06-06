@@ -33,14 +33,7 @@ const TotalsSection = ({ form, totalProductCost, shippingCost, finalCost }: Tota
             render={({ field }) => (
               <FormItem className='mb-0'>
                 <FormControl>
-                  <Input
-                    type='number'
-                    min={0}
-                    step='any'
-                    placeholder='0.00'
-                    {...field}
-                    className='h-7 text-xs w-24 text-right'
-                  />
+                  <Input type='number' min={0} step='any' placeholder='0.00' {...field} className='h-7 text-xs w-24' />
                 </FormControl>
               </FormItem>
             )}

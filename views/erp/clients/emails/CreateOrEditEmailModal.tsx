@@ -84,7 +84,7 @@ const CreateOrEditEmailModal: React.FC<{
         if (!open) onCancel()
       }}
       title='Send Email'
-      maxWidth='4xl'
+      maxWidth='xl'
       isLoading={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
@@ -109,7 +109,7 @@ const CreateOrEditEmailModal: React.FC<{
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
           <CustomFormField
             type='email'
             register={form.register}

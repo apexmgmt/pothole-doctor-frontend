@@ -1,4 +1,4 @@
-import type { DateRange } from 'react-day-picker'
+import type { DateRange } from '@/components/ui/date-range-picker'
 
 export interface LocationOption {
   id: string

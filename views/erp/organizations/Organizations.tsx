@@ -6,18 +6,16 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import Link from 'next/link'
 
-import { FingerprintIcon, PlusIcon, Search } from 'lucide-react'
+import { PlusIcon, Search } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
-import FilterDrawer from '@/components/erp/common/FilterDrawer'
 import { DetailsIcon, FilterIcon, UserIcon } from '@/public/icons'
 import OrganizationService from '@/services/api/organizations.service'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, Organization } from '@/types'
 import OrganizationDetails from '@/views/erp/organizations/OrganizationDetails'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { Switch } from '@/components/ui/switch'
 import OrganizationStatusSwitch from '@/views/erp/organizations/OrganizationStatusSwitch'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -28,36 +26,17 @@ import AuthService from '@/services/api/auth.service'
 import { encryptData } from '@/utils/encryption'
 import { appUrl } from '@/utils/utility'
 import { toast } from 'sonner'
-
-interface CompanyData {
-  id: string
-  name: string
-  phone: string
-  company: string
-  jobAddress: string
-  email: string
-  stage: string
-  [key: string]: any
-}
-
-interface FilterField {
-  key: string
-  label: string
-  type: string
-  placeholder?: string
-  options?: { value: string; label: string }[]
-}
-
-interface FilterButton {
-  label: string
-  action: string
-  variant: string
-}
+import CreateOrEditOrganizationModal from '@/views/erp/organizations/CreateOrEditOrganizationModal'
 
 const Organizations: React.FC = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
+
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [editCompanyId, setEditCompanyId] = useState<string | undefined>(undefined)
+  const [editCompanyDetails, setEditCompanyDetails] = useState<any>(undefined)
 
   const [activeTab, setActiveTab] = useState<string>('companies')
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
@@ -258,8 +237,13 @@ const Organizations: React.FC = () => {
                 canEditCompany && (
                   <EditButton
                     tooltip='Edit Company Information'
-                    link={`/erp/companies/${row.id}/edit`}
                     variant='text'
+                    onClick={() => {
+                      setModalMode('edit')
+                      setEditCompanyId(row.id)
+                      setEditCompanyDetails(row)
+                      setIsModalOpen(true)
+                    }}
                   />
                 ),
                 canEditCompany && (
@@ -345,12 +329,20 @@ const Organizations: React.FC = () => {
         )}
       </div>
       {canCreateCompany && (
-        <Link href='/erp/companies/create'>
-          <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90'>
-            <PlusIcon className='w-4 h-4' />
-            <span className='hidden min-[480px]:block'>Add Company</span>
-          </Button>
-        </Link>
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90'
+          onClick={() => {
+            setModalMode('create')
+            setEditCompanyId(undefined)
+            setEditCompanyDetails(undefined)
+            setIsModalOpen(true)
+          }}
+        >
+          <PlusIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Add Company</span>
+        </Button>
       )}
     </div>
   )
@@ -441,6 +433,15 @@ const Organizations: React.FC = () => {
           statusLoading={selectedCompanyId ? statusLoading[selectedCompanyId] : false}
         />
       </div>
+
+      <CreateOrEditOrganizationModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        mode={modalMode}
+        companyId={editCompanyId}
+        companyDetails={editCompanyDetails}
+        onSuccess={fetchData}
+      />
     </CommonLayout>
   )
 }

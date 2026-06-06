@@ -152,7 +152,7 @@ const OrderDetailsForm = ({ form, mode, couriers, warehouses, businessLocations 
   }
 
   return (
-    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 border border-border rounded-lg'>
+    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2 p-4 border border-border rounded-lg'>
       {fields.map(renderFormField)}
     </div>
   )

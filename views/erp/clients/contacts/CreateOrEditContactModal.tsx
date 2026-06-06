@@ -187,7 +187,7 @@ const CreateOrEditContactModal: React.FC<CreateOrEditContactModalProps> = ({
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
           <CustomFormField
             type='text'
             register={form.register}

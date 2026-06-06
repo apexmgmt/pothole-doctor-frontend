@@ -365,7 +365,7 @@ const Clients: React.FC<{
               variant='ghost'
               size='sm'
               type='button'
-              className='w-full hover:text-dark hover:bg-white hover:border-white'
+              className='w-full hover:text-dark hover:bg-white! hover:border-white'
               onClick={() => handleOpenStageModal(row.id, row?.clientable?.stage || null)}
             >
               Stage

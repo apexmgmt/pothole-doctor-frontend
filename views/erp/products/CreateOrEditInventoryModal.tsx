@@ -232,19 +232,21 @@ const CreateOrEditInventoryModal = ({
       type: 'number',
       label: 'Company Cost',
       rules: { required: 'Company Cost is required' },
-      unit: product.purchase_unit?.name ?? product.purchase_uom?.name
+      unit: product.purchase_unit?.name ?? product.purchase_uom?.name,
+      fieldClassName: 'grid-cols-[92px_minmax(0,_1fr)]!'
     },
     {
       name: 'work_order_cost',
       type: 'number',
-      label: 'Work Order Cost',
+      label: 'WO. Cost',
       rules: { required: 'Work Order Cost is required' },
       onBlur: () => {
         const newWoCost = Number(getValues('work_order_cost'))
         const margin = Number(getValues('margin'))
 
         setValue('customer_price', getSellPrice(newWoCost, margin))
-      }
+      },
+      fieldClassName: 'grid-cols-[68px_minmax(0,_1fr)]!'
     },
     {
       name: 'customer_price',
@@ -257,7 +259,8 @@ const CreateOrEditInventoryModal = ({
         const woCost = Number(getValues('work_order_cost'))
 
         setValue('margin', getMargin(woCost, newSellPrice))
-      }
+      },
+      fieldClassName: 'grid-cols-[92px_minmax(0,_1fr)]!'
     },
     {
       name: 'margin',
@@ -269,7 +272,8 @@ const CreateOrEditInventoryModal = ({
         const woCost = Number(getValues('work_order_cost'))
 
         setValue('customer_price', getSellPrice(woCost, newMargin))
-      }
+      },
+      fieldClassName: 'grid-cols-[68px_minmax(0,_1fr)]!'
     }
   ]
 
@@ -285,7 +289,8 @@ const CreateOrEditInventoryModal = ({
       ],
       onChange: () => {
         setValue('warehouse_id', '')
-      }
+      },
+      fieldClassName: 'self-end'
     },
     {
       name: 'stock_section_id',
@@ -322,7 +327,7 @@ const CreateOrEditInventoryModal = ({
     }
   ]
 
-  const sharedFieldClass = 'grid grid-cols-[116px_minmax(0,_1fr)] gap-2'
+  const sharedFieldClass = 'grid grid-cols-[108px_minmax(0,_1fr)] gap-2'
   const sharedLabelClass = 'justify-end items-start self-start text-right pt-1.5'
 
   const renderFormField = (field: FormFieldType) => {
@@ -343,7 +348,7 @@ const CreateOrEditInventoryModal = ({
         <div key={field.name} className='flex items-start gap-1.5'>
           {formField}
 
-          <p className='text-xs leading-none text-muted-foreground text-nowrap pt-2'>{field.unit}</p>
+          <p className='w-[146px] text-xs leading-none text-muted-foreground pt-2 line-clamp-1'>{field.unit}</p>
         </div>
       )
     }
@@ -447,7 +452,7 @@ const CreateOrEditInventoryModal = ({
             </SharedCard>
 
             {/* Product Cost / Pricing */}
-            <SharedCard title='Product Cost/Pricing' contentClass='grid grid-cols-2 gap-x-4 gap-y-2'>
+            <SharedCard title='Product Cost/Pricing' contentClass='grid grid-cols-[5fr_3fr] gap-x-4 gap-y-2'>
               {pricingFields.map(renderFormField)}
             </SharedCard>
           </div>

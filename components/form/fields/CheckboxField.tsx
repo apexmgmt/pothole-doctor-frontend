@@ -40,7 +40,10 @@ const CheckboxField = <T extends FieldValues>({
         className={className}
       />
       {label && (
-        <Label htmlFor={checkboxId} className={cn('text-sm font-normal text-popover-foreground', labelClassName)}>
+        <Label
+          htmlFor={checkboxId}
+          className={cn('text-xs font-normal leading-tight text-popover-foreground', labelClassName)}
+        >
           {label}
         </Label>
       )}

@@ -36,8 +36,16 @@ const InputField = <T extends FieldValues>({
                   value: 0,
                   message: `${label ?? 'Value'} can't be negative`
                 }
-              : undefined
-        })
+              : undefined,
+          pattern:
+            rules?.pattern ||
+            (type === 'email'
+              ? {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: 'Invalid email address'
+                }
+              : undefined)
+        } as any)
       : undefined
 
   return (

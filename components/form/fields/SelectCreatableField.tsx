@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Controller, FieldValues, Path } from 'react-hook-form'
 
-import { ChevronsUpDown, Plus, XIcon } from 'lucide-react'
+import { Check, ChevronsUpDown, Plus } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -12,9 +11,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { FieldComponentProps } from './types'
 import { cn } from '@/lib/utils'
 
-export type MultiSelectCreatableFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
+export type SelectCreatableFieldProps<T extends FieldValues> = Omit<FieldComponentProps<T>, 'register'>
 
-const MultiSelectCreatableField = <T extends FieldValues>({
+const SelectCreatableField = <T extends FieldValues>({
   name,
   placeholder,
   control,
@@ -27,7 +26,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
   autoFocus,
   disabled = false,
   className
-}: MultiSelectCreatableFieldProps<T>) => {
+}: SelectCreatableFieldProps<T>) => {
   const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState('')
 
@@ -64,18 +63,12 @@ const MultiSelectCreatableField = <T extends FieldValues>({
     return normalizedOptions.some(option => option.value.toLowerCase() === normalized)
   }
 
-  const renderMultiSelect = (selectedValues: string[], setSelectedValues: (nextValue: string[]) => void) => {
-    const handleToggle = (option: string) => {
-      let nextValue = [...selectedValues]
-
-      if (nextValue.includes(option)) {
-        nextValue = nextValue.filter(v => v !== option)
-      } else {
-        nextValue = [...nextValue, option]
-      }
-
-      setSelectedValues(nextValue)
-      onBlur?.(nextValue)
+  const renderSelect = (selectedValue: string | undefined, setSelectedValue: (nextValue: string) => void) => {
+    const handleSelect = (optionValue: string) => {
+      setSelectedValue(optionValue)
+      onBlur?.(optionValue)
+      setOpen(false)
+      setInputValue('')
     }
 
     const handleCreate = () => {
@@ -85,8 +78,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
         return
       }
 
-      handleToggle(nextValue)
-      setInputValue('')
+      handleSelect(nextValue)
     }
 
     const showCreate = inputValue.trim().length > 0 && !isExistingOption(inputValue)
@@ -113,35 +105,19 @@ const MultiSelectCreatableField = <T extends FieldValues>({
         <PopoverTrigger asChild>
           <Button
             variant='outline'
+            role='combobox'
             disabled={disabled}
             autoFocus={autoFocus}
-            className={cn('w-full pe-1.5! justify-between', className, 'h-auto! min-h-7!')}
+            className={cn(
+              'w-full pe-1.5! justify-between',
+              selectedValue ? 'text-[#f4f4f5]' : 'text-[#a7a7ae]!',
+              className,
+              'h-auto! min-h-7!'
+            )}
           >
-            <div
-              className={`flex flex-1 flex-wrap items-center gap-1 text-left ${selectedValues.length === 0 ? 'text-[#a7a7ae] overflow-hidden' : 'text-[#f4f4f5]'}`}
-            >
-              {!(selectedValues.length > 0) ? (
-                <span>{placeholder}</span>
-              ) : (
-                selectedValues.map((valueItem, i) => (
-                  <span
-                    key={`${valueItem}-${i}`}
-                    className='flex items-center gap-1.5 pl-2 pr-1 py-px rounded-sm text-xs leading-none bg-white/10'
-                  >
-                    {lookupLabel(valueItem)}
-                    <span
-                      onClick={event => {
-                        event.stopPropagation()
-                        handleToggle(valueItem)
-                      }}
-                      className='p-1 hover:text-red-500 hover:bg-red-500/15 rounded-sm cursor-pointer'
-                    >
-                      <XIcon className='size-3' />
-                    </span>
-                  </span>
-                ))
-              )}
-            </div>
+            <span className='overflow-hidden text-left flex-1'>
+              {selectedValue ? lookupLabel(selectedValue) : placeholder}
+            </span>
             <ChevronsUpDown className='ml-2 size-3.5 shrink-0 opacity-50' />
           </Button>
         </PopoverTrigger>
@@ -171,17 +147,17 @@ const MultiSelectCreatableField = <T extends FieldValues>({
                   </CommandItem>
                 )}
                 {normalizedOptions.map(option => {
-                  const isSelected = selectedValues.includes(option.value)
+                  const isSelected = selectedValue === option.value
 
                   return (
                     <CommandItem
                       key={option.key}
                       value={option.label}
                       disabled={!!option.disabled}
-                      onSelect={() => handleToggle(option.value)}
+                      onSelect={() => handleSelect(option.value)}
                       className='flex items-center gap-2'
                     >
-                      <Checkbox checked={isSelected} className='size-4 [&_span_svg]:size-3.25 pointer-events-none' />
+                      <Check className={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
                       {option.labelPrefix && <span className='mr-2'>{option.labelPrefix}</span>}
                       {option.label}
                     </CommandItem>
@@ -196,9 +172,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
   }
 
   if (!control || !name) {
-    const selectedValues: string[] = Array.isArray(value) ? value : []
-
-    return renderMultiSelect(selectedValues, nextValue => {
+    return renderSelect(String(value ?? '') || undefined, nextValue => {
       onChange?.(nextValue)
     })
   }
@@ -209,9 +183,7 @@ const MultiSelectCreatableField = <T extends FieldValues>({
       control={control}
       rules={rules}
       render={({ field }) => {
-        const selectedValues: string[] = Array.isArray(field.value) ? field.value : []
-
-        return renderMultiSelect(selectedValues, nextValue => {
+        return renderSelect(String(field.value ?? value ?? '') || undefined, nextValue => {
           field.onChange(nextValue)
           onChange?.(nextValue)
         })
@@ -220,4 +192,4 @@ const MultiSelectCreatableField = <T extends FieldValues>({
   )
 }
 
-export default MultiSelectCreatableField
+export default SelectCreatableField

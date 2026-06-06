@@ -54,7 +54,7 @@ const ComboboxField = <T extends FieldValues>({
           onClick={e => e.stopPropagation()}
           disabled={disabled}
           autoFocus={autoFocus}
-          className={`w-full justify-between ${selectedValue ? 'text-[#f4f4f5]' : 'text-[#a7a7ae]!'} ${className}`}
+          className={`w-full pe-1.5! justify-between ${selectedValue ? 'text-[#f4f4f5]' : 'text-[#a7a7ae]!'} ${className}`}
         >
           <span className='overflow-hidden'>
             {selectedValue ? selectOptions.find(o => o.value === selectedValue)?.label : placeholder}

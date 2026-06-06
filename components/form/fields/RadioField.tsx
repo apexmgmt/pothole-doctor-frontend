@@ -29,15 +29,20 @@ const RadioField = <T extends FieldValues>({
         setSelectedValue(nextValue)
         onBlur?.(nextValue)
       }}
-      className={cn('space-y-2', className)}
+      className={cn('flex gap-2', className)}
       disabled={disabled}
     >
       {selectOptions.map((option, idx) => {
         const radioId = `${String(name ?? 'radio')}-${idx}`
 
         return (
-          <div key={radioId} className='flex items-center space-x-2'>
-            <RadioGroupItem value={option.value} id={radioId} disabled={disabled || option.disabled} autoFocus={autoFocus && idx === 0} />
+          <div key={radioId} className='flex items-center gap-x-2'>
+            <RadioGroupItem
+              value={option.value}
+              id={radioId}
+              disabled={disabled || option.disabled}
+              autoFocus={autoFocus && idx === 0}
+            />
             <Label htmlFor={radioId} className='cursor-pointer text-xs! font-normal! text-popover-foreground!   '>
               {option.label}
             </Label>
