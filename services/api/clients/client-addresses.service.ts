@@ -41,7 +41,7 @@ export default class ClientAddressService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create client address')
+        throw errorData
       }
 
       return await response.json()
@@ -86,7 +86,7 @@ export default class ClientAddressService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update client address')
+        throw errorData
       }
 
       return await response.json()

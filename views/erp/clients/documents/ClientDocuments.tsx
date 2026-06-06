@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import Image from 'next/image'
 
@@ -9,27 +9,24 @@ import { PlusIcon, Search } from 'lucide-react'
 import { toast } from 'sonner'
 
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import EditButton from '@/components/erp/common/buttons/EditButton'
+
+// import EditButton from '@/components/erp/common/buttons/EditButton'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+
+// import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { DocumentIcon } from '@/public/icons'
 import { Column, DataTableApiResponse, Document } from '@/types'
 import { generateFileUrl, getFileType } from '@/utils/utility'
-
-import CreateOrEditDocumentModal from './CreateOrEditDocumentModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import ClientDocumentService from '@/services/api/clients/client-documents.service'
 
 const ClientDocuments = ({ clientId }: { clientId: string }) => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: clientId })
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Set initial search value from filterOptions
   useEffect(() => {
@@ -102,36 +99,34 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
     : []
 
   const handleOpenCreateModal = () => {
-    setModalMode('create')
-    setSelectedDocumentId(null)
-    setSelectedDocument(null)
-    setIsModalOpen(true)
+    fileInputRef.current?.click()
   }
 
-  const handleOpenEditModal = async (id: string) => {
-    setModalMode('edit')
-    setSelectedDocumentId(id)
+  const handleUploadDocument = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
 
-    // Fetch contact type details
+    if (!file) return
+
+    const formData = new FormData()
+
+    formData.append('client_id', clientId)
+    formData.append('file', file)
+
     try {
-      const response = await ClientDocumentService.show(id)
-
-      setSelectedDocument(response.data)
-      setIsModalOpen(true)
-    } catch (error) {
-      toast.error('Failed to fetch document details')
+      await ClientDocumentService.store(formData)
+      toast.success('Document added successfully')
+      fetchData()
+    } catch (error: any) {
+      if (error?.errors && typeof error.errors === 'object') {
+        Object.values(error.errors).forEach((errMsg: any) => {
+          errMsg?.map((msg: string) => toast.error(msg))
+        })
+      } else {
+        toast.error(error?.message || 'Something went wrong')
+      }
+    } finally {
+      event.target.value = ''
     }
-  }
-
-  const handleModalClose = () => {
-    setIsModalOpen(false)
-    setSelectedDocumentId(null)
-    setSelectedDocument(null)
-  }
-
-  const handleSuccess = () => {
-    fetchData()
-    handleModalClose()
   }
 
   // Column definitions for CommonTable
@@ -191,7 +186,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
       cell: row => (
         <ThreeDotButton
           buttons={[
-            <EditButton tooltip='Edit Document' onClick={() => handleOpenEditModal(row.id)} variant='text' />,
+            // <EditButton tooltip='Edit Document' onClick={() => handleOpenEditModal(row.id)} variant='text' />,
             <DeleteButton tooltip='Delete Document' variant='text' onClick={() => handleDeleteDocument(row.id)} />
           ]}
         />
@@ -223,11 +218,11 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
   }
 
   // Check if filters are active (excluding pagination)
-  const hasActiveFilters = () => {
-    const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+  // const hasActiveFilters = () => {
+  //   const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
-    return filterKeys.length > 0
-  }
+  //   return filterKeys.length > 0
+  // }
 
   // Custom filters component
   const customFilters = (
@@ -264,6 +259,8 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
 
   return (
     <>
+      <input ref={fileInputRef} type='file' className='hidden' onChange={handleUploadDocument} />
+
       <CommonTable
         data={{
           data: documentData,
@@ -281,16 +278,6 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
         pagination={true}
         isLoading={isLoading}
         emptyMessage='No document found'
-      />
-
-      <CreateOrEditDocumentModal
-        clientId={clientId}
-        mode={modalMode}
-        open={isModalOpen}
-        onOpenChange={handleModalClose}
-        documentId={selectedDocumentId || undefined}
-        documentDetails={selectedDocument || undefined}
-        onSuccess={handleSuccess}
       />
     </>
   )

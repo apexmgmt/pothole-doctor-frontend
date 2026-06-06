@@ -8,7 +8,7 @@ import { EmailTemplate, EmailTemplatePayload } from '@/types'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
+import CustomFormField from '@/components/form/CustomFormField'
 import TipTapRichTextEditor, { TipTapRichTextEditorRef } from '@/components/erp/common/editor/TipTapRichTextEditor'
 import EmailTemplateService from '@/services/api/settings/email_templates.service'
 
@@ -29,6 +29,7 @@ export default function EditEmailTemplateDialog({
   const [isLoading, setIsLoading] = useState(false)
   const [descriptionHtml, setDescriptionHtml] = useState('')
   const editorRef = useRef<TipTapRichTextEditorRef>(null)
+  const [selectedPlaceholder, setSelectedPlaceholder] = useState('')
 
   useEffect(() => {
     if (template && open) {
@@ -65,17 +66,28 @@ export default function EditEmailTemplateDialog({
   }
 
   const placeholders = [
+    { label: 'Company Name', value: '{{CompanyName}}' },
+    { label: 'Quote URL', value: '{{QuoteURL}}' },
+    { label: 'Quote Number', value: '{{QuoteNumber}}' },
+    { label: 'Estimate Number', value: '{{EstimateNumber}}' },
+    { label: 'Site Address', value: '{{SiteAddress}}' },
+    { label: 'Invoice URL', value: '{{InvoiceURL}}' },
+    { label: 'Invoice Number', value: '{{invoiceNumber}}' },
+    { label: 'Location Name', value: '{{LocationName}}' },
+    { label: 'Location Email', value: '{{LocationEmail}}' },
+    { label: 'Location Phone', value: '{{LocationPhone}}' },
+    { label: 'Location Address', value: '{{LocationAddress}}' },
     { label: 'Customer Name', value: '{{CustomerName}}' },
+    { label: 'Customer Email', value: '{{CustomerEmail}}' },
+    { label: 'Customer Phone', value: '{{CustomerPhone}}' },
+    { label: 'Customer Address', value: '{{CustomerAddress}}' },
+    { label: 'Salesman Name', value: '{{SalesmanName}}' },
+    { label: 'Salesman Email', value: '{{SalesmanEmail}}' },
+    { label: 'Salesman Phone Number', value: '{{SalesmanPhoneNumber}}' },
+    { label: 'Name', value: '{{name}}' },
     { label: 'Task Name', value: '{{TaskName}}' },
     { label: 'Date Time', value: '{{DateTime}}' },
-    { label: 'Company Name', value: '{{CompanyName}}' },
-    { label: 'Phone Number', value: '{{PhoneNumber}}' },
-    { label: 'Quote URL', value: '{{QuoteURL}}' },
-    { label: 'Invoice URL', value: '{{InvoiceURL}}' },
-    { label: 'Salesman', value: '{{Salesman}}' },
-    { label: 'Salesman Phone Number', value: '{{SalesmanPhoneNumber}}' },
-    { label: 'Salesman Email', value: '{{SalesmanEmail}}' },
-
+    { label: 'Task Type', value: '{{task-type}}' }
   ]
 
   const insertPlaceholder = (placeholder: string) => {
@@ -94,7 +106,7 @@ export default function EditEmailTemplateDialog({
       onOpenChange={onOpenChange}
       title='Edit Email Template'
       description='Update the email template content'
-      maxWidth='4xl'
+      maxWidth='5xl'
       isLoading={isLoading}
       actions={
         <>
@@ -107,49 +119,51 @@ export default function EditEmailTemplateDialog({
         </>
       }
     >
-      <form id='edit-email-template-form' onSubmit={handleSubmit} className='space-y-6'>
-        <div className='space-y-2'>
-          <Label htmlFor='title'>
-            Template Title <span className='text-destructive'>*</span>
-          </Label>
-          <Input
-            id='title'
+      <form id='edit-email-template-form' onSubmit={handleSubmit} className='space-y-2'>
+        <div className='space-y-2 grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <CustomFormField
+            type='text'
+            name='title'
+            label='Template Title'
             value={title}
-            onChange={e => setTitle(e.target.value)}
-            required
+            onChange={value => setTitle(typeof value === 'string' ? value : '')}
+            rules={{ required: 'Template title is required' }}
             placeholder='Enter template title'
-          />
-        </div>
-
-        <div className='space-y-2'>
-          <Label>Available Placeholders</Label>
-          <div className='flex flex-wrap gap-2'>
-            {placeholders.map(placeholder => (
-              <Button
-                key={placeholder.value}
-                type='button'
-                variant='outline'
-                size='sm'
-                onClick={() => insertPlaceholder(placeholder.value)}
-                className='text-xs'
-              >
-                {placeholder.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div className='space-y-2'>
-          <Label>
-            Template Content <span className='text-destructive'>*</span>
-          </Label>
-          <TipTapRichTextEditor
-            ref={editorRef}
-            value={descriptionHtml}
-            onChange={setDescriptionHtml}
-            placeholder='Enter template content...'
             disabled={isLoading}
+            fieldClassName={'grid grid-cols-[128px_minmax(0,_1fr)]'}
+            labelClassName={'justify-end self-start text-right pt-1'}
           />
+
+          <CustomFormField
+            type='select'
+            name='placeholders'
+            label='Available Placeholders'
+            placeholder='Select placeholder to insert'
+            value={selectedPlaceholder}
+            selectOptions={placeholders}
+            onChange={value => {
+              if (typeof value !== 'string' || value === '') return
+              insertPlaceholder(value)
+              setSelectedPlaceholder('')
+            }}
+            disabled={isLoading}
+            fieldClassName={'grid grid-cols-[128px_minmax(0,_1fr)]'}
+            labelClassName={'justify-end self-start text-right pt-1'}
+          />
+        </div>
+        <div className='space-y-2 grid grid-cols-[128px_minmax(0,1fr)]'>
+          <Label className='text-xs font-normal justify-end self-start text-right pt-1 gap-0'>
+            Template Content<span className='text-destructive'>*</span>
+          </Label>
+          <div className='ml-2'>
+            <TipTapRichTextEditor
+              ref={editorRef}
+              value={descriptionHtml}
+              onChange={setDescriptionHtml}
+              placeholder='Enter template content...'
+              disabled={isLoading}
+            />
+          </div>
         </div>
       </form>
     </CommonDialog>
