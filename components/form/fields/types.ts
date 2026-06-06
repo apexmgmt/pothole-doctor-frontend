@@ -18,6 +18,7 @@ export type InputType =
   | 'combobox'
   | 'datepicker'
   | 'radio'
+  | 'color'
 
 export type SelectOption = {
   value: string
