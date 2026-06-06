@@ -1,13 +1,8 @@
 'use client'
 
 import { UseFormReturn } from 'react-hook-form'
-
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Label } from '@/components/ui/label'
-import { CreatableSelect, MultiSelect } from '@/components/ui/select'
 import { BusinessLocation, Company } from '@/types'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface BasicInformationFieldsProps {
   form: UseFormReturn<any>
@@ -20,74 +15,79 @@ export function BasicInformationFields({ form, businessLocations, companies, ent
   const isIndividual = entity === 'individual'
   const isBusiness = entity === 'business'
 
+  const {
+    register,
+    control,
+    formState: { errors }
+  } = form
+
+  const user_type = form.watch('user_type')
+
+  const sharedFieldClass = 'grid grid-cols-[116px_minmax(0,_1fr)] gap-2'
+  const sharedLabelClass = 'justify-end items-start self-start text-right pt-1.5'
+
   return (
-    <div className='sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4'>
-      {/* User type Radio Group */}
-      <FormField
-        control={form.control}
+    <>
+      {/* Row 1: Role (user_type, col-span-2) & Status (col-span-1) */}
+      <CustomFormField
+        type='radio'
         name='user_type'
+        label='Role'
+        control={control}
         rules={{ required: 'Role is required' }}
-        render={({ field }) => (
-          <FormItem className='flex flex-col gap-4 md:col-span-2 '>
-            <FormLabel>Role</FormLabel>
-            <FormControl>
-              <RadioGroup
-                onValueChange={val => field.onChange(val)}
-                value={field.value}
-                className='flex flex-row gap-4 items-center'
-              >
-                <div className='flex gap-2 items-center'>
-                  <RadioGroupItem value='contractor' id='user_type-contractor' />
-                  <Label htmlFor='user_type-contractor' className='cursor-pointer'>
-                    Contractor
-                  </Label>
-                </div>
-                <div className='flex gap-2 items-center'>
-                  <RadioGroupItem value='referral' id='user_type-referral' />
-                  <Label htmlFor='user_type-referral' className='cursor-pointer'>
-                    Referral
-                  </Label>
-                </div>
-              </RadioGroup>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        errors={errors}
+        selectOptions={[
+          { value: 'contractor', label: 'Contractor' },
+          { value: 'referral', label: 'Referral' }
+        ]}
+        fieldClassName={`${sharedFieldClass} sm:col-span-2 items-center`}
+        labelClassName={`${sharedLabelClass} pt-0!`}
       />
-      {/* <div className='col-span-1 grid  gap-4'> */}
-      {/* Location id Field */}
-      <FormField
-        control={form.control}
+
+      <CustomFormField
+        type='radio'
+        name='status'
+        label='Status'
+        value={form.watch('status') ? 'true' : 'false'}
+        onChange={(val: any) => form.setValue('status', val === 'true')}
+        errors={errors}
+        selectOptions={[
+          { value: 'true', label: 'Active' },
+          { value: 'false', label: 'Disabled' }
+        ]}
+        fieldClassName={`${sharedFieldClass} items-center`}
+        labelClassName={`${sharedLabelClass} pt-0!`}
+      />
+
+      {/* Row 2: Location (col-span-1), Company Name (col-span-1), Entity (col-span-1) */}
+      <CustomFormField
+        type='multiselect'
         name='location_id'
+        label='Location'
+        placeholder='Select locations'
+        control={control}
+        errors={errors}
         rules={{
           required: 'Location is required',
           validate: value => (value && value.length > 0) || 'At least one location must be selected'
         }}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              Location<span className='text-red-500'>*</span>
-            </FormLabel>
-            <FormControl>
-              <MultiSelect
-                options={businessLocations.map(loc => ({
-                  value: loc.id.toString(),
-                  label: loc.name
-                }))}
-                selected={field.value || []}
-                onChange={field.onChange}
-                placeholder='Select locations'
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        selectOptions={businessLocations.map(loc => ({
+          value: loc.id.toString(),
+          label: loc.name
+        }))}
+        fieldClassName={sharedFieldClass}
+        labelClassName={sharedLabelClass}
       />
-      {/* Company Name Field */}
-      <FormField
-        control={form.control}
+
+      <CustomFormField
+        type='select-creatable'
         name='company_name'
+        label='Company Name'
+        placeholder='Select or type company name'
+        control={control}
+        errors={errors}
         rules={{
+          required: isBusiness ? 'Company name is required' : false,
           validate: value => {
             if (entity === 'business' && !value?.trim()) {
               return 'Company name is required'
@@ -96,34 +96,42 @@ export function BasicInformationFields({ form, businessLocations, companies, ent
             return true
           }
         }}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              Company Name {isBusiness && <span className='text-red-500'>*</span>}
-            </FormLabel>
-            <FormControl>
-              <CreatableSelect
-                options={companies.map(company => ({
-                  value: company.name,
-                  label: company.name
-                }))}
-                value={field.value || ''}
-                onChange={field.onChange}
-                placeholder='Select or type company name'
-                className='w-full'
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        selectOptions={companies.map(company => ({
+          value: company.name,
+          label: company.name
+        }))}
+        fieldClassName={sharedFieldClass}
+        labelClassName={sharedLabelClass}
       />
-      {/* </div>
-      <div className='col-span-1 grid  gap-4'> */}
-      {/* First Name Field */}
-      <FormField
-        control={form.control}
+
+      {user_type === 'contractor' ? (
+        <CustomFormField
+          type='radio'
+          name='entity'
+          label='Entity'
+          control={control}
+          errors={errors}
+          selectOptions={[
+            { value: 'individual', label: 'Individual' },
+            { value: 'business', label: 'Business' }
+          ]}
+          fieldClassName={`${sharedFieldClass} items-center`}
+          labelClassName={`${sharedLabelClass} pt-0!`}
+        />
+      ) : (
+        <div />
+      )}
+
+      {/* Row 3: First Name, Last Name, Email Confirmation */}
+      <CustomFormField
+        type='text'
         name='first_name'
+        label='First Name'
+        placeholder='Enter first name'
+        register={register}
+        errors={errors}
         rules={{
+          required: isIndividual ? 'First name is required' : false,
           validate: value => {
             const normalized = value?.trim() || ''
 
@@ -138,23 +146,19 @@ export function BasicInformationFields({ form, businessLocations, companies, ent
             return true
           }
         }}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              First Name {isIndividual && <span className='text-red-500'>*</span>}
-            </FormLabel>
-            <FormControl>
-              <Input placeholder='Enter first name' {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        fieldClassName={sharedFieldClass}
+        labelClassName={sharedLabelClass}
       />
-      {/* Last Name Field */}
-      <FormField
-        control={form.control}
+
+      <CustomFormField
+        type='text'
         name='last_name'
+        label='Last Name'
+        placeholder='Enter last name'
+        register={register}
+        errors={errors}
         rules={{
+          required: isIndividual ? 'Last name is required' : false,
           validate: value => {
             if (entity === 'individual' && !value?.trim()) {
               return 'Last name is required'
@@ -163,91 +167,107 @@ export function BasicInformationFields({ form, businessLocations, companies, ent
             return true
           }
         }}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              Last Name {isIndividual && <span className='text-red-500'>*</span>}
-            </FormLabel>
-            <FormControl>
-              <Input placeholder='Enter last name' {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        fieldClassName={sharedFieldClass}
+        labelClassName={sharedLabelClass}
       />
-      {/* </div>
-      <div className='col-span-1 grid  gap-4'> */}
-      {/* Email Field */}
-      <FormField
-        control={form.control}
+
+      <CustomFormField
+        type='checkbox'
+        name='is_email_confirmation'
+        label='Email Confirmation'
+        value={form.watch('is_email_confirmation') === 1}
+        onChange={(val: any) => form.setValue('is_email_confirmation', val ? 1 : 0)}
+        errors={errors}
+        fieldClassName='ps-31'
+      />
+
+      {/* Row 4: Email, Phone, SSN */}
+      <CustomFormField
+        type='email'
         name='email'
+        label='Email'
+        placeholder='Enter email'
+        register={register}
+        errors={errors}
         rules={{
-          required: 'Email is required',
-          pattern: {
-            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-            message: 'Invalid email address'
-          }
+          required: 'Email is required'
         }}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              Email<span className='text-red-500'>*</span>
-            </FormLabel>
-            <FormControl>
-              <Input type='email' placeholder='Enter email' {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        fieldClassName={sharedFieldClass}
+        labelClassName={sharedLabelClass}
       />
-      {/* Phone Field */}
-      <FormField
-        control={form.control}
+
+      <CustomFormField
+        type='tel'
         name='phone'
+        label='Phone'
+        placeholder='Enter phone'
+        register={register}
+        errors={errors}
         rules={{
           minLength: { value: 7, message: 'Phone number must be at least 7 characters' }
         }}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Phone</FormLabel>
-            <FormControl>
-              <Input type='tel' placeholder='Enter phone' {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        fieldClassName={sharedFieldClass}
+        labelClassName={sharedLabelClass}
       />
-      {/* </div>
-      <div className='col-span-1 grid  gap-4'> */}
-      {/* Fax Field */}
-      <FormField
-        control={form.control}
+
+      <CustomFormField
+        type='text'
+        name='ssn'
+        label='SSN'
+        placeholder='Enter SSN'
+        register={register}
+        errors={errors}
+        fieldClassName={sharedFieldClass}
+        labelClassName={sharedLabelClass}
+      />
+
+      {/* Row 5: Fax, Password, EIN */}
+      <CustomFormField
+        type='tel'
         name='fax'
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Fax</FormLabel>
-            <FormControl>
-              <Input type='tel' placeholder='Enter fax' {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        label='Fax'
+        placeholder='Enter fax'
+        register={register}
+        errors={errors}
+        fieldClassName={sharedFieldClass}
+        labelClassName={sharedLabelClass}
       />
-      {/* Password Field */}
-      <FormField
-        control={form.control}
+
+      <CustomFormField
+        type='password'
         name='password'
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Password</FormLabel>
-            <FormControl>
-              <Input type='password' placeholder='Enter password' {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        label='Password'
+        placeholder='Enter password'
+        register={register}
+        errors={errors}
+        fieldClassName={sharedFieldClass}
+        labelClassName={sharedLabelClass}
       />
-      {/* </div> */}
-    </div>
+
+      <CustomFormField
+        type='text'
+        name='ein'
+        label='EIN'
+        placeholder='Enter EIN'
+        register={register}
+        errors={errors}
+        fieldClassName={sharedFieldClass}
+        labelClassName={sharedLabelClass}
+      />
+
+      {/* Row 6: Two hidden placeholders (Col 1 & Col 2 on md), Notes (Col 3) */}
+      <div className='hidden md:block' />
+      <div className='hidden md:block' />
+      <CustomFormField
+        type='textarea'
+        name='notes'
+        label='Notes'
+        placeholder='Enter notes'
+        register={register}
+        errors={errors}
+        fieldClassName={sharedFieldClass}
+        labelClassName={sharedLabelClass}
+      />
+    </>
   )
 }
