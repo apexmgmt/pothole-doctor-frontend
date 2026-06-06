@@ -51,7 +51,7 @@ export default class VendorRebateCreditService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to add rebate credit')
+        throw errorData
       }
 
       await revalidate('vendor-rebate-credits')
@@ -105,7 +105,7 @@ export default class VendorRebateCreditService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update rebate credit')
+        throw errorData
       }
 
       await revalidate('vendor-rebate-credits')
