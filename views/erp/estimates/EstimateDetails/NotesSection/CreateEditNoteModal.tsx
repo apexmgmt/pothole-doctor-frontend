@@ -79,7 +79,7 @@ const CreteEditNoteModal: React.FC<CreteEditNoteModalProps> = ({
       open={isOpen}
       onOpenChange={onOpenChange}
       title={mode === 'edit' ? 'Edit Note' : 'Add Note'}
-      maxWidth='xl'
+      maxWidth='2xl'
       isLoading={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
@@ -107,12 +107,16 @@ const CreteEditNoteModal: React.FC<CreteEditNoteModalProps> = ({
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
           <CustomFormField
             name='comment'
-            label='Comment'
+            
+            // label='Comment'
             type='textarea'
             placeholder='Type your note here...'
             rules={{ required: 'Comment is required' }}
             register={form.register}
             errors={form.formState.errors}
+
+            // fieldClassName='grid grid-cols-[72px_minmax(0,_1fr)]'
+            // labelClassName='justify-end self-start text-right pt-1'
           />
         </form>
       </Form>

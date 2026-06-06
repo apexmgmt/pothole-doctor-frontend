@@ -7,10 +7,9 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { CountryWithStates, VendorPickupAddress, VendorPickupAddressPayload } from '@/types'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import CustomFormField from '@/components/form/CustomFormField'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import VendorPickupAddressService from '@/services/api/vendors/vendor-pickup-addresses.service'
@@ -58,9 +57,21 @@ const CreateOrEditPickupAddressModal = ({
     }
   })
 
+  const {
+    reset,
+    watch,
+    setValue,
+    getValues,
+    setError,
+    register,
+    control,
+    handleSubmit,
+    formState: { isSubmitting, errors }
+  } = form
+
   useEffect(() => {
     if (open) {
-      form.reset({
+      reset({
         title: pickupAddressDetails?.title ?? '',
         street_address: pickupAddressDetails?.street_address ?? '',
         state_id: pickupAddressDetails?.state_id?.toString() ?? '',
@@ -69,11 +80,11 @@ const CreateOrEditPickupAddressModal = ({
         country_id: pickupAddressDetails?.city?.country_id?.toString() ?? ''
       })
     }
-  }, [pickupAddressDetails, open, form])
+  }, [pickupAddressDetails, open, reset])
 
   // Watch country and state selection
-  const selectedCountryId = form.watch('country_id')
-  const selectedStateId = form.watch('state_id')
+  const selectedCountryId = watch('country_id')
+  const selectedStateId = watch('state_id')
 
   // Get available states based on selected country
   const availableStates = useMemo(() => {
@@ -93,26 +104,26 @@ const CreateOrEditPickupAddressModal = ({
 
   // Reset state when country changes
   useEffect(() => {
-    if (selectedCountryId && form.getValues('state_id')) {
-      const stateExists = availableStates.some(s => s.id.toString() === form.getValues('state_id'))
+    if (selectedCountryId && getValues('state_id')) {
+      const stateExists = availableStates.some(s => s.id.toString() === getValues('state_id'))
 
       if (!stateExists) {
-        form.setValue('state_id', '')
-        form.setValue('city_id', '')
+        setValue('state_id', '')
+        setValue('city_id', '')
       }
     }
-  }, [selectedCountryId, availableStates, form])
+  }, [selectedCountryId, availableStates, getValues, setValue])
 
   // Reset city when state changes
   useEffect(() => {
-    if (selectedStateId && form.getValues('city_id')) {
-      const cityExists = availableCities.some(c => c.id.toString() === form.getValues('city_id'))
+    if (selectedStateId && getValues('city_id')) {
+      const cityExists = availableCities.some(c => c.id.toString() === getValues('city_id'))
 
       if (!cityExists) {
-        form.setValue('city_id', '')
+        setValue('city_id', '')
       }
     }
-  }, [selectedStateId, availableCities, form])
+  }, [selectedStateId, availableCities, getValues, setValue])
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true)
@@ -139,7 +150,7 @@ const CreateOrEditPickupAddressModal = ({
       if (mode === 'create') {
         await VendorPickupAddressService.store(payload as VendorPickupAddressPayload)
         toast.success('Pickup address added successfully')
-        form.reset()
+        reset()
         onOpenChange(false)
         onSuccess?.()
       } else if (mode === 'edit' && pickupAddressId) {
@@ -149,6 +160,19 @@ const CreateOrEditPickupAddressModal = ({
         onSuccess?.()
       }
     } catch (error: any) {
+      const serverErrors = error?.errors || {}
+
+      if (serverErrors && typeof serverErrors === 'object') {
+        Object.entries(serverErrors).forEach(([field, messages]) => {
+          const errMessage = (messages as string[])?.[0]
+
+          setError(field as keyof FormValues, {
+            type: 'server',
+            message: typeof errMessage === 'string' ? errMessage : ''
+          })
+        })
+      }
+
       toast.error(error?.message || 'Failed to save pickup address')
     } finally {
       setIsLoading(false)
@@ -156,9 +180,12 @@ const CreateOrEditPickupAddressModal = ({
   }
 
   const onCancel = () => {
-    form.reset()
+    reset()
     onOpenChange(false)
   }
+
+  const fieldStyle = 'grid grid-cols-[152px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
 
   return (
     <CommonDialog
@@ -168,188 +195,108 @@ const CreateOrEditPickupAddressModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Add Pickup Address' : 'Edit Pickup Address'}
       description={mode === 'create' ? 'Add a new pickup address for this vendor.' : 'Update pickup address details.'}
-      maxWidth='md'
-      disableClose={form.formState.isSubmitting}
+      maxWidth='4xl'
+      disableClose={isSubmitting}
       actions={
         <div className='flex gap-3'>
-          <Button
-            type='button'
-            variant='outline'
-            onClick={onCancel}
-            disabled={form.formState.isSubmitting}
-            className='flex-1'
-          >
+          <Button type='button' variant='outline' onClick={onCancel} disabled={isSubmitting} className='flex-1'>
             Cancel
           </Button>
-          <Button
-            type='submit'
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={form.formState.isSubmitting}
-            className='flex-1'
-          >
-            {form.formState.isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
+          <Button type='submit' onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className='flex-1'>
+            {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
           </Button>
         </div>
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <FormField
-            control={form.control}
-            name='title'
-            rules={{
-              required: 'Title is required',
-              minLength: { value: 2, message: 'Title must be at least 2 characters' }
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Title <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter title' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
+        <form onSubmit={handleSubmit(onSubmit)} className='grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2'>
+          <div className='md:col-span-2'>
+            <CustomFormField
+              name='title'
+              label='Title'
+              placeholder='Enter title'
+              rules={{
+                required: 'Title is required',
+                minLength: { value: 2, message: 'Title must be at least 2 characters' }
+              }}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
+            />
+          </div>
+          <div className='md:col-span-2'>
+            <CustomFormField
+              name='street_address'
+              type='textarea'
+              label='Street Address'
+              placeholder='Enter street address'
+              rules={{ required: 'Street address is required' }}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
+            />
+          </div>
+          <CustomFormField
             name='country_id'
+            label='Country'
+            type='select'
+            placeholder='Select country'
             rules={{ required: 'Country is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Country <span className='text-red-500'>*</span>
-                </FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select country' />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {countriesWithStatesAndCities.map(country => (
-                      <SelectItem key={country.id} value={country.id.toString()}>
-                        {country.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+            selectOptions={countriesWithStatesAndCities.map(country => ({
+              value: country.id.toString(),
+              label: country.name
+            }))}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
 
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='state_id'
+            label='State'
+            type='select'
+            placeholder={!selectedCountryId ? 'Please select a country first' : 'Select state'}
             rules={{ required: 'State is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  State <span className='text-red-500'>*</span>
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={!selectedCountryId || availableStates.length === 0}
-                >
-                  <FormControl>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select state' />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {availableStates.length === 0 ? (
-                      <div className='px-2 py-1.5 text-sm text-muted-foreground'>
-                        {!selectedCountryId ? 'Please select a country first' : 'No states available'}
-                      </div>
-                    ) : (
-                      availableStates.map(state => (
-                        <SelectItem key={state.id} value={state.id.toString()}>
-                          {state.name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+            selectOptions={availableStates.map(state => ({
+              value: state.id.toString(),
+              label: state.name
+            }))}
+            disabled={!selectedCountryId || availableStates.length === 0}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
 
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='city_id'
+            label='City'
+            type='select'
+            placeholder={!selectedStateId ? 'Please select a state first' : 'Select city'}
             rules={{ required: 'City is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  City <span className='text-red-500'>*</span>
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={!selectedStateId || availableCities.length === 0}
-                >
-                  <FormControl>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select city' />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {availableCities.length === 0 ? (
-                      <div className='px-2 py-1.5 text-sm text-muted-foreground'>
-                        {!selectedStateId ? 'Please select a state first' : 'No cities available'}
-                      </div>
-                    ) : (
-                      availableCities.map(city => (
-                        <SelectItem key={city.id} value={city.id.toString()}>
-                          {city.name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+            selectOptions={availableCities.map(city => ({
+              value: city.id.toString(),
+              label: city.name
+            }))}
+            disabled={!selectedStateId || availableCities.length === 0}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
 
-          <FormField
-            control={form.control}
-            name='street_address'
-            rules={{ required: 'Street address is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Street Address <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter street address' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='zip_code'
+            label='Zip Code'
+            placeholder='Enter zip code'
             rules={{ required: 'Zip code is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Zip Code <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter zip code' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
         </form>
       </Form>

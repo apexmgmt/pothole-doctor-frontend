@@ -52,7 +52,7 @@ export default class InterestLevelService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to create interest level')
+        throw errorData
       }
 
       await revalidate('interest-levels')
@@ -106,7 +106,7 @@ export default class InterestLevelService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to update interest level')
+        throw errorData
       }
 
       await revalidate('interest-levels')
