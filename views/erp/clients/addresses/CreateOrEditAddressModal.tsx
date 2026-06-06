@@ -155,7 +155,7 @@ const CreateOrEditAddressModal: React.FC<CreateOrEditAddressModalProps> = ({
         if (!open) onCancel()
       }}
       title={mode === 'edit' ? 'Edit Address' : 'Add Address'}
-      maxWidth='2xl'
+      maxWidth='4xl'
       isLoading={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
@@ -180,7 +180,7 @@ const CreateOrEditAddressModal: React.FC<CreateOrEditAddressModalProps> = ({
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2'>
           <CustomFormField
             type='text'
             register={form.register}
@@ -194,17 +194,18 @@ const CreateOrEditAddressModal: React.FC<CreateOrEditAddressModalProps> = ({
             labelClassName={labelStyle}
           />
           <CustomFormField
-            type='text'
-            register={form.register}
-            name='street_address'
-            label='Street Address'
-            placeholder='Street address'
-            rules={{ required: 'Street address is required' }}
+            type='checkbox'
+            control={form.control}
+            name='is_default'
+            label='Default'
+            value={Boolean(form.watch('is_default'))}
+            onChange={val => form.setValue('is_default', Boolean(val) ? 1 : 0, { shouldDirty: true })}
             errors={form.formState.errors}
             disabled={form.formState.isSubmitting}
-            fieldClassName={fieldStyle}
-            labelClassName={labelStyle}
+            fieldClassName={`${fieldStyle} [&>button]:order-2 [&>label]:order-1`}
+            labelClassName={`${labelStyle}`}
           />
+
           <CustomFormField
             type='email'
             register={form.register}
@@ -241,6 +242,20 @@ const CreateOrEditAddressModal: React.FC<CreateOrEditAddressModalProps> = ({
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}
           />
+          <div className='md:col-span-2'>
+            <CustomFormField
+              type='textarea'
+              register={form.register}
+              name='street_address'
+              label='Street Address'
+              placeholder='Street address'
+              rules={{ required: 'Street address is required' }}
+              errors={form.formState.errors}
+              disabled={form.formState.isSubmitting}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
+            />
+          </div>
           <CustomFormField
             type='select'
             control={form.control}
@@ -295,22 +310,6 @@ const CreateOrEditAddressModal: React.FC<CreateOrEditAddressModalProps> = ({
             name='zip_code'
             label='Zip Code'
             placeholder='Zip Code'
-            errors={form.formState.errors}
-            disabled={form.formState.isSubmitting}
-            fieldClassName={fieldStyle}
-            labelClassName={labelStyle}
-          />
-          <CustomFormField
-            type='select'
-            control={form.control}
-            name='is_default'
-            label='Default Address'
-            selectOptions={[
-              { label: 'Yes', value: '1' },
-              { label: 'No', value: '0' }
-            ]}
-            value={String(form.watch('is_default') ?? 0)}
-            onChange={val => form.setValue('is_default', Number(val), { shouldDirty: true })}
             errors={form.formState.errors}
             disabled={form.formState.isSubmitting}
             fieldClassName={fieldStyle}
