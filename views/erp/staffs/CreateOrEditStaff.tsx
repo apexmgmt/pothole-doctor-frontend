@@ -4,25 +4,22 @@ import React, { useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { useForm } from 'react-hook-form'
+import { Path, RegisterOptions, useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 
-import { Eye, EyeOff } from 'lucide-react'
-
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
+import { Form } from '@/components/ui/form'
 import { SpinnerCustom } from '@/components/ui/spinner'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { CreateOrEditStaffProps, StaffPayload } from '@/types'
 import StaffService from '@/services/api/staff.service'
 import Link from 'next/link'
+import { InputType, SelectOption } from '@/components/form/fields/types'
+import CustomFormField from '@/components/form/CustomFormField'
 
 const defaultValues: StaffPayload = {
   first_name: '',
@@ -36,6 +33,20 @@ const defaultValues: StaffPayload = {
   roles: [],
   permissions: [],
   commission_type_id: ''
+}
+
+type FormFieldType = {
+  name: Path<StaffPayload>
+  type?: InputType
+  label?: string
+  placeholder?: string
+  rules?: RegisterOptions<StaffPayload, Path<StaffPayload>>
+  selectOptions?: SelectOption[]
+  onChange?: (value: any) => void
+  onBlur?: () => void
+  fieldClassName?: string
+  description?: string
+  disabled?: boolean
 }
 
 const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
@@ -68,13 +79,9 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
     : defaultValues
 
   const form = useForm<StaffPayload>({ defaultValues: initialValues, mode: 'onSubmit' })
-  const { handleSubmit, control, getValues, reset, formState, watch } = form
-  const { isSubmitting } = formState
+  const { handleSubmit, control, getValues, reset, formState, watch, register, setValue } = form
+  const { errors } = formState
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [selectedRole, setSelectedRole] = useState<string>('')
-  const [showPassword, setShowPassword] = useState<boolean>(false)
-
-  const selectedRoles = watch('roles') || []
 
   useEffect(() => {
     dispatch(setPageTitle('Manage Staff'))
@@ -84,8 +91,8 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
   useEffect(() => {
     const password = watch('password')
 
-    form.setValue('password_confirmation', password)
-  }, [watch('password'), form])
+    setValue('password_confirmation', password)
+  }, [watch('password'), setValue])
 
   // Update form when staffData changes
   useEffect(() => {
@@ -130,7 +137,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
     if (mode === 'create') {
       try {
         StaffService.store(data)
-          .then(response => {
+          .then(() => {
             setIsLoading(false)
             toast.success('Staff created successfully')
             router.push('/erp/staffs')
@@ -143,7 +150,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
     } else if (mode === 'edit' && staffId != null) {
       try {
         StaffService.update(staffId, data)
-          .then(response => {
+          .then(() => {
             setIsLoading(false)
             toast.success('Staff updated successfully')
             router.push('/erp/staffs')
@@ -156,42 +163,85 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
     }
   }
 
-  const onCancel = () => {
-    if (mode === 'edit' && staffData) {
-      reset({
-        first_name: staffData.first_name || '',
-        last_name: staffData.last_name || '',
-        email: staffData.email || '',
-        phone: staffData.userable?.phone || '',
-        user_type: staffData.guard || 'admin',
-        password: '',
-        password_confirmation: '',
-        address: staffData.userable?.address || '',
-        roles: staffData.roles?.map(role => role.name) || [],
-        permissions: staffData.permissions?.map(permission => permission.name) || [],
-        commission_type_id: staffData?.userable?.commission_type_id || ''
-      })
-    } else {
-      reset(defaultValues)
+  const fields: FormFieldType[] = [
+    {
+      name: 'first_name',
+      type: 'text',
+      label: 'First Name',
+      placeholder: 'First name',
+      rules: { required: 'First Name is required' }
+    },
+    {
+      name: 'last_name',
+      type: 'text',
+      label: 'Last Name',
+      placeholder: 'Last name',
+      rules: { required: 'Last Name is required' }
+    },
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Email',
+      placeholder: 'Staff email',
+      rules: { required: 'Email is required' }
+    },
+    {
+      name: 'phone',
+      type: 'text',
+      label: 'Phone',
+      placeholder: 'Phone'
+    },
+    {
+      name: 'password',
+      type: 'password',
+      label: mode === 'edit' ? 'Password' : 'Password',
+      placeholder: 'Password',
+      description: mode === 'edit' ? 'Leave blank to keep current' : undefined,
+      rules: { required: mode === 'create' ? 'Password is required' : false }
+    },
+    ...(isTenant
+      ? [
+          {
+            name: 'commission_type_id',
+            type: 'select',
+            label: 'Commission Type',
+            placeholder: 'Select commission type',
+            selectOptions: commissionTypes.map(ct => ({ value: ct.id, label: ct.name }))
+          } as FormFieldType
+        ]
+      : []),
+    {
+      name: 'address',
+      type: 'textarea',
+      label: 'Address',
+      placeholder: 'Full address',
+      fieldClassName: 'sm:col-span-2',
+      rules: { required: 'Address is required' }
+    },
+    {
+      name: 'roles',
+      type: 'multiselect',
+      label: 'Roles',
+      placeholder: 'Select roles',
+      selectOptions: roles.map(role => ({ value: role.name, label: role.name })),
+      fieldClassName: 'sm:col-span-2'
     }
-  }
+  ]
 
-  const handleRoleSelect = (roleName: string) => {
-    const currentRoles = getValues('roles') || []
+  const sharedFieldClass = 'grid grid-cols-[100px_minmax(0,_1fr)] gap-2'
+  const sharedLabelClass = 'justify-end items-start self-start text-right pt-1.5'
 
-    if (!currentRoles.includes(roleName)) {
-      form.setValue('roles', [...currentRoles, roleName])
-    }
-
-    setSelectedRole('')
-  }
-
-  const handleRoleRemove = (roleName: string) => {
-    const currentRoles = getValues('roles') || []
-
-    form.setValue(
-      'roles',
-      currentRoles.filter(r => r !== roleName)
+  const renderFormField = (field: FormFieldType) => {
+    return (
+      <CustomFormField
+        key={field.name}
+        {...field}
+        register={register}
+        control={control}
+        errors={errors}
+        fieldClassName={`${sharedFieldClass} ${field.fieldClassName || ''}`}
+        labelClassName={sharedLabelClass}
+      />
     )
   }
 
@@ -202,232 +252,19 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
       <Form {...form}>
         <form
           onSubmit={handleSubmit(onSubmit)}
+          noValidate
           className='bg-bg-2 rounded-lg border border-border p-6 w-full max-w-3xl space-y-6 relative mx-auto'
         >
           {isLoading && <SpinnerCustom />}
 
           <h2 className='text-xl font-semibold text-light'>{mode === 'create' ? 'Create Staff' : 'Edit Staff'}</h2>
 
-          <div className='grid grid-cols-1 sm:grid-cols-2! gap-4 lg:gap-6'>
-            <FormField
-              control={control}
-              name='first_name'
-              rules={{ required: 'Required' }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    First Name <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder='First name'
-                      className='bg-bg-3 border-border text-light placeholder:text-gray'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name='last_name'
-              rules={{ required: 'Required' }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Last Name <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder='Last name'
-                      className='bg-bg-3 border-border text-light placeholder:text-gray'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name='email'
-              rules={{
-                required: 'Required',
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: 'Invalid email'
-                }
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Email <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type='email'
-                      placeholder='Staff email'
-                      className='bg-bg-3 border-border text-light placeholder:text-gray'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name='phone'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder='Phone'
-                      className='bg-bg-3 border-border text-light placeholder:text-gray'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name='password'
-              rules={{ required: mode === 'create' ? 'Required' : false }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Password{' '}
-                    {mode === 'edit' ? '(Leave blank to keep current)' : <span className='text-red-500'>*</span>}
-                  </FormLabel>
-                  <FormControl>
-                    <div className='relative'>
-                      <Input
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder='Password'
-                        className='bg-bg-3 border-border text-light placeholder:text-gray pr-10'
-                        {...field}
-                      />
-                      <button
-                        type='button'
-                        onClick={() => setShowPassword(!showPassword)}
-                        className='absolute right-3 top-1/2 -translate-y-1/2 text-gray hover:text-light cursor-pointer'
-                      >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Commission Type Field */}
-            {isTenant && (
-              <FormField
-                control={control}
-                name='commission_type_id'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Commission Type</FormLabel>
-                    <FormControl>
-                      <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                        <SelectTrigger className='bg-bg-3 border-border text-light w-full'>
-                          <SelectValue placeholder='Select commission type' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {commissionTypes.map(ct => (
-                            <SelectItem key={ct.id} value={ct.id}>
-                              {ct.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-            <FormField
-              control={control}
-              name='address'
-              rules={{ required: 'Required' }}
-              render={({ field }) => (
-                <FormItem className='sm:col-span-2'>
-                  <FormLabel>
-                    Address <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <textarea
-                      rows={3}
-                      placeholder='Full address'
-                      className='flex w-full rounded-md border border-border bg-bg-3 px-3 py-2 text-sm text-light placeholder:text-gray focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Roles Field */}
-            <FormField
-              control={control}
-              name='roles'
-              render={({ field }) => (
-                <FormItem className='sm:col-span-2'>
-                  <FormLabel>Roles</FormLabel>
-                  <FormControl>
-                    <div className='space-y-3'>
-                      <Select value={selectedRole} onValueChange={handleRoleSelect}>
-                        <SelectTrigger className='bg-bg-3 border-border text-light w-full'>
-                          <SelectValue placeholder='Select roles' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {roles.map(role => (
-                            <SelectItem key={role.id} value={role.name} disabled={selectedRoles.includes(role.name)}>
-                              {role.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {selectedRoles.length > 0 && (
-                        <div className='flex flex-wrap gap-2'>
-                          {selectedRoles.map(roleName => (
-                            <div
-                              key={roleName}
-                              className='flex items-center gap-2 bg-bg-3 border border-border rounded-md px-3 py-1.5 text-sm text-light'
-                            >
-                              <span>{roleName}</span>
-                              <button
-                                type='button'
-                                onClick={() => handleRoleRemove(roleName)}
-                                className='text-gray hover:text-light cursor-pointer'
-                              >
-                                ×
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2'>{fields.map(renderFormField)}</div>
 
           {/* Permissions Section */}
           <Accordion type='single' collapsible className='space-y-6'>
             <AccordionItem value='permissions' className='border-none'>
-              <AccordionTrigger className='text-base font-semibold text-light hover:no-underline p-2.5 cursor-pointer bg-primary/10  rounded-lg'>
+              <AccordionTrigger className='text-base font-semibold text-light hover:no-underline p-2.5 cursor-pointer bg-primary/10 rounded-lg'>
                 Permissions (Optional)
               </AccordionTrigger>
               <AccordionContent>
@@ -441,28 +278,23 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                         {permissions[module]
                           .sort((a, b) => a.id - b.id)
                           .map(permission => (
-                            <FormField
+                            <CustomFormField
                               key={permission.id}
-                              control={control}
-                              name='permissions'
-                              render={({ field }) => {
-                                return (
-                                  <FormItem className='flex flex-row items-start space-y-0'>
-                                    <FormControl>
-                                      <Checkbox
-                                        checked={field.value?.includes(permission.name)}
-                                        onCheckedChange={checked => {
-                                          return checked
-                                            ? field.onChange([...(field.value || []), permission.name])
-                                            : field.onChange(field.value?.filter(value => value !== permission.name))
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormLabel className='text-sm font-normal cursor-pointer text-light'>
-                                      {permission.name}
-                                    </FormLabel>
-                                  </FormItem>
-                                )
+                              type='checkbox'
+                              name={`permission_${permission.id}`}
+                              label={permission.name}
+                              value={watch('permissions')?.includes(permission.name)}
+                              onChange={checked => {
+                                const currentPermissions = getValues('permissions') || []
+
+                                if (checked) {
+                                  setValue('permissions', [...currentPermissions, permission.name])
+                                } else {
+                                  setValue(
+                                    'permissions',
+                                    currentPermissions.filter(p => p !== permission.name)
+                                  )
+                                }
                               }}
                             />
                           ))}
@@ -475,10 +307,16 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
           </Accordion>
 
           <div className='flex gap-3 pt-4 border-t border-border'>
-            <Button type='submit' disabled={isLoading} className='flex-1 disabled:opacity-50'>
+            <Button type='submit' size='sm' disabled={isLoading} className='flex-1 disabled:opacity-50'>
               {isLoading ? 'Saving...' : mode === 'create' ? 'Create Staff' : 'Update Staff'}
             </Button>
-            <Button type='button' variant='outline' className='flex-1 border-border text-light disabled:opacity-50' asChild>
+            <Button
+              type='button'
+              size='sm'
+              variant='outline'
+              className='flex-1 border-border text-light disabled:opacity-50'
+              asChild
+            >
               <Link href='/erp/staffs/' prefetch>
                 Cancel
               </Link>
