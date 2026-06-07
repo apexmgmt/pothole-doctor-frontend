@@ -2,9 +2,8 @@
 
 import React from 'react'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { Vendor } from '@/types'
+import { Badge } from '@/components/ui/badge'
 
 interface VendorDetailsContentProps {
   vendorData: Vendor
@@ -12,12 +11,6 @@ interface VendorDetailsContentProps {
 
 const VendorDetailsContent: React.FC<VendorDetailsContentProps> = ({ vendorData }) => {
   const fullName = vendorData.first_name || 'N/A'
-
-  const initials = fullName
-    .split(' ')
-    .map((name: string) => name.charAt(0))
-    .join('')
-    .toUpperCase()
 
   const fullAddress = [
     vendorData.userable?.street_address,
@@ -31,23 +24,8 @@ const VendorDetailsContent: React.FC<VendorDetailsContentProps> = ({ vendorData 
   return (
     <div className='space-y-6'>
       {/* Header */}
-      <div className='flex items-center justify-between'>
-        <h3 className='text-xl font-semibold text-light mt-2'>Vendor Details</h3>
-      </div>
-
-      {/* Profile Section */}
-      <div className='flex items-center space-x-4 py-4 bg-bg-3 rounded-lg'>
-        <Avatar className='h-16 w-16'>
-          <AvatarImage src={''} alt={fullName} />
-          <AvatarFallback className='text-lg font-semibold'>{initials || 'V'}</AvatarFallback>
-        </Avatar>
-        <div>
-          <h4 className='text-lg/[1.1] font-medium text-light'>{fullName}</h4>
-          <p className='text-gray text-sm/tight break-all'>{vendorData.email}</p>
-          <Badge variant={vendorData.status ? 'default' : 'destructive'}>
-            {vendorData.status ? 'Active' : 'Inactive'}
-          </Badge>
-        </div>
+      <div className='flex items-center justify-between pt-4'>
+        <h3 className='text-base font-medium leading-none text-light mt-2'>{fullName}</h3>
       </div>
 
       {/* Details Info (Always Visible) */}

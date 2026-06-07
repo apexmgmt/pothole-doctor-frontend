@@ -52,7 +52,7 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit, countri
   if (isLoading) {
     return (
       <div className='space-y-6'>
-        <div className='flex items-center justify-between'>
+        <div className='flex items-center justify-between pt-4'>
           <Skeleton className='h-8 w-48' />
           {/* <Skeleton className='h-10 w-24' /> */}
         </div>
@@ -79,8 +79,6 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit, countri
       </div>
     )
   }
-
-
 
   const tabs = [
     {
@@ -131,12 +129,8 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit, countri
         </TabsList>
       </Tabs>
 
-      {activeTab === 'salesman' && vendorData.userable_id && (
-        <VendorSalesmen vendorId={vendorData.userable_id} />
-      )}
-      {activeTab === 'documents' && vendorData.userable_id && (
-        <VendorDocuments vendorId={vendorData.userable_id} />
-      )}
+      {activeTab === 'salesman' && vendorData.userable_id && <VendorSalesmen vendorId={vendorData.userable_id} />}
+      {activeTab === 'documents' && vendorData.userable_id && <VendorDocuments vendorId={vendorData.userable_id} />}
       {activeTab === 'rebate-credits' && vendorData.userable_id && (
         <VendorRebateCredits vendorId={vendorData.userable_id} />
       )}
