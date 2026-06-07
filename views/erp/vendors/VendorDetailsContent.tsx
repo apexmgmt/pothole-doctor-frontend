@@ -4,6 +4,7 @@ import React from 'react'
 
 import { Vendor } from '@/types'
 import { Badge } from '@/components/ui/badge'
+import DetailItem from '@/components/erp/common/DetailItem'
 
 interface VendorDetailsContentProps {
   vendorData: Vendor
@@ -36,30 +37,12 @@ const VendorDetailsContent: React.FC<VendorDetailsContentProps> = ({ vendorData 
           <div className='space-y-4'>
             <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Contact Information</h5>
             <div className='space-y-3'>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Vendor Name : </label>
-                <p className='text-light'>{vendorData.first_name || 'N/A'}</p>
-              </div>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Email : </label>
-                <p className='text-light'>{vendorData.email || 'N/A'}</p>
-              </div>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Phone : </label>
-                <p className='text-light'>{vendorData.userable?.phone || 'N/A'}</p>
-              </div>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Fax : </label>
-                <p className='text-light'>{vendorData.userable?.fax_number || 'N/A'}</p>
-              </div>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Website : </label>
-                <p className='text-light break-all'>{vendorData.userable?.website || 'N/A'}</p>
-              </div>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Account Number : </label>
-                <p className='text-light'>{vendorData.userable?.number || 'N/A'}</p>
-              </div>
+              <DetailItem label='Vendor Name' value={fullName} />
+              <DetailItem label='Email' value={vendorData.email || 'N/A'} />
+              <DetailItem label='Phone' value={vendorData.userable?.phone || 'N/A'} />
+              <DetailItem label='Fax' value={vendorData.userable?.fax_number || 'N/A'} />
+              <DetailItem label='Website' value={vendorData.userable?.website || 'N/A'} valueClassName='break-all' />
+              <DetailItem label='Account Number' value={vendorData.userable?.number || 'N/A'} />
             </div>
           </div>
 
@@ -67,26 +50,11 @@ const VendorDetailsContent: React.FC<VendorDetailsContentProps> = ({ vendorData 
           <div className='space-y-4'>
             <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Business Information</h5>
             <div className='space-y-3'>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Payment Term : </label>
-                <p className='text-light'>{vendorData.userable?.payment_term?.name || 'N/A'}</p>
-              </div>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Tax Type : </label>
-                <p className='text-light capitalize'>{vendorData.userable?.tax_type?.replace(/-/g, ' ') || 'N/A'}</p>
-              </div>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Profit Margin : </label>
-                <p className='text-light'>{vendorData.userable?.profit_margin}%</p>
-              </div>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Full Address : </label>
-                <p className='text-light'>{fullAddress || 'N/A'}</p>
-              </div>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Zip Code : </label>
-                <p className='text-light'>{vendorData.userable?.zip_code || 'N/A'}</p>
-              </div>
+              <DetailItem label='Payment Term' value={vendorData.userable?.payment_term?.name || 'N/A'} />
+              <DetailItem label='Tax Type' value={vendorData.userable?.tax_type?.replace(/-/g, ' ') || 'N/A'} valueClassName='capitalize' />
+              <DetailItem label='Profit Margin' value={vendorData.userable?.profit_margin ? `${vendorData.userable.profit_margin}%` : 'N/A'} />
+              <DetailItem label='Full Address' value={fullAddress || 'N/A'} />
+              <DetailItem label='Zip Code' value={vendorData.userable?.zip_code || 'N/A'} />
             </div>
           </div>
         </div>
@@ -97,33 +65,17 @@ const VendorDetailsContent: React.FC<VendorDetailsContentProps> = ({ vendorData 
             <h5 className='text-sm font-medium text-light uppercase tracking-wide'>B2B Integration</h5>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               <div className='space-y-3'>
-                <div className='flex items-center gap-2.5'>
-                  <label className='text-xs text-gray uppercase min-w-25'>B2B Status : </label>
-                  <br />
-                  <Badge variant='default'>Enabled</Badge>
-                </div>
-                <div className='flex items-center gap-2.5'>
-                  <label className='text-xs text-gray uppercase min-w-25'>Host URL : </label>
-                  <p className='text-light break-all'>{vendorData.userable?.b2b_host_url || 'N/A'}</p>
-                </div>
-                <div className='flex items-center gap-2.5'>
-                  <label className='text-xs text-gray uppercase min-w-25'>Port Number : </label>
-                  <p className='text-light'>{vendorData.userable?.b2b_port_number || 'N/A'}</p>
-                </div>
+                <DetailItem
+                  label='B2B Status'
+                  value={<Badge variant='default'>Enabled</Badge>}
+                />
+                <DetailItem label='Host URL' value={vendorData.userable?.b2b_host_url || 'N/A'} valueClassName='break-all' />
+                <DetailItem label='Port Number' value={vendorData.userable?.b2b_port_number || 'N/A'} />
               </div>
               <div className='space-y-3'>
-                <div className='flex items-center gap-2.5'>
-                  <label className='text-xs text-gray uppercase min-w-25'>Vendor ID : </label>
-                  <p className='text-light'>{vendorData.userable?.b2b_vendor_id || 'N/A'}</p>
-                </div>
-                <div className='flex items-center gap-2.5'>
-                  <label className='text-xs text-gray uppercase min-w-25'>Username : </label>
-                  <p className='text-light'>{vendorData.userable?.b2b_username || 'N/A'}</p>
-                </div>
-                <div className='flex items-center gap-2.5'>
-                  <label className='text-xs text-gray uppercase min-w-25'>Vendor Folder : </label>
-                  <p className='text-light'>{vendorData.userable?.b2b_vendor_folder || 'N/A'}</p>
-                </div>
+                <DetailItem label='Vendor ID' value={vendorData.userable?.b2b_vendor_id || 'N/A'} />
+                <DetailItem label='Username' value={vendorData.userable?.b2b_username || 'N/A'} />
+                <DetailItem label='Vendor Folder' value={vendorData.userable?.b2b_vendor_folder || 'N/A'} />
               </div>
             </div>
           </div>
@@ -131,27 +83,24 @@ const VendorDetailsContent: React.FC<VendorDetailsContentProps> = ({ vendorData 
 
         {/* Notes */}
         {vendorData.userable?.note && (
-          <div className='space-y-2 flex items-center gap-2.5 pt-4 border-t border-border'>
-            <label className='text-xs text-gray uppercase min-w-25'>Notes : </label>
-            <p className='text-light whitespace-pre-wrap'>{vendorData.userable.note}</p>
+          <div className='pt-4 border-t border-border'>
+            <DetailItem label='Notes' value={vendorData.userable.note} valueClassName='whitespace-pre-wrap' />
           </div>
         )}
 
         {/* Timestamps */}
         <div className='pt-4 border-t border-border'>
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Created At : </label>
-              <p className='text-light text-sm'>
-                {vendorData.created_at ? new Date(vendorData.created_at).toLocaleString() : 'N/A'}
-              </p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Updated At : </label>
-              <p className='text-light text-sm'>
-                {vendorData.updated_at ? new Date(vendorData.updated_at).toLocaleString() : 'N/A'}
-              </p>
-            </div>
+            <DetailItem
+              label='Created At'
+              value={vendorData.created_at ? new Date(vendorData.created_at).toLocaleString() : 'N/A'}
+              valueClassName='text-sm'
+            />
+            <DetailItem
+              label='Updated At'
+              value={vendorData.updated_at ? new Date(vendorData.updated_at).toLocaleString() : 'N/A'}
+              valueClassName='text-sm'
+            />
           </div>
         </div>
       </div>

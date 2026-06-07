@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Partner } from '@/types'
 import PartnerService from '@/services/api/partners/partners.service'
+import DetailItem from '@/components/erp/common/DetailItem'
 
 interface PartnerDetailsProps {
   partnerId: string
@@ -135,30 +136,12 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partnerId }) => {
         <div className='space-y-4'>
           <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Contact Information</h5>
           <div className='space-y-3'>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Name : </label>
-              <p className='text-light'>{fullName}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Email : </label>
-              <p className='text-light'>{partnerData.email || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Phone : </label>
-              <p className='text-light'>{partnerData.userable?.phone || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Fax : </label>
-              <p className='text-light'>{partnerData.userable?.fax || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Company : </label>
-              <p className='text-light'>{partnerData.userable?.company?.name || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Entity : </label>
-              <p className='text-light capitalize'>{partnerData.userable?.entity || 'N/A'}</p>
-            </div>
+            <DetailItem label='Name' value={fullName} />
+            <DetailItem label='Email' value={partnerData.email || 'N/A'} />
+            <DetailItem label='Phone' value={partnerData.userable?.phone || 'N/A'} />
+            <DetailItem label='Fax' value={partnerData.userable?.fax || 'N/A'} />
+            <DetailItem label='Company' value={partnerData.userable?.company?.name || 'N/A'} />
+            <DetailItem label='Entity' value={partnerData.userable?.entity || 'N/A'} valueClassName='capitalize' />
           </div>
         </div>
 
@@ -166,48 +149,56 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partnerId }) => {
         <div className='space-y-4'>
           <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Business Information</h5>
           <div className='space-y-3'>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Contractor Type : </label>
-              <p className='text-light'>{partnerData.userable?.partner_type?.name || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Schedule Color : </label>
-              {partnerData.userable?.schedule_color ? (
-                <div className='flex items-center gap-2'>
-                  <span
-                    className='w-4 h-4 rounded-full border border-border/50'
-                    style={{ backgroundColor: partnerData.userable.schedule_color }}
-                  />
-                  <p className='text-light'>{partnerData.userable.schedule_color}</p>
-                </div>
-              ) : (
-                <p className='text-light'>N/A</p>
-              )}
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Hold Amount : </label>
-              <p className='text-light'>
-                {partnerData.userable?.hold_amount
+            <DetailItem
+              label='Contractor Type'
+              value={partnerData.userable?.partner_type?.name || 'N/A'}
+              labelClassName='min-w-32'
+            />
+            <DetailItem
+              label='Schedule Color'
+              value={
+                partnerData.userable?.schedule_color ? (
+                  <div className='flex items-center gap-2'>
+                    <span
+                      className='w-4 h-4 rounded-full border border-border/50'
+                      style={{ backgroundColor: partnerData.userable.schedule_color }}
+                    />
+                    <span>{partnerData.userable.schedule_color}</span>
+                  </div>
+                ) : (
+                  'N/A'
+                )
+              }
+              labelClassName='min-w-32'
+            />
+            <DetailItem
+              label='Hold Amount'
+              value={
+                partnerData.userable?.hold_amount
                   ? `$${parseFloat(String(partnerData.userable.hold_amount)).toFixed(2)}`
-                  : 'N/A'}
-              </p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Hold Amount (%) : </label>
-              <p className='text-light'>
-                {partnerData.userable?.hold_amount_percent
+                  : 'N/A'
+              }
+              labelClassName='min-w-32'
+            />
+            <DetailItem
+              label='Hold Amount (%)'
+              value={
+                partnerData.userable?.hold_amount_percent
                   ? `${parseFloat(String(partnerData.userable.hold_amount_percent)).toFixed(2)}%`
-                  : 'N/A'}
-              </p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Insurance Expiry : </label>
-              <p className='text-light'>{formatDate(partnerData.userable?.insurance_expiration)}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>W9 Expiry : </label>
-              <p className='text-light'>{formatDate(partnerData.userable?.w9_expiration)}</p>
-            </div>
+                  : 'N/A'
+              }
+              labelClassName='min-w-32'
+            />
+            <DetailItem
+              label='Insurance Expiry'
+              value={formatDate(partnerData.userable?.insurance_expiration)}
+              labelClassName='min-w-32'
+            />
+            <DetailItem
+              label='W9 Expiry'
+              value={formatDate(partnerData.userable?.w9_expiration)}
+              labelClassName='min-w-32'
+            />
           </div>
         </div>
       </div>
@@ -217,30 +208,21 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partnerId }) => {
         <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Identification & Address</h5>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
           <div className='space-y-3'>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>EIN : </label>
-              <p className='text-light'>{partnerData.userable?.ein || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>SSN : </label>
-              <p className='text-light'>{partnerData.userable?.ssn || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>In House : </label>
-              <Badge variant={partnerData.userable?.in_house_contractor === 1 ? 'default' : 'secondary'}>
-                {partnerData.userable?.in_house_contractor === 1 ? 'Yes' : 'No'}
-              </Badge>
-            </div>
+            <DetailItem label='EIN' value={partnerData.userable?.ein || 'N/A'} labelClassName='min-w-16' />
+            <DetailItem label='SSN' value={partnerData.userable?.ssn || 'N/A'} labelClassName='min-w-16' />
+            <DetailItem
+              label='In House'
+              value={
+                <Badge variant={partnerData.userable?.in_house_contractor === 1 ? 'default' : 'secondary'}>
+                  {partnerData.userable?.in_house_contractor === 1 ? 'Yes' : 'No'}
+                </Badge>
+              }
+              labelClassName='min-w-16'
+            />
           </div>
           <div className='space-y-3'>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Address : </label>
-              <p className='text-light'>{fullAddress || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Zip Code : </label>
-              <p className='text-light'>{partnerData.userable?.zip_code || 'N/A'}</p>
-            </div>
+            <DetailItem label='Address' value={fullAddress || 'N/A'} labelClassName='min-w-16' />
+            <DetailItem label='Zip Code' value={partnerData.userable?.zip_code || 'N/A'} labelClassName='min-w-16' />
           </div>
         </div>
       </div>
@@ -282,27 +264,24 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partnerId }) => {
 
       {/* Notes */}
       {partnerData.userable?.notes && (
-        <div className='space-y-2 flex items-center gap-2.5 pt-4 border-t border-border'>
-          <label className='text-xs text-gray uppercase min-w-25'>Notes : </label>
-          <p className='text-light whitespace-pre-wrap'>{partnerData.userable.notes}</p>
+        <div className='pt-4 border-t border-border'>
+          <DetailItem label='Notes' value={partnerData.userable.notes} valueClassName='whitespace-pre-wrap' />
         </div>
       )}
 
       {/* Timestamps */}
       <div className='pt-4 border-t border-border'>
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-          <div className='flex items-center gap-2.5'>
-            <label className='text-xs text-gray uppercase min-w-25'>Created At : </label>
-            <p className='text-light text-sm'>
-              {partnerData.created_at ? new Date(partnerData.created_at).toLocaleString() : 'N/A'}
-            </p>
-          </div>
-          <div className='flex items-center gap-2.5'>
-            <label className='text-xs text-gray uppercase min-w-25'>Updated At : </label>
-            <p className='text-light text-sm'>
-              {partnerData.updated_at ? new Date(partnerData.updated_at).toLocaleString() : 'N/A'}
-            </p>
-          </div>
+          <DetailItem
+            label='Created At'
+            value={partnerData.created_at ? new Date(partnerData.created_at).toLocaleString() : 'N/A'}
+            valueClassName='text-sm'
+          />
+          <DetailItem
+            label='Updated At'
+            value={partnerData.updated_at ? new Date(partnerData.updated_at).toLocaleString() : 'N/A'}
+            valueClassName='text-sm'
+          />
         </div>
       </div>
     </div>
