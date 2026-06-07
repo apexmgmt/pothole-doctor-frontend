@@ -223,9 +223,6 @@ const CreateOrEditTaskModal = ({
     }
 
     if (selectedTaskTypeId && taskReminders.length > 0) {
-      const smsChannel = taskReminderChannels.find(ch => ch.type === 'sms')
-      const emailChannel = taskReminderChannels.find(ch => ch.type === 'email')
-
       // Filter reminders for selected task type
       const taskTypeReminders = taskReminders.filter(reminder => reminder.task_type_id === selectedTaskTypeId)
 
@@ -450,6 +447,7 @@ const CreateOrEditTaskModal = ({
           <Button
             type='button'
             variant='outline'
+            size='sm'
             onClick={onCancel}
             disabled={form.formState.isSubmitting}
             className='flex-1'
@@ -458,6 +456,7 @@ const CreateOrEditTaskModal = ({
           </Button>
           <Button
             type='submit'
+            size='sm'
             onClick={form.handleSubmit(onSubmit)}
             disabled={form.formState.isSubmitting}
             className='flex-1'
