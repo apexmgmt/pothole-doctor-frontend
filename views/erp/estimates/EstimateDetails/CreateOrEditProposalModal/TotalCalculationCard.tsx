@@ -13,15 +13,17 @@ const TotalCalculationCard = ({
   total?: number | string
   title?: string
 }) => (
-  <Card className='bg-zinc-900 border-zinc-800'>
-    <CardContent className='p-4'>
-      {title && <p className='text-xs font-bold text-zinc-400 uppercase mb-3'>{title}</p>}
-      <h6 className='text-sm font-semibold text-zinc-200 mb-4'>Subtotal: {formatCurrency(subtotal)}</h6>
-      <h6 className='text-sm font-semibold text-zinc-200 mb-4'>Sales Tax: {formatCurrency(salesTax)}</h6>
+  <Card className='bg-accent/40 border-accent'>
+    <CardContent className='p-4 flex flex-col h-full'>
+      <div className='flex-1'>
+        {title && <p className='text-xs font-bold uppercase mb-3'>{title}</p>}
+        <h6 className='text-xs font-semibold mb-4'>Subtotal: {formatCurrency(subtotal)}</h6>
+        <h6 className='text-xs font-semibold mb-4'>Sales Tax: {formatCurrency(salesTax)}</h6>
+      </div>
       <Separator className='mb-3' />
       <div className='flex gap-1'>
-        <p className='text-sm font-semibold text-zinc-200'>{'Total:'}</p>
-        <p className='text-sm font-semibold text-zinc-400'>${Number(total).toFixed(2)}</p>
+        <p className='text-xs font-semibold'>{'Total:'}</p>
+        <p className='text-xs font-semibold'>${Number(total).toFixed(2)}</p>
       </div>
     </CardContent>
   </Card>

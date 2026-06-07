@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import CustomFormField from '@/components/form/CustomFormField'
 import { Separator } from '@/components/ui/separator'
 import { Estimate, ProposalServiceItemPayload } from '@/types'
 import { DollarSign, PercentIcon, X } from 'lucide-react'
@@ -42,18 +42,20 @@ const DiscountDetailsCard = ({
   }
 
   return (
-    <Card className='bg-zinc-900 border-zinc-800'>
-      <CardContent className='p-4'>
-        <h6 className='flex justify-end text-sm font-semibold text-zinc-200 mb-4'>Discount</h6>
-        <div className='flex justify-end mb-3'>
-          <p className='text-sm font-semibold text-red-400'>{formatCurrency(totalDiscount)}</p>
+    <Card className='bg-accent/40 border-accent'>
+      <CardContent className='p-4 flex flex-col h-full'>
+        <div className='flex1'>
+          <h6 className='flex justify-end text-xs font-semibold text-zinc-200 mb-4'>Discount</h6>
+          <div className='flex justify-end mb-4'>
+            <p className='text-xs font-semibold text-red-400'>{formatCurrency(totalDiscount)}</p>
+          </div>
         </div>
-        <Separator className='mb-4' />
+        <Separator className='mb-3' />
         {mode !== 'view' && (
           <div className='flex justify-end gap-1'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant='outline' size='icon'>
+                <Button variant='outline' size='icon' className='h-7 w-7'>
                   {localType === 'fixed' ? <DollarSign className='h-4 w-4' /> : <PercentIcon className='h-4 w-4' />}
                 </Button>
               </DropdownMenuTrigger>
@@ -64,7 +66,7 @@ const DiscountDetailsCard = ({
                       variant={localType === 'percentage' ? 'default' : 'outline'}
                       size='sm'
                       onClick={() => setLocalType('percentage')}
-                      className='flex-1'
+                      className='flex-1 h-7 w-7'
                     >
                       <PercentIcon className='h-4 w-4 mr-1' />
                     </Button>
@@ -72,19 +74,16 @@ const DiscountDetailsCard = ({
                       variant={localType === 'fixed' ? 'default' : 'outline'}
                       size='sm'
                       onClick={() => setLocalType('fixed')}
-                      className='flex-1'
+                      className='flex-1 h-7 w-7'
                     >
                       <DollarSign className='h-4 w-4 mr-1' />
                     </Button>
                   </div>
-                  <Input
+                  <CustomFormField
                     type='number'
                     value={localValue}
-                    onChange={e => setLocalValue(e.target.value)}
+                    onChange={(val: any) => setLocalValue(val)}
                     placeholder={localType === 'percentage' ? '0-100' : 'Amount'}
-                    min={0}
-                    max={localType === 'percentage' ? 100 : undefined}
-                    step={localType === 'percentage' ? 1 : 0.01}
                   />
                   <Button onClick={handleApply} className='w-full' size='sm'>
                     Apply
@@ -99,6 +98,7 @@ const DiscountDetailsCard = ({
                 onApplyDiscount('percentage', 0)
                 setLocalValue('0')
               }}
+              className='h-7 w-7'
             >
               <X className='h-4 w-4' />
             </Button>

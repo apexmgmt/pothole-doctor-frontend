@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import CustomFormField from '@/components/form/CustomFormField'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { X, Check } from 'lucide-react'
 
@@ -45,10 +45,11 @@ export const StylePopover = ({ value = '', onSave, disabled = false, trigger }: 
         <div className='space-y-3'>
           <div className='space-y-1'>
             <label className='text-xs font-medium text-zinc-300'>Style</label>
-            <Input
+            <CustomFormField
+              type='text'
               placeholder='Enter style'
               value={editValue}
-              onChange={e => setEditValue(e.target.value)}
+              onChange={(val: any) => setEditValue(val)}
               className='h-8'
             />
           </div>
@@ -93,10 +94,11 @@ export const ColorPopover = ({ value = '', onSave, disabled = false, trigger }: 
         <div className='space-y-3'>
           <div className='space-y-1'>
             <label className='text-xs font-medium text-zinc-300'>Color</label>
-            <Input
+            <CustomFormField
+              type='text'
               placeholder='Enter color'
               value={editValue}
-              onChange={e => setEditValue(e.target.value)}
+              onChange={(val: any) => setEditValue(val)}
               className='h-8'
             />
           </div>

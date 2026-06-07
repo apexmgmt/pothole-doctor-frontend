@@ -4,12 +4,13 @@ import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Input } from '@/components/ui/input'
+
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Commission, WorkOrder } from '@/types'
 import { EditIcon, InfoIcon, UserIcon } from 'lucide-react'
 import { formatCurrency } from '@/utils/currency'
+import CustomFormField from '@/components/form/CustomFormField'
 
 function formatRuleLabel(c: Commission): string {
   const rate =
@@ -124,17 +125,15 @@ const AssignUserCard = ({
 
   const isCustomActive = customCommission !== 0
 
-  // When custom commission is active, show the stored backend value (already reflects the override).
+  // When custom commission is active, show the live calculated value
   // When cleared (customCommission === 0), recalculate live from the user's commission rules.
-  const storedProfit = Number(workOrder?.total_profit ?? 0)
-
   const effectiveCommission = isCustomActive
     ? isCustomCommissionPercentage
-      ? (storedProfit * customCommission) / 100
+      ? (profit * customCommission) / 100
       : customCommission
     : calculateRuleCommission(commissions, profit, total)
 
-  const effectivePercent = storedProfit > 0 ? (effectiveCommission / storedProfit) * 100 : 0
+  const effectivePercent = profit > 0 ? (effectiveCommission / profit) * 100 : 0
 
   const handleApply = () => {
     const value = parseFloat(draftValue) || 0
@@ -151,9 +150,9 @@ const AssignUserCard = ({
 
   return (
     <>
-      <Card className='bg-zinc-900 border-zinc-800'>
+      <Card className='bg-accent/40 border-accent'>
         <CardContent className='p-4'>
-          <h6 className='text-sm font-semibold text-zinc-200 flex items-center gap-1'>
+          <h6 className='text-xs font-semibold text-zinc-200 flex items-center gap-1'>
             <UserIcon className='h-4 w-4 shrink-0' />
             <span>
               {workOrder?.assign_user?.first_name} {workOrder?.assign_user?.last_name}
@@ -162,15 +161,15 @@ const AssignUserCard = ({
             <TooltipProvider delayDuration={100}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <InfoIcon className='h-4 w-4 text-zinc-400 cursor-pointer hover:text-zinc-200 transition-colors shrink-0' />
+                  <InfoIcon className='h-4 w-4 cursor-pointer hover:text-zinc-200 transition-colors shrink-0' />
                 </TooltipTrigger>
                 <TooltipContent
                   side='bottom'
                   align='start'
-                  className='max-w-xs bg-zinc-800 border border-zinc-700 text-zinc-100 p-3 space-y-2 rounded-md shadow-lg'
+                  className='max-w-xs bg-accent border border-accent text-accent-foreground p-3  rounded-md shadow-lg'
                 >
                   {commissions.length === 0 ? (
-                    <p className='text-xs text-zinc-400'>No commission rules assigned.</p>
+                    <p className='text-xs text-accent-foreground'>No commission rules assigned.</p>
                   ) : (
                     <>
                       {commissionTypeName && (
@@ -190,16 +189,16 @@ const AssignUserCard = ({
             </TooltipProvider>
           </h6>
 
-          <div className='flex justify-between mt-4'>
-            <div className='text-sm font-semibold text-blue-200'>{effectivePercent.toFixed(2)}%</div>
-            <div className='text-sm font-semibold text-zinc-200'>{formatCurrency(effectiveCommission)}</div>
+          <div className='flex justify-between my-4'>
+            <div className='text-xs font-semibold text-blue-200'>{effectivePercent.toFixed(2)}%</div>
+            <div className='text-xs font-semibold text-zinc-200'>{formatCurrency(effectiveCommission)}</div>
           </div>
 
           <Popover open={popoverOpen} onOpenChange={handlePopoverOpenChange}>
             <PopoverTrigger asChild>
               <button
                 type='button'
-                className='mt-1 text-sm inline-flex items-center gap-1 text-zinc-300 hover:text-zinc-100 transition-colors'
+                className='mt-1 text-xs inline-flex items-center gap-1 text-zinc-300 hover:text-zinc-100 transition-colors'
               >
                 <EditIcon className='h-4 w-4' />
                 Custom Commission
@@ -217,7 +216,19 @@ const AssignUserCard = ({
               <div className='flex gap-1'>
                 <button
                   type='button'
-                  onClick={() => setDraftIsPercentage(false)}
+                  onClick={() => {
+                    if (draftIsPercentage) {
+                      const num = parseFloat(draftValue)
+
+                      if (!isNaN(num)) {
+                        const flatAmount = profit > 0 ? (num / 100) * profit : 0
+
+                        setDraftValue(Number(flatAmount.toFixed(2)).toString())
+                      }
+
+                      setDraftIsPercentage(false)
+                    }
+                  }}
                   className={`flex-1 text-xs py-1 rounded transition-colors ${
                     !draftIsPercentage ? 'bg-blue-600 text-white' : 'bg-zinc-700 text-zinc-400 hover:bg-zinc-600'
                   }`}
@@ -226,7 +237,19 @@ const AssignUserCard = ({
                 </button>
                 <button
                   type='button'
-                  onClick={() => setDraftIsPercentage(true)}
+                  onClick={() => {
+                    if (!draftIsPercentage) {
+                      const num = parseFloat(draftValue)
+
+                      if (!isNaN(num)) {
+                        const pctAmount = profit > 0 ? (num / profit) * 100 : 0
+
+                        setDraftValue(Number(pctAmount.toFixed(2)).toString())
+                      }
+
+                      setDraftIsPercentage(true)
+                    }
+                  }}
                   className={`flex-1 text-xs py-1 rounded transition-colors ${
                     draftIsPercentage ? 'bg-blue-600 text-white' : 'bg-zinc-700 text-zinc-400 hover:bg-zinc-600'
                   }`}
@@ -235,26 +258,46 @@ const AssignUserCard = ({
                 </button>
               </div>
 
-              {/* Amount input */}
-              <div className='space-y-1'>
-                <Label className='text-xs text-zinc-400'>
-                  {draftIsPercentage ? 'Percentage (% of total)' : 'Amount ($)'}
-                </Label>
-                <div className='relative'>
-                  <span className='absolute left-2 top-1/2 -translate-y-1/2 text-xs text-zinc-400 pointer-events-none'>
-                    {draftIsPercentage ? '%' : '$'}
-                  </span>
-                  <Input
-                    type='number'
-                    min={0}
-                    step={0.01}
-                    value={draftValue}
-                    onChange={e => setDraftValue(e.target.value)}
-                    className='pl-6 text-xs bg-zinc-700 border-zinc-600 text-zinc-100'
-                    placeholder='0.00'
-                  />
-                </div>
-              </div>
+              <CustomFormField
+                type='number'
+                label={draftIsPercentage ? 'Percentage (% of profit)' : 'Amount ($)'}
+                leftAddon={draftIsPercentage ? undefined : '$'}
+                rightAddon={draftIsPercentage ? '%' : undefined}
+                value={draftValue}
+                onChange={(val: any) => {
+                  const strVal = String(val)
+                  const num = parseFloat(strVal)
+
+                  if (strVal === '' || isNaN(num)) {
+                    setDraftValue(strVal)
+
+                    return
+                  }
+
+                  if (num < 0) {
+                    setDraftValue('0')
+
+                    return
+                  }
+
+                  if (draftIsPercentage && num > 100) {
+                    setDraftValue('100')
+
+                    return
+                  }
+
+                  if (!draftIsPercentage && num > profit) {
+                    setDraftValue(String(profit))
+
+                    return
+                  }
+
+                  setDraftValue(strVal)
+                }}
+                placeholder='0.00'
+                labelClassName='text-xs font-normal mb-1'
+                fieldClassName='gap-1'
+              />
 
               {/* Actions */}
               <div className='flex gap-2'>

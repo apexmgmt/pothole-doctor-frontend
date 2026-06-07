@@ -1,4 +1,4 @@
-import { Input } from '@/components/ui/input'
+import CustomFormField from '@/components/form/CustomFormField'
 import { Button } from '@/components/ui/button'
 import { Boxes, Wrench, GridIcon, ClipboardIcon, MessageSquareIcon, Minus, Box } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
@@ -43,17 +43,16 @@ const ServiceTypeActions = ({
   const hideMaterialActions = normalizedDocumentType === 'labor only'
 
   return (
-  <div className='flex items-center gap-2 bg-zinc-800 p-3 rounded-md'>
+  <div className='flex items-center gap-2 bg-accent/40 p-3 rounded-xl border border-accent'>
     {mode !== 'view' && !hideMargin && (
       <div className='flex items-center gap-2 flex-1'>
-        <span className='text-sm font-medium text-zinc-300'>% Margin:</span>
-        <Input
+        <span className='text-sm text-nowrap font-medium text-zinc-300'>% Margin:</span>
+        <CustomFormField
           type='number'
           value={margin}
-          onChange={e => setMargin(e.target.value)}
-          className='w-24 h-8 bg-zinc-900 border-zinc-700'
-          min={0}
-          max={100}
+          onChange={(val: any) => setMargin(val)}
+          className='w-24 bg-zinc-900 border-zinc-700'
+          fieldClassName='w-auto'
         />
         <Button
           variant='ghost'
@@ -71,7 +70,7 @@ const ServiceTypeActions = ({
             onLinesChange(updated)
           }}
         >
-          <span className='text-zinc-400'>↻</span>
+          <span className='text-accent-foreground'>↻</span>
         </Button>
       </div>
     )}
@@ -82,7 +81,7 @@ const ServiceTypeActions = ({
         {!hideMaterialActions && isAllowed('product') && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant='ghost' size='sm' className='h-8 w-8 p-0 text-zinc-400' title='Add products'>
+              <Button variant='ghost' size='sm' className='h-8 w-8 p-0 text-accent-foreground' title='Add products'>
                 <Boxes className='h-4 w-4' />
               </Button>
             </DropdownMenuTrigger>
@@ -101,7 +100,7 @@ const ServiceTypeActions = ({
             onClick={() => setOpenLaborCostModal(true)}
             variant='ghost'
             size='sm'
-            className='h-8 w-8 p-0 text-zinc-400'
+            className='h-8 w-8 p-0 text-accent-foreground'
           >
             <Wrench className='h-4 w-4' />
           </Button>

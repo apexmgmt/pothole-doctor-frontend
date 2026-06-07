@@ -125,7 +125,9 @@ const EditWorkOrderServicesView = ({
   const isCustomCommissionActive = customCommission !== 0
 
   const totalCommission = isCustomCommissionActive
-    ? Number(currentWorkOrder?.commissions ?? 0)
+    ? isCustomCommissionPercentage
+      ? (profit * customCommission) / 100
+      : customCommission
     : calculateRuleCommission(commissions, profit, lockedTotal)
 
   const totalNetProfit = profit - totalCommission
@@ -624,9 +626,9 @@ const EditWorkOrderServicesView = ({
       </div>
 
       {/* Custom Message */}
-      <Card className='bg-zinc-900 border-zinc-800'>
+      <Card className='bg-accent/20 border-accent'>
         <CardContent className='p-4'>
-          <label htmlFor='wo-custom-message' className='block text-sm font-medium text-zinc-200 mb-2'>
+          <label htmlFor='wo-custom-message' className='block text-sm font-medium text-accent-foreground/70 mb-2'>
             Message / Notes
           </label>
           <Textarea

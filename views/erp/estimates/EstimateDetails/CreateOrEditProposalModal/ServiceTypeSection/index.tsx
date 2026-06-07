@@ -154,25 +154,25 @@ const ServiceTypeSection = ({
 
   return (
     <>
-      <Card className='bg-zinc-900 border-zinc-800'>
+      <Card className='bg-accent/20 border-accent'>
         <CardHeader className='pb-3'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
               <Settings2Icon className='h-5 w-5 text-blue-500' />
               <h3 className='text-lg font-semibold text-white'>{serviceTypeName}</h3>
             </div>
-            <Button
+            {mode !== 'view' && <Button
               variant='ghost'
               size='sm'
               onClick={onRemove}
-              className='h-8 w-8 p-0 text-zinc-400 hover:text-red-500'
+              className='h-8 w-8 p-0 text-accent-foreground hover:text-red-500'
             >
               <XIcon className='h-4 w-4' />
-            </Button>
+            </Button>}
           </div>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <ServiceTypeActions
+          {mode !== 'view' && <ServiceTypeActions
             mode={mode}
             documentTypeName={documentTypeName}
             margin={margin}
@@ -186,15 +186,15 @@ const ServiceTypeSection = ({
             addLine={addLine}
             hideMargin={hideMargin}
             allowedLineTypes={allowedLineTypes}
-          />
+          />}
 
           <ServiceTypeSummary {...summary} simpleSummary={hideMargin} />
 
-          <div className='rounded border border-zinc-800 mt-4'>
+          <div className='rounded-xl border border-accent bg-accent/30 mt-4'>
             <ScrollArea className='w-full'>
-              <table className='min-w-full text-sm'>
-                <thead className='bg-zinc-900 text-zinc-100'>
-                  <tr className='text-left'>
+              <table className='min-w-full text-xs rounded-xl'>
+                <thead>
+                  <tr className='text-left bg-accent/40 text-accent-foreground'>
                     <th className='px-2 py-1 whitespace-nowrap'>#</th>
                     <th className='px-2 py-1 whitespace-nowrap'>Item Name</th>
                     <th className='px-2 py-1 whitespace-nowrap'>Description</th>
@@ -282,9 +282,9 @@ const ServiceTypeSection = ({
 
           {/* Contractor Section — shown when showContractorOptions and there are labor lines */}
           {showContractorOptions && hasLaborLines && (
-            <div className='rounded border border-blue-800/40 bg-blue-950/20 mt-4'>
+            <div className='rounded-xl border bg-accent/30 border-accent mt-4'>
               {/* Contractor Header */}
-              <div className='flex items-center gap-2 px-3 py-2 border-b border-blue-800/30 flex-wrap'>
+              <div className='flex items-center gap-2 px-3 py-2 flex-wrap'>
                 <ContractorNotesPopover
                   notes={contractorNotes}
                   onSave={newNotes => handleNotesBlur(newNotes)}
@@ -292,7 +292,7 @@ const ServiceTypeSection = ({
                 />
 
                 <div className='flex items-center gap-1.5'>
-                  <UserIcon className='h-4 w-4 text-zinc-400' />
+                  <UserIcon className='h-4 w-4 text-accent-foreground' />
                   {selectedContractor ? (
                     <div className='flex items-center gap-1'>
                       <span className='text-sm font-medium text-zinc-200'>
@@ -320,8 +320,8 @@ const ServiceTypeSection = ({
 
               {/* Labor Lines Table */}
               <ScrollArea className='w-full'>
-                <table className='min-w-full text-sm'>
-                  <thead className='bg-blue-950/30 text-zinc-300'>
+                <table className='min-w-full text-xs'>
+                  <thead className='bg-accent/40 text-accent-foreground'>
                     <tr className='text-left'>
                       <th className='px-2 py-1 whitespace-nowrap'>#</th>
                       <th className='px-2 py-1 whitespace-nowrap'>Labor Name</th>

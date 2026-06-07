@@ -30,6 +30,7 @@ import AddServiceButton from '@/views/erp/estimates/EstimateDetails/CreateOrEdit
 import ClientDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ClientDetailsCard'
 import ProfitDetailsCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ProfitDetailsCard'
 import TotalCalculationCard from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/TotalCalculationCard'
+import AssignUserCard, { calculateRuleCommission } from './AssignUserCard'
 
 const EditWorkOrderServicesModal = ({
   open,
@@ -69,7 +70,15 @@ const EditWorkOrderServicesModal = ({
   // Keep currentWorkOrder in sync when the prop changes
   useEffect(() => {
     setCurrentWorkOrder(workOrder)
+    setCustomCommission(Number(workOrder?.custom_commissions ?? 0))
+    setIsCustomCommissionPercentage(Boolean(workOrder?.is_custom_commission_percent ?? false))
   }, [workOrder])
+
+  const [customCommission, setCustomCommission] = useState<number>(Number(workOrder?.custom_commissions ?? 0))
+
+  const [isCustomCommissionPercentage, setIsCustomCommissionPercentage] = useState<boolean>(
+    Boolean(workOrder?.is_custom_commission_percent ?? false)
+  )
 
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
 
@@ -106,6 +115,17 @@ const EditWorkOrderServicesModal = ({
 
   const profit = lockedTotal - currentCost - totalFreight - totalTax
   const profitPercent = lockedTotal > 0 ? (profit / lockedTotal) * 100 : 0
+
+  const commissions = workOrder?.assign_user?.userable?.commission_type?.commissions ?? []
+  const isCustomCommissionActive = customCommission !== 0
+
+  const totalCommission = isCustomCommissionActive
+    ? isCustomCommissionPercentage
+      ? (profit * customCommission) / 100
+      : customCommission
+    : calculateRuleCommission(commissions, profit, lockedTotal)
+
+  const totalNetProfit = profit - totalCommission
 
   // Material lines (product / invoice / expense types)
   const materialLines = allLines.filter(l => l.type === 'product' || l.type === 'invoice' || l.type === 'expense')
@@ -153,6 +173,8 @@ const EditWorkOrderServicesModal = ({
     message: customMessageRef.current?.value || '',
     discount_type: 'percentage',
     discount: 0,
+    custom_commissions: customCommission,
+    is_custom_commission_percentage: isCustomCommissionPercentage,
     services: serviceTypeLineItems.map((st, index) => ({
       service_type_id: selectedServiceType[index]?.id || st.serviceTypeId,
       group_id: st.groupId ?? null,
@@ -328,9 +350,25 @@ const EditWorkOrderServicesModal = ({
         </div>
 
         {/* Detail Cards */}
-        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-4 mb-4'>
+        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 gap-4 mb-4'>
           <ClientDetailsCard estimateDetails={workOrder as any} />
-          <ProfitDetailsCard profitPercent={profitPercent} profitAmount={profit} totalProfit={profit} />
+          <AssignUserCard
+            workOrder={currentWorkOrder}
+            profit={profit}
+            total={lockedTotal}
+            customCommission={customCommission}
+            isCustomCommissionPercentage={isCustomCommissionPercentage}
+            onCommissionChange={(value, isPercentage) => {
+              setCustomCommission(value)
+              setIsCustomCommissionPercentage(isPercentage)
+            }}
+          />
+          <ProfitDetailsCard
+            profitPercent={profitPercent}
+            profitAmount={profit}
+            totalProfit={profit}
+            totalNetProfit={totalNetProfit}
+          />
           {/* Material breakdown */}
           <TotalCalculationCard
             title='Material'

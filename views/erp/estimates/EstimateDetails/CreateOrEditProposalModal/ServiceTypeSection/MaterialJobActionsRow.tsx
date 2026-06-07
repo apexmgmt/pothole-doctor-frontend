@@ -83,7 +83,7 @@ const MaterialJobActionsRow = ({ actions, onActionsChange, orderStatus, orderNum
 
   return (
     <>
-      <tr className='bg-zinc-950 border-b border-zinc-800'>
+      <tr className='bg-accent/40 border-b border-accent'>
         <td colSpan={15} className='p-2'>
           <div className='flex flex-wrap items-center gap-1'>
             {showOrderStatusBadge && (
