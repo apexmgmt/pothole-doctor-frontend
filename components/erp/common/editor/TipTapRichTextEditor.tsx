@@ -18,6 +18,9 @@ import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-color'
+import { Highlight } from '@tiptap/extension-highlight'
 import {
   Bold,
   Italic,
@@ -35,10 +38,14 @@ import {
   Unlink,
   Undo2,
   Redo2,
-  Upload
+  Upload,
+  Baseline,
+  Highlighter,
+  Palette
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 
 interface TipTapRichTextEditorProps {
@@ -415,6 +422,102 @@ const hasVisibleText = (html: string) => {
   return Boolean(text)
 }
 
+const TEXT_COLORS = [
+  '#000000', // Black
+  '#4B5563', // Gray
+  '#EF4444', // Red
+  '#F97316', // Orange
+  '#EAB308', // Yellow
+  '#22C55E', // Green
+  '#3B82F6', // Blue
+  '#6366F1', // Indigo
+  '#8B5CF6', // Purple
+  '#EC4899' // Pink
+]
+
+const HIGHLIGHT_COLORS = [
+  '#FEE2E2', // Soft Red
+  '#FFEDD5', // Soft Orange
+  '#FEF08A', // Soft Yellow
+  '#DCFCE7', // Soft Green
+  '#DBEAFE', // Soft Blue
+  '#E0E7FF', // Soft Indigo
+  '#F3E8FF', // Soft Purple
+  '#FCE7F3', // Soft Pink
+  '#F3F4F6', // Soft Gray
+  '#FFFFFF' // White
+]
+
+interface CustomColorRowProps {
+  initialColor: string
+  onSelect: (color: string) => void
+  onCancel: () => void
+  onReset: () => void
+  title: string
+}
+
+const CustomColorRow = ({ initialColor, onSelect, onCancel, onReset, title }: CustomColorRowProps) => {
+  const [tempColor, setTempColor] = useState(initialColor)
+  const [showControls, setShowControls] = useState(false)
+
+  useEffect(() => {
+    setTempColor(initialColor)
+    setShowControls(false)
+  }, [initialColor])
+
+  return (
+    <div className='flex flex-col gap-1.5 border-t border-border mt-1 pt-1.5'>
+      <div className='flex items-center justify-between gap-2'>
+        <Button
+          type='button'
+          variant='ghost'
+          className='h-6 text-[11px] px-1.5 py-0 justify-start font-normal'
+          onClick={onReset}
+        >
+          Reset Color
+        </Button>
+        <label className='relative flex items-center gap-1 cursor-pointer group shrink-0' title={title}>
+          <input
+            type='color'
+            value={tempColor}
+            onChange={e => {
+              setTempColor(e.target.value)
+              setShowControls(true)
+            }}
+            className='w-5 h-5 rounded cursor-pointer border border-border/40 p-0 bg-transparent opacity-0 absolute inset-0'
+          />
+          <Palette className='h-4 w-4 text-muted-foreground transition-transform group-hover:scale-105' />
+        </label>
+      </div>
+      {showControls && (
+        <div className='flex items-center justify-end gap-1.5 mt-0.5 border-t border-border/30 pt-1'>
+          <Button
+            type='button'
+            className='h-5 text-[10px] px-2 py-0 font-medium rounded'
+            onClick={() => {
+              onSelect(tempColor)
+              setShowControls(false)
+            }}
+          >
+            Ok
+          </Button>
+          <Button
+            type='button'
+            variant='outline'
+            className='h-5 text-[10px] px-2 py-0 font-medium rounded'
+            onClick={() => {
+              onCancel()
+              setShowControls(false)
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextEditorProps>(
   function TipTapRichTextEditor(
     {
@@ -435,10 +538,6 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
     const dragCounterRef = useRef(0)
     const suppressNextExpandRef = useRef(false)
 
-    const setExpanded = useCallback((nextExpanded: boolean) => {
-      setIsExpanded(prev => (prev === nextExpanded ? prev : nextExpanded))
-    }, [])
-
     const editor = useEditor({
       immediatelyRender: false,
       editable: !disabled,
@@ -448,6 +547,11 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
         MediaImage,
         MediaVideo,
         Underline,
+        TextStyle,
+        Color,
+        Highlight.configure({
+          multicolor: true
+        }),
         TextAlign.configure({
           types: ['heading', 'paragraph']
         }),
@@ -465,6 +569,21 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
         onChange(currentEditor.getHTML())
       }
     })
+
+    const [isTextColorOpen, setIsTextColorOpen] = useState(false)
+    const [isHighlightColorOpen, setIsHighlightColorOpen] = useState(false)
+
+    const handleTextColorOpenChange = useCallback((open: boolean) => {
+      setIsTextColorOpen(open)
+    }, [])
+
+    const handleHighlightColorOpenChange = useCallback((open: boolean) => {
+      setIsHighlightColorOpen(open)
+    }, [])
+
+    const setExpanded = useCallback((nextExpanded: boolean) => {
+      setIsExpanded(prev => (prev === nextExpanded ? prev : nextExpanded))
+    }, [])
 
     const insertMediaFiles = useCallback(
       async (files: File[]) => {
@@ -702,7 +821,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().toggleBold().run()}
             className={editor?.isActive('bold') ? 'bg-accent' : ''}
             disabled={disabled}
@@ -713,7 +832,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().toggleItalic().run()}
             className={editor?.isActive('italic') ? 'bg-accent' : ''}
             disabled={disabled}
@@ -724,7 +843,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().toggleUnderline().run()}
             className={editor?.isActive('underline') ? 'bg-accent' : ''}
             disabled={disabled}
@@ -733,12 +852,160 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
             <UnderlineIcon className='h-4 w-4' />
           </Button>
 
+          {/* Text Color Popover */}
+          <Popover open={isTextColorOpen} onOpenChange={handleTextColorOpenChange}>
+            <PopoverTrigger asChild>
+              <Button
+                type='button'
+                variant='ghost'
+                size='icon-xs'
+                disabled={disabled}
+                aria-label='Text Color'
+                className='relative flex flex-col items-center justify-center'
+              >
+                <Baseline className='h-3.5 w-3.5' />
+                <span
+                  className='absolute bottom-1 left-1/2 -translate-x-1/2 w-3 h-[2px] rounded-full'
+                  style={{ backgroundColor: editor?.getAttributes('textStyle').color || 'currentColor' }}
+                />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className='z-50 w-44 rounded-md border border-border bg-[#09090B] p-2 shadow-md outline-none'
+              align='start'
+              onFocusOutside={e => e.preventDefault()}
+              onPointerDownOutside={e => {
+                if (e.target instanceof Element && e.target.closest('[type="color"]')) {
+                  e.preventDefault()
+                }
+              }}
+              onCloseAutoFocus={e => e.preventDefault()}
+            >
+              <div className='flex flex-col gap-2'>
+                <div className='text-[10px] font-semibold uppercase tracking-wider px-1'>Text Color</div>
+                <div className='grid grid-cols-5 gap-1'>
+                  {TEXT_COLORS.map(color => {
+                    const isActive = editor?.getAttributes('textStyle').color === color
+
+                    return (
+                      <button
+                        key={color}
+                        type='button'
+                        onClick={() => {
+                          editor?.chain().focus().setColor(color).run()
+                          setIsTextColorOpen(false)
+                        }}
+                        className={cn(
+                          'w-6 h-6 rounded-full border border-border/40 cursor-pointer transition-transform hover:scale-110 flex items-center justify-center relative',
+                          isActive && 'ring-1 ring-ring ring-offset-1 ring-offset-background'
+                        )}
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      >
+                        {isActive && <div className='w-1.5 h-1.5 rounded-full bg-white mix-blend-difference' />}
+                      </button>
+                    )
+                  })}
+                </div>
+                <CustomColorRow
+                  initialColor={editor?.getAttributes('textStyle').color || '#000000'}
+                  title='Custom Color'
+                  onReset={() => {
+                    editor?.chain().focus().unsetColor().run()
+                    setIsTextColorOpen(false)
+                  }}
+                  onSelect={color => {
+                    editor?.chain().focus().setColor(color).run()
+                    setIsTextColorOpen(false)
+                  }}
+                  onCancel={() => {
+                    setIsTextColorOpen(false)
+                  }}
+                />
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* Highlight Color Popover */}
+          <Popover open={isHighlightColorOpen} onOpenChange={handleHighlightColorOpenChange}>
+            <PopoverTrigger asChild>
+              <Button
+                type='button'
+                variant='ghost'
+                size='icon-xs'
+                disabled={disabled}
+                aria-label='Highlight Color'
+                className='relative flex flex-col items-center justify-center'
+              >
+                <Highlighter className='h-3.5 w-3.5' />
+                <span
+                  className='absolute bottom-1 left-1/2 -translate-x-1/2 w-3 h-[2px] rounded-full'
+                  style={{ backgroundColor: editor?.getAttributes('highlight').color || 'transparent' }}
+                />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className='z-50 w-44 rounded-md border border-border bg-[#09090B] p-2 shadow-md outline-none'
+              align='start'
+              onFocusOutside={e => e.preventDefault()}
+              onPointerDownOutside={e => {
+                if (e.target instanceof Element && e.target.closest('[type="color"]')) {
+                  e.preventDefault()
+                }
+              }}
+              onCloseAutoFocus={e => e.preventDefault()}
+            >
+              <div className='flex flex-col gap-2'>
+                <div className='text-[10px] font-semibold uppercase tracking-wider px-1'>Highlight</div>
+                <div className='grid grid-cols-5 gap-1'>
+                  {HIGHLIGHT_COLORS.map(color => {
+                    const isActive = editor?.getAttributes('highlight').color === color
+
+                    return (
+                      <button
+                        key={color}
+                        type='button'
+                        onClick={() => {
+                          editor?.chain().focus().setHighlight({ color }).run()
+                          setIsHighlightColorOpen(false)
+                        }}
+                        className={cn(
+                          'w-6 h-6 rounded-full border border-border/40 cursor-pointer transition-transform hover:scale-110 flex items-center justify-center relative',
+                          isActive && 'ring-1 ring-ring ring-offset-1 ring-offset-background'
+                        )}
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      >
+                        {isActive && <div className='w-1.5 h-1.5 rounded-full bg-black' />}
+                      </button>
+                    )
+                  })}
+                </div>
+                <CustomColorRow
+                  initialColor={editor?.getAttributes('highlight').color || '#ffff00'}
+                  title='Custom Highlight'
+                  onReset={() => {
+                    editor?.chain().focus().unsetHighlight().run()
+                    setIsHighlightColorOpen(false)
+                  }}
+                  onSelect={color => {
+                    editor?.chain().focus().setHighlight({ color }).run()
+                    setIsHighlightColorOpen(false)
+                  }}
+                  onCancel={() => {
+                    setIsHighlightColorOpen(false)
+                  }}
+                />
+              </div>
+            </PopoverContent>
+          </Popover>
+
           <div className='mx-1 h-6 w-px bg-border' />
 
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
             className={editor?.isActive('heading', { level: 1 }) ? 'bg-accent' : ''}
             disabled={disabled}
@@ -749,7 +1016,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
             className={editor?.isActive('heading', { level: 2 }) ? 'bg-accent' : ''}
             disabled={disabled}
@@ -760,7 +1027,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
             className={editor?.isActive('heading', { level: 3 }) ? 'bg-accent' : ''}
             disabled={disabled}
@@ -771,7 +1038,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().toggleHeading({ level: 4 }).run()}
             className={editor?.isActive('heading', { level: 4 }) ? 'bg-accent' : ''}
             disabled={disabled}
@@ -782,7 +1049,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().toggleHeading({ level: 5 }).run()}
             className={editor?.isActive('heading', { level: 5 }) ? 'bg-accent' : ''}
             disabled={disabled}
@@ -793,7 +1060,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().toggleHeading({ level: 6 }).run()}
             className={editor?.isActive('heading', { level: 6 }) ? 'bg-accent' : ''}
             disabled={disabled}
@@ -804,7 +1071,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().toggleBulletList().run()}
             className={editor?.isActive('bulletList') ? 'bg-accent' : ''}
             disabled={disabled}
@@ -815,7 +1082,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().toggleOrderedList().run()}
             className={editor?.isActive('orderedList') ? 'bg-accent' : ''}
             disabled={disabled}
@@ -826,7 +1093,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().toggleBlockquote().run()}
             className={editor?.isActive('blockquote') ? 'bg-accent' : ''}
             disabled={disabled}
@@ -840,7 +1107,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().setTextAlign('left').run()}
             className={editor?.isActive({ textAlign: 'left' }) ? 'bg-accent' : ''}
             disabled={disabled}
@@ -851,7 +1118,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().setTextAlign('center').run()}
             className={editor?.isActive({ textAlign: 'center' }) ? 'bg-accent' : ''}
             disabled={disabled}
@@ -862,7 +1129,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().setTextAlign('right').run()}
             className={editor?.isActive({ textAlign: 'right' }) ? 'bg-accent' : ''}
             disabled={disabled}
@@ -873,7 +1140,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().setTextAlign('justify').run()}
             className={editor?.isActive({ textAlign: 'justify' }) ? 'bg-accent' : ''}
             disabled={disabled}
@@ -887,7 +1154,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={toggleLink}
             className={editor?.isActive('link') ? 'bg-accent' : ''}
             disabled={disabled}
@@ -898,7 +1165,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().unsetLink().run()}
             disabled={disabled}
             aria-label='Remove Link'
@@ -908,7 +1175,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={openMediaPicker}
             disabled={disabled}
             aria-label='Upload Image or Video'
@@ -921,7 +1188,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().undo().run()}
             disabled={disabled || !editor?.can().chain().focus().undo().run()}
             aria-label='Undo'
@@ -931,7 +1198,7 @@ const TipTapRichTextEditor = forwardRef<TipTapRichTextEditorRef, TipTapRichTextE
           <Button
             type='button'
             variant='ghost'
-            size='icon-sm'
+            size='icon-xs'
             onClick={() => editor?.chain().focus().redo().run()}
             disabled={disabled || !editor?.can().chain().focus().redo().run()}
             aria-label='Redo'
