@@ -23,10 +23,6 @@ import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CreateOrEditVendorModal from './CreateOrEditVendorModal'
 import VendorDetails from './VendorDetails'
-import VendorDocuments from './documents/VendorDocuments'
-import VendorRebateCredits from './rebate-credits/VendorRebateCredits'
-import VendorPickupAddresses from './pickup-addresses/VendorPickupAddresses'
-import VendorSalesmen from './salesman/VendorSalesmen'
 import { hasPermission } from '@/utils/role-permission'
 
 const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCities, paymentTerms }) => {
@@ -303,34 +299,6 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
             onClick: () => setActiveTab('details'),
             isActive: activeTab === 'details',
             disabled: !selectedVendorId
-          },
-          {
-            label: 'Salesmen',
-            icon: UserIcon,
-            onClick: () => setActiveTab('salesman'),
-            isActive: activeTab === 'salesman',
-            disabled: !selectedVendorId && !selectedUserAbleId
-          },
-          {
-            label: 'Documents',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('documents'),
-            isActive: activeTab === 'documents',
-            disabled: !selectedVendorId && !selectedUserAbleId
-          },
-          {
-            label: 'Rebate & Credits',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('rebate-credits'),
-            isActive: activeTab === 'rebate-credits',
-            disabled: !selectedVendorId && !selectedUserAbleId
-          },
-          {
-            label: 'Pickup Addresses',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('pickup-addresses'),
-            isActive: activeTab === 'pickup-addresses',
-            disabled: !selectedVendorId && !selectedUserAbleId
           }
         ]
       : [])
@@ -367,22 +335,11 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
         )}
 
         {activeTab === 'details' && selectedVendorId && (
-          <VendorDetails vendorId={selectedVendorId} onEdit={vendor => handleOpenEditModal(vendor.id)} />
-        )}
-        {activeTab === 'documents' && selectedVendorId && selectedUserAbleId && (
-          <VendorDocuments vendorId={selectedUserAbleId || ''} />
-        )}
-        {activeTab === 'rebate-credits' && selectedVendorId && selectedUserAbleId && (
-          <VendorRebateCredits vendorId={selectedUserAbleId || ''} />
-        )}
-        {activeTab === 'pickup-addresses' && selectedVendorId && selectedUserAbleId && (
-          <VendorPickupAddresses
+          <VendorDetails
+            vendorId={selectedVendorId}
+            onEdit={vendor => handleOpenEditModal(vendor.id)}
             countriesWithStatesAndCities={countriesWithStatesAndCities}
-            vendorId={selectedUserAbleId || ''}
           />
-        )}
-        {activeTab === 'salesman' && selectedVendorId && selectedUserAbleId && (
-          <VendorSalesmen vendorId={selectedUserAbleId || ''} />
         )}
       </CommonLayout>
 
