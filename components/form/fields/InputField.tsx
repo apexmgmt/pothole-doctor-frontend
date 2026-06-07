@@ -4,6 +4,7 @@ import { FieldValues, Path } from 'react-hook-form'
 import { Eye, EyeOff } from 'lucide-react'
 
 import { Input } from '@/components/ui/input'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 
 import { FieldComponentProps } from './types'
 
@@ -22,7 +23,9 @@ const InputField = <T extends FieldValues>({
   onBlur,
   autoFocus,
   disabled = false,
-  className = ''
+  className = '',
+  leftAddon,
+  rightAddon
 }: FieldComponentProps<T>) => {
   const [showPassword, setShowPassword] = useState(false)
 
@@ -47,6 +50,39 @@ const InputField = <T extends FieldValues>({
               : undefined)
         } as any)
       : undefined
+
+  const inputProps = {
+    type: type !== 'password' ? type : showPassword ? 'text' : type,
+    id: typeof name === 'string' ? name : undefined,
+    name: typeof name === 'string' ? name : undefined,
+    disabled,
+    step: 'any',
+    placeholder,
+    autoFocus,
+    ...registeredProps,
+    value: value as string | number | readonly string[] | undefined,
+    onChange: (e: any) => {
+      registeredProps?.onChange(e)
+      onChange?.(e.target.value)
+    },
+    onBlur: (e: any) => {
+      registeredProps?.onBlur(e)
+      onBlur?.()
+    },
+    readOnly: readonly,
+  }
+
+  if (leftAddon || rightAddon) {
+    return (
+      <div className='relative'>
+        <InputGroup className={className}>
+          {leftAddon && <InputGroupAddon align='inline-start' className='pl-2 text-zinc-400'>{leftAddon}</InputGroupAddon>}
+          <InputGroupInput {...inputProps} className='px-2 h-full' />
+          {rightAddon && <InputGroupAddon align='inline-end' className='pr-2 text-zinc-400'>{rightAddon}</InputGroupAddon>}
+        </InputGroup>
+      </div>
+    )
+  }
 
   return (
     <div className='relative'>

@@ -22,7 +22,7 @@ import ServiceTypeSection from './ServiceTypeSection'
 import AddServiceButton from './AddServiceButton'
 import ProposalActionsDropdown from './ProposalActionsDropdown'
 import PaymentSettingModal from './PaymentSettingModal'
-import { Textarea } from '@/components/ui/textarea'
+import CustomFormField from '@/components/form/CustomFormField'
 import ProposalService from '@/services/api/estimates/proposals.service'
 import { toast } from 'sonner'
 import { getDiscountedUnitPrice } from '@/utils/business-calculation'
@@ -78,8 +78,6 @@ const CreateOrEditProposalModal = ({
 
   const [downPaymentAmount, setDownPaymentAmount] = useState(proposalDetails?.down_payment_amount ?? 0)
   const [downPaymentPercent, setDownPaymentPercent] = useState(proposalDetails?.down_payment_percentage ?? 0)
-
-  const customMessageRef = useRef<HTMLTextAreaElement>(null)
 
   const isVoidOrDead = currentProposalStatus === 'void proposal' || currentProposalStatus === 'dead proposal'
   const effectiveMode = isVoidOrDead ? ('view' as const) : mode
@@ -215,7 +213,7 @@ const CreateOrEditProposalModal = ({
 
   const buildPayload = (): ProposalPayload => ({
     estimate_id: estimateId || '',
-    message: customMessageRef.current?.value || '',
+    message: customMessage || '',
     discount_type: discountType,
     discount: discountValue,
     is_down_payment_materials: isDownPaymentMaterials,
@@ -543,16 +541,16 @@ const CreateOrEditProposalModal = ({
         {/* Custom message field */}
         <Card className='bg-zinc-900 border-zinc-800'>
           <CardContent className='p-4'>
-            <label htmlFor='custom-message' className='block text-sm font-medium text-zinc-200 mb-2'>
-              Custom Message
-            </label>
-            <Textarea
-              id='custom-message'
-              className='w-full'
+            <CustomFormField
+              type='textarea'
+              name='custom-message'
+              label='Custom Message'
               placeholder='Enter a custom message for the proposal...'
-              ref={customMessageRef}
-              defaultValue={proposalDetails?.message || ''}
+              value={customMessage}
+              onChange={(val: any) => setCustomMessage(val)}
               disabled={effectiveMode === 'view'}
+              className='w-full'
+              labelClassName='text-sm font-medium text-zinc-200 mb-2'
             />
           </CardContent>
         </Card>

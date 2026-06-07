@@ -1,9 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
+import CustomFormField from '@/components/form/CustomFormField'
 import { Button } from '@/components/ui/button'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { formatCurrency } from '@/utils/currency'
@@ -109,7 +107,7 @@ const PaymentSettingModal = ({
       open={open}
       onOpenChange={onOpenChange}
       title='Payment Settings'
-      maxWidth='sm'
+      maxWidth='xl'
       actions={
         <div className='flex gap-3'>
           <Button type='button' variant='outline' onClick={() => onOpenChange(false)} className='flex-1'>
@@ -121,43 +119,37 @@ const PaymentSettingModal = ({
         </div>
       }
     >
-      <div className='space-y-6'>
-        <div className='flex items-center gap-3'>
-          <Label>Material Balance</Label>
-          <Switch checked={isMaterials} onCheckedChange={handleMaterialsToggle} />
-          <span className='text-sm text-muted-foreground'>{isMaterials ? 'YES' : 'NO'}</span>
-        </div>
+      <div className='space-y-2'>
+          <CustomFormField 
+          label='Material Balance' 
+           type='switch' value={isMaterials} onChange={(val: any) => handleMaterialsToggle(val)} 
+           className=''
+           fieldClassName='grid grid-cols-[104px_minmax(0,1fr)] [&_button]:order-2 [&_label]:order-1'
+              labelClassName='justify-end self-start text-right pt-1'
+           />
         {isMaterials && (
           <p className='text-xs text-muted-foreground'>
             Base: material items total: <span className='font-semibold'>{formatCurrency(Number(materialTotal))}</span>
           </p>
         )}
-        <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-          <div className='space-y-2'>
-            <Label>Amount</Label>
-            <Input
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4'>
+            <CustomFormField
               type='number'
-              min='0'
-              step='0.01'
+              label='Amount'
               value={amountStr}
-              onChange={e => handleAmountChange(e.target.value)}
+              onChange={(val: any) => handleAmountChange(val)}
+              fieldClassName='grid grid-cols-[104px_minmax(0,_1fr)]'
+              labelClassName='justify-end self-start text-right pt-1'
             />
-          </div>
-          <div className='space-y-2'>
-            <Label>Balance (%)</Label>
-            <div className='relative'>
-              <Input
+              <CustomFormField
                 type='number'
-                min='0'
-                max='100'
-                step='0.01'
+                label='Balance (%)'
                 value={percentStr}
-                onChange={e => handlePercentChange(e.target.value)}
-                className='pr-8'
+                onChange={(val: any) => handlePercentChange(val)}
+                fieldClassName='grid grid-cols-[104px_minmax(0,_1fr)]'
+                labelClassName='justify-end self-start text-right pt-1'
+                rightAddon='%'
               />
-              <span className='absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>%</span>
-            </div>
-          </div>
         </div>
       </div>
     </CommonDialog>
