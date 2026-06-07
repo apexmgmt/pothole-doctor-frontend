@@ -1,18 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-
 import { useForm } from 'react-hook-form'
-
 import { toast } from 'sonner'
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Product, PurchaseOrder } from '@/types'
 import InventoryService from '@/services/api/products/inventories.service'
+import { cn } from '@/lib/utils'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface FormValues {
   adjustment_type: 'addition' | 'reduction'
@@ -75,12 +73,19 @@ const AdjustInventoryModal = ({ open, onOpenChange, onSuccess, inventory, produc
     form.reset()
   }
 
-  const displayField = (label: string, value: string | number | null | undefined) => (
-    <div className='flex flex-col gap-1'>
-      <span className='text-xs text-muted-foreground'>{label}</span>
-      <span className='text-sm font-medium rounded-md px-3 py-2 bg-white/5 min-h-9'>{value ?? '—'}</span>
-    </div>
-  )
+  const displayField = (label: string, value: string | number | null | undefined, index: number) => {
+    const borderClass = index === 0 ? 'border-l-0 pl-0' : 'border-l border-border pl-3'
+
+    return (
+      <div key={`${label}-${index}`} className={cn('flex flex-col gap-1.25', borderClass)}>
+        <span className='text-xs text-muted-foreground font-normal leading-none'>{label}</span>
+        <span className='text-[13px] font-medium leading-tight'>{value ?? '-'}</span>
+      </div>
+    )
+  }
+
+  const fieldStyle = 'grid grid-cols-[108px_minmax(0,_1fr)] gap-2'
+  const labelStyle = 'justify-end items-start self-start text-right pt-1.5'
 
   return (
     <CommonDialog
@@ -104,90 +109,57 @@ const AdjustInventoryModal = ({ open, onOpenChange, onSuccess, inventory, produc
       }
     >
       <Form {...form}>
-        <form id='adjustment-form' onSubmit={form.handleSubmit(onSubmit)}>
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-            {/* Left column */}
-            <div className='space-y-4'>
-              {displayField('PO#', `PO-${inventory.purchase_order_number}`)}
+        <form id='adjustment-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+          {/* Display Fields */}
+          <div className='p-2.5 bg-[#1F1F1F] rounded-lg grid grid-cols-2 gap-x-3 gap-y-6'>
+            {[
+              { label: 'PO#', value: `PO-${inventory.purchase_order_number}` },
+              { label: 'Available Quantity', value: `${availableQty} ${unitName}` }
+            ].map((field, idx) => displayField(field.label, field.value, idx))}
+          </div>
 
-              <FormField
-                control={form.control}
-                name='adjustment_type'
-                rules={{ required: 'Adjustment type is required' }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Adjustment Type <span className='text-destructive'>*</span>
-                    </FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select type' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value='addition'>Addition</SelectItem>
-                        <SelectItem value='reduction'>Reduction</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2'>
+            <CustomFormField
+              name='adjustment_type'
+              label='Adjustment Type'
+              type='select'
+              placeholder='Select type'
+              rules={{ required: 'Adjustment type is required' }}
+              selectOptions={[
+                { value: 'addition', label: 'Addition' },
+                { value: 'reduction', label: 'Reduction' }
+              ]}
+              control={form.control}
+              errors={form.formState.errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
+            />
 
-            {/* Right column */}
-            <div className='space-y-4'>
-              {displayField('Available Quantity', `${availableQty} ${unitName}`)}
-
-              <FormField
-                control={form.control}
+            <div className='flex items-start gap-1.5'>
+              <CustomFormField
                 name='quantity'
+                label='Qty to Adjust'
+                type='number'
                 rules={{ required: 'Quantity is required', min: { value: 1, message: 'Must be ≥ 1' } }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Qty to Adjust <span className='text-destructive'>*</span>
-                    </FormLabel>
-                    <div className='flex items-center gap-2'>
-                      <FormControl>
-                        <Input
-                          type='number'
-                          step='any'
-                          min={1}
-                          {...field}
-                          onChange={e => field.onChange(e.target.value)}
-                        />
-                      </FormControl>
-                      <span className='text-sm text-muted-foreground whitespace-nowrap'>{unitName}</span>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                register={form.register}
+                errors={form.formState.errors}
+                fieldClassName={`${fieldStyle} flex-1`}
+                labelClassName={labelStyle}
               />
+              <span className='text-sm text-muted-foreground whitespace-nowrap pt-2'>{unitName}</span>
             </div>
-            <div className='sm:col-span-2'>
-              <FormField
-                control={form.control}
-                name='reason'
-                rules={{ required: 'Comments is required' }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Comments <span className='text-destructive'>*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <textarea
-                        className='flex min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
-                        placeholder='Comments...'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+
+            <CustomFormField
+              name='reason'
+              label='Comments'
+              type='textarea'
+              placeholder='Comments...'
+              rules={{ required: 'Comments is required' }}
+              register={form.register}
+              errors={form.formState.errors}
+              fieldClassName={`sm:col-span-2 ${fieldStyle}`}
+              labelClassName={labelStyle}
+            />
           </div>
         </form>
       </Form>

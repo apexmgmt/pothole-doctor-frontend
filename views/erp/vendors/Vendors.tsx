@@ -19,14 +19,10 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import VendorService from '@/services/api/vendors/vendors.service'
-import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
+import { DetailsIcon, UserIcon } from '@/public/icons'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CreateOrEditVendorModal from './CreateOrEditVendorModal'
 import VendorDetails from './VendorDetails'
-import VendorDocuments from './documents/VendorDocuments'
-import VendorRebateCredits from './rebate-credits/VendorRebateCredits'
-import VendorPickupAddresses from './pickup-addresses/VendorPickupAddresses'
-import VendorSalesmen from './salesman/VendorSalesmen'
 import { hasPermission } from '@/utils/role-permission'
 
 const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCities, paymentTerms }) => {
@@ -37,7 +33,6 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedVendorId, setSelectedVendorId] = useState<string | null>(null)
-  const [selectedUserAbleId, setSelectedUserAbleId] = useState<string | null>(null)
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
@@ -129,7 +124,6 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const handleOpenCreateModal = () => {
     setModalMode('create')
     setSelectedVendorId(null)
-    setSelectedUserAbleId(null)
     setSelectedVendor(null)
     setIsModalOpen(true)
   }
@@ -137,7 +131,6 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
     setSelectedVendorId(id)
-    setSelectedUserAbleId(null)
 
     // Fetch contact type details
     try {
@@ -303,34 +296,6 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
             onClick: () => setActiveTab('details'),
             isActive: activeTab === 'details',
             disabled: !selectedVendorId
-          },
-          {
-            label: 'Salesmen',
-            icon: UserIcon,
-            onClick: () => setActiveTab('salesman'),
-            isActive: activeTab === 'salesman',
-            disabled: !selectedVendorId && !selectedUserAbleId
-          },
-          {
-            label: 'Documents',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('documents'),
-            isActive: activeTab === 'documents',
-            disabled: !selectedVendorId && !selectedUserAbleId
-          },
-          {
-            label: 'Rebate & Credits',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('rebate-credits'),
-            isActive: activeTab === 'rebate-credits',
-            disabled: !selectedVendorId && !selectedUserAbleId
-          },
-          {
-            label: 'Pickup Addresses',
-            icon: DocumentIcon,
-            onClick: () => setActiveTab('pickup-addresses'),
-            isActive: activeTab === 'pickup-addresses',
-            disabled: !selectedVendorId && !selectedUserAbleId
           }
         ]
       : [])
@@ -338,7 +303,6 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
 
   const handleRowSelect = (partner: any) => {
     setSelectedVendorId(partner?.id || null)
-    setSelectedUserAbleId(partner?.userable_id || null)
   }
 
   return (
@@ -367,22 +331,11 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
         )}
 
         {activeTab === 'details' && selectedVendorId && (
-          <VendorDetails vendorId={selectedVendorId} onEdit={vendor => handleOpenEditModal(vendor.id)} />
-        )}
-        {activeTab === 'documents' && selectedVendorId && selectedUserAbleId && (
-          <VendorDocuments vendorId={selectedUserAbleId || ''} />
-        )}
-        {activeTab === 'rebate-credits' && selectedVendorId && selectedUserAbleId && (
-          <VendorRebateCredits vendorId={selectedUserAbleId || ''} />
-        )}
-        {activeTab === 'pickup-addresses' && selectedVendorId && selectedUserAbleId && (
-          <VendorPickupAddresses
+          <VendorDetails
+            vendorId={selectedVendorId}
+            onEdit={vendor => handleOpenEditModal(vendor.id)}
             countriesWithStatesAndCities={countriesWithStatesAndCities}
-            vendorId={selectedUserAbleId || ''}
           />
-        )}
-        {activeTab === 'salesman' && selectedVendorId && selectedUserAbleId && (
-          <VendorSalesmen vendorId={selectedUserAbleId || ''} />
         )}
       </CommonLayout>
 
