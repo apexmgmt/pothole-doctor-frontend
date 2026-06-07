@@ -166,10 +166,7 @@ const EditWorkOrderModal = ({
     onOpenChange(false)
   }
 
-  const selectedClient = useMemo(
-    () => clients.find(c => c.id === watch('client_id')),
-    [clients, watch('client_id')]
-  )
+  const selectedClient = useMemo(() => clients.find(c => c.id === watch('client_id')), [clients, watch('client_id')])
 
   const isMaterialOnly = useMemo(
     () => workOrderTypes.find(t => t.id === watch('work_order_type_id'))?.name === 'Material Only',
@@ -214,13 +211,7 @@ const EditWorkOrderModal = ({
           >
             Cancel
           </Button>
-          <Button
-            type='submit'
-            size='sm'
-            onClick={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-            className='flex-1'
-          >
+          <Button type='submit' size='sm' onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className='flex-1'>
             {isSubmitting ? 'Saving...' : 'Update & Edit Services →'}
           </Button>
         </div>
@@ -236,10 +227,10 @@ const EditWorkOrderModal = ({
             rules={{ required: 'Work order title is required', minLength: { value: 2, message: 'Min 2 characters' } }}
             register={register}
             errors={errors}
-            fieldClassName={`sm:col-span-2 ${fieldStyle}`}
+            fieldClassName={fieldStyle}
             labelClassName={labelStyle}
           />
-          
+
           {/* Work Order Type */}
           <CustomFormField
             name='work_order_type_id'
@@ -256,7 +247,7 @@ const EditWorkOrderModal = ({
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}
           />
-          
+
           {/* Customer */}
           <CustomFormField
             name='client_id'
@@ -276,7 +267,7 @@ const EditWorkOrderModal = ({
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}
           />
-          
+
           {/* Material Only: Interaction */}
           {isMaterialOnly && (
             <CustomFormField
@@ -303,7 +294,7 @@ const EditWorkOrderModal = ({
               }}
             />
           )}
-          
+
           {/* Cash and Pickup sub-fields */}
           {isMaterialOnly && interactionValue === 'cash_and_pickup' && (
             <>
@@ -318,7 +309,7 @@ const EditWorkOrderModal = ({
                 fieldClassName={fieldStyle}
                 labelClassName={labelStyle}
               />
-              
+
               <CustomFormField
                 name='pickup_location_id'
                 label='Pickup Location'
@@ -334,7 +325,7 @@ const EditWorkOrderModal = ({
                 fieldClassName={fieldStyle}
                 labelClassName={labelStyle}
               />
-              
+
               <CustomFormField
                 name='pickup_notes'
                 label='Notes'
@@ -347,7 +338,7 @@ const EditWorkOrderModal = ({
               />
             </>
           )}
-          
+
           {/* Cash and Delivery sub-fields */}
           {isMaterialOnly && interactionValue === 'cash_and_delivery' && (
             <>
@@ -389,7 +380,7 @@ const EditWorkOrderModal = ({
                   </FormItem>
                 )}
               />
-              
+
               <CustomFormField
                 name='delivery_location'
                 label='Delivery Location'
@@ -400,7 +391,7 @@ const EditWorkOrderModal = ({
                 fieldClassName={fieldStyle}
                 labelClassName={labelStyle}
               />
-              
+
               <CustomFormField
                 name='delivery_notes'
                 label='Notes'
@@ -413,7 +404,7 @@ const EditWorkOrderModal = ({
               />
             </>
           )}
-          
+
           {/* Business Location */}
           <CustomFormField
             name='location_id'
@@ -426,11 +417,11 @@ const EditWorkOrderModal = ({
             }))}
             control={control}
             errors={errors}
-            fieldClassName={`sm:col-span-2 ${fieldStyle}`}
+            fieldClassName={fieldStyle}
             labelClassName={labelStyle}
             disabled={true}
           />
-          
+
           {/* Event Location (Client Address) */}
           <CustomFormField
             name='address_id'
@@ -438,12 +429,7 @@ const EditWorkOrderModal = ({
             type='select'
             placeholder={selectedClient ? 'Select Address' : 'Select Customer first'}
             selectOptions={addressOptions.map(address => {
-              const label = [
-                address.street_address,
-                address.city?.name,
-                address.state?.name,
-                address.zip_code
-              ]
+              const label = [address.street_address, address.city?.name, address.state?.name, address.zip_code]
                 .filter(Boolean)
                 .join(', ')
 
@@ -451,11 +437,11 @@ const EditWorkOrderModal = ({
             })}
             control={control}
             errors={errors}
-            fieldClassName={`sm:col-span-2 ${fieldStyle}`}
+            fieldClassName={fieldStyle}
             labelClassName={labelStyle}
             disabled={!selectedClient}
           />
-          
+
           {/* Assigned Staff */}
           <CustomFormField
             name='assign_id'
@@ -472,7 +458,7 @@ const EditWorkOrderModal = ({
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}
           />
-          
+
           {/* Payment Term */}
           <CustomFormField
             name='payment_term_id'
@@ -489,7 +475,7 @@ const EditWorkOrderModal = ({
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}
           />
-          
+
           {/* Issue Date */}
           <CustomFormField
             name='issue_date'
@@ -502,7 +488,7 @@ const EditWorkOrderModal = ({
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}
           />
-          
+
           {/* Due Date */}
           <CustomFormField
             name='due_date'
@@ -514,7 +500,7 @@ const EditWorkOrderModal = ({
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}
           />
-          
+
           {/* Tax Rate */}
           <CustomFormField
             name='tax_rate'
