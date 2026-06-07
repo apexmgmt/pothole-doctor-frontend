@@ -84,12 +84,12 @@ export default function TaskDetailsPanel({
   }
 
   const renderInlineActions = (onSave: () => void) => (
-    <div className='absolute -bottom-6 right-1 z-10 flex gap-2'>
+    <div className='absolute -bottom-7 right-0 z-10 flex gap-1.5'>
       <Button
         type='button'
         variant='primary'
         size='icon'
-        className='size-6 rounded-xs shadow-sm shadow-[#929292]/40 bg-white hover:bg-white/90 text-black'
+        className='size-6 rounded-sm shadow-sm shadow-[#929292]/40 bg-white hover:bg-white/90 text-black'
         onClick={onSave}
         aria-label='Save'
       >
@@ -99,7 +99,7 @@ export default function TaskDetailsPanel({
         type='button'
         variant='outline'
         size='icon'
-        className='size-6 rounded-xs shadow-sm shadow-[#929292]/40'
+        className='size-6 rounded-sm shadow-sm shadow-[#929292]/40 bg-accent hover:bg-accent/90'
         onClick={cancelInlineEdit}
         aria-label='Cancel'
       >
@@ -123,13 +123,13 @@ export default function TaskDetailsPanel({
     field: InlineEditableField,
     content: ReactNode,
     startValue?: string,
-    align: 'items-center' | 'items-start' = 'items-center'
+    align: 'items-center' | 'items-start' = 'items-center',
+    className: string = ''
   ) => (
     <div
       className={cn(
-        'group flex justify-between gap-2 hover:bg-accent/40 px-2.5 py-1.5 rounded-md transition-colors duration-100',
-        align,
-        canEditTask && 'cursor-pointer'
+        `group flex justify-between ${align} gap-2 hover:bg-accent/40 px-2.5 py-1.5 rounded-md transition-colors duration-100 ${canEditTask ? 'cursor-pointer' : ''}`,
+        className
       )}
       onClick={() => startInlineEdit(field, startValue)}
     >
@@ -170,7 +170,9 @@ export default function TaskDetailsPanel({
         renderEditableDisplay(
           'status',
           <Badge variant={statusMeta.variant}>{statusMeta.label}</Badge>,
-          task?.status || ''
+          task?.status || '',
+          undefined,
+          'py-0.75 [&>div]:flex'
         )
     },
     {

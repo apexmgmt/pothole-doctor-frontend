@@ -1,8 +1,6 @@
 import { useEffect } from 'react'
-
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import { Checkbox } from '@/components/ui/checkbox'
 import { TaskReminderChannel } from '@/types'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface TaskReminderFieldsProps {
   form: any
@@ -117,17 +115,15 @@ export function TaskReminderFields({ form, taskReminderChannels, fieldStyle, lab
     <div className='grid grid-cols-1 gap-4'>
       {/* SMS Reminder */}
       <div className='space-y-3'>
-        <FormField
-          control={form.control}
+        <CustomFormField
+          type='checkbox'
           name='sms_reminder'
-          render={({ field }) => (
-            <FormItem className={fieldStyle}>
-              <FormLabel className={`text-xs pt-0! ${labelStyle}`}>SMS Reminder</FormLabel>
-              <FormControl>
-                <Checkbox checked={!!field.value} onCheckedChange={checked => field.onChange(checked ? 1 : 0)} />
-              </FormControl>
-            </FormItem>
-          )}
+          label='SMS Reminder'
+          value={form.watch('sms_reminder') === 1}
+          onChange={(val: any) => form.setValue('sms_reminder', val ? 1 : 0)}
+          errors={form.formState.errors}
+          fieldClassName={`${fieldStyle} [&>button]:order-2 [&>label]:order-1`}
+          labelClassName={labelStyle}
         />
 
         {smsReminderEnabled === 1 && smsChannel && (
@@ -135,65 +131,48 @@ export function TaskReminderFields({ form, taskReminderChannels, fieldStyle, lab
             {/* Customer SMS Times */}
             <div>
               <p className='text-sm font-medium mb-2'>Customer:</p>
-              <div className='flex flex-wrap gap-4'>
+              <div className='flex flex-wrap gap-4 [&>div]:w-auto'>
                 {smsChannel.times?.map(time => (
-                  <FormField
+                  <CustomFormField
                     key={`sms_customer_${time.id}`}
-                    control={form.control}
+                    type='checkbox'
                     name={`sms_customer_times.${time.id}`}
-                    render={({ field }) => (
-                      <FormItem className='flex flex-row items-center space-x-2 space-y-0'>
-                        <FormControl>
-                          <Checkbox
-                            checked={!!field.value}
-                            onCheckedChange={handleTimeCheckedChange('sms', 'customer', time.id)}
-                          />
-                        </FormControl>
-                        <FormLabel className='font-normal text-sm cursor-pointer'>{time.label}</FormLabel>
-                      </FormItem>
-                    )}
+                    label={time.label}
+                    value={form.watch(`sms_customer_times.${time.id}`) === 1}
+                    onChange={(val: any) => handleTimeCheckedChange('sms', 'customer', time.id)(!!val)}
+                    errors={form.formState.errors}
                   />
                 ))}
               </div>
             </div>
             {/* Show error messages below each section */}
-            {smsReminderEnabled === 1 && (
+            {form.formState.errors?.sms_customer_times && (
               <div className='ml-6'>
-                {form.formState.errors.sms_customer_times && (
-                  <p className='text-red-500 text-xs'>{form.formState.errors.sms_customer_times.message}</p>
-                )}
+                <p className='text-red-500 text-xs'>{form.formState.errors.sms_customer_times.message}</p>
               </div>
             )}
+
             {/* Employee SMS Times */}
             <div>
               <p className='text-sm font-medium mb-2'>Employee:</p>
-              <div className='flex flex-wrap gap-4'>
+              <div className='flex flex-wrap gap-4 [&>div]:w-auto'>
                 {smsChannel.times?.map(time => (
-                  <FormField
+                  <CustomFormField
                     key={`sms_employee_${time.id}`}
-                    control={form.control}
+                    type='checkbox'
                     name={`sms_employee_times.${time.id}`}
-                    render={({ field }) => (
-                      <FormItem className='flex flex-row items-center space-x-2 space-y-0'>
-                        <FormControl>
-                          <Checkbox
-                            checked={!!field.value}
-                            onCheckedChange={handleTimeCheckedChange('sms', 'employee', time.id)}
-                          />
-                        </FormControl>
-                        <FormLabel className='font-normal text-sm cursor-pointer'>{time.label}</FormLabel>
-                      </FormItem>
-                    )}
+                    label={time.label}
+                    value={form.watch(`sms_employee_times.${time.id}`) === 1}
+                    onChange={(val: any) => handleTimeCheckedChange('sms', 'employee', time.id)(!!val)}
+                    errors={form.formState.errors}
                   />
                 ))}
               </div>
             </div>
             {/* Show error messages below each section */}
-            {smsReminderEnabled === 1 && (
+            {form.formState.errors?.sms_employee_times && (
               <div className='ml-6'>
-                {form.formState.errors.sms_employee_times && (
-                  <p className='text-red-500 text-xs'>{form.formState.errors.sms_employee_times.message}</p>
-                )}
+                <p className='text-red-500 text-xs'>{form.formState.errors.sms_employee_times.message}</p>
               </div>
             )}
           </div>
@@ -202,17 +181,15 @@ export function TaskReminderFields({ form, taskReminderChannels, fieldStyle, lab
 
       {/* Email Reminder */}
       <div className='space-y-3'>
-        <FormField
-          control={form.control}
+        <CustomFormField
+          type='checkbox'
           name='email_reminder'
-          render={({ field }) => (
-            <FormItem className={fieldStyle}>
-              <FormLabel className={`text-xs pt-0! ${labelStyle}`}>Email Reminder</FormLabel>
-              <FormControl>
-                <Checkbox checked={!!field.value} onCheckedChange={checked => field.onChange(checked ? 1 : 0)} />
-              </FormControl>
-            </FormItem>
-          )}
+          label='Email Reminder'
+          value={form.watch('email_reminder') === 1}
+          onChange={(val: any) => form.setValue('email_reminder', val ? 1 : 0)}
+          errors={form.formState.errors}
+          fieldClassName={`${fieldStyle} [&>button]:order-2 [&>label]:order-1`}
+          labelClassName={labelStyle}
         />
 
         {emailReminderEnabled === 1 && emailChannel && (
@@ -220,23 +197,16 @@ export function TaskReminderFields({ form, taskReminderChannels, fieldStyle, lab
             {/* Customer Email Times */}
             <div>
               <p className='text-sm font-medium mb-2'>Customer:</p>
-              <div className='flex flex-wrap gap-4'>
+              <div className='flex flex-wrap gap-4 [&>div]:w-auto'>
                 {emailChannel.times?.map(time => (
-                  <FormField
+                  <CustomFormField
                     key={`email_customer_${time.id}`}
-                    control={form.control}
+                    type='checkbox'
                     name={`email_customer_times.${time.id}`}
-                    render={({ field }) => (
-                      <FormItem className='flex flex-row items-center space-x-2 space-y-0'>
-                        <FormControl>
-                          <Checkbox
-                            checked={!!field.value}
-                            onCheckedChange={handleTimeCheckedChange('email', 'customer', time.id)}
-                          />
-                        </FormControl>
-                        <FormLabel className='font-normal text-sm cursor-pointer'>{time.label}</FormLabel>
-                      </FormItem>
-                    )}
+                    label={time.label}
+                    value={form.watch(`email_customer_times.${time.id}`) === 1}
+                    onChange={(val: any) => handleTimeCheckedChange('email', 'customer', time.id)(!!val)}
+                    errors={form.formState.errors}
                   />
                 ))}
               </div>
@@ -252,23 +222,16 @@ export function TaskReminderFields({ form, taskReminderChannels, fieldStyle, lab
             {/* Employee Email Times */}
             <div>
               <p className='text-sm font-medium mb-2'>Employee:</p>
-              <div className='flex flex-wrap gap-4'>
+              <div className='flex flex-wrap gap-4 [&>div]:w-auto'>
                 {emailChannel.times?.map(time => (
-                  <FormField
+                  <CustomFormField
                     key={`email_employee_${time.id}`}
-                    control={form.control}
+                    type='checkbox'
                     name={`email_employee_times.${time.id}`}
-                    render={({ field }) => (
-                      <FormItem className='flex flex-row items-center space-x-2 space-y-0'>
-                        <FormControl>
-                          <Checkbox
-                            checked={!!field.value}
-                            onCheckedChange={handleTimeCheckedChange('email', 'employee', time.id)}
-                          />
-                        </FormControl>
-                        <FormLabel className='font-normal text-sm cursor-pointer'>{time.label}</FormLabel>
-                      </FormItem>
-                    )}
+                    label={time.label}
+                    value={form.watch(`email_employee_times.${time.id}`) === 1}
+                    onChange={(val: any) => handleTimeCheckedChange('email', 'employee', time.id)(!!val)}
+                    errors={form.formState.errors}
                   />
                 ))}
               </div>
