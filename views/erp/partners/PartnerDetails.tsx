@@ -39,21 +39,53 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partnerId }) => {
 
   if (isLoading) {
     return (
-      <div className='space-y-6'>
+      <div className='space-y-6 mt-2.5'>
+        {/* Header */}
         <div className='flex items-center justify-between pt-4'>
           <Skeleton className='h-8 w-48' />
         </div>
-        <div className='flex items-center space-x-4 py-4 bg-bg-3 rounded-lg'>
-          <Skeleton className='h-16 w-16 rounded-full' />
-          <div className='space-y-2 flex-1'>
-            <Skeleton className='h-6 w-48' />
-            <Skeleton className='h-4 w-64' />
-            <Skeleton className='h-6 w-20' />
+
+        {/* Details Content Skeleton */}
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+          {/* Left Column (Contact Info) */}
+          <div className='space-y-4 bg-bg-3 p-5 rounded-lg'>
+            <Skeleton className='h-6 w-32' />
+            <div className='space-y-3'>
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='h-4 w-5/6' />
+              <Skeleton className='h-4 w-4/5' />
+              <Skeleton className='h-4 w-11/12' />
+            </div>
+          </div>
+          {/* Right Column (Business Info) */}
+          <div className='space-y-4 bg-bg-3 p-5 rounded-lg'>
+            <Skeleton className='h-6 w-32' />
+            <div className='space-y-3'>
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='h-4 w-5/6' />
+              <Skeleton className='h-4 w-4/5' />
+              <Skeleton className='h-4 w-11/12' />
+            </div>
           </div>
         </div>
+
+        {/* Skills & Locations Skeleton */}
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <Skeleton className='h-64' />
-          <Skeleton className='h-64' />
+          <div className='space-y-4 bg-bg-3 p-5 rounded-lg'>
+            <Skeleton className='h-6 w-32' />
+            <div className='flex flex-wrap gap-1.5'>
+              <Skeleton className='h-6 w-16 rounded-full' />
+              <Skeleton className='h-6 w-20 rounded-full' />
+              <Skeleton className='h-6 w-14 rounded-full' />
+            </div>
+          </div>
+          <div className='space-y-4 bg-bg-3 p-5 rounded-lg'>
+            <Skeleton className='h-6 w-32' />
+            <div className='flex flex-wrap gap-1.5'>
+              <Skeleton className='h-6 w-24 rounded-full' />
+              <Skeleton className='h-6 w-18 rounded-full' />
+            </div>
+          </div>
         </div>
       </div>
     )
