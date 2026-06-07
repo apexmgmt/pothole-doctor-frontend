@@ -25,7 +25,6 @@ import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import EstimateService from '@/services/api/estimates/estimates.service'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DatePicker } from '@/components/ui/datePicker'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Textarea } from '@/components/ui/textarea'
 import { DateTimePicker } from '@/components/ui/datetime-picker'
 import CustomFormField from '@/components/form/CustomFormField'
@@ -472,56 +471,29 @@ const CreateOrEditEstimateModal = ({
           {/* Material Only: Interaction field */}
           {isMaterialOnly && (
             <>
-              <FormField
-                control={control}
+              <CustomFormField
                 name='interaction'
+                label='Interaction'
+                type='radio'
                 rules={{ required: 'Interaction type is required' }}
-                render={({ field }) => (
-                  <FormItem className={`sm:col-span-2 py-3 ${fieldStyle}`}>
-                    <FormLabel className={`text-xs data-[error=true]:text-card-foreground ${labelStyle}`}>
-                      Interaction <span className='text-red-500'>*</span>
-                    </FormLabel>
-                    <div>
-                      <FormControl>
-                        <RadioGroup
-                          value={field.value}
-                          onValueChange={value => {
-                            field.onChange(value)
-
-                            // Reset sub-fields when switching
-                            setValue('pickup_date', '')
-                            setValue('pickup_location_id', '')
-                            setValue('pickup_notes', '')
-                            setValue('delivery_datetime', null)
-                            setValue('delivery_location', '')
-                            setValue('delivery_notes', '')
-                          }}
-                          className='flex flex-row gap-6'
-                        >
-                          <div className='flex items-center space-x-2'>
-                            <RadioGroupItem value='cash_and_pickup' id='cash_and_pickup' />
-                            <label
-                              htmlFor='cash_and_pickup'
-                              className='text-sm font-medium leading-none cursor-pointer'
-                            >
-                              Cash and Pickup
-                            </label>
-                          </div>
-                          <div className='flex items-center space-x-2'>
-                            <RadioGroupItem value='cash_and_delivery' id='cash_and_delivery' />
-                            <label
-                              htmlFor='cash_and_delivery'
-                              className='text-sm font-medium leading-none cursor-pointer'
-                            >
-                              Cash and Delivery
-                            </label>
-                          </div>
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage className='mt-1.5' />
-                    </div>
-                  </FormItem>
-                )}
+                control={control}
+                errors={errors}
+                fieldClassName={`sm:col-span-2 py-3 ${fieldStyle}`}
+                labelClassName={labelStyle}
+                className='flex flex-row gap-6'
+                selectOptions={[
+                  { value: 'cash_and_pickup', label: 'Cash and Pickup' },
+                  { value: 'cash_and_delivery', label: 'Cash and Delivery' }
+                ]}
+                onChange={() => {
+                  // Reset sub-fields when switching
+                  setValue('pickup_date', '')
+                  setValue('pickup_location_id', '')
+                  setValue('pickup_notes', '')
+                  setValue('delivery_datetime', null)
+                  setValue('delivery_location', '')
+                  setValue('delivery_notes', '')
+                }}
               />
 
               {/* Cash and Pickup sub-fields */}
