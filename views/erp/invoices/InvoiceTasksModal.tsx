@@ -204,7 +204,7 @@ const InvoiceTasksModal = ({
             <Button variant='default' size='sm' onClick={() => setIsAddTaskOpen(true)}>
               + Add Task
             </Button>
-            <Button variant='outline' onClick={() => onOpenChange(false)}>
+            <Button variant='outline' size='sm' onClick={() => onOpenChange(false)}>
               Close
             </Button>
           </div>

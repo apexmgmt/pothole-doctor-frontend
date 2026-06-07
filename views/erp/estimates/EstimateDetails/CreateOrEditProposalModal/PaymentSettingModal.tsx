@@ -112,10 +112,10 @@ const PaymentSettingModal = ({
       maxWidth='sm'
       actions={
         <div className='flex gap-3'>
-          <Button type='button' variant='outline' onClick={() => onOpenChange(false)} className='flex-1'>
+          <Button type='button' variant='outline' size='sm' onClick={() => onOpenChange(false)} className='flex-1'>
             Close
           </Button>
-          <Button type='button' onClick={handleSave} className='flex-1'>
+          <Button type='button' size='sm' onClick={handleSave} className='flex-1'>
             Save
           </Button>
         </div>

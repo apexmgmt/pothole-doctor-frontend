@@ -29,7 +29,7 @@ const CompletionCertificatesModal = ({
         maxWidth='sm'
         disableClose={false}
         actions={
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
+          <Button variant='outline' size='sm' onClick={() => onOpenChange(false)}>
             Close
           </Button>
         }

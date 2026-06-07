@@ -130,7 +130,7 @@ const ProposalHistoryModal = ({
       maxWidth='7xl'
       isLoading={false}
       actions={
-        <Button variant='outline' onClick={() => onOpenChange(false)}>
+        <Button variant='outline' size='sm' onClick={() => onOpenChange(false)}>
           Close
         </Button>
       }

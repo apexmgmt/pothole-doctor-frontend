@@ -241,10 +241,10 @@ const AddNonInventoryJobActionModal = ({
       disableClose={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
-          <Button type='button' variant='outline' onClick={onCancel} disabled={form.formState.isSubmitting}>
+          <Button type='button' variant='outline' size='sm' onClick={onCancel} disabled={form.formState.isSubmitting}>
             Cancel
           </Button>
-          <Button type='submit' form='non-inventory-action-form' disabled={form.formState.isSubmitting}>
+          <Button type='submit' size='sm' form='non-inventory-action-form' disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? 'Saving...' : 'Save'}
           </Button>
         </div>

@@ -94,10 +94,10 @@ const AdjustInventoryModal = ({ open, onOpenChange, onSuccess, inventory, produc
       disableClose={isLoading}
       actions={
         <div className='flex gap-3'>
-          <Button type='button' variant='outline' onClick={onCancel} disabled={isLoading}>
+          <Button type='button' variant='outline' size='sm' onClick={onCancel} disabled={isLoading}>
             Cancel
           </Button>
-          <Button type='submit' form='adjustment-form' disabled={isLoading}>
+          <Button type='submit' size='sm' form='adjustment-form' disabled={isLoading}>
             {isLoading ? 'Saving...' : 'Save'}
           </Button>
         </div>

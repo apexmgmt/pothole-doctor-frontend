@@ -91,6 +91,7 @@ const CreateOrEditEmailModal: React.FC<{
           <Button
             type='button'
             variant='outline'
+            size='sm'
             onClick={onCancel}
             disabled={form.formState.isSubmitting}
             className='flex-1'
@@ -99,6 +100,7 @@ const CreateOrEditEmailModal: React.FC<{
           </Button>
           <Button
             type='submit'
+            size='sm'
             onClick={form.handleSubmit(onSubmit)}
             disabled={form.formState.isSubmitting}
             className='flex-1'

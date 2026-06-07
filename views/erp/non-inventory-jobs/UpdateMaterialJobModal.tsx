@@ -425,10 +425,10 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
       disableClose={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
-          <Button type='button' variant='outline' onClick={onCancel} disabled={form.formState.isSubmitting}>
+          <Button type='button' variant='outline' size='sm' onClick={onCancel} disabled={form.formState.isSubmitting}>
             Cancel
           </Button>
-          <Button type='submit' form='update-material-job-form' disabled={form.formState.isSubmitting}>
+          <Button type='submit' size='sm' form='update-material-job-form' disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? 'Saving...' : 'Save'}
           </Button>
         </div>
@@ -553,7 +553,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
                 control={form.control}
                 name='order_number'
                 rules={{
-                  required: "Order Number Is Required"
+                  required: 'Order Number Is Required'
                 }}
                 render={({ field }) => (
                   <FormItem>

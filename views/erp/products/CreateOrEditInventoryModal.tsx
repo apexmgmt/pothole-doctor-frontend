@@ -396,10 +396,10 @@ const CreateOrEditInventoryModal = ({
       disableClose={isLoading}
       actions={
         <div className='flex gap-3'>
-          <Button type='button' variant='outline' onClick={onCancel} disabled={isLoading}>
+          <Button type='button' variant='outline' size='sm' onClick={onCancel} disabled={isLoading}>
             Cancel
           </Button>
-          <Button type='submit' form='inventory-form' disabled={isLoading}>
+          <Button type='submit' size='sm' form='inventory-form' disabled={isLoading}>
             {isLoading ? (mode === 'create' ? 'Creating...' : 'Saving...') : mode === 'create' ? 'Save' : 'Update'}
           </Button>
         </div>

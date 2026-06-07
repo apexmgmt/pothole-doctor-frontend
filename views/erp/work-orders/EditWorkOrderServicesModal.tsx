@@ -281,10 +281,10 @@ const EditWorkOrderServicesModal = ({
       disableClose={isLoading}
       actions={
         <div className='flex gap-3'>
-          <Button type='button' variant='outline' onClick={onCancel} disabled={isLoading} className='flex-1'>
+          <Button type='button' variant='outline' size='sm' onClick={onCancel} disabled={isLoading} className='flex-1'>
             Cancel
           </Button>
-          <Button type='button' onClick={onSubmit} disabled={isLoading} className='flex-1'>
+          <Button type='button' size='sm' onClick={onSubmit} disabled={isLoading} className='flex-1'>
             {isLoading ? 'Saving...' : 'Update Services'}
           </Button>
         </div>

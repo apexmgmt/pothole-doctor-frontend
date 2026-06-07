@@ -266,10 +266,17 @@ const CreateOrEditEstimateModal = ({
       disableClose={isSubmitting}
       actions={
         <div className='flex gap-3'>
-          <Button type='button' variant='outline' onClick={onCancel} disabled={isSubmitting} className='flex-1'>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className='flex-1'
+          >
             Cancel
           </Button>
-          <Button type='submit' onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className='flex-1'>
+          <Button type='submit' size='sm' onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className='flex-1'>
             {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
           </Button>
         </div>

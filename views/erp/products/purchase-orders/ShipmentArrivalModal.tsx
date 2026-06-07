@@ -460,24 +460,41 @@ const ShipmentArrivalModal = ({
       actions={
         viewOnly ? (
           <div className='flex items-center justify-between w-full'>
-            <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
+            <Button type='button' variant='outline' size='sm' onClick={() => onOpenChange(false)}>
               Close
             </Button>
-            <Button type='button' onClick={handleDownloadPDF} disabled={isPDFGenerating || !purchaseOrder}>
+            <Button type='button' size='sm' onClick={handleDownloadPDF} disabled={isPDFGenerating || !purchaseOrder}>
               <FileDown className='w-4 h-4 mr-2' />
               {isPDFGenerating ? 'Generating...' : 'Download PDF'}
             </Button>
           </div>
         ) : (
           <div className='flex items-center justify-between w-full'>
-            <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+            <Button
+              type='button'
+              variant='outline'
+              size='sm'
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
             <div className='flex gap-3'>
-              <Button type='button' variant='outline' onClick={() => handleSubmit('received')} disabled={isSubmitting}>
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                onClick={() => handleSubmit('received')}
+                disabled={isSubmitting}
+              >
                 {submittingAs === 'received' ? 'Processing...' : 'Mark Received'}
               </Button>
-              <Button type='button' onClick={() => handleSubmit('moved_to_inventory')} disabled={isSubmitting}>
+              <Button
+                type='button'
+                size='sm'
+                onClick={() => handleSubmit('moved_to_inventory')}
+                disabled={isSubmitting}
+              >
                 {submittingAs === 'moved_to_inventory' ? 'Processing...' : 'Mark Received & Move to Inventory'}
               </Button>
             </div>
