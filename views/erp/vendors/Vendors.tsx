@@ -19,7 +19,7 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import VendorService from '@/services/api/vendors/vendors.service'
-import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
+import { DetailsIcon, UserIcon } from '@/public/icons'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CreateOrEditVendorModal from './CreateOrEditVendorModal'
 import VendorDetails from './VendorDetails'
@@ -33,7 +33,6 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedVendorId, setSelectedVendorId] = useState<string | null>(null)
-  const [selectedUserAbleId, setSelectedUserAbleId] = useState<string | null>(null)
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
@@ -125,7 +124,6 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const handleOpenCreateModal = () => {
     setModalMode('create')
     setSelectedVendorId(null)
-    setSelectedUserAbleId(null)
     setSelectedVendor(null)
     setIsModalOpen(true)
   }
@@ -133,7 +131,6 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const handleOpenEditModal = async (id: string) => {
     setModalMode('edit')
     setSelectedVendorId(id)
-    setSelectedUserAbleId(null)
 
     // Fetch contact type details
     try {
@@ -306,7 +303,6 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
 
   const handleRowSelect = (partner: any) => {
     setSelectedVendorId(partner?.id || null)
-    setSelectedUserAbleId(partner?.userable_id || null)
   }
 
   return (
