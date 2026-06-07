@@ -313,14 +313,14 @@ const CreateOrEditPurchaseOrderModal = ({
       disableClose={isLoading}
       actions={
         <div className='flex items-center justify-end w-full'>
-          {/* <Button type='button' variant='outline' onClick={() => {}} disabled={isLoading}>
+          {/* <Button type='button' variant='outline' size='sm' onClick={() => {}} disabled={isLoading}>
             Print Purchase Order
           </Button> */}
           <div className='flex gap-3'>
-            <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isLoading}>
+            <Button type='button' variant='outline' size='sm' onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancel
             </Button>
-            <Button type='submit' form='purchase-order-form' disabled={isSubmitting}>
+            <Button type='submit' size='sm' form='purchase-order-form' disabled={isSubmitting}>
               {isSubmitting ? (mode === 'create' ? 'Creating...' : 'Saving...') : mode === 'create' ? 'Save' : 'Update'}
             </Button>
           </div>

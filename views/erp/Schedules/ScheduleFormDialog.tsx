@@ -211,9 +211,11 @@ export default function ScheduleFormDialog({
 
     const currentWoId = form.getValues('work_order_id')
     const wo = workOrders.find(w => w.id === currentWoId)
+
     const baseTitle = wo
       ? `#${wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}${wo.invoice_number?.toString() || '—'} - ${wo.title}`
       : ''
+
     const serviceTypeName = svc.service_type?.name ?? ''
 
     setValue('title', serviceTypeName ? `${baseTitle} - ${serviceTypeName}` : baseTitle)
@@ -252,9 +254,11 @@ export default function ScheduleFormDialog({
       // Auto-update title with service type name
       const currentWoId = form.getValues('work_order_id')
       const wo = workOrders.find(w => w.id === currentWoId)
+
       const baseTitle = wo
         ? `#${wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}${wo.invoice_number?.toString() || '—'} - ${wo.title}`
         : ''
+
       const serviceTypeName = svc.service_type?.name ?? ''
 
       setValue('title', serviceTypeName ? `${baseTitle} - ${serviceTypeName}` : baseTitle)
@@ -325,10 +329,10 @@ export default function ScheduleFormDialog({
       disableClose={isSubmitting}
       actions={
         <div className='flex justify-end gap-2 w-full'>
-          <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+          <Button type='button' variant='outline' size='sm' onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button type='submit' form='schedule-form' disabled={isSubmitting || isFetchingWO}>
+          <Button type='submit' size='sm' form='schedule-form' disabled={isSubmitting || isFetchingWO}>
             {isSubmitting ? 'Saving...' : 'Save'}
           </Button>
         </div>

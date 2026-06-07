@@ -110,10 +110,10 @@ export default function EditEmailTemplateDialog({
       isLoading={isLoading}
       actions={
         <>
-          <Button variant='outline' type='button' onClick={() => onOpenChange(false)} disabled={isLoading}>
+          <Button variant='outline' type='button' size='sm' onClick={() => onOpenChange(false)} disabled={isLoading}>
             Cancel
           </Button>
-          <Button type='submit' form='edit-email-template-form' disabled={isLoading}>
+          <Button type='submit' size='sm' form='edit-email-template-form' disabled={isLoading}>
             {isLoading ? 'Saving...' : 'Save Changes'}
           </Button>
         </>

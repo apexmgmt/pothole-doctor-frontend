@@ -77,6 +77,7 @@ const CreateOrEditSmsModal: React.FC<{
           <Button
             type='button'
             variant='outline'
+            size='sm'
             onClick={onCancel}
             disabled={form.formState.isSubmitting}
             className='flex-1'
@@ -85,6 +86,7 @@ const CreateOrEditSmsModal: React.FC<{
           </Button>
           <Button
             type='submit'
+            size='sm'
             onClick={form.handleSubmit(onSubmit)}
             disabled={form.formState.isSubmitting || !form.watch('to') || !form.watch('message')}
             className='flex-1'

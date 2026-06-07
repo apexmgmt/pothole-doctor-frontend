@@ -162,6 +162,7 @@ const CreateOrEditAddressModal: React.FC<CreateOrEditAddressModalProps> = ({
           <Button
             type='button'
             variant='outline'
+            size='sm'
             onClick={onCancel}
             disabled={form.formState.isSubmitting}
             className='flex-1'
@@ -170,6 +171,7 @@ const CreateOrEditAddressModal: React.FC<CreateOrEditAddressModalProps> = ({
           </Button>
           <Button
             type='submit'
+            size='sm'
             onClick={form.handleSubmit(onSubmit)}
             disabled={form.formState.isSubmitting}
             className='flex-1'

@@ -62,12 +62,13 @@ const VoidDeadProposalModal = ({ action, proposalId, onClose, onSuccess }: VoidD
       isLoading={loading}
       disableClose={loading}
       actions={
-        <div className='flex gap-3 justify-end'>
-          <Button type='button' variant='outline' onClick={onClose} disabled={loading} className='flex-1'>
+        <div className='flex gap-3 w-full'>
+          <Button type='button' size='sm' variant='outline' onClick={onClose} disabled={loading} className='flex-1'>
             Cancel
           </Button>
           <Button
             type='button'
+            size='sm'
             onClick={handleSubmit}
             disabled={loading}
             className='flex-1'
