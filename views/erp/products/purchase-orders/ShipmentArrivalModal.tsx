@@ -444,14 +444,12 @@ const ShipmentArrivalModal = ({
     }
   }
 
-  // ─── Render ────────────────────────────────────────────────────────────────
-
   return (
     <CommonDialog
       open={open}
       onOpenChange={onOpenChange}
       title={viewOnly ? 'Shipment Details' : 'View Shipment Arrived Information'}
-      maxWidth='full'
+      className='sm:max-w-[1600px]'
       isLoading={isLoading || isSubmitting || isPDFGenerating}
       loadingMessage={
         isPDFGenerating ? 'Generating PDF...' : isSubmitting ? 'Processing...' : 'Loading purchase order...'
