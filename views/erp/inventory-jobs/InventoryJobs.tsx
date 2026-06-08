@@ -338,7 +338,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
     return (
       <table className='min-w-full text-xs'>
         <thead>
-          <tr className='text-zinc-400 text-left border-b border-zinc-700'>
+          <tr className='text-accent-foreground text-left border-b border-accent'>
             <th className='px-3 py-1.5 whitespace-nowrap'>Action</th>
             <th className='px-3 py-1.5 whitespace-nowrap'>Employee</th>
             <th className='px-3 py-1.5 whitespace-nowrap'>Quantity</th>

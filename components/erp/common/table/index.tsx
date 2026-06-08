@@ -315,7 +315,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
                       </tr>
                       {expandableRow && isExpanded && (
                         <tr
-                          className={`border-b border-border bg-zinc-950 ${
+                          className={`border-b border-accent bg-accent/10 ${
                             rowIndex + 1 === tableData.length ? '' : ''
                           }`}
                         >
