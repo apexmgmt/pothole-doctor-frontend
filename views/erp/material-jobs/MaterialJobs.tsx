@@ -142,9 +142,15 @@ const MaterialJobs: React.FC<MaterialJobsProps> = ({ staffs, warehouses, busines
       id: 'order_status',
       header: 'Order Status',
       cell: (row: MaterialJob) => (
-        <Badge variant={getOrderStatusVariant(row.order_status)} className='capitalize whitespace-nowrap'>
-          {row.order_status?.replace(/_/g, ' ') || '—'}
-        </Badge>
+        <>
+          {row.job_type !== 'inventory' ? (
+            <Badge variant={getOrderStatusVariant(row.order_status)} className='capitalize whitespace-nowrap'>
+              {row.order_status?.replace(/_/g, ' ') || '—'}
+            </Badge>
+          ) : (
+            <span></span>
+          )}
+        </>
       ),
       sortable: true
     },
@@ -344,7 +350,12 @@ const MaterialJobs: React.FC<MaterialJobsProps> = ({ staffs, warehouses, busines
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={setSearchValue}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
