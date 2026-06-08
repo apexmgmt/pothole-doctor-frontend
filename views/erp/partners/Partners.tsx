@@ -97,11 +97,11 @@ const Partners: React.FC<PartnersProps> = ({
         })
         .catch(error => {
           setIsLoading(false)
-          toast.error('Error fetching contact types')
+          toast.error('Error fetching contractors')
         })
     } catch (error) {
       setIsLoading(false)
-      toast.error('Error fetching partners')
+      toast.error('Error fetching contractors')
     }
   }
 
@@ -179,7 +179,7 @@ const Partners: React.FC<PartnersProps> = ({
       size: 16
     },
     {
-      id: 'first_name',
+      id: 'name',
       header: 'Full Name',
       cell: row => <span>{row.name}</span>,
       sortable: true
