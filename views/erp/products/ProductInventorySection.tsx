@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import CreateOrEditInventoryModal from './CreateOrEditInventoryModal'
+import { formatDate } from '@/utils/date'
 
 interface ProductInventorySectionProps {
   product: Product
@@ -104,9 +105,11 @@ const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
       sortable: false
     },
     {
-      id: 'lot_number',
+      id: 'dye_lot',
       header: 'Lot Number',
-      cell: (row: PurchaseOrder) => <span>{row.lot_number || '—'}</span>,
+      cell: (row: PurchaseOrder) => (
+        <span>{row?.purchase_products?.[0]?.purchase_product_receipts?.[0]?.dye_lot || '—'}</span>
+      ),
       sortable: false
     },
     {
@@ -116,9 +119,9 @@ const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
       sortable: false
     },
     {
-      id: 'added_date',
+      id: 'created_at',
       header: 'Date Added',
-      cell: (row: PurchaseOrder) => <span>{row.added_date || '—'}</span>,
+      cell: (row: PurchaseOrder) => <span>{formatDate(row.created_at)}</span>,
       sortable: true
     },
     {
