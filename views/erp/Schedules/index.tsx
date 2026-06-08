@@ -163,13 +163,13 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
       id: 'company',
       header: 'Company',
       cell: (row: Schedule) => <span>{row.client?.company?.name || ''}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'job_type',
       header: 'Job Type',
       cell: (row: Schedule) => <span>{row.service_type?.name || ''}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'contractor',
@@ -179,7 +179,7 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
 
         return <span>{parts.join(' ') || ''}</span>
       },
-      sortable: true
+      sortable: false
     },
     {
       id: 'starting_date',
@@ -231,13 +231,13 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
       id: 'special_instructions',
       header: 'Special Instruction',
       cell: (row: Schedule) => <Description description={row?.special_instructions ?? ''} />,
-      sortable: false
+      sortable: true
     },
     {
       id: 'internal_commands',
       header: 'Internal Notes',
       cell: (row: Schedule) => <Description description={row?.internal_commands ?? ''} />,
-      sortable: false
+      sortable: true
     },
     {
       id: 'actions',
