@@ -224,7 +224,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
       <div className='relative'>
         <ScrollArea className='w-full'>
           <table className='w-full'>
-            <thead className='bg-border/40'>
+            <thead className='bg-accent'>
               <tr>
                 {expandableRow && <th className='w-8 px-2 py-1.5 rounded-l-lg' />}
                 {columns.map((column, index) => {
@@ -264,7 +264,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
                       <tr
                         onClick={() => handleRowClick(row)}
                         className={`transition-colors cursor-pointer ${
-                          isSelected ? 'bg-gray-800 hover:bg-gray-900' : 'hover:bg-gray-900'
+                          isSelected ? 'bg-accent/30 text-accent-foreground/90 hover:bg-accent/40 hover:text-accent-foreground' : 'hover:bg-accent/40 text-accent-foreground'
                         } ${!isExpanded && rowIndex + 1 === tableData.length ? '' : 'border-b border-border'}`}
                       >
                         {expandableRow && (
@@ -293,7 +293,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
                             <td
                               key={column.id}
                               style={columnWidth}
-                              className={`px-4 py-2.5 text-light text-[13px] whitespace-nowrap min-w-25`}
+                              className={`px-4 py-1.5 text-light text-[13px] whitespace-nowrap min-w-25`}
                               onClick={e => {
                                 // Stop propagation if clicked element is a button, link, or inside one
                                 const target = e.target as HTMLElement
