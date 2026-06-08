@@ -20,7 +20,7 @@ import {
   Warehouse
 } from 'lucide-react'
 
-import { NavigationItem, User } from '@/types'
+import { NavigationItem } from '@/types'
 import { filterMenuByPermissions } from '@/utils/menu-permissions'
 
 import { SettingsIcon, HomeIcon } from '@/public/icons'
@@ -28,13 +28,15 @@ import SidebarFooter from './SidebarFooter'
 import MenuItem from './menu-item'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useSidebar } from './sidebarContext'
+import { useSidebarData } from './sidebarDataContext'
 import TaskIcon from '@/public/icons/TaskIcon'
 import EstimateIcon from '@/public/icons/Estimate'
 import InvoiceIcon from '@/public/icons/Invoice'
 import WorkOrderIcon from '@/public/icons/WorkOrderIcon'
 import MaterialJobIcon from '@/public/icons/MaterialJobIcon'
 
-const Sidebar: React.FC<{ user: User | null; permissions: string[] }> = ({ user, permissions }) => {
+const Sidebar: React.FC = () => {
+  const { user, permissions } = useSidebarData()
   const iconSize = 'size-3.5'
 
   const allNavigationItems: NavigationItem[] = [
