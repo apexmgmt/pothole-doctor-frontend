@@ -180,7 +180,7 @@ export const getSharedWorkOrderColumns = (
           </div>
         )
       },
-      sortable: true
+      sortable: false
     },
 
     // contractor paid
