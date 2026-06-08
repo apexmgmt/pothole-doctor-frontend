@@ -284,22 +284,22 @@ const ShipmentProductCard = ({
                       </Select>
                     </td>
                     <td className='px-2 py-2'>
-                      {/* <Input
+                      <Input
                         value={r.stock_area}
                         disabled={locked}
                         onChange={e => onUpdateReceipt(p.id, rIdx, { stock_area: e.target.value })}
                         placeholder='Stock Area'
                         
-                      /> */}
+                      />
                     </td>
                     <td className='px-2 py-2'>
-                      {/* <Input
-                        value={r.stock_section_id}
+                      <Input
+                        value={r.stock_section}
                         disabled={locked}
-                        onChange={e => onUpdateReceipt(p.id, rIdx, { stock_section_id: e.target.value })}
+                        onChange={e => onUpdateReceipt(p.id, rIdx, { stock_section: e.target.value })}
                         placeholder='Section'
                         
-                      /> */}
+                      />
                     </td>
                     <td className='px-2 py-2'>
                       <Input

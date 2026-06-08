@@ -11,7 +11,7 @@ export interface ReceiptRowState {
   warehouse_type: 'warehouse' | 'location'
   warehouse_id: string
   stock_area: string
-  stock_section_id: string
+  stock_section: string
   dye_lot: string
   is_moved_to_inventory: boolean
 }
