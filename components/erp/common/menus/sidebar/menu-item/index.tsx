@@ -1,4 +1,4 @@
-import React, { useState, ReactNode } from 'react'
+import React, { useState, useEffect, ReactNode } from 'react'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -17,21 +17,6 @@ const MenuItem: React.FC<{
 }> = ({ item, isLastItem = false, level = 0, parentIcon }) => {
   const pathname = usePathname()
   const [expandedSections, setExpandedSections] = useState<ExpandedSections>({})
-
-  const toggleSection = (section: string) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }))
-  }
-
-  const { sidebarToggle } = useSidebar()
-
-  const handleClick = () => {
-    if (window.innerWidth < 768) {
-      sidebarToggle()
-    }
-  }
 
   // path helpers
   const normalize = (p: string) => p.replace(/\/+$/, '') || '/'
@@ -54,7 +39,32 @@ const MenuItem: React.FC<{
     !!item.subItems?.some(child => isItemActive(child) || hasActiveDescendant(child))
 
   const isActive = isItemActive(item) || hasActiveDescendant(item)
-  const isExpanded = expandedSections[item.id]
+  const isExpanded = expandedSections[item.id] !== undefined ? expandedSections[item.id] : isActive
+
+  useEffect(() => {
+    if (isActive) {
+      setExpandedSections(prev => ({
+        ...prev,
+        [item.id]: true
+      }))
+    }
+  }, [isActive, item.id])
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !(prev[section] !== undefined ? prev[section] : isActive)
+    }))
+  }
+
+  const { sidebarToggle } = useSidebar()
+
+  const handleClick = () => {
+    if (window.innerWidth < 768) {
+      sidebarToggle()
+    }
+  }
+
   const resolvedIcon = item.icon ?? parentIcon // ensure submenu shows an icon
 
   return item.hasSubItems && item.subItems ? (
