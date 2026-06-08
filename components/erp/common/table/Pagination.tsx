@@ -118,12 +118,16 @@ const Pagination: React.FC<PaginationProps> = ({
               <span className='px-3 py-1 text-gray'>...</span>
             ) : (
               <Button
-                onClick={() => onPageChange(page as number)}
+                onClick={() => {
+                  if (currentPage !== page) onPageChange(page as number)
+                }}
                 disabled={isLoading}
                 variant='ghost'
                 size='sm'
                 className={`${
-                  currentPage === page ? 'bg-accent-foreground/90 text-accent font-medium hover:bg-accent-foreground hover:text-accent-foreground' : 'text-accent-accent-foreground/90 hover:text-accent-foreground'
+                  currentPage === page
+                    ? 'bg-accent-foreground/90 text-accent font-medium hover:bg-accent-foreground! hover:text-accent! hover:cursor-default!'
+                    : 'text-accent-accent-foreground/90 hover:text-accent-foreground'
                 } h-7`}
               >
                 {page}
