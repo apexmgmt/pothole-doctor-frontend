@@ -27,6 +27,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 import CustomFormField from '@/components/form/CustomFormField'
+import { formatCurrency } from '@/utils/currency'
 
 const NonInventoryProducts: React.FC<ProductsProps> = ({
   productCategories,
@@ -240,13 +241,13 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
       id: 'vendor',
       header: 'Vendor',
       cell: (row: Product) => <span>{row?.vendor?.first_name ?? ''}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'category',
       header: 'Category',
       cell: (row: Product) => <span>{row?.category?.name ?? ''}</span>,
-      sortable: true
+      sortable: false
     },
     {
       id: 'sku',
@@ -255,7 +256,7 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
       sortable: true
     },
     {
-      id: 'product_name',
+      id: 'vendor_product_name',
       header: 'Product Name',
       cell: (row: Product) => <span>{row.vendor_product_name || row.private_product_name}</span>,
       sortable: true
@@ -267,26 +268,26 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
       sortable: true
     },
     {
-      id: 'style',
+      id: 'vendor_style',
       header: 'Style',
       cell: (row: Product) => <span>{row.vendor_style || row.private_style}</span>,
       sortable: true
     },
     {
-      id: 'color',
+      id: 'vendor_color',
       header: 'Color',
       cell: (row: Product) => <span>{row.vendor_color || row.private_color}</span>,
       sortable: true
     },
     {
-      id: 'product_price',
+      id: 'selling_price',
       header: 'Product Price',
       cell: (row: Product) => (
         <span>
-          {Number(row?.selling_price ?? 0).toFixed(2)}/{row.selling_unit?.name}
+          {formatCurrency(Number(row?.selling_price || '0'))}/{row?.selling_unit?.name}
         </span>
       ),
-      sortable: false
+      sortable: true
     },
     ...(!hideActionButton
       ? ([
