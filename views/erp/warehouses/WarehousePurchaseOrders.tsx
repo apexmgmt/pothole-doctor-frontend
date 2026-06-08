@@ -135,12 +135,12 @@ const WarehousePurchaseOrders: React.FC<WarehousePurchaseOrdersProps> = ({ wareh
       sortable: false
     },
     {
-      id: 'arrival_date',
+      id: 'est_arrival_date',
       header: 'Arrival Date',
       cell: (row: PurchaseOrder) => (
         <span>{formatDate(row.actual_arrival_date || row.est_arrival_date || '') || '-'}</span>
       ),
-      sortable: true
+      sortable: false
     }
   ]
 
