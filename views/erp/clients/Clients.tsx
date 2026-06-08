@@ -40,6 +40,7 @@ import CreateEditClientModal from './CreateEditClientModal'
 import ClientDetails from './ClientDetails'
 import { hasPermission } from '@/utils/role-permission'
 import ChangeLeadStageModal, { LeadStage } from '@/views/erp/clients/ChangeLeadStageModal'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const Clients: React.FC<{
   type: 'lead' | 'customer'
@@ -520,6 +521,8 @@ const Clients: React.FC<{
   // Custom filters component
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
+      <TableSearch value={searchValue} onChange={setSearchValue} />
+
       <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80! '>
         <InputGroup>
           <InputGroupInput
@@ -533,7 +536,7 @@ const Clients: React.FC<{
           </InputGroupAddon>
         </InputGroup>
         {hasActiveFilters() && (
-          <Button variant='ghost' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='ghost' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear Filters
           </Button>
         )}
@@ -542,7 +545,7 @@ const Clients: React.FC<{
         <Button
           variant='default'
           size='sm'
-          className='bg-light text-bg hover:bg-light/90'
+          className='bg-light text-bg hover:bg-light/90 h-7'
           onClick={handleOpenCreateModal}
         >
           <PlusIcon className='w-4 h-4' />
