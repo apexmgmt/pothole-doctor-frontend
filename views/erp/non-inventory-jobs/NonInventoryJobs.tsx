@@ -339,7 +339,7 @@ const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses,
     return (
       <table className='min-w-full text-xs'>
         <thead>
-          <tr className='text-zinc-400 text-left border-b border-zinc-700'>
+          <tr className='text-accent-foreground text-left border-b border-accent'>
             <th className='px-3 py-1.5 whitespace-nowrap'>Action</th>
             <th className='px-3 py-1.5 whitespace-nowrap'>Employee</th>
             <th className='px-3 py-1.5 whitespace-nowrap'>Quantity</th>
@@ -351,7 +351,7 @@ const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses,
         </thead>
         <tbody>
           {row.actions.map((action: MaterialJobAction, idx: number) => (
-            <tr key={action.id} className='border-b border-zinc-800/60 hover:bg-zinc-900/60'>
+            <tr key={action.id} className='border-b border-accent/30 hover:bg-accent/30'>
               <td className='px-3 py-1.5'>
                 <Badge
                   variant={getStatusVariant(action.action_status)}

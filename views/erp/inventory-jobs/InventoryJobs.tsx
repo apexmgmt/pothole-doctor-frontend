@@ -350,7 +350,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
         </thead>
         <tbody>
           {row.actions.map((action: MaterialJobAction, idx: number) => (
-            <tr key={action.id} className='border-b border-zinc-800/60 hover:bg-zinc-900/60'>
+            <tr key={action.id} className='border-b border-accent/30 hover:bg-accent/30'>
               <td className='px-3 py-1.5'>
                 <Badge
                   variant={getStatusVariant(action.action_status)}
