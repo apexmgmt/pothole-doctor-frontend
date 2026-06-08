@@ -152,7 +152,6 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partnerId }) => {
             <DetailItem
               label='Contractor Type'
               value={partnerData.userable?.partner_type?.name || 'N/A'}
-              labelClassName='min-w-32'
             />
             <DetailItem
               label='Schedule Color'
@@ -169,7 +168,6 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partnerId }) => {
                   'N/A'
                 )
               }
-              labelClassName='min-w-32'
             />
             <DetailItem
               label='Hold Amount'
@@ -178,7 +176,6 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partnerId }) => {
                   ? `$${parseFloat(String(partnerData.userable.hold_amount)).toFixed(2)}`
                   : 'N/A'
               }
-              labelClassName='min-w-32'
             />
             <DetailItem
               label='Hold Amount (%)'
@@ -187,17 +184,14 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partnerId }) => {
                   ? `${parseFloat(String(partnerData.userable.hold_amount_percent)).toFixed(2)}%`
                   : 'N/A'
               }
-              labelClassName='min-w-32'
             />
             <DetailItem
               label='Insurance Expiry'
               value={formatDate(partnerData.userable?.insurance_expiration)}
-              labelClassName='min-w-32'
             />
             <DetailItem
               label='W9 Expiry'
               value={formatDate(partnerData.userable?.w9_expiration)}
-              labelClassName='min-w-32'
             />
           </div>
         </div>
@@ -208,8 +202,8 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partnerId }) => {
         <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Identification & Address</h5>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
           <div className='space-y-3'>
-            <DetailItem label='EIN' value={partnerData.userable?.ein || 'N/A'} labelClassName='min-w-16' />
-            <DetailItem label='SSN' value={partnerData.userable?.ssn || 'N/A'} labelClassName='min-w-16' />
+            <DetailItem label='EIN' value={partnerData.userable?.ein || 'N/A'} />
+            <DetailItem label='SSN' value={partnerData.userable?.ssn || 'N/A'} />
             <DetailItem
               label='In House'
               value={
@@ -217,12 +211,11 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partnerId }) => {
                   {partnerData.userable?.in_house_contractor === 1 ? 'Yes' : 'No'}
                 </Badge>
               }
-              labelClassName='min-w-16'
             />
           </div>
           <div className='space-y-3'>
-            <DetailItem label='Address' value={fullAddress || 'N/A'} labelClassName='min-w-16' />
-            <DetailItem label='Zip Code' value={partnerData.userable?.zip_code || 'N/A'} labelClassName='min-w-16' />
+            <DetailItem label='Address' value={fullAddress || 'N/A'} />
+            <DetailItem label='Zip Code' value={partnerData.userable?.zip_code || 'N/A'} />
           </div>
         </div>
       </div>
