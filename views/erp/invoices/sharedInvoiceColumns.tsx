@@ -102,7 +102,7 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
         Boolean
       )
 
-      return <Description description={addressParts.join(', ') || '—'} />
+      return <Description className='text-[13px]' buttonClassName='text-[13px]' description={addressParts.join(', ') || '—'} />
     },
     sortable: false
   },
@@ -121,7 +121,7 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
         row?.address?.phone ?? row?.client?.phone
       ].filter(Boolean)
 
-      return <Description description={contactParts.join('\n') || '—'} />
+      return <Description className='text-[13px]' buttonClassName='text-[13px]' description={contactParts.join('\n') || '—'} />
     },
     sortable: false
   },
