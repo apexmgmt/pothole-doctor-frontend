@@ -114,19 +114,19 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
 
         return <span>{parts.join(' ')}</span>
       },
-      sortable: true
+      sortable: false
     },
     {
       id: 'source',
       header: 'Source',
       cell: row => <span>{row.source}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'subject',
       header: 'Subject',
       cell: row => <span>{row.subject || ''}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'created_at',
@@ -144,7 +144,7 @@ const ClientEmails = ({ clientId, client }: { clientId: string; client: Client |
       ),
       sortable: false,
       headerAlign: 'center',
-      size: 30
+      size: 30,
     }
   ]
 
