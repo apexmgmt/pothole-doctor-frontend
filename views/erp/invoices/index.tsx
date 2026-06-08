@@ -2,13 +2,12 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ImageIcon, PlusIcon, Search } from 'lucide-react'
+import { ImageIcon, PlusIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
@@ -40,6 +39,7 @@ import InvoiceDocuments from './documents/InvoiceDocuments'
 import InvoiceJobImages from './job-images/InvoiceJobImages'
 import InvoiceSummary from './InvoiceSummary'
 import { getSharedInvoiceColumns } from './sharedInvoiceColumns'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const Invoices: React.FC<{
   invoiceTypes: EstimateType[]
@@ -224,7 +224,7 @@ const Invoices: React.FC<{
                 canEditInvoice && (
                   <Button
                     key='add-task'
-                    className='w-full'
+                    className='w-full h-7'
                     variant='ghost'
                     onClick={() => {
                       setTaskModalInvoiceId(row.id)
@@ -250,7 +250,7 @@ const Invoices: React.FC<{
                 canEditInvoice && (
                   <Button
                     key='add-note'
-                    className='w-full'
+                    className='w-full h-7'
                     variant='ghost'
                     onClick={() => {
                       setAddNoteInvoiceId(row.id)
@@ -344,19 +344,9 @@ const Invoices: React.FC<{
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80! '>
-        <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='lg:w-80 min-w-0'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
           </Button>
         )}
@@ -365,7 +355,7 @@ const Invoices: React.FC<{
         <Button
           variant='default'
           size='sm'
-          className='bg-light text-bg hover:bg-light/90'
+          className='bg-light text-bg hover:bg-light/90 h-7'
           onClick={handleOpenCreateModal}
         >
           <PlusIcon className='w-4 h-4' />

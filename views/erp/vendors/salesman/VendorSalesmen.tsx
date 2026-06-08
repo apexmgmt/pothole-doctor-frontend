@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { Check, PlusIcon, Search, X } from 'lucide-react'
+import { Check, PlusIcon, X } from 'lucide-react'
 
 import { toast } from 'sonner'
 
@@ -9,12 +9,12 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Column, DataTableApiResponse, VendorSalesman, VendorSalesmanPayload } from '@/types'
 
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import VendorSalesmanService from '@/services/api/vendors/vendor-salesman.service'
 import CustomFormField from '@/components/form/CustomFormField'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const INLINE_CREATE_ID = '__inline_create__'
 
@@ -488,19 +488,9 @@ const VendorSalesmen = ({ vendorId }: { vendorId: string }) => {
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='lg:w-80 min-w-0'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
         {/* {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
           </Button>
         )} */}
@@ -508,7 +498,7 @@ const VendorSalesmen = ({ vendorId }: { vendorId: string }) => {
       <Button
         variant='default'
         size='sm'
-        className='bg-light text-bg hover:bg-light/90'
+        className='bg-light text-bg hover:bg-light/90 h-7'
         onClick={handleOpenCreateInline}
         disabled={isInlineEditing}
       >

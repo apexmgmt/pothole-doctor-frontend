@@ -2,14 +2,13 @@
 
 import React, { useState, useEffect } from 'react'
 
-import { Search } from 'lucide-react'
+
 
 import { toast } from 'sonner'
 
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
@@ -38,6 +37,7 @@ import ContactTypeService from '@/services/api/settings/contact_types.service'
 import LocationService from '@/services/api/locations/location.service'
 import CreateEditClientModal from '@/views/erp/clients/CreateEditClientModal'
 import { hasPermission } from '@/utils/role-permission'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const BusinessLocationClients: React.FC<{
   locationId: string
@@ -370,19 +370,9 @@ const BusinessLocationClients: React.FC<{
 
   const customFilters = (
     <div className='flex items-center gap-2'>
-      <InputGroup>
-        <InputGroupInput
-          placeholder='Search...'
-          value={searchValue}
-          onChange={e => setSearchValue(e.target.value)}
-          className='lg:w-80 min-w-0'
-        />
-        <InputGroupAddon>
-          <Search />
-        </InputGroupAddon>
-      </InputGroup>
+      <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
       {hasActiveFilters() && (
-        <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+        <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
           Clear
         </Button>
       )}

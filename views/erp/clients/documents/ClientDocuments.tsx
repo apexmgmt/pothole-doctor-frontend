@@ -4,7 +4,7 @@ import Image from 'next/image'
 
 import Link from 'next/link'
 
-import { PlusIcon, Search } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 
 import { toast } from 'sonner'
 
@@ -14,12 +14,12 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 
-// import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { DocumentIcon } from '@/public/icons'
 import { Column, DataTableApiResponse, Document } from '@/types'
 import { generateFileUrl, getFileType } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import ClientDocumentService from '@/services/api/clients/client-documents.service'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const ClientDocuments = ({ clientId }: { clientId: string }) => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
@@ -228,19 +228,9 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        {/* <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='lg:w-80 min-w-0'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+        {/* <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
           </Button>
         )} */}
@@ -248,7 +238,7 @@ const ClientDocuments = ({ clientId }: { clientId: string }) => {
       <Button
         variant='default'
         size='sm'
-        className='bg-light text-bg hover:bg-light/90'
+        className='bg-light text-bg hover:bg-light/90 h-7'
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />

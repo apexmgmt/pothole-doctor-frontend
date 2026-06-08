@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { Search } from 'lucide-react'
+
 
 import { toast } from 'sonner'
 
@@ -12,10 +12,10 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CommonTable from '@/components/erp/common/table'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Column, DataTableApiResponse, WorkOrder } from '@/types'
 import WorkOrderService from '@/services/api/work-orders/work_orders.service'
 import { getSharedWorkOrderColumns } from '@/views/erp/work-orders/sharedWorkOrderColumns'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const ClientWorkOrders = ({ clientId }: { clientId: string }) => {
   const router = useRouter()
@@ -124,17 +124,7 @@ const ClientWorkOrders = ({ clientId }: { clientId: string }) => {
 
   const customFilters = (
     <div className='flex items-center justify-between w-full '>
-      <InputGroup>
-        <InputGroupInput
-          placeholder='Search...'
-          value={searchValue}
-          onChange={e => setSearchValue(e.target.value)}
-          className='lg:w-80 min-w-0'
-        />
-        <InputGroupAddon>
-          <Search />
-        </InputGroupAddon>
-      </InputGroup>
+      <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
     </div>
   )
 
