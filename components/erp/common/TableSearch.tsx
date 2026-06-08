@@ -16,7 +16,7 @@ const TableSearch: FC<Props> = ({ name, label, value, onChange, placeholder = 'S
     <div className={`relative ${className}`}>
       <CustomFormField
         type='text'
-        name={name}
+        name={name ?? 'search'}
         label={label}
         placeholder={placeholder ?? 'Search...'}
         value={value}

@@ -344,7 +344,6 @@ const ProductStock: React.FC<ProductsProps> = ({
             value={searchValue}
             onChange={setSearchValue}
             placeholder='Search...'
-            className='w-full lg:w-80 min-w-0'
           />
 
           {/* Category filter */}
