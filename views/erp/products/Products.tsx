@@ -27,6 +27,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { hasPermission } from '@/utils/role-permission'
 import { formatCurrency } from '@/utils/currency'
 import TableSearch from '@/components/erp/common/TableSearch'
+import CustomFormField from '@/components/form/CustomFormField'
 
 const Products: React.FC<ProductsProps> = ({
   productCategories,
@@ -379,68 +380,66 @@ const Products: React.FC<ProductsProps> = ({
 
   // Custom filters component
   const customFilters = (
-    <div className='flex items-center justify-between w-full gap-2.5 '>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1 '>
-        {/* Global search filter */}
-        <div className='flex flex-col flex-1'>
-          <label htmlFor='product-search' className='text-xs font-medium mb-1 text-muted-foreground'>
-            Search
-          </label>
-          <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+    <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between w-full gap-2.5'>
+      <div className='flex-1 flex flex-col lg:flex-row lg:items-center gap-2'>
+        <div className='grid grid-cols-1 lg:grid-cols-3 gap-2 w-full lg:max-w-240'>
+          {/* Global search filter */}
+          <TableSearch
+            name='product-search'
+            label='Search'
+            value={searchValue}
+            onChange={setSearchValue}
+            placeholder='Search...'
+            className='w-full'
+          />
+
+          {/* Category filter */}
+          <CustomFormField
+            type='select'
+            name='category-filter'
+            label='Category'
+            placeholder='All'
+            value={filterOptions.category_id || 'all'}
+            onChange={v => handleCategoryChange(v as string)}
+            selectOptions={[
+              { label: 'All', value: 'all' },
+              ...productCategories.map(cat => ({ label: cat.name, value: cat.id }))
+            ]}
+          />
+
+          {/* SKU filter */}
+          <CustomFormField
+            type='text'
+            name='sku-filter'
+            label='SKU'
+            placeholder='SKU...'
+            value={filterOptions.sku || ''}
+            onChange={value => {
+              setFilterOptions((prev: any) => {
+                const newOptions = { ...prev }
+
+                if (value && typeof value === 'string' && value.trim() !== '') {
+                  newOptions.sku = value
+                } else {
+                  delete newOptions.sku
+                }
+
+                // Optionally reset page on filter change
+                if (newOptions.page) delete newOptions.page
+
+                return newOptions
+              })
+            }}
+          />
         </div>
-        {/* Category filter */}
-        <div className='flex flex-col flex-1'>
-          <label htmlFor='category-filter' className='text-xs font-medium mb-1 text-muted-foreground'>
-            Category
-          </label>
-          <Select value={filterOptions.category_id || 'all'} onValueChange={handleCategoryChange}>
-            <SelectTrigger id='category-filter' className='md:min-w-40 min-w-0 w-full'>
-              <SelectValue placeholder='All' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All</SelectItem>
-              {productCategories.map(cat => (
-                <SelectItem key={cat.id} value={cat.id}>
-                  {cat.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        {/* SKU filter */}
-        <div className='flex flex-col flex-1'>
-          <label htmlFor='sku-filter' className='text-xs font-medium mb-1 text-muted-foreground'>
-            SKU
-          </label>
-          <InputGroup>
-            <InputGroupInput
-              id='sku-filter'
-              placeholder='SKU...'
-              value={filterOptions.sku || ''}
-              onChange={e => {
-                const value = e.target.value
 
-                setFilterOptions((prev: any) => {
-                  const newOptions = { ...prev }
-
-                  if (value && value.trim() !== '') {
-                    newOptions.sku = value
-                  } else {
-                    delete newOptions.sku
-                  }
-
-                  // Optionally reset page on filter change
-                  if (newOptions.page) delete newOptions.page
-
-                  return newOptions
-                })
-              }}
-              className='lg:w-40 min-w-0'
-            />
-          </InputGroup>
-        </div>
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light mt-5 h-7'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={handleClearFilters}
+            className='text-gray hover:text-light mt-5 h-7'
+          >
             Clear
           </Button>
         )}
@@ -453,7 +452,7 @@ const Products: React.FC<ProductsProps> = ({
           onClick={handleOpenCreateModal}
         >
           <PlusIcon className='w-4 h-4' />
-          <span className='hidden sm:block'>Add Product</span>
+          <span>Add Product</span>
         </Button>
       )}
     </div>

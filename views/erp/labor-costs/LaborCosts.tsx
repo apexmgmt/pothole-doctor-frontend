@@ -314,13 +314,18 @@ const LaborCosts: React.FC<{
   // Custom filters component
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80!'>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1'>
         {/* Global search filter */}
         <div className='flex flex-col'>
           <label htmlFor='product-search' className='text-xs font-medium mb-1 text-muted-foreground'>
             Search
           </label>
-          <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+          <TableSearch
+            value={searchValue}
+            onChange={setSearchValue}
+            placeholder='Search...'
+            className='lg:w-80 min-w-0'
+          />
         </div>
         {/* Service type filter */}
         <div className='flex flex-col'>
@@ -345,7 +350,12 @@ const LaborCosts: React.FC<{
           </Select>
         </div>
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light mt-5 h-7'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={handleClearFilters}
+            className='text-gray hover:text-light mt-5 h-7'
+          >
             Clear
           </Button>
         )}

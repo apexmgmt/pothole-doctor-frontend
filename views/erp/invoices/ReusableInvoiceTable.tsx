@@ -173,8 +173,13 @@ const ReusableInvoiceTable: React.FC<ReusableInvoiceTableProps> = ({
 
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80!'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+      <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+        <TableSearch
+          value={searchValue}
+          onChange={setSearchValue}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
@@ -182,7 +187,12 @@ const ReusableInvoiceTable: React.FC<ReusableInvoiceTableProps> = ({
         )}
       </div>
       {showCreateButton && (
-        <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90 h-7' onClick={onCreateInvoice}>
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90 h-7'
+          onClick={onCreateInvoice}
+        >
           <PlusIcon className='w-4 h-4' />
           <span className='hidden min-[480px]:block'>{createButtonLabel}</span>
         </Button>
