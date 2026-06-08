@@ -57,3 +57,4 @@ export * from './products/material_jobs'
 export * from './schedules'
 
 export * from './organizationses';
+export * from './notifications';

@@ -8,6 +8,7 @@ import CustomButton from './CustomButton'
 import { BellIcon, SearchIcon } from '@/public/icons'
 import { PanelLeftIcon } from 'lucide-react'
 import { useSidebar } from './menus/sidebar/sidebarContext'
+import NotificationsPopover from './NotificationsPopover'
 
 const Header: React.FC = () => {
   const pageTitle = useSelector((state: any) => state.pageTitle.pageTitle)
@@ -25,9 +26,9 @@ const Header: React.FC = () => {
         </CustomButton>
         <div className='flex-1 text-lg md:text-xl font-semibold text-light-2 truncate min-w-0'>{pageTitle}</div>
       </div>
-      <div className='flex gap-2 opacity-0 pointer-events-none'>
+      <div className='flex gap-2'>
         <CustomButton icon={<SearchIcon />} variant='outline' className='md:p-2.5! p-1.5! md:rounded-xl rounded-lg' />
-        <CustomButton icon={<BellIcon />} variant='outline' className='md:p-2.5! p-1.5! md:rounded-xl rounded-lg' />
+        <NotificationsPopover />
       </div>
     </header>
   )
