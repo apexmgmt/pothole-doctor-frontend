@@ -61,7 +61,7 @@ const MenuItem: React.FC<{
     <div key={item.id} className='relative'>
       <button
         onClick={() => toggleSection(item.id)}
-        className={`w-full flex items-center justify-between px-3 py-1 rounded-lg text-left transition-colors cursor-pointer ${
+        className={`w-full flex items-center justify-between text-sm px-2.5 py-1 rounded-md text-left transition-colors cursor-pointer ${
           isActive ? 'bg-accent/40 text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
         }`}
         type='button'
@@ -98,7 +98,7 @@ const MenuItem: React.FC<{
         key={item.id}
         href={item.href}
         onClick={handleClick}
-        className={`flex items-center gap-3 px-3 py-1 rounded-lg transition-colors ${
+        className={`flex items-center gap-3 text-sm px-2.5 py-1 rounded-md transition-colors ${
           isActive ? 'bg-accent text-accent-foreground' : 'text-gray hover:text-light hover:bg-accent/50'
         }`}
         prefetch={true}
