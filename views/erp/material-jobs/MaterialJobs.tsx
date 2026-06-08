@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Search } from 'lucide-react'
+import { Search, Plus } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -11,13 +11,21 @@ import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { Column, DataTableApiResponse, MaterialJob } from '@/types'
+import { BusinessLocation, Column, DataTableApiResponse, MaterialJob, Staff, Warehouse } from '@/types'
 import { formatDate } from '@/utils/date'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import MaterialJobService from '@/services/api/products/material-jobs.service'
 import { useRouter } from 'next/navigation'
+import AddInventoryJobActionModal from '../inventory-jobs/AddInventoryJobActionModal'
+import AddNonInventoryJobActionModal from '../non-inventory-jobs/AddNonInventoryJobActionModal'
 
-const MaterialJobs: React.FC = () => {
+interface MaterialJobsProps {
+  staffs: Staff[]
+  warehouses: Warehouse[]
+  businessLocations: BusinessLocation[]
+}
+
+const MaterialJobs: React.FC<MaterialJobsProps> = ({ staffs, warehouses, businessLocations }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -26,6 +34,10 @@ const MaterialJobs: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>(() => getInitialFilters(searchParams))
+
+  const [openInventoryModal, setOpenInventoryModal] = useState(false)
+  const [openNonInventoryModal, setOpenNonInventoryModal] = useState(false)
+  const [selectedJob, setSelectedJob] = useState<MaterialJob | null>(null)
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
@@ -291,7 +303,27 @@ const MaterialJobs: React.FC = () => {
     {
       id: 'actions',
       header: 'Action',
-      cell: (_row: MaterialJob) => <div className='flex items-center justify-center gap-2' />,
+      cell: (row: MaterialJob) => (
+        <div className='flex items-center justify-center gap-2'>
+          <Button
+            size='sm'
+            variant='outline'
+            className='h-7 px-2 text-xs'
+            onClick={() => {
+              setSelectedJob(row)
+
+              if (row.job_type === 'inventory') {
+                setOpenInventoryModal(true)
+              } else {
+                setOpenNonInventoryModal(true)
+              }
+            }}
+          >
+            <Plus className='h-3 w-3 mr-1' />
+            Add Action
+          </Button>
+        </div>
+      ),
       sortable: false,
       headerAlign: 'center',
       size: 30
@@ -333,15 +365,35 @@ const MaterialJobs: React.FC = () => {
   )
 
   return (
-    <CommonLayout title='Material Jobs' buttons={[]}>
-      <CommonTable
-        data={apiResponse ?? undefined}
-        columns={columns}
-        customFilters={customFilters}
-        isLoading={isLoading}
-        setFilterOptions={setFilterOptions}
+    <>
+      <CommonLayout title='Material Jobs' buttons={[]}>
+        <CommonTable
+          data={apiResponse ?? undefined}
+          columns={columns}
+          customFilters={customFilters}
+          isLoading={isLoading}
+          setFilterOptions={setFilterOptions}
+        />
+      </CommonLayout>
+      <AddInventoryJobActionModal
+        open={openInventoryModal}
+        onOpenChange={setOpenInventoryModal}
+        materialJob={selectedJob}
+        staffs={staffs}
+        warehouses={warehouses}
+        businessLocations={businessLocations}
+        onSuccess={fetchData}
       />
-    </CommonLayout>
+      <AddNonInventoryJobActionModal
+        open={openNonInventoryModal}
+        onOpenChange={setOpenNonInventoryModal}
+        materialJob={selectedJob}
+        staffs={staffs}
+        warehouses={warehouses}
+        businessLocations={businessLocations}
+        onSuccess={fetchData}
+      />
+    </>
   )
 }
 

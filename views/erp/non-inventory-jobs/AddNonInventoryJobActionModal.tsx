@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { useForm } from 'react-hook-form'
+import { Path, RegisterOptions, useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -10,16 +10,15 @@ import { format } from 'date-fns'
 import { BusinessLocation, MaterialJob, MaterialJobActionPayload, Staff, Warehouse } from '@/types'
 import { VendorPickupAddress } from '@/types/vendors'
 import { ClientAddress } from '@/types/clients/clients_addresses'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { DatePicker } from '@/components/ui/datePicker'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import MaterialJobService from '@/services/api/products/material-jobs.service'
 import VendorPickupAddressService from '@/services/api/vendors/vendor-pickup-addresses.service'
 import ClientAddressService from '@/services/api/clients/client-addresses.service'
+import { InputType, SelectOption } from '@/components/form/fields/types'
+import CustomFormField from '@/components/form/CustomFormField'
+import { mathRoundFixed } from '@/utils/utility'
 
 interface AddNonInventoryJobActionModalProps {
   open: boolean
@@ -41,6 +40,20 @@ interface FormValues {
   location_notes: string
 }
 
+type ActionStage = 'shipped_from_vendor' | 'received' | 'prepared' | 'picked_up' | 'shipped'
+
+type FormFieldType = {
+  name: Path<FormValues>
+  type?: InputType
+  label?: string
+  placeholder?: string
+  description?: string
+  rules?: RegisterOptions<FormValues, Path<FormValues>>
+  selectOptions?: SelectOption[]
+  onChange?: (value: any) => void
+  disabled?: boolean
+}
+
 const ACTION_STATUS_OPTIONS = [
   { value: 'shipped_from_vendor', label: 'Shipped From Vendor' },
   { value: 'received', label: 'Received' },
@@ -48,6 +61,34 @@ const ACTION_STATUS_OPTIONS = [
   { value: 'picked_up', label: 'Picked Up' },
   { value: 'shipped', label: 'Shipped' }
 ]
+
+const normalizeActionStatus = (status?: string | null): ActionStage | null => {
+  if (!status) return null
+
+  const normalized = status.toLowerCase().replace(/\s+/g, '_')
+
+  if (
+    normalized === 'shipped_from_vendor' ||
+    normalized === 'received' ||
+    normalized === 'prepared' ||
+    normalized === 'picked_up' ||
+    normalized === 'shipped'
+  ) {
+    return normalized as ActionStage
+  }
+
+  return null
+}
+
+const getNextActionStatus = (lastStatus: ActionStage | null): ActionStage => {
+  if (!lastStatus) return 'shipped_from_vendor'
+  if (lastStatus === 'shipped_from_vendor') return 'received'
+  if (lastStatus === 'received') return 'prepared'
+  if (lastStatus === 'prepared') return 'picked_up'
+  if (lastStatus === 'picked_up') return 'shipped'
+
+  return 'shipped'
+}
 
 const LOCATION_TYPE_OPTIONS = [
   { value: 'warehouse', label: 'Warehouse' },
@@ -74,27 +115,99 @@ const AddNonInventoryJobActionModal = ({
   const [clientAddresses, setClientAddresses] = useState<ClientAddress[]>([])
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(false)
 
+  const actions = materialJob?.actions ?? []
+
+  const actionTotals = actions.reduce(
+    (acc, action) => {
+      const status = normalizeActionStatus(action.action_status)
+      const qty = Number(action.quantity ?? 0)
+
+      if (!status || Number.isNaN(qty) || qty <= 0) return acc
+
+      acc[status] += qty
+
+      return acc
+    },
+    { shipped_from_vendor: 0, received: 0, prepared: 0, picked_up: 0, shipped: 0 }
+  )
+
+  const getLatestActionStatus = (): ActionStage | null => {
+    if (actions.length === 0) return null
+
+    const latest = actions.reduce((latestAction, currentAction) => {
+      const latestTime = new Date(latestAction.action_date || (latestAction as any).created_at || 0).getTime()
+
+      const currentTime = new Date(currentAction.action_date || (currentAction as any).created_at || 0).getTime()
+
+      return currentTime > latestTime ? currentAction : latestAction
+    })
+
+    return normalizeActionStatus(latest.action_status)
+  }
+
+  const defaultActionStatus = getNextActionStatus(getLatestActionStatus())
+  const jobQuantity = Number(materialJob?.purchase_quantity ?? materialJob?.quantity ?? 0)
+
+  const getAllowedQuantityForStatus = (statusValue?: string): number => {
+    const status = normalizeActionStatus(statusValue)
+
+    if (!status) return 0
+
+    if (status === 'shipped_from_vendor') {
+      return mathRoundFixed(Math.max(0, jobQuantity - actionTotals.shipped_from_vendor), 4)
+    }
+
+    if (status === 'received') {
+      return mathRoundFixed(Math.max(0, actionTotals.shipped_from_vendor - actionTotals.received), 4)
+    }
+
+    if (status === 'prepared') {
+      return mathRoundFixed(Math.max(0, actionTotals.received - actionTotals.prepared), 4)
+    }
+
+    if (status === 'picked_up') {
+      return mathRoundFixed(Math.max(0, actionTotals.prepared - actionTotals.picked_up), 4)
+    }
+
+    return mathRoundFixed(Math.max(0, actionTotals.picked_up - actionTotals.shipped), 4)
+  }
+
+  const defaultQuantity = getAllowedQuantityForStatus(defaultActionStatus)
+
   const form = useForm<FormValues>({
     defaultValues: {
-      action_status: '',
+      action_status: defaultActionStatus,
       action_date: new Date(),
       employee_id: materialJob?.sale_representative?.id ?? '',
-      quantity: materialJob?.purchase_quantity ?? materialJob?.quantity ?? '',
+      quantity: defaultQuantity > 0 ? defaultQuantity : '',
       warehouse_type: 'warehouse',
       warehouse_id: '',
       location_notes: ''
     }
   })
 
-  const warehouseType = form.watch('warehouse_type')
+  const {
+    watch,
+    setValue,
+    control,
+    register,
+    formState: { errors }
+  } = form
+
+  const warehouseType = watch('warehouse_type')
+  const selectedActionStatus = watch('action_status')
+  const maxAllowedQuantity = getAllowedQuantityForStatus(selectedActionStatus)
 
   useEffect(() => {
     if (open) {
+      const nextDefaultStatus = getNextActionStatus(getLatestActionStatus())
+      const nextDefaultQuantity = getAllowedQuantityForStatus(nextDefaultStatus)
+
       form.reset({
-        action_status: '',
+        action_status: nextDefaultStatus,
         action_date: new Date(),
         employee_id: materialJob?.sale_representative?.id ?? '',
-        quantity: materialJob?.purchase_quantity ?? materialJob?.quantity ?? '',
+        quantity: nextDefaultQuantity > 0 ? nextDefaultQuantity : '',
         warehouse_type: 'warehouse',
         warehouse_id: '',
         location_notes: ''
@@ -104,8 +217,9 @@ const AddNonInventoryJobActionModal = ({
     }
   }, [open, materialJob])
 
+  // Reset warehouse_id when warehouse_type changes
   useEffect(() => {
-    form.setValue('warehouse_id', '')
+    setValue('warehouse_id', '')
 
     if (!open || !materialJob) return
 
@@ -132,12 +246,49 @@ const AddNonInventoryJobActionModal = ({
     }
   }, [warehouseType, open, materialJob])
 
+  useEffect(() => {
+    const currentQuantity = Number(form.getValues('quantity'))
+
+    if (Number.isNaN(currentQuantity)) return
+
+    if (maxAllowedQuantity <= 0) {
+      setValue('quantity', '', { shouldValidate: true })
+
+      return
+    }
+
+    if (currentQuantity > maxAllowedQuantity) {
+      setValue('quantity', maxAllowedQuantity, { shouldValidate: true })
+    }
+  }, [selectedActionStatus, maxAllowedQuantity])
+
   const onSubmit = async (values: FormValues) => {
     if (!materialJob) return
 
+    const quantity = Number(values.quantity)
+    const allowedQuantity = getAllowedQuantityForStatus(values.action_status)
+
+    if (Number.isNaN(quantity) || quantity <= 0) {
+      toast.error('Quantity must be greater than 0')
+
+      return
+    }
+
+    if (quantity > allowedQuantity) {
+      toast.error(`Quantity cannot be greater than ${allowedQuantity} ${purchaseUnit}`)
+
+      return
+    }
+
     const payload: MaterialJobActionPayload = {
       action_status: values.action_status,
-      quantity: Number(values.quantity),
+      quantity: mathRoundFixed(
+        quantity *
+          (materialJob?.product?.purchase_uom_id === materialJob?.product?.selling_unit_id
+            ? 1
+            : (materialJob?.product?.coverage_per_rate ?? 1)),
+        4
+      ),
       action_date: values.action_date ? format(values.action_date, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
       employee_id: values.employee_id,
       vendor_id: materialJob.vendor_id ?? '',
@@ -167,13 +318,6 @@ const AddNonInventoryJobActionModal = ({
     form.reset()
   }
 
-  const displayField = (label: string, value: string | number | null | undefined) => (
-    <div className='flex flex-col gap-1'>
-      <span className='text-xs text-muted-foreground'>{label}</span>
-      <span className='text-sm font-medium rounded-md px-3 py-2 bg-white/5 min-h-9'>{value ?? '—'}</span>
-    </div>
-  )
-
   const getLocationLabel = () => {
     switch (warehouseType) {
       case 'warehouse':
@@ -200,33 +344,120 @@ const AddNonInventoryJobActionModal = ({
     }
   }
 
-  const renderLocationOptions = () => {
+  const getLocationOptions = (): SelectOption[] => {
     switch (warehouseType) {
       case 'warehouse':
-        return warehouses.map(w => (
-          <SelectItem key={w.id} value={w.id}>
-            {w.title}
-          </SelectItem>
-        ))
+        return warehouses.map(w => ({ value: w.id, label: w.title }))
       case 'location':
-        return businessLocations.map(bl => (
-          <SelectItem key={bl.id} value={bl.id}>
-            {bl.name}
-          </SelectItem>
-        ))
+        return businessLocations.map(bl => ({ value: bl.id, label: bl.name }))
       case 'vendor_address':
-        return vendorAddresses.map(addr => (
-          <SelectItem key={addr.id} value={addr.id}>
-            {addr.title} {addr.street_address ? `— ${addr.street_address}` : ''}
-          </SelectItem>
-        ))
+        return vendorAddresses.map(addr => ({
+          value: addr.id,
+          label: `${addr.title} ${addr.street_address ? `— ${addr.street_address}` : ''}`
+        }))
       case 'job_site':
-        return clientAddresses.map(addr => (
-          <SelectItem key={addr.id} value={addr.id}>
-            {addr.title} {addr.street_address ? `— ${addr.street_address}` : ''}
-          </SelectItem>
-        ))
+        return clientAddresses.map(addr => ({
+          value: addr.id,
+          label: `${addr.title} ${addr.street_address ? `— ${addr.street_address}` : ''}`
+        }))
     }
+  }
+
+  const leftFields: FormFieldType[] = [
+    {
+      name: 'action_status',
+      type: 'select',
+      label: 'Action',
+      placeholder: 'Select action',
+      rules: { required: 'Action is required' },
+      selectOptions: ACTION_STATUS_OPTIONS.map(opt => ({
+        ...opt,
+        disabled: getAllowedQuantityForStatus(opt.value) <= 0
+      }))
+    },
+    {
+      name: 'action_date',
+      type: 'datepicker',
+      label: 'Action Date',
+      placeholder: 'Select date',
+      rules: { required: 'Action date is required' }
+    },
+    {
+      name: 'employee_id',
+      type: 'select',
+      label: 'Employee',
+      placeholder: 'Select employee',
+      selectOptions: staffs.map(staff => ({
+        value: staff.id,
+        label: [staff.first_name, staff.last_name].filter(Boolean).join(' ')
+      }))
+    },
+    {
+      name: 'location_notes',
+      type: 'textarea',
+      label: 'Comment',
+      placeholder: 'Enter comment...'
+    }
+  ]
+
+  const rightFields: FormFieldType[] = [
+    {
+      name: 'quantity',
+      type: 'number',
+      label: `Qty (${purchaseUnit})`,
+      placeholder: '0',
+      description: `Max Qty: ${maxAllowedQuantity} ${purchaseUnit} (${selectedActionStatus?.replace(/_/g, ' ') || 'action'})`,
+      rules: {
+        required: 'Quantity is required',
+        min: { value: 0.01, message: 'Quantity must be greater than 0' },
+        validate: value => {
+          const numericValue = Number(value)
+
+          if (Number.isNaN(numericValue)) return 'Quantity is required'
+          if (numericValue <= 0) return 'Quantity must be greater than 0'
+
+          if (numericValue > maxAllowedQuantity) {
+            return `Quantity cannot be greater than ${maxAllowedQuantity} ${purchaseUnit}`
+          }
+
+          return true
+        }
+      }
+    },
+    {
+      name: 'warehouse_type',
+      type: 'select',
+      label: 'Location Type',
+      placeholder: 'Select location type',
+      rules: { required: 'Location type is required' },
+      selectOptions: LOCATION_TYPE_OPTIONS
+    },
+    {
+      name: 'warehouse_id',
+      type: 'select',
+      label: getLocationLabel(),
+      placeholder: getLocationPlaceholder(),
+      rules: { required: `${getLocationLabel()} is required` },
+      selectOptions: getLocationOptions(),
+      disabled: isLoadingAddresses
+    }
+  ]
+
+  const sharedFieldClass = 'grid grid-cols-[100px_minmax(0,_1fr)]'
+  const sharedLabelClass = 'justify-end items-start self-start text-right pt-1'
+
+  const renderFormField = (field: FormFieldType) => {
+    return (
+      <CustomFormField
+        key={field.name}
+        {...field}
+        register={register}
+        control={control}
+        errors={errors}
+        fieldClassName={sharedFieldClass}
+        labelClassName={sharedLabelClass}
+      />
+    )
   }
 
   return (
@@ -234,17 +465,16 @@ const AddNonInventoryJobActionModal = ({
       open={open}
       onOpenChange={onOpenChange}
       title='Manage Non-Inventory Product Tracking'
-      description=''
-      maxWidth='3xl'
+      className='sm:max-w-300'
       isLoading={form.formState.isSubmitting}
       loadingMessage='Saving action...'
-      disableClose={form.formState.isSubmitting}
+      disableClose={form.formState.isSubmitting || isLoadingAddresses}
       actions={
         <div className='flex gap-3'>
-          <Button type='button' variant='outline' onClick={onCancel} disabled={form.formState.isSubmitting}>
+          <Button type='button' variant='outline' size='sm' onClick={onCancel} disabled={form.formState.isSubmitting}>
             Cancel
           </Button>
-          <Button type='submit' form='non-inventory-action-form' disabled={form.formState.isSubmitting}>
+          <Button type='submit' size='sm' form='non-inventory-action-form' disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? 'Saving...' : 'Save'}
           </Button>
         </div>
@@ -254,195 +484,11 @@ const AddNonInventoryJobActionModal = ({
         <form id='non-inventory-action-form' onSubmit={form.handleSubmit(onSubmit)}>
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             {/* Left column */}
-            <div className='space-y-4'>
-              {/* Action Status */}
-              <FormField
-                control={form.control}
-                name='action_status'
-                rules={{ required: 'Action is required' }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Action <span className='text-destructive'>*</span>
-                    </FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange} disabled={form.formState.isSubmitting}>
-                      <FormControl>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select action' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {ACTION_STATUS_OPTIONS.map(opt => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Action Date */}
-              <FormField
-                control={form.control}
-                name='action_date'
-                rules={{ required: 'Action date is required' }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Action Date <span className='text-destructive'>*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <DatePicker value={field.value} onChange={field.onChange} placeholder='Select date' />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Employee */}
-              <FormField
-                control={form.control}
-                name='employee_id'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Employee</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange} disabled={form.formState.isSubmitting}>
-                      <FormControl>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select employee' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {staffs.map(staff => (
-                          <SelectItem key={staff.id} value={staff.id}>
-                            {[staff.first_name, staff.last_name].filter(Boolean).join(' ')}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Comment */}
-              <FormField
-                control={form.control}
-                name='location_notes'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Comment</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder='Enter comment...'
-                        className='resize-none min-h-[100px]'
-                        {...field}
-                        disabled={form.formState.isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <div className='flex flex-col gap-y-2'>{leftFields.map(renderFormField)}</div>
 
             {/* Right column */}
-            <div className='space-y-4'>
-              {/* Quantity */}
-              <FormField
-                control={form.control}
-                name='quantity'
-                rules={{
-                  required: 'Quantity is required',
-                  min: { value: 0.01, message: 'Quantity must be greater than 0' }
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Quantity <span className='text-destructive'>*</span>
-                    </FormLabel>
-                    <div className='flex items-center gap-2'>
-                      <FormControl>
-                        <Input
-                          type='number'
-                          min={0}
-                          step='any'
-                          placeholder='0'
-                          {...field}
-                          disabled={form.formState.isSubmitting}
-                          className='flex-1'
-                        />
-                      </FormControl>
-                      <span className='text-sm text-muted-foreground whitespace-nowrap px-3 py-2 bg-muted rounded-md min-w-16 text-center'>
-                        {purchaseUnit}
-                      </span>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Location Type */}
-              <FormField
-                control={form.control}
-                name='warehouse_type'
-                rules={{ required: 'Location type is required' }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Location Type <span className='text-destructive'>*</span>
-                    </FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange} disabled={form.formState.isSubmitting}>
-                      <FormControl>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select location type' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {LOCATION_TYPE_OPTIONS.map(opt => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Dynamic Location Dropdown */}
-              <FormField
-                control={form.control}
-                name='warehouse_id'
-                rules={{ required: `${getLocationLabel()} is required` }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {getLocationLabel()} <span className='text-destructive'>*</span>
-                    </FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={form.formState.isSubmitting || isLoadingAddresses}
-                    >
-                      <FormControl>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder={getLocationPlaceholder()} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>{renderLocationOptions()}</SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Max Quantity (read-only) */}
-              {displayField(`Max Quantity to Prepare`, `${maxQuantity} ${purchaseUnit}`)}
+            <div className='flex flex-col gap-y-2'>
+              {rightFields.map(renderFormField)}
             </div>
           </div>
         </form>
@@ -452,3 +498,4 @@ const AddNonInventoryJobActionModal = ({
 }
 
 export default AddNonInventoryJobActionModal
+

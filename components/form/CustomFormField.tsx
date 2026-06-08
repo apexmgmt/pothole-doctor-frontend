@@ -50,13 +50,16 @@ const CustomFormField = <T extends FieldValues>({
   autoFocus,
   className = '',
   labelClassName = '',
-  fieldClassName = ''
+  fieldClassName = '',
+  leftAddon,
+  rightAddon
 }: FormFieldProps<T>) => {
   const fieldError = name ? errors?.[name as Path<T>] : undefined
 
   // Combine base styles
   const inputStyle = cn(
-    `text-sm font-normal leading-none bg-[#1f1f1f] hover:bg-[#1f1f1f] placeholder:text-[#a7a7ae] text-[#f4f4f5] px-2.5! py-1.25 ${type === 'textarea' ? '' : 'h-7!'} ${fieldError ? 'border-red-500' : ''}`,
+    `text-sm font-normal leading-none bg-[#1f1f1f] hover:bg-[#1f1f1f] placeholder:text-[#a7a7ae] text-[#f4f4f5] ${type === 'textarea' ? '' : 'h-7!'} ${fieldError ? 'border-red-500' : ''}`,
+    !(leftAddon || rightAddon) && 'px-2.5! py-1.25',
     className
   )
 
@@ -250,6 +253,8 @@ const CustomFormField = <T extends FieldValues>({
             autoFocus={autoFocus}
             disabled={disabled}
             className={inputStyle}
+            leftAddon={leftAddon}
+            rightAddon={rightAddon}
           />
         )}
 

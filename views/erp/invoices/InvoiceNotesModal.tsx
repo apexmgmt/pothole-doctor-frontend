@@ -165,7 +165,7 @@ const InvoiceNotesModal = ({
             <Button variant='default' size='sm' onClick={() => setIsAddNoteOpen(true)}>
               + Add Note
             </Button>
-            <Button variant='outline' onClick={() => onOpenChange(false)}>
+            <Button variant='outline' size='sm' onClick={() => onOpenChange(false)}>
               Close
             </Button>
           </div>

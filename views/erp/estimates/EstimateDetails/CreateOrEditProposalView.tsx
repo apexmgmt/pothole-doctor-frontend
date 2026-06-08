@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeftIcon, UserIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
+import CustomFormField from '@/components/form/CustomFormField'
 import {
   Estimate,
   ProductCategory,
@@ -81,7 +81,7 @@ const CreateOrEditProposalView = ({
   const [downPaymentAmount, setDownPaymentAmount] = useState(proposalDetails?.down_payment_amount ?? 0)
   const [downPaymentPercent, setDownPaymentPercent] = useState(proposalDetails?.down_payment_percentage ?? 0)
 
-  const customMessageRef = useRef<HTMLTextAreaElement>(null)
+  const [customMessage, setCustomMessage] = useState(proposalDetails?.message || '')
 
   const [serviceTypeLineItems, setServiceTypeLineItems] = useState<
     { serviceTypeName: string; serviceTypeId: string; groupId: string | null; lines: ProposalServiceItemPayload[] }[]
@@ -187,7 +187,7 @@ const CreateOrEditProposalView = ({
 
   const buildPayload = (): ProposalPayload => ({
     estimate_id: estimateId || '',
-    message: customMessageRef.current?.value || '',
+    message: customMessage || '',
     discount_type: discountType,
     discount: discountValue,
     is_down_payment_materials: isDownPaymentMaterials,
@@ -390,6 +390,7 @@ const CreateOrEditProposalView = ({
       setIsDownPaymentMaterials(proposalDetails.is_down_payment_materials ?? false)
       setDownPaymentAmount(proposalDetails.down_payment_amount ?? 0)
       setDownPaymentPercent(proposalDetails.down_payment_percentage ?? 0)
+      setCustomMessage(proposalDetails.message || '')
     }
   }, [initialMode, proposalDetails])
 
@@ -442,7 +443,7 @@ const CreateOrEditProposalView = ({
       </div>
 
       {/* Summary cards */}
-      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-4'>
+      <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4'>
         <ClientDetailsCard estimateDetails={proposalDetails?.estimate ?? estimateDetails} />
         <SalesRepresentativeCard
           estimateDetails={proposalDetails?.estimate ?? estimateDetails}
@@ -551,16 +552,16 @@ const CreateOrEditProposalView = ({
       {/* Custom message */}
       <Card className='bg-zinc-900 border-zinc-800'>
         <CardContent className='p-4'>
-          <label htmlFor='custom-message' className='block text-sm font-medium text-zinc-200 mb-2'>
-            Custom Message
-          </label>
-          <Textarea
-            id='custom-message'
-            className='w-full'
+          <CustomFormField
+            type='textarea'
+            name='custom-message'
+            label='Custom Message'
             placeholder='Enter a custom message for the proposal...'
-            ref={customMessageRef}
-            defaultValue={proposalDetails?.message || ''}
+            value={customMessage}
+            onChange={(e: any) => setCustomMessage(e.target.value)}
             disabled={effectiveMode === 'view'}
+            className='w-full'
+            labelClassName='text-sm font-medium text-zinc-200 mb-2'
           />
         </CardContent>
       </Card>

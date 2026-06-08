@@ -4,21 +4,30 @@ import React, { useEffect, useState } from 'react'
 
 import { toast } from 'sonner'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import VendorService from '@/services/api/vendors/vendors.service'
+import VendorDetailsContent from './VendorDetailsContent'
 import EditButton from '@/components/erp/common/buttons/EditButton'
-import { Vendor } from '@/types'
+import { Vendor, CountryWithStates } from '@/types'
 import { Skeleton } from '@/components/ui/skeleton'
+import { DocumentIcon, UserIcon } from '@/public/icons'
+import clsx from 'clsx'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
+import VendorDocuments from './documents/VendorDocuments'
+import VendorRebateCredits from './rebate-credits/VendorRebateCredits'
+import VendorPickupAddresses from './pickup-addresses/VendorPickupAddresses'
+import VendorSalesmen from './salesman/VendorSalesmen'
 
 interface VendorDetailsProps {
   vendorId: string
   onEdit?: (vendor: Vendor) => void
+  countriesWithStatesAndCities: CountryWithStates[]
 }
 
-const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit }) => {
+const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit, countriesWithStatesAndCities }) => {
   const [vendorData, setVendorData] = useState<Vendor | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [activeTab, setActiveTab] = useState<string>('salesman')
 
   const fetchVendorDetails = async () => {
     setIsLoading(true)
@@ -41,23 +50,59 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit }) => {
   }, [vendorId])
 
   if (isLoading) {
+    const skeletonTabs = [
+      { id: 'salesman' },
+      { id: 'documents' },
+      { id: 'rebate-credits' },
+      { id: 'pickup-addresses' }
+    ]
+
     return (
-      <div className='space-y-6'>
-        <div className='flex items-center justify-between'>
+      <div className='space-y-6 mt-2.5'>
+        {/* Header */}
+        <div className='flex items-center justify-between pt-4'>
           <Skeleton className='h-8 w-48' />
-          {/* <Skeleton className='h-10 w-24' /> */}
         </div>
-        <div className='flex items-center space-x-4 py-4 bg-bg-3 rounded-lg'>
-          <Skeleton className='h-16 w-16 rounded-full' />
-          <div className='space-y-2 flex-1'>
-            <Skeleton className='h-6 w-48' />
-            <Skeleton className='h-4 w-64' />
-            <Skeleton className='h-6 w-20' />
+
+        {/* Vendor Details Content Skeleton */}
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+          {/* Left Column (Contact Info) */}
+          <div className='space-y-4 bg-bg-3 p-5 rounded-lg'>
+            <Skeleton className='h-6 w-32' />
+            <div className='space-y-3'>
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='h-4 w-5/6' />
+              <Skeleton className='h-4 w-4/5' />
+              <Skeleton className='h-4 w-11/12' />
+            </div>
+          </div>
+          {/* Right Column (Business Info) */}
+          <div className='space-y-4 bg-bg-3 p-5 rounded-lg'>
+            <Skeleton className='h-6 w-32' />
+            <div className='space-y-3'>
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='h-4 w-5/6' />
+              <Skeleton className='h-4 w-4/5' />
+              <Skeleton className='h-4 w-11/12' />
+            </div>
           </div>
         </div>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <Skeleton className='h-64' />
-          <Skeleton className='h-64' />
+
+        {/* Tabs Skeleton */}
+        <div className='bg-accent/40 border border-accent/40 rounded-xl p-1 flex items-center gap-2 flex-wrap overflow-x-auto'>
+          {skeletonTabs.map(tab => (
+            <Skeleton key={tab.id} className='h-8 w-28 rounded-lg shrink-0' />
+          ))}
+        </div>
+
+        {/* Tab Content Skeleton */}
+        <div className='space-y-4 bg-bg-3 p-5 rounded-lg'>
+          <Skeleton className='h-6 w-40' />
+          <div className='space-y-2'>
+            <Skeleton className='h-4 w-full' />
+            <Skeleton className='h-4 w-full' />
+            <Skeleton className='h-4 w-3/4' />
+          </div>
         </div>
       </div>
     )
@@ -71,179 +116,66 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit }) => {
     )
   }
 
-  const fullName = vendorData.first_name || 'N/A'
-
-  const initials = fullName
-    .split(' ')
-    .map((name: string) => name.charAt(0))
-    .join('')
-    .toUpperCase()
-
-  const fullAddress = [
-    vendorData.userable?.street_address,
-    vendorData.userable?.city?.name,
-    vendorData.userable?.state?.name,
-    vendorData.userable?.zip_code
+  const tabs = [
+    {
+      id: 'salesman',
+      label: 'Salesmen',
+      icon: UserIcon
+    },
+    {
+      id: 'documents',
+      label: 'Documents',
+      icon: DocumentIcon
+    },
+    {
+      id: 'rebate-credits',
+      label: 'Rebate & Credits',
+      icon: DocumentIcon
+    },
+    {
+      id: 'pickup-addresses',
+      label: 'Pickup Addresses',
+      icon: DocumentIcon
+    }
   ]
-    .filter(Boolean)
-    .join(', ')
 
   return (
-    <div className='space-y-6'>
-      {/* Header */}
-      <div className='flex items-center justify-between'>
-        <h3 className='text-xl font-semibold text-light mt-2'>Vendor Details</h3>
-        {/* <div className='mt-2'>
-          <EditButton
-            title='Edit'
-            tooltip='Edit Vendor Information'
-            onClick={() => onEdit?.(vendorData)}
-            variant='icon'
-            buttonSize='default'
-            buttonVariant='ghost'
-          />
-        </div> */}
-      </div>
+    <div>
+      <VendorDetailsContent vendorData={vendorData} />
 
-      {/* Profile Section */}
-      <div className='flex items-center space-x-4 py-4 bg-bg-3 rounded-lg'>
-        <Avatar className='h-16 w-16'>
-          <AvatarImage src={''} alt={fullName} />
-          <AvatarFallback className='text-lg font-semibold'>{initials || 'V'}</AvatarFallback>
-        </Avatar>
-        <div>
-          <h4 className='text-lg/[1.1] font-medium text-light'>{fullName}</h4>
-          <p className='text-gray text-sm/tight break-all'>{vendorData.email}</p>
-          <Badge variant={vendorData.status ? 'default' : 'destructive'}>
-            {vendorData.status ? 'Active' : 'Inactive'}
-          </Badge>
-        </div>
-      </div>
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className='my-4'>
+        <TabsList className='h-auto w-full justify-start overflow-x-auto bg-accent/40 border-accent/40 rounded-xl p-1'>
+          {tabs.map(tab => {
+            const Icon = tab.icon
 
-      {/* Details Grid */}
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-        {/* Contact Information */}
-        <div className='space-y-4'>
-          <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Contact Information</h5>
-          <div className='space-y-3'>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Vendor Name : </label>
-              <p className='text-light'>{vendorData.first_name || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Email : </label>
-              <p className='text-light'>{vendorData.email || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Phone : </label>
-              <p className='text-light'>{vendorData.userable?.phone || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Fax : </label>
-              <p className='text-light'>{vendorData.userable?.fax_number || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Website : </label>
-              <p className='text-light break-all'>{vendorData.userable?.website || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Account Number : </label>
-              <p className='text-light'>{vendorData.userable?.number || 'N/A'}</p>
-            </div>
-          </div>
-        </div>
+            return (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className={clsx(
+                  'h-8 gap-2 whitespace-nowrap rounded-lg border border-transparent px-3 py-2.5 text-xs text-accent-foreground/50 data-[state=active]:border-accent data-[state=active]:bg-accent/90 data-[state=active]:text-accent-foreground'
+                )}
+              >
+                <Icon className='h-4 w-4' />
+                <span>{tab.label}</span>
+              </TabsTrigger>
+            )
+          })}
+        </TabsList>
+      </Tabs>
 
-        {/* Business Information */}
-        <div className='space-y-4'>
-          <h5 className='text-sm font-medium text-light uppercase tracking-wide'>Business Information</h5>
-          <div className='space-y-3'>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Payment Term : </label>
-              <p className='text-light'>{vendorData.userable?.payment_term?.name || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Tax Type : </label>
-              <p className='text-light capitalize'>{vendorData.userable?.tax_type?.replace(/-/g, ' ') || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Profit Margin : </label>
-              <p className='text-light'>{vendorData.userable?.profit_margin}%</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Full Address : </label>
-              <p className='text-light'>{fullAddress || 'N/A'}</p>
-            </div>
-            <div className='flex items-center gap-2.5'>
-              <label className='text-xs text-gray uppercase min-w-25'>Zip Code : </label>
-              <p className='text-light'>{vendorData.userable?.zip_code || 'N/A'}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* B2B Information */}
-      {vendorData.userable?.is_enable_b2b === 1 && (
-        <div className='space-y-4 pt-4 border-t border-border'>
-          <h5 className='text-sm font-medium text-light uppercase tracking-wide'>B2B Integration</h5>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-            <div className='space-y-3'>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>B2B Status : </label>
-                <br />
-                <Badge variant='default'>Enabled</Badge>
-              </div>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Host URL : </label>
-                <p className='text-light break-all'>{vendorData.userable?.b2b_host_url || 'N/A'}</p>
-              </div>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Port Number : </label>
-                <p className='text-light'>{vendorData.userable?.b2b_port_number || 'N/A'}</p>
-              </div>
-            </div>
-            <div className='space-y-3'>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Vendor ID : </label>
-                <p className='text-light'>{vendorData.userable?.b2b_vendor_id || 'N/A'}</p>
-              </div>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Username : </label>
-                <p className='text-light'>{vendorData.userable?.b2b_username || 'N/A'}</p>
-              </div>
-              <div className='flex items-center gap-2.5'>
-                <label className='text-xs text-gray uppercase min-w-25'>Vendor Folder : </label>
-                <p className='text-light'>{vendorData.userable?.b2b_vendor_folder || 'N/A'}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+      {activeTab === 'salesman' && vendorData.userable_id && <VendorSalesmen vendorId={vendorData.userable_id} />}
+      {activeTab === 'documents' && vendorData.userable_id && <VendorDocuments vendorId={vendorData.userable_id} />}
+      {activeTab === 'rebate-credits' && vendorData.userable_id && (
+        <VendorRebateCredits vendorId={vendorData.userable_id} />
       )}
-
-      {/* Notes */}
-      {vendorData.userable?.note && (
-        <div className='space-y-2 flex items-center gap-2.5 pt-4 border-t border-border'>
-          <label className='text-xs text-gray uppercase min-w-25'>Notes : </label>
-          <p className='text-light whitespace-pre-wrap'>{vendorData.userable.note}</p>
-        </div>
+      {activeTab === 'pickup-addresses' && vendorData.userable_id && (
+        <VendorPickupAddresses
+          countriesWithStatesAndCities={countriesWithStatesAndCities}
+          vendorId={vendorData.userable_id}
+        />
       )}
-
-      {/* Timestamps */}
-      <div className='pt-4 border-t border-border'>
-        <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-          <div className='flex items-center gap-2.5'>
-            <label className='text-xs text-gray uppercase min-w-25'>Created At : </label>
-            <p className='text-light text-sm'>
-              {vendorData.created_at ? new Date(vendorData.created_at).toLocaleString() : 'N/A'}
-            </p>
-          </div>
-          <div className='flex items-center gap-2.5'>
-            <label className='text-xs text-gray uppercase min-w-25'>Updated At : </label>
-            <p className='text-light text-sm'>
-              {vendorData.updated_at ? new Date(vendorData.updated_at).toLocaleString() : 'N/A'}
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

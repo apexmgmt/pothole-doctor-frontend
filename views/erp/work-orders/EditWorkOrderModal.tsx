@@ -15,15 +15,11 @@ import {
   Staff
 } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import WorkOrderService from '@/services/api/work-orders/work_orders.service'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { DatePicker } from '@/components/ui/datePicker'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Textarea } from '@/components/ui/textarea'
 import { DateTimePicker } from '@/components/ui/datetime-picker'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface EditWorkOrderModalProps {
   open: boolean
@@ -75,9 +71,20 @@ const EditWorkOrderModal = ({
     }
   })
 
+  const {
+    reset,
+    watch,
+    setValue,
+    setError,
+    register,
+    control,
+    handleSubmit,
+    formState: { isSubmitting, errors }
+  } = form
+
   useEffect(() => {
     if (open) {
-      form.reset({
+      reset({
         title: workOrderDetails?.title || '',
         service_type_id: workOrderDetails?.service_type_id || '',
         work_order_type_id: workOrderDetails?.work_order_type_id || '',
@@ -99,7 +106,7 @@ const EditWorkOrderModal = ({
         tax_rate: workOrderDetails?.tax_rate || 0
       })
     }
-  }, [workOrderDetails, open])
+  }, [workOrderDetails, open, reset])
 
   const onSubmit = async (values: WorkOrderPayload) => {
     if (!workOrderId) return
@@ -146,7 +153,7 @@ const EditWorkOrderModal = ({
       const updatedWorkOrder = response?.data
 
       toast.success('Work order updated successfully')
-      form.reset()
+      reset()
       onOpenChange(false)
       onSuccess?.(updatedWorkOrder)
     } catch (error: any) {
@@ -155,21 +162,18 @@ const EditWorkOrderModal = ({
   }
 
   const onCancel = () => {
-    form.reset()
+    reset()
     onOpenChange(false)
   }
 
-  const selectedClient = useMemo(
-    () => clients.find(c => c.id === form.watch('client_id')),
-    [clients, form.watch('client_id')]
-  )
+  const selectedClient = useMemo(() => clients.find(c => c.id === watch('client_id')), [clients, watch('client_id')])
 
   const isMaterialOnly = useMemo(
-    () => workOrderTypes.find(t => t.id === form.watch('work_order_type_id'))?.name === 'Material Only',
-    [workOrderTypes, form.watch('work_order_type_id')]
+    () => workOrderTypes.find(t => t.id === watch('work_order_type_id'))?.name === 'Material Only',
+    [workOrderTypes, watch('work_order_type_id')]
   )
 
-  const interactionValue = form.watch('interaction')
+  const interactionValue = watch('interaction')
   const addressOptions = selectedClient?.addresses || []
 
   // Find default address ID and auto-set when client changes
@@ -177,523 +181,336 @@ const EditWorkOrderModal = ({
 
   // When client changes, auto-select default address and client's business location
   useEffect(() => {
-    form.setValue('address_id', defaultAddressId)
+    setValue('address_id', defaultAddressId)
 
-    // form.setValue('location_id', selectedClient?.location_id ?? '')
-  }, [form.watch('client_id')])
+    // setValue('location_id', selectedClient?.location_id ?? '')
+  }, [watch('client_id')])
+
+  const fieldStyle = 'grid grid-cols-[152px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
 
   return (
     <CommonDialog
-      isLoading={form.formState.isSubmitting}
+      isLoading={isSubmitting}
       loadingMessage='Saving work order...'
       open={open}
       onOpenChange={onOpenChange}
       title='Edit Work Order'
       description='Update work order information'
-      maxWidth='4xl'
-      disableClose={form.formState.isSubmitting}
+      className='sm:max-w-264!'
+      disableClose={isSubmitting}
       actions={
         <div className='flex gap-3'>
           <Button
             type='button'
             variant='outline'
+            size='sm'
             onClick={onCancel}
-            disabled={form.formState.isSubmitting}
+            disabled={isSubmitting}
             className='flex-1'
           >
             Cancel
           </Button>
-          <Button
-            type='submit'
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={form.formState.isSubmitting}
-            className='flex-1'
-          >
-            {form.formState.isSubmitting ? 'Saving...' : 'Update & Edit Services →'}
+          <Button type='submit' size='sm' onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className='flex-1'>
+            {isSubmitting ? 'Saving...' : 'Update & Edit Services →'}
           </Button>
         </div>
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='grid grid-cols-2 gap-4'>
+        <form onSubmit={handleSubmit(onSubmit)} className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2'>
           {/* Title */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='title'
+            label='Title'
+            placeholder='Enter work order title'
             rules={{ required: 'Work order title is required', minLength: { value: 2, message: 'Min 2 characters' } }}
-            render={({ field }) => (
-              <FormItem className='col-span-2'>
-                <FormLabel>
-                  Title <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter work order title' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          {/* Work Order Type */}
-          <FormField
-            control={form.control}
-            name='work_order_type_id'
-            rules={{ required: 'Work order type is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Work Order Type <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Work Order Type' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {workOrderTypes.map(type => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Customer */}
-          <FormField
-            control={form.control}
-            name='client_id'
-            rules={{ required: 'Customer is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Customer <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select
-                    value={field.value}
-                    onValueChange={value => {
-                      field.onChange(value)
-                      form.setValue('address_id', '')
 
-                      // form.setValue('location_id', '')
-                    }}
-                  >
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Customer' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clients.map(client => (
-                        <SelectItem key={client.id} value={client.id}>
-                          {client.first_name} {client.last_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          {/* Work Order Type */}
+          <CustomFormField
+            name='work_order_type_id'
+            label='Work Order Type'
+            type='select'
+            placeholder='Select Work Order Type'
+            rules={{ required: 'Work order type is required' }}
+            selectOptions={workOrderTypes.map(type => ({
+              label: type.name,
+              value: type.id
+            }))}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
+
+          {/* Customer */}
+          <CustomFormField
+            name='client_id'
+            label='Customer'
+            type='combobox'
+            placeholder='Select Customer'
+            rules={{ required: 'Customer is required' }}
+            selectOptions={clients.map(client => ({
+              label: `${client.first_name} ${client.last_name}`,
+              value: client.id
+            }))}
+            onChange={() => {
+              setValue('address_id', '')
+            }}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+          />
+
           {/* Material Only: Interaction */}
           {isMaterialOnly && (
-            <FormField
-              control={form.control}
+            <CustomFormField
               name='interaction'
+              label='Interaction'
+              type='radio'
               rules={{ required: 'Interaction type is required' }}
-              render={({ field }) => (
-                <FormItem className='col-span-2'>
-                  <FormLabel>
-                    Interaction <span className='text-red-500'>*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      value={field.value ?? ''}
-                      onValueChange={value => {
-                        field.onChange(value)
-                        form.setValue('pickup_date', '')
-                        form.setValue('pickup_location_id', '')
-                        form.setValue('pickup_notes', '')
-                        form.setValue('delivery_datetime', null)
-                        form.setValue('delivery_location', '')
-                        form.setValue('delivery_notes', '')
-                      }}
-                      className='flex flex-row gap-6'
-                    >
-                      <div className='flex items-center space-x-2'>
-                        <RadioGroupItem value='cash_and_pickup' id='wo_cash_and_pickup' />
-                        <label htmlFor='wo_cash_and_pickup' className='text-sm font-medium leading-none cursor-pointer'>
-                          Cash and Pickup
-                        </label>
-                      </div>
-                      <div className='flex items-center space-x-2'>
-                        <RadioGroupItem value='cash_and_delivery' id='wo_cash_and_delivery' />
-                        <label
-                          htmlFor='wo_cash_and_delivery'
-                          className='text-sm font-medium leading-none cursor-pointer'
-                        >
-                          Cash and Delivery
-                        </label>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              control={control}
+              errors={errors}
+              fieldClassName={`sm:col-span-2 py-3 ${fieldStyle}`}
+              labelClassName={labelStyle}
+              className='flex flex-row gap-6'
+              selectOptions={[
+                { value: 'cash_and_pickup', label: 'Cash and Pickup' },
+                { value: 'cash_and_delivery', label: 'Cash and Delivery' }
+              ]}
+              onChange={() => {
+                setValue('pickup_date', '')
+                setValue('pickup_location_id', '')
+                setValue('pickup_notes', '')
+                setValue('delivery_datetime', null)
+                setValue('delivery_location', '')
+                setValue('delivery_notes', '')
+              }}
             />
           )}
+
           {/* Cash and Pickup sub-fields */}
           {isMaterialOnly && interactionValue === 'cash_and_pickup' && (
             <>
-              <FormField
-                control={form.control}
+              <CustomFormField
                 name='pickup_date'
+                label='Date of Pickup'
+                type='datepicker'
+                placeholder='Select pickup date'
                 rules={{ required: 'Date of pickup is required' }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Date of Pickup <span className='text-red-500'>*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <DatePicker
-                        value={field.value ? new Date(field.value) : null}
-                        onChange={val => field.onChange(val ? val.toISOString().slice(0, 10) : '')}
-                        placeholder='Select pickup date'
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                control={control}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
               />
-              <FormField
-                control={form.control}
+
+              <CustomFormField
                 name='pickup_location_id'
+                label='Pickup Location'
+                type='select'
+                placeholder='Select Pickup Location'
                 rules={{ required: 'Pickup location is required' }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Pickup Location <span className='text-red-500'>*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select Pickup Location' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {businessLocations.length === 0 ? (
-                            <div className='px-3 py-2 text-muted-foreground text-sm'>No locations found</div>
-                          ) : (
-                            businessLocations.map(loc => (
-                              <SelectItem key={loc.id} value={loc.id}>
-                                {loc.name}
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                selectOptions={businessLocations.map(loc => ({
+                  label: loc.name,
+                  value: loc.id
+                }))}
+                control={control}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
               />
-              <FormField
-                control={form.control}
+
+              <CustomFormField
                 name='pickup_notes'
-                render={({ field }) => (
-                  <FormItem className='col-span-2'>
-                    <FormLabel>Notes</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder='Enter notes...' rows={3} {...field} value={field.value ?? ''} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label='Notes'
+                type='textarea'
+                placeholder='Enter notes...'
+                register={register}
+                errors={errors}
+                fieldClassName={`sm:col-span-2 ${fieldStyle}`}
+                labelClassName={labelStyle}
               />
             </>
           )}
+
           {/* Cash and Delivery sub-fields */}
           {isMaterialOnly && interactionValue === 'cash_and_delivery' && (
             <>
               <FormField
-                control={form.control}
+                control={control}
                 name='delivery_datetime'
                 rules={{ required: 'Date & time of delivery is required' }}
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
+                  <FormItem className={fieldStyle}>
+                    <FormLabel className={`text-xs data-[error=true]:text-card-foreground ${labelStyle}`}>
                       Date &amp; Time of Delivery <span className='text-red-500'>*</span>
                     </FormLabel>
-                    <FormControl>
-                      <DateTimePicker
-                        value={
-                          typeof field.value === 'number'
-                            ? field.value
-                            : field.value
-                              ? new Date((field.value as string).replace(' ', 'T')).getTime()
-                              : null
-                        }
-                        onChange={val => {
-                          if (val === null) {
-                            field.onChange(null)
-                          } else {
-                            const d = new Date(val)
-                            const pad = (n: number) => String(n).padStart(2, '0')
-                            const formatted = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
-
-                            field.onChange(formatted)
+                    <div>
+                      <FormControl>
+                        <DateTimePicker
+                          value={
+                            typeof field.value === 'number'
+                              ? field.value
+                              : field.value
+                                ? new Date((field.value as string).replace(' ', 'T')).getTime()
+                                : null
                           }
-                        }}
-                        placeholder='Select delivery date & time'
-                      />
-                    </FormControl>
-                    <FormMessage />
+                          onChange={val => {
+                            if (val === null) {
+                              field.onChange(null)
+                            } else {
+                              const d = new Date(val)
+                              const pad = (n: number) => String(n).padStart(2, '0')
+                              const formatted = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+
+                              field.onChange(formatted)
+                            }
+                          }}
+                          placeholder='Select delivery date & time'
+                        />
+                      </FormControl>
+                      <FormMessage className='mt-1.5' />
+                    </div>
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
+
+              <CustomFormField
                 name='delivery_location'
+                label='Delivery Location'
+                placeholder='Enter delivery location'
                 rules={{ required: 'Delivery location is required' }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Delivery Location <span className='text-red-500'>*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter delivery location' {...field} value={field.value ?? ''} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                register={register}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
               />
-              <FormField
-                control={form.control}
+
+              <CustomFormField
                 name='delivery_notes'
-                render={({ field }) => (
-                  <FormItem className='col-span-2'>
-                    <FormLabel>Notes</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder='Enter notes...' rows={3} {...field} value={field.value ?? ''} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label='Notes'
+                type='textarea'
+                placeholder='Enter notes...'
+                register={register}
+                errors={errors}
+                fieldClassName={`sm:col-span-2 ${fieldStyle}`}
+                labelClassName={labelStyle}
               />
             </>
           )}
-          {/* Business Location */}
-          <FormField
-            control={form.control}
-            name='location_id'
-            render={({ field }) => (
-              <FormItem className='col-span-2'>
-                <FormLabel>Business Location</FormLabel>
-                <FormControl>
-                  <Select value={field.value ?? ''} onValueChange={field.onChange} disabled>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Business Location' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {businessLocations.length === 0 ? (
-                        <div className='px-3 py-2 text-muted-foreground text-sm'>No locations found</div>
-                      ) : (
-                        businessLocations.map(loc => (
-                          <SelectItem key={loc.id} value={loc.id}>
-                            {loc.name}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Event Location (Client Address) */}
-          <FormField
-            control={form.control}
-            name='address_id'
-            render={({ field }) => (
-              <FormItem className='col-span-2'>
-                <FormLabel>Event Location</FormLabel>
-                <FormControl>
-                  <Select value={field.value ?? ''} onValueChange={field.onChange} disabled={!selectedClient}>
-                    <SelectTrigger className='w-full h-auto! text-left whitespace-normal'>
-                      <SelectValue placeholder={selectedClient ? 'Select Address' : 'Select Customer first'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {addressOptions.length === 0 ? (
-                        <div className='px-3 py-2 text-muted-foreground text-sm'>No addresses found</div>
-                      ) : (
-                        addressOptions.map(address => {
-                          const label = [
-                            address.street_address,
-                            address.city?.name,
-                            address.state?.name,
-                            address.zip_code
-                          ]
-                            .filter(Boolean)
-                            .join(', ')
 
-                          return (
-                            <SelectItem key={address.id} value={address.id}>
-                              {address.title} - {label}
-                            </SelectItem>
-                          )
-                        })
-                      )}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          {/* Business Location */}
+          <CustomFormField
+            name='location_id'
+            label='Business Location'
+            type='select'
+            placeholder='Select Business Location'
+            selectOptions={businessLocations.map(loc => ({
+              label: loc.name,
+              value: loc.id
+            }))}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+            disabled={true}
           />
+
+          {/* Event Location (Client Address) */}
+          <CustomFormField
+            name='address_id'
+            label='Event Location'
+            type='select'
+            placeholder={selectedClient ? 'Select Address' : 'Select Customer first'}
+            selectOptions={addressOptions.map(address => {
+              const label = [address.street_address, address.city?.name, address.state?.name, address.zip_code]
+                .filter(Boolean)
+                .join(', ')
+
+              return { label: `${address.title} - ${label}`, value: address.id }
+            })}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+            disabled={!selectedClient}
+          />
+
           {/* Assigned Staff */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='assign_id'
+            label='Assigned To'
+            type='combobox'
+            placeholder='Select Staff'
             rules={{ required: 'Assigned staff is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Assigned To <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Staff' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {staffs.map(staff => (
-                        <SelectItem key={staff.id} value={staff.id}>
-                          {staff.first_name} {staff.last_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            selectOptions={staffs.map(staff => ({
+              label: `${staff.first_name} ${staff.last_name}`,
+              value: staff.id
+            }))}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
-          {/* Service Type */}
-          {/* <FormField
-            control={form.control}
-            name='service_type_id'
-            rules={{ required: 'Service type is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Service Type <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Service Type' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {serviceTypes.map(type => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
+
           {/* Payment Term */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='payment_term_id'
+            label='Payment Term'
+            type='select'
+            placeholder='Select Payment Term'
             rules={{ required: 'Payment term is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Payment Term <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select Payment Term' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {paymentTerms.map(term => (
-                        <SelectItem key={term.id} value={term.id}>
-                          {term.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            selectOptions={paymentTerms.map(term => ({
+              label: term.name,
+              value: term.id
+            }))}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
+
           {/* Issue Date */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='issue_date'
+            label='Issue Date'
+            type='datepicker'
+            placeholder='Select issue date'
             rules={{ required: 'Issue date is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Issue Date <span className='text-red-500'>*</span>
-                </FormLabel>
-                <FormControl>
-                  <DatePicker
-                    value={field.value ? new Date(field.value) : null}
-                    onChange={val => field.onChange(val ? val.toISOString().slice(0, 10) : '')}
-                    placeholder='Select issue date'
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
+
           {/* Due Date */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='due_date'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Due Date</FormLabel>
-                <FormControl>
-                  <DatePicker
-                    value={field.value ? new Date(field.value) : null}
-                    onChange={val => field.onChange(val ? val.toISOString().slice(0, 10) : '')}
-                    placeholder='Select due date'
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='Due Date'
+            type='datepicker'
+            placeholder='Select due date'
+            control={control}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
+
           {/* Tax Rate */}
-          <FormField
-            control={form.control}
+          <CustomFormField
             name='tax_rate'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tax Rate (%)</FormLabel>
-                <FormControl>
-                  <Input
-                    type='number'
-                    step='0.01'
-                    placeholder='0'
-                    {...field}
-                    onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='Tax Rate (%)'
+            type='number'
+            placeholder='0'
+            register={register}
+            errors={errors}
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
           />
         </form>
       </Form>

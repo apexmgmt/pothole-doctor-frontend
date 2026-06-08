@@ -375,6 +375,7 @@ const CreateEditViewNonInventoryProductModal = ({
             <Button
               type='button'
               variant='outline'
+              size='sm'
               onClick={onCancel}
               disabled={form.formState.isSubmitting}
               className='flex-1'
@@ -383,6 +384,7 @@ const CreateEditViewNonInventoryProductModal = ({
             </Button>
             <Button
               type='submit'
+              size='sm'
               onClick={form.handleSubmit(onSubmit)}
               disabled={form.formState.isSubmitting}
               className='flex-1'
@@ -391,7 +393,7 @@ const CreateEditViewNonInventoryProductModal = ({
             </Button>
           </div>
         ) : (
-          <Button type='button' variant='outline' onClick={onCancel}>
+          <Button type='button' variant='outline' size='sm' onClick={onCancel}>
             Close
           </Button>
         )

@@ -224,7 +224,13 @@ const AddInventoryJobActionModal = ({
 
     const payload: MaterialJobActionPayload = {
       action_status: values.action_status,
-      quantity: mathRoundFixed(quantity * (materialJob?.product?.coverage_per_rate ?? 1), 4),
+      quantity: mathRoundFixed(
+        quantity *
+          (materialJob?.product?.purchase_uom_id === materialJob?.product?.selling_unit_id
+            ? 1
+            : (materialJob?.product?.coverage_per_rate ?? 1)),
+        4
+      ),
       action_date: values.action_date ? format(values.action_date, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
       employee_id: values.employee_id,
       vendor_id: materialJob.vendor_id ?? '',
@@ -385,10 +391,10 @@ const AddInventoryJobActionModal = ({
       disableClose={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
-          <Button type='button' variant='outline' onClick={onCancel} disabled={form.formState.isSubmitting}>
+          <Button type='button' variant='outline' size='sm' onClick={onCancel} disabled={form.formState.isSubmitting}>
             Cancel
           </Button>
-          <Button type='submit' form='inventory-action-form' disabled={form.formState.isSubmitting}>
+          <Button type='submit' size='sm' form='inventory-action-form' disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? 'Saving...' : 'Save'}
           </Button>
         </div>

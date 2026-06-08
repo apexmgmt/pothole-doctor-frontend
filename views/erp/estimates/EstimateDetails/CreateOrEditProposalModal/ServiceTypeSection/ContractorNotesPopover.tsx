@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { StickyNoteIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
+import CustomFormField from '@/components/form/CustomFormField'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 interface ContractorNotesPopoverProps {
@@ -44,9 +44,10 @@ export const ContractorNotesPopover = ({ notes, onSave, disabled }: ContractorNo
       </PopoverTrigger>
       <PopoverContent className='w-80 p-0 overflow-hidden' align='start'>
         <div className='p-3 space-y-3'>
-          <Textarea
+          <CustomFormField
+            type='textarea'
             value={draftNotes}
-            onChange={e => setDraftNotes(e.target.value)}
+            onChange={(val: any) => setDraftNotes(val)}
             placeholder='Enter contractor notes...'
             className='min-h-[100px] text-sm bg-zinc-900 border-zinc-700 focus-visible:ring-amber-600/50'
             disabled={disabled}

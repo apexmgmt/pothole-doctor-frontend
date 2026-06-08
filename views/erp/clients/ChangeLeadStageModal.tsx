@@ -9,14 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import ClientService from '@/services/api/clients/clients.service'
 
-export type LeadStage =
-  | 'prospect'
-  | 'open'
-  | 'working'
-  | 'meeting-set'
-  | 'opportunity'
-  | 'closed-won'
-  | 'closed-lost'
+export type LeadStage = 'prospect' | 'open' | 'working' | 'meeting-set' | 'opportunity' | 'closed-won' | 'closed-lost'
 
 const LEAD_STAGE_OPTIONS: { value: LeadStage; label: string }[] = [
   { value: 'prospect', label: 'Prospect' },
@@ -85,15 +78,10 @@ const ChangeLeadStageModal: React.FC<ChangeLeadStageModalProps> = ({
       isLoading={isSubmitting}
       actions={
         <>
-          <Button
-            type='button'
-            variant='outline'
-            onClick={() => onOpenChange(false)}
-            disabled={isSubmitting}
-          >
+          <Button type='button' variant='outline' size='sm' onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button type='button' onClick={handleSubmit} disabled={isSubmitting || !clientId}>
+          <Button type='button' size='sm' onClick={handleSubmit} disabled={isSubmitting || !clientId}>
             Update Stage
           </Button>
         </>

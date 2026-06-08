@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { DatePicker } from '@/components/ui/datePicker'
 import { TimePicker } from '@/components/ui/timePicker'
 import { Partner, ProposalService, WorkOrder } from '@/types'
+import CustomFormField from '@/components/form/CustomFormField'
 import { Schedule, SchedulePayload } from '@/types/schedules'
 import ScheduleService from '@/services/api/schedules.service'
 import WorkOrderService from '@/services/api/work-orders/work_orders.service'
@@ -117,6 +118,7 @@ export default function ScheduleFormDialog({
     control,
     setValue,
     reset,
+    register,
     formState: { isSubmitting, errors }
   } = form
 
@@ -211,9 +213,11 @@ export default function ScheduleFormDialog({
 
     const currentWoId = form.getValues('work_order_id')
     const wo = workOrders.find(w => w.id === currentWoId)
+
     const baseTitle = wo
       ? `#${wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}${wo.invoice_number?.toString() || '—'} - ${wo.title}`
       : ''
+
     const serviceTypeName = svc.service_type?.name ?? ''
 
     setValue('title', serviceTypeName ? `${baseTitle} - ${serviceTypeName}` : baseTitle)
@@ -252,9 +256,11 @@ export default function ScheduleFormDialog({
       // Auto-update title with service type name
       const currentWoId = form.getValues('work_order_id')
       const wo = workOrders.find(w => w.id === currentWoId)
+
       const baseTitle = wo
         ? `#${wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}${wo.invoice_number?.toString() || '—'} - ${wo.title}`
         : ''
+
       const serviceTypeName = svc.service_type?.name ?? ''
 
       setValue('title', serviceTypeName ? `${baseTitle} - ${serviceTypeName}` : baseTitle)
@@ -314,284 +320,235 @@ export default function ScheduleFormDialog({
     }
   }
 
+  const onCancel = () => {
+    onOpenChange(false)
+  }
+
+  const fieldStyle = 'grid grid-cols-[130px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1 text-xs font-medium'
+
   return (
     <CommonDialog
+      isLoading={isSubmitting}
+      loadingMessage='Saving appointment...'
       open={open}
       onOpenChange={onOpenChange}
       title={mode === 'edit' ? 'Edit Appointment' : 'Add Appointment'}
-      maxWidth='lg'
-      isLoading={isSubmitting}
-      loadingMessage='Saving...'
+      description={mode === 'edit' ? 'Update appointment information' : 'Add a new appointment to the system'}
       disableClose={isSubmitting}
+      maxWidth='2xl'
       actions={
-        <div className='flex justify-end gap-2 w-full'>
-          <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+        <div className='flex gap-3'>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className='flex-1'
+          >
             Cancel
           </Button>
-          <Button type='submit' form='schedule-form' disabled={isSubmitting || isFetchingWO}>
-            {isSubmitting ? 'Saving...' : 'Save'}
+          <Button
+            type='submit'
+            size='sm'
+            onClick={handleSubmit(onSubmit)}
+            disabled={isSubmitting || isFetchingWO}
+            className='flex-1'
+          >
+            {isSubmitting ? 'Saving...' : mode === 'edit' ? 'Update' : 'Save'}
           </Button>
         </div>
       }
     >
       <Form {...form}>
-        <form id='schedule-form' onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-4'>
-          <div className='grid grid-cols-1 sm:grid-cols-[140px_1fr] items-start gap-2 sm:gap-x-3 sm:gap-y-4'>
+        <form onSubmit={handleSubmit(onSubmit)} className='space-y-2'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2'>
             {/* Work Order */}
-            <FormField
-              control={control}
-              name='work_order_id'
-              rules={{ required: 'Work order is required' }}
-              render={({ field }) => (
-                <>
-                  <FormLabel className='text-right pt-2 text-sm'>
-                    Open Jobs <span className='text-destructive'>*</span>
-                  </FormLabel>
-                  <FormItem className='m-0'>
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={val => handleWorkOrderChange(val, field.onChange)}
-                        disabled={isFetchingWO}
-                      >
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select Work Order Number' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {workOrders.map(wo => (
-                            <SelectItem key={wo.id} value={wo.id}>
-                              #{wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}
-                              {wo.invoice_number?.toString() || '—'} - {wo.title}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </>
-              )}
-            />
-
-            {/* Service Group → Service Type (only shown when WO has services) */}
-            {(woServices.length > 0 || isFetchingWO) && (
-              <FormField
+            <div className='col-span-2'>
+              <CustomFormField
+                name='work_order_id'
+                type='select'
+                label='Open Jobs'
+                placeholder='Select Work Order Number'
                 control={control}
-                name='service_group_id'
-                rules={{ required: 'Service type is required' }}
-                render={({ field }) => (
-                  <>
-                    <FormLabel className='text-right pt-2 text-sm'>
-                      Service Type <span className='text-destructive'>*</span>
-                    </FormLabel>
-                    <FormItem className='m-0'>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={val => handleServiceGroupChange(val, field.onChange)}
-                          disabled={isFetchingWO}
-                        >
-                          <SelectTrigger className='w-full'>
-                            <SelectValue placeholder={isFetchingWO ? 'Loading services...' : 'Select Service Type'} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {woServices.map(svc => (
-                              <SelectItem key={svc.id} value={svc.id}>
-                                {svc.service_type?.name ?? svc.service_type_id}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </>
-                )}
+                register={register}
+                rules={{ required: 'Work order is required' }}
+                selectOptions={workOrders.map(wo => ({
+                  value: wo.id,
+                  label: `#${wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}${wo.invoice_number?.toString() || '—'} - ${wo.title}`
+                }))}
+                onChange={val => handleWorkOrderChange(val as string, v => setValue('work_order_id', v))}
+                disabled={isFetchingWO}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
               />
+            </div>
+            {/* Service Group */}
+            {(woServices.length > 0 || isFetchingWO) && (
+              <div className='col-span-2'>
+                <CustomFormField
+                  name='service_group_id'
+                  type='select'
+                  label='Service Type'
+                  placeholder={isFetchingWO ? 'Loading services...' : 'Select Service Type'}
+                  control={control}
+                  register={register}
+                  rules={{ required: 'Service type is required' }}
+                  selectOptions={woServices.map(svc => ({
+                    value: svc.id,
+                    label: svc.service_type?.name ?? svc.service_type_id
+                  }))}
+                  onChange={val => handleServiceGroupChange(val as string, v => setValue('service_group_id', v))}
+                  disabled={isFetchingWO}
+                  errors={errors}
+                  fieldClassName={fieldStyle}
+                  labelClassName={labelStyle}
+                />
+              </div>
             )}
 
             {/* Title */}
-            <FormField
-              control={control}
-              name='title'
-              render={({ field }) => (
-                <>
-                  <FormLabel className='text-right pt-2 text-sm'>Title</FormLabel>
-                  <FormItem className='m-0'>
-                    <FormControl>
-                      <Input {...field} placeholder='Auto-filled from Work Order' />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </>
-              )}
-            />
+            <div className='col-span-2'>
+              <CustomFormField
+                name='title'
+                rules={{ required: 'Title is required' }}
+                type='text'
+                label='Title'
+                placeholder='Auto-filled from Work Order'
+                control={control}
+                register={register}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
+              />
+            </div>
 
             {/* Contractor */}
-            <FormField
-              control={control}
-              name='contractor_id'
-              rules={{ required: 'Contractor is required' }}
-              render={({ field }) => (
-                <>
-                  <FormLabel className='text-right pt-2 text-sm'>
-                    Select Contractor <span className='text-destructive'>*</span>
-                  </FormLabel>
-                  <FormItem className='m-0'>
-                    <FormControl>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select Contractor' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {partners.map(p => (
-                            <SelectItem key={p.id} value={p.id}>
-                              {`${p.first_name} ${p.last_name}`.trim()}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </>
-              )}
-            />
-
-            {/* Start Date / Time */}
-            <FormField
-              control={control}
+            <div className='col-span-2'>
+              <CustomFormField
+                name='contractor_id'
+                type='select'
+                label='Select Contractor'
+                placeholder='Select Contractor'
+                control={control}
+                register={register}
+                rules={{ required: 'Contractor is required' }}
+                selectOptions={partners.map(p => ({
+                  value: p.id,
+                  label: `${p.first_name} ${p.last_name}`.trim()
+                }))}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
+              />
+            </div>
+            {/* Start Date */}
+            <CustomFormField
               name='starting_date'
-              render={({ field }) => (
-                <>
-                  <FormLabel className='text-right pt-2 text-sm'>Start Date/Time</FormLabel>
-                  <FormItem className='m-0'>
-                    <div className='flex gap-2 flex-col sm:flex-row'>
-                      <FormControl>
-                        <DatePicker
-                          value={field.value ? new Date(field.value + 'T00:00:00') : null}
-                          onChange={(date: Date | null) => field.onChange(date ? format(date, 'yyyy-MM-dd') : '')}
-                          className='flex-1'
-                        />
-                      </FormControl>
-                      <Controller
-                        control={control}
-                        name='starting_time'
-                        render={({ field: tf }) => (
-                          <TimePicker value={tf.value || null} onChange={tf.onChange} className='flex-1' />
-                        )}
-                      />
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                </>
-              )}
+              type='datepicker'
+              label='Start Date'
+              placeholder='Select start date'
+              control={control}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
 
-            {/* End Date / Time */}
-            <FormField
+            {/* Start Time */}
+            <CustomFormField
+              name='starting_time'
+              type='time'
+              label='Start Time'
+              placeholder='Select start time'
               control={control}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
+            />
+
+            {/* End Date */}
+            <CustomFormField
               name='ending_date'
-              render={({ field }) => (
-                <>
-                  <FormLabel className='text-right pt-2 text-sm'>End Date/Time</FormLabel>
-                  <FormItem className='m-0'>
-                    <div className='flex gap-2 flex-col sm:flex-row'>
-                      <FormControl>
-                        <DatePicker
-                          value={field.value ? new Date(field.value + 'T00:00:00') : null}
-                          onChange={(date: Date | null) => field.onChange(date ? format(date, 'yyyy-MM-dd') : '')}
-                          className='flex-1'
-                        />
-                      </FormControl>
-                      <Controller
-                        control={control}
-                        name='ending_time'
-                        render={({ field: tf }) => (
-                          <TimePicker value={tf.value || null} onChange={tf.onChange} className='flex-1' />
-                        )}
-                      />
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                </>
-              )}
+              type='datepicker'
+              label='End Date'
+              placeholder='Select end date'
+              control={control}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
+            />
+
+            {/* End Time */}
+            <CustomFormField
+              name='ending_time'
+              type='time'
+              label='End Time'
+              placeholder='Select end time'
+              control={control}
+              register={register}
+              errors={errors}
+              fieldClassName={fieldStyle}
+              labelClassName={labelStyle}
             />
 
             {/* Show Schedule */}
-            <FormField
-              control={control}
-              name='is_show_schedule'
-              render={({ field }) => (
-                <>
-                  <FormLabel className='text-right pt-1 text-sm'>Show Schedule</FormLabel>
-                  <FormItem className='m-0'>
-                    <div className='flex items-center gap-2'>
-                      <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                      <span className='text-xs text-muted-foreground'>{field.value ? 'YES' : 'NO'}</span>
-                    </div>
-                  </FormItem>
-                </>
-              )}
-            />
-          </div>
-
-          {/* Notification toggles — 2-column grid */}
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 border border-border rounded-md p-3'>
-            {TOGGLE_FIELDS.map(({ label, key }) => (
-              <FormField
-                key={key}
+            <div className={`sm:col-span-2 gap-x-2 ${fieldStyle}`}>
+              <CustomFormField
+                name='is_show_schedule'
+                type='switch'
+                label='Show Schedule'
                 control={control}
+                register={register}
+                errors={errors}
+                fieldClassName={`${fieldStyle} [&>button]:order-2 [&>label]:order-1`}
+                labelClassName={labelStyle}
+              />
+            </div>
+
+            {/* Notification toggles — 2-column grid */}
+            {TOGGLE_FIELDS.map(({ label, key }) => (
+              <CustomFormField
+                key={key}
                 name={key as keyof FormValues}
-                render={({ field }) => (
-                  <FormItem className='m-0'>
-                    <div className='flex items-center justify-between gap-2'>
-                      <FormLabel className='text-sm font-normal'>{label}</FormLabel>
-                      <div className='flex items-center gap-1.5'>
-                        <FormControl>
-                          <Switch checked={field.value as boolean} onCheckedChange={field.onChange} />
-                        </FormControl>
-                        <span className='text-xs text-muted-foreground w-6'>
-                          {(field.value as boolean) ? 'YES' : 'NO'}
-                        </span>
-                      </div>
-                    </div>
-                  </FormItem>
-                )}
+                type='switch'
+                label={label}
+                control={control}
+                register={register}
+                errors={errors}
+                fieldClassName={`${fieldStyle} [&>button]:order-2 [&>label]:order-1`}
+                labelClassName={labelStyle}
               />
             ))}
           </div>
-
           {/* Special Instructions */}
-          <FormField
-            control={control}
+          <CustomFormField
             name='special_instructions'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className='text-sm'>Special Instructions</FormLabel>
-                <FormControl>
-                  <Textarea {...field} placeholder='Special instructions...' rows={3} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            type='textarea'
+            label='Special Instructions'
+            placeholder='Special instructions...'
+            control={control}
+            register={register}
+            errors={errors}
+            fieldClassName={`col-span-1 sm:col-span-2 ${fieldStyle}`}
+            labelClassName={labelStyle}
           />
 
           {/* Internal Comments */}
-          <FormField
-            control={control}
+          <CustomFormField
             name='internal_commands'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className='text-sm'>Internal Comments</FormLabel>
-                <FormControl>
-                  <Textarea {...field} placeholder='Internal comments...' rows={3} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            type='textarea'
+            label='Internal Comments'
+            placeholder='Internal comments...'
+            control={control}
+            register={register}
+            errors={errors}
+            fieldClassName={`col-span-1 sm:col-span-2 ${fieldStyle}`}
+            labelClassName={labelStyle}
           />
         </form>
       </Form>

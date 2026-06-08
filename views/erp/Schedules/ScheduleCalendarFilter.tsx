@@ -1,16 +1,11 @@
 'use client'
 
 import React, { useMemo, useState } from 'react'
-import { Check, ChevronsUpDown, RotateCcw } from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
 import { Client, Partner, ServiceType, WorkOrder } from '@/types'
-import { getPaletteColorByKey } from '@/constants/colors'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import { cn } from '@/lib/utils'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface ScheduleCalendarFilterProps {
   clients: Client[]
@@ -33,7 +28,6 @@ export default function ScheduleCalendarFilter({
   filterOptions,
   setFilterOptions
 }: ScheduleCalendarFilterProps) {
-  const [isContractorOpen, setIsContractorOpen] = useState(false)
 
   /**
    * Finds the currently selected work order from preloaded options.
@@ -112,17 +106,6 @@ export default function ScheduleCalendarFilter({
 
   const isAllContractorsSelected = !filterOptions.contractor_id || filterOptions.contractor_id === 'all'
 
-  /**
-   * Used to show selected contractor label in the searchable combobox trigger.
-   */
-  const selectedContractor = useMemo(() => {
-    if (!filterOptions.contractor_id || filterOptions.contractor_id === 'all') {
-      return null
-    }
-
-    return partners.find(partner => partner.id === filterOptions.contractor_id) || null
-  }, [filterOptions.contractor_id, partners])
-
   return (
     <ScrollArea className='xl:h-[835px] w-full xl:w-72 shrink-0 rounded-lg border border-border bg-card'>
       <div className='flex flex-col gap-4 p-4'>
@@ -138,138 +121,81 @@ export default function ScheduleCalendarFilter({
 
         {/* Customer */}
         <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4 '>
-          <div className='flex flex-col gap-1.5'>
-            <Label className='text-xs text-muted-foreground'>Customer</Label>
-            <Select value={filterOptions.client_id ?? 'all'} onValueChange={value => handleChange('client_id', value)}>
-              <SelectTrigger className='w-full'>
-                <SelectValue placeholder='Select Customer' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='all'>All Customers</SelectItem>
-                {clients.map(client => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.company?.name || `${client.first_name} ${client.last_name}`.trim()}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <CustomFormField
+            type='select'
+            name='client_id'
+            label='Customer'
+            
+            placeholder='Select Customer'
+            value={filterOptions.client_id ?? 'all'}
+            onChange={(value) => handleChange('client_id', value as string)}
+            selectOptions={[
+              { label: 'All Customers', value: 'all' },
+              ...clients.map(client => ({
+                label: client.company?.name || `${client.first_name} ${client.last_name}`.trim(),
+                value: client.id,
+              }))
+            ]}
+          />
 
           {/* Work Order */}
-          <div className='flex flex-col gap-1.5'>
-            <Label className='text-xs text-muted-foreground'>Work Order</Label>
-            <Select
-              value={filterOptions.work_order_id ?? 'all'}
-              onValueChange={value => handleChange('work_order_id', value)}
-            >
-              <SelectTrigger className='w-full'>
-                <SelectValue placeholder='Select Work Order' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='all'>All Work Orders</SelectItem>
-                {workOrders.map(wo => (
-                  <SelectItem key={wo.id} value={wo.id}>
-                    #{wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}
-                    {wo.invoice_number?.toString() || '—'} - {wo.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <CustomFormField
+            type='select'
+            name='work_order_id'
+            label='Work Order'
+            
+            placeholder='Select Work Order'
+            value={filterOptions.work_order_id ?? 'all'}
+            onChange={(value) => handleChange('work_order_id', value as string)}
+            selectOptions={[
+              { label: 'All Work Orders', value: 'all' },
+              ...workOrders.map(wo => ({
+                label: `#${wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}${wo.invoice_number?.toString() || '—'} - ${wo.title}`,
+                value: wo.id,
+              }))
+            ]}
+          />
 
           {/* Job Type / Service Type */}
-          <div className='flex flex-col gap-1.5'>
-            <Label className='text-xs text-muted-foreground'>Job Type</Label>
-            <Select
-              value={filterOptions.service_type_id ?? 'all'}
-              onValueChange={value => handleChange('service_type_id', value)}
-            >
-              <SelectTrigger className='w-full'>
-                <SelectValue placeholder='Select Job Type' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='all'>All Job Types</SelectItem>
-                {(filterOptions.work_order_id ? woServiceTypes : serviceTypes).map(st => (
-                  <SelectItem key={st.id} value={st.id}>
-                    {st.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <CustomFormField
+            type='select'
+            name='service_type_id'
+            label='Job Type'
+            placeholder='Select Job Type'
+            value={filterOptions.service_type_id ?? 'all'}
+            onChange={(value) => handleChange('service_type_id', value as string)}
+            selectOptions={[
+              { label: 'All Job Types', value: 'all' },
+              ...(filterOptions.work_order_id ? woServiceTypes : serviceTypes).map(st => ({
+                label: st.name,
+                value: st.id,
+              }))
+            ]}
+          />
 
           {/* Contractor */}
-          <div className='flex flex-col gap-1.5'>
-            <Label className='text-xs text-muted-foreground'>Contractor</Label>
-            <Popover open={isContractorOpen} onOpenChange={setIsContractorOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  type='button'
-                  variant='outline'
-                  role='combobox'
-                  aria-expanded={isContractorOpen}
-                  className='w-full justify-between bg-transparent px-3 text-sm font-normal'
-                >
-                  <span className='truncate text-left'>
-                    {selectedContractor
-                      ? `${selectedContractor.first_name} ${selectedContractor.last_name}`.trim()
-                      : 'All Contractors'}
-                  </span>
-                  <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className='w-(--radix-popover-trigger-width) p-0' align='start'>
-                <Command>
-                  <CommandInput placeholder='Search contractor...' />
-                  <CommandList>
-                    <CommandEmpty>No contractor found.</CommandEmpty>
-                    <CommandGroup>
-                      <CommandItem
-                        value='all contractors'
-                        onSelect={() => {
-                          handleChange('contractor_id', 'all')
-                          setIsContractorOpen(false)
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            'mr-2 h-4 w-4',
-                            (filterOptions.contractor_id ?? 'all') === 'all' ? 'opacity-100' : 'opacity-0'
-                          )}
-                        />
-                        <span>All Contractors</span>
-                      </CommandItem>
-
-                      {partners.map(partner => {
-                        const partnerName = `${partner.first_name} ${partner.last_name}`.trim()
-                        const isSelected = filterOptions.contractor_id === partner.id
-
-                        return (
-                          <CommandItem
-                            key={partner.id}
-                            value={partnerName}
-                            onSelect={() => {
-                              handleChange('contractor_id', partner.id)
-                              setIsContractorOpen(false)
-                            }}
-                          >
-                            <Check className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')} />
-                            {isAllContractorsSelected && (
-                              <span
-                                className='mr-2 inline-block h-2.5 w-2.5 rounded-full border border-white/30'
-                                style={{ backgroundColor: getPaletteColorByKey(partner.id) }}
-                              />
-                            )}
-                            <span>{partnerName || 'N/A'}</span>
-                          </CommandItem>
-                        )
-                      })}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
+          <CustomFormField
+            type='combobox'
+            name='contractor_id'
+            label='Contractor'
+            
+            placeholder='Select Contractor'
+            value={filterOptions.contractor_id ?? 'all'}
+            onChange={(value) => handleChange('contractor_id', value as string)}
+            selectOptions={[
+              { label: 'All Contractors', value: 'all' },
+              ...partners.map(partner => ({
+                label: `${partner.first_name} ${partner.last_name}`.trim() || 'N/A',
+                value: partner.id,
+                labelPrefix: isAllContractorsSelected ? (
+                  <span
+                    className='inline-block h-2.5 w-2.5 rounded-full border border-white/30'
+                    style={{ backgroundColor: partner?.userable?.schedule_color }}
+                  />
+                ) : undefined
+              }))
+            ]}
+          />
         </div>
 
         {isAllContractorsSelected && partners.length > 0 && (
@@ -280,7 +206,7 @@ export default function ScheduleCalendarFilter({
                 <div key={partner.id} className='flex items-center gap-2 text-xs'>
                   <span
                     className='inline-block h-2.5 w-2.5 rounded-full border border-white/30 shrink-0'
-                    style={{ backgroundColor: getPaletteColorByKey(partner.id) }}
+                    style={{ backgroundColor: partner?.userable?.schedule_color }}
                   />
                   <span className='truncate'>{`${partner.first_name} ${partner.last_name}`.trim()}</span>
                 </div>

@@ -8,12 +8,8 @@ import { format } from 'date-fns'
 import { BusinessLocation, MaterialJob, MaterialJobUpdatePayload, PaymentTerm, Warehouse } from '@/types'
 import { VendorPickupAddress } from '@/types/vendors'
 import { ClientAddress } from '@/types/clients/clients_addresses'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { DatePicker } from '@/components/ui/datePicker'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import MaterialJobService from '@/services/api/products/material-jobs.service'
 import VendorPickupAddressService from '@/services/api/vendors/vendor-pickup-addresses.service'
@@ -21,6 +17,8 @@ import ClientAddressService from '@/services/api/clients/client-addresses.servic
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import WarehouseService from '@/services/api/warehouses.service'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
+import { cn } from '@/lib/utils'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface UpdateMaterialJobModalProps {
   open: boolean
@@ -164,7 +162,17 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
     }
   })
 
-  const shippedTo = form.watch('shipped_to')
+  const {
+    reset,
+    watch,
+    setValue,
+    register,
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = form
+
+  const shippedTo = watch('shipped_to')
 
   // Populate form when modal opens or job changes
   useEffect(() => {
@@ -172,7 +180,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
       // Calculate billing information based on service item
       const billing = calculateBillingInfo(materialJob)
 
-      form.reset({
+      reset({
         order_status: materialJob.order_status || '',
         estimated_received_date: materialJob.estimate_received_date
           ? new Date(materialJob.estimate_received_date)
@@ -230,7 +238,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
 
   // Fetch addresses when shipped_to changes
   useEffect(() => {
-    form.setValue('shipped_to_location_id', '')
+    setValue('shipped_to_location_id', '')
 
     if (!open || !materialJob) return
 
@@ -258,9 +266,9 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
   }, [shippedTo, open, materialJob])
 
   // Watch billing fields and recalculate vendor_invoice_total
-  const freightCost = form.watch('freight_cost')
-  const taxAmount = form.watch('tax_amount')
-  const discountAmount = form.watch('discount_amount')
+  const freightCost = watch('freight_cost')
+  const taxAmount = watch('tax_amount')
+  const discountAmount = watch('discount_amount')
 
   useEffect(() => {
     if (!open || !materialJob?.service_item) return
@@ -279,7 +287,7 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
     const total = baseCost + freight + tax - discount
 
     // Update total_amount (read-only display) as string
-    form.setValue('total_amount', String(total.toFixed(2)))
+    setValue('total_amount', String(total.toFixed(2)))
   }, [freightCost, taxAmount, discountAmount, open, materialJob, form])
 
   const getShippedToLabel = () => {
@@ -309,37 +317,6 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
         return isLoadingAddresses ? 'Loading...' : 'Select job site address'
       default:
         return 'Select location'
-    }
-  }
-
-  const renderShippedToOptions = () => {
-    switch (shippedTo) {
-      case 'warehouse':
-        return warehouses.map(w => (
-          <SelectItem key={w.id} value={w.id}>
-            {w.title}
-          </SelectItem>
-        ))
-      case 'location':
-        return businessLocations.map(bl => (
-          <SelectItem key={bl.id} value={bl.id}>
-            {bl.name}
-          </SelectItem>
-        ))
-      case 'vendor_address':
-        return vendorAddresses.map(addr => (
-          <SelectItem key={addr.id} value={addr.id}>
-            {addr.title} {addr.street_address ? `— ${addr.street_address}` : ''}
-          </SelectItem>
-        ))
-      case 'job_site':
-        return clientAddresses.map(addr => (
-          <SelectItem key={addr.id} value={addr.id}>
-            {addr.title} {addr.street_address ? `— ${addr.street_address}` : ''}
-          </SelectItem>
-        ))
-      default:
-        return null
     }
   }
 
@@ -388,15 +365,30 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
 
   const onCancel = () => {
     onOpenChange(false)
-    form.reset()
+    reset()
   }
 
-  const displayField = (label: string, value: string | number | null | undefined) => (
-    <div className='flex flex-col gap-1'>
-      <span className='text-xs text-muted-foreground'>{label}</span>
-      <span className='text-sm font-medium rounded-md px-3 py-2 bg-white/5 min-h-9'>{value ?? '—'}</span>
-    </div>
-  )
+  const displayField = (label: string, value: string | number | null | undefined, index?: number) => {
+    const isFirst2 = index !== undefined && index % 2 === 0
+    const isFirst3 = index !== undefined && index % 3 === 0
+    const isFirst4 = index !== undefined && index % 4 === 0
+
+    const borderClass = cn(
+      isFirst2 ? 'border-l-0 pl-0' : 'border-l border-border pl-3',
+      isFirst3 ? 'md:border-l-0 md:pl-0' : 'md:border-l md:border-border md:pl-3',
+      isFirst4 ? 'lg:border-l-0 lg:pl-0' : 'lg:border-l lg:border-border lg:pl-3'
+    )
+
+    return (
+      <div key={`${label}-${index}`} className={cn('flex flex-col gap-1.25', borderClass)}>
+        <span className='text-xs text-muted-foreground font-normal leading-none'>{label}</span>
+        <span className='text-[13px] font-medium leading-tight'>{value ?? '—'}</span>
+      </div>
+    )
+  }
+
+  const fieldStyle = 'grid grid-cols-[124px_minmax(0,_1fr)]'
+  const labelStyle = 'justify-end self-start text-right pt-1'
 
   const vendorName = materialJob?.vendor
     ? [materialJob.vendor.first_name, materialJob.vendor.last_name].filter(Boolean).join(' ')
@@ -420,30 +412,32 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
       title='Update Material Job'
       description=''
       maxWidth='4xl'
-      isLoading={form.formState.isSubmitting}
+      isLoading={isSubmitting}
       loadingMessage='Saving...'
-      disableClose={form.formState.isSubmitting}
+      disableClose={isSubmitting}
       actions={
         <div className='flex gap-3'>
-          <Button type='button' variant='outline' onClick={onCancel} disabled={form.formState.isSubmitting}>
+          <Button type='button' variant='outline' size='sm' onClick={onCancel} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button type='submit' form='update-material-job-form' disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? 'Saving...' : 'Save'}
+          <Button type='submit' size='sm' form='update-material-job-form' disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : 'Save'}
           </Button>
         </div>
       }
     >
       <Form {...form}>
-        <form id='update-material-job-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+        <form id='update-material-job-form' onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
           {/* ── Section 1: Vendor Details ── */}
           <div>
             <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3'>Vendor Details</h3>
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-lg border bg-muted/30'>
-              {displayField('Vendor Name', vendorName)}
-              {displayField('Email', vendorEmail)}
-              {displayField('Phone', vendorPhone)}
-              {displayField('Address', vendorAddress)}
+            <div className='p-2.5 bg-[#1F1F1F] rounded-lg grid grid-cols-2 sm:grid-cols-4 gap-x-3 gap-y-6'>
+              {[
+                { label: 'Vendor Name', value: vendorName },
+                { label: 'Email', value: vendorEmail },
+                { label: 'Phone', value: vendorPhone },
+                { label: 'Address', value: vendorAddress }
+              ].map((field, idx) => displayField(field.label, field.value, idx))}
             </div>
           </div>
 
@@ -455,88 +449,76 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
                 {serviceTypeName}
               </span>
             </div>
-            <div className='p-4 rounded-lg border bg-muted/30 space-y-3'>
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                {displayField('Product Name', serviceItemName)}
-                {displayField('Color', productColor)}
-                {displayField('Description', serviceItemDescription)}
-                {displayField(
-                  'Quantity',
-                  `${materialJob?.quantity} ${materialJob?.selling_unit?.name || materialJob?.service_item?.unit?.name || 'Unit'}${materialJob?.quantity !== materialJob?.purchase_quantity ? ` (${materialJob?.purchase_quantity} ${materialJob?.purchase_unit?.name || 'Unit'})` : ''}`
-                )}
-                {displayField(
-                  'Unit Cost',
-                  materialJob?.service_item?.unit_cost != null
-                    ? `$${Number(materialJob.service_item?.unit_cost).toFixed(2)}`
-                    : '—'
-                )}
-                {displayField(
-                  'Total Tax Amount',
-                  `$${calculatedBilling.taxAmount.toFixed(2)}${materialJob?.service_item?.tax_type === 'percentage' ? ` (${materialJob.service_item.tax}%)` : ''}`
-                )}
-                {displayField(
-                  'Freight Charge',
-                  materialJob?.service_item?.freight_charge != null
-                    ? `$${Number(materialJob.service_item?.freight_charge).toFixed(2)}`
-                    : '—'
-                )}
+            <div className='p-4 rounded-lg border border-border bg-[#1F1F1F]/30 space-y-3'>
+              <div className='p-2.5 bg-[#1F1F1F] rounded-lg grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6'>
+                {[
+                  { label: 'Product Name', value: serviceItemName },
+                  { label: 'Color', value: productColor },
+                  { label: 'Description', value: serviceItemDescription },
+                  {
+                    label: 'Quantity',
+                    value: `${materialJob?.quantity} ${materialJob?.selling_unit?.name || materialJob?.service_item?.unit?.name || 'Unit'}${materialJob?.quantity !== materialJob?.purchase_quantity ? ` (${materialJob?.purchase_quantity} ${materialJob?.purchase_unit?.name || 'Unit'})` : ''}`
+                  },
+                  {
+                    label: 'Unit Cost',
+                    value:
+                      materialJob?.service_item?.unit_cost != null
+                        ? `$${Number(materialJob.service_item?.unit_cost).toFixed(2)}`
+                        : '—'
+                  },
+                  {
+                    label: 'Total Tax Amount',
+                    value: `$${calculatedBilling.taxAmount.toFixed(2)}${materialJob?.service_item?.tax_type === 'percentage' ? ` (${materialJob.service_item.tax}%)` : ''}`
+                  },
+                  {
+                    label: 'Freight Charge',
+                    value:
+                      materialJob?.service_item?.freight_charge != null
+                        ? `$${Number(materialJob.service_item?.freight_charge).toFixed(2)}`
+                        : '—'
+                  }
+                ].map((field, idx) => displayField(field.label, field.value, idx))}
               </div>
 
-              <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2'>
+              <div className='grid grid-cols-1 sm:grid-cols-3 gap-x-3 gap-y-2 pt-2'>
                 {/* Order Status */}
-                <FormField
-                  control={form.control}
+                <CustomFormField
                   name='order_status'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Order Status</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange} disabled={form.formState.isSubmitting}>
-                        <FormControl>
-                          <SelectTrigger className='w-full'>
-                            <SelectValue placeholder='Select status' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {ORDER_STATUS_OPTIONS.map(opt => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label='Order Status'
+                  type='select'
+                  placeholder='Select status'
+                  selectOptions={ORDER_STATUS_OPTIONS}
+                  control={control}
+                  errors={errors}
+                  fieldClassName={fieldStyle}
+                  labelClassName={labelStyle}
+                  disabled={isSubmitting}
                 />
 
                 {/* Est. Received Date */}
-                <FormField
-                  control={form.control}
+                <CustomFormField
                   name='estimated_received_date'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Est. Received Date</FormLabel>
-                      <FormControl>
-                        <DatePicker value={field.value} onChange={field.onChange} placeholder='Select date' />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label='Est. Received Date'
+                  type='datepicker'
+                  placeholder='Select date'
+                  control={control}
+                  errors={errors}
+                  fieldClassName={fieldStyle}
+                  labelClassName={labelStyle}
+                  disabled={isSubmitting}
                 />
 
                 {/* Ship Date */}
-                <FormField
-                  control={form.control}
+                <CustomFormField
                   name='shipped_date'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ship Date</FormLabel>
-                      <FormControl>
-                        <DatePicker value={field.value} onChange={field.onChange} placeholder='Select date' />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label='Ship Date'
+                  type='datepicker'
+                  placeholder='Select date'
+                  control={control}
+                  errors={errors}
+                  fieldClassName={fieldStyle}
+                  labelClassName={labelStyle}
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
@@ -547,113 +529,91 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
             <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3'>
               Order Information
             </h3>
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2'>
               {/* Order Number */}
-              <FormField
-                control={form.control}
+              <CustomFormField
                 name='order_number'
-                rules={{
-                  required: "Order Number Is Required"
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Order Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter order number' {...field} disabled={form.formState.isSubmitting} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label='Order Number'
+                placeholder='Enter order number'
+                rules={{ required: 'Order Number Is Required' }}
+                register={register}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
+                disabled={isSubmitting}
               />
 
               {/* PO Create Date */}
-              <FormField
-                control={form.control}
+              <CustomFormField
                 name='po_create_date'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>PO Create Date</FormLabel>
-                    <FormControl>
-                      <DatePicker value={field.value} onChange={field.onChange} placeholder='Select date' />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label='PO Create Date'
+                type='datepicker'
+                placeholder='Select date'
+                control={control}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
+                disabled={isSubmitting}
               />
 
               {/* Ship To */}
-              <FormField
-                control={form.control}
+              <CustomFormField
                 name='shipped_to'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ship To</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange} disabled={form.formState.isSubmitting}>
-                      <FormControl>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select destination type' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {SHIP_TO_OPTIONS.map(opt => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label='Ship To'
+                type='select'
+                placeholder='Select destination type'
+                selectOptions={SHIP_TO_OPTIONS}
+                control={control}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
+                disabled={isSubmitting}
               />
 
               {/* Dynamic Ship-To Location */}
               {shippedTo && (
-                <FormField
-                  control={form.control}
+                <CustomFormField
                   name='shipped_to_location_id'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{getShippedToLabel()}</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={form.formState.isSubmitting || isLoadingAddresses}
-                      >
-                        <FormControl>
-                          <SelectTrigger className='w-full'>
-                            <SelectValue placeholder={getShippedToPlaceholder()} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>{renderShippedToOptions()}</SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label={getShippedToLabel()}
+                  type='select'
+                  placeholder={getShippedToPlaceholder()}
+                  selectOptions={
+                    shippedTo === 'warehouse'
+                      ? warehouses.map(w => ({ value: w.id, label: w.title }))
+                      : shippedTo === 'location'
+                        ? businessLocations.map(bl => ({ value: bl.id, label: bl.name }))
+                        : shippedTo === 'vendor_address'
+                          ? vendorAddresses.map(addr => ({
+                              value: addr.id,
+                              label: `${addr.title}${addr.street_address ? ` — ${addr.street_address}` : ''}`
+                            }))
+                          : shippedTo === 'job_site'
+                            ? clientAddresses.map(addr => ({
+                                value: addr.id,
+                                label: `${addr.title}${addr.street_address ? ` — ${addr.street_address}` : ''}`
+                              }))
+                            : []
+                  }
+                  control={control}
+                  errors={errors}
+                  fieldClassName={fieldStyle}
+                  labelClassName={labelStyle}
+                  disabled={isSubmitting || isLoadingAddresses}
                 />
               )}
 
               {/* Comments — full width */}
-              <div className='sm:col-span-2'>
-                <FormField
-                  control={form.control}
-                  name='comments'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Comments</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder='Enter comments...'
-                          className='resize-none min-h-20'
-                          {...field}
-                          disabled={form.formState.isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <CustomFormField
+                name='comments'
+                label='Comments'
+                type='textarea'
+                placeholder='Enter comments...'
+                register={register}
+                errors={errors}
+                fieldClassName={`sm:col-span-2 ${fieldStyle}`}
+                labelClassName={labelStyle}
+                disabled={isSubmitting}
+              />
             </div>
           </div>
 
@@ -662,231 +622,138 @@ const UpdateMaterialJobModal = ({ open, onOpenChange, materialJob, onSuccess }: 
             <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3'>
               Bill Information
             </h3>
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2'>
               {/* Reconciled Toggle */}
-              <FormField
-                control={form.control}
+              <CustomFormField
                 name='is_reconciled'
-                render={({ field }) => (
-                  <FormItem className='flex flex-row items-center gap-3 space-y-0'>
-                    <FormLabel className='min-w-fit'>Reconciled</FormLabel>
-                    <FormControl>
-                      <button
-                        type='button'
-                        role='switch'
-                        aria-checked={field.value}
-                        onClick={() => field.onChange(!field.value)}
-                        disabled={form.formState.isSubmitting}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer ${
-                          field.value ? 'bg-primary' : 'bg-gray-300'
-                        }`}
-                      >
-                        <span
-                          className={`block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform ${
-                            field.value ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label='Reconciled'
+                type='switch'
+                control={control}
+                errors={errors}
+                fieldClassName='grid grid-cols-[152px_minmax(0,_1fr)] [&_button]:order-2 [&_label]:order-1'
+                labelClassName={labelStyle}
+                disabled={isSubmitting}
               />
 
               {/* Payment Term */}
-              <FormField
-                control={form.control}
+              <CustomFormField
                 name='payment_term_id'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Payment Term</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange} disabled={form.formState.isSubmitting}>
-                      <FormControl>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select payment term' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {paymentTerms.map(term => (
-                          <SelectItem key={term.id} value={term.id}>
-                            {term.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label='Payment Term'
+                type='select'
+                placeholder='Select payment term'
+                selectOptions={paymentTerms.map(term => ({ value: term.id, label: term.name }))}
+                control={control}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
+                disabled={isSubmitting}
               />
 
               {/* Bill Date */}
-              <FormField
-                control={form.control}
+              <CustomFormField
                 name='bill_date'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bill Date</FormLabel>
-                    <FormControl>
-                      <DatePicker value={field.value} onChange={field.onChange} placeholder='Select date' />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label='Bill Date'
+                type='datepicker'
+                placeholder='Select date'
+                control={control}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
+                disabled={isSubmitting}
               />
 
               {/* Due Date */}
-              <FormField
-                control={form.control}
+              <CustomFormField
                 name='due_date'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Due Date</FormLabel>
-                    <FormControl>
-                      <DatePicker value={field.value} onChange={field.onChange} placeholder='Select date' />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label='Due Date'
+                type='datepicker'
+                placeholder='Select date'
+                control={control}
+                errors={errors}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
+                disabled={isSubmitting}
               />
 
               {/* ── Financial Fields: inline label + input layout ── */}
-              <div className='sm:col-span-2 border rounded-lg p-4 space-y-2 bg-muted/20'>
+              <div className='sm:col-span-2 border border-border rounded-lg p-4 space-y-2 bg-[#1F1F1F]/20'>
                 {/* Freight */}
-                <FormField
-                  control={form.control}
+                <CustomFormField
                   name='freight_cost'
-                  render={({ field }) => (
-                    <FormItem className='flex items-center gap-4 space-y-0'>
-                      <FormLabel className='w-40 shrink-0 text-right text-muted-foreground'>Freight</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='number'
-                          min={0}
-                          step='0.01'
-                          placeholder='0.00'
-                          className='h-8 text-sm'
-                          {...field}
-                          disabled={form.formState.isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label='Freight'
+                  type='number'
+                  placeholder='0.00'
+                  register={register}
+                  errors={errors}
+                  fieldClassName={fieldStyle}
+                  labelClassName={cn(labelStyle, 'text-muted-foreground')}
+                  disabled={isSubmitting}
                 />
 
                 {/* Tax Total */}
-                <FormField
-                  control={form.control}
+                <CustomFormField
                   name='tax_amount'
-                  render={({ field }) => (
-                    <FormItem className='flex items-center gap-4 space-y-0'>
-                      <FormLabel className='w-40 shrink-0 text-right text-muted-foreground'>Tax Total</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='number'
-                          min={0}
-                          step='0.01'
-                          placeholder='0.00'
-                          className='h-8 text-sm'
-                          {...field}
-                          disabled={form.formState.isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label='Tax Total'
+                  type='number'
+                  placeholder='0.00'
+                  register={register}
+                  errors={errors}
+                  fieldClassName={fieldStyle}
+                  labelClassName={cn(labelStyle, 'text-muted-foreground')}
+                  disabled={isSubmitting}
                 />
 
                 {/* Discount */}
-                <FormField
-                  control={form.control}
+                <CustomFormField
                   name='discount_amount'
-                  render={({ field }) => (
-                    <FormItem className='flex items-center gap-4 space-y-0'>
-                      <FormLabel className='w-40 shrink-0 text-right text-orange-500'>Discount (-)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='number'
-                          min={0}
-                          step='0.01'
-                          placeholder='0.00'
-                          className='h-8 text-sm'
-                          {...field}
-                          disabled={form.formState.isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label='Discount (-)'
+                  type='number'
+                  placeholder='0.00'
+                  register={register}
+                  errors={errors}
+                  fieldClassName={fieldStyle}
+                  labelClassName={cn(labelStyle, 'text-orange-500')}
+                  disabled={isSubmitting}
                 />
 
                 {/* Total Amount — read-only, auto-calculated */}
-                <FormField
-                  control={form.control}
+                <CustomFormField
                   name='total_amount'
-                  render={({ field }) => (
-                    <FormItem className='flex items-center gap-4 space-y-0'>
-                      <FormLabel className='w-40 shrink-0 text-right font-semibold'>Total Amount</FormLabel>
-                      <FormControl>
-                        <Input
-                          readOnly
-                          tabIndex={-1}
-                          className='h-8 text-sm font-semibold bg-muted cursor-default'
-                          {...field}
-                          value={field.value ? `$${Number(field.value).toFixed(2)}` : '$0.00'}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
+                  label='Total Amount'
+                  readonly={true}
+                  register={register}
+                  fieldClassName={fieldStyle}
+                  labelClassName={cn(labelStyle, 'font-semibold')}
+                  className='font-semibold bg-muted cursor-default'
+                  value={`$${Number(watch('total_amount') || 0).toFixed(2)}`}
                 />
 
-                <div className='border-t my-2' />
+                <div className='border-t border-light/50 my-2' />
 
                 {/* Vendor Invoice Total */}
-                <FormField
-                  control={form.control}
+                <CustomFormField
                   name='vendor_invoice_total'
-                  render={({ field }) => (
-                    <FormItem className='flex items-center gap-4 space-y-0'>
-                      <FormLabel className='w-40 shrink-0 text-right text-muted-foreground'>
-                        Vendor Invoice Total
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type='number'
-                          min={0}
-                          step='0.01'
-                          placeholder='0.00'
-                          className='h-8 text-sm'
-                          {...field}
-                          disabled={form.formState.isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label='Vendor Invoice Total'
+                  type='number'
+                  placeholder='0.00'
+                  register={register}
+                  errors={errors}
+                  fieldClassName={fieldStyle}
+                  labelClassName={cn(labelStyle, 'text-muted-foreground')}
+                  disabled={isSubmitting}
                 />
 
                 {/* Adjustment Amount (+/-) */}
-                <FormField
-                  control={form.control}
+                <CustomFormField
                   name='adjustment_amount'
-                  render={({ field }) => (
-                    <FormItem className='flex items-center gap-4 space-y-0'>
-                      <FormLabel className='w-40 shrink-0 text-right text-muted-foreground'>+/-</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='number'
-                          step='0.01'
-                          placeholder='0.00'
-                          className='h-8 text-sm'
-                          {...field}
-                          disabled={form.formState.isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label='+/-'
+                  type='number'
+                  placeholder='0.00'
+                  register={register}
+                  errors={errors}
+                  fieldClassName={fieldStyle}
+                  labelClassName={cn(labelStyle, 'text-muted-foreground')}
+                  disabled={isSubmitting}
                 />
               </div>
             </div>

@@ -65,6 +65,7 @@ const ProposalRevisionModal: React.FC<ProposalRevisionModalProps> = ({
           <Button
             type='button'
             variant='outline'
+            size='sm'
             onClick={onCancel}
             disabled={form.formState.isSubmitting}
             className='flex-1'
@@ -73,6 +74,7 @@ const ProposalRevisionModal: React.FC<ProposalRevisionModalProps> = ({
           </Button>
           <Button
             type='submit'
+            size='sm'
             onClick={form.handleSubmit(onSubmit)}
             disabled={form.formState.isSubmitting || !form.watch('comment')}
             className='flex-1'

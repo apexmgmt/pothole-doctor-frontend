@@ -1,16 +1,14 @@
 import { Fragment } from 'react'
 import { Boxes, Box, Wrench, ClipboardIcon, GridIcon, Minus } from 'lucide-react'
 
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import CustomFormField from '@/components/form/CustomFormField'
 import { ProposalServiceItemPayload, Unit, Vendor } from '@/types'
 import { cn } from '@/lib/utils'
 import { getDiscountedUnitPrice } from '@/utils/business-calculation'
 import LineItemActions from './LineItemActions'
 import MaterialJobActionsRow from './MaterialJobActionsRow'
 import { StylePopover, ColorPopover } from './StyleColorPopover'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+
 
 interface LineItemRowProps {
   line: ProposalServiceItemPayload
@@ -77,24 +75,25 @@ const LineItemRow = ({
 
   return (
     <Fragment>
-      <tr className={cn('border-b border-zinc-800 align-top', line.type === 'deduction' && 'text-red-500')}>
+      <tr className={cn('border-t border-accent/40 align-top', line.type === 'deduction' && 'text-red-500')}>
         <td className='px-2 py-3'>{idx + 1}.</td>
 
         {/* Name */}
         <td className='px-2 py-1'>
           <div className='flex items-center gap-2'>
-            {line.type === 'product' && line.product_id && <Boxes className='h-4 w-4 text-zinc-400' />}
-            {line.type === 'product' && !line.product_id && <Box className='h-4 w-4 text-zinc-400' />}
-            {line.type === 'labor' && <Wrench className='h-4 w-4 text-zinc-400' />}
-            {line.type === 'expense' && <ClipboardIcon className='h-4 w-4 text-zinc-400' />}
-            {line.type === 'invoice' && <GridIcon className='h-4 w-4 text-zinc-400' />}
+            {line.type === 'product' && line.product_id && <Boxes className='h-4 w-4 text-accent-foreground' />}
+            {line.type === 'product' && !line.product_id && <Box className='h-4 w-4 text-accent-foreground' />}
+            {line.type === 'labor' && <Wrench className='h-4 w-4 text-accent-foreground' />}
+            {line.type === 'expense' && <ClipboardIcon className='h-4 w-4 text-accent-foreground' />}
+            {line.type === 'invoice' && <GridIcon className='h-4 w-4 text-accent-foreground' />}
             {line.type === 'deduction' && <Minus className='h-4 w-4 text-red-500' />}
             <div className='w-full min-w-32'>
-              <Input
+              <CustomFormField
+                type='text'
                 value={getEditValue(idx, 'name', line.name ?? '')}
-                onChange={e => setEditValue(idx, 'name', e.target.value)}
-                onBlur={e => {
-                  updateLine(idx, 'name', e.target.value)
+                onChange={(val: any) => setEditValue(idx, 'name', val)}
+                onBlur={() => {
+                  updateLine(idx, 'name', getEditValue(idx, 'name', line.name ?? ''))
                   clearEditValue(idx, 'name')
                 }}
                 className={cn(
@@ -112,11 +111,12 @@ const LineItemRow = ({
         {/* Description */}
         <td className='px-2 py-1'>
           <div className='w-full min-w-32'>
-            <Input
+            <CustomFormField
+              type='text'
               value={getEditValue(idx, 'description', line.description ?? '')}
-              onChange={e => setEditValue(idx, 'description', e.target.value)}
-              onBlur={e => {
-                updateLine(idx, 'description', e.target.value)
+              onChange={(val: any) => setEditValue(idx, 'description', val)}
+              onBlur={() => {
+                updateLine(idx, 'description', getEditValue(idx, 'description', line.description ?? ''))
                 clearEditValue(idx, 'description')
               }}
               className={cn('w-full', fieldErrors?.description && 'border-red-500 focus-visible:ring-red-500')}
@@ -130,24 +130,18 @@ const LineItemRow = ({
         {showVendor && (
           <td className='px-2 py-1'>
             {line.type === 'product' && (
-              <Select
+              <CustomFormField
+                type='select'
+                placeholder='Vendor'
                 value={line.vendor_id || line.product?.vendor_id || ''}
-                onValueChange={val => updateLine(idx, 'vendor_id', val)}
+                onChange={(val: any) => updateLine(idx, 'vendor_id', val)}
                 disabled={isLocked || !!line.product_id}
-              >
-                <SelectTrigger
-                  className={cn('w-36 text-xs', fieldErrors?.vendor_id && 'border-red-500 focus:ring-red-500')}
-                >
-                  <SelectValue placeholder='Vendor' />
-                </SelectTrigger>
-                <SelectContent>
-                  {vendors.map(vendor => (
-                    <SelectItem key={vendor.id} value={vendor.id}>
-                      {[vendor.first_name, vendor.last_name].filter(Boolean).join(' ')}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                selectOptions={vendors.map(vendor => ({
+                  value: vendor.id,
+                  label: [vendor.first_name, vendor.last_name].filter(Boolean).join(' ')
+                }))}
+                className={cn('w-36 text-xs', fieldErrors?.vendor_id && 'border-red-500')}
+              />
             )}
           </td>
         )}
@@ -202,21 +196,18 @@ const LineItemRow = ({
         {/* Unit Cost */}
         <td className='px-2 py-1'>
           {line.type !== 'deduction' && (
-            <InputGroup className='max-w-28'>
-              <InputGroupAddon>$</InputGroupAddon>
-              <InputGroupInput
-                type='number'
-                value={getEditValue(idx, 'unit_cost', String(line.unit_cost ?? 0))}
-                onChange={e => setEditValue(idx, 'unit_cost', e.target.value)}
-                onBlur={e => {
-                  updateLine(idx, 'unit_cost', parseFloat(e.target.value) || 0)
-                  clearEditValue(idx, 'unit_cost')
-                }}
-                className={cn('', fieldErrors?.unit_cost && 'border-red-500 focus-visible:ring-red-500')}
-                min={0}
-                disabled={isLocked}
-              />
-            </InputGroup>
+            <CustomFormField
+              type='number'
+              leftAddon='$'
+              value={getEditValue(idx, 'unit_cost', String(line.unit_cost ?? 0))}
+              onChange={(val: any) => setEditValue(idx, 'unit_cost', val)}
+              onBlur={() => {
+                updateLine(idx, 'unit_cost', parseFloat(getEditValue(idx, 'unit_cost', String(line.unit_cost ?? 0))) || 0)
+                clearEditValue(idx, 'unit_cost')
+              }}
+              className={cn('max-w-28', fieldErrors?.unit_cost && 'border-red-500 focus-visible:ring-red-500')}
+              disabled={isLocked}
+            />
           )}
         </td>
 
@@ -224,27 +215,26 @@ const LineItemRow = ({
         <td className='px-2 py-1'>
           {line.type !== 'deduction' && (
             <div className='flex flex-col gap-1'>
-              <Input
+              <CustomFormField
                 type='number'
                 value={getEditValue(idx, 'qty', String(line.qty ?? 1))}
-                onChange={e => setEditValue(idx, 'qty', e.target.value)}
-                onBlur={e => {
-                  const raw = parseFloat(e.target.value) || 0
+                onChange={(val: any) => setEditValue(idx, 'qty', val)}
+                onBlur={() => {
+                  const raw = parseFloat(getEditValue(idx, 'qty', String(line.qty ?? 1))) || 0
                   const clamped = clampProductQty(raw, line)
 
                   updateLine(idx, 'qty', clamped)
                   clearEditValue(idx, 'qty')
                 }}
                 className={cn(
-                  'w-20 bg-yellow-200 text-black',
+                  'w-20 ',
                   fieldErrors?.qty && 'border-red-500 focus-visible:ring-red-500'
                 )}
-                min={0}
                 disabled={isLocked}
               />
               {(line.type === 'product' || line.type === 'labor') &&
                 (line.product_id || line.labor_cost_id ? (
-                  <span className='text-xs text-zinc-400 px-1 truncate w-28' title={line.unit_name || '—'}>
+                  <span className='text-xs text-accent-foreground px-1 truncate w-28' title={line.unit_name || '—'}>
                     {line.unit_name || '—'}
                     {line.product_id && !!line.product?.coverage_per_rate && (
                       <span className='text-xs text-blue-400 px-1 truncate w-28'>
@@ -254,28 +244,22 @@ const LineItemRow = ({
                     )}
                   </span>
                 ) : (
-                  <Select
+                  <CustomFormField
+                    type='select'
+                    placeholder='Unit'
                     value={line.unit_id ?? ''}
-                    onValueChange={val => {
+                    onChange={(val: any) => {
                       const unit = units.find(u => u.id === val)
 
                       updateLineFields(idx, { unit_id: val, unit_name: unit?.name ?? '' })
                     }}
                     disabled={isLocked}
-                  >
-                    <SelectTrigger
-                      className={cn('w-20 h-6! text-xs', fieldErrors?.unit_id && 'border-red-500 focus:ring-red-500')}
-                    >
-                      <SelectValue placeholder='Unit' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {units.map(unit => (
-                        <SelectItem key={unit.id} value={unit.id}>
-                          {unit.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    selectOptions={units.map(unit => ({
+                      value: unit.id,
+                      label: unit.name
+                    }))}
+                    className={cn('w-20 h-6! text-xs', fieldErrors?.unit_id && 'border-red-500')}
+                  />
                 ))}
             </div>
           )}
@@ -284,10 +268,13 @@ const LineItemRow = ({
         {/* Total Cost */}
         <td className='px-2 py-1'>
           {line.type !== 'deduction' && (
-            <InputGroup className='max-w-28'>
-              <InputGroupAddon>$</InputGroupAddon>
-              <InputGroupInput value={totalCost.toFixed(2)} readOnly className='w-28' />
-            </InputGroup>
+            <CustomFormField
+              type='text'
+              leftAddon='$'
+              value={totalCost.toFixed(2)}
+              readonly
+              className='max-w-28'
+            />
           )}
         </td>
 
@@ -295,24 +282,18 @@ const LineItemRow = ({
         {!hideMargin && (
           <td className='px-2 py-1'>
             {line.type !== 'deduction' && (
-              <>
-                <InputGroup className='max-w-28'>
-                  <InputGroupInput
-                    type='number'
-                    value={getEditValue(idx, 'margin', String(line.margin ?? 0))}
-                    onChange={e => setEditValue(idx, 'margin', e.target.value)}
-                    onBlur={e => {
-                      updateLine(idx, 'margin', parseFloat(e.target.value) || 0)
-                      clearEditValue(idx, 'margin')
-                    }}
-                    className={cn('w-28', fieldErrors?.margin && 'border-red-500 focus-visible:ring-red-500')}
-                    min={0}
-                    max={100}
-                    disabled={isLocked}
-                  />
-                  <InputGroupAddon align='inline-end'>%</InputGroupAddon>
-                </InputGroup>
-              </>
+              <CustomFormField
+                type='number'
+                rightAddon='%'
+                value={getEditValue(idx, 'margin', String(line.margin ?? 0))}
+                onChange={(val: any) => setEditValue(idx, 'margin', val)}
+                onBlur={() => {
+                  updateLine(idx, 'margin', parseFloat(getEditValue(idx, 'margin', String(line.margin ?? 0))) || 0)
+                  clearEditValue(idx, 'margin')
+                }}
+                className={cn('max-w-28', fieldErrors?.margin && 'border-red-500 focus-visible:ring-red-500')}
+                disabled={isLocked}
+              />
             )}
           </td>
         )}
@@ -322,36 +303,39 @@ const LineItemRow = ({
             {/* Unit Price */}
             <td className='px-2 py-1'>
               {line.type !== 'deduction' && (
-                <InputGroup className='max-w-28'>
-                  <InputGroupAddon>$</InputGroupAddon>
-                  <InputGroupInput value={unitPrice.toFixed(2)} readOnly className='w-28' />
-                </InputGroup>
+                <CustomFormField
+                  type='text'
+                  leftAddon='$'
+                  value={unitPrice.toFixed(2)}
+                  readonly
+                  className='max-w-28'
+                />
               )}
             </td>
 
             {/* Total Price */}
             <td className='px-2 py-1'>
               {line.type === 'deduction' ? (
-                <InputGroup className='max-w-28'>
-                  <InputGroupAddon>$</InputGroupAddon>
-                  <InputGroupInput
-                    disabled={isLocked}
-                    type='number'
-                    min={0}
-                    value={getEditValue(idx, 'total_price', Number(line.total_price)?.toFixed(2) ?? '')}
-                    onChange={e => setEditValue(idx, 'total_price', e.target.value)}
-                    onBlur={e => {
-                      updateLine(idx, 'total_price', parseFloat(e.target.value) || 0)
-                      clearEditValue(idx, 'total_price')
-                    }}
-                    className={cn('w-28', fieldErrors?.total_price && 'border-red-500 focus-visible:ring-red-500')}
-                  />
-                </InputGroup>
+                <CustomFormField
+                  type='number'
+                  leftAddon='$'
+                  value={getEditValue(idx, 'total_price', Number(line.total_price)?.toFixed(2) ?? '')}
+                  onChange={(val: any) => setEditValue(idx, 'total_price', val)}
+                  onBlur={() => {
+                    updateLine(idx, 'total_price', parseFloat(getEditValue(idx, 'total_price', Number(line.total_price)?.toFixed(2) ?? '')) || 0)
+                    clearEditValue(idx, 'total_price')
+                  }}
+                  disabled={isLocked}
+                  className={cn('max-w-28', fieldErrors?.total_price && 'border-red-500 focus-visible:ring-red-500')}
+                />
               ) : (
-                <InputGroup className='max-w-28'>
-                  <InputGroupAddon>$</InputGroupAddon>
-                  <InputGroupInput value={totalPrice.toFixed(2)} readOnly className='w-28' />
-                </InputGroup>
+                <CustomFormField
+                  type='text'
+                  leftAddon='$'
+                  value={totalPrice.toFixed(2)}
+                  readonly
+                  className='max-w-28'
+                />
               )}
             </td>
           </>
@@ -362,10 +346,11 @@ const LineItemRow = ({
         {!hideTaxOption && (
           <td className='px-2 py-3.5 text-center'>
             {line.type !== 'deduction' && (
-              <Checkbox
+              <CustomFormField
+                type='checkbox'
                 disabled={isLocked}
-                checked={line.is_sale ? true : false}
-                onCheckedChange={checked => updateLine(idx, 'is_sale', checked ? 1 : 0)}
+                value={line.is_sale ? true : false}
+                onChange={(checked: any) => updateLine(idx, 'is_sale', checked ? 1 : 0)}
               />
             )}
           </td>
