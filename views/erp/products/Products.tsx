@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
-import { PlusIcon, Search } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 
 import { toast } from 'sonner'
 
@@ -12,7 +12,7 @@ import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, Product, ProductsProps } from '@/types'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { InputGroup, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
@@ -26,6 +26,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { hasPermission } from '@/utils/role-permission'
 import { formatCurrency } from '@/utils/currency'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const Products: React.FC<ProductsProps> = ({
   productCategories,
@@ -385,18 +386,7 @@ const Products: React.FC<ProductsProps> = ({
           <label htmlFor='product-search' className='text-xs font-medium mb-1 text-muted-foreground'>
             Search
           </label>
-          <InputGroup>
-            <InputGroupInput
-              id='product-search'
-              placeholder='Search...'
-              value={searchValue}
-              onChange={e => setSearchValue(e.target.value)}
-              className='lg:w-80 min-w-0'
-            />
-            <InputGroupAddon className='hidden! sm:block!'>
-              <Search />
-            </InputGroupAddon>
-          </InputGroup>
+          <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
         </div>
         {/* Category filter */}
         <div className='flex flex-col flex-1'>
@@ -450,7 +440,7 @@ const Products: React.FC<ProductsProps> = ({
           </InputGroup>
         </div>
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light mt-5'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light mt-5 h-7'>
             Clear
           </Button>
         )}
@@ -459,7 +449,7 @@ const Products: React.FC<ProductsProps> = ({
         <Button
           variant='default'
           size='sm'
-          className='bg-light text-bg hover:bg-light/90 mt-5'
+          className='bg-light text-bg hover:bg-light/90 mt-5 h-7'
           onClick={handleOpenCreateModal}
         >
           <PlusIcon className='w-4 h-4' />

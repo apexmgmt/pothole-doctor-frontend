@@ -1,13 +1,12 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Search } from 'lucide-react'
+
 import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Badge } from '@/components/ui/badge'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
@@ -22,6 +21,7 @@ import ScheduleService from '@/services/api/schedules.service'
 import { formatDate } from '@/utils/date'
 import { Schedule } from '@/types/schedules'
 import { Column, Partner, WorkOrder } from '@/types'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = ({
   workOrders = [],
@@ -271,19 +271,9 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='lg:w-80 min-w-0'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
           </Button>
         )}

@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
-import { Search, ShoppingCartIcon } from 'lucide-react'
+import { ShoppingCartIcon } from 'lucide-react'
 
 import { toast } from 'sonner'
 
@@ -12,7 +12,6 @@ import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, Product, ProductsProps, PurchaseOrder } from '@/types'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { getInitialFilters, mathRoundFixed, updateURL } from '@/utils/utility'
@@ -22,6 +21,7 @@ import { PackageIcon, WarehouseIcon, SlidersHorizontalIcon } from 'lucide-react'
 import ProductInventorySection from './ProductInventorySection'
 import InventoryAdjustmentSection from './InventoryAdjustmentSection'
 import { formatCurrency } from '@/utils/currency'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const ProductStock: React.FC<ProductsProps> = ({
   productCategories,
@@ -340,18 +340,7 @@ const ProductStock: React.FC<ProductsProps> = ({
           <label htmlFor='stock-search' className='text-xs font-medium mb-1 text-muted-foreground'>
             Search
           </label>
-          <InputGroup>
-            <InputGroupInput
-              id='stock-search'
-              placeholder='Search...'
-              value={searchValue}
-              onChange={e => setSearchValue(e.target.value)}
-              className='w-full lg:w-80 min-w-0'
-            />
-            <InputGroupAddon>
-              <Search />
-            </InputGroupAddon>
-          </InputGroup>
+          <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='w-full lg:w-80 min-w-0' />
         </div>
 
         <div className='flex flex-col flex-1'>
@@ -374,7 +363,7 @@ const ProductStock: React.FC<ProductsProps> = ({
         </div>
 
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light mt-5'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light mt-5 h-7'>
             Clear
           </Button>
         )}
