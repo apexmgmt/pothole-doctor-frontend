@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import Link from 'next/link'
 
-import { PlusIcon, Search } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -15,7 +15,6 @@ import OrganizationService from '@/services/api/organizations.service'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, Organization } from '@/types'
 import OrganizationDetails from '@/views/erp/organizations/OrganizationDetails'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import OrganizationStatusSwitch from '@/views/erp/organizations/OrganizationStatusSwitch'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
@@ -27,6 +26,7 @@ import { encryptData } from '@/utils/encryption'
 import { appUrl } from '@/utils/utility'
 import { toast } from 'sonner'
 import CreateOrEditOrganizationModal from '@/views/erp/organizations/CreateOrEditOrganizationModal'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const Organizations: React.FC = () => {
   const router = useRouter()
@@ -310,20 +310,15 @@ const Organizations: React.FC = () => {
   // Custom filters component
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80! '>
-        <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='lg:w-80 min-w-0'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+        <TableSearch
+          value={searchValue}
+          onChange={setSearchValue}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
-          <Button variant='ghost' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='ghost' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear Filters
           </Button>
         )}
@@ -332,7 +327,7 @@ const Organizations: React.FC = () => {
         <Button
           variant='default'
           size='sm'
-          className='bg-light text-bg hover:bg-light/90'
+          className='bg-light text-bg hover:bg-light/90 h-7'
           onClick={() => {
             setModalMode('create')
             setEditCompanyId(undefined)

@@ -18,14 +18,9 @@ import {
   Staff
 } from '@/types'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import EstimateService from '@/services/api/estimates/estimates.service'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { DatePicker } from '@/components/ui/datePicker'
-import { Textarea } from '@/components/ui/textarea'
 import { DateTimePicker } from '@/components/ui/datetime-picker'
 import CustomFormField from '@/components/form/CustomFormField'
 
@@ -241,6 +236,20 @@ const CreateOrEditEstimateModal = ({
     }
   }, [watch('client_id'), mode, selectedClient, defaultAddressId])
 
+  // If selected client is tax exempt, force tax_rate to 0
+  // Otherwise, if they are not tax exempt, populate tax_rate based on current location
+  useEffect(() => {
+    if (selectedClient?.clientable?.is_tax_exempt) {
+      setValue('tax_rate', 0)
+    } else {
+      const selectedLocation = businessLocations.find(loc => loc.id === form.getValues('location_id'))
+
+      if (selectedLocation && selectedLocation.sales_tax) {
+        setValue('tax_rate', selectedLocation.sales_tax)
+      }
+    }
+  }, [selectedClient])
+
   // Auto-populate tax_rate from selected business location's sales_tax if tax_rate is empty
   // useEffect(() => {
   //   const selectedLocation = businessLocations.find(loc => loc.id === watch('location_id'))
@@ -356,6 +365,8 @@ const CreateOrEditEstimateModal = ({
             selectOptions={businessLocations.map(loc => ({ value: loc.id, label: loc.name }))}
             control={control}
             onChange={value => {
+              if (selectedClient?.clientable?.is_tax_exempt) return
+
               const selectedLocation = businessLocations.find(loc => loc.id === value)
 
               if (selectedLocation && selectedLocation.sales_tax) {

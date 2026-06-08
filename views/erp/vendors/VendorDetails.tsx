@@ -6,7 +6,6 @@ import { toast } from 'sonner'
 
 import VendorService from '@/services/api/vendors/vendors.service'
 import VendorDetailsContent from './VendorDetailsContent'
-import EditButton from '@/components/erp/common/buttons/EditButton'
 import { Vendor, CountryWithStates } from '@/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DocumentIcon, UserIcon } from '@/public/icons'
@@ -50,12 +49,7 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({ vendorId, onEdit, countri
   }, [vendorId])
 
   if (isLoading) {
-    const skeletonTabs = [
-      { id: 'salesman' },
-      { id: 'documents' },
-      { id: 'rebate-credits' },
-      { id: 'pickup-addresses' }
-    ]
+    const skeletonTabs = [{ id: 'salesman' }, { id: 'documents' }, { id: 'rebate-credits' }, { id: 'pickup-addresses' }]
 
     return (
       <div className='space-y-6 mt-2.5'>

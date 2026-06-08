@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
-import { PlusIcon, Search } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 
 import { toast } from 'sonner'
 
@@ -12,7 +12,6 @@ import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, LaborCost, LaborCostsProps, ServiceType, Unit } from '@/types'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
@@ -25,6 +24,8 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { hasPermission } from '@/utils/role-permission'
 import { formatCurrency } from '@/utils/currency'
+import TableSearch from '@/components/erp/common/TableSearch'
+import CustomFormField from '@/components/form/CustomFormField'
 
 const LaborCosts: React.FC<{
   serviceTypes: ServiceType[]
@@ -313,62 +314,53 @@ const LaborCosts: React.FC<{
 
   // Custom filters component
   const customFilters = (
-    <div className='flex items-center justify-between w-full gap-2.5'>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80!'>
-        {/* Global search filter */}
-        <div className='flex flex-col'>
-          <label htmlFor='product-search' className='text-xs font-medium mb-1 text-muted-foreground'>
-            Search
-          </label>
-          <InputGroup>
-            <InputGroupInput
-              id='product-search'
-              placeholder='Search...'
-              value={searchValue}
-              onChange={e => setSearchValue(e.target.value)}
-              className='lg:w-80 min-w-0'
-            />
-            <InputGroupAddon>
-              <Search />
-            </InputGroupAddon>
-          </InputGroup>
+    <div className='flex flex-col md:flex-row md:items-center md:justify-between w-full gap-2.5'>
+      <div className='flex-1 flex flex-col md:flex-row md:items-center gap-2'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-2 w-full md:max-w-160'>
+          {/* Global search filter */}
+          <TableSearch
+            name='product-search'
+            label='Search'
+            value={searchValue}
+            onChange={setSearchValue}
+            placeholder='Search...'
+          />
+
+          {/* Service type filter */}
+          <CustomFormField
+            type='select'
+            name='service-type-filter'
+            label='Service Type'
+            placeholder='All'
+            value={filterOptions.service_type_id || 'all'}
+            onChange={v => handleServiceTypeChange(v as string)}
+            selectOptions={[
+              { label: 'All', value: 'all' },
+              ...(serviceTypes.map(st => ({ label: st.name, value: st.id })) || [])
+            ]}
+          />
         </div>
-        {/* Service type filter */}
-        <div className='flex flex-col'>
-          <label
-            htmlFor='service-type-filter'
-            className='text-xs font-medium mb-1 text-muted-foreground whitespace-nowrap'
-          >
-            Service Type
-          </label>
-          <Select value={filterOptions.service_type_id || 'all'} onValueChange={handleServiceTypeChange}>
-            <SelectTrigger id='service-type-filter' className='lg:w-72 min-w-0 sm:min-w-25'>
-              <SelectValue placeholder='All' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All</SelectItem>
-              {serviceTypes.map(st => (
-                <SelectItem key={st.id} value={st.id}>
-                  {st.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light mt-5'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={handleClearFilters}
+            className='text-gray hover:text-light mt-5 h-7'
+          >
             Clear
           </Button>
         )}
       </div>
+
       <Button
         variant='default'
         size='sm'
-        className='bg-light text-bg hover:bg-light/90 mt-5'
+        className='bg-light text-bg hover:bg-light/90 mt-5 h-7'
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />
-        <span className='hidden sm:block'>Add Labor Cost</span>
+        <span>Add Labor Cost</span>
       </Button>
     </div>
   )

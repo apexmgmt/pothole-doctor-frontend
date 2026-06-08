@@ -2,19 +2,26 @@
 
 import { useRef } from 'react'
 
-import { ExternalLink, FileText, ImageIcon, Paperclip, Trash2, UploadCloud } from 'lucide-react'
+import {
+  Check,
+  CheckCircle2,
+  ExternalLink,
+  FileText,
+  ImageIcon,
+  Paperclip,
+  Trash2,
+  UploadCloud,
+  X,
+  XCircle
+} from 'lucide-react'
 
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
-import { DatePicker } from '@/components/ui/datePicker'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { BusinessLocation, Courier, Document, Warehouse } from '@/types'
 import { PurchaseOrder } from '@/types/products/purchase_orders'
 import { formatDate } from '@/utils/date'
 import { generateFileUrl, getFileType } from '@/utils/utility'
+import { cn } from '@/lib/utils'
+import CustomFormField from '@/components/form/CustomFormField'
 
 import { IncorrectFlags, ShipmentFormState } from './shipment-arrival.types'
 
@@ -43,6 +50,27 @@ const ReadOnlyField = ({ value, className }: { value: string | number | null | u
   </div>
 )
 
+const displayField = (label: string, value: React.ReactNode, index?: number) => {
+  const isFirst2 = index !== undefined && index % 2 === 0
+  const isFirst3 = index !== undefined && index % 3 === 0
+  const isFirst4 = index !== undefined && index % 4 === 0
+  const isFirst5 = index !== undefined && index % 5 === 0
+
+  const borderClass = cn(
+    isFirst2 ? 'border-l-0 pl-0' : 'border-l border-border pl-3',
+    isFirst3 ? 'sm:border-l-0 sm:pl-0' : 'sm:border-l sm:border-border sm:pl-3',
+    isFirst4 ? 'md:border-l-0 md:pl-0' : 'md:border-l md:border-border md:pl-3',
+    isFirst5 ? 'lg:border-l-0 lg:pl-0' : 'lg:border-l lg:border-border lg:pl-3'
+  )
+
+  return (
+    <div key={`${label}-${index}`} className={cn('flex flex-col gap-1.25', borderClass)}>
+      <span className='text-xs text-muted-foreground font-normal leading-none'>{label}</span>
+      <span className='text-[13px] font-medium leading-tight'>{value ?? '-'}</span>
+    </div>
+  )
+}
+
 // ─── Component ─────────────────────────────────────────────────────────────────
 
 const ShipmentHeaderCard = ({
@@ -59,6 +87,9 @@ const ShipmentHeaderCard = ({
 }: ShipmentHeaderCardProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const fieldStyle = 'grid grid-cols-[128px_minmax(0,_1fr)] gap-2'
+  const labelStyle = 'justify-end items-start self-start text-right pt-1.5'
+
   const renderWarehouseName = () => {
     if (!purchaseOrder) return '—'
     if (purchaseOrder.warehouse_type === 'warehouse') return (purchaseOrder.warehouse as Warehouse)?.title ?? '—'
@@ -67,160 +98,188 @@ const ShipmentHeaderCard = ({
   }
 
   return (
-    <Card className='p-4 space-y-3'>
-      {/* Row 1: PO#, Reference Number, Carrier */}
-      <div className='grid grid-cols-3 gap-4 items-center'>
+    <div className='space-y-4'>
+      {/* Shipment metadata columns */}
+      <div className='p-2.5 bg-[#1F1F1F] rounded-lg'>
         <div className='flex items-center gap-3'>
-          <span className='text-xs text-muted-foreground whitespace-nowrap w-28'>PO #</span>
-          {purchaseOrder ? (
-            <Badge variant='info' className='text-sm'>
-              PO-{purchaseOrder.purchase_order_number?.toString().padStart(4, '0') ?? '—'}
-            </Badge>
-          ) : (
-            <span className='text-muted-foreground text-sm'>—</span>
-          )}
+          <p className='text-xs leading-none text-muted-foreground'>PO #</p>
+          <div className='bg-[#FFC31C14] p-[7px] border border-border rounded-lg'>
+            <p className='text-[11px] leading-none text-light'>
+              {purchaseOrder ? `PO-${purchaseOrder.purchase_order_number?.toString().padStart(4, '0') ?? '—'}` : '-'}
+            </p>
+          </div>
         </div>
-        <div className='flex items-center gap-3'>
-          <span className='text-xs text-muted-foreground whitespace-nowrap w-32'>Reference Number</span>
-          <ReadOnlyField value={purchaseOrder?.reference_number} className='flex-1' />
-        </div>
-        <div className='flex items-center gap-3'>
-          <span className='text-xs text-muted-foreground whitespace-nowrap w-14'>Carrier</span>
-          <ReadOnlyField value={(purchaseOrder?.courier as Courier)?.name} className='flex-1' />
-        </div>
-      </div>
-
-      {/* Row 2: Vendor, Location, Lot Number */}
-      <div className='grid grid-cols-3 gap-4 items-center'>
-        <div className='flex items-center gap-3'>
-          <span className='text-xs text-muted-foreground whitespace-nowrap w-28'>Vendor</span>
-          <ReadOnlyField
-            value={
-              purchaseOrder?.vendor
+        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-3 gap-y-6 mt-2'>
+          {[
+            { label: 'Reference Number', value: purchaseOrder?.reference_number },
+            { label: 'Carrier', value: (purchaseOrder?.courier as Courier)?.name },
+            {
+              label: 'Vendor',
+              value: purchaseOrder?.vendor
                 ? `${purchaseOrder.vendor.first_name ?? ''} ${purchaseOrder.vendor.last_name ?? ''}`.trim()
                 : undefined
-            }
-            className='flex-1'
-          />
-        </div>
-        <div className='flex items-center gap-3'>
-          <span className='text-xs text-muted-foreground whitespace-nowrap w-32'>Location</span>
-          <ReadOnlyField value={renderWarehouseName()} className='flex-1' />
-        </div>
-        <div className='flex items-center gap-3'>
-          <span className='text-xs text-muted-foreground whitespace-nowrap w-14'>Lot Number</span>
-          <ReadOnlyField value={purchaseOrder?.lot_number} className='flex-1' />
+            },
+            { label: 'Location', value: renderWarehouseName() },
+            { label: 'Lot Number', value: purchaseOrder?.lot_number }
+          ].map((field, idx) => displayField(field.label, field.value, idx))}
         </div>
       </div>
 
-      {/* Row 3: Estimated (with Incorrect toggles) on left, Actual fields on right */}
-      <div className='grid grid-cols-2 gap-8 pt-1'>
-        {/* Left: Estimated fields + Comment */}
-        <div className='space-y-3'>
-          <div className='flex items-center gap-2'>
-            <span className='text-xs text-muted-foreground whitespace-nowrap w-36'>Estimated Departure</span>
-            <div className='flex-1'>
-              <ReadOnlyField value={formatDate(purchaseOrder?.est_departure_date ?? '')} />
-            </div>
-            {!viewOnly && (
-              <div className='flex items-center gap-1.5'>
-                <Switch checked={incorrectFlags.departure} onCheckedChange={() => onToggleIncorrect('departure')} />
-                <span className='text-xs text-muted-foreground'>Incorrect</span>
-              </div>
-            )}
-          </div>
+      {/* Estimated fields (with Incorrect toggles) and conditional Actual fields */}
+      <div className='space-y-2 p-4 border border-border rounded-lg'>
+        {/* Row 1: Departure */}
+        <div className='w-full grid grid-cols-[minmax(0,_1fr)_100px_minmax(0,_1fr)] gap-3'>
+          <CustomFormField
+            label='Estimated Departure'
+            value={purchaseOrder?.est_departure_date ? formatDate(purchaseOrder.est_departure_date) : '—'}
+            readonly
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+            className='cursor-default'
+          />
 
-          <div className='flex items-center gap-2'>
-            <span className='text-xs text-muted-foreground whitespace-nowrap w-36'>Estimated Arrival</span>
-            <div className='flex-1'>
-              <ReadOnlyField value={formatDate(purchaseOrder?.est_arrival_date ?? '')} />
-            </div>
-            {!viewOnly && (
-              <div className='flex items-center gap-1.5'>
-                <Switch checked={incorrectFlags.arrival} onCheckedChange={() => onToggleIncorrect('arrival')} />
-                <span className='text-xs text-muted-foreground'>Incorrect</span>
-              </div>
-            )}
-          </div>
+          {!viewOnly ? (
+            <button type='button' onClick={() => onToggleIncorrect('departure')} className='relative cursor-pointer'>
+              <span
+                className={`absolute left-0 bottom-1/2 translate-y-1/2 size-6 flex justify-center items-center border rounded-full ${incorrectFlags.departure ? 'bg-[#35292A] border-[#FF383C1F]' : 'bg-[#29322B] border-[#34C7591F]'}`}
+              >
+                {incorrectFlags.departure ? (
+                  <X className='size-4 text-[#FF383C]' />
+                ) : (
+                  <Check className='size-4 text-[#34C759]' />
+                )}
+              </span>
+              <span className='block min-w-18 text-xs leading-none text-center ps-3 pe-2 py-0.75 bg-[#1F1F1F] border border-border rounded-full'>
+                {incorrectFlags.departure ? 'Incorrect' : 'Correct'}
+              </span>
+            </button>
+          ) : (
+            <div />
+          )}
 
-          <div className='flex items-center gap-2'>
-            <span className='text-xs text-muted-foreground whitespace-nowrap w-36'>Estimated Shipping</span>
+          {incorrectFlags.departure && (
             <div className='flex-1'>
-              <ReadOnlyField
-                value={purchaseOrder?.est_shipping_cost != null ? String(purchaseOrder.est_shipping_cost) : undefined}
+              <CustomFormField
+                name='actual_departure_date'
+                label='Actual Departure'
+                type='datepicker'
+                placeholder='Select date'
+                value={form.actual_departure_date ? (formatDate(form.actual_departure_date) ?? '') : ''}
+                onChange={(v: any) => onFormChange('actual_departure_date', v ? new Date(v) : null)}
+                readonly={viewOnly}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
               />
             </div>
-            {!viewOnly && (
-              <div className='flex items-center gap-1.5'>
-                <Switch checked={incorrectFlags.shipping} onCheckedChange={() => onToggleIncorrect('shipping')} />
-                <span className='text-xs text-muted-foreground'>Incorrect</span>
-              </div>
-            )}
-          </div>
-
-          <div className='space-y-1 pt-1'>
-            <Label className='text-xs text-muted-foreground'>Comment</Label>
-            <Textarea
-              placeholder='Comment...'
-              rows={4}
-              value={form.comments}
-              onChange={e => onFormChange('comments', e.target.value)}
-              className='resize-none'
-              disabled={viewOnly}
-            />
-          </div>
+          )}
         </div>
 
-        {/* Right: Actual fields */}
-        <div className='space-y-3'>
-          {incorrectFlags.departure && (
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Actual Departure</Label>
-              {viewOnly ? (
-                <ReadOnlyField value={form.actual_departure_date ? formatDate(form.actual_departure_date) : '—'} />
-              ) : (
-                <DatePicker
-                  value={form.actual_departure_date}
-                  onChange={v => onFormChange('actual_departure_date', v)}
-                  placeholder='Actual Departure'
-                />
-              )}
-            </div>
+        {/* Row 2: Arrival */}
+        <div className='w-full grid grid-cols-[minmax(0,_1fr)_100px_minmax(0,_1fr)] gap-3'>
+          <CustomFormField
+            label='Estimated Arrival'
+            value={purchaseOrder?.est_arrival_date ? formatDate(purchaseOrder.est_arrival_date) : '—'}
+            readonly
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+            className='cursor-default'
+          />
+
+          {!viewOnly ? (
+            <button type='button' onClick={() => onToggleIncorrect('arrival')} className='relative cursor-pointer'>
+              <span
+                className={`absolute left-0 bottom-1/2 translate-y-1/2 size-6 flex justify-center items-center border rounded-full ${incorrectFlags.arrival ? 'bg-[#35292A] border-[#FF383C1F]' : 'bg-[#29322B] border-[#34C7591F]'}`}
+              >
+                {incorrectFlags.arrival ? (
+                  <X className='size-4 text-[#FF383C]' />
+                ) : (
+                  <Check className='size-4 text-[#34C759]' />
+                )}
+              </span>
+              <span className='block min-w-18 text-xs leading-none text-center ps-3 pe-2 py-0.75 bg-[#1F1F1F] border border-border rounded-full'>
+                {incorrectFlags.arrival ? 'Incorrect' : 'Correct'}
+              </span>
+            </button>
+          ) : (
+            <div />
           )}
+
           {incorrectFlags.arrival && (
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>Actual Arrival</Label>
-              {viewOnly ? (
-                <ReadOnlyField value={form.actual_arrival_date ? formatDate(form.actual_arrival_date) : '—'} />
-              ) : (
-                <DatePicker
-                  value={form.actual_arrival_date}
-                  onChange={v => onFormChange('actual_arrival_date', v)}
-                  placeholder='Actual Arrival'
-                />
-              )}
-            </div>
-          )}
-          {incorrectFlags.shipping && (
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>
-                Shipping Cost {!viewOnly && <span className='text-destructive'>*</span>}
-              </Label>
-              {viewOnly ? (
-                <ReadOnlyField value={form.actual_shipping_cost !== '' ? form.actual_shipping_cost : '—'} />
-              ) : (
-                <Input
-                  type='number'
-                  min={0}
-                  step='any'
-                  placeholder='0'
-                  value={form.actual_shipping_cost}
-                  onChange={e => onFormChange('actual_shipping_cost', e.target.value)}
-                />
-              )}
+            <div className='flex-1'>
+              <CustomFormField
+                name='actual_arrival_date'
+                label='Actual Arrival'
+                type='datepicker'
+                placeholder='Select date'
+                value={form.actual_arrival_date ? (formatDate(form.actual_arrival_date) ?? '') : ''}
+                onChange={(v: any) => onFormChange('actual_arrival_date', v ? new Date(v) : null)}
+                readonly={viewOnly}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
+              />
             </div>
           )}
         </div>
+
+        {/* Row 3: Shipping */}
+        <div className='w-full grid grid-cols-[minmax(0,_1fr)_100px_minmax(0,_1fr)] gap-3'>
+          <CustomFormField
+            label='Estimated Shipping'
+            value={purchaseOrder?.est_shipping_cost != null ? String(purchaseOrder.est_shipping_cost) : '—'}
+            readonly
+            fieldClassName={fieldStyle}
+            labelClassName={labelStyle}
+            className='cursor-default'
+          />
+
+          {!viewOnly ? (
+            <button type='button' onClick={() => onToggleIncorrect('shipping')} className='relative cursor-pointer'>
+              <span
+                className={`absolute left-0 bottom-1/2 translate-y-1/2 size-6 flex justify-center items-center border rounded-full ${incorrectFlags.shipping ? 'bg-[#35292A] border-[#FF383C1F]' : 'bg-[#29322B] border-[#34C7591F]'}`}
+              >
+                {incorrectFlags.shipping ? (
+                  <X className='size-4 text-[#FF383C]' />
+                ) : (
+                  <Check className='size-4 text-[#34C759]' />
+                )}
+              </span>
+              <span className='block min-w-18 text-xs leading-none text-center ps-3 pe-2 py-0.75 bg-[#1F1F1F] border border-border rounded-full'>
+                {incorrectFlags.shipping ? 'Incorrect' : 'Correct'}
+              </span>
+            </button>
+          ) : (
+            <div />
+          )}
+
+          {incorrectFlags.shipping && (
+            <div className='flex-1'>
+              <CustomFormField
+                name='actual_shipping_cost'
+                label='Shipping Cost'
+                type='number'
+                placeholder='0'
+                rules={{ required: true }}
+                value={form.actual_shipping_cost}
+                onChange={(v: any) => onFormChange('actual_shipping_cost', v)}
+                readonly={viewOnly}
+                fieldClassName={fieldStyle}
+                labelClassName={labelStyle}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Comment Row */}
+        <CustomFormField
+          label='Comment'
+          type='textarea'
+          placeholder='Comment...'
+          value={form.comments}
+          onChange={v => onFormChange('comments', v as string)}
+          readonly={viewOnly}
+          fieldClassName={`${fieldStyle} mt-4`}
+          labelClassName={labelStyle}
+        />
       </div>
 
       {/* ─── Documents ─────────────────────────────────────────────────── */}
@@ -299,7 +358,7 @@ const ShipmentHeaderCard = ({
           </ul>
         )}
       </div>
-    </Card>
+    </div>
   )
 }
 

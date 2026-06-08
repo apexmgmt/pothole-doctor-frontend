@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, Product, InventoryAdjustment, PurchaseOrder } from '@/types'
 import InventoryService from '@/services/api/products/inventories.service'
 import AdjustInventoryModal from './AdjustInventoryModal'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 interface InventoryAdjustmentSectionProps {
   inventory: PurchaseOrder
@@ -120,7 +121,7 @@ const InventoryAdjustmentSection: React.FC<InventoryAdjustmentSectionProps> = ({
       <Button
         variant='default'
         size='sm'
-        className='bg-light text-bg hover:bg-light/90'
+        className='bg-light text-bg hover:bg-light/90 h-7'
         onClick={() => setIsModalOpen(true)}
       >
         <PlusIcon className='w-4 h-4' />

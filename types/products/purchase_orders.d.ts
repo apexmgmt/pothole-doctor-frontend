@@ -69,7 +69,7 @@ export interface PurchaseProductReceipt extends Model {
   warehouse_id: string
   warehouse?: Warehouse | BusinessLocation
   stock_area: string | null
-  stock_section_id: string | null
+  stock_section: string | null
   dye_lot: string | null
   is_moved_to_inventory: boolean
 }
@@ -108,7 +108,7 @@ export interface InventoryPayload {
   warehouse_type: 'warehouse' | 'location'
   warehouse_id: string | null
   stock_area: string | null
-  stock_section_id: string | null
+  stock_section: string | null
   quantity: number
   work_order_cost: number
   margin: number | null
@@ -163,7 +163,7 @@ export interface ShipmentProductReceiptPayload {
   warehouse_type: 'warehouse' | 'location'
   warehouse_id: string
   stock_area?: string | null
-  stock_section_id?: string | null
+  stock_section?: string | null
   dye_lot?: string | null
   comments?: string | null
 }

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
-import { PlusIcon, Search } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 
 import { toast } from 'sonner'
 
@@ -12,7 +12,6 @@ import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { City, Column, CountryWithStates, DataTableApiResponse, State } from '@/types'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
@@ -22,6 +21,7 @@ import CityService from '@/services/api/locations/city.service'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const Cities: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = ({ countriesWithStateAndCities }) => {
   const router = useRouter()
@@ -251,20 +251,15 @@ const Cities: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = (
   // Custom filters component
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80!'>
-        <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='lg:w-80 min-w-0'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+        <TableSearch
+          value={searchValue}
+          onChange={setSearchValue}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
           </Button>
         )}
@@ -273,7 +268,7 @@ const Cities: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = (
         <Button
           variant='default'
           size='sm'
-          className='bg-light text-bg hover:bg-light/90'
+          className='bg-light text-bg hover:bg-light/90 h-7'
           onClick={handleOpenCreateModal}
         >
           <PlusIcon className='w-4 h-4' />

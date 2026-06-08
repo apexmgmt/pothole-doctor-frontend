@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { PlusIcon, Search } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 
 import { toast } from 'sonner'
 
@@ -13,11 +13,11 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { Button } from '@/components/ui/button'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import InvoiceService from '@/services/api/invoices/invoices.service'
 import { Column, DataTableApiResponse, Invoice } from '@/types'
 import { hasPermission } from '@/utils/role-permission'
 import { getSharedInvoiceColumns } from './sharedInvoiceColumns'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 type ReusableInvoiceTableProps = {
   fixedFilters?: Record<string, any>
@@ -173,26 +173,26 @@ const ReusableInvoiceTable: React.FC<ReusableInvoiceTableProps> = ({
 
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80!'>
-        <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='lg:w-80 min-w-0'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+        <TableSearch
+          value={searchValue}
+          onChange={setSearchValue}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
           </Button>
         )}
       </div>
       {showCreateButton && (
-        <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90' onClick={onCreateInvoice}>
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90 h-7'
+          onClick={onCreateInvoice}
+        >
           <PlusIcon className='w-4 h-4' />
           <span className='hidden min-[480px]:block'>{createButtonLabel}</span>
         </Button>

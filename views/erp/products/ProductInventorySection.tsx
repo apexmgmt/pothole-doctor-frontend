@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import CreateOrEditInventoryModal from './CreateOrEditInventoryModal'
+import { formatDate } from '@/utils/date'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 interface ProductInventorySectionProps {
   product: Product
@@ -104,9 +106,11 @@ const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
       sortable: false
     },
     {
-      id: 'lot_number',
+      id: 'dye_lot',
       header: 'Lot Number',
-      cell: (row: PurchaseOrder) => <span>{row.lot_number || '—'}</span>,
+      cell: (row: PurchaseOrder) => (
+        <span>{row?.purchase_products?.[0]?.purchase_product_receipts?.[0]?.dye_lot || '—'}</span>
+      ),
       sortable: false
     },
     {
@@ -116,9 +120,9 @@ const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
       sortable: false
     },
     {
-      id: 'added_date',
+      id: 'created_at',
       header: 'Date Added',
-      cell: (row: PurchaseOrder) => <span>{row.added_date || '—'}</span>,
+      cell: (row: PurchaseOrder) => <span>{formatDate(row.created_at)}</span>,
       sortable: true
     },
     {
@@ -171,7 +175,7 @@ const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
 
   const customFilters = (
     <div className='flex items-center justify-end w-full'>
-      <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90' onClick={handleOpenCreate}>
+      <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90 h-7' onClick={handleOpenCreate}>
         <PlusIcon className='w-4 h-4' />
         Add Inventory
       </Button>

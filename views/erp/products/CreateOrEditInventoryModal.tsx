@@ -24,7 +24,7 @@ interface FormValues {
   warehouse_type: 'warehouse' | 'location'
   warehouse_id: string
   stock_area: string
-  stock_section_id: string
+  stock_section: string
   quantity: number
   company_cost: number
   work_order_cost: number
@@ -85,7 +85,7 @@ const CreateOrEditInventoryModal = ({
       warehouse_type: 'warehouse',
       warehouse_id: '',
       stock_area: '',
-      stock_section_id: '',
+      stock_section: '',
       quantity: 0,
       company_cost: product.product_cost ?? 0,
       work_order_cost: defaultWorkOrderCost,
@@ -118,7 +118,7 @@ const CreateOrEditInventoryModal = ({
         warehouse_type: (inventoryDetails?.warehouse_type as 'warehouse' | 'location') || 'warehouse',
         warehouse_id: inventoryDetails?.warehouse_id || '',
         stock_area: purchaseProduct?.purchase_product_receipts?.[0]?.stock_area || '',
-        stock_section_id: purchaseProduct?.purchase_product_receipts?.[0]?.stock_section_id || '',
+        stock_section: purchaseProduct?.purchase_product_receipts?.[0]?.stock_section || '',
         quantity: purchaseProduct?.quantity ?? 0,
         company_cost: product.product_cost ?? 0,
         work_order_cost: purchaseProduct?.work_order_cost ?? product.work_order_cost ?? product.product_cost ?? 0,
@@ -149,7 +149,7 @@ const CreateOrEditInventoryModal = ({
       warehouse_type: values.warehouse_type,
       warehouse_id: values.warehouse_id || null,
       stock_area: values.stock_area || null,
-      stock_section_id: values.stock_section_id || null,
+      stock_section: values.stock_section || null,
       quantity: Number(values.quantity),
       work_order_cost: Number(values.work_order_cost),
       margin: values.margin !== '' ? Number(values.margin) : null,
@@ -293,12 +293,6 @@ const CreateOrEditInventoryModal = ({
       fieldClassName: 'self-end'
     },
     {
-      name: 'stock_section_id',
-      type: 'text',
-      label: 'Section',
-      placeholder: 'Section'
-    },
-    {
       name: 'warehouse_id',
       type: 'select',
       label: isLocation ? 'Location' : 'Warehouse',
@@ -318,6 +312,12 @@ const CreateOrEditInventoryModal = ({
       type: 'text',
       label: 'Stock Area',
       placeholder: 'Stock area'
+    },
+    {
+      name: 'stock_section',
+      type: 'text',
+      label: 'Stock Section',
+      placeholder: 'Stock Section'
     },
     {
       name: 'comments',

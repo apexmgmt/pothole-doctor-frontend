@@ -104,7 +104,7 @@ export const getSharedWorkOrderColumns = (
 
         const uniqueServiceTypeNames = Array.from(new Set(serviceTypeNames)).filter(name => name)
 
-        return <Description description={uniqueServiceTypeNames.join(', ') || '—'} />
+        return <Description buttonClassName='text-[13px]' className='text-[13px]' description={uniqueServiceTypeNames.join(', ') || '—'} />
       },
       sortable: false
     },
@@ -116,7 +116,7 @@ export const getSharedWorkOrderColumns = (
           Boolean
         )
 
-        return <Description description={addressParts.join(', ') || '—'} />
+        return <Description buttonClassName='text-[13px]' className='text-[13px]' description={addressParts.join(', ') || '—'} />
       },
       sortable: false
     },
@@ -180,7 +180,7 @@ export const getSharedWorkOrderColumns = (
           </div>
         )
       },
-      sortable: true
+      sortable: false
     },
 
     // contractor paid

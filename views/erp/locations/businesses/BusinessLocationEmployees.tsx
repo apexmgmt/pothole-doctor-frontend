@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 
-import { Search } from 'lucide-react'
+
 
 import { toast } from 'sonner'
 
@@ -18,7 +18,6 @@ import {
   PartnerType,
   Skill
 } from '@/types'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
@@ -31,6 +30,7 @@ import SkillService from '@/services/api/skills.service'
 import CreateOrEditPartnerModal from '@/views/erp/partners/CreateOrEditPartnerModal'
 import { formatDateTime } from '@/utils/date'
 import { hasPermission } from '@/utils/role-permission'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const BusinessLocationEmployees: React.FC<{ locationId: string }> = ({ locationId }) => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
@@ -259,19 +259,9 @@ const BusinessLocationEmployees: React.FC<{ locationId: string }> = ({ locationI
 
   const customFilters = (
     <div className='flex items-center gap-2'>
-      <InputGroup>
-        <InputGroupInput
-          placeholder='Search...'
-          value={searchValue}
-          onChange={e => setSearchValue(e.target.value)}
-          className='lg:w-80 min-w-0'
-        />
-        <InputGroupAddon>
-          <Search />
-        </InputGroupAddon>
-      </InputGroup>
+      <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
       {hasActiveFilters() && (
-        <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+        <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
           Clear
         </Button>
       )}

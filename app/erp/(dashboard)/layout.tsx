@@ -7,6 +7,7 @@ import { getAuthUser } from '@/utils/auth'
 import { getPermissions } from '@/utils/role-permission'
 import { DashboardClientWrapper } from '@/hocs/DashboardClientWrapper'
 import { SidebarProvider } from '@/components/erp/common/menus/sidebar/sidebarContext'
+import { SidebarDataProvider } from '@/components/erp/common/menus/sidebar/sidebarDataContext'
 
 const Layout = async ({ children }: ReactNode) => {
   const user = await getAuthUser()
@@ -15,16 +16,18 @@ const Layout = async ({ children }: ReactNode) => {
   return (
     <DashboardClientWrapper>
       <SidebarProvider>
-        <section className='flex min-h-screen relative overflow-hidden h-screen'>
-          <Sidebar user={user} permissions={permissions} />
-          <section className='flex-1 w-full xl:w-[calc(100%-260px)] '>
-            <Header />
-            <ScrollArea className='flex-1 h-[calc(100%-63px)]'>
-              <main className='p-4 md:p-6'>{children}</main>
-              <ScrollBar orientation='vertical' />
-            </ScrollArea>
+        <SidebarDataProvider initialUser={user} initialPermissions={permissions}>
+          <section className='flex min-h-screen relative overflow-hidden h-screen'>
+            <Sidebar />
+            <section className='flex-1 w-full xl:w-[calc(100%-260px)] '>
+              <Header />
+              <ScrollArea className='flex-1 h-[calc(100%-63px)]'>
+                <main className='p-4 md:p-6'>{children}</main>
+                <ScrollBar orientation='vertical' />
+              </ScrollArea>
+            </section>
           </section>
-        </section>
+        </SidebarDataProvider>
       </SidebarProvider>
     </DashboardClientWrapper>
   )
