@@ -213,7 +213,7 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
           {row.city}, {row.state}, {row.zip_code}
         </span>
       ),
-      sortable: false
+      sortable: true
     },
     {
       id: 'actions',
