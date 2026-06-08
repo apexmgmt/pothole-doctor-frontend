@@ -14,6 +14,7 @@ import { Column, DataTableApiResponse, Document } from '@/types'
 import { generateFileUrl, getFileType } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import WorkOrderDocumentService from '@/services/api/work-orders/work-order-documents.service'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const WorkOrderDocuments = ({ workOrderId }: { workOrderId: string }) => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
@@ -164,7 +165,7 @@ const WorkOrderDocuments = ({ workOrderId }: { workOrderId: string }) => {
       <Button
         variant='default'
         size='sm'
-        className='bg-light text-bg hover:bg-light/90'
+        className='bg-light text-bg hover:bg-light/90 h-7'
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { PlusIcon, Search } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 
 import { toast } from 'sonner'
 
@@ -13,7 +13,6 @@ import CommonTable from '@/components/erp/common/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Description } from '@/components/ui/description'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Client, Column, DataTableApiResponse, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import { formatDate } from '@/utils/date'
 import ClientService from '@/services/api/clients/clients.service'
@@ -22,6 +21,7 @@ import TaskService from '@/services/api/tasks/tasks.service'
 import TaskReminderService from '@/services/api/settings/task_reminders.service'
 import TaskTypeService from '@/services/api/settings/task_types.service'
 import CreateOrEditTaskModal from '@/views/erp/tasks/CreateOrEditTaskModal'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const ClientTasks = ({ clientId }: { clientId: string }) => {
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
@@ -247,23 +247,18 @@ const ClientTasks = ({ clientId }: { clientId: string }) => {
 
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80! '>
-        <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='lg:w-80 min-w-0'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+        <TableSearch
+          value={searchValue}
+          onChange={setSearchValue}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
       </div>
       <Button
         variant='default'
         size='sm'
-        className='bg-light text-bg hover:bg-light/90'
+        className='bg-light text-bg hover:bg-light/90 h-7'
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />

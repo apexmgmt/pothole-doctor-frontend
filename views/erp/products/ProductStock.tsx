@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
-import { Search, ShoppingCartIcon } from 'lucide-react'
+import { ShoppingCartIcon } from 'lucide-react'
 
 import { toast } from 'sonner'
 
@@ -12,7 +12,6 @@ import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, Product, ProductsProps, PurchaseOrder } from '@/types'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { getInitialFilters, mathRoundFixed, updateURL } from '@/utils/utility'
@@ -22,6 +21,8 @@ import { PackageIcon, WarehouseIcon, SlidersHorizontalIcon } from 'lucide-react'
 import ProductInventorySection from './ProductInventorySection'
 import InventoryAdjustmentSection from './InventoryAdjustmentSection'
 import { formatCurrency } from '@/utils/currency'
+import TableSearch from '@/components/erp/common/TableSearch'
+import CustomFormField from '@/components/form/CustomFormField'
 
 const ProductStock: React.FC<ProductsProps> = ({
   productCategories,
@@ -182,28 +183,28 @@ const ProductStock: React.FC<ProductsProps> = ({
       sortable: true
     },
     {
-      id: 'product_name',
+      id: 'vendor_product_name',
       header: 'Product Name',
       cell: (row: Product) => <span>{row.vendor_product_name || row.private_product_name}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'description',
       header: 'Description',
       cell: (row: Product) => <span>{row.description}</span>,
-      sortable: false
+      sortable: true
     },
     {
-      id: 'style',
+      id: 'vendor_style',
       header: 'Style',
       cell: (row: Product) => <span>{row.vendor_style || row.private_style}</span>,
-      sortable: false
+      sortable: true
     },
     {
-      id: 'color',
+      id: 'vendor_color',
       header: 'Color',
       cell: (row: Product) => <span>{row.vendor_color || row.private_color}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'uom',
@@ -334,47 +335,39 @@ const ProductStock: React.FC<ProductsProps> = ({
   ]
 
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <div className='flex items-center gap-2  w-full sm:max-w-80! '>
-        <div className='flex flex-col flex-2'>
-          <label htmlFor='stock-search' className='text-xs font-medium mb-1 text-muted-foreground'>
-            Search
-          </label>
-          <InputGroup>
-            <InputGroupInput
-              id='stock-search'
-              placeholder='Search...'
-              value={searchValue}
-              onChange={e => setSearchValue(e.target.value)}
-              className='w-full lg:w-80 min-w-0'
-            />
-            <InputGroupAddon>
-              <Search />
-            </InputGroupAddon>
-          </InputGroup>
-        </div>
+    <div className='flex flex-col md:flex-row md:items-center md:justify-between w-full gap-2.5'>
+      <div className='flex-1 flex flex-col md:flex-row md:items-center gap-2'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-2 w-full md:max-w-160'>
+          <TableSearch
+            name='stock-search'
+            label='Search'
+            value={searchValue}
+            onChange={setSearchValue}
+            placeholder='Search...'
+          />
 
-        <div className='flex flex-col flex-1'>
-          <label htmlFor='stock-category' className='text-xs font-medium mb-1 text-muted-foreground'>
-            Category
-          </label>
-          <Select value={filterOptions.category_id || 'all'} onValueChange={handleCategoryChange}>
-            <SelectTrigger id='stock-category' className='w-full lg:w-40 min-w-0'>
-              <SelectValue placeholder='All' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All</SelectItem>
-              {productCategories.map(cat => (
-                <SelectItem key={cat.id} value={cat.id}>
-                  {cat.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Category filter */}
+          <CustomFormField
+            type='select'
+            name='category-filter'
+            label='Category'
+            placeholder='All'
+            value={filterOptions.category_id || 'all'}
+            onChange={v => handleCategoryChange(v as string)}
+            selectOptions={[
+              { label: 'All', value: 'all' },
+              ...productCategories.map(cat => ({ label: cat.name, value: cat.id }))
+            ]}
+          />
         </div>
 
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light mt-5'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={handleClearFilters}
+            className='text-gray hover:text-light mt-5 h-7'
+          >
             Clear
           </Button>
         )}

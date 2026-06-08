@@ -2,13 +2,12 @@
 
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Search, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { BusinessLocation, Column, DataTableApiResponse, MaterialJob, Staff, Warehouse } from '@/types'
@@ -18,6 +17,7 @@ import MaterialJobService from '@/services/api/products/material-jobs.service'
 import { useRouter } from 'next/navigation'
 import AddInventoryJobActionModal from '../inventory-jobs/AddInventoryJobActionModal'
 import AddNonInventoryJobActionModal from '../non-inventory-jobs/AddNonInventoryJobActionModal'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 interface MaterialJobsProps {
   staffs: Staff[]
@@ -142,9 +142,15 @@ const MaterialJobs: React.FC<MaterialJobsProps> = ({ staffs, warehouses, busines
       id: 'order_status',
       header: 'Order Status',
       cell: (row: MaterialJob) => (
-        <Badge variant={getOrderStatusVariant(row.order_status)} className='capitalize whitespace-nowrap'>
-          {row.order_status?.replace(/_/g, ' ') || '—'}
-        </Badge>
+        <>
+          {row.job_type !== 'inventory' ? (
+            <Badge variant={getOrderStatusVariant(row.order_status)} className='capitalize whitespace-nowrap'>
+              {row.order_status?.replace(/_/g, ' ') || '—'}
+            </Badge>
+          ) : (
+            <span></span>
+          )}
+        </>
       ),
       sortable: true
     },
@@ -344,19 +350,14 @@ const MaterialJobs: React.FC<MaterialJobsProps> = ({ staffs, warehouses, busines
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='lg:w-80 min-w-0'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+        <TableSearch
+          value={searchValue}
+          onChange={setSearchValue}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
           </Button>
         )}

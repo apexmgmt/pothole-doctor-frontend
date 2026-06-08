@@ -3,10 +3,9 @@
 import { PlusIcon, Trash2Icon } from 'lucide-react'
 
 import { Card } from '@/components/ui/card'
-import { DatePicker } from '@/components/ui/datePicker'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { BusinessLocation, Warehouse } from '@/types'
+import CustomFormField from '@/components/form/CustomFormField'
+import { formatDate } from '@/utils/formatTime'
 
 import { ProductRowState, ReceiptRowState } from './shipment-arrival.types'
 
@@ -94,13 +93,11 @@ const ShipmentProductCard = ({
               {/* Company Cost */}
               <td className='px-3 py-3 align-top'>
                 <div className='flex items-center gap-1'>
-                  <Input
+                  <CustomFormField
                     type='number'
-                    min={0}
-                    step='any'
                     value={p.company_cost}
-                    onChange={e => onCompanyCostChange(p.id, Number(e.target.value))}
-                    className='h-7 text-xs w-24'
+                    onChange={(v: any) => onCompanyCostChange(p.id, Math.max(0, Number(v)))}
+                    className='w-24'
                     disabled={viewOnly}
                   />
                   <span className='text-xs text-muted-foreground whitespace-nowrap'>{p.purchase_unit_name}</span>
@@ -110,13 +107,11 @@ const ShipmentProductCard = ({
               {/* Work Order Cost */}
               <td className='px-3 py-3 align-top'>
                 <div className='flex items-center gap-1'>
-                  <Input
+                  <CustomFormField
                     type='number'
-                    min={0}
-                    step='any'
                     value={p.work_order_cost}
-                    onChange={e => onWorkOrderCostChange(p.id, Number(e.target.value))}
-                    className='h-7 text-xs w-24'
+                    onChange={(v: any) => onWorkOrderCostChange(p.id, Math.max(0, Number(v)))}
+                    className='w-24'
                     disabled={viewOnly}
                   />
                   <span className='text-xs text-muted-foreground whitespace-nowrap'>{p.purchase_unit_name}</span>
@@ -128,34 +123,29 @@ const ShipmentProductCard = ({
                 <div className='space-y-1'>
                   {/* customer_price (editable) */}
                   <div className='flex items-center gap-1'>
-                    <Input
+                    <CustomFormField
                       type='number'
-                      min={0}
-                      step='any'
                       value={p.customer_price}
-                      onChange={e => onCustomerPriceChange(p.id, Number(e.target.value))}
-                      className='h-7 text-xs w-24'
+                      onChange={(v: any) => onCustomerPriceChange(p.id, Math.max(0, Number(v)))}
+                      className='w-24'
                       disabled={viewOnly}
                     />
                     <span className='text-xs text-muted-foreground whitespace-nowrap'>{p.selling_unit_name}</span>
                   </div>
                   {/* product selling_price (read-only) */}
                   <div className='flex items-center gap-1'>
-                    <div className='h-7 flex items-center px-2 rounded-md border border-border bg-muted text-xs w-24 text-muted-foreground'>
+                    <div className='h-7 flex items-center px-2.5 py-1.25 rounded-md border border-border bg-muted text-xs w-24 text-muted-foreground font-normal leading-none'>
                       {Number(p?.product_selling_price ?? 0).toFixed(2)}
                     </div>
                     <span className='text-xs text-muted-foreground whitespace-nowrap'>{p.selling_unit_name}</span>
                   </div>
                   {/* margin (editable) */}
                   <div className='flex items-center gap-1'>
-                    <Input
+                    <CustomFormField
                       type='number'
-                      min={0}
-                      max={99.99}
-                      step='any'
                       value={p.margin}
-                      onChange={e => onMarginChange(p.id, Number(e.target.value))}
-                      className='h-7 text-xs w-24'
+                      onChange={(v: any) => onMarginChange(p.id, Math.min(99.99, Math.max(0, Number(v))))}
+                      className='w-24'
                       disabled={viewOnly}
                     />
                     <span className='text-xs text-muted-foreground'>%</span>
@@ -221,91 +211,78 @@ const ShipmentProductCard = ({
                     className={`border-b border-border last:border-0 ${locked ? 'opacity-70 ring-1 ring-destructive/40 bg-destructive/5' : ''}`}
                   >
                     <td className='px-2 py-2'>
-                      <Input
+                      <CustomFormField
                         type='number'
-                        min={0}
-                        step='any'
                         value={r.received_quantity}
                         disabled={locked || viewOnly}
-                        onChange={e => onUpdateReceipt(p.id, rIdx, { received_quantity: Number(e.target.value) })}
+                        onChange={(v: any) => onUpdateReceipt(p.id, rIdx, { received_quantity: Math.max(0, Number(v)) })}
                         className='w-20'
                       />
                     </td>
                     <td className='px-2 py-2'>
-                      <DatePicker
-                        value={r.received_date}
-                        onChange={v => onUpdateReceipt(p.id, rIdx, { received_date: v })}
+                      <CustomFormField
+                        type='datepicker'
                         placeholder='Date'
+                        value={r.received_date ? formatDate(r.received_date) : ''}
+                        onChange={(v: any) => onUpdateReceipt(p.id, rIdx, { received_date: v ? new Date(v) : null })}
                         disabled={locked || viewOnly}
                       />
                     </td>
                     <td className='px-2 py-2'>
-                      <Select
+                      <CustomFormField
+                        type='select'
                         value={r.warehouse_type}
-                        onValueChange={v =>
+                        onChange={(v: any) =>
                           onUpdateReceipt(p.id, rIdx, {
                             warehouse_type: v as 'warehouse' | 'location',
                             warehouse_id: ''
                           })
                         }
+                        selectOptions={[
+                          { value: 'warehouse', label: 'Warehouse' },
+                          { value: 'location', label: 'Location' }
+                        ]}
                         disabled={locked || viewOnly}
-                      >
-                        <SelectTrigger className='w-full'>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value='warehouse'>Warehouse</SelectItem>
-                          <SelectItem value='location'>Location</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      />
                     </td>
                     <td className='px-2 py-2'>
-                      <Select
+                      <CustomFormField
+                        type='select'
+                        placeholder='Select'
                         value={r.warehouse_id}
-                        onValueChange={v => onUpdateReceipt(p.id, rIdx, { warehouse_id: v })}
+                        onChange={(v: any) => onUpdateReceipt(p.id, rIdx, { warehouse_id: v })}
+                        selectOptions={
+                          r.warehouse_type === 'warehouse'
+                            ? warehouses.map(w => ({ value: w.id, label: w.title }))
+                            : businessLocations.map(bl => ({ value: bl.id, label: bl.name }))
+                        }
                         disabled={locked || viewOnly}
-                      >
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {r.warehouse_type === 'warehouse'
-                            ? warehouses.map(w => (
-                                <SelectItem key={w.id} value={w.id}>
-                                  {w.title}
-                                </SelectItem>
-                              ))
-                            : businessLocations.map(bl => (
-                                <SelectItem key={bl.id} value={bl.id}>
-                                  {bl.name}
-                                </SelectItem>
-                              ))}
-                        </SelectContent>
-                      </Select>
+                      />
                     </td>
                     <td className='px-2 py-2'>
-                      {/* <Input
+                      <CustomFormField
+                        type='text'
                         value={r.stock_area}
                         disabled={locked}
-                        onChange={e => onUpdateReceipt(p.id, rIdx, { stock_area: e.target.value })}
+                        onChange={(v: any) => onUpdateReceipt(p.id, rIdx, { stock_area: v })}
                         placeholder='Stock Area'
-                        
-                      /> */}
+                      />
                     </td>
                     <td className='px-2 py-2'>
-                      {/* <Input
-                        value={r.stock_section_id}
+                      <CustomFormField
+                        type='text'
+                        value={r.stock_section}
                         disabled={locked}
-                        onChange={e => onUpdateReceipt(p.id, rIdx, { stock_section_id: e.target.value })}
+                        onChange={(v: any) => onUpdateReceipt(p.id, rIdx, { stock_section: v })}
                         placeholder='Section'
-                        
-                      /> */}
+                      />
                     </td>
                     <td className='px-2 py-2'>
-                      <Input
+                      <CustomFormField
+                        type='text'
                         value={r.dye_lot}
                         disabled={locked || viewOnly}
-                        onChange={e => onUpdateReceipt(p.id, rIdx, { dye_lot: e.target.value })}
+                        onChange={(v: any) => onUpdateReceipt(p.id, rIdx, { dye_lot: v })}
                         placeholder='Dye Lot'
                       />
                     </td>

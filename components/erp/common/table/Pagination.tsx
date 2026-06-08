@@ -3,7 +3,7 @@
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
+import CustomFormField from '@/components/form/CustomFormField'
 
 interface PaginationProps {
   total: number
@@ -60,26 +60,23 @@ const Pagination: React.FC<PaginationProps> = ({
     return pages
   }
 
+  const pageSizeOptions = pageSizes.map(size => ({ value: String(size), label: String(size) }))
+
   return (
     <div className='flex items-center justify-between border-t border-border py-3'>
       {/* Left side - Rows per page */}
       <div className='flex items-center gap-4'>
         <div className='flex items-center gap-2'>
-          <Select value={String(perPage)} onValueChange={v => onPageSizeChange(Number(v))}>
-            <SelectTrigger className='w-20'>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {pageSizes.map(size => (
-                <SelectItem key={size} value={String(size)}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <CustomFormField
+            type='select'
+            value={String(perPage)}
+            onChange={v => onPageSizeChange(Number(v))}
+            selectOptions={pageSizeOptions}
+            className='w-20'
+          />
         </div>
 
-        <span className='text-sm text-gray whitespace-nowrap'>
+        <span className='text-sm text-accent-foreground/60 whitespace-nowrap'>
           Showing {from} to {to} of {total} entries
         </span>
       </div>
@@ -91,8 +88,9 @@ const Pagination: React.FC<PaginationProps> = ({
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1 || isLoading}
           variant='ghost'
-          size='icon'
+          size='sm'
           title='First page'
+          className='h-7'
         >
           <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M11 19l-7-7 7-7m8 14l-7-7 7-7' />
@@ -104,8 +102,9 @@ const Pagination: React.FC<PaginationProps> = ({
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1 || isLoading}
           variant='ghost'
-          size='icon'
+          size='sm'
           title='Previous page'
+          className='h-7'
         >
           <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
@@ -119,13 +118,17 @@ const Pagination: React.FC<PaginationProps> = ({
               <span className='px-3 py-1 text-gray'>...</span>
             ) : (
               <Button
-                onClick={() => onPageChange(page as number)}
+                onClick={() => {
+                  if (currentPage !== page) onPageChange(page as number)
+                }}
                 disabled={isLoading}
                 variant='ghost'
                 size='sm'
                 className={`${
-                  currentPage === page ? 'bg-light text-bg font-medium hover:bg-light/90 hover:text-bg' : 'text-gray hover:text-light'
-                }`}
+                  currentPage === page
+                    ? 'bg-accent-foreground/90 text-accent font-medium hover:bg-accent-foreground! hover:text-accent! hover:cursor-default!'
+                    : 'text-accent-accent-foreground/90 hover:text-accent-foreground'
+                } h-7`}
               >
                 {page}
               </Button>
@@ -138,8 +141,9 @@ const Pagination: React.FC<PaginationProps> = ({
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages || totalPages === 0 || isLoading}
           variant='ghost'
-          size='icon'
+          size='sm'
           title='Next page'
+          className='h-7'
         >
           <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
@@ -153,6 +157,7 @@ const Pagination: React.FC<PaginationProps> = ({
           variant='ghost'
           size='icon'
           title='Last page'
+          className='h-7'
         >
           <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 5l7 7-7 7M5 5l7 7-7 7' />

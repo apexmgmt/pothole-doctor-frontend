@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { PlusIcon, Search } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 
 import { toast } from 'sonner'
 
@@ -8,13 +8,13 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Column, CountryWithStates, DataTableApiResponse, ClientContact } from '@/types'
 import { formatDate } from '@/utils/date'
 
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import CreateOrEditContactModal from './CreateOrEditContactModal'
 import ClientContactService from '@/services/api/clients/client-contacts.service'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 const ClientContacts = ({
   clientId,
@@ -205,20 +205,15 @@ const ClientContacts = ({
 
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1 sm:max-w-80! '>
-        <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='lg:w-80 min-w-0'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+      <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+        <TableSearch
+          value={searchValue}
+          onChange={setSearchValue}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {/* {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
           </Button>
         )} */}
@@ -226,7 +221,7 @@ const ClientContacts = ({
       <Button
         variant='default'
         size='sm'
-        className='bg-light text-bg hover:bg-light/90'
+        className='bg-light text-bg hover:bg-light/90 h-7'
         onClick={handleOpenCreateModal}
       >
         <PlusIcon className='w-4 h-4' />

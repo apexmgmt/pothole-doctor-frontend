@@ -51,7 +51,7 @@ const buildEmptyReceipt = (
   warehouse_type: defaultWarehouseType,
   warehouse_id: defaultWarehouseId,
   stock_area: '',
-  stock_section_id: '',
+  stock_section: '',
   dye_lot: '',
   is_moved_to_inventory: false
 })
@@ -69,7 +69,7 @@ const mapProductToState = (
         warehouse_type: r.warehouse_type,
         warehouse_id: r.warehouse_id,
         stock_area: r.stock_area ?? '',
-        stock_section_id: r.stock_section_id ?? '',
+        stock_section: r.stock_section ?? '',
         dye_lot: r.dye_lot ?? '',
         is_moved_to_inventory: r.is_moved_to_inventory
       }))
@@ -310,7 +310,7 @@ const ShipmentArrivalModal = ({
           warehouse_type: r.warehouse_type,
           warehouse_id: r.warehouse_id,
           stock_area: r.stock_area || null,
-          stock_section_id: r.stock_section_id || null,
+          stock_section: r.stock_section || null,
           dye_lot: r.dye_lot || null
         }))
 
@@ -444,14 +444,12 @@ const ShipmentArrivalModal = ({
     }
   }
 
-  // ─── Render ────────────────────────────────────────────────────────────────
-
   return (
     <CommonDialog
       open={open}
       onOpenChange={onOpenChange}
       title={viewOnly ? 'Shipment Details' : 'View Shipment Arrived Information'}
-      maxWidth='full'
+      className='sm:max-w-[1600px]'
       isLoading={isLoading || isSubmitting || isPDFGenerating}
       loadingMessage={
         isPDFGenerating ? 'Generating PDF...' : isSubmitting ? 'Processing...' : 'Loading purchase order...'

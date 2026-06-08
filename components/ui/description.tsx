@@ -10,6 +10,7 @@ interface DescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {
   length?: number
   isShowMore?: boolean
   lines?: number
+  buttonClassName?: string
 }
 
 export function Description({
@@ -19,6 +20,7 @@ export function Description({
   isShowMore = true,
   lines = 2,
   className,
+  buttonClassName,
   ...props
 }: DescriptionProps) {
   const [isExpanded, setIsExpanded] = React.useState(false)
@@ -55,8 +57,8 @@ export function Description({
         <Button
           variant='link'
           size='sm'
-          className='h-auto p-0 w-fit justify-start text-primary hover:no-underline'
-          onClick={() => setIsExpanded(prev => !prev)}
+          className={cn('h-auto p-0 w-fit justify-start text-primary hover:no-underline', buttonClassName ?? '')}
+          onClick={() => setIsExpanded(prev => !prev)}  
         >
           {isExpanded ? 'Show Less' : 'Show More'}
         </Button>

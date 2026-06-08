@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
-import { PlusIcon, Search } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 
 import { toast } from 'sonner'
 
@@ -12,7 +12,6 @@ import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
@@ -35,6 +34,7 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import PurchaseOrderService from '@/services/api/products/purchase_orders.service'
 import CreateOrEditPurchaseOrderModal from './CreateOrEditPurchaseOrderModal'
 import { hasPermission } from '@/utils/role-permission'
+import TableSearch from '@/components/erp/common/TableSearch'
 
 interface PurchaseOrdersProps {
   vendors: Vendor[]
@@ -407,25 +407,15 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5 '>
       <div className='flex items-center gap-2 lg:flex-0 flex-1 '>
-        <InputGroup>
-          <InputGroupInput
-            placeholder='Search...'
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            className='lg:w-80 min-w-0'
-          />
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-        </InputGroup>
+        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
         {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light'>
+          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
           </Button>
         )}
       </div>
       {canCreate && (
-        <Button
+        <Button className='h-7'
           size='sm'
           onClick={() => {
             setModalMode('create')
