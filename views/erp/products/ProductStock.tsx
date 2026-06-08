@@ -183,28 +183,28 @@ const ProductStock: React.FC<ProductsProps> = ({
       sortable: true
     },
     {
-      id: 'product_name',
+      id: 'vendor_product_name',
       header: 'Product Name',
       cell: (row: Product) => <span>{row.vendor_product_name || row.private_product_name}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'description',
       header: 'Description',
       cell: (row: Product) => <span>{row.description}</span>,
-      sortable: false
+      sortable: true
     },
     {
-      id: 'style',
+      id: 'vendor_style',
       header: 'Style',
       cell: (row: Product) => <span>{row.vendor_style || row.private_style}</span>,
-      sortable: false
+      sortable: true
     },
     {
-      id: 'color',
+      id: 'vendor_color',
       header: 'Color',
       cell: (row: Product) => <span>{row.vendor_color || row.private_color}</span>,
-      sortable: false
+      sortable: true
     },
     {
       id: 'uom',
