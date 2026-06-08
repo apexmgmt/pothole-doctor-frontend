@@ -23,6 +23,7 @@ import PartnerService from '@/services/api/partners/partners.service'
 import CreateOrEditPartnerModal from './CreateOrEditPartnerModal'
 import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
 import PartnerDocuments from './documents/PartnerDocuments'
+import PartnerDetails from './PartnerDetails'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { hasPermission } from '@/utils/role-permission'
 
@@ -154,6 +155,8 @@ const Partners: React.FC<PartnersProps> = ({
       toast.error('Failed to fetch partner details')
     }
   }
+
+  console.log(selectedPartner)
 
   const handleModalClose = () => {
     setIsModalOpen(false)
@@ -333,6 +336,13 @@ const Partners: React.FC<PartnersProps> = ({
     ...(canViewPartner
       ? [
           {
+            label: 'Details',
+            icon: DetailsIcon,
+            onClick: () => setActiveTab('details'),
+            isActive: activeTab === 'details',
+            disabled: !selectedPartnerId
+          },
+          {
             label: 'Documents',
             icon: DocumentIcon,
             onClick: () => setActiveTab('documents'),
@@ -371,6 +381,8 @@ const Partners: React.FC<PartnersProps> = ({
             emptyMessage='No contractor found'
           />
         )}
+
+        {activeTab === 'details' && selectedPartnerId && <PartnerDetails partnerId={selectedPartnerId} />}
 
         {activeTab === 'documents' && selectedPartnerId && <PartnerDocuments userId={selectedPartnerId} />}
       </CommonLayout>

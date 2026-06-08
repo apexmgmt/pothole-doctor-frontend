@@ -1,4 +1,5 @@
 import { Control, FieldValues, Path, RegisterOptions, UseFormRegister } from 'react-hook-form'
+import { ReactNode } from 'react'
 
 export type InputType =
   | 'text'
@@ -18,6 +19,7 @@ export type InputType =
   | 'combobox'
   | 'datepicker'
   | 'radio'
+  | 'color'
 
 export type SelectOption = {
   value: string
@@ -45,6 +47,8 @@ export type BaseFieldProps<T extends FieldValues> = {
   className?: string
   labelClassName?: string
   fieldClassName?: string
+  leftAddon?: ReactNode
+  rightAddon?: ReactNode
 }
 
 export type FieldComponentProps<T extends FieldValues> = BaseFieldProps<T>

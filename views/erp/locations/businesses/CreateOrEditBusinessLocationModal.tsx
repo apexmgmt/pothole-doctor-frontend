@@ -398,10 +398,10 @@ const CreateOrEditBusinessLocationModal = ({
       className='sm:max-w-252!'
       actions={
         <div className='flex gap-3'>
-          <Button type='button' variant='outline' onClick={onCancel} disabled={isSubmitting}>
+          <Button type='button' variant='outline' size='sm' onClick={onCancel} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button type='submit' onClick={handleSubmit(onSubmit)} disabled={isSubmitting}>
+          <Button type='submit' size='sm' onClick={handleSubmit(onSubmit)} disabled={isSubmitting}>
             {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
           </Button>
         </div>

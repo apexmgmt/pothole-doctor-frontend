@@ -1,8 +1,7 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import CustomFormField from '@/components/form/CustomFormField'
 import ProposalService from '@/services/api/estimates/proposals.service'
 import { toast } from 'sonner'
 
@@ -18,14 +17,14 @@ interface VoidDeadProposalModalProps {
 const VoidDeadProposalModal = ({ action, proposalId, onClose, onSuccess }: VoidDeadProposalModalProps) => {
   const [loading, setLoading] = useState(false)
   const [reasonError, setReasonError] = useState('')
-  const reasonRef = useRef<HTMLTextAreaElement>(null)
+  const [reason, setReason] = useState('')
 
   const title = action === 'void' ? 'Mark Proposal as Void' : action === 'dead' ? 'Mark Proposal as Dead' : ''
 
   const handleSubmit = async () => {
-    const reason = reasonRef.current?.value?.trim() ?? ''
+    const reasonValue = reason.trim()
 
-    if (!reason) {
+    if (!reasonValue) {
       setReasonError('Reason is required.')
 
       return
@@ -36,11 +35,11 @@ const VoidDeadProposalModal = ({ action, proposalId, onClose, onSuccess }: VoidD
     setLoading(true)
 
     try {
-      await ProposalService.markAsVoidOrDead(proposalId, action, reason)
+      await ProposalService.markAsVoidOrDead(proposalId, action, reasonValue)
       const newStatus = action === 'void' ? 'void proposal' : 'dead proposal'
 
       toast.success(`Proposal marked as ${newStatus} successfully`)
-      onSuccess(newStatus, reason)
+      onSuccess(newStatus, reasonValue)
       onClose()
     } catch (error: any) {
       toast.error(error?.message || `Failed to mark proposal as ${action}`)
@@ -59,16 +58,17 @@ const VoidDeadProposalModal = ({ action, proposalId, onClose, onSuccess }: VoidD
       onOpenChange={handleOpenChange}
       title={title}
       description='Please provide a reason before proceeding.'
-      maxWidth='md'
+      maxWidth='xl'
       isLoading={loading}
       disableClose={loading}
       actions={
         <div className='flex gap-3 w-full'>
-          <Button type='button' variant='outline' onClick={onClose} disabled={loading} className='flex-1'>
+          <Button type='button' size='sm' variant='outline' onClick={onClose} disabled={loading} className='flex-1'>
             Cancel
           </Button>
           <Button
             type='button'
+            size='sm'
             onClick={handleSubmit}
             disabled={loading}
             className='flex-1'
@@ -79,16 +79,19 @@ const VoidDeadProposalModal = ({ action, proposalId, onClose, onSuccess }: VoidD
         </div>
       }
     >
-      <div className='space-y-2 py-1'>
-        <Label htmlFor='void-dead-reason'>
-          Reason for {action === 'void' ? 'void' : 'dead'} proposal <span className='text-red-500'>*</span>
-        </Label>
-        <Textarea
-          id='void-dead-reason'
-          ref={reasonRef}
+      <div className='space-y-2'>
+        <CustomFormField
+          type='textarea'
+          name='void-dead-reason'
+          label={`Reason for ${action === 'void' ? 'void' : 'dead'} proposal`}
+          rules={{ required: true }}
+          value={reason}
+          onChange={(val: any) => {
+             setReason(val)
+             if (reasonError) setReasonError('')
+          }}
           placeholder='Enter the reason...'
-          rows={4}
-          onChange={() => reasonError && setReasonError('')}
+
         />
         {reasonError && <p className='text-sm text-red-500'>{reasonError}</p>}
       </div>

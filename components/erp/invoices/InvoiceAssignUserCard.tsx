@@ -109,9 +109,9 @@ const InvoiceAssignUserCard = ({ invoice, profit = 0, total = 0 }: InvoiceAssign
 
   return (
     <>
-      <Card className='bg-zinc-900 border-zinc-800'>
+      <Card className='bg-accent/40 border-accent'>
         <CardContent className='p-4'>
-          <h6 className='text-sm font-semibold text-zinc-200 flex items-center gap-1'>
+          <h6 className='text-xs font-semibold text-zinc-200 flex items-center gap-1'>
             <UserIcon className='h-4 w-4 shrink-0' />
             <span>
               {invoice?.assign_user?.first_name} {invoice?.assign_user?.last_name}
@@ -120,15 +120,15 @@ const InvoiceAssignUserCard = ({ invoice, profit = 0, total = 0 }: InvoiceAssign
             <TooltipProvider delayDuration={100}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <InfoIcon className='h-4 w-4 text-zinc-400 cursor-pointer hover:text-zinc-200 transition-colors shrink-0' />
+                  <InfoIcon className='h-4 w-4 text-accent-foreground cursor-pointer hover:text-zinc-200 transition-colors shrink-0' />
                 </TooltipTrigger>
                 <TooltipContent
                   side='bottom'
                   align='start'
-                  className='max-w-xs bg-zinc-800 border border-zinc-700 text-zinc-100 p-3 space-y-2 rounded-md shadow-lg'
+                  className='max-w-xs bg-accent text-accent-foreground p-3 rounded-md shadow-lg'
                 >
                   {commissions.length === 0 ? (
-                    <p className='text-xs text-zinc-400'>No commission rules assigned.</p>
+                    <p className='text-xs text-accent-foreground'>No commission rules assigned.</p>
                   ) : (
                     <>
                       {commissionTypeName && (
@@ -149,8 +149,8 @@ const InvoiceAssignUserCard = ({ invoice, profit = 0, total = 0 }: InvoiceAssign
           </h6>
 
           <div className='flex justify-between mt-4'>
-            <div className='text-sm font-semibold text-blue-200'>{effectivePercent.toFixed(2)}%</div>
-            <div className='text-sm font-semibold text-zinc-200'>{formatCurrency(effectiveCommission)}</div>
+            <div className='text-xs font-semibold text-blue-200'>{effectivePercent.toFixed(2)}%</div>
+            <div className='text-xs font-semibold text-zinc-200'>{formatCurrency(effectiveCommission)}</div>
           </div>
         </CardContent>
       </Card>

@@ -198,7 +198,7 @@ const ProposalTasksModal = ({
         isLoading={isFetchingTask}
         loadingMessage='Loading task details...'
         actions={
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
+          <Button variant='outline' size='sm' onClick={() => onOpenChange(false)}>
             Close
           </Button>
         }

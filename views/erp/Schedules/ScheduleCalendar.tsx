@@ -194,8 +194,7 @@ export default function ScheduleCalendar({
    */
   const eventPropGetter = (event: ScheduleCalendarEventType) => {
     const schedule = event.resource
-    const colorKey = isSingleContractorView ? schedule?.id : schedule?.contractor_id || schedule?.contractor?.id
-    const color = getPaletteColorByKey(colorKey)
+    const color = schedule?.contractor?.userable?.schedule_color
 
     return {
       style: {

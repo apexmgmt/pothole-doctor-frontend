@@ -17,10 +17,8 @@ import { Separator } from '@/components/ui/separator'
 import { LocationFields } from './LocationFields'
 import { HoldAmountFields } from './HoldAmountFields'
 import { ContractorDetailsFields } from './ContractorDetailsFields'
-import { EntityInformationFields } from './EntityInformationFields'
 import { BasicInformationFields } from './BasicInformationFields'
 import { formatDateTime } from '@/utils/date'
-import { Demo } from '@/components/ui/color-picker'
 
 interface FormValues {
   first_name: string
@@ -294,12 +292,13 @@ const CreateOrEditPartnerModal = ({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Create New Contractor' : 'Edit Contractor'}
       description={mode === 'create' ? 'Add a new contractor to the system' : 'Update contractor information'}
-      maxWidth='5xl'
+      className='sm:max-w-[1280px]'
       disableClose={form.formState.isSubmitting}
       actions={
         <div className='flex gap-3'>
           <Button
             type='button'
+            size='sm'
             variant='outline'
             onClick={onCancel}
             disabled={form.formState.isSubmitting}
@@ -309,6 +308,7 @@ const CreateOrEditPartnerModal = ({
           </Button>
           <Button
             type='submit'
+            size='sm'
             onClick={form.handleSubmit(onSubmit)}
             disabled={form.formState.isSubmitting}
             className='flex-1'
@@ -320,16 +320,13 @@ const CreateOrEditPartnerModal = ({
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mb-4 mr-0.5'>
-          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 items-start'>
             <BasicInformationFields
               form={form}
               businessLocations={businessLocations}
               companies={companies}
               entity={entity}
             />
-
-            {/* Entity Information section */}
-            <EntityInformationFields form={form} />
 
             {user_type === 'contractor' && (
               <div className='sm:col-span-2 md:col-span-3'>

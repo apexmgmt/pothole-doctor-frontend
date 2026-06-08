@@ -229,7 +229,7 @@ const ClientDetails: React.FC<ClientDetailsProps> = ({
                 key={tab.id}
                 value={tab.id}
                 className={clsx(
-                  'h-10 gap-2 whitespace-nowrap rounded-lg border border-transparent px-3 text-accent-foreground/50 data-[state=active]:border-accent data-[state=active]:bg-accent/90 data-[state=active]:text-accent-foreground'
+                  'h-8 gap-2 whitespace-nowrap rounded-lg border border-transparent px-3 py-2.5 text-xs text-accent-foreground/50 data-[state=active]:border-accent data-[state=active]:bg-accent/90 data-[state=active]:text-accent-foreground'
                 )}
               >
                 <Icon className='h-4 w-4' />

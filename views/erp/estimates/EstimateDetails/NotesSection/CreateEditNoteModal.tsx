@@ -86,6 +86,7 @@ const CreteEditNoteModal: React.FC<CreteEditNoteModalProps> = ({
           <Button
             type='button'
             variant='outline'
+            size='sm'
             onClick={onCancel}
             disabled={form.formState.isSubmitting}
             className='flex-1'
@@ -94,6 +95,7 @@ const CreteEditNoteModal: React.FC<CreteEditNoteModalProps> = ({
           </Button>
           <Button
             type='submit'
+            size='sm'
             onClick={form.handleSubmit(onSubmit)}
             disabled={form.formState.isSubmitting || !form.watch('comment')}
             className='flex-1'
@@ -107,8 +109,6 @@ const CreteEditNoteModal: React.FC<CreteEditNoteModalProps> = ({
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
           <CustomFormField
             name='comment'
-            
-            // label='Comment'
             type='textarea'
             placeholder='Type your note here...'
             rules={{ required: 'Comment is required' }}

@@ -546,7 +546,7 @@ const AddInvoiceServicesView = ({
       </div>
 
       {/* Custom Message */}
-      <Card className='bg-zinc-900 border-zinc-800'>
+      <Card className='bg-accent/20 border-accent'>
         <CardContent className='p-4'>
           <CustomFormField
             name='inv-custom-message'

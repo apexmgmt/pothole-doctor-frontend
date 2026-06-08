@@ -109,11 +109,17 @@ const TaskDocuments = ({ taskId }: TaskDocumentsProps) => {
   const documents = (apiResponse?.data || []) as Document[]
 
   return (
-    <div className='rounded-md border border-border p-4 mt-3 space-y-3'>
+    <div className='rounded-md border border-border p-4 mt-3 mb-px space-y-3'>
       <div className='flex items-center justify-between gap-2'>
         <h4 className='text-sm font-semibold'>Task Attachments</h4>
-        <Button type='button' size='sm' onClick={handleOpenUpload} disabled={!taskId || isUploading || isLoading}>
-          <PlusIcon className='h-4 w-4' />
+        <Button
+          type='button'
+          size='sm'
+          onClick={handleOpenUpload}
+          disabled={!taskId || isUploading || isLoading}
+          className='text-xs h-7 py-2 rounded-md'
+        >
+          <PlusIcon className='size-3.5' />
           {isUploading ? 'Uploading...' : 'Upload'}
         </Button>
       </div>

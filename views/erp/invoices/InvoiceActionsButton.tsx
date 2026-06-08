@@ -4,6 +4,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Invoice } from '@/types'
 import { Check, ChevronDownIcon, Eye, Mail } from 'lucide-react'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
+import Link from 'next/link'
+import { DocumentIcon } from '@/public/icons'
 
 const InvoiceActionsButton = ({
   invoice,
@@ -42,6 +44,18 @@ const InvoiceActionsButton = ({
             <DropdownMenuItem onClick={onViewWorkOrder}>
               <Eye className='mr-2 h-4 w-4' />
               View Work Order
+            </DropdownMenuItem>
+          )}
+          {invoice?.proposal_id && invoice?.estimate_id && (
+            <DropdownMenuItem asChild>
+              <Link
+                href={`/erp/estimates/${invoice?.estimate_id}/proposals/${invoice?.proposal_id}`}
+                prefetch={true}
+                target='_blank'
+              >
+                <DocumentIcon className='mr-2 h-4 w-4' />
+                View Original Proposal
+              </Link>
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={() => setConfirmEmailOpen(true)} disabled={isSendingEmail}>

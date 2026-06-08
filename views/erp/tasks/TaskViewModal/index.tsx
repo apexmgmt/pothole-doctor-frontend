@@ -370,7 +370,7 @@ export default function TaskViewModal({
       isLoading={isLoadingTask}
       className='sm:max-w-[1440px]'
       actions={
-        <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
+        <Button type='button' variant='outline' size='sm' onClick={() => onOpenChange(false)}>
           Close
         </Button>
       }

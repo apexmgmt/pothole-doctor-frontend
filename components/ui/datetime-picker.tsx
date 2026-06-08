@@ -42,7 +42,7 @@ export function DateTimePicker({
           )}
           disabled={disabled}
         >
-          {dateValue ? dateValue.toLocaleString() : <span>{placeholder}</span>}
+          <span className='flex-1 overflow-hidden'>{dateValue ? dateValue.toLocaleString() : placeholder}</span>
           <CalendarIcon className='size-4' />
         </Button>
       </PopoverTrigger>
