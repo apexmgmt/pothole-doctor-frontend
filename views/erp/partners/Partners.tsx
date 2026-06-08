@@ -156,8 +156,6 @@ const Partners: React.FC<PartnersProps> = ({
     }
   }
 
-  console.log(selectedPartner)
-
   const handleModalClose = () => {
     setIsModalOpen(false)
     setSelectedPartnerId(null)
