@@ -1,17 +1,11 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { format } from 'date-fns/format'
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Textarea } from '@/components/ui/textarea'
-import { DatePicker } from '@/components/ui/datePicker'
-import { TimePicker } from '@/components/ui/timePicker'
+import { Form } from '@/components/ui/form'
 import { Partner, ProposalService, WorkOrder } from '@/types'
 import CustomFormField from '@/components/form/CustomFormField'
 import { Schedule, SchedulePayload } from '@/types/schedules'
@@ -119,7 +113,8 @@ export default function ScheduleFormDialog({
     setValue,
     reset,
     register,
-    formState: { isSubmitting, errors }
+    formState: { isSubmitting, errors },
+    watch
   } = form
 
   // Reset form when dialog opens
@@ -327,6 +322,35 @@ export default function ScheduleFormDialog({
   const fieldStyle = 'grid grid-cols-[130px_minmax(0,_1fr)]'
   const labelStyle = 'justify-end self-start text-right pt-1 text-xs font-medium'
 
+  const contractorId = watch('contractor_id')
+  const workOrderId = watch('work_order_id')
+
+  const filteredWorkOrders = useMemo(() => {
+    if (!contractorId) return workOrders
+
+    return workOrders.filter(wo => {
+      if (!wo.services || wo.services.length === 0) return false
+
+      return wo.services.some(svc => svc.contractor_id === contractorId)
+    })
+  }, [workOrders, contractorId])
+
+  const filteredWoServices = useMemo(() => {
+    if (!contractorId) {
+      return woServices.filter(svc => svc.contractor_id)
+    }
+
+    return woServices.filter(svc => svc.contractor_id === contractorId)
+  }, [woServices, contractorId])
+
+  const filteredPartners = useMemo(() => {
+    if (!workOrderId || woServices.length === 0) return partners
+
+    const validContractorIds = new Set(woServices.map(svc => svc.contractor_id).filter(Boolean))
+
+    return partners.filter(p => validContractorIds.has(p.id))
+  }, [partners, workOrderId, woServices])
+
   return (
     <CommonDialog
       isLoading={isSubmitting}
@@ -374,7 +398,7 @@ export default function ScheduleFormDialog({
                 control={control}
                 register={register}
                 rules={{ required: 'Work order is required' }}
-                selectOptions={workOrders.map(wo => ({
+                selectOptions={filteredWorkOrders.map(wo => ({
                   value: wo.id,
                   label: `#${wo.invoice_number_prefix ? `${wo.invoice_number_prefix}-` : ''}${wo.invoice_number?.toString() || '—'} - ${wo.title}`
                 }))}
@@ -386,7 +410,7 @@ export default function ScheduleFormDialog({
               />
             </div>
             {/* Service Group */}
-            {(woServices.length > 0 || isFetchingWO) && (
+            {(filteredWoServices.length > 0 || isFetchingWO) && (
               <div className='col-span-2'>
                 <CustomFormField
                   name='service_group_id'
@@ -396,7 +420,7 @@ export default function ScheduleFormDialog({
                   control={control}
                   register={register}
                   rules={{ required: 'Service type is required' }}
-                  selectOptions={woServices.map(svc => ({
+                  selectOptions={filteredWoServices.map(svc => ({
                     value: svc.id,
                     label: svc.service_type?.name ?? svc.service_type_id
                   }))}
@@ -435,7 +459,7 @@ export default function ScheduleFormDialog({
                 control={control}
                 register={register}
                 rules={{ required: 'Contractor is required' }}
-                selectOptions={partners.map(p => ({
+                selectOptions={filteredPartners.map(p => ({
                   value: p.id,
                   label: `${p.first_name} ${p.last_name}`.trim()
                 }))}
