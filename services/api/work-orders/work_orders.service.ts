@@ -61,6 +61,7 @@ export default class WorkOrderService {
 
       await revalidate('work-orders')
       await revalidate('work-orders-summary')
+      await revalidate('invoices-summary')
 
       return await response.json()
     } catch (error) {
@@ -91,6 +92,7 @@ export default class WorkOrderService {
 
       await revalidate('work-orders')
       await revalidate('work-orders-summary')
+      await revalidate('invoices-summary')
 
       return await response.json()
     } catch (error) {
@@ -148,6 +150,7 @@ export default class WorkOrderService {
 
       await revalidate('work-orders')
       await revalidate('work-orders-summary')
+      await revalidate('invoices-summary')
 
       return await response.json()
     } catch (error) {
