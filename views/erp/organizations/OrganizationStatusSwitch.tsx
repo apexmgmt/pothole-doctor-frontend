@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { Switch } from '@/components/ui/switch'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
+import CustomFormField from '@/components/form/CustomFormField'
 import OrganizationService from '@/services/api/organizations.service'
 import { Badge } from '@/components/ui/badge'
 
@@ -53,15 +53,22 @@ const OrganizationStatusSwitch: React.FC<OrganizationStatusSwitchProps> = ({
       trigger={
         <span>
           {variant === 'switch' && (
-            <Switch
-              checked={internalChecked}
-              disabled={loading || isLoading}
+            <div
               onClick={e => {
                 e.stopPropagation()
-                setOpen(true)
+                e.preventDefault()
+                if (!loading && !isLoading) setOpen(true)
               }}
-              onCheckedChange={() => {}}
-            />
+            >
+              <CustomFormField
+                type='switch'
+                name='status'
+                value={internalChecked}
+                disabled={loading || isLoading}
+                onChange={() => {}}
+                className='pointer-events-none'
+              />
+            </div>
           )}
           {variant === 'button' && (
             <Badge              variant={internalChecked ? 'success' : 'destructive'}

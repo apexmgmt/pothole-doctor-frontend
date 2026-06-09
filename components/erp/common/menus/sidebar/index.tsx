@@ -509,7 +509,7 @@ const Sidebar: React.FC = () => {
               permissions: ['Manage Unit']
             }
           ],
-          exactMatch: false,
+          exactMatch: true,
           permissions: [
             'Manage Lead Interest',
             'Manage Category',
@@ -579,7 +579,7 @@ const Sidebar: React.FC = () => {
       />
 
       <aside
-        className={`transition-all duration-300 h-screen ${isOpen ? 'max-xl:translate-x-0' : 'max-xl:-translate-x-full'} w-[260px] bg-bg-2 border-r border-border flex flex-col max-xl:absolute max-xl:top-0 max-xl:z-50 max-xl:h-full`}
+        className={`transition-all duration-300 h-screen ${isOpen ? 'max-xl:translate-x-0' : 'max-xl:-translate-x-full'} w-[240px] bg-bg-2 border-r border-border flex flex-col max-xl:absolute max-xl:top-0 max-xl:z-50 max-xl:h-full`}
       >
         {/* Header/Logo */}
         <Link href={'/erp'} className='px-4 py-3 border-b border-border'>
