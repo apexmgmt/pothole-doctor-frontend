@@ -34,15 +34,17 @@ const ContractorActions = ({
           <Command>
             <CommandList>
               <CommandGroup heading='Actions'>
-                <CommandItem
-                  onSelect={() => {
-                    setOpen(false)
-                    onAddSchedule?.()
-                  }}
-                >
-                  <CalendarIcon className='mr-2 h-4 w-4' />
-                  <span>Add / View Schedule</span>
-                </CommandItem>
+                {contractorId && (
+                  <CommandItem
+                    onSelect={() => {
+                      setOpen(false)
+                      onAddSchedule?.()
+                    }}
+                  >
+                    <CalendarIcon className='mr-2 h-4 w-4' />
+                    <span>Add / View Schedule</span>
+                  </CommandItem>
+                )}
                 <CommandItem
                   onSelect={() => {
                     setOpen(false)
