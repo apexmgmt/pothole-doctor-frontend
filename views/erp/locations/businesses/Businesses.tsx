@@ -203,7 +203,7 @@ const BusinessLocations: React.FC = () => {
     {
       id: 'street_address',
       header: 'Address',
-      cell: row => <span>{row.street_address}</span>,
+      cell: row => <span>{row.street_address}, {row.city}, {row.state}</span>,
       sortable: true
     },
     {
