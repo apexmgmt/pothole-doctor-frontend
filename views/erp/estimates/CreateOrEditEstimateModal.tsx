@@ -342,11 +342,28 @@ const CreateOrEditEstimateModal = ({
               label: `${client.first_name} ${client.last_name}`,
               value: client.id
             }))}
-            onChange={() => {
+            onChange={value => {
               setValue('address_id', '')
 
               if (mode === 'create') {
                 setValue('location_id', '')
+              }
+
+              const newClient = clients.find(c => c.id === value)
+
+              if (newClient?.clientable?.is_tax_exempt) {
+                setValue('tax_rate', 0)
+              } else {
+                const locId = mode === 'create' ? newClient?.location_id : form.getValues('location_id')
+                const selectedLocation = businessLocations.find(loc => loc.id === locId)
+
+                if (
+                  selectedLocation &&
+                  selectedLocation.sales_tax !== undefined &&
+                  selectedLocation.sales_tax !== null
+                ) {
+                  setValue('tax_rate', selectedLocation.sales_tax)
+                }
               }
             }}
             control={control}

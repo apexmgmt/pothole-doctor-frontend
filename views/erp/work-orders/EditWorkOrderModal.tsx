@@ -259,8 +259,24 @@ const EditWorkOrderModal = ({
               label: `${client.first_name} ${client.last_name}`,
               value: client.id
             }))}
-            onChange={() => {
+            onChange={value => {
               setValue('address_id', '')
+
+              const newClient = clients.find(c => c.id === value)
+
+              if (newClient?.clientable?.is_tax_exempt) {
+                setValue('tax_rate', 0)
+              } else {
+                const selectedLocation = businessLocations.find(loc => loc.id === form.getValues('location_id'))
+
+                if (
+                  selectedLocation &&
+                  selectedLocation.sales_tax !== undefined &&
+                  selectedLocation.sales_tax !== null
+                ) {
+                  setValue('tax_rate', selectedLocation.sales_tax)
+                }
+              }
             }}
             control={control}
             errors={errors}
@@ -416,6 +432,17 @@ const EditWorkOrderModal = ({
               value: loc.id
             }))}
             control={control}
+            onChange={value => {
+              const currentClient = clients.find(c => c.id === form.getValues('client_id'))
+
+              if (currentClient?.clientable?.is_tax_exempt) return
+
+              const selectedLocation = businessLocations.find(loc => loc.id === value)
+
+              if (selectedLocation && selectedLocation.sales_tax !== undefined && selectedLocation.sales_tax !== null) {
+                setValue('tax_rate', selectedLocation.sales_tax)
+              }
+            }}
             errors={errors}
             fieldClassName={fieldStyle}
             labelClassName={labelStyle}
