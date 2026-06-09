@@ -203,7 +203,7 @@ const BusinessLocations: React.FC = () => {
     {
       id: 'street_address',
       header: 'Address',
-      cell: row => <span>{row.street_address}</span>,
+      cell: row => <span>{row.street_address}, {row.city}, {row.state}</span>,
       sortable: true
     },
     {
@@ -282,11 +282,11 @@ const BusinessLocations: React.FC = () => {
     try {
       const response = await BusinessLocationService.show(id)
 
+      setModalLoading(false)
       setModalBusinessLocation(response.data || null)
     } catch (error: any) {
       toast.error(typeof error?.message === 'string' ? error.message : 'Failed to load business location')
       setIsModalOpen(false)
-    } finally {
       setModalLoading(false)
     }
   }
@@ -302,14 +302,24 @@ const BusinessLocations: React.FC = () => {
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={setSearchValue}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
           </Button>
         )}
       </div>
-      <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90 h-7' onClick={handleCreateLocation}>
+      <Button
+        variant='default'
+        size='sm'
+        className='bg-light text-bg hover:bg-light/90 h-7'
+        onClick={handleCreateLocation}
+      >
         <PlusIcon className='w-4 h-4' />
         <span className='hidden min-[480px]:block'>Add Business Location</span>
       </Button>

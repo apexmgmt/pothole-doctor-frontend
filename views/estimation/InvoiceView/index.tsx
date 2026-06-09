@@ -208,10 +208,10 @@ const InvoiceView = ({
     <div>
       <div>
         {/* Invoice Basic Info — uses displayInvoice so history versions render correctly */}
-        <InvoiceBasicInfo invoice={displayInvoice} />
+        <InvoiceBasicInfo invoice={invoice} />
         <Separator className='mt-4 bg-[#e5e7eb]' />
         {/* Billing Information */}
-        <InvoiceBillingInformation invoice={displayInvoice} />
+        <InvoiceBillingInformation invoice={invoice} />
         {/* Billing Items */}
         <InvoiceBillingItems invoice={displayInvoice} />
         <Separator className='mb-4 bg-[#e5e7eb]' />

@@ -108,6 +108,7 @@ const CreateOrEditBusinessLocationModal = ({
   useEffect(() => {
     if (open) {
       form.reset(defaultValues)
+      setIsLoading(false)
     }
   }, [open, defaultValues, isFetching])
 
@@ -231,6 +232,8 @@ const CreateOrEditBusinessLocationModal = ({
         toast.success('Business location created successfully')
         onSuccess?.()
       }
+
+      setIsLoading(false)
     } catch (error: any) {
       if (error?.errors && typeof error.errors === 'object') {
         Object.entries(error.errors).forEach(([fieldName, errMsg]: [string, any]) => {
@@ -534,7 +537,7 @@ const CreateOrEditBusinessLocationModal = ({
                             if ((value as string).length > 4) return
 
                             const newValue = (value as string).replace(/\D/g, '')
-                            const newZip = zipMain ? `${zipMain}-${newValue}` : `-${newValue}`
+                            const newZip = newValue ? (zipMain ? `${zipMain}-${newValue}` : `-${newValue}`) : zipMain
 
                             field.onChange(newZip)
                           }}
