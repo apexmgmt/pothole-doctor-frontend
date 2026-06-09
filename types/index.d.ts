@@ -52,9 +52,8 @@ export * from './work_orders'
 export * from './completion_certificates'
 export * from './couriers'
 export * from './products/purchase_orders'
-
 export * from './products/material_jobs'
 export * from './schedules'
-
-export * from './organizationses';
-export * from './notifications';
+export * from './organizations'
+export * from './notifications'
+export * from './contract_templates'
