@@ -140,7 +140,7 @@ const LineItemRow = ({
                   value: vendor.id,
                   label: [vendor.first_name, vendor.last_name].filter(Boolean).join(' ')
                 }))}
-                className={cn('w-36 text-xs', fieldErrors?.vendor_id && 'border-red-500')}
+                className={cn('min-w-36 text-xs', fieldErrors?.vendor_id && 'border-red-500')}
               />
             )}
           </td>
@@ -205,7 +205,7 @@ const LineItemRow = ({
                 updateLine(idx, 'unit_cost', parseFloat(getEditValue(idx, 'unit_cost', String(line.unit_cost ?? 0))) || 0)
                 clearEditValue(idx, 'unit_cost')
               }}
-              className={cn('max-w-28', fieldErrors?.unit_cost && 'border-red-500 focus-visible:ring-red-500')}
+              className={cn('min-w-28', fieldErrors?.unit_cost && 'border-red-500 focus-visible:ring-red-500')}
               disabled={isLocked}
             />
           )}
@@ -227,7 +227,7 @@ const LineItemRow = ({
                   clearEditValue(idx, 'qty')
                 }}
                 className={cn(
-                  'w-20 ',
+                  'min-w-20 max-w-28',
                   fieldErrors?.qty && 'border-red-500 focus-visible:ring-red-500'
                 )}
                 disabled={isLocked}
@@ -258,7 +258,7 @@ const LineItemRow = ({
                       value: unit.id,
                       label: unit.name
                     }))}
-                    className={cn('w-20 h-6! text-xs', fieldErrors?.unit_id && 'border-red-500')}
+                    className={cn('min-w-20 h-6! text-xs', fieldErrors?.unit_id && 'border-red-500')}
                   />
                 ))}
             </div>
@@ -273,7 +273,7 @@ const LineItemRow = ({
               leftAddon='$'
               value={totalCost.toFixed(2)}
               readonly
-              className='max-w-28'
+              className='min-w-28'
             />
           )}
         </td>
@@ -291,7 +291,7 @@ const LineItemRow = ({
                   updateLine(idx, 'margin', parseFloat(getEditValue(idx, 'margin', String(line.margin ?? 0))) || 0)
                   clearEditValue(idx, 'margin')
                 }}
-                className={cn('max-w-28', fieldErrors?.margin && 'border-red-500 focus-visible:ring-red-500')}
+                className={cn('min-w-28', fieldErrors?.margin && 'border-red-500 focus-visible:ring-red-500')}
                 disabled={isLocked}
               />
             )}
@@ -308,7 +308,7 @@ const LineItemRow = ({
                   leftAddon='$'
                   value={unitPrice.toFixed(2)}
                   readonly
-                  className='max-w-28'
+                  className='min-w-28'
                 />
               )}
             </td>
@@ -326,7 +326,7 @@ const LineItemRow = ({
                     clearEditValue(idx, 'total_price')
                   }}
                   disabled={isLocked}
-                  className={cn('max-w-28', fieldErrors?.total_price && 'border-red-500 focus-visible:ring-red-500')}
+                  className={cn('min-w-28', fieldErrors?.total_price && 'border-red-500 focus-visible:ring-red-500')}
                 />
               ) : (
                 <CustomFormField
@@ -334,7 +334,7 @@ const LineItemRow = ({
                   leftAddon='$'
                   value={totalPrice.toFixed(2)}
                   readonly
-                  className='max-w-28'
+                  className='min-w-28'
                 />
               )}
             </td>
