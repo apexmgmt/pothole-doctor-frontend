@@ -236,20 +236,6 @@ const CreateOrEditEstimateModal = ({
     }
   }, [watch('client_id'), mode, selectedClient, defaultAddressId])
 
-  // If selected client is tax exempt, force tax_rate to 0
-  // Otherwise, if they are not tax exempt, populate tax_rate based on current location
-  useEffect(() => {
-    if (selectedClient?.clientable?.is_tax_exempt) {
-      setValue('tax_rate', 0)
-    } else {
-      const selectedLocation = businessLocations.find(loc => loc.id === form.getValues('location_id'))
-
-      if (selectedLocation && selectedLocation.sales_tax) {
-        setValue('tax_rate', selectedLocation.sales_tax)
-      }
-    }
-  }, [selectedClient])
-
   // Auto-populate tax_rate from selected business location's sales_tax if tax_rate is empty
   // useEffect(() => {
   //   const selectedLocation = businessLocations.find(loc => loc.id === watch('location_id'))
@@ -342,11 +328,28 @@ const CreateOrEditEstimateModal = ({
               label: `${client.first_name} ${client.last_name}`,
               value: client.id
             }))}
-            onChange={() => {
+            onChange={value => {
               setValue('address_id', '')
 
               if (mode === 'create') {
                 setValue('location_id', '')
+              }
+
+              const newClient = clients.find(c => c.id === value)
+
+              if (newClient?.clientable?.is_tax_exempt) {
+                setValue('tax_rate', 0)
+              } else {
+                const locId = mode === 'create' ? newClient?.location_id : form.getValues('location_id')
+                const selectedLocation = businessLocations.find(loc => loc.id === locId)
+
+                if (
+                  selectedLocation &&
+                  selectedLocation.sales_tax !== undefined &&
+                  selectedLocation.sales_tax !== null
+                ) {
+                  setValue('tax_rate', selectedLocation.sales_tax)
+                }
               }
             }}
             control={control}

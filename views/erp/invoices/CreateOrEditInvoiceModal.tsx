@@ -208,20 +208,6 @@ const CreateOrEditInvoiceModal = ({
     }
   }, [form.watch('client_id')])
 
-  // If selected client is tax exempt, force tax_rate to 0
-  // Otherwise, if they are not tax exempt, populate tax_rate based on current location
-  useEffect(() => {
-    if (selectedClient?.clientable?.is_tax_exempt) {
-      form.setValue('tax_rate', 0)
-    } else {
-      const selectedLocation = businessLocations.find(loc => loc.id === form.getValues('location_id'))
-
-      if (selectedLocation && selectedLocation.sales_tax) {
-        form.setValue('tax_rate', selectedLocation.sales_tax)
-      }
-    }
-  }, [selectedClient])
-
   const fieldStyle = 'grid grid-cols-[152px_minmax(0,_1fr)]'
   const labelStyle = 'justify-end self-start text-right pt-1'
 
@@ -315,11 +301,28 @@ const CreateOrEditInvoiceModal = ({
               label: `${client.first_name} ${client.last_name}`,
               value: client.id
             }))}
-            onChange={() => {
+            onChange={value => {
               form.setValue('address_id', '')
 
               if (mode === 'create') {
                 form.setValue('location_id', '')
+              }
+
+              const newClient = clients.find(c => c.id === value)
+
+              if (newClient?.clientable?.is_tax_exempt) {
+                form.setValue('tax_rate', 0)
+              } else {
+                const locId = mode === 'create' ? newClient?.location_id : form.getValues('location_id')
+                const selectedLocation = businessLocations.find(loc => loc.id === locId)
+
+                if (
+                  selectedLocation &&
+                  selectedLocation.sales_tax !== undefined &&
+                  selectedLocation.sales_tax !== null
+                ) {
+                  form.setValue('tax_rate', selectedLocation.sales_tax)
+                }
               }
             }}
             control={control}
