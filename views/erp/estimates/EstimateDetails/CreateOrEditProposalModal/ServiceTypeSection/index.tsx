@@ -332,7 +332,7 @@ const ServiceTypeSection = ({
                       {!hideMargin && <th className='px-2 py-1 whitespace-nowrap'>Margin</th>}
                       {!hidePriceColumns && <th className='px-2 py-1 whitespace-nowrap'>Unit Price</th>}
                       {!hidePriceColumns && <th className='px-2 py-1 whitespace-nowrap'>Total Price</th>}
-                      <th className='px-2 py-1 whitespace-nowrap'>Labor Tax</th>
+                      {/* <th className='px-2 py-1 whitespace-nowrap'>Labor Tax</th> */}
                       <th className='px-2 py-1 whitespace-nowrap flex justify-end'>
                         {mode !== 'view' && (
                           <ContractorActions
@@ -364,6 +364,7 @@ const ServiceTypeSection = ({
                           showPurchaseQty={false}
                           hideMargin={hideMargin}
                           hidePriceColumns={hidePriceColumns}
+                          hideTaxOption={true}
                           units={units}
                           vendors={vendors}
                           updateLineFields={updateLineFields}

@@ -205,7 +205,7 @@ const LineItemRow = ({
                 updateLine(idx, 'unit_cost', parseFloat(getEditValue(idx, 'unit_cost', String(line.unit_cost ?? 0))) || 0)
                 clearEditValue(idx, 'unit_cost')
               }}
-              className={cn('min-w-28', fieldErrors?.unit_cost && 'border-red-500 focus-visible:ring-red-500')}
+              className={cn('min-w-28 max-w-48', fieldErrors?.unit_cost && 'border-red-500 focus-visible:ring-red-500')}
               disabled={isLocked}
             />
           )}
@@ -258,7 +258,7 @@ const LineItemRow = ({
                       value: unit.id,
                       label: unit.name
                     }))}
-                    className={cn('min-w-20 h-6! text-xs', fieldErrors?.unit_id && 'border-red-500')}
+                    className={cn('min-w-20 max-w-28 h-6! text-xs', fieldErrors?.unit_id && 'border-red-500')}
                   />
                 ))}
             </div>
@@ -273,7 +273,7 @@ const LineItemRow = ({
               leftAddon='$'
               value={totalCost.toFixed(2)}
               readonly
-              className='min-w-28'
+              className='min-w-28 max-w-64'
             />
           )}
         </td>
