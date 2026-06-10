@@ -4,7 +4,7 @@ import { useRef, useState, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { Separator } from '@/components/ui/separator'
-import { Invoice, InvoiceHistory } from '@/types'
+import { Invoice, InvoiceHistory, ContractTemplate } from '@/types'
 import InvoiceService from '@/services/api/invoices/invoices.service'
 import InvoiceActions from './InvoiceActions'
 import InvoiceBasicInfo from './InvoiceBasicInfo'
@@ -55,12 +55,14 @@ const InvoiceView = ({
   invoice,
   inid,
   icid,
-  histories
+  histories,
+  contractTemplates = []
 }: {
   invoice: Invoice
   inid: string
   icid: string
   histories: InvoiceHistory[]
+  contractTemplates?: ContractTemplate[]
 }) => {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -116,6 +118,19 @@ const InvoiceView = ({
   // Show the submit/signature flow only when on the latest version and not yet signed
   const canShowSubmit = isLast && !lastIsSigned && (invoiceStatus === 'new' || invoiceStatus === 'sent to customer')
 
+  const matchedTemplate = useMemo(() => {
+    const invoiceTemplates = contractTemplates.filter(t => t.is_invoice_contract)
+    const matches = invoiceTemplates.filter(t => t.contract_type_id === invoice?.invoice_type_id)
+
+    if (matches.length === 1) return matches[0]
+
+    if (matches.length > 1) {
+      return matches.find(t => t.is_default_invoice_contract) || matches[0]
+    }
+
+    return null
+  }, [contractTemplates, invoice?.invoice_type_id])
+
   const navigate = (index: number) => {
     setCurrentIndex(index)
     const params = new URLSearchParams(searchParams.toString())
@@ -155,6 +170,7 @@ const InvoiceView = ({
         isAgreed={isAgreed}
         paymentMethod={paymentMethod}
         paymentFieldEntries={paymentFieldEntries}
+        contractTemplate={matchedTemplate}
       />
     ).toBlob()
 
@@ -216,8 +232,7 @@ const InvoiceView = ({
         <InvoiceBillingItems invoice={displayInvoice} />
         <Separator className='mb-4 bg-[#e5e7eb]' />
         {/* Customer Agreement */}
-        <InvoiceCustomerAgreement />
-        <Separator className='mb-4 bg-[#e5e7eb]' />
+        <InvoiceCustomerAgreement contractTemplate={matchedTemplate} />
         {/* Payment Method */}
         <InvoicePaymentMethod
           invoice={invoice}
