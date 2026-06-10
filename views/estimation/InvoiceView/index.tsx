@@ -14,13 +14,16 @@ import InvoiceCustomerAgreement from './InvoiceCustomerAgreement'
 import InvoicePaymentMethod, { InvoicePaymentMethodHandle } from './InvoicePaymentMethod'
 import InvoiceSignature, { InvoiceSignatureHandle } from './InvoiceSignature'
 
-/** Convert any image URL to a PNG data URL via an in-memory canvas. */
-const loadImageAsDataUrl = (src: string): Promise<string | null> => {
-  return new Promise(resolve => {
-    try {
-      const img = new window.Image()
+const loadImageAsDataUrl = async (src: string): Promise<string | null> => {
+  try {
+    const response = await fetch(src)
 
-      img.crossOrigin = 'anonymous'
+    if (!response.ok) return null
+    const blob = await response.blob()
+    const objectUrl = URL.createObjectURL(blob)
+
+    return new Promise(resolve => {
+      const img = new window.Image()
 
       img.onload = () => {
         try {
@@ -32,15 +35,21 @@ const loadImageAsDataUrl = (src: string): Promise<string | null> => {
           resolve(canvas.toDataURL('image/png'))
         } catch {
           resolve(null)
+        } finally {
+          URL.revokeObjectURL(objectUrl)
         }
       }
 
-      img.onerror = () => resolve(null)
-      img.src = src
-    } catch {
-      resolve(null)
-    }
-  })
+      img.onerror = () => {
+        resolve(null)
+        URL.revokeObjectURL(objectUrl)
+      }
+
+      img.src = objectUrl
+    })
+  } catch (error) {
+    return null
+  }
 }
 
 /** Map internal payment method keys to the backend-expected values. */
@@ -155,7 +164,34 @@ const InvoiceView = ({
     const paymentFieldEntries = paymentRef.current?.getFieldEntries() ?? []
 
     // ── 2. Load logo as a PNG data URL (avoids WebP / CORS issues in react-pdf) ─
-    const logoDataUrl = await loadImageAsDataUrl(window.location.origin + '/images/dashboard/logo.webp')
+    let absoluteLogoUrl = window.location.origin + '/images/dashboard/logo.webp'
+
+    if (invoice?.location?.is_branding && invoice?.location?.logo) {
+      const { generateFileUrl } = await import('@/utils/utility')
+
+      absoluteLogoUrl = generateFileUrl(invoice.location.logo) ?? absoluteLogoUrl
+    }
+
+    // Use a server action to fetch the image and completely bypass browser CORS restrictions
+    const { fetchImageAsBase64 } = await import('@/app/(estimation)/invoice/actions')
+    let logoDataUrl = await fetchImageAsBase64(absoluteLogoUrl)
+
+    if (logoDataUrl && (logoDataUrl.includes('image/webp') || logoDataUrl.includes('application/octet-stream'))) {
+      // If the server action returns WebP, React-PDF will crash. We must decode it to PNG via Canvas!
+      const convertedUrl = await loadImageAsDataUrl(logoDataUrl)
+
+      if (convertedUrl) logoDataUrl = convertedUrl
+      else logoDataUrl = null // Fallback to null if WebP conversion fails
+    } else if (!logoDataUrl) {
+      // If server action fails entirely, fallback to client-side direct fetch
+      logoDataUrl = await loadImageAsDataUrl(absoluteLogoUrl)
+
+      if (!logoDataUrl && !absoluteLogoUrl.endsWith('.webp')) {
+        logoDataUrl = absoluteLogoUrl
+      } else if (!logoDataUrl) {
+        logoDataUrl = null
+      }
+    }
 
     // ── 3. Dynamically import react-pdf to avoid SSR issues ──────────────────
     const { pdf } = await import('@react-pdf/renderer')

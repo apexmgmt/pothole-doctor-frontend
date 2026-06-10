@@ -351,17 +351,26 @@ const InvoicePDFDocument = ({
   return (
     <Document>
       <Page size='A4' style={s.page}>
-        {/* ── LOGO ── */}
-        {logoDataUrl && (
-          <View style={{ marginBottom: 12 }}>
-            <Image src={logoDataUrl} style={{ width: 120, height: 51 }} />
-          </View>
-        )}
-
         {/* ── BASIC INFO: company left, invoice meta right ── */}
         <View style={[s.spaceBetween, { marginBottom: 10, alignItems: 'flex-start' }]}>
           <View style={s.companyInfo}>
-            {invoice?.assign_user?.userable?.address && <Text>{invoice.assign_user.userable.address}</Text>}
+            {/* ── LOGO ── */}
+            {logoDataUrl && (
+              <View style={{ marginBottom: 12 }}>
+                <Image src={logoDataUrl} style={{ width: 145, height: 61, objectFit: 'contain' }} />
+              </View>
+            )}
+            {invoice?.location?.name && <Text style={{ fontFamily: 'Helvetica-Bold' }}>{invoice.location.name}</Text>}
+            {invoice?.location?.street_address && (
+              <Text>
+                {invoice.location.street_address}
+                {'\n'}
+                {invoice.location.city?.name}
+                {invoice.location.state ? ',' : ''} {invoice.location.state?.name}
+                {invoice.location.zip_code ? ',' : ''} {invoice.location.zip_code}
+              </Text>
+            )}
+            {invoice?.location?.website && <Text>{invoice.location.website}</Text>}
             {invoice?.assign_user?.email && <Text>Email: {invoice.assign_user.email}</Text>}
             {invoice?.assign_user?.userable?.phone && <Text>Phone: {invoice.assign_user.userable.phone}</Text>}
           </View>
