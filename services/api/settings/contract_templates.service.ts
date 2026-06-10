@@ -1,4 +1,4 @@
-import apiInterceptor from './api.interceptor'
+import apiInterceptor from '../api.interceptor'
 import {
   API_URL,
   CONTRACT_TEMPLATES,
