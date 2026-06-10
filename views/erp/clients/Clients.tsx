@@ -76,7 +76,17 @@ const Clients: React.FC<{
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+
+  const [filterOptions, setFilterOptions] = useState<any>(() => {
+    const filters = getInitialFilters(searchParams)
+
+    if (filters.client_id) {
+      delete filters.client_id
+    }
+
+    return filters
+  })
+
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [isStageModalOpen, setIsStageModalOpen] = useState<boolean>(false)
@@ -99,6 +109,22 @@ const Clients: React.FC<{
       hasPermission('Create Customer').then(result => setCanCreateClient(result))
       hasPermission('Update Customer').then(result => setCanEditClient(result))
       hasPermission('Delete Customer').then(result => setCanDeleteClient(result))
+    }
+
+    // Open client details if client_id is present in URL
+    const urlClientId = searchParams.get('client_id')
+
+    if (urlClientId) {
+      setSelectedClientId(urlClientId)
+      setActiveTab('details')
+
+      ClientService.show(urlClientId)
+        .then(response => {
+          if (response?.data) {
+            setSelectedClient(response.data)
+          }
+        })
+        .catch(() => {})
     }
   }, [])
 
