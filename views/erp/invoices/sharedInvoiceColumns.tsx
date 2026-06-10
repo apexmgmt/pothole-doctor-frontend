@@ -1,4 +1,5 @@
 import React from 'react'
+import Link from 'next/link'
 
 import { Badge } from '@/components/ui/badge'
 import { Description } from '@/components/ui/description'
@@ -76,8 +77,17 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
     header: 'Customer',
     cell: (row: Invoice) => {
       const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
+      const name = parts.join(' ') || '—'
 
-      return <span>{parts.join(' ') || '—'}</span>
+      if (row?.client?.id) {
+        return (
+          <Link href={`/erp/customers?client_id=${row.client.id}`} className='hover:underline cursor-pointer'>
+            {name}
+          </Link>
+        )
+      }
+
+      return <span>{name}</span>
     },
     sortable: false
   },
@@ -102,7 +112,13 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
         Boolean
       )
 
-      return <Description className='text-[13px]' buttonClassName='text-[13px]' description={addressParts.join(', ') || '—'} />
+      return (
+        <Description
+          className='text-[13px]'
+          buttonClassName='text-[13px]'
+          description={addressParts.join(', ') || '—'}
+        />
+      )
     },
     sortable: false
   },
@@ -121,7 +137,13 @@ export const getSharedInvoiceColumns = (onOpenInvoice: (row: Invoice) => void): 
         row?.address?.phone ?? row?.client?.phone
       ].filter(Boolean)
 
-      return <Description className='text-[13px]' buttonClassName='text-[13px]' description={contactParts.join('\n') || '—'} />
+      return (
+        <Description
+          className='text-[13px]'
+          buttonClassName='text-[13px]'
+          description={contactParts.join('\n') || '—'}
+        />
+      )
     },
     sortable: false
   },

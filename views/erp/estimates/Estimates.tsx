@@ -236,12 +236,17 @@ const Estimates: React.FC<{
       header: 'Customer',
       cell: (row: Estimate) => {
         const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
+        const name = parts.join(' ') || ''
 
-        return (
-          <Link href={`/erp/estimates/${row.id}`} prefetch>
-            {parts.join(' ') || ''}
-          </Link>
-        )
+        if (row?.client?.id) {
+          return (
+            <Link href={`/erp/customers?client_id=${row.client.id}`} className='hover:underline cursor-pointer'>
+              {name}
+            </Link>
+          )
+        }
+
+        return <span>{name}</span>
       },
       sortable: false
     },

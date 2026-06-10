@@ -1,4 +1,5 @@
 import React from 'react'
+import Link from 'next/link'
 
 import { Badge } from '@/components/ui/badge'
 import { Column, ProposalService, WorkOrder } from '@/types'
@@ -78,8 +79,17 @@ export const getSharedWorkOrderColumns = (
       header: 'Customer',
       cell: (row: WorkOrder) => {
         const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
+        const name = parts.join(' ') || ''
 
-        return <span>{parts.join(' ') || ''}</span>
+        if (row?.client?.id) {
+          return (
+            <Link href={`/erp/customers?client_id=${row.client.id}`} className='hover:underline cursor-pointer'>
+              {name}
+            </Link>
+          )
+        }
+
+        return <span>{name}</span>
       },
       sortable: false
     },
@@ -104,7 +114,13 @@ export const getSharedWorkOrderColumns = (
 
         const uniqueServiceTypeNames = Array.from(new Set(serviceTypeNames)).filter(name => name)
 
-        return <Description buttonClassName='text-[13px]' className='text-[13px]' description={uniqueServiceTypeNames.join(', ') || '—'} />
+        return (
+          <Description
+            buttonClassName='text-[13px]'
+            className='text-[13px]'
+            description={uniqueServiceTypeNames.join(', ') || '—'}
+          />
+        )
       },
       sortable: false
     },
@@ -116,7 +132,13 @@ export const getSharedWorkOrderColumns = (
           Boolean
         )
 
-        return <Description buttonClassName='text-[13px]' className='text-[13px]' description={addressParts.join(', ') || '—'} />
+        return (
+          <Description
+            buttonClassName='text-[13px]'
+            className='text-[13px]'
+            description={addressParts.join(', ') || '—'}
+          />
+        )
       },
       sortable: false
     },
