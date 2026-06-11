@@ -188,6 +188,40 @@ const Estimates: React.FC<{
       sortable: true
     },
     {
+      id: 'estimate_type',
+      header: 'Estimate Type',
+      cell: (row: Estimate) => (
+        <Link href={`/erp/estimates/${row.id}`} prefetch>
+          {row?.estimate_type?.name || ''}
+        </Link>
+      ),
+      sortable: false
+    },
+    {
+      id: 'location',
+      header: 'Location',
+      cell: (row: Estimate) => (
+        <Link href={`/erp/estimates/${row.id}`} prefetch>
+          {row?.location?.name || ''}
+        </Link>
+      ),
+      sortable: false
+    },
+    {
+      id: 'assign_user',
+      header: 'Assigned To',
+      cell: (row: Estimate) => {
+        const parts = [row?.assign_user?.first_name, row?.assign_user?.last_name].filter(Boolean)
+
+        return (
+          <Link href={`/erp/estimates/${row.id}`} prefetch>
+            {parts.join(' ') || ''}
+          </Link>
+        )
+      },
+      sortable: false
+    },
+    {
       id: 'company',
       header: 'Company',
       cell: (row: Estimate) => (
@@ -202,13 +236,38 @@ const Estimates: React.FC<{
       header: 'Customer',
       cell: (row: Estimate) => {
         const parts = [row?.client?.first_name, row?.client?.last_name].filter(Boolean)
+        const name = parts.join(' ') || ''
 
-        return (
-          <Link href={`/erp/estimates/${row.id}`} prefetch>
-            {parts.join(' ') || ''}
-          </Link>
-        )
+        if (row?.client?.id) {
+          return (
+            <Link href={`/erp/customers?client_id=${row.client.id}`} className='hover:underline cursor-pointer'>
+              {name}
+            </Link>
+          )
+        }
+
+        return <span>{name}</span>
       },
+      sortable: false
+    },
+    {
+      id: 'payment_term',
+      header: 'Payment Term',
+      cell: (row: Estimate) => (
+        <Link href={`/erp/estimates/${row.id}`} prefetch>
+          {row?.payment_term?.name || ''}
+        </Link>
+      ),
+      sortable: false
+    },
+    {
+      id: 'tax_rate',
+      header: 'Tax Rate',
+      cell: (row: Estimate) => (
+        <Link href={`/erp/estimates/${row.id}`} prefetch>
+          {row.tax_rate != null ? `${row.tax_rate}%` : ''}
+        </Link>
+      ),
       sortable: false
     },
     {
@@ -227,28 +286,6 @@ const Estimates: React.FC<{
       ),
       sortable: false
     },
-
-    // {
-    //   id: 'service_type',
-    //   header: 'Service Type',
-    //   cell: (row: Estimate) => <span>{row?.service_type?.name || ''}</span>,
-    //   sortable: true
-    // },
-
-    // {
-    //   id: 'status',
-    //   header: 'Status',
-    //   cell: row => (
-    //     <Badge
-    //       key={row.id}
-    //       variant={row.status === 'Completed' ? 'default' : row.status === 'In Progress' ? 'secondary' : 'destructive'}
-    //       className='mr-1 mb-1'
-    //     >
-    //       {row.status}
-    //     </Badge>
-    //   ),
-    //   sortable: true
-    // },
     {
       id: 'actions',
       header: 'Action',

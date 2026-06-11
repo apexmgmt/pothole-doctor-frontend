@@ -1,5 +1,6 @@
 import InvoiceService from '@/services/api/invoices/invoices.service'
-import { Invoice, InvoiceHistory } from '@/types'
+import ContractTemplateService from '@/services/api/settings/contract_templates.service'
+import { Invoice, InvoiceHistory, ContractTemplate } from '@/types'
 import InvoiceView from '@/views/estimation/InvoiceView'
 import { Metadata } from 'next'
 export const dynamic = 'force-dynamic'
@@ -45,16 +46,24 @@ const InvoiceDetailsPage = async ({ searchParams }: { searchParams: any }) => {
   const { inid, icid } = await searchParams
   let invoice: Invoice | null = null
   let histories: InvoiceHistory[] = []
+  let contractTemplates: ContractTemplate[] = []
 
-  try {
-    const response = await InvoiceService.viewInvoice(inid, icid)
+  const [invoiceResult, templatesResult] = await Promise.allSettled([
+    InvoiceService.viewInvoice(inid, icid),
+    ContractTemplateService.getAll()
+  ])
 
-    invoice = response?.data?.invoice ?? null
-    histories = response?.data?.histories ?? []
-  } catch (error) {
-    console.log('Error fetching invoice details', error)
-    invoice = null
-    histories = []
+  if (invoiceResult.status === 'fulfilled') {
+    invoice = invoiceResult.value?.data?.invoice ?? null
+    histories = invoiceResult.value?.data?.histories ?? []
+  } else {
+    console.log('Error fetching invoice details', invoiceResult.reason)
+  }
+
+  if (templatesResult.status === 'fulfilled') {
+    contractTemplates = templatesResult.value?.data || []
+  } else {
+    console.log('Error fetching contract templates', templatesResult.reason)
   }
 
   if (!invoice) {
@@ -66,7 +75,7 @@ const InvoiceDetailsPage = async ({ searchParams }: { searchParams: any }) => {
     )
   }
 
-  return <InvoiceView invoice={invoice} inid={inid ?? ''} icid={icid ?? ''} histories={histories} />
+  return <InvoiceView invoice={invoice} inid={inid ?? ''} icid={icid ?? ''} histories={histories} contractTemplates={contractTemplates} />
 }
 
 export default InvoiceDetailsPage

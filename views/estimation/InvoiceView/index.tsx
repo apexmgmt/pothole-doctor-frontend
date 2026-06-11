@@ -4,7 +4,7 @@ import { useRef, useState, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { Separator } from '@/components/ui/separator'
-import { Invoice, InvoiceHistory } from '@/types'
+import { Invoice, InvoiceHistory, ContractTemplate } from '@/types'
 import InvoiceService from '@/services/api/invoices/invoices.service'
 import InvoiceActions from './InvoiceActions'
 import InvoiceBasicInfo from './InvoiceBasicInfo'
@@ -14,13 +14,16 @@ import InvoiceCustomerAgreement from './InvoiceCustomerAgreement'
 import InvoicePaymentMethod, { InvoicePaymentMethodHandle } from './InvoicePaymentMethod'
 import InvoiceSignature, { InvoiceSignatureHandle } from './InvoiceSignature'
 
-/** Convert any image URL to a PNG data URL via an in-memory canvas. */
-const loadImageAsDataUrl = (src: string): Promise<string | null> => {
-  return new Promise(resolve => {
-    try {
-      const img = new window.Image()
+const loadImageAsDataUrl = async (src: string): Promise<string | null> => {
+  try {
+    const response = await fetch(src)
 
-      img.crossOrigin = 'anonymous'
+    if (!response.ok) return null
+    const blob = await response.blob()
+    const objectUrl = URL.createObjectURL(blob)
+
+    return new Promise(resolve => {
+      const img = new window.Image()
 
       img.onload = () => {
         try {
@@ -32,15 +35,21 @@ const loadImageAsDataUrl = (src: string): Promise<string | null> => {
           resolve(canvas.toDataURL('image/png'))
         } catch {
           resolve(null)
+        } finally {
+          URL.revokeObjectURL(objectUrl)
         }
       }
 
-      img.onerror = () => resolve(null)
-      img.src = src
-    } catch {
-      resolve(null)
-    }
-  })
+      img.onerror = () => {
+        resolve(null)
+        URL.revokeObjectURL(objectUrl)
+      }
+
+      img.src = objectUrl
+    })
+  } catch (error) {
+    return null
+  }
 }
 
 /** Map internal payment method keys to the backend-expected values. */
@@ -55,12 +64,14 @@ const InvoiceView = ({
   invoice,
   inid,
   icid,
-  histories
+  histories,
+  contractTemplates = []
 }: {
   invoice: Invoice
   inid: string
   icid: string
   histories: InvoiceHistory[]
+  contractTemplates?: ContractTemplate[]
 }) => {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -116,6 +127,19 @@ const InvoiceView = ({
   // Show the submit/signature flow only when on the latest version and not yet signed
   const canShowSubmit = isLast && !lastIsSigned && (invoiceStatus === 'new' || invoiceStatus === 'sent to customer')
 
+  const matchedTemplate = useMemo(() => {
+    const invoiceTemplates = contractTemplates.filter(t => t.is_invoice_contract)
+    const matches = invoiceTemplates.filter(t => t.contract_type_id === invoice?.invoice_type_id)
+
+    if (matches.length === 1) return matches[0]
+
+    if (matches.length > 1) {
+      return matches.find(t => t.is_default_invoice_contract) || matches[0]
+    }
+
+    return null
+  }, [contractTemplates, invoice?.invoice_type_id])
+
   const navigate = (index: number) => {
     setCurrentIndex(index)
     const params = new URLSearchParams(searchParams.toString())
@@ -140,7 +164,34 @@ const InvoiceView = ({
     const paymentFieldEntries = paymentRef.current?.getFieldEntries() ?? []
 
     // ── 2. Load logo as a PNG data URL (avoids WebP / CORS issues in react-pdf) ─
-    const logoDataUrl = await loadImageAsDataUrl(window.location.origin + '/images/dashboard/logo.webp')
+    let absoluteLogoUrl = window.location.origin + '/images/dashboard/logo.webp'
+
+    if (invoice?.location?.is_branding && invoice?.location?.logo) {
+      const { generateFileUrl } = await import('@/utils/utility')
+
+      absoluteLogoUrl = generateFileUrl(invoice.location.logo) ?? absoluteLogoUrl
+    }
+
+    // Use a server action to fetch the image and completely bypass browser CORS restrictions
+    const { fetchImageAsBase64 } = await import('@/app/(estimation)/invoice/actions')
+    let logoDataUrl = await fetchImageAsBase64(absoluteLogoUrl)
+
+    if (logoDataUrl && (logoDataUrl.includes('image/webp') || logoDataUrl.includes('application/octet-stream'))) {
+      // If the server action returns WebP, React-PDF will crash. We must decode it to PNG via Canvas!
+      const convertedUrl = await loadImageAsDataUrl(logoDataUrl)
+
+      if (convertedUrl) logoDataUrl = convertedUrl
+      else logoDataUrl = null // Fallback to null if WebP conversion fails
+    } else if (!logoDataUrl) {
+      // If server action fails entirely, fallback to client-side direct fetch
+      logoDataUrl = await loadImageAsDataUrl(absoluteLogoUrl)
+
+      if (!logoDataUrl && !absoluteLogoUrl.endsWith('.webp')) {
+        logoDataUrl = absoluteLogoUrl
+      } else if (!logoDataUrl) {
+        logoDataUrl = null
+      }
+    }
 
     // ── 3. Dynamically import react-pdf to avoid SSR issues ──────────────────
     const { pdf } = await import('@react-pdf/renderer')
@@ -155,6 +206,7 @@ const InvoiceView = ({
         isAgreed={isAgreed}
         paymentMethod={paymentMethod}
         paymentFieldEntries={paymentFieldEntries}
+        contractTemplate={matchedTemplate}
       />
     ).toBlob()
 
@@ -208,16 +260,15 @@ const InvoiceView = ({
     <div>
       <div>
         {/* Invoice Basic Info — uses displayInvoice so history versions render correctly */}
-        <InvoiceBasicInfo invoice={displayInvoice} />
+        <InvoiceBasicInfo invoice={invoice} />
         <Separator className='mt-4 bg-[#e5e7eb]' />
         {/* Billing Information */}
-        <InvoiceBillingInformation invoice={displayInvoice} />
+        <InvoiceBillingInformation invoice={invoice} />
         {/* Billing Items */}
         <InvoiceBillingItems invoice={displayInvoice} />
         <Separator className='mb-4 bg-[#e5e7eb]' />
         {/* Customer Agreement */}
-        <InvoiceCustomerAgreement />
-        <Separator className='mb-4 bg-[#e5e7eb]' />
+        <InvoiceCustomerAgreement contractTemplate={matchedTemplate} />
         {/* Payment Method */}
         <InvoicePaymentMethod
           invoice={invoice}

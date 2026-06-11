@@ -103,10 +103,10 @@ const ProposalView = ({
   return (
     <>
       {/* Proposal Basic Info */}
-      <ProposalBasicInfo proposal={displayProposal} />
+      <ProposalBasicInfo proposal={proposal} />
       <Separator className='mt-4' />
       {/* Billing Information */}
-      <BillingInformation proposal={displayProposal} />
+      <BillingInformation proposal={proposal} />
       {/* Billing Items */}
       <BillingItems proposal={displayProposal} />
       <Separator className='mb-4' />

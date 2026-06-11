@@ -64,6 +64,7 @@ export default class InvoiceService {
 
       await revalidate('invoices')
       await revalidate('invoices-summary')
+      await revalidate('work-orders-summary')
 
       return await response.json()
     } catch (error) {
@@ -152,6 +153,7 @@ export default class InvoiceService {
 
       await revalidate('invoices')
       await revalidate('invoices-summary')
+      await revalidate('work-orders-summary')
 
       return await response.json()
     } catch (error) {
@@ -183,6 +185,7 @@ export default class InvoiceService {
 
       await revalidate('invoices')
       await revalidate('invoices-summary')
+      await revalidate('work-orders-summary')
 
       return await response.json()
     } catch (error) {
@@ -212,6 +215,7 @@ export default class InvoiceService {
 
       await revalidate('invoices')
       await revalidate('invoices-summary')
+      await revalidate('work-orders-summary')
 
       return await response.json()
     } catch (error) {
@@ -241,6 +245,7 @@ export default class InvoiceService {
 
       await revalidate('invoices')
       await revalidate('invoices-summary')
+      await revalidate('work-orders-summary')
 
       return await response.json()
     } catch (error) {

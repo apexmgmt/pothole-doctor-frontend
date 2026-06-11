@@ -82,7 +82,8 @@ export const PERMISSION_BASED_ROUTES: Record<string, string> = {
   '/erp/settings/task-reminders': 'Manage Task Reminder',
   '/erp/settings/uom-units': 'Manage Unit',
   '/erp/settings/measure-units': 'Manage Unit',
-  '/erp/settings/service-types': 'Manage Service Type'
+  '/erp/settings/service-types': 'Manage Service Type',
+  '/erp/settings/contract-templates': 'Manage Contract Template'
 }
 
 /**
