@@ -1,3 +1,7 @@
+import ServiceTemplates from '@/views/erp/settings/ServiceTemplates'
+
+export const dynamic = 'force-dynamic'
+
 export default function ServiceTemplatesPage() {
-    return <div>ServiceTemplates Page</div>;
-    }
+  return <ServiceTemplates />
+}
