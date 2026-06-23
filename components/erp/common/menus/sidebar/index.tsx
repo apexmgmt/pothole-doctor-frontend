@@ -516,6 +516,15 @@ const Sidebar: React.FC = () => {
               hasSubItems: false,
               exactMatch: true,
               permissions: ['Manage Contract Template']
+            },
+            {
+              id: 'service-templates',
+              label: 'Service Templates',
+              href: '/erp/settings/service-templates',
+              icon: <LocateIcon className={iconSize} />,
+              hasSubItems: false,
+              exactMatch: true,
+              permissions: ['Manage Service Template']
             }
           ],
           exactMatch: true,
@@ -526,7 +535,8 @@ const Sidebar: React.FC = () => {
             'Manage Contact Type',
             'Manage Note Type',
             'Manage Task Type',
-            'Manage Contract Template'
+            'Manage Contract Template',
+            'Manage Service Template'
           ]
         },
 
@@ -572,7 +582,8 @@ const Sidebar: React.FC = () => {
         'Manage Role',
         'Manage Contractor',
         'Manage Labor Cost',
-        'Manage Contract Template'
+        'Manage Contract Template',
+        'Manage Service Template'
       ]
     }
   ]
