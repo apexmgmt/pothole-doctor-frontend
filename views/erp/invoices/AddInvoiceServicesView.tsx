@@ -20,8 +20,10 @@ import {
   ServiceType,
   Staff,
   Unit,
-  Vendor
+  Vendor,
+  ServiceTemplate
 } from '@/types'
+import ImportTemplateDropdown from './ImportTemplateDropdown'
 import CreateOrEditInvoiceModal from './CreateOrEditInvoiceModal'
 import InvoiceService from '@/services/api/invoices/invoices.service'
 import InvoiceActionsButton from './InvoiceActionsButton'
@@ -47,7 +49,8 @@ const AddInvoiceServicesView = ({
   clients = [],
   staffs = [],
   paymentTerms = [],
-  businessLocations = []
+  businessLocations = [],
+  serviceTemplates = []
 }: {
   invoice: Invoice
   serviceTypes: ServiceType[]
@@ -60,6 +63,7 @@ const AddInvoiceServicesView = ({
   staffs?: Staff[]
   paymentTerms?: PaymentTerm[]
   businessLocations?: BusinessLocation[]
+  serviceTemplates?: ServiceTemplate[]
 }) => {
   const router = useRouter()
 
@@ -200,6 +204,58 @@ const AddInvoiceServicesView = ({
     setServiceTypeLineItems(prev => prev.filter((_, i) => i !== index))
     setHasUnsavedChanges(true)
     setServiceFieldErrors({})
+  }
+
+  const handleImportTemplate = (template: ServiceTemplate) => {
+    if (!template.service_type_id) return
+
+    const st = serviceTypes.find(s => s.id === template.service_type_id)
+
+    if (st) {
+      setSelectedServiceType(prev => [...prev, { id: st.id, name: st.name }])
+
+      const mappedLines = (template.service?.items || []).map(item => ({
+        item_id: null,
+        product_id: item.product_id,
+        product: item?.product,
+        labor_cost_id: item.labor_cost_id,
+        name: item.name,
+        description: item.description,
+        sku: item.sku ?? '',
+        style: item.style ?? '',
+        color: item.color ?? '',
+        type: item.type,
+        unit_cost: item.unit_cost,
+        qty: item.qty,
+        unit_name: item.unit_name || '',
+        unit_id: item.unit_id ?? '',
+        total_cost: item.total_cost,
+        margin: item.margin,
+        unit_price: item.unit_price,
+        discount: item.discount,
+        discount_type: item.discount_type,
+        freight_charge: item.freight_charge,
+        is_sale: item.is_sale,
+        tax_type: item.tax_type,
+        tax: item.tax,
+        tax_amount: item.total_tax || 0,
+        total_price: item.total_price,
+        note: item.note || ''
+      }))
+
+      setServiceTypeLineItems(prev => [
+        ...prev,
+        {
+          serviceTypeName: st.name,
+          serviceTypeId: st.id,
+          groupId: null,
+          lines: mappedLines as ProposalServiceItemPayload[]
+        }
+      ])
+
+      setHasUnsavedChanges(true)
+      setServiceFieldErrors({})
+    }
   }
 
   const buildPayload = (): InvoiceServicePayload => ({
@@ -469,6 +525,8 @@ const AddInvoiceServicesView = ({
             onOpenChange={setServiceSelectOpen}
             onSelect={handleAddServiceType}
           />
+          {/* service template */}
+          <ImportTemplateDropdown serviceTemplates={serviceTemplates} onSelect={handleImportTemplate} />
         </div>
         <div className='flex gap-2'>
           <Button type='button' variant='outline' onClick={() => router.push('/erp/invoices')} disabled={isLoading}>
