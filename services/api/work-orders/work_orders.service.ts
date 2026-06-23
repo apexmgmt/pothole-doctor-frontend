@@ -33,7 +33,7 @@ export default class WorkOrderService {
       if (!response.ok) {
         const errorData = await response.json()
 
-        throw new Error(errorData.message || 'Failed to fetch invoices')
+        throw new Error(errorData.message || 'Failed to fetch work orders')
       }
 
       return await response.json()

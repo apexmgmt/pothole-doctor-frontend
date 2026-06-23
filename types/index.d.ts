@@ -57,3 +57,5 @@ export * from './schedules'
 export * from './organizations'
 export * from './notifications'
 export * from './contract_templates'
+
+export * from './service_templates';
