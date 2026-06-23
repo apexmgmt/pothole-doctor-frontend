@@ -23,7 +23,7 @@ import {
   Vendor,
   ServiceTemplate
 } from '@/types'
-import ImportTemplateDropdown from './ImportTemplateDropdown'
+import ImportTemplateDropdown from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalModal/ImportTemplateDropdown'
 import CreateOrEditInvoiceModal from './CreateOrEditInvoiceModal'
 import InvoiceService from '@/services/api/invoices/invoices.service'
 import InvoiceActionsButton from './InvoiceActionsButton'

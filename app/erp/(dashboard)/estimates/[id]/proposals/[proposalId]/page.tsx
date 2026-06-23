@@ -4,7 +4,8 @@ import ProductCategoryService from '@/services/api/products/product_categories.s
 import ServiceTypeService from '@/services/api/settings/service_types.service'
 import UnitService from '@/services/api/settings/units.service'
 import VendorService from '@/services/api/vendors/vendors.service'
-import { Estimate, ProductCategory, Proposal, ServiceType, Unit, Vendor } from '@/types'
+import ServiceTemplateService from '@/services/api/settings/service_templates.service'
+import { Estimate, ProductCategory, Proposal, ServiceType, Unit, Vendor, ServiceTemplate } from '@/types'
 import { notFound } from 'next/navigation'
 import CreateOrEditProposalView from '@/views/erp/estimates/EstimateDetails/CreateOrEditProposalView'
 
@@ -22,7 +23,7 @@ const ProposalPage = async ({
   const isCreate = proposalId === 'create'
   const mode = isCreate ? 'create' : modeParam === 'view' ? 'view' : 'edit'
 
-  const [estimateRes, serviceTypesRes, unitsRes, productCategoriesRes, uomUnitsRes, vendorsRes, proposalRes] =
+  const [estimateRes, serviceTypesRes, unitsRes, productCategoriesRes, uomUnitsRes, vendorsRes, proposalRes, serviceTemplatesRes] =
     await Promise.allSettled([
       EstimateService.show(estimateId),
       ServiceTypeService.getAll(),
@@ -30,7 +31,8 @@ const ProposalPage = async ({
       ProductCategoryService.getAll(),
       UnitService.getAll('uom'),
       VendorService.getAll(),
-      isCreate ? Promise.resolve({ data: null }) : ProposalService.show(proposalId)
+      isCreate ? Promise.resolve({ data: null }) : ProposalService.show(proposalId),
+      ServiceTemplateService.getAll()
     ])
 
   if (estimateRes.status === 'rejected') {
@@ -49,6 +51,9 @@ const ProposalPage = async ({
   const uomUnits: Unit[] = uomUnitsRes.status === 'fulfilled' ? uomUnitsRes.value.data || [] : []
   const vendors: Vendor[] = vendorsRes.status === 'fulfilled' ? vendorsRes.value.data || [] : []
   const proposal: Proposal | null = proposalRes.status === 'fulfilled' ? proposalRes.value.data || null : null
+  
+  const serviceTemplates: ServiceTemplate[] =
+    serviceTemplatesRes.status === 'fulfilled' ? serviceTemplatesRes.value.data || [] : []
 
   const READ_ONLY_STATUSES = ['converted to invoice', 'void proposal', 'dead proposal']
 
@@ -67,6 +72,7 @@ const ProposalPage = async ({
       productCategories={productCategories}
       uomUnits={uomUnits}
       vendors={vendors}
+      serviceTemplates={serviceTemplates}
     />
   )
 }
