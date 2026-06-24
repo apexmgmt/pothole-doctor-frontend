@@ -143,3 +143,9 @@ export interface ProductGallery {
   created_at: string
   updated_at: string
 }
+
+export interface ProductBulkEditPayload {
+  id: string
+  product_cost: number
+  margin: number
+}
