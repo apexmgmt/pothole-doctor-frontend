@@ -12,7 +12,6 @@ import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, Product, ProductsProps } from '@/types'
-import { InputGroup, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
@@ -23,7 +22,6 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import ProductService from '@/services/api/products/products.service'
 import CreateEditViewProductModal from './CreateEditViewProductModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { hasPermission } from '@/utils/role-permission'
 import { formatCurrency } from '@/utils/currency'
@@ -420,9 +418,21 @@ const Products: React.FC<ProductsProps> = ({
     try {
       await ProductService.bulkDelete({ ids: activeSelectedRows.map(r => r.id) })
       toast.success('Products deleted successfully')
+
+      const total = apiResponse?.total || 0
+      const perPage = apiResponse?.per_page || 10
+      const currentPage = filterOptions.page ? Number(filterOptions.page) : 1
+      const restItemCount = total - activeSelectedRows.length
+      const pageCount = Math.max(1, Math.ceil(restItemCount / perPage))
+      
       activeSetSelectedRows?.([])
-      fetchData()
       setIsBulkDeleteModalOpen(false)
+
+      if (currentPage > pageCount) {
+        setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
+      } else {
+        fetchData()
+      }
     } catch (error: any) {
       toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete products')
     } finally {
@@ -435,7 +445,19 @@ const Products: React.FC<ProductsProps> = ({
       await ProductService.destroy(id)
         .then(response => {
           toast.success('Product deleted successfully')
-          fetchData()
+          activeSetSelectedRows?.((prev: any) => (prev || []).filter((r: any) => r.id !== id))
+
+          const total = apiResponse?.total || 0
+          const perPage = apiResponse?.per_page || 10
+          const currentPage = filterOptions.page ? Number(filterOptions.page) : 1
+          const restItemCount = total - 1
+          const pageCount = Math.max(1, Math.ceil(restItemCount / perPage))
+
+          if (currentPage > pageCount) {
+            setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
+          } else {
+            fetchData()
+          }
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete product')

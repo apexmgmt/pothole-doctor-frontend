@@ -201,7 +201,19 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
       await NonInventoryProductService.destroy(id)
         .then(() => {
           toast.success('Non-inventory product deleted successfully')
-          fetchData()
+          activeSetSelectedRows?.((prev: any) => (prev || []).filter((r: any) => r.id !== id))
+
+          const total = apiResponse?.total || 0
+          const perPage = apiResponse?.per_page || 10
+          const currentPage = filterOptions.page ? Number(filterOptions.page) : 1
+          const restItemCount = total - 1
+          const pageCount = Math.max(1, Math.ceil(restItemCount / perPage))
+
+          if (currentPage > pageCount) {
+            setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
+          } else {
+            fetchData()
+          }
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete non-inventory product')
@@ -229,9 +241,21 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
     try {
       await NonInventoryProductService.bulkDelete({ ids: activeSelectedRows.map(r => r.id) })
       toast.success('Non-inventory products deleted successfully')
+
+      const total = apiResponse?.total || 0
+      const perPage = apiResponse?.per_page || 10
+      const currentPage = filterOptions.page ? Number(filterOptions.page) : 1
+      const restItemCount = total - activeSelectedRows.length
+      const pageCount = Math.max(1, Math.ceil(restItemCount / perPage))
+
       activeSetSelectedRows?.([])
-      fetchData()
       setIsBulkDeleteModalOpen(false)
+
+      if (currentPage > pageCount) {
+        setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
+      } else {
+        fetchData()
+      }
     } catch (error: any) {
       toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete non-inventory products')
     } finally {
