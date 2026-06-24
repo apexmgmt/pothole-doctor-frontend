@@ -7,9 +7,11 @@ import {
   NON_INVENTORY_PRODUCTS_ALL_TENANT,
   NON_INVENTORY_PRODUCTS_BULK_DELETE,
   NON_INVENTORY_PRODUCTS_BULK_DELETE_TENANT,
+  NON_INVENTORY_PRODUCTS_BULK_EDIT,
+  NON_INVENTORY_PRODUCTS_BULK_EDIT_TENANT,
   NON_INVENTORY_PRODUCTS_TENANT
 } from '@/constants/api'
-import { ProductPayload } from '@/types'
+import { ProductBulkEditPayload, ProductPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
 
 export default class NonInventoryProductService {
@@ -17,7 +19,16 @@ export default class NonInventoryProductService {
   static index = async (filterOptions: object = {}) => {
     try {
       const isTenantApi = await isTenant()
-      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+      const params = new URLSearchParams()
+
+      Object.entries(filterOptions as Record<string, any>).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach(v => params.append(`${key}[]`, String(v)))
+        } else if (value !== undefined && value !== null) {
+          params.append(key, String(value))
+        }
+      })
+      const queryParams = params.toString()
 
       const response = await apiInterceptor(
         API_URL +
@@ -119,6 +130,40 @@ export default class NonInventoryProductService {
 
       await revalidate('non-inventory-products')
       await revalidate(`non-inventory-products/${productId}`)
+      await revalidate('non-inventory-products-all')
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Bulk Edit Products API
+   *
+   * @param {ProductBulkEditPayload[]} payload - Array of product objects to update
+   * @returns Promise<any>
+   */
+  static bulkEdit = async (payload: ProductBulkEditPayload[]) => {
+    try {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_BULK_EDIT_TENANT : NON_INVENTORY_PRODUCTS_BULK_EDIT),
+        {
+          requiresAuth: true,
+          method: 'PUT',
+          body: JSON.stringify({ changes: payload })
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      await revalidate('non-inventory-products')
       await revalidate('non-inventory-products-all')
 
       return await response.json()

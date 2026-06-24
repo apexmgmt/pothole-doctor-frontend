@@ -22,12 +22,15 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import NonInventoryProductService from '@/services/api/products/non-inventory-products.service'
 import CreateEditViewNonInventoryProductModal from './CreateEditViewNonInventoryProductModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
+import DuplicateButton from '@/components/erp/common/buttons/DuplicateButton'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
+import BulkEditProductModal from './BulkEditProductModal'
 import CustomFormField from '@/components/form/CustomFormField'
 import { formatCurrency } from '@/utils/currency'
+import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 
 const NonInventoryProducts: React.FC<ProductsProps> = ({
   productCategories,
@@ -50,12 +53,20 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(false)
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
   const [canCreateProduct, setCanCreateProduct] = useState<boolean>(false)
   const [canEditProduct, setCanEditProduct] = useState<boolean>(false)
   const [canDeleteProduct, setCanDeleteProduct] = useState<boolean>(false)
   const [canViewProduct, setCanViewProduct] = useState<boolean>(false)
+
+  const [localSelectedRows, setLocalSelectedRows] = useState<Product[]>([])
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+
+  const activeSelectedRows = isFromModal ? selectedRows : localSelectedRows
+  const activeSetSelectedRows = isFromModal ? setSelectedRows : setLocalSelectedRows
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
@@ -148,6 +159,20 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
     }
   }
 
+  const handleOpenDuplicateModal = async (id: string) => {
+    setModalMode('duplicate' as any)
+    setSelectedProductId(id)
+
+    try {
+      const response = await NonInventoryProductService.show(id)
+
+      setSelectedProduct(response.data)
+      setIsModalOpen(true)
+    } catch (error) {
+      toast.error('Failed to fetch non-inventory product details')
+    }
+  }
+
   const handleModalClose = () => {
     setIsModalOpen(false)
     setSelectedProductId(null)
@@ -178,7 +203,19 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
       await NonInventoryProductService.destroy(id)
         .then(() => {
           toast.success('Non-inventory product deleted successfully')
-          fetchData()
+          activeSetSelectedRows?.((prev: any) => (prev || []).filter((r: any) => r.id !== id))
+
+          const total = apiResponse?.total || 0
+          const perPage = apiResponse?.per_page || 10
+          const currentPage = filterOptions.page ? Number(filterOptions.page) : 1
+          const restItemCount = total - 1
+          const pageCount = Math.max(1, Math.ceil(restItemCount / perPage))
+
+          if (currentPage > pageCount) {
+            setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
+          } else {
+            fetchData()
+          }
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete non-inventory product')
@@ -199,44 +236,100 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
     setSearchValue('')
   }
 
+  const handleBulkDelete = async () => {
+    if (!activeSelectedRows || activeSelectedRows.length === 0) return
+    setIsBulkDeleting(true)
+
+    try {
+      await NonInventoryProductService.bulkDelete({ ids: activeSelectedRows.map(r => r.id) })
+      toast.success('Non-inventory products deleted successfully')
+
+      const total = apiResponse?.total || 0
+      const perPage = apiResponse?.per_page || 10
+      const currentPage = filterOptions.page ? Number(filterOptions.page) : 1
+      const restItemCount = total - activeSelectedRows.length
+      const pageCount = Math.max(1, Math.ceil(restItemCount / perPage))
+
+      activeSetSelectedRows?.([])
+      setIsBulkDeleteModalOpen(false)
+
+      if (currentPage > pageCount) {
+        setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
+      } else {
+        fetchData()
+      }
+    } catch (error: any) {
+      toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete non-inventory products')
+    } finally {
+      setIsBulkDeleting(false)
+    }
+  }
+
   const columns: Column[] = [
-    ...((isFromModal
-      ? [
-          {
-            id: 'select',
-            header: '',
-            cell: (row: Product) => (
-              <Checkbox
-                checked={selectedRows?.some((r: Product) => r.id === row.id)}
-                onCheckedChange={checked => {
-                  setSelectedRows?.((prev: Product[]) => {
-                    if (checked) {
-                      if (!prev.some(r => r.id === row.id)) return [...prev, row]
-
-                      return prev
-                    } else {
-                      return prev.filter(r => r.id !== row.id)
-                    }
-                  })
-                }}
-              />
-            ),
-            sortable: false,
-            size: 16
-          }
-        ]
-      : []) as Column[]),
     {
-      id: 'index',
-      header: '#',
-      cell: (row: Product, rowIndex: number | undefined) => {
-        const from = apiResponse?.from || 1
+      id: 'select',
+      header: (
+        <Checkbox
+          className='border-accent-foreground/60!'
+          checked={
+            !!apiResponse?.data?.length &&
+            (apiResponse.data as Product[]).every(row => activeSelectedRows?.some(r => r.id === row.id))
+          }
+          onCheckedChange={checked => {
+            if (checked) {
+              const newSelected = [...(activeSelectedRows || [])]
+              const currentData = (apiResponse?.data || []) as Product[]
 
-        return <span className='text-gray'>{from + (rowIndex || 0)}</span>
-      },
+              currentData.forEach(row => {
+                if (!newSelected.some(r => r.id === row.id)) {
+                  newSelected.push(row)
+                }
+              })
+              activeSetSelectedRows?.(newSelected)
+            } else {
+              const currentIds = ((apiResponse?.data as Product[]) || []).map(r => r.id)
+
+              activeSetSelectedRows?.((activeSelectedRows || []).filter(r => !currentIds.includes(r.id)))
+            }
+          }}
+        />
+      ),
+      cell: (row: Product) => (
+        <Checkbox
+          checked={activeSelectedRows?.some((r: Product) => r.id === row.id)}
+          onCheckedChange={checked => {
+            activeSetSelectedRows?.((prev: any) => {
+              const prevArray = prev || []
+
+              if (checked) {
+                if (!prevArray.some((r: Product) => r.id === row.id)) return [...prevArray, row]
+
+                return prevArray
+              } else {
+                return prevArray.filter((r: Product) => r.id !== row.id)
+              }
+            })
+          }}
+        />
+      ),
       sortable: false,
       size: 16
     },
+    ...(!isFromModal
+      ? [
+          {
+            id: 'index',
+            header: '#',
+            cell: (row: Product, rowIndex: number | undefined) => {
+              const from = apiResponse?.from || 1
+
+              return <span className='text-gray'>{from + (rowIndex || 0)}</span>
+            },
+            sortable: false,
+            size: 16
+          } as Column
+        ]
+      : []),
     {
       id: 'vendor',
       header: 'Vendor',
@@ -304,6 +397,15 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
                             <ViewButton
                               tooltip='View Product Information'
                               onClick={() => handleOpenViewModal(row.id)}
+                              variant='text'
+                            />
+                          ]
+                        : []),
+                      ...(canCreateProduct
+                        ? [
+                            <DuplicateButton
+                              tooltip='Duplicate Product'
+                              onClick={() => handleOpenDuplicateModal(row.id)}
                               variant='text'
                             />
                           ]
@@ -403,17 +505,29 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
           </Button>
         )}
       </div>
-      {canCreateProduct && !hideActionButton && (
-        <Button
-          variant='default'
-          size='sm'
-          className='bg-light text-bg hover:bg-light/90 mt-5 h-7'
-          onClick={handleOpenCreateModal}
-        >
-          <PlusIcon className='w-4 h-4' />
-          <span className='hidden sm:block'>Add Non-Inventory Product</span>
-        </Button>
-      )}
+      <div className='flex items-center gap-2 mt-5'>
+        {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
+          <Button variant='outline' size='sm' className='h-7 bg-[#2A2A2A] hover:bg-[#333333]' onClick={() => setIsBulkEditModalOpen(true)}>
+            Bulk Edit
+          </Button>
+        )}
+        {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canDeleteProduct && (
+          <Button variant='destructive' size='sm' className='h-7' onClick={() => setIsBulkDeleteModalOpen(true)}>
+            Bulk Delete
+          </Button>
+        )}
+        {canCreateProduct && !hideActionButton && (
+          <Button
+            variant='default'
+            size='sm'
+            className='bg-light text-bg hover:bg-light/90 h-7'
+            onClick={handleOpenCreateModal}
+          >
+            <PlusIcon className='w-4 h-4' />
+            <span className='hidden sm:block'>Add Non-Inventory Product</span>
+          </Button>
+        )}
+      </div>
     </div>
   )
 
@@ -473,6 +587,26 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
         uomUnits={uomUnits}
         serviceTypes={serviceTypes}
         vendors={vendors}
+      />
+      <ConfirmDialog
+        open={isBulkDeleteModalOpen}
+        onOpenChange={setIsBulkDeleteModalOpen}
+        title='Confirm Bulk Delete'
+        message={`Are you sure you want to delete ${activeSelectedRows?.length || 0} non-inventory products? This action cannot be undone.`}
+        confirmButtonTitle='Delete'
+        confirmButtonProps={{ variant: 'destructive' }}
+        onConfirm={handleBulkDelete}
+        loading={isBulkDeleting}
+      />
+      <BulkEditProductModal
+        open={isBulkEditModalOpen}
+        onOpenChange={setIsBulkEditModalOpen}
+        onSuccess={() => {
+          fetchData()
+          activeSetSelectedRows?.([])
+        }}
+        selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}
+        type="non_inventory"
       />
     </>
   )

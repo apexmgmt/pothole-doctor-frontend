@@ -12,21 +12,21 @@ import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, Product, ProductsProps } from '@/types'
-import { InputGroup, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
+import DuplicateButton from '@/components/erp/common/buttons/DuplicateButton'
 import { getInitialFilters, mathRoundFixed, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import ProductService from '@/services/api/products/products.service'
 import CreateEditViewProductModal from './CreateEditViewProductModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { hasPermission } from '@/utils/role-permission'
 import { formatCurrency } from '@/utils/currency'
 import TableSearch from '@/components/erp/common/TableSearch'
+import BulkEditProductModal from './BulkEditProductModal'
 import CustomFormField from '@/components/form/CustomFormField'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 
@@ -61,6 +61,7 @@ const Products: React.FC<ProductsProps> = ({
 
   const [localSelectedRows, setLocalSelectedRows] = useState<Product[]>([])
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false)
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false)
   const [isBulkDeleting, setIsBulkDeleting] = useState(false)
 
   const activeSelectedRows = isFromModal ? selectedRows : localSelectedRows
@@ -151,6 +152,20 @@ const Products: React.FC<ProductsProps> = ({
 
   const handleOpenViewModal = async (id: string) => {
     setModalMode('view')
+    setSelectedProductId(id)
+
+    try {
+      const response = await ProductService.show(id)
+
+      setSelectedProduct(response.data)
+      setIsModalOpen(true)
+    } catch (error) {
+      toast.error('Failed to fetch product details')
+    }
+  }
+
+  const handleOpenDuplicateModal = async (id: string) => {
+    setModalMode('duplicate' as any)
     setSelectedProductId(id)
 
     try {
@@ -342,6 +357,15 @@ const Products: React.FC<ProductsProps> = ({
                             />
                           ]
                         : []),
+                      ...(canCreateProduct
+                        ? [
+                            <DuplicateButton
+                              tooltip='Duplicate Product'
+                              onClick={() => handleOpenDuplicateModal(row.id)}
+                              variant='text'
+                            />
+                          ]
+                        : []),
                       ...(canEditProduct
                         ? [
                             <EditButton
@@ -367,6 +391,7 @@ const Products: React.FC<ProductsProps> = ({
                             `/erp/products/stock?tab=inventory&inventory_product_id=${encodeURIComponent(row.id)}`
                           )
                         }
+                        className='w-full'
                       >
                         Show Inventory
                       </Button>
@@ -395,9 +420,21 @@ const Products: React.FC<ProductsProps> = ({
     try {
       await ProductService.bulkDelete({ ids: activeSelectedRows.map(r => r.id) })
       toast.success('Products deleted successfully')
+
+      const total = apiResponse?.total || 0
+      const perPage = apiResponse?.per_page || 10
+      const currentPage = filterOptions.page ? Number(filterOptions.page) : 1
+      const restItemCount = total - activeSelectedRows.length
+      const pageCount = Math.max(1, Math.ceil(restItemCount / perPage))
+
       activeSetSelectedRows?.([])
-      fetchData()
       setIsBulkDeleteModalOpen(false)
+
+      if (currentPage > pageCount) {
+        setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
+      } else {
+        fetchData()
+      }
     } catch (error: any) {
       toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete products')
     } finally {
@@ -410,7 +447,19 @@ const Products: React.FC<ProductsProps> = ({
       await ProductService.destroy(id)
         .then(response => {
           toast.success('Product deleted successfully')
-          fetchData()
+          activeSetSelectedRows?.((prev: any) => (prev || []).filter((r: any) => r.id !== id))
+
+          const total = apiResponse?.total || 0
+          const perPage = apiResponse?.per_page || 10
+          const currentPage = filterOptions.page ? Number(filterOptions.page) : 1
+          const restItemCount = total - 1
+          const pageCount = Math.max(1, Math.ceil(restItemCount / perPage))
+
+          if (currentPage > pageCount) {
+            setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
+          } else {
+            fetchData()
+          }
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete product')
@@ -494,6 +543,16 @@ const Products: React.FC<ProductsProps> = ({
         )}
       </div>
       <div className='flex items-center gap-2 mt-5'>
+        {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
+          <Button
+            variant='outline'
+            size='sm'
+            className='h-7 bg-[#2A2A2A] hover:bg-[#333333]'
+            onClick={() => setIsBulkEditModalOpen(true)}
+          >
+            Bulk Edit
+          </Button>
+        )}
         {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canDeleteProduct && (
           <Button variant='destructive' size='sm' className='h-7' onClick={() => setIsBulkDeleteModalOpen(true)}>
             Bulk Delete
@@ -580,6 +639,16 @@ const Products: React.FC<ProductsProps> = ({
         confirmButtonProps={{ variant: 'destructive' }}
         onConfirm={handleBulkDelete}
         loading={isBulkDeleting}
+      />
+      <BulkEditProductModal
+        open={isBulkEditModalOpen}
+        onOpenChange={setIsBulkEditModalOpen}
+        onSuccess={() => {
+          fetchData()
+          activeSetSelectedRows?.([])
+        }}
+        selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}
+        type='inventory'
       />
     </>
   )
