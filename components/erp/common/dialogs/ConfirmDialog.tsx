@@ -22,7 +22,7 @@ interface ConfirmDialogProps {
   cancelButtonTitle?: string
   confirmButtonTitle?: string
   onConfirm: (e?: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>
-  confirmButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>
+  confirmButtonProps?: React.ComponentProps<typeof Button>
   loading?: boolean
 }
 

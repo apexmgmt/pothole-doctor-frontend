@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 
 export type Column = {
   id: string
-  header: string
+  header: string | ReactNode
   cell: (row: any, rowIndex?: number) => ReactNode
   sortable?: boolean
   enableSorting?: boolean

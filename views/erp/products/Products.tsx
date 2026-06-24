@@ -28,6 +28,7 @@ import { hasPermission } from '@/utils/role-permission'
 import { formatCurrency } from '@/utils/currency'
 import TableSearch from '@/components/erp/common/TableSearch'
 import CustomFormField from '@/components/form/CustomFormField'
+import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 
 const Products: React.FC<ProductsProps> = ({
   productCategories,
@@ -57,6 +58,13 @@ const Products: React.FC<ProductsProps> = ({
   const [canEditProduct, setCanEditProduct] = useState<boolean>(false)
   const [canDeleteProduct, setCanDeleteProduct] = useState<boolean>(false)
   const [canViewProduct, setCanViewProduct] = useState<boolean>(false)
+
+  const [localSelectedRows, setLocalSelectedRows] = useState<Product[]>([])
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false)
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+
+  const activeSelectedRows = isFromModal ? selectedRows : localSelectedRows
+  const activeSetSelectedRows = isFromModal ? setSelectedRows : setLocalSelectedRows
 
   // Set initial search value from filterOptions and check permissions
   useEffect(() => {
@@ -182,34 +190,57 @@ const Products: React.FC<ProductsProps> = ({
 
   // Column definitions for CommonTable
   const columns: Column[] = [
-    ...((isFromModal
-      ? [
-          {
-            id: 'select',
-            header: '',
-            cell: (row: Product) => (
-              <Checkbox
-                checked={selectedRows?.some((r: Product) => r.id === row.id)}
-                onCheckedChange={checked => {
-                  setSelectedRows?.((prev: Product[]) => {
-                    if (checked) {
-                      // Add if not already present
-                      if (!prev.some(r => r.id === row.id)) return [...prev, row]
-
-                      return prev
-                    } else {
-                      // Remove
-                      return prev.filter(r => r.id !== row.id)
-                    }
-                  })
-                }}
-              />
-            ),
-            sortable: false,
-            size: 16
+    {
+      id: 'select',
+      header: (
+        <Checkbox
+          className='border-accent-foreground/60!'
+          checked={
+            !!apiResponse?.data?.length &&
+            (apiResponse.data as Product[]).every(row => activeSelectedRows?.some(r => r.id === row.id))
           }
-        ]
-      : [
+          onCheckedChange={checked => {
+            if (checked) {
+              const newSelected = [...(activeSelectedRows || [])]
+              const currentData = (apiResponse?.data || []) as Product[]
+
+              currentData.forEach(row => {
+                if (!newSelected.some(r => r.id === row.id)) {
+                  newSelected.push(row)
+                }
+              })
+              activeSetSelectedRows?.(newSelected)
+            } else {
+              const currentIds = ((apiResponse?.data as Product[]) || []).map(r => r.id)
+
+              activeSetSelectedRows?.((activeSelectedRows || []).filter(r => !currentIds.includes(r.id)))
+            }
+          }}
+        />
+      ),
+      cell: (row: Product) => (
+        <Checkbox
+          checked={activeSelectedRows?.some((r: Product) => r.id === row.id)}
+          onCheckedChange={checked => {
+            activeSetSelectedRows?.((prev: any) => {
+              const prevArray = prev || []
+
+              if (checked) {
+                if (!prevArray.some((r: Product) => r.id === row.id)) return [...prevArray, row]
+
+                return prevArray
+              } else {
+                return prevArray.filter((r: Product) => r.id !== row.id)
+              }
+            })
+          }}
+        />
+      ),
+      sortable: false,
+      size: 16
+    },
+    ...(!isFromModal
+      ? [
           {
             id: 'index',
             header: '#',
@@ -221,8 +252,9 @@ const Products: React.FC<ProductsProps> = ({
             },
             sortable: false,
             size: 16
-          }
-        ]) as Column[]),
+          } as Column
+        ]
+      : []),
 
     {
       id: 'vendor',
@@ -356,6 +388,23 @@ const Products: React.FC<ProductsProps> = ({
     setSearchValue('')
   }
 
+  const handleBulkDelete = async () => {
+    if (!activeSelectedRows || activeSelectedRows.length === 0) return
+    setIsBulkDeleting(true)
+
+    try {
+      await ProductService.bulkDelete({ ids: activeSelectedRows.map(r => r.id) })
+      toast.success('Products deleted successfully')
+      activeSetSelectedRows?.([])
+      fetchData()
+      setIsBulkDeleteModalOpen(false)
+    } catch (error: any) {
+      toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete products')
+    } finally {
+      setIsBulkDeleting(false)
+    }
+  }
+
   const handleDeleteProduct = async (id: string) => {
     try {
       await ProductService.destroy(id)
@@ -444,17 +493,24 @@ const Products: React.FC<ProductsProps> = ({
           </Button>
         )}
       </div>
-      {canCreateProduct && !hideActionButton && (
-        <Button
-          variant='default'
-          size='sm'
-          className='bg-light text-bg hover:bg-light/90 mt-5 h-7'
-          onClick={handleOpenCreateModal}
-        >
-          <PlusIcon className='w-4 h-4' />
-          <span>Add Product</span>
-        </Button>
-      )}
+      <div className='flex items-center gap-2 mt-5'>
+        {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canDeleteProduct && (
+          <Button variant='destructive' size='sm' className='h-7' onClick={() => setIsBulkDeleteModalOpen(true)}>
+            Bulk Delete
+          </Button>
+        )}
+        {canCreateProduct && !hideActionButton && (
+          <Button
+            variant='default'
+            size='sm'
+            className='bg-light text-bg hover:bg-light/90 h-7'
+            onClick={handleOpenCreateModal}
+          >
+            <PlusIcon className='w-4 h-4' />
+            <span>Add Product</span>
+          </Button>
+        )}
+      </div>
     </div>
   )
 
@@ -514,6 +570,16 @@ const Products: React.FC<ProductsProps> = ({
         uomUnits={uomUnits}
         serviceTypes={serviceTypes}
         vendors={vendors}
+      />
+      <ConfirmDialog
+        open={isBulkDeleteModalOpen}
+        onOpenChange={setIsBulkDeleteModalOpen}
+        title='Confirm Bulk Delete'
+        message={`Are you sure you want to delete ${activeSelectedRows?.length || 0} products? This action cannot be undone.`}
+        confirmButtonTitle='Delete'
+        confirmButtonProps={{ variant: 'destructive' }}
+        onConfirm={handleBulkDelete}
+        loading={isBulkDeleting}
       />
     </>
   )

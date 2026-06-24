@@ -5,6 +5,8 @@ import {
   NON_INVENTORY_PRODUCTS,
   NON_INVENTORY_PRODUCTS_ALL,
   NON_INVENTORY_PRODUCTS_ALL_TENANT,
+  NON_INVENTORY_PRODUCTS_BULK_DELETE,
+  NON_INVENTORY_PRODUCTS_BULK_DELETE_TENANT,
   NON_INVENTORY_PRODUCTS_TENANT
 } from '@/constants/api'
 import { ProductPayload } from '@/types'
@@ -146,6 +148,40 @@ export default class NonInventoryProductService {
 
       await revalidate('non-inventory-products')
       await revalidate(`non-inventory-products/${productId}`)
+      await revalidate('non-inventory-products-all')
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Bulk Delete Non Inventory Products API
+   *
+   * @param {string[]} ids - Array of product IDs to delete
+   * @returns Promise<any>
+   */
+  static bulkDelete = async ({ ids }: { ids: string[] }) => {
+    try {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_BULK_DELETE_TENANT : NON_INVENTORY_PRODUCTS_BULK_DELETE),
+        {
+          requiresAuth: true,
+          method: 'DELETE',
+          body: JSON.stringify({ ids })
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to delete non-inventory products')
+      }
+
+      await revalidate('non-inventory-products')
       await revalidate('non-inventory-products-all')
 
       return await response.json()

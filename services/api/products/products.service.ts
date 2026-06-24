@@ -1,6 +1,14 @@
 import { getApiUrl, isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { API_URL, PRODUCTS, PRODUCTS_ALL, PRODUCTS_ALL_TENANT, PRODUCTS_TENANT } from '@/constants/api'
+import {
+  API_URL,
+  PRODUCTS,
+  PRODUCTS_ALL,
+  PRODUCTS_ALL_TENANT,
+  PRODUCTS_BULK_DELETE,
+  PRODUCTS_BULK_DELETE_TENANT,
+  PRODUCTS_TENANT
+} from '@/constants/api'
 import { ProductPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
 
@@ -126,6 +134,40 @@ export default class ProductService {
 
       await revalidate('products')
       await revalidate(`products/${productId}`)
+      await revalidate('products-all')
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Bulk Delete Products API
+   *
+   * @param {string[]} ids - Array of product IDs to delete
+   * @returns Promise<any>
+   */
+  static bulkDelete = async ({ ids }: { ids: string[] }) => {
+    try {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PRODUCTS_BULK_DELETE_TENANT : PRODUCTS_BULK_DELETE),
+        {
+          requiresAuth: true,
+          method: 'DELETE',
+          body: JSON.stringify({ ids })
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to delete products')
+      }
+
+      await revalidate('products')
       await revalidate('products-all')
 
       return await response.json()
