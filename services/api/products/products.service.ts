@@ -19,7 +19,16 @@ export default class ProductService {
   static index = async (filterOptions: object = {}) => {
     try {
       const isTenantApi = await isTenant()
-      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+      const params = new URLSearchParams()
+
+      Object.entries(filterOptions as Record<string, any>).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach(v => params.append(`${key}[]`, String(v)))
+        } else if (value !== undefined && value !== null) {
+          params.append(key, String(value))
+        }
+      })
+      const queryParams = params.toString()
 
       const response = await apiInterceptor(
         API_URL + (isTenantApi ? PRODUCTS_TENANT : PRODUCTS) + (queryParams ? `?${queryParams}` : ''),

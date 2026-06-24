@@ -27,6 +27,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
+import BulkEditProductModal from './BulkEditProductModal'
 import CustomFormField from '@/components/form/CustomFormField'
 import { formatCurrency } from '@/utils/currency'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
@@ -52,6 +53,8 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(false)
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
   const [canCreateProduct, setCanCreateProduct] = useState<boolean>(false)
@@ -60,7 +63,6 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
   const [canViewProduct, setCanViewProduct] = useState<boolean>(false)
 
   const [localSelectedRows, setLocalSelectedRows] = useState<Product[]>([])
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false)
   const [isBulkDeleting, setIsBulkDeleting] = useState(false)
 
   const activeSelectedRows = isFromModal ? selectedRows : localSelectedRows
@@ -504,6 +506,11 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
         )}
       </div>
       <div className='flex items-center gap-2 mt-5'>
+        {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
+          <Button variant='outline' size='sm' className='h-7 bg-[#2A2A2A] hover:bg-[#333333]' onClick={() => setIsBulkEditModalOpen(true)}>
+            Bulk Edit
+          </Button>
+        )}
         {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canDeleteProduct && (
           <Button variant='destructive' size='sm' className='h-7' onClick={() => setIsBulkDeleteModalOpen(true)}>
             Bulk Delete
@@ -590,6 +597,16 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
         confirmButtonProps={{ variant: 'destructive' }}
         onConfirm={handleBulkDelete}
         loading={isBulkDeleting}
+      />
+      <BulkEditProductModal
+        open={isBulkEditModalOpen}
+        onOpenChange={setIsBulkEditModalOpen}
+        onSuccess={() => {
+          fetchData()
+          activeSetSelectedRows?.([])
+        }}
+        selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}
+        type="non_inventory"
       />
     </>
   )

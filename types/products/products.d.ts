@@ -146,6 +146,7 @@ export interface ProductGallery {
 
 export interface ProductBulkEditPayload {
   id: string
-  product_cost: number
-  margin: number
+  product_cost?: number
+  margin?: number
+  status?: number | boolean
 }
