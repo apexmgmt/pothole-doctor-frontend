@@ -38,6 +38,18 @@ export const PRODUCTS_BULK_DELETE: string = '/v1/products/bulk-delete',
   NON_INVENTORY_PRODUCTS_BULK_DELETE_TENANT: string = '/v1/tenant/non-inventory-products/bulk-delete'
 
 /**
+ * Edit bulk products {changes: []}
+ *
+ * @example
+ *  const payload = { changes: [{ id: 'uuid1', product_cost: 10, margin: 20 }] }
+ * @method PUT
+ */
+export const PRODUCTS_BULK_EDIT: string = '/v1/products/bulk-edit',
+  PRODUCTS_BULK_EDIT_TENANT: string = '/v1/tenant/products/bulk-edit',
+  NON_INVENTORY_PRODUCTS_BULK_EDIT: string = '/v1/non-inventory-products/bulk-edit',
+  NON_INVENTORY_PRODUCTS_BULK_EDIT_TENANT: string = '/v1/tenant/non-inventory-products/bulk-edit'
+
+/**
  * API endpoint for product galleries
  *
  * Data table operation method: GET
