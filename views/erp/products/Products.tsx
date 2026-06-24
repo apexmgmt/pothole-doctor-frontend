@@ -17,6 +17,7 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
+import DuplicateButton from '@/components/erp/common/buttons/DuplicateButton'
 import { getInitialFilters, mathRoundFixed, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import ProductService from '@/services/api/products/products.service'
@@ -151,6 +152,20 @@ const Products: React.FC<ProductsProps> = ({
 
   const handleOpenViewModal = async (id: string) => {
     setModalMode('view')
+    setSelectedProductId(id)
+
+    try {
+      const response = await ProductService.show(id)
+
+      setSelectedProduct(response.data)
+      setIsModalOpen(true)
+    } catch (error) {
+      toast.error('Failed to fetch product details')
+    }
+  }
+
+  const handleOpenDuplicateModal = async (id: string) => {
+    setModalMode('duplicate' as any)
     setSelectedProductId(id)
 
     try {
@@ -342,6 +357,15 @@ const Products: React.FC<ProductsProps> = ({
                             />
                           ]
                         : []),
+                      ...(canCreateProduct
+                        ? [
+                            <DuplicateButton
+                              tooltip='Duplicate Product'
+                              onClick={() => handleOpenDuplicateModal(row.id)}
+                              variant='text'
+                            />
+                          ]
+                        : []),
                       ...(canEditProduct
                         ? [
                             <EditButton
@@ -367,6 +391,7 @@ const Products: React.FC<ProductsProps> = ({
                             `/erp/products/stock?tab=inventory&inventory_product_id=${encodeURIComponent(row.id)}`
                           )
                         }
+                        className="w-full"
                       >
                         Show Inventory
                       </Button>

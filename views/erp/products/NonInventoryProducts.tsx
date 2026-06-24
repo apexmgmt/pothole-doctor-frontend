@@ -22,6 +22,7 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import NonInventoryProductService from '@/services/api/products/non-inventory-products.service'
 import CreateEditViewNonInventoryProductModal from './CreateEditViewNonInventoryProductModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
+import DuplicateButton from '@/components/erp/common/buttons/DuplicateButton'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { hasPermission } from '@/utils/role-permission'
@@ -144,6 +145,20 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
 
   const handleOpenViewModal = async (id: string) => {
     setModalMode('view')
+    setSelectedProductId(id)
+
+    try {
+      const response = await NonInventoryProductService.show(id)
+
+      setSelectedProduct(response.data)
+      setIsModalOpen(true)
+    } catch (error) {
+      toast.error('Failed to fetch non-inventory product details')
+    }
+  }
+
+  const handleOpenDuplicateModal = async (id: string) => {
+    setModalMode('duplicate' as any)
     setSelectedProductId(id)
 
     try {
@@ -356,6 +371,15 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
                             <ViewButton
                               tooltip='View Product Information'
                               onClick={() => handleOpenViewModal(row.id)}
+                              variant='text'
+                            />
+                          ]
+                        : []),
+                      ...(canCreateProduct
+                        ? [
+                            <DuplicateButton
+                              tooltip='Duplicate Product'
+                              onClick={() => handleOpenDuplicateModal(row.id)}
                               variant='text'
                             />
                           ]
