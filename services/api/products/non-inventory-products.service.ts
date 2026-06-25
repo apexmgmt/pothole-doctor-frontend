@@ -9,6 +9,8 @@ import {
   NON_INVENTORY_PRODUCTS_BULK_DELETE_TENANT,
   NON_INVENTORY_PRODUCTS_BULK_EDIT,
   NON_INVENTORY_PRODUCTS_BULK_EDIT_TENANT,
+  NON_INVENTORY_PRODUCTS_BULK_QR_CODE,
+  NON_INVENTORY_PRODUCTS_BULK_QR_CODE_TENANT,
   NON_INVENTORY_PRODUCTS_BULK_UPDATE,
   NON_INVENTORY_PRODUCTS_BULK_UPDATE_TENANT,
   NON_INVENTORY_PRODUCTS_TENANT
@@ -189,6 +191,40 @@ export default class NonInventoryProductService {
         {
           requiresAuth: true,
           method: 'PUT',
+          body: JSON.stringify(payload)
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      await revalidate('non-inventory-products')
+      await revalidate('non-inventory-products-all')
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Bulk Generate QR Codes for Products API
+   *
+   * @param { { ids: string[] } } payload - Product bulk QR code payload
+   * @returns Promise<any>
+   */
+  static bulkQrCode = async (payload: { ids: string[] }) => {
+    try {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_BULK_QR_CODE_TENANT : NON_INVENTORY_PRODUCTS_BULK_QR_CODE),
+        {
+          requiresAuth: true,
+          method: 'POST',
           body: JSON.stringify(payload)
         }
       )

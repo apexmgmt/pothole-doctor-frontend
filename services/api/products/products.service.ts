@@ -9,6 +9,8 @@ import {
   PRODUCTS_BULK_DELETE_TENANT,
   PRODUCTS_BULK_EDIT,
   PRODUCTS_BULK_EDIT_TENANT,
+  PRODUCTS_BULK_QR_CODE,
+  PRODUCTS_BULK_QR_CODE_TENANT,
   PRODUCTS_BULK_UPDATE,
   PRODUCTS_BULK_UPDATE_TENANT,
   PRODUCTS_TENANT
@@ -175,6 +177,40 @@ export default class ProductService {
         {
           requiresAuth: true,
           method: 'PUT',
+          body: JSON.stringify(payload)
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      await revalidate('products')
+      await revalidate('products-all')
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Bulk Generate QR Codes for Products API
+   *
+   * @param { { ids: string[] } } payload - Product bulk QR code payload
+   * @returns Promise<any>
+   */
+  static bulkQrCode = async (payload: { ids: string[] }) => {
+    try {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PRODUCTS_BULK_QR_CODE_TENANT : PRODUCTS_BULK_QR_CODE),
+        {
+          requiresAuth: true,
+          method: 'POST',
           body: JSON.stringify(payload)
         }
       )

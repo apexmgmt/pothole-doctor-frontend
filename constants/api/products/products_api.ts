@@ -62,6 +62,18 @@ export const PRODUCTS_BULK_UPDATE: string = '/v1/products/bulk-update',
   NON_INVENTORY_PRODUCTS_BULK_UPDATE_TENANT: string = '/v1/tenant/non-inventory-products/bulk-update'
 
 /**
+ * Generate QR codes for bulk products {ids: [uuid1, uuid2, uuid3]}
+ *
+ * @example
+ *  const payload = {ids: [uuid1, uuid2, uuid3]}
+ * @method POST
+ */
+export const PRODUCTS_BULK_QR_CODE: string = '/v1/products/bulk-qr-code',
+  PRODUCTS_BULK_QR_CODE_TENANT: string = '/v1/tenant/products/bulk-qr-code',
+  NON_INVENTORY_PRODUCTS_BULK_QR_CODE: string = '/v1/non-inventory-products/bulk-qr-code',
+  NON_INVENTORY_PRODUCTS_BULK_QR_CODE_TENANT: string = '/v1/tenant/non-inventory-products/bulk-qr-code'
+
+/**
  * API endpoint for product galleries
  *
  * Data table operation method: GET
