@@ -28,6 +28,7 @@ import { formatCurrency } from '@/utils/currency'
 import TableSearch from '@/components/erp/common/TableSearch'
 import BulkEditProductModal from './BulkEditProductModal'
 import BulkUpdateProductModal from './BulkUpdateProductModal'
+import BulkQrPrintModal from './BulkQrPrintModal'
 import CustomFormField from '@/components/form/CustomFormField'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 
@@ -61,9 +62,10 @@ const Products: React.FC<ProductsProps> = ({
   const [canViewProduct, setCanViewProduct] = useState<boolean>(false)
 
   const [localSelectedRows, setLocalSelectedRows] = useState<Product[]>([])
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false)
-  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false)
-  const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState(false)
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(false)
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState<boolean>(false)
+  const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState<boolean>(false)
+  const [isBulkQrModalOpen, setIsBulkQrModalOpen] = useState<boolean>(false)
   const [isBulkDeleting, setIsBulkDeleting] = useState(false)
 
   const activeSelectedRows = isFromModal ? selectedRows : localSelectedRows
@@ -602,6 +604,16 @@ const Products: React.FC<ProductsProps> = ({
             Bulk Update
           </Button>
         )}
+        {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
+          <Button
+            variant='outline'
+            size='sm'
+            className='h-7 bg-[#2A2A2A] hover:bg-[#333333]'
+            onClick={() => setIsBulkQrModalOpen(true)}
+          >
+            Bulk QR
+          </Button>
+        )}
         {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canDeleteProduct && (
           <Button variant='destructive' size='sm' className='h-7' onClick={() => setIsBulkDeleteModalOpen(true)}>
             Bulk Delete
@@ -710,6 +722,12 @@ const Products: React.FC<ProductsProps> = ({
         type='inventory'
         vendorId={filterOptions.vendor_id && filterOptions.vendor_id !== 'all' ? filterOptions.vendor_id : null}
         categoryId={filterOptions.category_id && filterOptions.category_id !== 'all' ? filterOptions.category_id : null}
+      />
+      <BulkQrPrintModal
+        open={isBulkQrModalOpen}
+        onOpenChange={setIsBulkQrModalOpen}
+        selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}
+        type='inventory'
       />
     </>
   )
