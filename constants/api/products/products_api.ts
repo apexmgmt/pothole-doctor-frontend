@@ -50,6 +50,18 @@ export const PRODUCTS_BULK_EDIT: string = '/v1/products/bulk-edit',
   NON_INVENTORY_PRODUCTS_BULK_EDIT_TENANT: string = '/v1/tenant/non-inventory-products/bulk-edit'
 
 /**
+ * Update bulk products {ids: [uuid1, uuid2, uuid3], changes: {margin: 20, product_cost: 10, is_freight_percentage: boolean, freight_amount: number, status: boolean, is_update_all_product_for_vendor: boolean, is_update_all_product_for_category: boolean}, vendor_id: string | null, category_id: string | null}
+ *
+ * @example
+ *  const payload = {ids: [uuid1, uuid2, uuid3], changes: {margin: 20, product_cost: 10, is_freight_percentage: boolean, freight_amount: number, status: boolean, is_update_all_product_for_vendor: boolean, is_update_all_product_for_category: boolean}, vendor_id: string | null, category_id: string | null}
+ * @method PUT
+ */
+export const PRODUCTS_BULK_UPDATE: string = '/v1/products/bulk-update',
+  PRODUCTS_BULK_UPDATE_TENANT: string = '/v1/tenant/products/bulk-update',
+  NON_INVENTORY_PRODUCTS_BULK_UPDATE: string = '/v1/non-inventory-products/bulk-update',
+  NON_INVENTORY_PRODUCTS_BULK_UPDATE_TENANT: string = '/v1/tenant/non-inventory-products/bulk-update'
+
+/**
  * API endpoint for product galleries
  *
  * Data table operation method: GET

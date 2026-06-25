@@ -6,6 +6,7 @@ export default class DashboardService {
   static get = async () => {
     try {
       const isTenantApi = await isTenant()
+
       const response = await apiInterceptor(API_URL + (isTenantApi ? DASHBOARD_TENANT : DASHBOARD), {
         requiresAuth: true,
         method: 'GET'

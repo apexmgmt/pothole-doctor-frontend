@@ -9,9 +9,11 @@ import {
   PRODUCTS_BULK_DELETE_TENANT,
   PRODUCTS_BULK_EDIT,
   PRODUCTS_BULK_EDIT_TENANT,
+  PRODUCTS_BULK_UPDATE,
+  PRODUCTS_BULK_UPDATE_TENANT,
   PRODUCTS_TENANT
 } from '@/constants/api'
-import { ProductBulkEditPayload, ProductPayload } from '@/types'
+import { ProductBulkEditPayload, ProductBulkUpdatePayload, ProductPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
 
 export default class ProductService {
@@ -142,6 +144,40 @@ export default class ProductService {
         method: 'PUT',
         body: JSON.stringify({ changes: payload })
       })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw errorData
+      }
+
+      await revalidate('products')
+      await revalidate('products-all')
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Bulk Update Products API
+   *
+   * @param {ProductBulkUpdatePayload} payload - Product bulk update payload
+   * @returns Promise<any>
+   */
+  static bulkUpdate = async (payload: ProductBulkUpdatePayload) => {
+    try {
+      const isTenantApi = await isTenant()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? PRODUCTS_BULK_UPDATE_TENANT : PRODUCTS_BULK_UPDATE),
+        {
+          requiresAuth: true,
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
