@@ -150,3 +150,20 @@ export interface ProductBulkEditPayload {
   margin?: number
   status?: number | boolean
 }
+
+export interface ProductBulkUpdatePayload {
+  ids: string[]
+  changes: {
+    product_cost?: number
+    margin?: number
+    coverage_per_rate?: number
+    is_freight_percentage?: boolean
+    freight_amount?: number
+    status?: boolean
+    is_update_all_product_for_vendor?: boolean
+    is_update_all_product_for_category?: boolean
+    round_up_quantity?: boolean
+  }
+  vendor_id?: string | null
+  category_id?: string | null
+}

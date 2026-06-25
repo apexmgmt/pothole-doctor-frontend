@@ -27,6 +27,8 @@ import { hasPermission } from '@/utils/role-permission'
 import { formatCurrency } from '@/utils/currency'
 import TableSearch from '@/components/erp/common/TableSearch'
 import BulkEditProductModal from './BulkEditProductModal'
+import BulkUpdateProductModal from './BulkUpdateProductModal'
+import BulkQrPrintModal from './BulkQrPrintModal'
 import CustomFormField from '@/components/form/CustomFormField'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 
@@ -60,8 +62,10 @@ const Products: React.FC<ProductsProps> = ({
   const [canViewProduct, setCanViewProduct] = useState<boolean>(false)
 
   const [localSelectedRows, setLocalSelectedRows] = useState<Product[]>([])
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false)
-  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false)
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(false)
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState<boolean>(false)
+  const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState<boolean>(false)
+  const [isBulkQrModalOpen, setIsBulkQrModalOpen] = useState<boolean>(false)
   const [isBulkDeleting, setIsBulkDeleting] = useState(false)
 
   const activeSelectedRows = isFromModal ? selectedRows : localSelectedRows
@@ -189,6 +193,28 @@ const Products: React.FC<ProductsProps> = ({
     handleModalClose()
   }
 
+  /**
+   * Handles the change of vendor filter
+   * @param value The value of the vendor filter
+   */
+  const handleVendorChange = (value: string) => {
+    setFilterOptions((prev: any) => {
+      const newOptions = { ...prev }
+
+      if (value === 'all') {
+        delete newOptions.vendor_id
+      } else {
+        newOptions.vendor_id = value
+      }
+
+      return newOptions
+    })
+  }
+
+  /**
+   * Handles the change of category filter
+   * @param value The value of the category filter
+   */
   const handleCategoryChange = (value: string) => {
     setFilterOptions((prev: any) => {
       const newOptions = { ...prev }
@@ -203,7 +229,9 @@ const Products: React.FC<ProductsProps> = ({
     })
   }
 
-  // Column definitions for CommonTable
+  /**
+   * Column definitions for CommonTable
+   */
   const columns: Column[] = [
     {
       id: 'select',
@@ -478,8 +506,8 @@ const Products: React.FC<ProductsProps> = ({
 
   // Custom filters component
   const customFilters = (
-    <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between w-full gap-2.5'>
-      <div className='flex-1 flex flex-col lg:flex-row lg:items-center gap-2'>
+    <div className='flex flex-col lg:flex-row lg:items-start lg:justify-between w-full gap-2.5'>
+      <div className='flex-1 flex flex-col lg:flex-row lg:items-start gap-2'>
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-2 w-full lg:max-w-240'>
           {/* Global search filter */}
           <TableSearch
@@ -489,6 +517,19 @@ const Products: React.FC<ProductsProps> = ({
             onChange={setSearchValue}
             placeholder='Search...'
             className='w-full'
+          />
+          {/* Vendor filter */}
+          <CustomFormField
+            type='select'
+            name='vendor-filter'
+            label='Vendor'
+            placeholder='All'
+            value={filterOptions.vendor_id || 'all'}
+            onChange={v => handleVendorChange(v as string)}
+            selectOptions={[
+              { label: 'All', value: 'all' },
+              ...(vendors || []).map(v => ({ label: `${v.first_name} ${v.last_name ?? ''}`, value: v.id }))
+            ]}
           />
 
           {/* Category filter */}
@@ -536,13 +577,13 @@ const Products: React.FC<ProductsProps> = ({
             variant='outline'
             size='sm'
             onClick={handleClearFilters}
-            className='text-gray hover:text-light mt-5 h-7'
+            className='text-gray hover:text-light lg:mt-5.75 h-7'
           >
             Clear
           </Button>
         )}
       </div>
-      <div className='flex items-center gap-2 mt-5'>
+      <div className='flex items-start flex-wrap gap-2 lg:mt-5.75'>
         {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
           <Button
             variant='outline'
@@ -551,6 +592,26 @@ const Products: React.FC<ProductsProps> = ({
             onClick={() => setIsBulkEditModalOpen(true)}
           >
             Bulk Edit
+          </Button>
+        )}
+        {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
+          <Button
+            variant='outline'
+            size='sm'
+            className='h-7 bg-[#2A2A2A] hover:bg-[#333333]'
+            onClick={() => setIsBulkUpdateModalOpen(true)}
+          >
+            Bulk Update
+          </Button>
+        )}
+        {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
+          <Button
+            variant='outline'
+            size='sm'
+            className='h-7 bg-[#2A2A2A] hover:bg-[#333333]'
+            onClick={() => setIsBulkQrModalOpen(true)}
+          >
+            Bulk QR
           </Button>
         )}
         {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canDeleteProduct && (
@@ -647,6 +708,24 @@ const Products: React.FC<ProductsProps> = ({
           fetchData()
           activeSetSelectedRows?.([])
         }}
+        selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}
+        type='inventory'
+      />
+      <BulkUpdateProductModal
+        open={isBulkUpdateModalOpen}
+        onOpenChange={setIsBulkUpdateModalOpen}
+        onSuccess={() => {
+          fetchData()
+          activeSetSelectedRows?.([])
+        }}
+        selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}
+        type='inventory'
+        vendorId={filterOptions.vendor_id && filterOptions.vendor_id !== 'all' ? filterOptions.vendor_id : null}
+        categoryId={filterOptions.category_id && filterOptions.category_id !== 'all' ? filterOptions.category_id : null}
+      />
+      <BulkQrPrintModal
+        open={isBulkQrModalOpen}
+        onOpenChange={setIsBulkQrModalOpen}
         selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}
         type='inventory'
       />

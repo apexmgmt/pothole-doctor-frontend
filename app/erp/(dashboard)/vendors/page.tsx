@@ -14,8 +14,10 @@ export default async function VendorsPage() {
   ])
 
   const taxTypes: TaxType[] = taxTypesRes.status === 'fulfilled' ? taxTypesRes.value.data || [] : []
+
   const countriesWithStatesAndCities: CountryWithStates[] =
     locationsRes.status === 'fulfilled' ? locationsRes.value.data || [] : []
+
   const paymentTerms: PaymentTerm[] = paymentTermsRes.status === 'fulfilled' ? paymentTermsRes.value.data || [] : []
 
   return (
