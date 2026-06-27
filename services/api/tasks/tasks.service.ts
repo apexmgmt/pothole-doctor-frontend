@@ -1,6 +1,14 @@
 import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
-import { TASKS_ALL, TASKS, API_URL, TASKS_TENANT, TASKS_ALL_TENANT, TASKS_STATUS_TENANT } from '@/constants/api'
+import {
+  TASKS_ALL,
+  TASKS,
+  API_URL,
+  TASKS_TENANT,
+  TASKS_ALL_TENANT,
+  TASKS_STATUS_TENANT,
+  TASKS_BULK_ACTION_TENANT
+} from '@/constants/api'
 import { TaskPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -135,6 +143,37 @@ export default class TaskService {
 
       await revalidate('tasks')
       await revalidate(`tasks/${taskId}`)
+      await revalidate('tasks-all')
+
+      return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Summary of the bulkAction API
+   *
+   * This API is used to update the status of multiple tasks at once.
+   * @param ids string[] (array of task ids)
+   * @param status string (kanban column id)
+   * @returns promise with the updated task data if successful, or an error if the API call fails
+   */
+  static bulkAction = async (ids: string[], status: string) => {
+    try {
+      const response = await apiInterceptor(API_URL + TASKS_BULK_ACTION_TENANT, {
+        requiresAuth: true,
+        method: 'PUT',
+        body: JSON.stringify({ ids, status })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to update task status')
+      }
+
+      await revalidate('tasks')
       await revalidate('tasks-all')
 
       return await response.json()
