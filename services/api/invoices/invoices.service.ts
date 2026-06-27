@@ -9,7 +9,8 @@ import {
   INVOICES_SERVICES,
   INVOICES_SUMMARY,
   SEND_INVOICE_EMAIL,
-  VIEW_INVOICE
+  VIEW_INVOICE,
+  INVOICES_EXPORT_TENANT
 } from '@/constants/api'
 import apiInterceptor from '../api.interceptor'
 import { InvoicePayload } from '@/types'
@@ -40,6 +41,32 @@ export default class InvoiceService {
       }
 
       return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Export invoices API
+   *
+   * @param filterOptions An object containing key-value pairs for filtering the invoices.
+   */
+  static exportInvoices = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(API_URL + INVOICES_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''), {
+        requiresAuth: true,
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to export invoices')
+      }
+
+      return await response.blob()
     } catch (error) {
       throw error
     }

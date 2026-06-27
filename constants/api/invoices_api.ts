@@ -10,6 +10,12 @@
 export const INVOICES: string = '/v1/tenant/invoices/'
 
 /**
+ * This contains the API endpoint to export invoices.
+ * @method GET - Export data: GET /export
+ */
+export const INVOICES_EXPORT_TENANT: string = '/v1/tenant/invoices/export/'
+
+/**
  * This contains the API endpoint to get a summary of invoices for tenant.
  * @method GET 
  */

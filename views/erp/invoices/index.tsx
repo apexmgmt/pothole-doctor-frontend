@@ -27,7 +27,7 @@ import {
 } from '@/types'
 import { getInitialFilters, updateURL } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
-import { DocumentIcon, UserIcon } from '@/public/icons'
+import { DocumentIcon, UserIcon, ExcelIcon } from '@/public/icons'
 import InvoiceService from '@/services/api/invoices/invoices.service'
 
 import CreateOrEditInvoiceModal from './CreateOrEditInvoiceModal'
@@ -205,6 +205,27 @@ const Invoices: React.FC<{
     }
   }
 
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting invoices...`)
+      const blob = await InvoiceService.exportInvoices(filterOptions)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `invoices-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(`Invoices exported successfully`)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   const actionColumn: Column = useMemo(
     () => ({
       id: 'actions',
@@ -344,6 +365,15 @@ const Invoices: React.FC<{
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90 h-7 gap-1.5'
+          onClick={handleExport}
+        >
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
         <TableSearch
           value={searchValue}
           onChange={setSearchValue}
