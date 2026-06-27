@@ -11,9 +11,9 @@ import {
   NON_INVENTORY_PRODUCTS_BULK_EDIT_TENANT,
   NON_INVENTORY_PRODUCTS_BULK_QR_CODE,
   NON_INVENTORY_PRODUCTS_BULK_QR_CODE_TENANT,
-  NON_INVENTORY_PRODUCTS_BULK_UPDATE,
   NON_INVENTORY_PRODUCTS_BULK_UPDATE_TENANT,
-  NON_INVENTORY_PRODUCTS_TENANT
+  NON_INVENTORY_PRODUCTS_TENANT,
+  NON_INVENTORY_PRODUCTS_EXPORT_TENANT
 } from '@/constants/api'
 import { ProductBulkEditPayload, ProductBulkUpdatePayload, ProductPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
@@ -52,6 +52,31 @@ export default class NonInventoryProductService {
       }
 
       return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /** Export Non-Inventory Products API */
+  static exportProducts = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(
+        API_URL + NON_INVENTORY_PRODUCTS_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to export non-inventory products')
+      }
+
+      return await response.blob()
     } catch (error) {
       throw error
     }

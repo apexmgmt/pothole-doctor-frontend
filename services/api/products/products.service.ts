@@ -13,7 +13,8 @@ import {
   PRODUCTS_BULK_QR_CODE_TENANT,
   PRODUCTS_BULK_UPDATE,
   PRODUCTS_BULK_UPDATE_TENANT,
-  PRODUCTS_TENANT
+  PRODUCTS_TENANT,
+  PRODUCTS_EXPORT_TENANT
 } from '@/constants/api'
 import { ProductBulkEditPayload, ProductBulkUpdatePayload, ProductPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
@@ -50,6 +51,28 @@ export default class ProductService {
       }
 
       return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /** Export Products API */
+  static exportProducts = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(API_URL + PRODUCTS_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''), {
+        requiresAuth: true,
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to export products')
+      }
+
+      return await response.blob()
     } catch (error) {
       throw error
     }

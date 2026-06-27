@@ -25,6 +25,9 @@ export const PRODUCTS_ALL_TENANT: string = '/v1/tenant/get-products/'
 export const NON_INVENTORY_PRODUCTS_ALL: string = '/v1/get-non-inventory-products/'
 export const NON_INVENTORY_PRODUCTS_ALL_TENANT: string = '/v1/tenant/get-non-inventory-products/'
 
+export const PRODUCTS_EXPORT_TENANT: string = '/v1/tenant/products/export'
+export const NON_INVENTORY_PRODUCTS_EXPORT_TENANT: string = '/v1/tenant/non-inventory-products/export'
+
 /**
  * Delete bulk products {ids: []}
  *

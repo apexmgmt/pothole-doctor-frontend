@@ -23,6 +23,7 @@ import ProductService from '@/services/api/products/products.service'
 import CreateEditViewProductModal from './CreateEditViewProductModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
 import { Checkbox } from '@/components/ui/checkbox'
+import { ExcelIcon } from '@/public/icons'
 import { hasPermission } from '@/utils/role-permission'
 import { formatCurrency } from '@/utils/currency'
 import TableSearch from '@/components/erp/common/TableSearch'
@@ -470,6 +471,27 @@ const Products: React.FC<ProductsProps> = ({
     }
   }
 
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting products...`)
+      const blob = await ProductService.exportProducts(filterOptions)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `products-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(`Products exported successfully`)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   const handleDeleteProduct = async (id: string) => {
     try {
       await ProductService.destroy(id)
@@ -584,6 +606,15 @@ const Products: React.FC<ProductsProps> = ({
         )}
       </div>
       <div className='flex items-start flex-wrap gap-2 lg:mt-5.75'>
+        <Button
+          variant='default'
+          size='sm'
+          className='h-7 bg-light text-bg hover:bg-light/90 gap-1.5'
+          onClick={handleExport}
+        >
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
         {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
           <Button
             variant='outline'

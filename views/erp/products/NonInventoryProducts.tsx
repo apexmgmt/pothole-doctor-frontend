@@ -12,7 +12,6 @@ import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, Product, ProductsProps } from '@/types'
-import { InputGroup, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
@@ -23,8 +22,8 @@ import NonInventoryProductService from '@/services/api/products/non-inventory-pr
 import CreateEditViewNonInventoryProductModal from './CreateEditViewNonInventoryProductModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
 import DuplicateButton from '@/components/erp/common/buttons/DuplicateButton'
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
+import { ExcelIcon } from '@/public/icons'
 import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 import BulkEditProductModal from './BulkEditProductModal'
@@ -222,6 +221,27 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
 
       return newOptions
     })
+  }
+
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting non-inventory products...`)
+      const blob = await NonInventoryProductService.exportProducts(filterOptions)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `non-inventory-products-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(`Non-inventory products exported successfully`)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export data')
+    }
   }
 
   const handleDeleteProduct = async (id: string) => {
@@ -544,6 +564,15 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
         )}
       </div>
       <div className='flex items-start flex-wrap gap-2 lg:mt-5.75'>
+        <Button
+          variant='default'
+          size='sm'
+          className='h-7 bg-light text-bg hover:bg-light/90 gap-1.5'
+          onClick={handleExport}
+        >
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
         {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
           <Button
             variant='outline'
