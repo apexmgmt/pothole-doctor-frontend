@@ -1,7 +1,7 @@
 import { isTenant } from '@/utils/utility'
 import apiInterceptor from '../api.interceptor'
 import { revalidate } from '@/services/app/cache.service'
-import { API_URL, CLIENTS, CLIENTS_ALL, CLIENTS_ALL_TENANT, CLIENTS_LEAD_STAGE, CLIENTS_TENANT } from '@/constants/api'
+import { API_URL, CLIENTS, CLIENTS_ALL, CLIENTS_ALL_TENANT, CLIENTS_LEAD_STAGE, CLIENTS_TENANT, CLIENTS_EXPORT, CLIENTS_EXPORT_TENANT } from '@/constants/api'
 import { ClientPayload } from '@/types'
 
 export default class ClientService {
@@ -27,6 +27,32 @@ export default class ClientService {
       }
 
       return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /** Export Clients API */
+  static exportClients = async (filterOptions: object = {}) => {
+    try {
+      const isTenantApi = await isTenant()
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(
+        API_URL + (isTenantApi ? CLIENTS_EXPORT_TENANT : CLIENTS_EXPORT) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        
+        throw new Error(errorData.message || 'Failed to export clients')
+      }
+
+      return await response.blob()
     } catch (error) {
       throw error
     }

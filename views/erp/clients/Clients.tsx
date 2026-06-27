@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
-import { DetailsIcon, UserIcon } from '@/public/icons'
+import { DetailsIcon, ExcelIcon, UserIcon } from '@/public/icons'
 import { Button } from '@/components/ui/button'
 import {
   BusinessLocation,
@@ -526,6 +526,27 @@ const Clients: React.FC<{
     })
   }
 
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting ${type}s...`)
+      const blob = await ClientService.exportClients({ ...filterOptions, type })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `${type}s-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)}s exported successfully`)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   const handleClearFilters = () => {
     setFilterOptions({})
     setSearchValue('')
@@ -546,18 +567,29 @@ const Clients: React.FC<{
   // Custom filters component
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch
-          value={searchValue}
-          onChange={setSearchValue}
-          placeholder='Search...'
-          className='lg:w-80 min-w-0'
-        />
-        {hasActiveFilters() && (
-          <Button variant='ghost' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
-            Clear Filters
-          </Button>
-        )}
+      <div className='flex flex-row gap-2'>
+        <Button
+          variant='default'
+          size='sm'
+          className='h-7'
+          onClick={handleExport}
+        >
+          <ExcelIcon className='w-4 h-4 text-black' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
+        <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+          <TableSearch
+            value={searchValue}
+            onChange={setSearchValue}
+            placeholder='Search...'
+            className='lg:w-80 min-w-0'
+          />
+          {hasActiveFilters() && (
+            <Button variant='ghost' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
+              Clear Filters
+            </Button>
+          )}
+        </div>
       </div>
       {canCreateClient && (
         <Button
