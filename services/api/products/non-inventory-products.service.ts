@@ -13,7 +13,8 @@ import {
   NON_INVENTORY_PRODUCTS_BULK_QR_CODE_TENANT,
   NON_INVENTORY_PRODUCTS_BULK_UPDATE_TENANT,
   NON_INVENTORY_PRODUCTS_TENANT,
-  NON_INVENTORY_PRODUCTS_EXPORT_TENANT
+  NON_INVENTORY_PRODUCTS_EXPORT_TENANT,
+  NON_INVENTORY_PRODUCTS_BULK_UPDATE
 } from '@/constants/api'
 import { ProductBulkEditPayload, ProductBulkUpdatePayload, ProductPayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
