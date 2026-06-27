@@ -26,6 +26,8 @@ import CreateOrEditTaskModal from './CreateOrEditTaskModal'
 import { hasPermission } from '@/utils/role-permission'
 import TaskViewModal from './TaskViewModal'
 import TableSearch from '@/components/erp/common/TableSearch'
+import { Checkbox } from '@/components/ui/checkbox'
+import BulkActionTaskModal from './BulkActionTaskModal'
 
 const Tasks: React.FC<{
   staffs: Staff[]
@@ -52,6 +54,9 @@ const Tasks: React.FC<{
   const [canCreateTask, setCanCreateTask] = useState<boolean>(false)
   const [canEditTask, setCanEditTask] = useState<boolean>(false)
   const [canDeleteTask, setCanDeleteTask] = useState<boolean>(false)
+
+  const [localSelectedRows, setLocalSelectedRows] = useState<Task[]>([])
+  const [isBulkActionModalOpen, setIsBulkActionModalOpen] = useState<boolean>(false)
 
   // Set initial search value from filterOptions and check permissions
   useEffect(() => {
@@ -161,6 +166,53 @@ const Tasks: React.FC<{
 
   // Column definitions for CommonTable
   const columns: Column[] = [
+    {
+      id: 'select',
+      header: (
+        <Checkbox
+          className='border-accent-foreground/60!'
+          checked={
+            !!apiResponse?.data?.length &&
+            (apiResponse.data as Task[]).every(row => localSelectedRows.some(r => r.id === row.id))
+          }
+          onCheckedChange={checked => {
+            if (checked) {
+              const newSelected = [...localSelectedRows]
+              const currentData = (apiResponse?.data || []) as Task[]
+
+              currentData.forEach(row => {
+                if (!newSelected.some(r => r.id === row.id)) {
+                  newSelected.push(row)
+                }
+              })
+              setLocalSelectedRows(newSelected)
+            } else {
+              const currentIds = ((apiResponse?.data as Task[]) || []).map(r => r.id)
+
+              setLocalSelectedRows(localSelectedRows.filter(r => !currentIds.includes(r.id)))
+            }
+          }}
+        />
+      ),
+      cell: (row: Task) => (
+        <Checkbox
+          checked={localSelectedRows.some(r => r.id === row.id)}
+          onCheckedChange={checked => {
+            setLocalSelectedRows(prev => {
+              if (checked) {
+                if (!prev.some(r => r.id === row.id)) return [...prev, row]
+
+                return prev
+              } else {
+                return prev.filter(r => r.id !== row.id)
+              }
+            })
+          }}
+        />
+      ),
+      sortable: false,
+      size: 16
+    },
     {
       id: 'name',
       header: 'Task Name',
@@ -327,24 +379,41 @@ const Tasks: React.FC<{
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={setSearchValue}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
           </Button>
         )}
       </div>
-      {canCreateTask && (
-        <Button
-          variant='default'
-          size='sm'
-          className='bg-light text-bg hover:bg-light/90 h-7'
-          onClick={handleOpenCreateModal}
-        >
-          <PlusIcon className='w-4 h-4' />
-          <span className='hidden min-[480px]:block'>Add Task</span>
-        </Button>
-      )}
+      <div className='flex flex-row items-center gap-2'>
+        {localSelectedRows.length > 0 && canEditTask && (
+          <Button
+            variant='default'
+            size='sm'
+            className='h-7 bg-[#2A2A2A] text-white hover:bg-[#333333] border border-[#2A2A2A]'
+            onClick={() => setIsBulkActionModalOpen(true)}
+          >
+            Bulk Action
+          </Button>
+        )}
+        {canCreateTask && (
+          <Button
+            variant='default'
+            size='sm'
+            className='bg-light text-bg hover:bg-light/90 h-7'
+            onClick={handleOpenCreateModal}
+          >
+            <PlusIcon className='w-4 h-4' />
+            <span className='hidden min-[480px]:block'>Add Task</span>
+          </Button>
+        )}
+      </div>
     </div>
   )
 
@@ -404,6 +473,16 @@ const Tasks: React.FC<{
         onEditTask={id => {
           handleViewModalClose()
           void handleOpenEditModal(id)
+        }}
+      />
+
+      <BulkActionTaskModal
+        open={isBulkActionModalOpen}
+        onOpenChange={setIsBulkActionModalOpen}
+        selectedIds={localSelectedRows.map(r => r.id)}
+        onSuccess={() => {
+          fetchData()
+          setLocalSelectedRows([])
         }}
       />
     </>
