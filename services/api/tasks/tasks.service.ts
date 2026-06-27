@@ -7,7 +7,8 @@ import {
   TASKS_TENANT,
   TASKS_ALL_TENANT,
   TASKS_STATUS_TENANT,
-  TASKS_BULK_ACTION_TENANT
+  TASKS_BULK_ACTION_TENANT,
+  TASKS_EXPORT_TENANT
 } from '@/constants/api'
 import { TaskPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
@@ -177,6 +178,28 @@ export default class TaskService {
       await revalidate('tasks-all')
 
       return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /** Export Tasks API */
+  static exportTasks = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(API_URL + TASKS_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''), {
+        requiresAuth: true,
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to export tasks')
+      }
+
+      return await response.blob()
     } catch (error) {
       throw error
     }

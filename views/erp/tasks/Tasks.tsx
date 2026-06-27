@@ -26,6 +26,7 @@ import CreateOrEditTaskModal from './CreateOrEditTaskModal'
 import { hasPermission } from '@/utils/role-permission'
 import TaskViewModal from './TaskViewModal'
 import TableSearch from '@/components/erp/common/TableSearch'
+import { ExcelIcon } from '@/public/icons'
 import { Checkbox } from '@/components/ui/checkbox'
 import BulkActionTaskModal from './BulkActionTaskModal'
 
@@ -353,6 +354,27 @@ const Tasks: React.FC<{
     setSearchValue('')
   }
 
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting tasks...`)
+      const blob = await TaskService.exportTasks(filterOptions)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `tasks-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(`Tasks exported successfully`)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   const handleDeleteTask = async (id: string) => {
     try {
       await TaskService.destroy(id)
@@ -378,18 +400,29 @@ const Tasks: React.FC<{
   // Custom filters component
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch
-          value={searchValue}
-          onChange={setSearchValue}
-          placeholder='Search...'
-          className='lg:w-80 min-w-0'
-        />
-        {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
-            Clear
-          </Button>
-        )}
+      <div className='flex flex-row gap-2'>
+        <Button
+          variant='default'
+          size='sm'
+          className='h-7 bg-light text-bg hover:bg-light/90'
+          onClick={handleExport}
+        >
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
+        <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+          <TableSearch
+            value={searchValue}
+            onChange={setSearchValue}
+            placeholder='Search...'
+            className='lg:w-80 min-w-0'
+          />
+          {hasActiveFilters() && (
+            <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
       <div className='flex flex-row items-center gap-2'>
         {localSelectedRows.length > 0 && canEditTask && (

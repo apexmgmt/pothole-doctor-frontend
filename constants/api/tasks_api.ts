@@ -39,6 +39,13 @@ export const TASKS_STATUS_TENANT = (taskId: string): string => `/v1/tenant/tasks
 export const TASKS_BULK_ACTION_TENANT: string = '/v1/tenant/tasks/bulk-action/'
 
 /**
+ * API endpoint for exporting tasks data to excel
+ *  
+ * @returns '/v1/tenant/tasks/export/'
+ */
+export const TASKS_EXPORT_TENANT: string = '/v1/tenant/tasks/export/'
+
+/**
  * Task comments API Endpoint
  *
  * @method GET to get comments of a task
