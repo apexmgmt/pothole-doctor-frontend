@@ -606,7 +606,7 @@ const Products: React.FC<ProductsProps> = ({
         )}
       </div>
       <div className='flex items-start flex-wrap gap-2 lg:mt-5.75'>
-        <Button
+        {!isFromModal && <Button
           variant='default'
           size='sm'
           className='h-7 bg-light text-bg hover:bg-light/90 gap-1.5'
@@ -614,7 +614,7 @@ const Products: React.FC<ProductsProps> = ({
         >
           <ExcelIcon className='w-4 h-4' />
           <span className='hidden min-[480px]:block'>Export</span>
-        </Button>
+        </Button>}
         {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
           <Button
             variant='outline'
