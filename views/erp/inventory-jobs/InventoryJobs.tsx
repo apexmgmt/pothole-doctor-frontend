@@ -28,6 +28,7 @@ import AddInventoryJobActionModal from './AddInventoryJobActionModal'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 import { formatCurrency } from '@/utils/currency'
 import TableSearch from '@/components/erp/common/TableSearch'
+import { ExcelIcon } from '@/public/icons'
 
 interface InventoryJobsProps {
   staffs: Staff[]
@@ -391,11 +392,34 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
         </tbody>
       </table>
     )
+
   }
 
   const handleClearFilters = () => {
     setFilterOptions({ job_type: 'inventory' })
     setSearchValue('')
+  }
+
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting inventory jobs...`)
+      const blob = await MaterialJobService.exportMaterialJobs({ ...filterOptions, job_type: 'inventory' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `inventory-jobs-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success('Inventory jobs exported successfully')
+    } catch (error) {
+      toast.error('Failed to export inventory jobs')
+      console.error('Export error:', error)
+    }
   }
 
   const hasActiveFilters = () => {
@@ -407,14 +431,30 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
   }
 
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <div className='flex items-center gap-2'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
-        {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
-            Clear
-          </Button>
-        )}
+    <div className='flex items-center justify-between w-full gap-2.5'>
+      <div className='flex flex-row gap-2'>
+        <Button
+          variant='default'
+          size='sm'
+          className='h-7 bg-light text-bg hover:bg-light/90'
+          onClick={handleExport}
+        >
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
+        <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+          <TableSearch
+            value={searchValue}
+            onChange={setSearchValue}
+            placeholder='Search...'
+            className='lg:w-80 min-w-0'
+          />
+          {hasActiveFilters() && (
+            <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )
