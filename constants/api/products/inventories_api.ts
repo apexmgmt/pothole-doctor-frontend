@@ -14,6 +14,12 @@
 export const INVENTORIES: string = '/v1/tenant/inventories/'
 
 /**
+ * This contains the API endpoint to export inventories.
+ * @method GET - Export data: GET /export
+ */
+export const INVENTORIES_EXPORT_TENANT: string = '/v1/tenant/inventories/export/'
+
+/**
  * Adjust inventory API
  * @param inventoryId Inventory ID
  * @returns API endpoint for adjusting inventory

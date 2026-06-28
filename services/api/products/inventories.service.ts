@@ -1,4 +1,4 @@
-import { API_URL, INVENTORIES, INVENTORY_ADJUST, INVENTORY_ADJUSTMENTS } from '@/constants/api'
+import { API_URL, INVENTORIES, INVENTORY_ADJUST, INVENTORY_ADJUSTMENTS, INVENTORIES_EXPORT_TENANT } from '@/constants/api'
 import { InventoryAdjustPayload, InventoryPayload } from '@/types'
 import apiInterceptor from '../api.interceptor'
 import { revalidate } from '../../app/cache.service'
@@ -25,6 +25,28 @@ export default class InventoryService {
       }
 
       return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /** Export Inventories API */
+  static exportInventories = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(API_URL + INVENTORIES_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''), {
+        requiresAuth: true,
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to export inventories')
+      }
+
+      return await response.blob()
     } catch (error) {
       throw error
     }

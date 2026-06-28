@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 
 import { PlusIcon } from 'lucide-react'
+import { ExcelIcon } from '@/public/icons'
 
 import { toast } from 'sonner'
 
@@ -16,6 +17,7 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import CreateOrEditInventoryModal from './CreateOrEditInventoryModal'
 import { formatDate } from '@/utils/date'
 import TableSearch from '@/components/erp/common/TableSearch'
+import { formatCurrency } from '@/utils/currency'
 
 interface ProductInventorySectionProps {
   product: Product
@@ -137,7 +139,7 @@ const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
       cell: (row: PurchaseOrder) => (
         <span>
           {row.purchase_products?.[0]?.work_order_cost != null
-            ? Number(row.purchase_products[0].work_order_cost).toFixed(2)
+            ? formatCurrency(row.purchase_products[0].work_order_cost)
             : '—'}
         </span>
       ),
@@ -149,7 +151,7 @@ const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
       cell: (row: PurchaseOrder) => (
         <span>
           {row.purchase_products?.[0]?.customer_price != null
-            ? Number(row.purchase_products[0].customer_price).toFixed(2)
+            ? formatCurrency(row.purchase_products[0].customer_price)
             : '—'}
         </span>
       ),
@@ -173,8 +175,38 @@ const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
     }
   ]
 
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting inventory records...`)
+      const blob = await InventoryService.exportInventories({ product_id: product.id, ...filterOptions })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `inventory-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(`Inventory exported successfully`)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   const customFilters = (
-    <div className='flex items-center justify-end w-full'>
+    <div className='flex items-center justify-end w-full gap-2'>
+      <Button
+        variant='default'
+        size='sm'
+        className='bg-light text-bg hover:bg-light/90 h-7 gap-1.5'
+        onClick={handleExport}
+      >
+        <ExcelIcon className='w-4 h-4' />
+        <span className='hidden min-[480px]:block'>Export</span>
+      </Button>
       <Button variant='default' size='sm' className='bg-light text-bg hover:bg-light/90 h-7' onClick={handleOpenCreate}>
         <PlusIcon className='w-4 h-4' />
         Add Inventory
