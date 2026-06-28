@@ -252,11 +252,19 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
           {(canEdit || canDelete) && (
             <ThreeDotButton
               buttons={[
-                ...(canEdit ? [<EditButton tooltip='Edit Schedule' onClick={() => {
-                  setModalMode('edit')
-                  setSelectedSchedule(row)
-                  setIsModalOpen(true)
-                }} variant='text' />] : []),
+                ...(canEdit
+                  ? [
+                      <EditButton
+                        tooltip='Edit Schedule'
+                        onClick={() => {
+                          setModalMode('edit')
+                          setSelectedSchedule(row)
+                          setIsModalOpen(true)
+                        }}
+                        variant='text'
+                      />
+                    ]
+                  : []),
                 ...(canDelete
                   ? [
                       <DeleteButton
@@ -280,7 +288,12 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={setSearchValue}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
@@ -310,7 +323,7 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
         isLoading={isLoading}
         emptyMessage='No schedule found'
       />
-      
+
       <ScheduleFormDialog
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
