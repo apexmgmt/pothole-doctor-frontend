@@ -40,6 +40,34 @@ export default class BusinessLocationService {
     }
   }
 
+  /**Export Business Locations API */
+  static exportBusinessLocations = async (filterOptions: object = {}) => {
+    try {
+      const isTenantApi = await isTenant()
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(
+        API_URL +
+          (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS) + 'export' +
+          (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to export business locations')
+      }
+
+      return await response.blob()
+    } catch (error) {
+      throw error
+    }
+  }
+
   /**Create Business Location API */
   static store = async (payload: FormData) => {
     try {

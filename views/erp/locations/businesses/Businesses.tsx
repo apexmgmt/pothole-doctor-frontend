@@ -18,7 +18,7 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
 import LocationService from '@/services/api/locations/location.service'
-import { DetailsIcon, LocationIcon, UserIcon } from '@/public/icons'
+import { DetailsIcon, LocationIcon, UserIcon, ExcelIcon } from '@/public/icons'
 import BusinessLocationDetails from './BusinessLocationDetails'
 import BusinessLocationClients from './BusinessLocationClients'
 import BusinessLocationEstimates from './BusinessLocationEstimates'
@@ -298,21 +298,49 @@ const BusinessLocations: React.FC = () => {
     return filterKeys.length > 0
   }
 
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting business locations...`)
+      const blob = await BusinessLocationService.exportBusinessLocations(filterOptions)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `business-locations-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success(`Business locations exported successfully`)
+    } catch (error: any) {
+      console.error('Export error:', error)
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   // Custom filters component
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch
-          value={searchValue}
-          onChange={setSearchValue}
-          placeholder='Search...'
-          className='lg:w-80 min-w-0'
-        />
-        {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
-            Clear
-          </Button>
-        )}
+      <div className='flex flex-row gap-2 w-full'>
+        <Button variant='default' size='sm' className='h-7 bg-light text-bg hover:bg-light/90' onClick={handleExport}>
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
+        <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+          <TableSearch
+            value={searchValue}
+            onChange={setSearchValue}
+            placeholder='Search...'
+            className='lg:w-80 min-w-0'
+          />
+          {hasActiveFilters() && (
+            <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
       <Button
         variant='default'
