@@ -1,5 +1,5 @@
 import apiInterceptor from '../api.interceptor'
-import { API_URL, MATERIAL_JOBS, MATERIAL_JOBS_ACTIONS } from '@/constants/api'
+import { API_URL, MATERIAL_JOBS, MATERIAL_JOBS_ACTIONS, MATERIAL_JOBS_EXPORT_TENANT } from '@/constants/api'
 import { MaterialJobActionPayload, MaterialJobUpdatePayload } from '@/types'
 import { revalidate } from '../../app/cache.service'
 
@@ -22,6 +22,33 @@ export default class MaterialJobService {
       }
 
       return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Export material jobs API
+   */
+  static exportMaterialJobs = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(
+        API_URL + MATERIAL_JOBS_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to export material jobs')
+      }
+
+      return await response.blob()
     } catch (error) {
       throw error
     }

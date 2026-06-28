@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
+import { ExcelIcon } from '@/public/icons'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
@@ -347,9 +349,39 @@ const MaterialJobs: React.FC<MaterialJobsProps> = ({ staffs, warehouses, busines
     return filterKeys.length > 0
   }
 
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting material jobs...`)
+      const blob = await MaterialJobService.exportMaterialJobs(filterOptions)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `material-jobs-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(`Material jobs exported successfully`)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90 h-7 gap-1.5'
+          onClick={handleExport}
+        >
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
         <TableSearch
           value={searchValue}
           onChange={setSearchValue}
