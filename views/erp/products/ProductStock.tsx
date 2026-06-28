@@ -16,8 +16,8 @@ import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { getInitialFilters, mathRoundFixed, updateURL } from '@/utils/utility'
 import ProductService from '@/services/api/products/products.service'
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { PackageIcon, WarehouseIcon, SlidersHorizontalIcon } from 'lucide-react'
+import { ExcelIcon } from '@/public/icons'
 import ProductInventorySection from './ProductInventorySection'
 import InventoryAdjustmentSection from './InventoryAdjustmentSection'
 import { formatCurrency } from '@/utils/currency'
@@ -334,9 +334,39 @@ const ProductStock: React.FC<ProductsProps> = ({
     }
   ]
 
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting product stock...`)
+      const blob = await ProductService.exportProducts(filterOptions, 'stock')
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `product-stock-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(`Product stock exported successfully`)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   const customFilters = (
     <div className='flex flex-col md:flex-row md:items-center md:justify-between w-full gap-2.5'>
       <div className='flex-1 flex flex-col md:flex-row md:items-center gap-2'>
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90 h-7 gap-1.5 md:mt-5'
+          onClick={handleExport}
+        >
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-2 w-full md:max-w-160'>
           <TableSearch
             name='stock-search'
@@ -360,6 +390,8 @@ const ProductStock: React.FC<ProductsProps> = ({
             ]}
           />
         </div>
+
+        
 
         {hasActiveFilters() && (
           <Button

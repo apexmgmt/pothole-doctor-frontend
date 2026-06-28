@@ -57,9 +57,15 @@ export default class ProductService {
   }
 
   /** Export Products API */
-  static exportProducts = async (filterOptions: object = {}) => {
+  static exportProducts = async (filterOptions: object = {}, exportType?: 'products' | 'stock') => {
     try {
-      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+      const queryParamsObj = { ...filterOptions } as Record<string, string>
+
+      if (exportType) {
+        queryParamsObj.export_type = exportType
+      }
+
+      const queryParams = new URLSearchParams(queryParamsObj).toString()
 
       const response = await apiInterceptor(API_URL + PRODUCTS_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
