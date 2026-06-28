@@ -419,14 +419,36 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
       sortable: true
     },
     {
-      id: 'selling_price',
-      header: 'Product Price',
+      id: 'product_cost',
+      header: 'Unit Cost',
       cell: (row: Product) => (
         <span>
-          {formatCurrency(Number(row?.selling_price || '0'))}/{row?.selling_unit?.name}
+          {formatCurrency(Number(row?.product_cost || '0'))}/{row?.selling_unit?.name}
         </span>
       ),
       sortable: true
+    },
+    {
+      id: 'selling_price',
+      header: 'Selling Price',
+      cell: (row: Product) => <span>{formatCurrency(Number(row?.selling_price || '0'))}</span>,
+      sortable: true
+    },
+    {
+      id: 'coverage_per_rate',
+      header: 'Coverage per Rate',
+      cell: (row: Product) => (
+        <span>
+          {row.coverage_per_rate} {row.coverage_unit?.name ?? ''} / {row.purchase_unit?.name ?? ''}
+        </span>
+      ),
+      sortable: false
+    },
+    {
+      id: 'from_b2b',
+      header: 'From B2B',
+      cell: (row: Product) => <span>{row.vendor?.userable?.is_enable_b2b ? 'Yes' : 'No'}</span>,
+      sortable: false
     },
     ...(!hideActionButton
       ? ([
