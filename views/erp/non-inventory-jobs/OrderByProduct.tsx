@@ -16,6 +16,8 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import MaterialJobService from '@/services/api/products/material-jobs.service'
 import UpdateMaterialJobModal from './UpdateMaterialJobModal'
 import TableSearch from '@/components/erp/common/TableSearch'
+import { toast } from 'sonner'
+import { ExcelIcon } from '@/public/icons'
 
 const OrderByProduct: React.FC = () => {
   const router = useRouter()
@@ -253,15 +255,43 @@ const OrderByProduct: React.FC = () => {
     return filterKeys.length > 0
   }
 
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting order by product jobs...`)
+      const blob = await MaterialJobService.exportMaterialJobs({ ...filterOptions, job_type: 'non_inventory', export_type: 'order_by_product' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `order-by-product-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success(`Order by product exported successfully`)
+    } catch (error: any) {
+      console.error('Export error:', error)
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <div className='flex items-center gap-2'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
-        {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
-            Clear
-          </Button>
-        )}
+    <div className='flex items-center justify-between w-full gap-2.5'>
+      <div className='flex flex-row gap-2'>
+        <Button variant='default' size='sm' className='h-7 bg-light text-bg hover:bg-light/90' onClick={handleExport}>
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
+        <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+          <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+          {hasActiveFilters() && (
+            <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )
