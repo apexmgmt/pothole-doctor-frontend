@@ -35,6 +35,7 @@ import PurchaseOrderService from '@/services/api/products/purchase_orders.servic
 import CreateOrEditPurchaseOrderModal from './CreateOrEditPurchaseOrderModal'
 import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
+import { formatCurrency } from '@/utils/currency'
 
 interface PurchaseOrdersProps {
   vendors: Vendor[]
@@ -195,7 +196,7 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
       case 'on_arrival':
         return 'warning'
       default:
-        return 'outline'
+        return 'destructive'
     }
   }
 
@@ -280,7 +281,7 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
       id: 'total_cost',
       header: 'Total Cost',
       cell: (row: PurchaseOrder) => (
-        <span>{(row as any).total_cost != null ? Number((row as any).total_cost).toFixed(2) : '—'}</span>
+        <span>{row.total_cost != null ? formatCurrency(row.total_cost) : '—'}</span>
       ),
       sortable: false
     },
@@ -288,15 +289,15 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
       id: 'paid_amount',
       header: 'Paid Amount',
       cell: (row: PurchaseOrder) => (
-        <span>{(row as any).paid_amount != null ? Number((row as any).paid_amount).toFixed(2) : '—'}</span>
+        <span>{row.paid_amount != null ? formatCurrency(row.paid_amount) : '—'}</span>
       ),
       sortable: false
     },
     {
-      id: 'balance_amount',
+      id: 'due_amount',
       header: 'Balance',
       cell: (row: PurchaseOrder) => (
-        <span>{(row as any).balance_amount != null ? Number((row as any).balance_amount).toFixed(2) : '—'}</span>
+        <span>{row.due_amount != null ? formatCurrency(row.due_amount ?? 0) : '—'}</span>
       ),
       sortable: false
     },
@@ -304,8 +305,8 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
       id: 'payment_status',
       header: 'Payment Status',
       cell: (row: PurchaseOrder) => (
-        <Badge variant={getPaymentStatusVariant((row as any).payment_due)} className='capitalize'>
-          {(row as any).payment_due ? (row as any).payment_due.replace(/_/g, ' ') : '—'}
+        <Badge variant={getPaymentStatusVariant(row.payment_due)} className='capitalize'>
+          {row.payment_due ? row.payment_due.replace(/_/g, ' ') : 'Unpaid'}
         </Badge>
       ),
       sortable: false
