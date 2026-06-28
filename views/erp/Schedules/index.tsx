@@ -23,6 +23,7 @@ import { Schedule } from '@/types/schedules'
 import { Column, Partner, WorkOrder } from '@/types'
 import TableSearch from '@/components/erp/common/TableSearch'
 import ScheduleFormDialog from './ScheduleFormDialog'
+import { ExcelIcon } from '@/public/icons'
 
 const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = ({
   workOrders = [],
@@ -120,6 +121,28 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
     return filterKeys.length > 0
+  }
+
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting schedules...`)
+      const blob = await ScheduleService.exportSchedules(filterOptions)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `schedules-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success(`Schedules exported successfully`)
+    } catch (error: any) {
+      console.error('Export error:', error)
+      toast.error(error.message || 'Failed to export data')
+    }
   }
 
   // Columns definition
@@ -286,19 +309,25 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
   ]
 
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <div className='flex items-center gap-2'>
-        <TableSearch
-          value={searchValue}
-          onChange={setSearchValue}
-          placeholder='Search...'
-          className='lg:w-80 min-w-0'
-        />
-        {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
-            Clear
-          </Button>
-        )}
+    <div className='flex items-center justify-between w-full gap-2.5'>
+      <div className='flex flex-row gap-2'>
+        <Button variant='default' size='sm' className='h-7 bg-light text-bg hover:bg-light/90' onClick={handleExport}>
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
+        <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+          <TableSearch
+            value={searchValue}
+            onChange={setSearchValue}
+            placeholder='Search...'
+            className='lg:w-80 min-w-0'
+          />
+          {hasActiveFilters() && (
+            <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )

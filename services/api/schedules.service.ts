@@ -42,6 +42,30 @@ export default class ScheduleService {
     }
   }
 
+  /**
+   * Export schedules
+   */
+  static exportSchedules = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(API_URL + SCHEDULES + 'export' + (queryParams ? `?${queryParams}` : ''), {
+        requiresAuth: true,
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to export schedules')
+      }
+
+      return await response.blob()
+    } catch (error) {
+      throw error
+    }
+  }
+
   /** Create Schedule API */
   static store = async (payload: SchedulePayload) => {
     try {
@@ -160,3 +184,4 @@ export default class ScheduleService {
     }
   }
 }
+
