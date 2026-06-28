@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 
 import { PlusIcon } from 'lucide-react'
+import { ExcelIcon } from '@/public/icons'
 
 import { toast } from 'sonner'
 
@@ -11,7 +12,6 @@ import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, Product, InventoryAdjustment, PurchaseOrder } from '@/types'
 import InventoryService from '@/services/api/products/inventories.service'
 import AdjustInventoryModal from './AdjustInventoryModal'
-import TableSearch from '@/components/erp/common/TableSearch'
 
 interface InventoryAdjustmentSectionProps {
   inventory: PurchaseOrder
@@ -116,8 +116,38 @@ const InventoryAdjustmentSection: React.FC<InventoryAdjustmentSectionProps> = ({
     }
   ]
 
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting inventory adjustments...`)
+      const blob = await InventoryService.exportInventoryAdjustments({ purchase_order_id: inventory.id, ...filterOptions })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `inventory-adjustments-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(`Inventory adjustments exported successfully`)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   const customFilters = (
-    <div className='flex items-center justify-end w-full'>
+    <div className='flex items-center justify-end w-full gap-2'>
+      <Button
+        variant='default'
+        size='sm'
+        className='bg-light text-bg hover:bg-light/90 h-7 gap-1.5'
+        onClick={handleExport}
+      >
+        <ExcelIcon className='w-4 h-4' />
+        <span className='hidden min-[480px]:block'>Export</span>
+      </Button>
       <Button
         variant='default'
         size='sm'

@@ -33,3 +33,9 @@ export const INVENTORY_ADJUST = (inventoryId: string): string => `/v1/tenant/inv
  * @method: POST (/purchaseOrderId) - Create inventory adjustment for a inventory purchase order
  */
 export const INVENTORY_ADJUSTMENTS: string = '/v1/tenant/inventory-adjustments/'
+
+/**
+ * This contains the API endpoint to export inventory adjustments.
+ * @method GET - Export data: GET /export
+ */
+export const INVENTORY_ADJUSTMENTS_EXPORT_TENANT: string = '/v1/tenant/inventory-adjustments/export/'
