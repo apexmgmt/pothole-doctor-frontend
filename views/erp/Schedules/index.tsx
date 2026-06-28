@@ -22,6 +22,7 @@ import { formatDate } from '@/utils/date'
 import { Schedule } from '@/types/schedules'
 import { Column, Partner, WorkOrder } from '@/types'
 import TableSearch from '@/components/erp/common/TableSearch'
+import ScheduleFormDialog from './ScheduleFormDialog'
 
 const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = ({
   workOrders = [],
@@ -38,6 +39,10 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
   const [canCreate, setCanCreate] = useState(false)
   const [canEdit, setCanEdit] = useState(false)
   const [canDelete, setCanDelete] = useState(false)
+
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null)
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
@@ -247,7 +252,11 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
           {(canEdit || canDelete) && (
             <ThreeDotButton
               buttons={[
-                ...(canEdit ? [<EditButton tooltip='Edit Schedule' onClick={() => {}} variant='text' />] : []),
+                ...(canEdit ? [<EditButton tooltip='Edit Schedule' onClick={() => {
+                  setModalMode('edit')
+                  setSelectedSchedule(row)
+                  setIsModalOpen(true)
+                }} variant='text' />] : []),
                 ...(canDelete
                   ? [
                       <DeleteButton
@@ -300,6 +309,19 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
         pagination={true}
         isLoading={isLoading}
         emptyMessage='No schedule found'
+      />
+      
+      <ScheduleFormDialog
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        mode={modalMode}
+        schedule={selectedSchedule}
+        partners={partners}
+        workOrders={workOrders}
+        onSuccess={() => {
+          setIsModalOpen(false)
+          fetchData()
+        }}
       />
     </CommonLayout>
   )
