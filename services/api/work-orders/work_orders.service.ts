@@ -6,7 +6,8 @@ import {
   WORK_ORDERS_ALL,
   WORK_ORDERS_RESTORE,
   WORK_ORDERS_SERVICES,
-  WORK_ORDERS_SUMMARY
+  WORK_ORDERS_SUMMARY,
+  WORK_ORDERS_EXPORT_TENANT
 } from '@/constants/api'
 import apiInterceptor from '../api.interceptor'
 import { CompletionCertificatePayload, WorkOrderPayload, WorkOrderServicePayload } from '@/types'
@@ -37,6 +38,32 @@ export default class WorkOrderService {
       }
 
       return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Export work orders API
+   *
+   * @param filterOptions An object containing key-value pairs for filtering the work orders.
+   */
+  static exportWorkOrders = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(API_URL + WORK_ORDERS_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''), {
+        requiresAuth: true,
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to export work orders')
+      }
+
+      return await response.blob()
     } catch (error) {
       throw error
     }

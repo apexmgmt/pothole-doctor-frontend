@@ -9,6 +9,12 @@ export const WORK_ORDERS: string = '/v1/tenant/work-orders/'
 export const WORK_ORDERS_ALL: string = '/v1/tenant/get-work-orders/'
 
 /**
+ * This contains the API endpoint to export work orders.
+ * @method GET - Export data: GET /export
+ */
+export const WORK_ORDERS_EXPORT_TENANT: string = '/v1/tenant/work-orders/export/'
+
+/**
  * This contains the API endpoint to get a summary of work orders for tenant
  * @method GET
  */

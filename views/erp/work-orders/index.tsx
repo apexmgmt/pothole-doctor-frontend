@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ImageIcon } from 'lucide-react'
-import { DocumentIcon, UserIcon } from '@/public/icons'
+import { DocumentIcon, UserIcon, ExcelIcon } from '@/public/icons'
 import { toast } from 'sonner'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
@@ -173,6 +173,27 @@ const WorkOrders: React.FC<{
     }
   }
 
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting work orders...`)
+      const blob = await WorkOrderService.exportWorkOrders(filterOptions)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `work-orders-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(`Work orders exported successfully`)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   const sharedColumns = getSharedWorkOrderColumns(row => handleOpenEditModal(row.id))
 
   const columns: Column[] = [
@@ -262,7 +283,21 @@ const WorkOrders: React.FC<{
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90 h-7 gap-1.5'
+          onClick={handleExport}
+        >
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
+        <TableSearch
+          value={searchValue}
+          onChange={setSearchValue}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
