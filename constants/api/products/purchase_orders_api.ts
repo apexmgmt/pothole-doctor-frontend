@@ -10,6 +10,12 @@
 export const PURCHASE_ORDERS: string = '/v1/tenant/purchase-orders/'
 
 /**
+ * Export Purchase Orders
+ * @method GET
+ */
+export const EXPORT_PURCHASE_ORDERS: string = '/v1/tenant/purchase-orders/export/'
+
+/**
  * Create a shipment for a purchase order
  * @method POST
  * @param purchaseOrderId string

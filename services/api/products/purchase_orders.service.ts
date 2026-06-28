@@ -1,4 +1,4 @@
-import { API_URL, PURCHASE_ORDERS, PURCHASE_ORDERS_SHIPMENT } from '@/constants/api'
+import { API_URL, PURCHASE_ORDERS, PURCHASE_ORDERS_SHIPMENT, EXPORT_PURCHASE_ORDERS } from '@/constants/api'
 import { PurchaseOrderPayload, PurchaseOrderShipmentPayload } from '@/types'
 import apiInterceptor from '../api.interceptor'
 import { revalidate } from '../../app/cache.service'
@@ -25,6 +25,34 @@ export default class PurchaseOrderService {
       }
 
       return await response.json()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Export Purchase Orders
+   * Returns an Excel file Blob
+   */
+  static exportPurchaseOrders = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
+
+      const response = await apiInterceptor(
+        API_URL + EXPORT_PURCHASE_ORDERS + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+
+        throw new Error(errorData.message || 'Failed to export purchase orders')
+      }
+
+      return await response.blob()
     } catch (error) {
       throw error
     }

@@ -36,6 +36,7 @@ import CreateOrEditPurchaseOrderModal from './CreateOrEditPurchaseOrderModal'
 import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 import { formatCurrency } from '@/utils/currency'
+import { ExcelIcon } from '@/public/icons'
 
 interface PurchaseOrdersProps {
   vendors: Vendor[]
@@ -280,25 +281,19 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
     {
       id: 'total_cost',
       header: 'Total Cost',
-      cell: (row: PurchaseOrder) => (
-        <span>{row.total_cost != null ? formatCurrency(row.total_cost) : '—'}</span>
-      ),
+      cell: (row: PurchaseOrder) => <span>{row.total_cost != null ? formatCurrency(row.total_cost) : '—'}</span>,
       sortable: false
     },
     {
       id: 'paid_amount',
       header: 'Paid Amount',
-      cell: (row: PurchaseOrder) => (
-        <span>{row.paid_amount != null ? formatCurrency(row.paid_amount) : '—'}</span>
-      ),
+      cell: (row: PurchaseOrder) => <span>{row.paid_amount != null ? formatCurrency(row.paid_amount) : '—'}</span>,
       sortable: false
     },
     {
       id: 'due_amount',
       header: 'Balance',
-      cell: (row: PurchaseOrder) => (
-        <span>{row.due_amount != null ? formatCurrency(row.due_amount ?? 0) : '—'}</span>
-      ),
+      cell: (row: PurchaseOrder) => <span>{row.due_amount != null ? formatCurrency(row.due_amount ?? 0) : '—'}</span>,
       sortable: false
     },
     {
@@ -405,28 +400,63 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
     return filterKeys.length > 0
   }
 
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting purchase orders...`)
+      const blob = await PurchaseOrderService.exportPurchaseOrders(filterOptions)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `purchase_orders_export_${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(`Purchase orders exported successfully`)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5 '>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1 '>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
-        {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
-            Clear
-          </Button>
-        )}
+      <div className='flex flex-row gap-2'>
+        <Button
+          variant='default'
+          size='sm'
+          className='h-7 bg-light text-bg hover:bg-light/90'
+          onClick={handleExport}
+        >
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block ml-1'>Export</span>
+        </Button>
+        <div className='flex items-center gap-2 lg:flex-0 flex-1 '>
+          <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+          {hasActiveFilters() && (
+            <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
       {canCreate && (
-        <Button className='h-7'
-          size='sm'
-          onClick={() => {
-            setModalMode('create')
-            setSelectedPurchaseOrderId(undefined)
-            setIsModalOpen(true)
-          }}
-        >
-          <PlusIcon className='w-4 h-4 mr-1' />
-          <span className='hidden min-[480px]:block'>Create Purchase Order</span>
-        </Button>
+        <div className='flex items-center gap-2'>
+          <Button
+            className='h-7'
+            size='sm'
+            onClick={() => {
+              setModalMode('create')
+              setSelectedPurchaseOrderId(undefined)
+              setIsModalOpen(true)
+            }}
+          >
+            <PlusIcon className='w-4 h-4 mr-1' />
+            <span className='hidden min-[480px]:block'>Create Purchase Order</span>
+          </Button>
+        </div>
       )}
     </div>
   )
