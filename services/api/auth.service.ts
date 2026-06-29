@@ -87,23 +87,33 @@ export default class AuthService {
 
     if (!refresh_token) throw new Error('No refresh token available')
 
-    try {
-      const payload: object = { refresh_token: refresh_token }
-      const isTenantApi = await isTenant()
+    // Call the internal API route which handles caching/deduplication
+    // Server-side fetch requires absolute URL; client-side uses relative
+    const baseUrl = typeof window === 'undefined' ? process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' : ''
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? AUTH_REFRESH_TOKEN_TENANT : AUTH_REFRESH_TOKEN), {
-        requiresAuth: false,
+    try {
+      const response = await fetch(`${baseUrl}/api/auth/refresh`, {
         method: 'POST',
-        body: JSON.stringify(payload)
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify({ refresh_token })
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
+      let data: any
 
-        throw new Error(errorData.message || 'Failed to refresh token')
+      try {
+        data = await response.json()
+      } catch {
+        data = null
       }
 
-      return await response.json()
+      if (!response.ok) {
+        throw data || new Error('Failed to refresh token')
+      }
+
+      return data
     } catch (error) {
       throw error
     }

@@ -45,10 +45,11 @@ const Login: React.FC<{ isTenant: boolean }> = ({ isTenant }) => {
               access_token: response?.data.access_token,
               refresh_token: response?.data.refresh_token,
               token_type: response?.data.token_type,
-              expires_in: response?.data.expires_in,
-              user: response?.data?.user,
-              roles: response?.data?.roles || [],
-              permissions: response?.data?.permissions || []
+              expires_in: response?.data.expires_in
+
+              // user: response?.data?.user,
+              // roles: response?.data?.roles || [],
+              // permissions: response?.data?.permissions || []
             }
 
             const encryptedData = encryptData(authData)
@@ -57,9 +58,15 @@ const Login: React.FC<{ isTenant: boolean }> = ({ isTenant }) => {
             window.location.href = redirectUrl
           } else {
             // Save the token and refresh token
-            CookieService.storeSync('access_token', response?.data.access_token, { expires: response?.data.expires_in })
-            CookieService.storeSync('refresh_token', response?.data.refresh_token)
-            CookieService.storeSync('token_type', response?.data.token_type)
+            CookieService.storeSync('access_token', response?.data.access_token, {
+              expires: response?.data.expires_in,
+              path: '/'
+            })
+            CookieService.storeSync('refresh_token', response?.data.refresh_token, {
+              expires: Number(process.env.NEXT_PUBLIC_REFRESH_TOKEN_DURATION ?? 120),
+              path: '/'
+            })
+            CookieService.storeSync('token_type', response?.data.token_type, { path: '/' })
             CookieService.storeSync('user', encryptData(response?.data?.user))
             CookieService.storeSync('roles', encryptData(response?.data?.roles || []))
 

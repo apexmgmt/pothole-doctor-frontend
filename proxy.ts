@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 import { isPublicRoute, isUnauthenticatedRoute } from './constants/routePermission'
-import AuthService from './services/api/auth.service'
+
+// import AuthService from './services/api/auth.service'
 import { getPermissionsFromCookies, hasRoutePermission } from './utils/role-permission'
 import { checkSubdomain } from './utils/utility'
 import SubdomainService from './services/api/subdomain.service'
@@ -88,7 +89,7 @@ export async function proxy(req: NextRequest) {
     return response
   }
 
-  // if access token is available 
+  // if access token is available
   if (accessToken) {
     // Check permission for the route
     const permissions = await getPermissionsFromCookies(req)
@@ -116,90 +117,45 @@ export async function proxy(req: NextRequest) {
     return response
   }
 
-  // if access token is not available but refresh token is available then try to refresh token
+  /* Refresh token flow — pass through and let the client-side interceptor
+     handle the refresh via the cached /api/auth/refresh route.
+     This avoids the race condition where both proxy and interceptor
+     call the backend simultaneously and one invalidates the other's token. */
   if (refreshToken) {
-    try {
-      const json = await AuthService.refreshToken(refreshToken)
+    // console.log('[PROXY] REFRESH TOKEN: ', refreshToken)
 
-      const payload = json.data || json
-      const newAccess = payload.access_token
-      const newRefresh = payload.refresh_token
-      const expiresIn = payload.expires_in
+    if (isUnauthenticatedRoute(pathname)) {
+      const erpUrl = req.nextUrl.clone()
 
-      if (!newAccess) {
-        throw new Error('No access token returned from refresh')
-      }
+      erpUrl.pathname = '/erp'
 
-      const nextRes = NextResponse.next()
-
-      // set the tokens on cookies
-      nextRes.cookies.set({
-        name: 'access_token',
-        value: newAccess,
-        httpOnly: false,
-        path: '/',
-        maxAge: typeof expiresIn === 'number' ? expiresIn : undefined
-      })
-
-      if (newRefresh) {
-        nextRes.cookies.set({
-          name: 'refresh_token',
-          value: newRefresh,
-          httpOnly: false,
-          path: '/'
-        })
-      }
-
-      if (payload.token_type) {
-        nextRes.cookies.set({
-          name: 'token_type',
-          value: payload.token_type,
-          httpOnly: false,
-          path: '/'
-        })
-      }
-
-      // Set tenant cookie if subdomain was verified
-      if (tenantId) {
-        nextRes.cookies.set({
-          name: 'tenant',
-          value: tenantId,
-          httpOnly: false,
-          path: '/'
-        })
-      }
-
-      // Check permission after token refresh
-      const permissions = await getPermissionsFromCookies(req)
-
-      if (!hasRoutePermission(pathname, permissions)) {
-        const forbiddenUrl = req.nextUrl.clone()
-
-        forbiddenUrl.pathname = '/erp'
-
-        return NextResponse.redirect(forbiddenUrl)
-      }
-
-      return nextRes
-    } catch (error) {
-      const loginUrl = req.nextUrl.clone()
-
-      loginUrl.pathname = '/erp/login'
-      loginUrl.searchParams.set('redirect', pathname)
-
-      const redirectRes = NextResponse.redirect(loginUrl)
-
-      redirectRes.cookies.delete('access_token')
-      redirectRes.cookies.delete('refresh_token')
-      redirectRes.cookies.delete('token_type')
-      redirectRes.cookies.delete('permissions_1')
-      redirectRes.cookies.delete('permissions_2')
-      redirectRes.cookies.delete('permissions_3')
-      redirectRes.cookies.delete('permissions_4')
-      redirectRes.cookies.delete('roles')
-
-      return redirectRes
+      return NextResponse.redirect(erpUrl)
     }
+
+    // Check permission for the route
+    const permissions = await getPermissionsFromCookies(req)
+
+    if (!hasRoutePermission(pathname, permissions)) {
+      const forbiddenUrl = req.nextUrl.clone()
+
+      forbiddenUrl.pathname = '/erp'
+
+      return NextResponse.redirect(forbiddenUrl)
+    }
+
+    const response = NextResponse.next()
+
+    // Set tenant cookie if subdomain was verified
+    if (tenantId) {
+      response.cookies.set({
+        name: 'tenant',
+        value: tenantId,
+        httpOnly: false,
+        path: '/'
+      })
+    }
+
+    return response
   }
 
   const loginUrl = req.nextUrl.clone()

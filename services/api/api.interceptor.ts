@@ -17,10 +17,44 @@ interface ApiInterceptorOptions extends RequestInit {
 const storeTokens = (data: any) => {
   if (!data) return
 
+  const isClient = typeof window !== 'undefined'
+
+  // console.log('[DEBUG] storeTokens called with data:', data)
+
   // keep same storage strategy as login
-  CookieService.store('access_token', data.access_token, { expires: data.expires_in })
-  CookieService.store('refresh_token', data.refresh_token)
-  CookieService.store('token_type', data.token_type)
+  if (data.access_token) {
+    const options = { expires: data.expires_in, path: '/' }
+
+    if (isClient) {
+      CookieService.storeSync('access_token', data.access_token, options)
+    } else {
+      CookieService.store('access_token', data.access_token, options)
+    }
+  }
+
+  if (data.refresh_token) {
+    const options = { expires: Number(process.env.NEXT_PUBLIC_REFRESH_TOKEN_DURATION ?? 120), path: '/' }
+
+    // console.log('[DEBUG] Storing NEW refresh_token:', data.refresh_token.substring(0, 10) + '...')
+
+    if (isClient) {
+      CookieService.storeSync('refresh_token', data.refresh_token, options)
+    } else {
+      CookieService.store('refresh_token', data.refresh_token, options)
+    }
+  } else {
+    // console.log('[DEBUG] NO refresh_token found in payload. Keeping old one.')
+  }
+
+  if (data.token_type) {
+    const options = { path: '/' }
+
+    if (isClient) {
+      CookieService.storeSync('token_type', data.token_type, options)
+    } else {
+      CookieService.store('token_type', data.token_type, options)
+    }
+  }
 }
 
 const clearAuthAndRedirect = async () => {
@@ -55,8 +89,9 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
     if (isRefreshing) {
       // Wait for ongoing refresh
       try {
-        await refreshPromise
-        accessToken = await CookieService.get('access_token')
+        const refreshed = await refreshPromise
+
+        accessToken = refreshed?.access_token
       } catch (err) {
         clearAuthAndRedirect()
         throw new Error('Unable to refresh token')
@@ -64,22 +99,26 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
     } else {
       isRefreshing = true
 
-      // Import AuthService dynamically to avoid circular dependency
-      const { default: AuthService } = await import('@/services/api/auth.service')
+      // Assign refreshPromise synchronously so parallel requests wait on it
+      refreshPromise = (async () => {
+        // Import AuthService dynamically to avoid circular dependency
+        const { default: AuthService } = await import('@/services/api/auth.service')
+        const refreshed = await AuthService.refreshToken()
+        const payload = refreshed?.data || refreshed
 
-      refreshPromise = AuthService.refreshToken()
-        .then(refreshed => {
-          if (refreshed && refreshed.access_token) {
-            storeTokens(refreshed)
-            isRefreshing = false
-            refreshPromise = null
+        if (payload && payload.access_token) {
+          storeTokens(payload)
 
-            return refreshed
-          } else {
-            isRefreshing = false
-            refreshPromise = null
-            throw new Error('No access token in refresh response')
-          }
+          return payload
+        } else {
+          throw new Error('No access token in refresh response')
+        }
+      })()
+        .then(payload => {
+          isRefreshing = false
+          refreshPromise = null
+
+          return payload
         })
         .catch(err => {
           isRefreshing = false
@@ -136,8 +175,8 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
         if (isRefreshing) {
           // Wait for ongoing refresh
           try {
-            await refreshPromise
-            const newAccessToken = await CookieService.get('access_token')
+            const refreshed = await refreshPromise
+            const newAccessToken = refreshed?.access_token
 
             if (newAccessToken) {
               const retryHeaders = { ...headers, Authorization: `Bearer ${newAccessToken}` }
@@ -151,22 +190,26 @@ const apiInterceptor = async (url: string, options: ApiInterceptorOptions = {}):
         } else {
           isRefreshing = true
 
-          // Import AuthService dynamically to avoid circular dependency
-          const { default: AuthService } = await import('@/services/api/auth.service')
+          // Assign refreshPromise synchronously so parallel requests wait on it
+          refreshPromise = (async () => {
+            // Import AuthService dynamically to avoid circular dependency
+            const { default: AuthService } = await import('@/services/api/auth.service')
+            const refreshed = await AuthService.refreshToken()
+            const payload = refreshed?.data || refreshed
 
-          refreshPromise = AuthService.refreshToken()
-            .then(refreshed => {
-              if (refreshed && refreshed.access_token) {
-                storeTokens(refreshed)
-                isRefreshing = false
-                refreshPromise = null
+            if (payload && payload.access_token) {
+              storeTokens(payload)
 
-                return refreshed
-              } else {
-                isRefreshing = false
-                refreshPromise = null
-                throw new Error('No access token in refresh response')
-              }
+              return payload
+            } else {
+              throw new Error('No access token in refresh response')
+            }
+          })()
+            .then(payload => {
+              isRefreshing = false
+              refreshPromise = null
+
+              return payload
             })
             .catch(err => {
               isRefreshing = false

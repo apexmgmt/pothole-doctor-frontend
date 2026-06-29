@@ -38,8 +38,11 @@ const RedirectingView: React.FC<RedirectingViewProps> = ({ encryptedData }) => {
         }
 
         // Store the decrypted data in cookies
-        CookieService.storeSync('access_token', authData.access_token, { expires: authData.expires_in })
-        CookieService.storeSync('refresh_token', authData.refresh_token)
+        CookieService.storeSync('access_token', authData.access_token, { expires: authData.expires_in, path: '/' })
+        CookieService.storeSync('refresh_token', authData.refresh_token, {
+          expires: Number(process.env.NEXT_PUBLIC_REFRESH_TOKEN_DURATION ?? 120),
+          path: '/'
+        })
         CookieService.storeSync('token_type', authData.token_type)
         CookieService.storeSync('user', encryptData(authData.user))
         CookieService.storeSync('roles', encryptData(authData.roles || []))

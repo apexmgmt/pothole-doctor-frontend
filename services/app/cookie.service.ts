@@ -46,7 +46,13 @@ export default class CookieService {
         if (options?.secure) serverOptions.secure = options.secure
         if (options?.sameSite) serverOptions.sameSite = options.sameSite
 
-        cookieStore.set(name, value, serverOptions)
+        try {
+          cookieStore.set(name, value, serverOptions)
+        } catch (error: any) {
+          if (!error?.message?.includes('Server Action or Route Handler')) {
+            console.warn(`Failed to set cookie ${name} on server:`, error)
+          }
+        }
       }
     } else {
       Cookies.set(name, value, options)
@@ -88,12 +94,13 @@ export default class CookieService {
       const cookieStore = await this.getServerCookies()
 
       if (cookieStore) {
-        const serverOptions: any = {}
-
-        if (options?.path) serverOptions.path = options.path
-        if (options?.domain) serverOptions.domain = options.domain
-
-        cookieStore.delete(name)
+        try {
+          cookieStore.delete(name)
+        } catch (error: any) {
+          if (!error?.message?.includes('Server Action or Route Handler')) {
+            console.warn(`Failed to delete cookie ${name} on server:`, error)
+          }
+        }
       }
     } else {
       Cookies.remove(name, options)
@@ -112,7 +119,13 @@ export default class CookieService {
         const allCookies = cookieStore.getAll()
 
         allCookies.forEach(cookie => {
-          cookieStore.delete(cookie.name)
+          try {
+            cookieStore.delete(cookie.name)
+          } catch (error: any) {
+            if (!error?.message?.includes('Server Action or Route Handler')) {
+              console.warn(`Failed to delete cookie ${cookie.name} on server:`, error)
+            }
+          }
         })
       }
     } else {
