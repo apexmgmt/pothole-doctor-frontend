@@ -64,6 +64,12 @@ export const handleRequest = async <T = any>(
           statusText: response.statusText
         }
       } else {
+        if (options.revalidateTags?.length) {
+          const { revalidate } = await import('@/services/app/cache.service')
+
+          await Promise.all(options.revalidateTags.map(tag => revalidate(tag)))
+        }
+
         result = responseData ?? { success: true }
       }
     } else {

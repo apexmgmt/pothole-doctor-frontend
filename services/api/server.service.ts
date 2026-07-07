@@ -50,5 +50,11 @@ export const executeServerRequest = async (
     }
   }
 
+  if (revalidateTags.length > 0) {
+    const { revalidate } = await import('@/services/app/cache.service')
+
+    await Promise.all(revalidateTags.map(tag => revalidate(tag)))
+  }
+
   return responseData ?? { success: true }
 }
