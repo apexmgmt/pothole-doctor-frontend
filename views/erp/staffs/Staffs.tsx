@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -27,97 +28,101 @@ import { generateFileUrl, getInitialFilters } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const Staffs: React.FC = () => {
+interface StaffsProps {
+  initialData: DataTableApiResponse<Staff> | null
+  permissions: {
+    canCreateStaff: boolean
+    canViewStaff: boolean
+    canEditStaff: boolean
+    canDeleteStaff: boolean
+  }
+}
+
+const Staffs: React.FC<StaffsProps> = ({ initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
+  const { canCreateStaff, canViewStaff, canEditStaff, canDeleteStaff } = permissions
+
   const [activeTab, setActiveTab] = useState<string>('staffs')
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Staff> | null>(initialData)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null)
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateStaff, setCanCreateStaff] = useState<boolean>(false)
-  const [canEditStaff, setCanEditStaff] = useState<boolean>(false)
-  const [canViewStaff, setCanViewStaff] = useState<boolean>(false)
-  const [canDeleteStaff, setCanDeleteStaff] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions and check permissions
-  useEffect(() => {
-    setSearchValue(filterOptions.search || '')
-    hasPermission('Create Staff').then(result => setCanCreateStaff(result))
-    hasPermission('Update Staff').then(result => setCanEditStaff(result))
-    hasPermission('View Staff').then(result => setCanViewStaff(result))
-    hasPermission('Delete Staff').then(result => setCanDeleteStaff(result))
-  }, [])
+  const getInitialFilters = () => {
+    const filters: any = {}
 
-  // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
+    searchParams.forEach((value, key) => {
+      if (key === 'page' || key === 'per_page') {
+        filters[key] = parseInt(value)
+      } else {
+        filters[key] = value
+      }
+    })
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+    return filters
+  }
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = getInitialFilters()
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  // Update URL when filters change
-  const updateURL = (filters: any) => {
     const params = new URLSearchParams()
 
-    Object.keys(filters).forEach(key => {
-      if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
-        params.set(key, String(filters[key]))
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
       }
     })
 
     const queryString = params.toString()
     const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
+    setIsLoading(true)
     router.push(newUrl, { scroll: false })
   }
 
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      StaffService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          console.error('Error fetching staffs:', error)
-        })
-    } catch (error) {
-      setIsLoading(false)
-      console.error('Error fetching staffs:', error)
-    }
-  }
+  useEffect(() => {
+    setApiResponse(initialData)
+    setIsLoading(false)
+  }, [initialData])
 
   useEffect(() => {
-    fetchData()
-    updateURL(filterOptions)
+    const filters = getInitialFilters()
+
+    setSearchValue(filters.search || '')
     dispatch(setPageTitle('Manage Staffs'))
-  }, [filterOptions])
+  }, [])
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   // Transform API data to match table format
   const staffsData = apiResponse?.data
@@ -204,7 +209,7 @@ const Staffs: React.FC = () => {
       await StaffService.destroy(id)
         .then(response => {
           toast.success('Staff deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete staff')
@@ -215,8 +220,8 @@ const Staffs: React.FC = () => {
   }
 
   const handleClearFilters = () => {
-    setFilterOptions({})
     setSearchValue('')
+    setFilterOptions({})
   }
 
   const handleRowSelect = (staff: any) => {
@@ -235,7 +240,7 @@ const Staffs: React.FC = () => {
 
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
-    const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+    const filterKeys = Object.keys(getInitialFilters()).filter(key => key !== 'page' && key !== 'per_page')
 
     return filterKeys.length > 0
   }
@@ -246,7 +251,7 @@ const Staffs: React.FC = () => {
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
         <TableSearch
           value={searchValue}
-          onChange={setSearchValue}
+          onChange={onSearchChange}
           placeholder='Search...'
           className='lg:w-80 min-w-0'
         />
@@ -320,7 +325,7 @@ const Staffs: React.FC = () => {
         <StaffDetails
           staffData={selectedStaff}
           setStaffData={setSelectedStaff}
-          fetchData={fetchData}
+          fetchData={() => router.refresh()}
           canEditStaff={canEditStaff}
         />
       )}

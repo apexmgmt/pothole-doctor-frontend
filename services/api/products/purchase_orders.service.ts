@@ -1,7 +1,6 @@
 import { API_URL, PURCHASE_ORDERS, PURCHASE_ORDERS_SHIPMENT, EXPORT_PURCHASE_ORDERS } from '@/constants/api'
 import { PurchaseOrderPayload, PurchaseOrderShipmentPayload } from '@/types'
 import { handleRequest } from '@/services/api/base.service'
-import { revalidate } from '../../app/cache.service'
 
 export default class PurchaseOrderService {
   /**
@@ -15,7 +14,7 @@ export default class PurchaseOrderService {
       const response = await handleRequest(API_URL + PURCHASE_ORDERS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['purchase-orders'] }
+        next: { revalidate: 30, tags: ['login', 'purchase-orders', queryParams ? `purchase-orders?${queryParams}` : 'purchase-orders'] }
       })
 
       return response
@@ -49,10 +48,9 @@ export default class PurchaseOrderService {
       const response = await handleRequest(API_URL + PURCHASE_ORDERS, {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['purchase-orders']
       })
-
-      await revalidate('purchase-orders')
 
       return response
     } catch (error) {
@@ -66,7 +64,7 @@ export default class PurchaseOrderService {
       const response = await handleRequest(API_URL + PURCHASE_ORDERS + purchaseOrderId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`purchase-orders/${purchaseOrderId}`] }
+        next: { revalidate: 30, tags: ['login', `purchase-orders/${purchaseOrderId}`] }
       })
 
       return response
@@ -81,11 +79,9 @@ export default class PurchaseOrderService {
       const response = await handleRequest(API_URL + PURCHASE_ORDERS + purchaseOrderId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['purchase-orders', `purchase-orders/${purchaseOrderId}`]
       })
-
-      await revalidate('purchase-orders')
-      await revalidate(`purchase-orders/${purchaseOrderId}`)
 
       return response
     } catch (error) {
@@ -98,11 +94,9 @@ export default class PurchaseOrderService {
     try {
       const response = await handleRequest(API_URL + PURCHASE_ORDERS + purchaseOrderId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['purchase-orders', `purchase-orders/${purchaseOrderId}`]
       })
-
-      await revalidate('purchase-orders')
-      await revalidate(`purchase-orders/${purchaseOrderId}`)
 
       return response
     } catch (error) {
@@ -120,11 +114,9 @@ export default class PurchaseOrderService {
       const response = await handleRequest(API_URL + PURCHASE_ORDERS_SHIPMENT(purchaseOrderId), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['purchase-orders', `purchase-orders/${purchaseOrderId}`]
       })
-
-      await revalidate('purchase-orders')
-      await revalidate(`purchase-orders/${purchaseOrderId}`)
 
       return response
     } catch (error) {

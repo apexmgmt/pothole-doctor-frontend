@@ -24,7 +24,7 @@ import CreateOrEditTaskModal from '@/views/erp/tasks/CreateOrEditTaskModal'
 import TableSearch from '@/components/erp/common/TableSearch'
 
 const ClientTasks = ({ clientId }: { clientId: string }) => {
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Task> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)

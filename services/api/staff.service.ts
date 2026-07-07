@@ -10,7 +10,6 @@ import {
   STAFFS_TENANT
 } from '@/constants/api'
 import { handleRequest } from '@/services/api/base.service'
-import { revalidate } from '../app/cache.service'
 
 export default class StaffService {
   /**Staffs DataTable API */
@@ -24,7 +23,7 @@ export default class StaffService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['staffs'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'staffs', queryParams ? `staffs?${queryParams}` : 'staffs'] } // Cache for 30 seconds
         }
       )
 
@@ -42,11 +41,9 @@ export default class StaffService {
       const response = await handleRequest(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['staffs', 'staffs-all']
       })
-
-      await revalidate('staffs')
-      await revalidate('staffs-all')
 
       return response
     } catch (error) {
@@ -61,7 +58,7 @@ export default class StaffService {
       const response = await handleRequest(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + staffId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`staffs/${staffId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', `staffs/${staffId}`] } // Cache for 30 seconds
       })
 
       return response
@@ -77,12 +74,9 @@ export default class StaffService {
       const response = await handleRequest(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + staffId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['staffs', `staffs/${staffId}`, 'staffs-all']
       })
-
-      await revalidate('staffs')
-      await revalidate(`staffs/${staffId}`)
-      await revalidate('staffs-all')
 
       return response
     } catch (error) {
@@ -96,12 +90,9 @@ export default class StaffService {
 
       const response = await handleRequest(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + staffId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['staffs', `staffs/${staffId}`, 'staffs-all']
       })
-
-      await revalidate('staffs')
-      await revalidate(`staffs/${staffId}`)
-      await revalidate('staffs-all')
 
       return response
     } catch (error) {
@@ -116,7 +107,7 @@ export default class StaffService {
       const response = await handleRequest(API_URL + (isTenantApi ? STAFFS_ALL_TENANT : STAFFS_ALL), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['staffs-all'] } // Cache for 1 hour
+        next: { revalidate: 3600, tags: ['login', 'staffs-all'] } // Cache for 1 hour
       })
 
       return response

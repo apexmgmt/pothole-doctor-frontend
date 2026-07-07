@@ -17,7 +17,7 @@ import WorkOrderDocumentService from '@/services/api/work-orders/work-order-docu
 import TableSearch from '@/components/erp/common/TableSearch'
 
 const WorkOrderDocuments = ({ workOrderId }: { workOrderId: string }) => {
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Document> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: workOrderId })
   const fileInputRef = useRef<HTMLInputElement>(null)

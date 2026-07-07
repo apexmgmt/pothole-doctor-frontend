@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -53,6 +54,12 @@ const Clients: React.FC<{
   noteTypes: NoteType[]
   countriesWithStatesAndCities: CountryWithStates[]
   contactTypes: ContactType[]
+  initialData: DataTableApiResponse<Client> | null
+  permissions: {
+    canCreateClient: boolean
+    canEditClient: boolean
+    canDeleteClient: boolean
+  }
 }> = ({
   type,
   interestLevels,
@@ -64,20 +71,24 @@ const Clients: React.FC<{
   businessLocations,
   noteTypes,
   countriesWithStatesAndCities,
-  contactTypes
+  contactTypes,
+  initialData,
+  permissions
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [activeTab, setActiveTab] = useState<string>('clients')
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Client> | null>(initialData)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
 
-  const [filterOptions, setFilterOptions] = useState<any>(() => {
+  const { canCreateClient, canEditClient, canDeleteClient } = permissions
+
+  const filterOptions = useMemo(() => {
     const filters = getInitialFilters(searchParams)
 
     if (filters.client_id) {
@@ -85,31 +96,40 @@ const Clients: React.FC<{
     }
 
     return filters
-  })
+  }, [searchParams])
 
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [isStageModalOpen, setIsStageModalOpen] = useState<boolean>(false)
   const [stageClientId, setStageClientId] = useState<string | null>(null)
   const [stageClientCurrentStage, setStageClientCurrentStage] = useState<LeadStage | null>(null)
-  const [canCreateClient, setCanCreateClient] = useState<boolean>(false)
-  const [canEditClient, setCanEditClient] = useState<boolean>(false)
-  const [canDeleteClient, setCanDeleteClient] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions and Check permissions
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
+
+  useEffect(() => {
+    setApiResponse(initialData)
+    setIsLoading(false)
+  }, [initialData])
+
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-
-    // Check permissions
-    if (type === 'lead') {
-      hasPermission('Create Lead').then(result => setCanCreateClient(result))
-      hasPermission('Update Lead').then(result => setCanEditClient(result))
-      hasPermission('Delete Lead').then(result => setCanDeleteClient(result))
-    } else {
-      hasPermission('Create Customer').then(result => setCanCreateClient(result))
-      hasPermission('Update Customer').then(result => setCanEditClient(result))
-      hasPermission('Delete Customer').then(result => setCanDeleteClient(result))
-    }
 
     // Open client details if client_id is present in URL
     const urlClientId = searchParams.get('client_id')
@@ -126,57 +146,36 @@ const Clients: React.FC<{
         })
         .catch(() => {})
     }
+
+    dispatch(setPageTitle(`Manage ${type === 'lead' ? 'Leads' : 'Customers'}`))
   }, [])
 
-  // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+          if (newOptions.page) {
+            delete newOptions.page
+          }
 
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      ClientService.index({ ...filterOptions, type: type })
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
+          return newOptions
         })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error(`Error fetching ${type === 'lead' ? 'leads' : 'customers'}`)
-        })
-    } catch (error) {
-      setIsLoading(false)
-      toast.error(`Something went wrong while fetching ${type === 'lead' ? 'leads' : 'customers'}!`)
-    }
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
   }
-
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle(`Manage ${type === 'lead' ? 'Leads' : 'Customers'}`))
-  }, [filterOptions])
 
   // Column definitions for CommonTable
   const clientColumns: Column[] = [
@@ -458,7 +457,7 @@ const Clients: React.FC<{
       await ClientService.destroy(id, type)
         .then(response => {
           toast.success(`${type === 'lead' ? 'Lead' : 'Client'} deleted successfully`)
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(
@@ -532,7 +531,7 @@ const Clients: React.FC<{
       const blob = await ClientService.exportClients({ ...filterOptions, type })
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
-      
+
       a.href = url
       const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
 
@@ -568,19 +567,14 @@ const Clients: React.FC<{
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex flex-row gap-2'>
-        <Button
-          variant='default'
-          size='sm'
-          className='h-7'
-          onClick={handleExport}
-        >
+        <Button variant='default' size='sm' className='h-7' onClick={handleExport}>
           <ExcelIcon className='w-4 h-4 text-black' />
           <span className='hidden min-[480px]:block'>Export</span>
         </Button>
         <div className='flex items-center gap-2 lg:flex-0 flex-1'>
           <TableSearch
             value={searchValue}
-            onChange={setSearchValue}
+            onChange={onSearchChange}
             placeholder='Search...'
             className='lg:w-80 min-w-0'
           />
@@ -665,7 +659,7 @@ const Clients: React.FC<{
         mode={modalMode}
         clientId={selectedClientId}
         clientData={selectedClient}
-        onSuccess={fetchData}
+        onSuccess={() => router.refresh()}
         interestLevels={interestLevels}
         companies={companies}
         staffs={staffs}

@@ -23,14 +23,18 @@ import { getInitialFilters } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const Cities: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = ({ countriesWithStateAndCities }) => {
+const Cities: React.FC<{
+  countriesWithStateAndCities: CountryWithStates[]
+  initialData?: DataTableApiResponse<City> | null
+  permissions?: { canCreateCity: boolean; canViewCity: boolean; canEditCity: boolean; canDeleteCity: boolean }
+}> = ({ countriesWithStateAndCities = [], initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<City> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedCityId, setSelectedCityId] = useState<string | null>(null)
   const [selectedCity, setSelectedCity] = useState<City | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
@@ -38,18 +42,18 @@ const Cities: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = (
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateCity, setCanCreateCity] = useState<boolean>(false)
-  const [canEditCity, setCanEditCity] = useState<boolean>(false)
-  const [canDeleteCity, setCanDeleteCity] = useState<boolean>(false)
+  const canCreateCity = permissions?.canCreateCity ?? false
+  const canEditCity = permissions?.canEditCity ?? false
+  const canDeleteCity = permissions?.canDeleteCity ?? false
 
   // Set initial search value from filterOptions and check permissions
   useEffect(() => {
-    setSearchValue(filterOptions.search || '')
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
-    // Check permissions
-    hasPermission('Create City').then(result => setCanCreateCity(result))
-    hasPermission('Update City').then(result => setCanEditCity(result))
-    hasPermission('Delete City').then(result => setCanDeleteCity(result))
+  useEffect(() => {
+    setSearchValue(filterOptions.search || '')
   }, [])
 
   // Debounced search update
@@ -92,28 +96,7 @@ const Cities: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = (
     router.push(newUrl, { scroll: false })
   }
 
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      CityService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          console.error('Error fetching cities:', error)
-        })
-    } catch (error) {
-      setIsLoading(false)
-      console.error('Error fetching cities:', error)
-    }
-  }
-
   useEffect(() => {
-    fetchData()
     updateURL(filterOptions)
     dispatch(setPageTitle('Manage Cities'))
   }, [filterOptions])
@@ -158,7 +141,7 @@ const Cities: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = (
   }
 
   const handleSuccess = () => {
-    fetchData()
+    router.refresh()
     handleModalClose()
   }
 
@@ -231,7 +214,7 @@ const Cities: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = (
       await CityService.destroy(id)
         .then(response => {
           toast.success('City deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete city')

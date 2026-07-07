@@ -17,7 +17,7 @@ interface TaskDocumentsProps {
 }
 
 const TaskDocuments = ({ taskId }: TaskDocumentsProps) => {
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Document> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)

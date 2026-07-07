@@ -40,7 +40,7 @@ const ReusableInvoiceTable: React.FC<ReusableInvoiceTableProps> = ({
 }) => {
   const router = useRouter()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Invoice> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>({})

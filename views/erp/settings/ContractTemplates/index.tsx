@@ -30,7 +30,7 @@ const ContractTemplates: React.FC<ContractTemplatesProps> = ({ estimateTypes }) 
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<any> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | undefined>(undefined)
   const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | undefined>(undefined)

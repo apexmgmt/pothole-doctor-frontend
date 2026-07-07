@@ -24,7 +24,7 @@ const VendorPickupAddresses = ({
   vendorId: string
   countriesWithStatesAndCities: CountryWithStates[]
 }) => {
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<any> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedPickupAddressId, setSelectedPickupAddressId] = useState<string | null>(null)
   const [selectedPickupAddress, setSelectedPickupAddress] = useState<VendorPickupAddress | null>(null)

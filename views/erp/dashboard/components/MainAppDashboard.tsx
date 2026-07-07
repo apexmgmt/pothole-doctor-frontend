@@ -25,51 +25,77 @@ export default function MainAppDashboard({ data, impersonateUser }: MainAppDashb
   const companiesData = ((data?.latest_organizations ?? []) as Record<string, unknown>[]).map((company, index) => ({
     id: String(company.id),
     index: index + 1,
-    name: `${company.first_name ?? ''} ${company.last_name ?? ''}`.trim() || String(company.name ?? 'N/A'),
-    phone: String((company.userable as Record<string, unknown>)?.phone ?? company.phone ?? 'N/A'),
-    company: String((company.domain as Record<string, unknown>)?.domain ?? company.company ?? 'N/A'),
-    jobAddress: String((company.userable as Record<string, unknown>)?.address ?? company.address ?? 'N/A'),
-    email: String(company.email ?? 'N/A'),
+    company_name: String((company.userable as Record<string, unknown>)?.company_name ?? ''),
+    first_name: String(company.first_name ?? ''),
+    last_name: String(company.last_name ?? ''),
+    phone: String((company.userable as Record<string, unknown>)?.phone ?? ''),
+    jobAddress: String((company.userable as Record<string, unknown>)?.address ?? '-'),
+    email: String(company.email ?? ''),
     status: company.status
   }))
 
   const companyColumns: Column[] = [
-    { id: 'index', header: '#', sortable: false, cell: row => <span className='text-gray'>{row.index}</span> },
-    { id: 'name', header: 'Name', sortable: false, cell: row => <span>{row.name}</span> },
-    { id: 'phone', header: 'Phone', sortable: false, cell: row => <span>{row.phone}</span> },
-    { id: 'company', header: 'Company', sortable: false, cell: row => <span>{row.company}</span> },
+    {
+      id: 'company_name',
+      header: 'Company',
+      sortable: false,
+      cell: row => <span>{row.company_name}</span>
+    },
+    {
+      id: 'name',
+      header: 'Name',
+      sortable: false,
+      cell: row => <span>{[row.first_name, row.last_name].filter(Boolean).join(' ')}</span>
+    },
+    {
+      id: 'phone',
+      header: 'Phone',
+      sortable: false,
+      cell: row => <span>{row.phone}</span>
+    },
     {
       id: 'jobAddress',
       header: 'Job Address',
       sortable: false,
       cell: row => <span className='max-w-xs truncate'>{row.jobAddress}</span>
     },
-    { id: 'email', header: 'Email', sortable: false, cell: row => <span>{row.email}</span> },
+    {
+      id: 'email',
+      header: 'Email',
+      sortable: false,
+      cell: row => <span>{row.email}</span>
+    },
     {
       id: 'status',
       header: 'Status',
       sortable: false,
-      cell: row => <OrganizationStatusSwitch checked={row.status} loading={false} companyId={row.id} />
+      cell: row => (
+        <div className='flex items-center gap-2'>
+          <OrganizationStatusSwitch checked={row.status} loading={false} companyId={row.id} />
+        </div>
+      )
     },
     {
       id: 'actions',
       header: 'Action',
       sortable: false,
       cell: row => (
-        <ThreeDotButton
-          buttons={[
-            <Button
-              key='impersonate'
-              variant='ghost'
-              size='icon'
-              type='button'
-              className='w-full'
-              onClick={() => impersonateUser(String(row.id))}
-            >
-              Impersonate
-            </Button>
-          ]}
-        />
+        <div className='flex gap-2'>
+          <ThreeDotButton
+            buttons={[
+              <Button
+                key='impersonate'
+                variant='ghost'
+                size='icon'
+                type='button'
+                className='w-full'
+                onClick={() => impersonateUser(String(row.id))}
+              >
+                Impersonate
+              </Button>
+            ]}
+          />
+        </div>
       )
     }
   ]
@@ -82,7 +108,7 @@ export default function MainAppDashboard({ data, impersonateUser }: MainAppDashb
           <h2 className='text-sm font-semibold text-card-foreground'>Daily Registrations</h2>
           {chartData.length > 0 && <p className='text-xs text-muted-foreground mt-0.5'>Last {chartData.length} days</p>}
         </div>
-        <div className='h-[220px] w-full'>
+        <div className='h-55 w-full'>
           {chartData.length > 0 ? (
             <ResponsiveContainer width='100%' height='100%'>
               <LineChart data={chartData} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>

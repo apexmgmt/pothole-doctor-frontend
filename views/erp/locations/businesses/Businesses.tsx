@@ -31,15 +31,23 @@ import { hasPermission } from '@/utils/role-permission'
 import CreateOrEditBusinessLocationModal from './CreateOrEditBusinessLocationModal'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const BusinessLocations: React.FC = () => {
+const BusinessLocations: React.FC<{
+  initialData?: DataTableApiResponse<BusinessLocation> | null
+  permissions?: {
+    canCreateBusiness: boolean
+    canViewBusiness: boolean
+    canEditBusiness: boolean
+    canDeleteBusiness: boolean
+  }
+}> = ({ initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [activeTab, setActiveTab] = useState<string>('businesses')
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<BusinessLocation> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedBusinessLocationId, setSelectedBusinessLocationId] = useState<string | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
 
@@ -50,23 +58,23 @@ const BusinessLocations: React.FC = () => {
   const [countriesWithStateAndCities, setCountriesWithStateAndCities] = useState<Location['countries']>([])
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateLocation, setCanCreateLocation] = useState<boolean>(false)
-  const [canEditLocation, setCanEditLocation] = useState<boolean>(false)
-  const [canDeleteLocation, setCanDeleteLocation] = useState<boolean>(false)
-  const [canViewLocation, setCanViewLocation] = useState<boolean>(false)
+  const canCreateLocation = permissions?.canCreateBusiness ?? false
+  const canEditLocation = permissions?.canEditBusiness ?? false
+  const canDeleteLocation = permissions?.canDeleteBusiness ?? false
+  const canViewLocation = permissions?.canViewBusiness ?? false
   const [canManageWarehouse, setCanManageWarehouse] = useState<boolean>(false)
   const [canManageStaff, setCanManageStaff] = useState<boolean>(false)
   const [canManageEstimate, setCanManageEstimate] = useState<boolean>(false)
 
   // Set initial search value from filterOptions and check permissions
   useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
+  useEffect(() => {
     setSearchValue(filterOptions.search || '')
 
-    // Check permissions
-    hasPermission('Create Location').then(result => setCanCreateLocation(result))
-    hasPermission('Update Location').then(result => setCanEditLocation(result))
-    hasPermission('Delete Location').then(result => setCanDeleteLocation(result))
-    hasPermission('View Location').then(result => setCanViewLocation(result))
     hasPermission('Manage Warehouse').then(result => setCanManageWarehouse(result))
     hasPermission('Manage Staff').then(result => setCanManageStaff(result))
     hasPermission('Manage Estimate').then(result => setCanManageEstimate(result))
@@ -126,28 +134,7 @@ const BusinessLocations: React.FC = () => {
     router.push(newUrl, { scroll: false })
   }
 
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      BusinessLocationService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          console.error('Error fetching business locations:', error)
-        })
-    } catch (error) {
-      setIsLoading(false)
-      console.error('Error fetching business locations:', error)
-    }
-  }
-
   useEffect(() => {
-    fetchData()
     updateURL(filterOptions)
     dispatch(setPageTitle('Manage Business Locations'))
   }, [filterOptions])
@@ -203,7 +190,11 @@ const BusinessLocations: React.FC = () => {
     {
       id: 'street_address',
       header: 'Address',
-      cell: row => <span>{row.street_address}, {row.city}, {row.state}</span>,
+      cell: row => (
+        <span>
+          {row.street_address}, {row.city}, {row.state}
+        </span>
+      ),
       sortable: true
     },
     {
@@ -254,7 +245,7 @@ const BusinessLocations: React.FC = () => {
       await BusinessLocationService.destroy(id)
         .then(response => {
           toast.success('Business location deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete business location')
@@ -452,7 +443,7 @@ const BusinessLocations: React.FC = () => {
         )}
 
         {activeTab === 'details' && selectedBusinessLocationId && (
-          <BusinessLocationDetails businessLocationId={selectedBusinessLocationId} fetchData={fetchData} />
+          <BusinessLocationDetails businessLocationId={selectedBusinessLocationId} fetchData={() => router.refresh()} />
         )}
 
         {activeTab === 'employees' && selectedBusinessLocationId && (
@@ -495,7 +486,7 @@ const BusinessLocations: React.FC = () => {
         countriesWithStateAndCities={countriesWithStateAndCities}
         isFetching={modalLoading}
         onSuccess={() => {
-          fetchData()
+          router.refresh()
           setModalBusinessLocation(null)
           setIsModalOpen(false)
         }}

@@ -187,21 +187,36 @@ export async function processRedirectData(encryptedData: string) {
       return { success: false, error: 'Failed to decrypt authentication data' }
     }
 
-    const cookieResult = await setAllAuthCookies(
+    const authResult = await setAuthCookies(
       authData.access_token,
       authData.refresh_token,
       authData.token_type,
-      authData.expires_in,
-      authData.roles || [],
-      authData.permissions || [],
-      authData.user
+      authData.expires_in
     )
 
-    if (!cookieResult.success) {
-      return { success: false, error: cookieResult.error }
+    if (!authResult.success) {
+      return { success: false, error: authResult.error }
     }
 
-    return { success: true, user: authData.user }
+    const AuthService = (await import('@/services/api/auth.service')).default
+    const userResponse = await AuthService.getAuthDetails()
+    const userData = userResponse?.data || userResponse
+
+    if (!userData || !userData.user) {
+      return { success: false, error: 'Failed to fetch user details during redirect' }
+    }
+
+    const roleResult = await setUserDataCookies({
+      roles: userData.roles || [],
+      permissions: userData.permissions || [],
+      user: userData.user
+    })
+
+    if (!roleResult.success) {
+      return { success: false, error: roleResult.error }
+    }
+
+    return { success: true, user: userData.user }
   } catch (error: any) {
     console.error('Error in processRedirectData:', error)
 

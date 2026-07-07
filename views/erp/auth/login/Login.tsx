@@ -44,10 +44,7 @@ const Login: React.FC<{ isTenant: boolean }> = ({ isTenant }) => {
               access_token: response?.data.access_token,
               refresh_token: response?.data.refresh_token,
               token_type: response?.data.token_type,
-              expires_in: response?.data.expires_in,
-              user: response?.data?.user,
-              roles: response?.data?.roles || [],
-              permissions: response?.data?.permissions || []
+              expires_in: response?.data.expires_in
             }
 
             const redirectUrl = await generateRedirectUrl(authData, response.data.domain ?? '')

@@ -27,7 +27,7 @@ export default function BulkEditProductModal({
 }: BulkEditProductModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<any> | null>(null)
 
   // Track changes keyed by product ID
   const [changes, setChanges] = useState<Record<string, ProductBulkEditPayload>>({})

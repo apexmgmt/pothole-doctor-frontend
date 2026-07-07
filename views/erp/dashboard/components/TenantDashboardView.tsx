@@ -5,6 +5,7 @@ import { BarChart2, DollarSign, FileText, Info, TrendingUp, Users } from 'lucide
 import ReportService from '@/services/api/reports.service'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
 import CommonTable from '@/components/erp/common/table'
+import ReusableInvoiceTable from '@/views/erp/invoices/ReusableInvoiceTable'
 import { Invoice } from '@/types'
 
 import { formatMoney, getStat, getStatObj, startOf, type LocationOption } from '../utils'
@@ -218,7 +219,7 @@ export default function TenantDashboardView({ data }: { data: Record<string, unk
 
         {/* ── Tab nav + filters ── */}
         <div className='px-4 flex items-center justify-between flex-wrap gap-3'>
-          <nav className='flex overflow-x-auto [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.12)_rgba(0,0,0,0.0)]'>
+          <nav className='flex overflow-x-auto scrollbar-thin [scrollbar-color:rgba(255,255,255,0.12)_rgba(0,0,0,0.0)]'>
             {TABS.map(tab => {
               const Icon = tab.icon
               const active = activeTab === tab.id
@@ -269,7 +270,7 @@ export default function TenantDashboardView({ data }: { data: Record<string, unk
                   <span className='inline-block w-8 h-1 rounded bg-blue-500' />
                   <span>Salesman Report</span>
                 </div>
-                <div className='h-[280px]'>
+                <div className='h-70'>
                   <SalesmanReportChart
                     report={salesmanReport}
                     loading={salesmanChartLoading}
@@ -328,22 +329,7 @@ export default function TenantDashboardView({ data }: { data: Record<string, unk
                 </Button>
               </div>
               <div className='px-2'>
-                <CommonTable
-                  data={{
-                    data: normalizedInvoices,
-                    per_page: normalizedInvoices.length || 10,
-                    total: normalizedInvoices.length,
-                    from: 1,
-                    to: normalizedInvoices.length,
-                    current_page: 1,
-                    last_page: 1
-                  }}
-                  columns={invoiceColumns}
-                  showFilters={false}
-                  pagination={false}
-                  isLoading={false}
-                  emptyMessage='No open invoices found'
-                />
+                <ReusableInvoiceTable emptyMessage='No open invoices found' />
               </div>
             </div>
           </>

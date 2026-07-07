@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { hasPermission } from '@/utils/role-permission'
 import OrganizationService from '@/services/api/organizations.service'
-import { DataTableApiResponse } from '@/types'
+import { DataTableApiResponse, Organization } from '@/types'
 import Organizations from '@/views/erp/organizations/Organizations'
 
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Pothole Doctors'
@@ -18,7 +18,7 @@ export default async function OrganizationsPage({
 }) {
   const resolvedSearchParams = await searchParams
 
-  let responseData: DataTableApiResponse | null = null
+  let responseData: DataTableApiResponse<Organization> | null = null
 
   try {
     // Next.js Server Cache will handle caching and revalidation based on your setup

@@ -25,7 +25,7 @@ export default class TaskService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['tasks'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['tasks', 'login'] } // Cache for 30 seconds
         }
       )
 
@@ -63,7 +63,7 @@ export default class TaskService {
       const response = await handleRequest(API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + taskId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`tasks/${taskId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: [`tasks/${taskId}`, 'login'] } // Cache for 30 seconds
       })
 
       return response
@@ -193,7 +193,7 @@ export default class TaskService {
       const response = await handleRequest(url, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['tasks-all'] } // Cache for 1 hour
+        next: { revalidate: 30, tags: ['tasks-all', 'login'] } // Cache for 30 seconds
       })
 
       return response

@@ -28,7 +28,7 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<PaymentTerm> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedPaymentTermId, setSelectedPaymentTermId] = useState<string | null>(null)
   const [selectedPaymentTerm, setSelectedPaymentTerm] = useState<PaymentTerm | null>(null)

@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -43,24 +44,53 @@ const Products: React.FC<ProductsProps> = ({
   setSelectedRows,
   selected_vendor_id = null,
   hideTitle = false,
-  hideActionButton = false
+  hideActionButton = false,
+  initialData,
+  permissions
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Product> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateProduct, setCanCreateProduct] = useState<boolean>(false)
-  const [canEditProduct, setCanEditProduct] = useState<boolean>(false)
-  const [canDeleteProduct, setCanDeleteProduct] = useState<boolean>(false)
-  const [canViewProduct, setCanViewProduct] = useState<boolean>(false)
+
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
+
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    if (selected_vendor_id) {
+      params.set('vendor_id', String(selected_vendor_id))
+    }
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
+
+  const canCreateProduct = permissions?.canCreateProduct ?? false
+  const canEditProduct = permissions?.canEditProduct ?? false
+  const canDeleteProduct = permissions?.canDeleteProduct ?? false
+  const canViewProduct = permissions?.canViewProduct ?? false
 
   const [localSelectedRows, setLocalSelectedRows] = useState<Product[]>([])
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(false)
@@ -72,66 +102,45 @@ const Products: React.FC<ProductsProps> = ({
   const activeSelectedRows = isFromModal ? selectedRows : localSelectedRows
   const activeSetSelectedRows = isFromModal ? setSelectedRows : setLocalSelectedRows
 
-  // Set initial search value from filterOptions and check permissions
+  useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
+  // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Create Product').then(result => setCanCreateProduct(result))
-    hasPermission('Update Product').then(result => setCanEditProduct(result))
-    hasPermission('Delete Product').then(result => setCanDeleteProduct(result))
-    hasPermission('View Product').then(result => setCanViewProduct(result))
-  }, [])
-
-  // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
-
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
-
-        if (newOptions.page) {
-          delete newOptions.page
-        }
-
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      ProductService.index({ ...filterOptions, ...(selected_vendor_id ? { vendor_id: selected_vendor_id } : {}) })
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch products')
-        })
-    } catch (error) {
-      setIsLoading(false)
-      toast.error('Something went wrong while fetching products!')
-    }
-  }
-
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
 
     // show the page title only if not from modal
     if (!isFromModal) dispatch(setPageTitle('Manage Products'))
-  }, [filterOptions, selected_vendor_id])
+  }, [])
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
@@ -190,7 +199,7 @@ const Products: React.FC<ProductsProps> = ({
   }
 
   const handleSuccess = () => {
-    fetchData()
+    router.refresh()
     handleModalClose()
   }
 
@@ -462,7 +471,7 @@ const Products: React.FC<ProductsProps> = ({
       if (currentPage > pageCount) {
         setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
       } else {
-        fetchData()
+        router.refresh()
       }
     } catch (error: any) {
       toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete products')
@@ -508,7 +517,7 @@ const Products: React.FC<ProductsProps> = ({
           if (currentPage > pageCount) {
             setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
           } else {
-            fetchData()
+            router.refresh()
           }
         })
         .catch(error => {
@@ -536,7 +545,7 @@ const Products: React.FC<ProductsProps> = ({
             name='product-search'
             label='Search'
             value={searchValue}
-            onChange={setSearchValue}
+            onChange={onSearchChange}
             placeholder='Search...'
             className='w-full'
           />
@@ -606,15 +615,17 @@ const Products: React.FC<ProductsProps> = ({
         )}
       </div>
       <div className='flex items-start flex-wrap gap-2 lg:mt-5.75'>
-        {!isFromModal && <Button
-          variant='default'
-          size='sm'
-          className='h-7 bg-light text-bg hover:bg-light/90 gap-1.5'
-          onClick={handleExport}
-        >
-          <ExcelIcon className='w-4 h-4' />
-          <span className='hidden min-[480px]:block'>Export</span>
-        </Button>}
+        {!isFromModal && (
+          <Button
+            variant='default'
+            size='sm'
+            className='h-7 bg-light text-bg hover:bg-light/90 gap-1.5'
+            onClick={handleExport}
+          >
+            <ExcelIcon className='w-4 h-4' />
+            <span className='hidden min-[480px]:block'>Export</span>
+          </Button>
+        )}
         {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
           <Button
             variant='outline'
@@ -736,7 +747,7 @@ const Products: React.FC<ProductsProps> = ({
         open={isBulkEditModalOpen}
         onOpenChange={setIsBulkEditModalOpen}
         onSuccess={() => {
-          fetchData()
+          router.refresh()
           activeSetSelectedRows?.([])
         }}
         selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}
@@ -746,7 +757,7 @@ const Products: React.FC<ProductsProps> = ({
         open={isBulkUpdateModalOpen}
         onOpenChange={setIsBulkUpdateModalOpen}
         onSuccess={() => {
-          fetchData()
+          router.refresh()
           activeSetSelectedRows?.([])
         }}
         selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}

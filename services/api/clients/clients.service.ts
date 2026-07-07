@@ -1,6 +1,5 @@
 import { isTenant } from '@/utils/utility'
 import { handleRequest } from '@/services/api/base.service'
-import { revalidate } from '@/services/app/cache.service'
 import {
   API_URL,
   CLIENTS,
@@ -25,7 +24,15 @@ export default class ClientService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`clients${type ? `-${type}` : ''}`] }
+          next: {
+            revalidate: 30,
+            tags: [
+              'login',
+              'clients',
+              `clients${type ? `-${type}` : ''}`,
+              queryParams ? `clients${type ? `-${type}` : ''}?${queryParams}` : `clients${type ? `-${type}` : ''}`
+            ]
+          }
         }
       )
 
@@ -63,18 +70,9 @@ export default class ClientService {
       const response = await handleRequest(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['clients', 'clients-all', type ? `clients-${type}` : '', type ? `clients-all-${type}` : ''].filter(Boolean)
       })
-
-      // Revalidate generic tags
-      await revalidate('clients')
-      await revalidate('clients-all')
-
-      // Revalidate type-specific tags if type is provided
-      if (type) {
-        await revalidate(`clients-${type}`)
-        await revalidate(`clients-all-${type}`)
-      }
 
       return response
     } catch (error) {
@@ -90,7 +88,7 @@ export default class ClientService {
       const response = await handleRequest(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`clients/${clientId}`] }
+        next: { revalidate: 30, tags: ['login', `clients/${clientId}`] }
       })
 
       return response
@@ -107,19 +105,9 @@ export default class ClientService {
       const response = await handleRequest(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['clients', 'clients-all', `clients/${clientId}`, type ? `clients-${type}` : '', type ? `clients-all-${type}` : ''].filter(Boolean)
       })
-
-      // Revalidate generic tags
-      await revalidate('clients')
-      await revalidate('clients-all')
-      await revalidate(`clients/${clientId}`)
-
-      // Revalidate type-specific tags if type is provided
-      if (type) {
-        await revalidate(`clients-${type}`)
-        await revalidate(`clients-all-${type}`)
-      }
 
       return response
     } catch (error) {
@@ -135,12 +123,9 @@ export default class ClientService {
     try {
       const response = await handleRequest(API_URL + CLIENTS_LEAD_STAGE(clientId, stage), {
         requiresAuth: true,
-        method: 'PUT'
+        method: 'PUT',
+        revalidateTags: ['clients', `clients/${clientId}`, 'clients-all']
       })
-
-      await revalidate('clients')
-      await revalidate(`clients/${clientId}`)
-      await revalidate('clients-all')
 
       return response
     } catch (error) {
@@ -155,13 +140,9 @@ export default class ClientService {
 
       const response = await handleRequest(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['clients', 'clients-all', `clients/${clientId}`, `clients${type ? `-${type}` : ''}`, `clients-all${type ? `-${type}` : ''}`]
       })
-
-      await revalidate(`clients${type ? `-${type}` : ''}`)
-      await revalidate(`clients/${clientId}`)
-      await revalidate(`clients-all${type ? `-${type}` : ''}`)
-      await revalidate('clients-all')
 
       return response
     } catch (error) {
@@ -176,13 +157,9 @@ export default class ClientService {
 
       const response = await handleRequest(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId + '/restore', {
         requiresAuth: true,
-        method: 'POST'
+        method: 'POST',
+        revalidateTags: ['clients', 'clients-all', `clients/${clientId}`, `clients${type ? `-${type}` : ''}`, `clients-all${type ? `-${type}` : ''}`]
       })
-
-      await revalidate(`clients${type ? `-${type}` : ''}`)
-      await revalidate(`clients/${clientId}`)
-      await revalidate(`clients-all${type ? `-${type}` : ''}`)
-      await revalidate('clients-all')
 
       return response
     } catch (error) {
@@ -201,8 +178,6 @@ export default class ClientService {
           requiresAuth: true,
           method: 'GET',
           cache: 'no-store'
-
-          // next: { revalidate: 3600, tags: [`clients-all${type ? `-${type}` : ''}`] } // Cache for 1 hour
         }
       )
 

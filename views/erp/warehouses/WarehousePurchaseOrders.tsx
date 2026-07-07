@@ -19,7 +19,7 @@ interface WarehousePurchaseOrdersProps {
 }
 
 const WarehousePurchaseOrders: React.FC<WarehousePurchaseOrdersProps> = ({ warehouseId }) => {
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<PurchaseOrder> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>({ warehouse_id: warehouseId })

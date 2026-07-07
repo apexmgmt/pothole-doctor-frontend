@@ -21,20 +21,34 @@ export const executeServerRequest = async (
 
   const response = await apiInterceptor(slug, fetchOptions)
 
+  const contentType = response.headers.get('content-type') || ''
+  const isJson = contentType.includes('application/json')
+
   let responseData: any
   let rawText = ''
 
-  try {
-    rawText = await response.text()
-    responseData = rawText ? JSON.parse(rawText) : null
-  } catch (e) {
-    console.error('Failed to parse JSON response:', rawText)
-    responseData = { _rawText: rawText, status: response.status, statusText: response.statusText }
+  if (!isJson && response.ok) {
+    const arrayBuffer = await response.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+
+    responseData = {
+      __isBlob: true,
+      base64: buffer.toString('base64'),
+      contentType
+    }
+  } else {
+    try {
+      rawText = await response.text()
+      responseData = rawText ? JSON.parse(rawText) : null
+    } catch (e) {
+      console.error('Failed to parse JSON response:', rawText)
+      responseData = { _rawText: rawText, status: response.status, statusText: response.statusText }
+    }
   }
 
   let isSuccess = response.ok
 
-  if (isSuccess && responseData && typeof responseData === 'object') {
+  if (isSuccess && responseData && typeof responseData === 'object' && !responseData.__isBlob) {
     if (responseData.success === false || responseData.status === 'error' || responseData.status === 'fail') {
       isSuccess = false
     }

@@ -28,7 +28,7 @@ const EstimateTypes: React.FC = () => {
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<EstimateType> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedEstimateTypeId, setSelectedEstimateTypeId] = useState<string | null>(null)
   const [selectedEstimateType, setSelectedEstimateType] = useState<EstimateType | null>(null)

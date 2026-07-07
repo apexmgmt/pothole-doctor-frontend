@@ -37,7 +37,7 @@ const LaborCosts: React.FC<{
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<LaborCost> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedLaborCostId, setSelectedLaborCostId] = useState<string | null>(null)
   const [selectedLaborCost, setSelectedLaborCost] = useState<LaborCost | null>(null)

@@ -24,14 +24,22 @@ import { getInitialFilters } from '@/utils/utility'
 import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const Countries: React.FC = () => {
+const Countries: React.FC<{
+  initialData?: DataTableApiResponse<Country> | null
+  permissions?: {
+    canCreateCountry: boolean
+    canViewCountry: boolean
+    canEditCountry: boolean
+    canDeleteCountry: boolean
+  }
+}> = ({ initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Country> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null)
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
@@ -39,18 +47,18 @@ const Countries: React.FC = () => {
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateCountry, setCanCreateCountry] = useState<boolean>(false)
-  const [canEditCountry, setCanEditCountry] = useState<boolean>(false)
-  const [canDeleteCountry, setCanDeleteCountry] = useState<boolean>(false)
+  const canCreateCountry = permissions?.canCreateCountry ?? false
+  const canEditCountry = permissions?.canEditCountry ?? false
+  const canDeleteCountry = permissions?.canDeleteCountry ?? false
 
   // Set initial search value from filterOptions and check permissions
   useEffect(() => {
-    setSearchValue(filterOptions.search || '')
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
-    // Check permissions
-    hasPermission('Create Country').then(result => setCanCreateCountry(result))
-    hasPermission('Update Country').then(result => setCanEditCountry(result))
-    hasPermission('Delete Country').then(result => setCanDeleteCountry(result))
+  useEffect(() => {
+    setSearchValue(filterOptions.search || '')
   }, [])
 
   // Debounced search update
@@ -93,28 +101,7 @@ const Countries: React.FC = () => {
     router.push(newUrl, { scroll: false })
   }
 
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      CountryService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          console.error('Error fetching countries:', error)
-        })
-    } catch (error) {
-      setIsLoading(false)
-      console.error('Error fetching countries:', error)
-    }
-  }
-
   useEffect(() => {
-    fetchData()
     updateURL(filterOptions)
     dispatch(setPageTitle('Manage Countries'))
   }, [filterOptions])
@@ -158,7 +145,7 @@ const Countries: React.FC = () => {
   }
 
   const handleSuccess = () => {
-    fetchData()
+    router.refresh()
   }
 
   // Column definitions for CommonTable
@@ -229,7 +216,7 @@ const Countries: React.FC = () => {
     try {
       await CountryService.destroy(id)
       toast.success('Country deleted successfully')
-      fetchData()
+      router.refresh()
     } catch (error) {
       toast.error('Failed to delete country')
     }

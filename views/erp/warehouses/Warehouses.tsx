@@ -30,7 +30,7 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Warehouse> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [activeTab, setActiveTab] = useState<'warehouses' | 'purchase_orders'>('warehouses')
   const [selectedWarehouseRow, setSelectedWarehouseRow] = useState<{ id: string; title: string } | null>(null)

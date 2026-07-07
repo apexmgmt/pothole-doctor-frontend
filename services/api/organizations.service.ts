@@ -12,7 +12,7 @@ export default class OrganizationService {
       const response = await handleRequest(API_URL + ORGANIZATIONS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['organizations', dynamicTag, 'login'] }, // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['organizations', dynamicTag, 'login'] }, // Cache for 30 seconds
         ...options
       })
 

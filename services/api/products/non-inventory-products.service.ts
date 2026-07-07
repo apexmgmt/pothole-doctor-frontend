@@ -17,7 +17,6 @@ import {
   NON_INVENTORY_PRODUCTS_BULK_UPDATE
 } from '@/constants/api'
 import { ProductBulkEditPayload, ProductBulkUpdatePayload, ProductPayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class NonInventoryProductService {
   /** Non-Inventory Product DataTable API */
@@ -42,7 +41,7 @@ export default class NonInventoryProductService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['non-inventory-products'] }
+          next: { revalidate: 30, tags: ['login', 'non-inventory-products', queryParams ? `non-inventory-products?${queryParams}` : 'non-inventory-products'] }
         }
       )
 
@@ -81,12 +80,10 @@ export default class NonInventoryProductService {
         {
           requiresAuth: true,
           method: 'POST',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['non-inventory-products', 'non-inventory-products-all']
         }
       )
-
-      await revalidate('non-inventory-products')
-      await revalidate('non-inventory-products-all')
 
       return response
     } catch (error) {
@@ -104,7 +101,7 @@ export default class NonInventoryProductService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`non-inventory-products/${productId}`] }
+          next: { revalidate: 30, tags: ['login', `non-inventory-products/${productId}`] }
         }
       )
 
@@ -124,13 +121,10 @@ export default class NonInventoryProductService {
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['non-inventory-products', 'non-inventory-products-all', `non-inventory-products/${productId}`]
         }
       )
-
-      await revalidate('non-inventory-products')
-      await revalidate(`non-inventory-products/${productId}`)
-      await revalidate('non-inventory-products-all')
 
       return response
     } catch (error) {
@@ -153,12 +147,10 @@ export default class NonInventoryProductService {
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify({ changes: payload })
+          body: JSON.stringify({ changes: payload }),
+          revalidateTags: ['non-inventory-products', 'non-inventory-products-all']
         }
       )
-
-      await revalidate('non-inventory-products')
-      await revalidate('non-inventory-products-all')
 
       return response
     } catch (error) {
@@ -181,12 +173,10 @@ export default class NonInventoryProductService {
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['non-inventory-products', 'non-inventory-products-all']
         }
       )
-
-      await revalidate('non-inventory-products')
-      await revalidate('non-inventory-products-all')
 
       return response
     } catch (error) {
@@ -209,12 +199,10 @@ export default class NonInventoryProductService {
         {
           requiresAuth: true,
           method: 'POST',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['non-inventory-products', 'non-inventory-products-all']
         }
       )
-
-      await revalidate('non-inventory-products')
-      await revalidate('non-inventory-products-all')
 
       return response
     } catch (error) {
@@ -231,13 +219,10 @@ export default class NonInventoryProductService {
         API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_TENANT : NON_INVENTORY_PRODUCTS) + productId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['non-inventory-products', 'non-inventory-products-all', `non-inventory-products/${productId}`]
         }
       )
-
-      await revalidate('non-inventory-products')
-      await revalidate(`non-inventory-products/${productId}`)
-      await revalidate('non-inventory-products-all')
 
       return response
     } catch (error) {
@@ -260,12 +245,10 @@ export default class NonInventoryProductService {
         {
           requiresAuth: true,
           method: 'DELETE',
-          body: JSON.stringify({ ids })
+          body: JSON.stringify({ ids }),
+          revalidateTags: ['non-inventory-products', 'non-inventory-products-all']
         }
       )
-
-      await revalidate('non-inventory-products')
-      await revalidate('non-inventory-products-all')
 
       return response
     } catch (error) {
@@ -282,13 +265,10 @@ export default class NonInventoryProductService {
         API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_TENANT : NON_INVENTORY_PRODUCTS) + productId + '/restore',
         {
           requiresAuth: true,
-          method: 'POST'
+          method: 'POST',
+          revalidateTags: ['non-inventory-products', 'non-inventory-products-all', `non-inventory-products/${productId}`]
         }
       )
-
-      await revalidate('non-inventory-products')
-      await revalidate(`non-inventory-products/${productId}`)
-      await revalidate('non-inventory-products-all')
 
       return response
     } catch (error) {
@@ -306,7 +286,7 @@ export default class NonInventoryProductService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 3600, tags: ['non-inventory-products-all'] }
+          next: { revalidate: 3600, tags: ['login', 'non-inventory-products-all'] }
         }
       )
 

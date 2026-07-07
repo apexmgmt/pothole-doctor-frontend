@@ -17,7 +17,7 @@ import CreateOrEditRebateCreditModal from './CreateOrEditRebateCreditModal'
 import TableSearch from '@/components/erp/common/TableSearch'
 
 const VendorRebateCredits = ({ vendorId }: { vendorId: string }) => {
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<VendorRebateCredit> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedRebateCreditId, setSelectedRebateCreditId] = useState<string | null>(null)
   const [selectedRebateCredit, setSelectedRebateCredit] = useState<VendorRebateCredit | null>(null)

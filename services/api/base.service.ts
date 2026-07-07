@@ -46,34 +46,62 @@ export const handleRequest = async <T = any>(
       })
 
       const contentType = response.headers.get('content-type') || ''
-      const responseData = contentType.includes('application/json') ? await response.json() : await response.text()
-      let isSuccess = response.ok
+      const isJson = contentType.includes('application/json')
 
-      if (isSuccess && responseData && typeof responseData === 'object') {
-        if (responseData.success === false || responseData.status === 'error' || responseData.status === 'fail') {
-          isSuccess = false
-        }
-      }
-
-      if (!isSuccess) {
+      if (!isJson && response.ok) {
         result = {
-          __isServerError: true,
-          responseData,
-          mode,
-          status: response.status,
-          statusText: response.statusText
+          blob: async () => await response.blob()
         }
       } else {
-        if (options.revalidateTags?.length) {
-          const { revalidate } = await import('@/services/app/cache.service')
+        const responseData = isJson ? await response.json() : await response.text()
+        let isSuccess = response.ok
 
-          await Promise.all(options.revalidateTags.map(tag => revalidate(tag)))
+        if (isSuccess && responseData && typeof responseData === 'object') {
+          if (responseData.success === false || responseData.status === 'error' || responseData.status === 'fail') {
+            isSuccess = false
+          }
         }
 
-        result = responseData ?? { success: true }
+        if (!isSuccess) {
+          result = {
+            __isServerError: true,
+            responseData,
+            mode,
+            status: response.status,
+            statusText: response.statusText
+          }
+        } else {
+          if (options.revalidateTags?.length) {
+            const { revalidate } = await import('@/services/app/cache.service')
+
+            await Promise.all(options.revalidateTags.map(tag => revalidate(tag)))
+          }
+
+          result = responseData ?? { success: true }
+        }
       }
     } else {
       result = await executeServerRequest(slug, options, mode, actualFormData)
+    }
+
+    if (result && typeof result === 'object' && result.__isBlob) {
+      return {
+        blob: async () => {
+          if (typeof window !== 'undefined') {
+            const binaryString = atob(result.base64)
+            const len = binaryString.length
+            const bytes = new Uint8Array(len)
+
+            for (let i = 0; i < len; i++) {
+              bytes[i] = binaryString.charCodeAt(i)
+            }
+
+            return new Blob([bytes], { type: result.contentType })
+          } else {
+            return new Blob([Buffer.from(result.base64, 'base64')], { type: result.contentType })
+          }
+        }
+      } as any
     }
 
     if (result && typeof result === 'object' && result.__isServerError) {

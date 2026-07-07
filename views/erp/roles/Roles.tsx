@@ -29,29 +29,34 @@ interface RoleData {
   name: string
 }
 
-const Roles: React.FC = () => {
+const Roles: React.FC<{
+  initialData?: DataTableApiResponse<any> | null
+  permissions?: { canCreateRole: boolean; canEditRole: boolean; canDeleteRole: boolean }
+}> = ({ initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [activeTab, setActiveTab] = useState<string>('roles')
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<any> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null)
   const [selectedRole, setSelectedRole] = useState<object | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateRole, setCanCreateRole] = useState<boolean>(false)
-  const [canEditRole, setCanEditRole] = useState<boolean>(false)
-  const [canDeleteRole, setCanDeleteRole] = useState<boolean>(false)
+  const canCreateRole = permissions?.canCreateRole ?? false
+  const canEditRole = permissions?.canEditRole ?? false
+  const canDeleteRole = permissions?.canDeleteRole ?? false
 
   // Set initial search value from filterOptions
   useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
+  useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Create Role').then(result => setCanCreateRole(result))
-    hasPermission('Update Role').then(result => setCanEditRole(result))
-    hasPermission('Delete Role').then(result => setCanDeleteRole(result))
   }, [])
 
   // Debounced search update
@@ -94,28 +99,7 @@ const Roles: React.FC = () => {
     router.push(newUrl, { scroll: false })
   }
 
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      RoleService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          console.error('Error fetching roles:', error)
-        })
-    } catch (error) {
-      setIsLoading(false)
-      console.error('Error fetching roles:', error)
-    }
-  }
-
   useEffect(() => {
-    fetchData()
     updateURL(filterOptions)
     dispatch(setPageTitle('Manage Roles'))
   }, [filterOptions])
@@ -196,7 +180,7 @@ const Roles: React.FC = () => {
       await RoleService.destroy(id)
         .then(response => {
           toast.success('Role deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete role')

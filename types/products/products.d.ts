@@ -1,4 +1,5 @@
 import { Model, ProductCategory, ServiceType, Unit, Vendor } from '..'
+import { DataTableApiResponse } from '../table'
 
 export interface Product extends Model {
   category_id: string
@@ -133,6 +134,8 @@ export interface ProductsProps {
   selected_vendor_id?: string | null
   hideTitle?: boolean
   hideActionButton?: boolean
+  initialData?: DataTableApiResponse<Product> | null
+  permissions?: { canCreateProduct?: boolean; canViewProduct?: boolean; canEditProduct?: boolean; canDeleteProduct?: boolean }
 }
 
 export interface ProductGallery {

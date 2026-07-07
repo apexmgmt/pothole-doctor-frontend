@@ -29,7 +29,7 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Commission> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedCommissionId, setSelectedCommissionId] = useState<string | null>(null)
   const [selectedCommission, setSelectedCommission] = useState<Commission | null>(null)

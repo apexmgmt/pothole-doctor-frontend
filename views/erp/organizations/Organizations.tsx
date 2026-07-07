@@ -27,7 +27,7 @@ import CreateOrEditOrganizationModal from '@/views/erp/organizations/CreateOrEdi
 import TableSearch from '@/components/erp/common/TableSearch'
 
 interface OrganizationsProps {
-  initialData: DataTableApiResponse | null
+  initialData: DataTableApiResponse<Organization> | null
   permissions: {
     canCreateCompany: boolean
     canViewCompany: boolean
@@ -49,7 +49,7 @@ const Organizations: React.FC<OrganizationsProps> = ({ initialData, permissions 
 
   const [activeTab, setActiveTab] = useState<string>('companies')
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(initialData)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Organization> | null>(initialData)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
@@ -141,10 +141,7 @@ const Organizations: React.FC<OrganizationsProps> = ({ initialData, permissions 
             access_token: response?.data.access_token,
             refresh_token: response?.data.refresh_token,
             token_type: response?.data.token_type,
-            expires_in: response?.data.expires_in,
-            user: response?.data?.user,
-            roles: response?.data?.roles || [],
-            permissions: response?.data?.permissions || []
+            expires_in: response?.data.expires_in
           }
 
           const baseUrl = appUrl(response.data.domain ?? '')
@@ -276,14 +273,14 @@ const Organizations: React.FC<OrganizationsProps> = ({ initialData, permissions 
         ...prev,
         data: prev.data.map(company =>
           company.id === updatedCompany.id
-            ? {
+            ? ({
                 ...company,
                 ...updatedCompany,
                 userable: {
                   ...company.userable,
                   ...updatedCompany.userable
                 }
-              }
+              } as Organization)
             : company
         )
       }

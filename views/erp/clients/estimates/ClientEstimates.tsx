@@ -37,7 +37,7 @@ import CreateOrEditEstimateModal from '@/views/erp/estimates/CreateOrEditEstimat
 import TableSearch from '@/components/erp/common/TableSearch'
 
 const ClientEstimates = ({ clientId }: { clientId: string }) => {
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Estimate> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, client_id: clientId })

@@ -16,7 +16,7 @@ export default class RoleService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['roles'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['roles', 'login'] } // Cache for 30 seconds
         }
       )
 
@@ -33,7 +33,7 @@ export default class RoleService {
       const response = await handleRequest(API_URL + (isTenantApi ? GET_ROLES_TENANT : GET_ROLES), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['roles-selection-list'] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['roles-selection-list', 'login'] } // Cache for 30 seconds
       })
 
       return response
@@ -69,7 +69,7 @@ export default class RoleService {
       const response = await handleRequest(API_URL + (isTenantApi ? ROLES_TENANT : ROLES) + roleId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`roles/${roleId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: [`roles/${roleId}`, 'login'] } // Cache for 30 seconds
       })
 
       return response

@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -45,6 +46,8 @@ interface PurchaseOrdersProps {
   couriers: Courier[]
   productCategories: ProductCategory[]
   serviceTypes: ServiceType[]
+  initialData?: DataTableApiResponse<PurchaseOrder> | null
+  permissions?: { canCreatePO: boolean; canViewPO: boolean; canEditPO: boolean; canDeletePO: boolean }
 }
 
 const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
@@ -53,17 +56,19 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
   businessLocations = [],
   couriers = [],
   productCategories = [],
-  serviceTypes = []
+  serviceTypes = [],
+  initialData = null,
+  permissions
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<PurchaseOrder> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
 
-  const [filterOptions, setFilterOptions] = useState<any>(() => {
+  const filterOptions = useMemo(() => {
     const filters = getInitialFilters(searchParams)
 
     // These are navigation params, not list filters.
@@ -71,7 +76,32 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
     delete filters.po_product_id
 
     return filters
-  })
+  }, [searchParams])
+
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    const openPoModal = searchParams.get('open_po_modal')
+    const poProductId = searchParams.get('po_product_id')
+
+    if (openPoModal) params.set('open_po_modal', openPoModal)
+    if (poProductId) params.set('po_product_id', poProductId)
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
@@ -80,18 +110,47 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
   const [isShipmentModalOpen, setIsShipmentModalOpen] = useState<boolean>(false)
   const [shipmentPurchaseOrderId, setShipmentPurchaseOrderId] = useState<string | undefined>(undefined)
   const [isShipmentViewOnly, setIsShipmentViewOnly] = useState<boolean>(false)
-  const [canCreate, setCanCreate] = useState<boolean>(false)
-  const [canEdit, setCanEdit] = useState<boolean>(false)
-  const [canDelete, setCanDelete] = useState<boolean>(false)
+  const canCreate = permissions?.canCreatePO ?? false
+  const canEdit = permissions?.canEditPO ?? false
+  const canDelete = permissions?.canDeletePO ?? false
 
   useEffect(() => {
-    setSearchValue(filterOptions.search || '')
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
-    // check permissions
-    hasPermission('Create Purchase Order').then(result => setCanCreate(result))
-    hasPermission('Update Purchase Order').then(result => setCanEdit(result))
-    hasPermission('Delete Purchase Order').then(result => setCanDelete(result))
+  // Set initial search value from filterOptions
+  useEffect(() => {
+    setSearchValue(filterOptions.search || '')
+    dispatch(setPageTitle('Purchase Orders'))
   }, [])
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   useEffect(() => {
     const openPoModal = searchParams.get('open_po_modal')
@@ -115,53 +174,11 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
     }
   }, [searchParams])
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
-
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
-
-        if (newOptions.page) {
-          delete newOptions.page
-        }
-
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    PurchaseOrderService.index(filterOptions)
-      .then(response => {
-        setApiResponse(response.data)
-        setIsLoading(false)
-      })
-      .catch(error => {
-        setIsLoading(false)
-        toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch purchase orders')
-      })
-  }
-
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Purchase Orders'))
-  }, [filterOptions])
-
   const handleDelete = async (id: string) => {
     try {
       await PurchaseOrderService.destroy(id)
       toast.success('Purchase order deleted successfully')
-      fetchData()
+      router.refresh()
     } catch (error: any) {
       toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete purchase order')
     }
@@ -406,7 +423,7 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
       const blob = await PurchaseOrderService.exportPurchaseOrders(filterOptions)
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
-      
+
       a.href = url
       const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
 
@@ -424,17 +441,17 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5 '>
       <div className='flex flex-row gap-2'>
-        <Button
-          variant='default'
-          size='sm'
-          className='h-7 bg-light text-bg hover:bg-light/90'
-          onClick={handleExport}
-        >
+        <Button variant='default' size='sm' className='h-7 bg-light text-bg hover:bg-light/90' onClick={handleExport}>
           <ExcelIcon className='w-4 h-4' />
           <span className='hidden min-[480px]:block ml-1'>Export</span>
         </Button>
         <div className='flex items-center gap-2 lg:flex-0 flex-1 '>
-          <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+          <TableSearch
+            value={searchValue}
+            onChange={onSearchChange}
+            placeholder='Search...'
+            className='lg:w-80 min-w-0'
+          />
           {hasActiveFilters() && (
             <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
               Clear
@@ -473,7 +490,7 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
             setPreselectedProductId(undefined)
           }
         }}
-        onSuccess={fetchData}
+        onSuccess={() => router.refresh()}
         purchaseOrderId={selectedPurchaseOrderId}
         preselectedProductId={preselectedProductId}
         vendors={vendors}
@@ -487,7 +504,7 @@ const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({
         <ShipmentArrivalModal
           open={isShipmentModalOpen}
           onOpenChange={setIsShipmentModalOpen}
-          onSuccess={fetchData}
+          onSuccess={() => router.refresh()}
           purchaseOrderId={shipmentPurchaseOrderId}
           warehouses={warehouses}
           businessLocations={businessLocations}

@@ -17,7 +17,7 @@ import InvoiceDocumentService from '@/services/api/invoices/invoice-documents.se
 import TableSearch from '@/components/erp/common/TableSearch'
 
 const InvoiceDocuments = ({ invoiceId }: { invoiceId: string }) => {
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Document> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, searchable_id: invoiceId })
   const fileInputRef = useRef<HTMLInputElement>(null)
