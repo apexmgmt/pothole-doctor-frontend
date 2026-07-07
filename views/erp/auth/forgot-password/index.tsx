@@ -32,7 +32,7 @@ const ForgotPassword: React.FC = () => {
       setApiError(null)
       await AuthService.forgotPassword(values.email)
 
-      const encrypted = encryptData({
+      const encrypted = await encryptData({
         type: 'forgot-password',
         email: values.email
       })
@@ -65,13 +65,13 @@ const ForgotPassword: React.FC = () => {
           error={errors.email}
         />
         <div className='mt-4'>
-          <CustomButton type='submit' variant='primary' fullWidth className='!py-2' disabled={isSubmitting}>
+          <CustomButton type='submit' variant='primary' fullWidth className='py-2!' disabled={isSubmitting}>
             {isSubmitting ? 'Sending...' : 'Reset Password'}
           </CustomButton>
         </div>
         <div className='mt-3'>
           <Link href='/erp/login' prefetch={true}>
-            <CustomButton type='button' variant='secondary' fullWidth className='!py-2'>
+            <CustomButton type='button' variant='secondary' fullWidth className='py-2!'>
               Login
             </CustomButton>
           </Link>

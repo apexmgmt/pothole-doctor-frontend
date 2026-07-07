@@ -4,13 +4,10 @@ import React, { useState, useEffect, useMemo } from 'react'
 
 import { useAppDispatch, useAppSelector } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import CookieService from '@/services/app/cookie.service'
-import { decryptData } from '@/utils/encryption'
 import { CountryWithStates, User } from '@/types'
 import ProfileHeader from './ProfileHeader'
 import ProfileTabs from './ProfileTabs'
 import GeneralTab from './GeneralTab'
-import PermissionsTab from './PermissionsTab'
 import SecurityTab from './SecurityTab'
 import { GeneralTabIcon, KeyIcon, SecurityIcon } from '@/public/icons'
 
@@ -25,28 +22,8 @@ const Profile: React.FC<ProfileProps> = ({ userData: propUser, countryWithStates
   const [activeTab, setActiveTab] = useState<string>('general')
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  // Get user from Redux, props, or cookies (in priority order)
-  const cookieUser: User | null = useMemo(() => {
-    if (reduxUser || propUser) return null
-
-    try {
-      const raw = CookieService.getSync('user')
-
-      if (!raw) return null
-      const decrypted = decryptData(raw)
-
-      if (typeof decrypted === 'string') {
-        return JSON.parse(decrypted) as User
-      }
-
-      return decrypted as User
-    } catch {
-      return null
-    }
-  }, [reduxUser, propUser])
-
-  // Priority: Redux user > Prop user > Cookie user
-  const userData = reduxUser || propUser || cookieUser
+  // Priority: Redux user > Prop user
+  const userData = reduxUser || propUser
 
   useEffect(() => {
     dispatch(setPageTitle('Profile'))

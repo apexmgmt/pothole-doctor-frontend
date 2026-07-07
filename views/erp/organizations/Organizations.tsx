@@ -22,7 +22,7 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { hasPermission } from '@/utils/role-permission'
 import AuthService from '@/services/api/auth.service'
-import { encryptData } from '@/utils/encryption'
+import { generateRedirectUrl } from '@/app/actions/auth'
 import { appUrl } from '@/utils/utility'
 import { toast } from 'sonner'
 import CreateOrEditOrganizationModal from '@/views/erp/organizations/CreateOrEditOrganizationModal'
@@ -157,15 +157,15 @@ const Organizations: React.FC = () => {
             permissions: response?.data?.permissions || []
           }
 
-          const encryptedData = encryptData(authData)
           const baseUrl = appUrl(response.data.domain ?? '')
-          const redirectUrl = `${baseUrl}/erp/redirecting?data=${encodeURIComponent(encryptedData)}`
 
-          const newWindow = window.open(redirectUrl, '_blank')
+          generateRedirectUrl(authData, response.data.domain ?? '').then(redirectUrl => {
+            const newWindow = window.open(redirectUrl, '_blank')
 
-          if (!newWindow) {
-            toast.error('Pop-up blocked. Please allow pop-ups for this site.')
-          }
+            if (!newWindow) {
+              toast.error('Pop-up blocked. Please allow pop-ups for this site.')
+            }
+          })
         })
         .catch(error => {
           toast.error(error?.message || 'Failed to impersonate user')

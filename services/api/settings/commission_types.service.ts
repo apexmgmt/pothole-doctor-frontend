@@ -1,5 +1,5 @@
 import { getApiUrl, isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import {
   COMMISSION_TYPES_ALL,
   COMMISSION_TYPES,
@@ -17,7 +17,7 @@ export default class CommissionTypeService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? COMMISSION_TYPES_TENANT : COMMISSION_TYPES) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -26,13 +26,7 @@ export default class CommissionTypeService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch commission-types')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -43,22 +37,16 @@ export default class CommissionTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? COMMISSION_TYPES_TENANT : COMMISSION_TYPES), {
+      const response = await handleRequest(API_URL + (isTenantApi ? COMMISSION_TYPES_TENANT : COMMISSION_TYPES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('commission-types')
       await revalidate('commission-types-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -69,7 +57,7 @@ export default class CommissionTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? COMMISSION_TYPES_TENANT : COMMISSION_TYPES) + commissionTypeId,
         {
           requiresAuth: true,
@@ -78,13 +66,7 @@ export default class CommissionTypeService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch commission types details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -95,7 +77,7 @@ export default class CommissionTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? COMMISSION_TYPES_TENANT : COMMISSION_TYPES) + commissionTypeId,
         {
           requiresAuth: true,
@@ -104,17 +86,11 @@ export default class CommissionTypeService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('commission-types')
       await revalidate(`commission-types/${commissionTypeId}`)
       await revalidate('commission-types-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -125,7 +101,7 @@ export default class CommissionTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? COMMISSION_TYPES_TENANT : COMMISSION_TYPES) + commissionTypeId,
         {
           requiresAuth: true,
@@ -133,17 +109,11 @@ export default class CommissionTypeService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete commission types')
-      }
-
       await revalidate('commission-types')
       await revalidate(`commission-types/${commissionTypeId}`)
       await revalidate('commission-types-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -154,7 +124,7 @@ export default class CommissionTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? COMMISSION_TYPES_ALL_TENANT : COMMISSION_TYPES_ALL),
         {
           requiresAuth: true,
@@ -163,13 +133,7 @@ export default class CommissionTypeService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch commission types')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

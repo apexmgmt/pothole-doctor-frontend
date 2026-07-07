@@ -15,7 +15,7 @@ type OtpRoutePayload = {
 }
 
 const OTP_LENGTH = 6
-const RESEND_COOLDOWN_SECONDS = 60
+const RESEND_COOL_DOWN_SECONDS = 60
 
 const OTPIndex: React.FC = () => {
   const router = useRouter()
@@ -23,7 +23,7 @@ const OTPIndex: React.FC = () => {
   const [otpDigits, setOtpDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''))
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResending, setIsResending] = useState(false)
-  const [resendCooldown, setResendCooldown] = useState(RESEND_COOLDOWN_SECONDS)
+  const [resendCoolDown, setResendCoolDown] = useState(RESEND_COOL_DOWN_SECONDS)
   const [email, setEmail] = useState('')
 
   const inputRefs = useRef<Array<HTMLInputElement | null>>([])
@@ -38,35 +38,39 @@ const OTPIndex: React.FC = () => {
       return
     }
 
-    try {
-      const decodedData = decodeURIComponent(encryptedData)
-      const parsed = decryptData(decodedData) as OtpRoutePayload
+    const processData = async () => {
+      try {
+        const decodedData = decodeURIComponent(encryptedData)
+        const parsed = (await decryptData(decodedData)) as OtpRoutePayload
 
-      if (!parsed?.email || parsed?.type !== 'forgot-password') {
+        if (!parsed?.email || parsed?.type !== 'forgot-password') {
+          toast.error('Invalid verification request')
+          router.replace('/erp/forgot-password')
+
+          return
+        }
+
+        setEmail(parsed.email)
+      } catch {
         toast.error('Invalid verification request')
         router.replace('/erp/forgot-password')
-
-        return
       }
-
-      setEmail(parsed.email)
-    } catch {
-      toast.error('Invalid verification request')
-      router.replace('/erp/forgot-password')
     }
+
+    processData()
   }, [searchParams, router])
 
   useEffect(() => {
-    if (resendCooldown <= 0) return
+    if (resendCoolDown <= 0) return
 
     const timer = window.setInterval(() => {
-      setResendCooldown(prev => (prev <= 1 ? 0 : prev - 1))
+      setResendCoolDown(prev => (prev <= 1 ? 0 : prev - 1))
     }, 1000)
 
     return () => {
       window.clearInterval(timer)
     }
-  }, [resendCooldown])
+  }, [resendCoolDown])
 
   const setAt = (index: number, rawValue: string) => {
     const value = rawValue.replace(/\D/g, '').slice(-1)
@@ -126,7 +130,7 @@ const OTPIndex: React.FC = () => {
         return
       }
 
-      const encrypted = encryptData({
+      const encrypted = await encryptData({
         type: 'reset-password',
         email,
         reset_token: resetToken
@@ -142,13 +146,13 @@ const OTPIndex: React.FC = () => {
   }
 
   const handleResend = async () => {
-    if (resendCooldown > 0 || !email) return
+    if (resendCoolDown > 0 || !email) return
 
     try {
       setIsResending(true)
       await AuthService.forgotPassword(email)
       setOtpDigits(Array(OTP_LENGTH).fill(''))
-      setResendCooldown(RESEND_COOLDOWN_SECONDS)
+      setResendCoolDown(RESEND_COOL_DOWN_SECONDS)
       toast.success('OTP resent successfully')
       inputRefs.current[0]?.focus()
     } catch (error: any) {
@@ -196,7 +200,7 @@ const OTPIndex: React.FC = () => {
         type='button'
         variant='primary'
         fullWidth
-        className='!py-2'
+        className='py-2!'
         onClick={handleSubmit}
         disabled={isSubmitting}
       >
@@ -209,9 +213,9 @@ const OTPIndex: React.FC = () => {
         fullWidth
         className='whitespace-nowrap mt-2'
         onClick={handleResend}
-        disabled={resendCooldown > 0 || isResending}
+        disabled={resendCoolDown > 0 || isResending}
       >
-        {isResending ? 'Resending...' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+        {isResending ? 'Resending...' : resendCoolDown > 0 ? `Resend in ${resendCoolDown}s` : 'Resend code'}
       </CustomButton>
       <Link
         href='/erp/login'

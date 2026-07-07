@@ -9,7 +9,7 @@ import {
   STAFFS_ALL_TENANT,
   STAFFS_TENANT
 } from '@/constants/api'
-import apiInterceptor from './api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { revalidate } from '../app/cache.service'
 
 export default class StaffService {
@@ -19,7 +19,7 @@ export default class StaffService {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -28,13 +28,7 @@ export default class StaffService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch staffs')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -45,22 +39,16 @@ export default class StaffService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('staffs')
       await revalidate('staffs-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -70,19 +58,13 @@ export default class StaffService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + staffId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + staffId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`staffs/${staffId}`] } // Cache for 60 seconds
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch staff details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -92,23 +74,17 @@ export default class StaffService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + staffId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + staffId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('staffs')
       await revalidate(`staffs/${staffId}`)
       await revalidate('staffs-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -118,22 +94,16 @@ export default class StaffService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + staffId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? STAFFS_TENANT : STAFFS) + staffId, {
         requiresAuth: true,
         method: 'DELETE'
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete staff')
-      }
 
       await revalidate('staffs')
       await revalidate(`staffs/${staffId}`)
       await revalidate('staffs-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -143,19 +113,13 @@ export default class StaffService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? STAFFS_ALL_TENANT : STAFFS_ALL), {
+      const response = await handleRequest(API_URL + (isTenantApi ? STAFFS_ALL_TENANT : STAFFS_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['staffs-all'] } // Cache for 1 hour
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch all staffs')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -165,7 +129,7 @@ export default class StaffService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? STAFF_CHANGE_PASSWORD_TENANT : STAFF_CHANGE_PASSWORD) + staffId,
         {
           requiresAuth: true,
@@ -174,13 +138,7 @@ export default class StaffService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

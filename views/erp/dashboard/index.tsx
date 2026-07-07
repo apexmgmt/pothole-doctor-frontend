@@ -5,8 +5,8 @@ import { toast } from 'sonner'
 
 import AuthService from '@/services/api/auth.service'
 import DashboardService from '@/services/api/dashboard.service'
-import { encryptData } from '@/utils/encryption'
 import { appUrl, isTenant } from '@/utils/utility'
+import { generateRedirectUrl } from '@/app/actions/auth'
 
 import MainAppDashboard from './components/MainAppDashboard'
 import TenantDashboardView from './components/TenantDashboardView'
@@ -49,9 +49,8 @@ const DashboardIndex = () => {
         permissions: response?.data?.permissions ?? []
       }
 
-      const encryptedData = encryptData(authData)
       const baseUrl = appUrl(response.data.domain ?? '')
-      const redirectUrl = `${baseUrl}/erp/redirecting?data=${encodeURIComponent(encryptedData)}`
+      const redirectUrl = await generateRedirectUrl(authData, response.data.domain ?? '')
 
       const newWindow = window.open(redirectUrl, '_blank')
 

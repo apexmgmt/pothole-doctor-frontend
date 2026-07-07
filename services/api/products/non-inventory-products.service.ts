@@ -1,5 +1,5 @@
 import { getApiUrl, isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import {
   API_URL,
   NON_INVENTORY_PRODUCTS,
@@ -35,7 +35,7 @@ export default class NonInventoryProductService {
       })
       const queryParams = params.toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL +
           (isTenantApi ? NON_INVENTORY_PRODUCTS_TENANT : NON_INVENTORY_PRODUCTS) +
           (queryParams ? `?${queryParams}` : ''),
@@ -46,13 +46,7 @@ export default class NonInventoryProductService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch non-inventory products')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -63,19 +57,13 @@ export default class NonInventoryProductService {
     try {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + NON_INVENTORY_PRODUCTS_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET'
         }
       )
-
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to export non-inventory products')
-      }
 
       return await response.blob()
     } catch (error) {
@@ -88,7 +76,7 @@ export default class NonInventoryProductService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_TENANT : NON_INVENTORY_PRODUCTS),
         {
           requiresAuth: true,
@@ -97,16 +85,10 @@ export default class NonInventoryProductService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('non-inventory-products')
       await revalidate('non-inventory-products-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -117,7 +99,7 @@ export default class NonInventoryProductService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_TENANT : NON_INVENTORY_PRODUCTS) + productId,
         {
           requiresAuth: true,
@@ -126,13 +108,7 @@ export default class NonInventoryProductService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch non-inventory product details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -143,7 +119,7 @@ export default class NonInventoryProductService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_TENANT : NON_INVENTORY_PRODUCTS) + productId,
         {
           requiresAuth: true,
@@ -152,17 +128,11 @@ export default class NonInventoryProductService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('non-inventory-products')
       await revalidate(`non-inventory-products/${productId}`)
       await revalidate('non-inventory-products-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -178,7 +148,7 @@ export default class NonInventoryProductService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_BULK_EDIT_TENANT : NON_INVENTORY_PRODUCTS_BULK_EDIT),
         {
           requiresAuth: true,
@@ -187,16 +157,10 @@ export default class NonInventoryProductService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('non-inventory-products')
       await revalidate('non-inventory-products-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -212,7 +176,7 @@ export default class NonInventoryProductService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_BULK_UPDATE_TENANT : NON_INVENTORY_PRODUCTS_BULK_UPDATE),
         {
           requiresAuth: true,
@@ -221,16 +185,10 @@ export default class NonInventoryProductService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('non-inventory-products')
       await revalidate('non-inventory-products-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -246,7 +204,7 @@ export default class NonInventoryProductService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_BULK_QR_CODE_TENANT : NON_INVENTORY_PRODUCTS_BULK_QR_CODE),
         {
           requiresAuth: true,
@@ -255,16 +213,10 @@ export default class NonInventoryProductService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('non-inventory-products')
       await revalidate('non-inventory-products-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -275,7 +227,7 @@ export default class NonInventoryProductService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_TENANT : NON_INVENTORY_PRODUCTS) + productId,
         {
           requiresAuth: true,
@@ -283,17 +235,11 @@ export default class NonInventoryProductService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete non-inventory product')
-      }
-
       await revalidate('non-inventory-products')
       await revalidate(`non-inventory-products/${productId}`)
       await revalidate('non-inventory-products-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -309,7 +255,7 @@ export default class NonInventoryProductService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_BULK_DELETE_TENANT : NON_INVENTORY_PRODUCTS_BULK_DELETE),
         {
           requiresAuth: true,
@@ -318,16 +264,10 @@ export default class NonInventoryProductService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete non-inventory products')
-      }
-
       await revalidate('non-inventory-products')
       await revalidate('non-inventory-products-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -338,7 +278,7 @@ export default class NonInventoryProductService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_TENANT : NON_INVENTORY_PRODUCTS) + productId + '/restore',
         {
           requiresAuth: true,
@@ -346,17 +286,11 @@ export default class NonInventoryProductService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to restore non-inventory product')
-      }
-
       await revalidate('non-inventory-products')
       await revalidate(`non-inventory-products/${productId}`)
       await revalidate('non-inventory-products-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -367,7 +301,7 @@ export default class NonInventoryProductService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? NON_INVENTORY_PRODUCTS_ALL_TENANT : NON_INVENTORY_PRODUCTS_ALL),
         {
           requiresAuth: true,
@@ -376,13 +310,7 @@ export default class NonInventoryProductService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch non-inventory products')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

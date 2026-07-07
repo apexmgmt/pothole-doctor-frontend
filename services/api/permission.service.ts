@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from './api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, PERMISSIONS, PERMISSIONS_TENANT } from '@/constants/api'
 
 export default class PermissionService {
@@ -8,7 +8,7 @@ export default class PermissionService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PERMISSIONS_TENANT : PERMISSIONS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -17,13 +17,7 @@ export default class PermissionService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch permissions')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

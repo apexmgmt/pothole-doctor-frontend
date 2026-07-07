@@ -1,12 +1,12 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
 import { useAppSelector, useAppDispatch } from '@/lib/hooks'
 import CookieService from '@/services/app/cookie.service'
-import { decryptData } from '@/utils/encryption'
+import { CookieKeys } from '@/constants/cookies'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -31,35 +31,21 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
   const reduxUser = useAppSelector(state => state.auth.user) as User | null
   const [open, setOpen] = useState(false)
 
-  const cookieUser: User | null = useMemo(() => {
-    const raw = CookieService.get('user')
-
-    if (!raw) return null
-
-    try {
-      const decrypted = decryptData(raw)
-
-      if (typeof decrypted === 'string') {
-        return JSON.parse(decrypted) as User
-      }
-
-      return decrypted as User
-    } catch {
-      return null
-    }
-  }, [reduxUser, propUser])
-
-  const effectiveUser: User | null = reduxUser || propUser || cookieUser || null
+  const effectiveUser: User | null = reduxUser || propUser || null
 
   const firstName = effectiveUser?.first_name ?? ''
   const lastName = effectiveUser?.last_name ?? ''
-  const fullName = [firstName, lastName].filter(Boolean).join(' ') || (effectiveUser?.user_type === 'contractor' || effectiveUser?.user_type === 'referral' ? effectiveUser?.userable?.company?.name : undefined) || 'User'
+
+  const fullName =
+    [firstName, lastName].filter(Boolean).join(' ') ||
+    (effectiveUser?.user_type === 'contractor' || effectiveUser?.user_type === 'referral'
+      ? effectiveUser?.userable?.company?.name
+      : undefined) ||
+    'User'
 
   const email = effectiveUser?.email ?? '---'
 
-  const avatar =
-    generateFileUrl(effectiveUser?.userable?.profile_picture) ||
-    '/images/avatar.webp'
+  const avatar = generateFileUrl(effectiveUser?.userable?.profile_picture) || '/images/avatar.webp'
 
   const initials = fullName
     .split(' ')
@@ -77,26 +63,26 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ user: propUser }) => {
     setOpen(false)
     AuthService.logout()
       .then(response => {
-        CookieService.delete('access_token')
-        CookieService.delete('refresh_token')
-        CookieService.delete('token_type')
-        CookieService.delete('user')
-        CookieService.delete('permissions_1')
-        CookieService.delete('permissions_2')
-        CookieService.delete('permissions_3')
-        CookieService.delete('roles')
+        CookieService.delete(CookieKeys.ACCESS_TOKEN)
+        CookieService.delete(CookieKeys.REFRESH_TOKEN)
+        CookieService.delete(CookieKeys.TOKEN_TYPE)
+        CookieService.delete(CookieKeys.USER)
+        CookieService.delete(CookieKeys.PERMISSIONS_1)
+        CookieService.delete(CookieKeys.PERMISSIONS_2)
+        CookieService.delete(CookieKeys.PERMISSIONS_3)
+        CookieService.delete(CookieKeys.ROLES)
         dispatch(logoutUserSuccess())
         router.push('/erp/login')
       })
       .catch(error => {
-        CookieService.delete('access_token')
-        CookieService.delete('refresh_token')
-        CookieService.delete('token_type')
-        CookieService.delete('user')
-        CookieService.delete('permissions_1')
-        CookieService.delete('permissions_2')
-        CookieService.delete('permissions_3')
-        CookieService.delete('roles')
+        CookieService.delete(CookieKeys.ACCESS_TOKEN)
+        CookieService.delete(CookieKeys.REFRESH_TOKEN)
+        CookieService.delete(CookieKeys.TOKEN_TYPE)
+        CookieService.delete(CookieKeys.USER)
+        CookieService.delete(CookieKeys.PERMISSIONS_1)
+        CookieService.delete(CookieKeys.PERMISSIONS_2)
+        CookieService.delete(CookieKeys.PERMISSIONS_3)
+        CookieService.delete(CookieKeys.ROLES)
         dispatch(logoutUserSuccess())
         router.push('/erp/login')
       })

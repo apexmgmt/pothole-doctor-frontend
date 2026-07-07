@@ -1,5 +1,5 @@
 import { API_URL, SERVICE_TEMPLATES, SERVICE_TEMPLATES_ALL, SERVICE_TEMPLATES_RESTORE } from '@/constants/api'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { ServiceTemplatePayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -15,19 +15,13 @@ export default class ServiceTemplateService {
     try {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(API_URL + SERVICE_TEMPLATES + (queryParams ? `?${queryParams}` : ''), {
+      const response = await handleRequest(API_URL + SERVICE_TEMPLATES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['service-templates', 'login'] } // Cache for 60 seconds
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch service templates')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -38,21 +32,15 @@ export default class ServiceTemplateService {
    */
   static store = async (payload: ServiceTemplatePayload) => {
     try {
-      const response = await apiInterceptor(API_URL + SERVICE_TEMPLATES, {
+      const response = await handleRequest(API_URL + SERVICE_TEMPLATES, {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('service-templates')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -67,18 +55,12 @@ export default class ServiceTemplateService {
    */
   static show = async (serviceTemplateId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + SERVICE_TEMPLATES + serviceTemplateId, {
+      const response = await handleRequest(API_URL + SERVICE_TEMPLATES + serviceTemplateId, {
         requiresAuth: true,
         method: 'GET'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch service template')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -94,21 +76,15 @@ export default class ServiceTemplateService {
    */
   static update = async (serviceTemplateId: string, payload: ServiceTemplatePayload) => {
     try {
-      const response = await apiInterceptor(API_URL + SERVICE_TEMPLATES + serviceTemplateId, {
+      const response = await handleRequest(API_URL + SERVICE_TEMPLATES + serviceTemplateId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('service-templates')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -123,20 +99,14 @@ export default class ServiceTemplateService {
    */
   static destroy = async (serviceTemplateId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + SERVICE_TEMPLATES + serviceTemplateId, {
+      const response = await handleRequest(API_URL + SERVICE_TEMPLATES + serviceTemplateId, {
         requiresAuth: true,
         method: 'DELETE'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete service template')
-      }
-
       await revalidate('service-templates')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -151,20 +121,14 @@ export default class ServiceTemplateService {
    */
   static restore = async (serviceTemplateId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + SERVICE_TEMPLATES_RESTORE(serviceTemplateId), {
+      const response = await handleRequest(API_URL + SERVICE_TEMPLATES_RESTORE(serviceTemplateId), {
         requiresAuth: true,
         method: 'POST'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to restore service template')
-      }
-
       await revalidate('service-templates')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -178,18 +142,12 @@ export default class ServiceTemplateService {
    */
   static getAll = async () => {
     try {
-      const response = await apiInterceptor(API_URL + SERVICE_TEMPLATES_ALL, {
+      const response = await handleRequest(API_URL + SERVICE_TEMPLATES_ALL, {
         requiresAuth: true,
         method: 'GET'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch service templates')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

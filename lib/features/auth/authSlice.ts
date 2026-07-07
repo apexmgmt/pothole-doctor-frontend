@@ -1,7 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-
-import { decryptData, encryptData } from '@/utils/encryption'
-import CookieService from '@/services/app/cookie.service'
 import { User } from '@/types'
 
 export interface AuthState {
@@ -9,41 +6,8 @@ export interface AuthState {
   refresh: boolean
 }
 
-// Use sync cookie APIs in reducers/initial state (reducers can't be async)
-// Return null on server to avoid SSR crashes
-const getUserFromCookie = (): User | null => {
-  try {
-    // If running on server, skip
-    if (typeof window === 'undefined') return null
-
-    const userCookie = CookieService.getSync('user')
-
-    if (!userCookie) return null
-
-    const decrypted = decryptData(userCookie)
-
-    if (process.env.NODE_ENV === 'development') {
-      if (typeof decrypted === 'string') {
-        try {
-          return JSON.parse(decrypted) as User
-        } catch {
-          return decrypted as unknown as User
-        }
-      }
-
-      return decrypted as User
-    }
-
-    return decrypted as User
-  } catch (error) {
-    console.error('Error reading user cookie', error)
-
-    return null
-  }
-}
-
 const initialState: AuthState = {
-  user: getUserFromCookie(),
+  user: null, // Hydrated from server
   refresh: true
 }
 
@@ -53,23 +17,9 @@ const authSlice = createSlice({
   reducers: {
     logoutUserSuccess: state => {
       state.user = null
-
-      // remove cookie on logout (client only)
-      try {
-        CookieService.deleteSync('user')
-      } catch {
-        /* noop */
-      }
     },
     setUserData: (state, action: PayloadAction<User | null>) => {
       state.user = action.payload
-
-      try {
-        // store as JSON string; encryption/decryption handled elsewhere
-        CookieService.storeSync('user', encryptData(action.payload))
-      } catch {
-        console.error('Failed to set user cookie')
-      }
     },
     setRefreshData: (state, action: PayloadAction<boolean>) => {
       state.refresh = action.payload

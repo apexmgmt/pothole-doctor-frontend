@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, CLIENT_EMAILS, CLIENT_EMAILS_TENANT } from '@/constants/api'
 import { ClientEmailPayload } from '@/types'
 
@@ -10,7 +10,7 @@ export default class ClientEmailService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? CLIENT_EMAILS_TENANT : CLIENT_EMAILS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -18,13 +18,7 @@ export default class ClientEmailService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch client emails')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -35,19 +29,13 @@ export default class ClientEmailService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_EMAILS_TENANT : CLIENT_EMAILS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? CLIENT_EMAILS_TENANT : CLIENT_EMAILS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to send email')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -58,7 +46,7 @@ export default class ClientEmailService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? CLIENT_EMAILS_TENANT : CLIENT_EMAILS) + clientEmailId,
         {
           requiresAuth: true,
@@ -66,13 +54,7 @@ export default class ClientEmailService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch client email details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -83,7 +65,7 @@ export default class ClientEmailService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? CLIENT_EMAILS_TENANT : CLIENT_EMAILS) + clientEmailId,
         {
           requiresAuth: true,
@@ -92,13 +74,7 @@ export default class ClientEmailService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to update client email')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -109,7 +85,7 @@ export default class ClientEmailService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? CLIENT_EMAILS_TENANT : CLIENT_EMAILS) + clientEmailId,
         {
           requiresAuth: true,
@@ -117,13 +93,7 @@ export default class ClientEmailService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete client email')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

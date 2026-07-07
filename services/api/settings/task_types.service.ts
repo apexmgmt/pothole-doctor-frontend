@@ -1,5 +1,5 @@
 import { getApiUrl, isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, TASK_TYPES, TASK_TYPES_ALL, TASK_TYPES_ALL_TENANT, TASK_TYPES_TENANT } from '@/constants/api'
 import { TaskTypePayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
@@ -11,7 +11,7 @@ export default class TaskTypeService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -20,13 +20,7 @@ export default class TaskTypeService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch task types')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -37,22 +31,16 @@ export default class TaskTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES), {
+      const response = await handleRequest(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('task-types')
       await revalidate('task-types-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -63,19 +51,13 @@ export default class TaskTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`task-types/${taskTypeId}`] } // Cache for 60 seconds
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch task type details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -86,23 +68,17 @@ export default class TaskTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('task-types')
       await revalidate(`task-types/${taskTypeId}`)
       await revalidate('task-types-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -113,22 +89,16 @@ export default class TaskTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId, {
         requiresAuth: true,
         method: 'DELETE'
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete task type')
-      }
 
       await revalidate('task-types')
       await revalidate(`task-types/${taskTypeId}`)
       await revalidate('task-types-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -139,7 +109,7 @@ export default class TaskTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId + '/restore',
         {
           requiresAuth: true,
@@ -147,17 +117,11 @@ export default class TaskTypeService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to restore task type')
-      }
-
       await revalidate('task-types')
       await revalidate(`task-types/${taskTypeId}`)
       await revalidate('task-types-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -168,19 +132,13 @@ export default class TaskTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? TASK_TYPES_ALL_TENANT : TASK_TYPES_ALL), {
+      const response = await handleRequest(API_URL + (isTenantApi ? TASK_TYPES_ALL_TENANT : TASK_TYPES_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['task-types-all'] } // Cache for 60 seconds
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch all task types')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

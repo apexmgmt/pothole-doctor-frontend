@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, VENDOR_PICKUP_ADDRESSES, VENDOR_PICKUP_ADDRESSES_TENANT } from '@/constants/api'
 import { VendorPickupAddressPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
@@ -11,7 +11,7 @@ export default class VendorPickupAddressService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL +
           (isTenantApi ? VENDOR_PICKUP_ADDRESSES_TENANT : VENDOR_PICKUP_ADDRESSES) +
           (queryParams ? `?${queryParams}` : ''),
@@ -22,13 +22,7 @@ export default class VendorPickupAddressService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch vendor pickup addresses')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -39,7 +33,7 @@ export default class VendorPickupAddressService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_PICKUP_ADDRESSES_TENANT : VENDOR_PICKUP_ADDRESSES),
         {
           requiresAuth: true,
@@ -48,15 +42,9 @@ export default class VendorPickupAddressService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('vendor-pickup-addresses')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -67,7 +55,7 @@ export default class VendorPickupAddressService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_PICKUP_ADDRESSES_TENANT : VENDOR_PICKUP_ADDRESSES) + vendorPickupAddressId,
         {
           requiresAuth: true,
@@ -76,13 +64,7 @@ export default class VendorPickupAddressService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch vendor pickup address details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -93,7 +75,7 @@ export default class VendorPickupAddressService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_PICKUP_ADDRESSES_TENANT : VENDOR_PICKUP_ADDRESSES) + vendorPickupAddressId,
         {
           requiresAuth: true,
@@ -102,16 +84,10 @@ export default class VendorPickupAddressService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('vendor-pickup-addresses')
       await revalidate(`vendor-pickup-addresses/${vendorPickupAddressId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -122,7 +98,7 @@ export default class VendorPickupAddressService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_PICKUP_ADDRESSES_TENANT : VENDOR_PICKUP_ADDRESSES) + vendorPickupAddressId,
         {
           requiresAuth: true,
@@ -130,16 +106,10 @@ export default class VendorPickupAddressService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete vendor pickup address')
-      }
-
       await revalidate('vendor-pickup-addresses')
       await revalidate(`vendor-pickup-addresses/${vendorPickupAddressId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

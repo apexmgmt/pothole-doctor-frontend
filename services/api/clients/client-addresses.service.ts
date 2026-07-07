@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, CLIENT_ADDRESSES, CLIENT_ADDRESSES_TENANT } from '@/constants/api'
 import { ClientAddressPayload } from '@/types'
 
@@ -10,18 +10,15 @@ export default class ClientAddressService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_ADDRESSES_TENANT : CLIENT_ADDRESSES) + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET'
-      })
+      const response = await handleRequest(
+        API_URL + (isTenantApi ? CLIENT_ADDRESSES_TENANT : CLIENT_ADDRESSES) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch client addresses')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -32,19 +29,13 @@ export default class ClientAddressService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_ADDRESSES_TENANT : CLIENT_ADDRESSES), {
+      const response = await handleRequest(API_URL + (isTenantApi ? CLIENT_ADDRESSES_TENANT : CLIENT_ADDRESSES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -55,18 +46,15 @@ export default class ClientAddressService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_ADDRESSES_TENANT : CLIENT_ADDRESSES) + clientAddressId, {
-        requiresAuth: true,
-        method: 'GET'
-      })
+      const response = await handleRequest(
+        API_URL + (isTenantApi ? CLIENT_ADDRESSES_TENANT : CLIENT_ADDRESSES) + clientAddressId,
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch client address details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -77,19 +65,16 @@ export default class ClientAddressService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_ADDRESSES_TENANT : CLIENT_ADDRESSES) + clientAddressId, {
-        requiresAuth: true,
-        method: 'PUT',
-        body: JSON.stringify(payload)
-      })
+      const response = await handleRequest(
+        API_URL + (isTenantApi ? CLIENT_ADDRESSES_TENANT : CLIENT_ADDRESSES) + clientAddressId,
+        {
+          requiresAuth: true,
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        }
+      )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -100,18 +85,15 @@ export default class ClientAddressService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_ADDRESSES_TENANT : CLIENT_ADDRESSES) + clientAddressId, {
-        requiresAuth: true,
-        method: 'DELETE'
-      })
+      const response = await handleRequest(
+        API_URL + (isTenantApi ? CLIENT_ADDRESSES_TENANT : CLIENT_ADDRESSES) + clientAddressId,
+        {
+          requiresAuth: true,
+          method: 'DELETE'
+        }
+      )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete client address')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

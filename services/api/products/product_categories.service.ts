@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import {
   API_URL,
   PRODUCT_CATEGORIES,
@@ -17,7 +17,7 @@ export default class ProductCategoryService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL +
           (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES) +
           (queryParams ? `?${queryParams}` : ''),
@@ -28,13 +28,7 @@ export default class ProductCategoryService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch product categories')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -45,22 +39,16 @@ export default class ProductCategoryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES), {
+      const response = await handleRequest(API_URL + (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('product-categories')
       await revalidate('product-categories-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -71,7 +59,7 @@ export default class ProductCategoryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES) + productCategoryId,
         {
           requiresAuth: true,
@@ -80,13 +68,7 @@ export default class ProductCategoryService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch product category details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -97,7 +79,7 @@ export default class ProductCategoryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES) + productCategoryId,
         {
           requiresAuth: true,
@@ -106,17 +88,11 @@ export default class ProductCategoryService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('product-categories')
       await revalidate(`product-categories/${productCategoryId}`)
       await revalidate('product-categories-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -127,7 +103,7 @@ export default class ProductCategoryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES) + productCategoryId,
         {
           requiresAuth: true,
@@ -135,17 +111,11 @@ export default class ProductCategoryService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete product category')
-      }
-
       await revalidate('product-categories')
       await revalidate(`product-categories/${productCategoryId}`)
       await revalidate('product-categories-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -156,7 +126,7 @@ export default class ProductCategoryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PRODUCT_CATEGORIES_ALL_TENANT : PRODUCT_CATEGORIES_ALL),
         {
           requiresAuth: true,
@@ -165,13 +135,7 @@ export default class ProductCategoryService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch product categories')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

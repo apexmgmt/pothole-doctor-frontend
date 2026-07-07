@@ -2,13 +2,82 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 import { isPublicRoute, isUnauthenticatedRoute } from './constants/routePermission'
-
-// import AuthService from './services/api/auth.service'
+import { CookieKeys } from './constants/cookies'
 import { getPermissionsFromCookies, hasRoutePermission } from './utils/role-permission'
 import { checkSubdomain } from './utils/utility'
 import SubdomainService from './services/api/subdomain.service'
+import { encryptRedirectUrl } from './utils/encryption'
+
+const getRedirectRoute = (): string => '/erp'
+
+interface CacheEntry {
+  data: any
+  timestamp: number
+}
+
+const globalForProxy = globalThis as unknown as {
+  authRefreshCache?: Map<string, CacheEntry>
+  authRefreshLock?: Map<string, Promise<any>>
+}
+
+const cache = globalForProxy.authRefreshCache || new Map<string, CacheEntry>()
+const lock = globalForProxy.authRefreshLock || new Map<string, Promise<any>>()
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForProxy.authRefreshCache = cache
+  globalForProxy.authRefreshLock = lock
+}
+
+const CACHE_DURATION = 60000
+
+// Copy cookies
+const copyCookies = (from: NextResponse, to: NextResponse) => {
+  from.cookies.getAll().forEach(cookie => {
+    to.cookies.set(cookie.name, cookie.value, {
+      httpOnly: cookie.httpOnly,
+      path: cookie.path
+    })
+  })
+}
+
+// Redirect user by permissions
+const redirectToUserRoute = (req: NextRequest, baseRes?: NextResponse) => {
+  const url = req.nextUrl.clone()
+
+  url.pathname = getRedirectRoute()
+  const redirectRes = NextResponse.redirect(url)
+
+  if (baseRes) {
+    copyCookies(baseRes, redirectRes)
+  }
+
+  return redirectRes
+}
+
+// Clear cookies
+const clearAuthCookies = (res: NextResponse) => {
+  ;[CookieKeys.ACCESS_TOKEN, CookieKeys.REFRESH_TOKEN, CookieKeys.TOKEN_TYPE].forEach(cookie =>
+    res.cookies.delete(cookie)
+  )
+}
+
+function isTokenExpired(token: string) {
+  try {
+    const payloadBase64 = token.split('.')[1]
+    const decodedJson = atob(payloadBase64)
+    const decoded = JSON.parse(decodedJson)
+    const exp = decoded.exp
+    const now = Date.now() / 1000
+
+    // Add 10 seconds of buffer
+    return exp < now + 10
+  } catch {
+    return true // if we can't parse it, treat it as expired
+  }
+}
 
 export async function proxy(req: NextRequest) {
+  const url = new URL(req.url)
   const { pathname } = req.nextUrl
 
   // Skip domain validation for error pages to prevent redirect loops
@@ -19,38 +88,39 @@ export async function proxy(req: NextRequest) {
   // Handle www redirect - strip www from any domain (except localhost)
   const hostname = req.headers.get('host') || req.nextUrl.hostname
 
-  // If hostname starts with 'www.', redirect to non-www version
   if (hostname.startsWith('www.') && !hostname.includes('localhost')) {
     const newUrl = req.nextUrl.clone()
-    const newHostname = hostname.replace(/^www\./, '')
 
-    // Update the URL with the new hostname (without www)
-    newUrl.host = newHostname
+    newUrl.host = hostname.replace(/^www\./, '')
 
-    return NextResponse.redirect(newUrl, 301) // 301 permanent redirect
+    return NextResponse.redirect(newUrl, 301)
   }
 
   // Check domain first and get domain info
   const domainInfo: any = checkSubdomain(req)
-
   let tenantId = ''
 
-  // if domain is subdomain and domain info has subdomin then need to verify the subdomain
+  console.log('[PROXY]: Domain Info: ', domainInfo)
+
   if (domainInfo.isSubdomain && domainInfo.subdomain) {
-    // if it is a subdomain then need to verify its existence
     try {
       const res = await SubdomainService.verification(domainInfo.subdomain)
 
-      if (res.status !== 'success') {
+      console.log('[PROXY]: Subdomain Verification Response: ', res)
+
+      // If handleRequest didn't throw an error, the subdomain is valid.
+      // Some APIs might return success: true instead of status: 'success'
+      if (res.status === 'error' || res.status === 'fail' || res.success === false) {
         const notFoundUrl = req.nextUrl.clone()
 
         notFoundUrl.pathname = '/invalid-subdomain'
 
         return NextResponse.redirect(notFoundUrl)
       } else {
-        tenantId = res?.data?.tenant_id || ''
+        tenantId = res?.data?.tenant_id || res?.tenant_id || ''
       }
     } catch (error) {
+      console.log('[PROXY]: Subdomain Verification Error: ', error)
       const notFoundUrl = req.nextUrl.clone()
 
       notFoundUrl.pathname = '/invalid-subdomain'
@@ -59,55 +129,166 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  let accessToken = req.cookies.get('access_token')?.value
-  let refreshToken = req.cookies.get('refresh_token')?.value
-  const tokenType = req.cookies.get('token_type')?.value || 'Bearer'
+  const isUnauth = isUnauthenticatedRoute(url.pathname)
+  const requiresAuth = !isPublicRoute(url.pathname) && !isUnauth
 
-  // If user tries to access unauthenticated routes and already has tokens, redirect to /erp
-  if (isUnauthenticatedRoute(pathname) && (accessToken || refreshToken)) {
-    const erpUrl = req.nextUrl.clone()
+  let accessToken = req.cookies.get(CookieKeys.ACCESS_TOKEN)?.value
+  let refreshToken = req.cookies.get(CookieKeys.REFRESH_TOKEN)?.value
 
-    erpUrl.pathname = '/erp'
-
-    return NextResponse.redirect(erpUrl)
+  if (accessToken && isTokenExpired(accessToken)) {
+    accessToken = undefined
   }
 
-  // if pathname is public or unauthenticated then no need to check further for tokens
-  if (isPublicRoute(pathname) || isUnauthenticatedRoute(pathname)) {
-    const response = NextResponse.next()
+  // If route requires login and user has no tokens
+  if (requiresAuth && !accessToken && !refreshToken) {
+    const loginUrl = req.nextUrl.clone()
 
-    // Set tenant cookie if subdomain was verified
-    if (tenantId) {
-      response.cookies.set({
-        name: 'tenant',
-        value: tenantId,
-        httpOnly: false,
-        path: '/'
+    loginUrl.pathname = '/erp/login'
+    const encryptedRedirect = await encryptRedirectUrl(pathname)
+
+    loginUrl.searchParams.set('redirect', encryptedRedirect || pathname)
+
+    return NextResponse.redirect(loginUrl)
+  }
+
+  /* Refresh token flow */
+  if (refreshToken && !accessToken) {
+    try {
+      const apiUrl = process.env.API_URL || 'http://localhost:8585/api'
+      const isTenantApi = !!tenantId
+
+      const refreshUrl = isTenantApi ? `${apiUrl}/v1/tenant/auth/refresh` : `${apiUrl}/v1/auth/refresh`
+
+      const now = Date.now()
+      let payload: any
+
+      const cached = cache.get(refreshToken)
+
+      if (cached && now - cached.timestamp < CACHE_DURATION) {
+        payload = cached.data
+      } else {
+        const existing = lock.get(refreshToken)
+
+        if (existing) {
+          payload = await existing
+        } else {
+          const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+
+          if (tenantId) headers['tenant'] = tenantId
+
+          const promise = fetch(refreshUrl, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ refresh_token: refreshToken })
+          }).then(async res => {
+            if (!res.ok) throw new Error('Refresh failed')
+            const json = await res.json()
+
+            return json.data || json
+          })
+
+          lock.set(refreshToken, promise)
+
+          try {
+            payload = await promise
+            cache.set(refreshToken, { data: payload, timestamp: Date.now() })
+
+            // Cleanup
+            for (const [key, entry] of cache.entries()) {
+              if (Date.now() - entry.timestamp > CACHE_DURATION) {
+                cache.delete(key)
+              }
+            }
+          } finally {
+            lock.delete(refreshToken)
+          }
+        }
+      }
+
+      const newAccess = payload?.access_token
+      const newRefresh = payload?.refresh_token
+
+      if (!newAccess) throw new Error('No access token returned')
+
+      req.cookies.set(CookieKeys.ACCESS_TOKEN, newAccess)
+      if (newRefresh) req.cookies.set(CookieKeys.REFRESH_TOKEN, newRefresh)
+
+      const requestHeaders = new Headers(req.headers)
+
+      requestHeaders.set('cookie', req.cookies.toString())
+      if (tenantId) requestHeaders.set('tenant', tenantId)
+
+      let nextRes = NextResponse.next({
+        request: {
+          headers: requestHeaders
+        }
       })
-    }
 
-    return response
+      if (isUnauth) {
+        nextRes = redirectToUserRoute(req, nextRes)
+      }
+
+      nextRes.cookies.set(CookieKeys.ACCESS_TOKEN, newAccess, {
+        maxAge: payload?.expires_in || 600,
+        path: '/',
+        httpOnly: false
+      })
+
+      if (newRefresh) {
+        nextRes.cookies.set(CookieKeys.REFRESH_TOKEN, newRefresh, {
+          maxAge: Number(process.env.REFRESH_TOKEN_DURATION || 864000),
+          path: '/',
+          httpOnly: false
+        })
+      }
+
+      if (payload?.token_type) {
+        nextRes.cookies.set(CookieKeys.TOKEN_TYPE, payload.token_type, { path: '/', httpOnly: false })
+      }
+
+      if (tenantId) {
+        nextRes.cookies.set(CookieKeys.TENANT, tenantId, { path: '/', httpOnly: false })
+      }
+
+      return nextRes
+    } catch (error) {
+      const loginUrl = req.nextUrl.clone()
+
+      loginUrl.pathname = '/erp/login'
+      const encryptedRedirect = await encryptRedirectUrl(pathname)
+
+      loginUrl.searchParams.set('redirect', encryptedRedirect || pathname)
+      const redirectRes = NextResponse.redirect(loginUrl)
+
+      clearAuthCookies(redirectRes)
+
+      return redirectRes
+    }
   }
 
-  // if access token is available
+  /* Access token flow */
   if (accessToken) {
-    // Check permission for the route
-    const permissions = await getPermissionsFromCookies(req)
+    if (isUnauth) {
+      return redirectToUserRoute(req)
+    }
 
-    if (!hasRoutePermission(pathname, permissions)) {
-      const forbiddenUrl = req.nextUrl.clone()
+    if (requiresAuth) {
+      const permissions = await getPermissionsFromCookies(req)
 
-      forbiddenUrl.pathname = '/erp' // or '/403' for a forbidden page
+      if (!hasRoutePermission(pathname, permissions)) {
+        const forbiddenUrl = req.nextUrl.clone()
 
-      return NextResponse.redirect(forbiddenUrl)
+        forbiddenUrl.pathname = '/erp'
+
+        return NextResponse.redirect(forbiddenUrl)
+      }
     }
 
     const response = NextResponse.next()
 
-    // Set tenant cookie if subdomain was verified
     if (tenantId) {
       response.cookies.set({
-        name: 'tenant',
+        name: CookieKeys.TENANT,
         value: tenantId,
         httpOnly: false,
         path: '/'
@@ -117,53 +298,18 @@ export async function proxy(req: NextRequest) {
     return response
   }
 
-  /* Refresh token flow — pass through and let the client-side interceptor
-     handle the refresh via the cached /api/auth/refresh route.
-     This avoids the race condition where both proxy and interceptor
-     call the backend simultaneously and one invalidates the other's token. */
-  if (refreshToken) {
-    // console.log('[PROXY] REFRESH TOKEN: ', refreshToken)
+  const finalResponse = NextResponse.next()
 
-    if (isUnauthenticatedRoute(pathname)) {
-      const erpUrl = req.nextUrl.clone()
-
-      erpUrl.pathname = '/erp'
-
-      return NextResponse.redirect(erpUrl)
-    }
-
-    // Check permission for the route
-    const permissions = await getPermissionsFromCookies(req)
-
-    if (!hasRoutePermission(pathname, permissions)) {
-      const forbiddenUrl = req.nextUrl.clone()
-
-      forbiddenUrl.pathname = '/erp'
-
-      return NextResponse.redirect(forbiddenUrl)
-    }
-
-    const response = NextResponse.next()
-
-    // Set tenant cookie if subdomain was verified
-    if (tenantId) {
-      response.cookies.set({
-        name: 'tenant',
-        value: tenantId,
-        httpOnly: false,
-        path: '/'
-      })
-    }
-
-    return response
+  if (tenantId) {
+    finalResponse.cookies.set({
+      name: CookieKeys.TENANT,
+      value: tenantId,
+      httpOnly: false,
+      path: '/'
+    })
   }
 
-  const loginUrl = req.nextUrl.clone()
-
-  loginUrl.pathname = '/erp/login'
-  loginUrl.searchParams.set('redirect', pathname)
-
-  return NextResponse.redirect(loginUrl)
+  return finalResponse
 }
 
 export const config = {

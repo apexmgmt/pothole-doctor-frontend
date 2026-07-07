@@ -23,7 +23,8 @@ import {
 } from '@/constants/api'
 import { isTenant } from '@/utils/utility'
 import CookieService from '../app/cookie.service'
-import apiInterceptor from './api.interceptor'
+import { CookieKeys } from '@/constants/cookies'
+import { handleRequest } from '@/services/api/base.service'
 import { ProfileChangePasswordPayload, ProfileDetailsPayload } from '@/types'
 
 export default class AuthService {
@@ -42,19 +43,13 @@ export default class AuthService {
 
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? AUTH_LOGIN_TENANT : AUTH_LOGIN), {
+      const response = await handleRequest(API_URL + (isTenantApi ? AUTH_LOGIN_TENANT : AUTH_LOGIN), {
         requiresAuth: false,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to login')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -62,18 +57,12 @@ export default class AuthService {
 
   static impersonate = async (user_id: string) => {
     try {
-      const response = await apiInterceptor(API_URL + IMPERSONATE + user_id, {
+      const response = await handleRequest(API_URL + IMPERSONATE + user_id, {
         requiresAuth: true,
         method: 'POST'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to impersonate user')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -82,7 +71,7 @@ export default class AuthService {
   static refreshToken = async (refresh_token?: string) => {
     // If not provided, try to get from CookieService (client-side only)
     if (!refresh_token) {
-      refresh_token = await CookieService.get('refresh_token')
+      refresh_token = await CookieService.get(CookieKeys.REFRESH_TOKEN)
     }
 
     if (!refresh_token) throw new Error('No refresh token available')
@@ -109,10 +98,6 @@ export default class AuthService {
         data = null
       }
 
-      if (!response.ok) {
-        throw data || new Error('Failed to refresh token')
-      }
-
       return data
     } catch (error) {
       throw error
@@ -127,18 +112,12 @@ export default class AuthService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? AUTH_LOGOUT_TENANT : AUTH_LOGOUT), {
+      const response = await handleRequest(API_URL + (isTenantApi ? AUTH_LOGOUT_TENANT : AUTH_LOGOUT), {
         requiresAuth: true,
         method: 'POST'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to logout')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -148,20 +127,14 @@ export default class AuthService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? AUTH_ME_TENANT : AUTH_ME), {
+      const response = await handleRequest(API_URL + (isTenantApi ? AUTH_ME_TENANT : AUTH_ME), {
         requiresAuth: true,
         method: 'GET'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
+      const data = response
 
-        throw new Error(errorData.message || 'Failed to get user details')
-      }
-
-      const data = await response.json()
-
-      CookieService.store('user', data?.data)
+      // CookieService.store(CookieKeys.USER, data?.data) // Handled by CheckAuthProvider and Server Actions now
 
       return data
     } catch (error) {
@@ -173,19 +146,13 @@ export default class AuthService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PROFILE_PICTURE_TENANT : PROFILE_PICTURE), {
+      const response = await handleRequest(API_URL + (isTenantApi ? PROFILE_PICTURE_TENANT : PROFILE_PICTURE), {
         requiresAuth: true,
         method: 'POST',
         body: payload
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to update profile picture')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -195,19 +162,13 @@ export default class AuthService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PROFILE_UPDATE_TENANT : PROFILE_UPDATE), {
+      const response = await handleRequest(API_URL + (isTenantApi ? PROFILE_UPDATE_TENANT : PROFILE_UPDATE), {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to update profile details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -217,7 +178,7 @@ export default class AuthService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PROFILE_CHANGE_PASSWORD_TENANT : PROFILE_CHANGE_PASSWORD),
         {
           requiresAuth: true,
@@ -226,13 +187,7 @@ export default class AuthService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to update profile profile')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -242,7 +197,7 @@ export default class AuthService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PROFILE_LAST_ACTIVITY_TENANT : PROFILE_LAST_ACTIVITY),
         {
           requiresAuth: true,
@@ -250,13 +205,7 @@ export default class AuthService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to get activity')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -271,7 +220,7 @@ export default class AuthService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PROFILE_LAST_ACTIVITY_TENANT : PROFILE_LAST_ACTIVITY) + tokenId,
         {
           requiresAuth: true,
@@ -279,13 +228,7 @@ export default class AuthService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to end session')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -299,7 +242,7 @@ export default class AuthService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PROFILE_LAST_ACTIVITY_TENANT : PROFILE_LAST_ACTIVITY),
         {
           requiresAuth: true,
@@ -307,13 +250,7 @@ export default class AuthService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to logout from all devices')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -328,19 +265,13 @@ export default class AuthService {
     const isTenantApi = await isTenant()
 
     try {
-      const response = await apiInterceptor(API_URL + FORGOT_PASSWORD(isTenantApi), {
+      const response = await handleRequest(API_URL + FORGOT_PASSWORD(isTenantApi), {
         requiresAuth: false,
         method: 'POST',
         body: JSON.stringify({ email })
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -356,19 +287,13 @@ export default class AuthService {
     const isTenantApi = await isTenant()
 
     try {
-      const response = await apiInterceptor(API_URL + VERIFY_FORGOT_PASSWORD_OTP(isTenantApi), {
+      const response = await handleRequest(API_URL + VERIFY_FORGOT_PASSWORD_OTP(isTenantApi), {
         requiresAuth: false,
         method: 'POST',
         body: JSON.stringify({ email, otp })
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -391,19 +316,13 @@ export default class AuthService {
     const isTenantApi = await isTenant()
 
     try {
-      const response = await apiInterceptor(API_URL + RESET_PASSWORD(isTenantApi), {
+      const response = await handleRequest(API_URL + RESET_PASSWORD(isTenantApi), {
         requiresAuth: false,
         method: 'POST',
         body: JSON.stringify({ email, password, password_confirmation, reset_token })
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

@@ -1,5 +1,5 @@
 import { TaskPayload } from '@/types'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, INVOICE_TASKS } from '@/constants/api'
 
 export default class InvoiceTaskService {
@@ -12,7 +12,7 @@ export default class InvoiceTaskService {
     const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
     try {
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + INVOICE_TASKS(invoice_id) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -20,13 +20,7 @@ export default class InvoiceTaskService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch invoice tasks')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -39,19 +33,13 @@ export default class InvoiceTaskService {
    */
   static store = async (invoice_id: string, payload: TaskPayload) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICE_TASKS(invoice_id), {
+      const response = await handleRequest(API_URL + INVOICE_TASKS(invoice_id), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -64,18 +52,12 @@ export default class InvoiceTaskService {
    */
   static show = async (invoice_id: string, task_id: string) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICE_TASKS(invoice_id) + `${task_id}/`, {
+      const response = await handleRequest(API_URL + INVOICE_TASKS(invoice_id) + `${task_id}/`, {
         requiresAuth: true,
         method: 'GET'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch invoice task')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -89,19 +71,13 @@ export default class InvoiceTaskService {
    */
   static update = async (invoice_id: string, task_id: string, payload: TaskPayload) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICE_TASKS(invoice_id) + `${task_id}/`, {
+      const response = await handleRequest(API_URL + INVOICE_TASKS(invoice_id) + `${task_id}/`, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -115,18 +91,12 @@ export default class InvoiceTaskService {
    */
   static destroy = async (invoice_id: string, task_id: string) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICE_TASKS(invoice_id) + `${task_id}/`, {
+      const response = await handleRequest(API_URL + INVOICE_TASKS(invoice_id) + `${task_id}/`, {
         requiresAuth: true,
         method: 'DELETE'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
