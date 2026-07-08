@@ -5,6 +5,10 @@ import { useEffect } from 'react'
 export function ErrorLogger() {
   useEffect(() => {
     const handleUncaught = (e: ErrorEvent) => {
+      // ResizeObserver loop errors are benign browser quirks triggered by
+      // dropdown/popover components during resize observation cycles
+      if (e.message?.includes('ResizeObserver')) return
+
       alert('Uncaught Error: ' + e.message + '\n' + e.filename + ':' + e.lineno)
     }
 
