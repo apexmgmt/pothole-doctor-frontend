@@ -9,6 +9,8 @@ import { generateRedirectUrl } from '@/app/actions/auth'
 
 import MainAppDashboard from './components/MainAppDashboard'
 import TenantDashboardView from './components/TenantDashboardView'
+import { useAppDispatch } from '@/lib/hooks'
+import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
 const DashboardIndex = ({
   initialData,
@@ -21,6 +23,11 @@ const DashboardIndex = ({
 }) => {
   const [tenantMode] = useState<boolean>(initialTenantMode)
   const [data] = useState<Record<string, unknown> | null>(initialData)
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    dispatch(setPageTitle('Dashboard'))
+  }, [])
 
   const impersonateUser = useCallback(async (userId: string) => {
     try {
@@ -48,7 +55,6 @@ const DashboardIndex = ({
       toast.error((err as { message?: string })?.message ?? 'Failed to impersonate user')
     }
   }, [])
-
 
   if (error) {
     return (

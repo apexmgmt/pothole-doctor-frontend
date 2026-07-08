@@ -27,6 +27,8 @@ type ReusableInvoiceTableProps = {
   createButtonLabel?: string
   emptyMessage?: string
   refreshKey?: number
+  pagination?: boolean
+  searchInvoice?: boolean
 }
 
 const ReusableInvoiceTable: React.FC<ReusableInvoiceTableProps> = ({
@@ -36,7 +38,9 @@ const ReusableInvoiceTable: React.FC<ReusableInvoiceTableProps> = ({
   onCreateInvoice,
   createButtonLabel = 'Add Invoice',
   emptyMessage = 'No invoices found',
-  refreshKey = 0
+  refreshKey = 0,
+  pagination = true,
+  searchInvoice = true
 }) => {
   const router = useRouter()
 
@@ -212,10 +216,10 @@ const ReusableInvoiceTable: React.FC<ReusableInvoiceTableProps> = ({
         last_page: apiResponse?.last_page || 1
       }}
       columns={columns}
-      customFilters={customFilters}
+      customFilters={searchInvoice ? customFilters : undefined}
       setFilterOptions={setFilterOptions}
       showFilters={true}
-      pagination={true}
+      pagination={pagination}
       isLoading={isLoading}
       emptyMessage={emptyMessage}
     />
