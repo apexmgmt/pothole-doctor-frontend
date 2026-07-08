@@ -7,6 +7,7 @@ import { getPermissionsFromCookies, hasRoutePermission } from './utils/role-perm
 import { checkSubdomain } from './utils/utility'
 import SubdomainService from './services/api/subdomain.service'
 import { encryptRedirectUrl } from './utils/encryption'
+import { API_URL, AUTH_REFRESH_TOKEN, AUTH_REFRESH_TOKEN_TENANT } from './constants/api'
 
 const getRedirectRoute = (): string => '/erp'
 
@@ -100,13 +101,13 @@ export async function proxy(req: NextRequest) {
   const domainInfo: any = checkSubdomain(req)
   let tenantId = ''
 
-  console.log('[PROXY]: Domain Info: ', domainInfo)
+  // console.log('[PROXY]: Domain Info: ', domainInfo)
 
   if (domainInfo.isSubdomain && domainInfo.subdomain) {
     try {
       const res = await SubdomainService.verification(domainInfo.subdomain)
 
-      console.log('[PROXY]: Subdomain Verification Response: ', res)
+      // console.log('[PROXY]: Subdomain Verification Response: ', res)
 
       // If handleRequest didn't throw an error, the subdomain is valid.
       // Some APIs might return success: true instead of status: 'success'
@@ -120,7 +121,7 @@ export async function proxy(req: NextRequest) {
         tenantId = res?.data?.tenant_id || res?.tenant_id || ''
       }
     } catch (error) {
-      console.log('[PROXY]: Subdomain Verification Error: ', error)
+      // console.log('[PROXY]: Subdomain Verification Error: ', error)
       const notFoundUrl = req.nextUrl.clone()
 
       notFoundUrl.pathname = '/invalid-subdomain'
@@ -136,11 +137,13 @@ export async function proxy(req: NextRequest) {
   let refreshToken = req.cookies.get(CookieKeys.REFRESH_TOKEN)?.value
 
   if (accessToken && isTokenExpired(accessToken)) {
+    // console.log('[PROXY]: Access Token found but is expired')
     accessToken = undefined
   }
 
   // If route requires login and user has no tokens
   if (requiresAuth && !accessToken && !refreshToken) {
+    // console.log('[PROXY]: Route requires authentication but no tokens found')
     const loginUrl = req.nextUrl.clone()
 
     loginUrl.pathname = '/erp/login'
@@ -153,39 +156,66 @@ export async function proxy(req: NextRequest) {
 
   /* Refresh token flow */
   if (refreshToken && !accessToken) {
+    // console.log('[PROXY]: Refresh token flow')
+
     try {
-      const apiUrl = process.env.API_URL || 'http://localhost:8585/api'
+      const apiUrl = API_URL
       const isTenantApi = !!tenantId
 
-      const refreshUrl = isTenantApi ? `${apiUrl}/v1/tenant/auth/refresh` : `${apiUrl}/v1/auth/refresh`
+      // console.log('[PROXY]: Tenant ID: ', tenantId)
+      // console.log('[PROXY]: Is tenant API: ', isTenantApi)
 
+      const refreshUrl = isTenantApi ? `${apiUrl}${AUTH_REFRESH_TOKEN_TENANT}` : `${apiUrl}${AUTH_REFRESH_TOKEN}`
+
+      // console.log('[PROXY]: Refresh URL: ', refreshUrl)
       const now = Date.now()
       let payload: any
 
       const cached = cache.get(refreshToken)
 
+      // console.log('[PROXY]: Cached: ', cached)
+
       if (cached && now - cached.timestamp < CACHE_DURATION) {
         payload = cached.data
+
+        // console.log('[PROXY]: Using cached data')
       } else {
+        // console.log('[PROXY]: No cached data found')
         const existing = lock.get(refreshToken)
 
+        // console.log('[PROXY]: Existing: ', existing)
+
         if (existing) {
+          // console.log('[PROXY]: Waiting for existing lock')
           payload = await existing
         } else {
+          // console.log('[PROXY]: No existing lock found, creating new lock')
           const headers: Record<string, string> = { 'Content-Type': 'application/json' }
 
           if (tenantId) headers['tenant'] = tenantId
+
+          // console.log('[PROXY]: Headers: ', headers)
+          // console.log('[PROXY]: Refresh Token: ', refreshToken)
 
           const promise = fetch(refreshUrl, {
             method: 'POST',
             headers,
             body: JSON.stringify({ refresh_token: refreshToken })
-          }).then(async res => {
-            if (!res.ok) throw new Error('Refresh failed')
-            const json = await res.json()
-
-            return json.data || json
           })
+            .then(async res => {
+              // console.log('[PROXY]: Refresh Response: ', res)
+              if (!res.ok) throw new Error('Refresh failed')
+              const json = await res.json()
+
+              // console.log('[PROXY]: Refresh Response JSON: ', json)
+
+              return json.data || json
+            })
+            .catch(error => {
+              // console.error('[PROXY]: Refresh fetch error: ', error?.message || error)
+              // console.error('[PROXY]: Refresh URL was: ', refreshUrl)
+              throw error
+            })
 
           lock.set(refreshToken, promise)
 
@@ -251,7 +281,8 @@ export async function proxy(req: NextRequest) {
       }
 
       return nextRes
-    } catch (error) {
+    } catch (error: any) {
+      // console.error('[PROXY]: Refresh token flow FAILED: ', error?.message || error)
       const loginUrl = req.nextUrl.clone()
 
       loginUrl.pathname = '/erp/login'
