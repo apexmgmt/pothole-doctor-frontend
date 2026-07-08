@@ -130,8 +130,12 @@ export async function proxy(req: NextRequest) {
     }
   }
 
+  const isErpRoute = url.pathname.startsWith('/erp')
   const isUnauth = isUnauthenticatedRoute(url.pathname)
-  const requiresAuth = !isPublicRoute(url.pathname) && !isUnauth
+
+  // Only /erp routes require auth (except public/unauth ones).
+  // Frontend routes (not starting with /erp) are always public.
+  const requiresAuth = isErpRoute && !isPublicRoute(url.pathname) && !isUnauth
 
   let accessToken = req.cookies.get(CookieKeys.ACCESS_TOKEN)?.value
   let refreshToken = req.cookies.get(CookieKeys.REFRESH_TOKEN)?.value
