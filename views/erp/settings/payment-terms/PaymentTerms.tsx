@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { PlusIcon } from 'lucide-react'
@@ -16,27 +16,52 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import CreateOrEditPaymentTermModal from './CreateOrEditPaymentTermModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ paymentTermTypes }) => {
+const PaymentTerms: React.FC<{
+  paymentTermTypes: PaymentTermType[] | []
+  initialData?: DataTableApiResponse<PaymentTerm> | null
+}> = ({ paymentTermTypes, initialData }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<PaymentTerm> | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<PaymentTerm> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedPaymentTermId, setSelectedPaymentTermId] = useState<string | null>(null)
   const [selectedPaymentTerm, setSelectedPaymentTerm] = useState<PaymentTerm | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
+
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
+
   const [canCreatePaymentTerm, setCanCreatePaymentTerm] = useState<boolean>(false)
   const [canEditPaymentTerm, setCanEditPaymentTerm] = useState<boolean>(false)
   const [canDeletePaymentTerm, setCanDeletePaymentTerm] = useState<boolean>(false)
@@ -51,55 +76,42 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
     hasPermission('Delete Payment Term').then(result => setCanDeletePaymentTerm(result))
   }, [])
 
+  useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
+  useEffect(() => {
+    dispatch(setPageTitle('Payment Terms'))
+  }, [dispatch])
+
   // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+          if (newOptions.page) {
+            delete newOptions.page
+          }
 
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      PaymentTermsService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
+          return newOptions
         })
-        .catch(error => {
-          setIsLoading(false)
-          console.error('Error fetching payment terms:', error)
-        })
-    } catch (error) {
-      setIsLoading(false)
-      console.error('Error fetching payment terms:', error)
-    }
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
   }
-
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Payment Terms'))
-  }, [filterOptions])
 
   // Transform API data to match table format
   const paymentTermsData = apiResponse?.data
@@ -147,7 +159,7 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
   }
 
   const handleSuccess = () => {
-    fetchData()
+    router.refresh()
     handleModalClose()
   }
 
@@ -226,8 +238,8 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
     try {
       await PaymentTermsService.destroy(id)
         .then(response => {
-          toast.success('Payment term deleted successfully')
-          fetchData()
+          toast.success('Payment Term deleted successfully')
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete payment term')
@@ -248,7 +260,12 @@ const PaymentTerms: React.FC<{ paymentTermTypes: PaymentTermType[] | [] }> = ({ 
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear

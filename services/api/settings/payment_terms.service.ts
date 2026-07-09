@@ -10,7 +10,6 @@ import {
   PAYMENT_TERMS_TYPES_TENANT
 } from '@/constants/api'
 import { PaymentTermPayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class PaymentTermsService {
   /**Payment Terms DataTable API */
@@ -24,7 +23,10 @@ export default class PaymentTermsService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['payment-terms'] } // Cache for 60 seconds
+          next: {
+            revalidate: 30,
+            tags: ['login', 'payment-terms', queryParams ? `payment-terms?${queryParams}` : 'payment-terms']
+          }
         }
       )
 
@@ -42,11 +44,9 @@ export default class PaymentTermsService {
       const response = await handleRequest(API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['payment-terms', 'payment-terms-all']
       })
-
-      await revalidate('payment-terms')
-      await revalidate('payment-terms-all')
 
       return response
     } catch (error) {
@@ -64,7 +64,7 @@ export default class PaymentTermsService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`payment-terms/${paymentTermId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `payment-terms/${paymentTermId}`] }
         }
       )
 
@@ -84,13 +84,10 @@ export default class PaymentTermsService {
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['payment-terms', 'payment-terms-all', `payment-terms/${paymentTermId}`]
         }
       )
-
-      await revalidate('payment-terms')
-      await revalidate(`payment-terms/${paymentTermId}`)
-      await revalidate('payment-terms-all')
 
       return response
     } catch (error) {
@@ -107,13 +104,10 @@ export default class PaymentTermsService {
         API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS) + paymentTermId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['payment-terms', 'payment-terms-all', `payment-terms/${paymentTermId}`]
         }
       )
-
-      await revalidate('payment-terms-all')
-      await revalidate(`payment-terms/${paymentTermId}`)
-      await revalidate('payment-terms')
 
       return response
     } catch (error) {
@@ -130,13 +124,10 @@ export default class PaymentTermsService {
         API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS) + paymentTermId + '/restore',
         {
           requiresAuth: true,
-          method: 'POST'
+          method: 'POST',
+          revalidateTags: ['payment-terms', 'payment-terms-all', `payment-terms/${paymentTermId}`]
         }
       )
-
-      await revalidate('payment-terms')
-      await revalidate(`payment-terms/${paymentTermId}`)
-      await revalidate('payment-terms-all')
 
       return response
     } catch (error) {
@@ -152,7 +143,7 @@ export default class PaymentTermsService {
       const response = await handleRequest(API_URL + (isTenantApi ? PAYMENT_TERMS_ALL_TENANT : PAYMENT_TERMS_ALL), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['payment-terms-all'] } // Cache for 1 hour
+        next: { revalidate: 30, tags: ['login', 'payment-terms-all'] }
       })
 
       return response
@@ -169,7 +160,7 @@ export default class PaymentTermsService {
       const response = await handleRequest(API_URL + (isTenantApi ? PAYMENT_TERMS_TYPES_TENANT : PAYMENT_TERMS_TYPES), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['payment-term-types'] } // Cache for 1 hour
+        next: { revalidate: 30, tags: ['login', 'payment-term-types'] }
       })
 
       return response
