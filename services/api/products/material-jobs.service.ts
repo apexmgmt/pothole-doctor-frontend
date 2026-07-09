@@ -1,7 +1,6 @@
 import { handleRequest } from '@/services/api/base.service'
 import { API_URL, MATERIAL_JOBS, MATERIAL_JOBS_ACTIONS, MATERIAL_JOBS_EXPORT_TENANT } from '@/constants/api'
 import { MaterialJobActionPayload, MaterialJobUpdatePayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class MaterialJobService {
   /** Material Jobs DataTable API */
@@ -12,7 +11,10 @@ export default class MaterialJobService {
       const response = await handleRequest(API_URL + MATERIAL_JOBS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['material-jobs'] }
+        next: {
+          revalidate: 30,
+          tags: ['login', 'material-jobs', queryParams ? `material-jobs?${queryParams}` : 'material-jobs']
+        }
       })
 
       return response
@@ -48,7 +50,7 @@ export default class MaterialJobService {
       const response = await handleRequest(API_URL + MATERIAL_JOBS + materialJobId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`material-jobs/${materialJobId}`] }
+        next: { revalidate: 30, tags: ['login', `material-jobs/${materialJobId}`] }
       })
 
       return response
@@ -63,11 +65,9 @@ export default class MaterialJobService {
       const response = await handleRequest(API_URL + MATERIAL_JOBS + materialJobId + '/non-inventory', {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['material-jobs', `material-jobs/${materialJobId}`]
       })
-
-      await revalidate('material-jobs')
-      await revalidate(`material-jobs/${materialJobId}`)
 
       return response
     } catch (error) {
@@ -81,11 +81,9 @@ export default class MaterialJobService {
       const response = await handleRequest(API_URL + MATERIAL_JOBS_ACTIONS(materialJobId), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['material-jobs', `material-jobs/${materialJobId}`]
       })
-
-      await revalidate('material-jobs')
-      await revalidate(`material-jobs/${materialJobId}`)
 
       return response
     } catch (error) {
@@ -98,11 +96,9 @@ export default class MaterialJobService {
     try {
       const response = await handleRequest(API_URL + MATERIAL_JOBS_ACTIONS(materialJobId) + `/${actionId}`, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['material-jobs', `material-jobs/${materialJobId}`]
       })
-
-      await revalidate('material-jobs')
-      await revalidate(`material-jobs/${materialJobId}`)
 
       return response
     } catch (error) {
