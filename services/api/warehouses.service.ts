@@ -2,7 +2,6 @@ import { isTenant } from '@/utils/utility'
 import { handleRequest } from '@/services/api/base.service'
 import { API_URL, WAREHOUSES, WAREHOUSES_ALL, WAREHOUSES_ALL_TENANT, WAREHOUSES_TENANT } from '@/constants/api'
 import { WarehousePayload } from '@/types'
-import { revalidate } from '../app/cache.service'
 
 export default class WarehouseService {
   /**Warehouse DataTable API */
@@ -16,7 +15,7 @@ export default class WarehouseService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['warehouses'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'warehouses', queryParams ? `warehouses?${queryParams}` : 'warehouses'] }
         }
       )
 
@@ -34,10 +33,9 @@ export default class WarehouseService {
       const response = await handleRequest(API_URL + (isTenantApi ? WAREHOUSES_TENANT : WAREHOUSES), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['warehouses', 'warehouses-all']
       })
-
-      await revalidate('warehouses')
 
       return response
     } catch (error) {
@@ -53,7 +51,7 @@ export default class WarehouseService {
       const response = await handleRequest(API_URL + (isTenantApi ? WAREHOUSES_TENANT : WAREHOUSES) + warehouseId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`warehouses/${warehouseId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', `warehouses/${warehouseId}`] }
       })
 
       return response
@@ -70,12 +68,9 @@ export default class WarehouseService {
       const response = await handleRequest(API_URL + (isTenantApi ? WAREHOUSES_TENANT : WAREHOUSES) + warehouseId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['warehouses', 'warehouses-all', `warehouses/${warehouseId}`]
       })
-
-      await revalidate('warehouses')
-      await revalidate(`warehouses/${warehouseId}`)
-      await revalidate('warehouses-all')
 
       return response
     } catch (error) {
@@ -90,12 +85,9 @@ export default class WarehouseService {
 
       const response = await handleRequest(API_URL + (isTenantApi ? WAREHOUSES_TENANT : WAREHOUSES) + warehouseId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['warehouses', 'warehouses-all', `warehouses/${warehouseId}`]
       })
-
-      await revalidate('warehouses')
-      await revalidate(`warehouses/${warehouseId}`)
-      await revalidate('warehouses-all')
 
       return response
     } catch (error) {
@@ -113,7 +105,7 @@ export default class WarehouseService {
       const response = await handleRequest(API_URL + (isTenantApi ? WAREHOUSES_ALL_TENANT : WAREHOUSES_ALL), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 300, tags: ['warehouses-all'] } // Cache for 5 minutes
+        next: { revalidate: 30, tags: ['login', 'warehouses-all'] }
       })
 
       return response
