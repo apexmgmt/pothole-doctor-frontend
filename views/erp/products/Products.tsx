@@ -57,6 +57,7 @@ const Products: React.FC<ProductsProps> = ({
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
+  const [skuValue, setSkuValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
 
@@ -110,6 +111,7 @@ const Products: React.FC<ProductsProps> = ({
   // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    setSkuValue(filterOptions.sku || '')
 
     // show the page title only if not from modal
     if (!isFromModal) dispatch(setPageTitle('Manage Products'))
@@ -140,6 +142,33 @@ const Products: React.FC<ProductsProps> = ({
   const onSearchChange = (value: string) => {
     setSearchValue(value)
     debouncedSearch(value)
+  }
+
+  const debouncedSkuSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.sku = val
+          } else {
+            delete newOptions.sku
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSkuSearchChange = (value: string) => {
+    setSkuValue(value)
+    debouncedSkuSearch(value)
   }
 
   const handleOpenCreateModal = () => {
@@ -583,23 +612,8 @@ const Products: React.FC<ProductsProps> = ({
             name='sku-filter'
             label='SKU'
             placeholder='SKU...'
-            value={filterOptions.sku || ''}
-            onChange={value => {
-              setFilterOptions((prev: any) => {
-                const newOptions = { ...prev }
-
-                if (value && typeof value === 'string' && value.trim() !== '') {
-                  newOptions.sku = value
-                } else {
-                  delete newOptions.sku
-                }
-
-                // Optionally reset page on filter change
-                if (newOptions.page) delete newOptions.page
-
-                return newOptions
-              })
-            }}
+            value={skuValue}
+            onChange={value => onSkuSearchChange(value as string)}
           />
         </div>
 
