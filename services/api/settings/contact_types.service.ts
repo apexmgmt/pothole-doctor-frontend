@@ -8,7 +8,6 @@ import {
   CONTACT_TYPES_TENANT
 } from '@/constants/api'
 import { ContactTypePayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
 
 export default class ContactTypeService {
   /**Contact types DataTable API */
@@ -22,7 +21,7 @@ export default class ContactTypeService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['contact-types'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'contact-types', queryParams ? `contact-types?${queryParams}` : 'contact-types'] }
         }
       )
 
@@ -40,10 +39,9 @@ export default class ContactTypeService {
       const response = await handleRequest(API_URL + (isTenantApi ? CONTACT_TYPES_TENANT : CONTACT_TYPES), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['contact-types', 'contact-types-all']
       })
-
-      await revalidate('contact-types')
 
       return response
     } catch (error) {
@@ -61,7 +59,7 @@ export default class ContactTypeService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`contact-types/${contactTypeId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `contact-types/${contactTypeId}`] }
         }
       )
 
@@ -81,13 +79,10 @@ export default class ContactTypeService {
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['contact-types', 'contact-types-all', `contact-types/${contactTypeId}`]
         }
       )
-
-      await revalidate('contact-types')
-      await revalidate(`contact-types/${contactTypeId}`)
-      await revalidate('contact-types-all')
 
       return response
     } catch (error) {
@@ -104,13 +99,10 @@ export default class ContactTypeService {
         API_URL + (isTenantApi ? CONTACT_TYPES_TENANT : CONTACT_TYPES) + contactTypeId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['contact-types', 'contact-types-all', `contact-types/${contactTypeId}`]
         }
       )
-
-      await revalidate('contact-types-all')
-      await revalidate(`contact-types/${contactTypeId}`)
-      await revalidate('contact-types')
 
       return response
     } catch (error) {
@@ -126,7 +118,7 @@ export default class ContactTypeService {
       const response = await handleRequest(API_URL + (isTenantApi ? CONTACT_TYPES_ALL_TENANT : CONTACT_TYPES_ALL), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['contact-types-all'] } // Cache for 1 hour
+        next: { revalidate: 3600, tags: ['login', 'contact-types-all'] }
       })
 
       return response

@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useForm } from 'react-hook-form'
 
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -17,7 +18,7 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import ContactTypeService from '@/services/api/settings/contact_types.service'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { hasPermission } from '@/utils/role-permission'
@@ -44,20 +45,45 @@ const emptyContactTypePayload: ContactTypeFormValues = {
 
 type ContactTypeFieldErrors = Partial<Record<keyof ContactTypeFormValues, string>>
 
-const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_terms }) => {
+const ContactTypes: React.FC<{
+  paymentTerms: PaymentTerm[]
+  initialData?: DataTableApiResponse<ContactType> | null
+}> = ({ paymentTerms, initialData }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<ContactType> | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<ContactType> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
   const [inlineMode, setInlineMode] = useState<'create' | 'edit' | null>(null)
   const [editingContactTypeId, setEditingContactTypeId] = useState<string | null>(null)
   const [canCreateContactType, setCanCreateContactType] = useState<boolean>(false)
   const [canEditContactType, setCanEditContactType] = useState<boolean>(false)
   const [canDeleteContactType, setCanDeleteContactType] = useState<boolean>(false)
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
+
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
 
   const {
     register,
@@ -82,51 +108,41 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
   }, [])
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
-
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
-
-        if (newOptions.page) {
-          delete newOptions.page
-        }
-
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      ContactTypeService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch contact types')
-        })
-    } catch {
-      setIsLoading(false)
-      toast.error('Something went wrong while fetching the contact types!')
-    }
-  }
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
   useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Contact Types'))
-  }, [filterOptions])
+    dispatch(setPageTitle('Contact Types'))
+  }, [dispatch])
+
+  // Debounced search update
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const getFieldErrorsFromApi = (error: any): ContactTypeFieldErrors => {
     const serverErrors = error?.errors
@@ -155,7 +171,7 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
       return row.payment_term.name
     }
 
-    const term = payment_terms.find(item => String(item.id) === String(row.payment_term_id))
+    const term = paymentTerms.find(item => String(item.id) === String(row.payment_term_id))
 
     return term?.name || 'N/A'
   }
@@ -195,16 +211,6 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
     clearErrors()
   }
 
-  const goToFirstPage = () => {
-    setFilterOptions((prev: any) => {
-      const next = { ...prev }
-
-      delete next.page
-
-      return next
-    })
-  }
-
   const handleInlineSubmit = async (values: ContactTypeFormValues) => {
     clearErrors()
 
@@ -219,35 +225,9 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
     try {
       if (inlineMode === 'create') {
         const response = await ContactTypeService.store(payload)
-        const createdContactType = response?.data as ContactType | undefined
-
-        setApiResponse(prev => {
-          if (!prev || !createdContactType) {
-            return prev
-          }
-
-          const perPage = prev.per_page || 10
-          const updatedTotal = (prev.total || 0) + 1
-          const nextData = [createdContactType, ...(prev.data || [])].slice(0, perPage)
-
-          return {
-            ...prev,
-            data: nextData,
-            total: updatedTotal,
-            from: 1,
-            to: nextData.length,
-            current_page: 1,
-            last_page: Math.max(1, Math.ceil(updatedTotal / perPage))
-          }
-        })
-
-        goToFirstPage()
-
-        if (!createdContactType) {
-          fetchData()
-        }
 
         toast.success(response?.message || 'Contact type created successfully')
+        router.refresh()
         handleInlineCancel()
 
         return
@@ -255,26 +235,9 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
 
       if (inlineMode === 'edit' && editingContactTypeId) {
         const response = await ContactTypeService.update(editingContactTypeId, payload)
-        const updatedContactType = response?.data as ContactType | undefined
-
-        if (updatedContactType) {
-          setApiResponse(prev => {
-            if (!prev) {
-              return prev
-            }
-
-            return {
-              ...prev,
-              data: (prev.data || []).map(item =>
-                (item as ContactType).id === editingContactTypeId ? updatedContactType : item
-              )
-            }
-          })
-        } else {
-          fetchData()
-        }
 
         toast.success(response?.message || 'Contact type updated successfully')
+        router.refresh()
         handleInlineCancel()
       }
     } catch (error: any) {
@@ -298,7 +261,7 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
       await ContactTypeService.destroy(id)
         .then(() => {
           toast.success('Contact type deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete contact type')
@@ -416,7 +379,7 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
               required: 'Payment term is required'
             },
             'select',
-            payment_terms.map(term => ({ value: String(term.id), label: term.name }))
+            paymentTerms.map(term => ({ value: String(term.id), label: term.name }))
           )
         ) : (
           <span>{getPaymentTermName(row)}</span>
@@ -553,7 +516,12 @@ const ContactTypes: React.FC<{ payment_terms: PaymentTerm[] }> = ({ payment_term
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
