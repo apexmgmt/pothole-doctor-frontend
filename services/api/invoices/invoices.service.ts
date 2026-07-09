@@ -279,7 +279,8 @@ export default class InvoiceService {
       const response = await handleRequest(API_URL + SEND_INVOICE_EMAIL(invoiceId), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify({ subject, message })
+        body: JSON.stringify({ subject, message }),
+        revalidateTags: ['invoices', `invoices/${invoiceId}`, 'invoices-histories', 'invoices-histories-summary']
       })
 
       return response
@@ -303,7 +304,15 @@ export default class InvoiceService {
         API_URL + INVOICE_HISTORIES(invoiceId) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
-          method: 'GET'
+          method: 'GET',
+          next: {
+            revalidate: 30,
+            tags: [
+              'login',
+              `invoices-histories/${invoiceId}`,
+              queryParams ? `invoices-histories/${invoiceId}?${queryParams}` : `invoices-histories/${invoiceId}`
+            ]
+          }
         }
       )
 
@@ -321,7 +330,7 @@ export default class InvoiceService {
       const response = await handleRequest(API_URL + INVOICES_SUMMARY, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['login', 'invoices-summary'] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', 'invoices-summary'] } // Cache for 60 seconds
       })
 
       return response
