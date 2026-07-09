@@ -2,13 +2,10 @@ import { Metadata } from 'next'
 import ClientService from '@/services/api/clients/clients.service'
 import InvoiceService from '@/services/api/invoices/invoices.service'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
-import ProductCategoryService from '@/services/api/products/product_categories.service'
 import EstimateTypeService from '@/services/api/settings/estimate_types.service'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
-import UnitService from '@/services/api/settings/units.service'
 import StaffService from '@/services/api/staff.service'
-import VendorService from '@/services/api/vendors/vendors.service'
 import {
   BusinessLocation,
   Client,
@@ -16,11 +13,8 @@ import {
   Invoice,
   InvoiceSummary,
   PaymentTerm,
-  ProductCategory,
   ServiceType,
   Staff,
-  Unit,
-  Vendor,
   DataTableApiResponse
 } from '@/types'
 import Invoices from '@/views/erp/invoices'
