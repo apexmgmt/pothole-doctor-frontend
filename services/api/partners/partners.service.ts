@@ -2,7 +2,6 @@ import { isTenant } from '@/utils/utility'
 import { handleRequest } from '@/services/api/base.service'
 import { API_URL, PARTNERS, PARTNERS_ALL_TENANT, PARTNERS_TENANT } from '@/constants/api'
 import { PartnerPayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class PartnerService {
   /**Partner DataTable API */
@@ -16,7 +15,7 @@ export default class PartnerService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['partners'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'partners', queryParams ? `partners?${queryParams}` : 'partners'] }
         }
       )
 
@@ -34,10 +33,9 @@ export default class PartnerService {
       const response = await handleRequest(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['partners', 'partners-all']
       })
-
-      await revalidate('partners')
 
       return response
     } catch (error) {
@@ -53,7 +51,7 @@ export default class PartnerService {
       const response = await handleRequest(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`partners/${partnerId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', `partners/${partnerId}`] }
       })
 
       return response
@@ -70,12 +68,9 @@ export default class PartnerService {
       const response = await handleRequest(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['partners', 'partners-all', `partners/${partnerId}`]
       })
-
-      await revalidate('partners')
-      await revalidate(`partners/${partnerId}`)
-      await revalidate('partners-all')
 
       return response
     } catch (error) {
@@ -90,12 +85,9 @@ export default class PartnerService {
 
       const response = await handleRequest(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['partners', 'partners-all', `partners/${partnerId}`]
       })
-
-      await revalidate('partners')
-      await revalidate(`partners/${partnerId}`)
-      await revalidate('partners-all')
 
       return response
     } catch (error) {
@@ -118,13 +110,10 @@ export default class PartnerService {
         API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId + '/restore',
         {
           requiresAuth: true,
-          method: 'POST'
+          method: 'POST',
+          revalidateTags: ['partners', 'partners-all', `partners/${partnerId}`]
         }
       )
-
-      await revalidate('partners')
-      await revalidate(`partners/${partnerId}`)
-      await revalidate('partners-all')
 
       return response
     } catch (error) {
@@ -141,7 +130,7 @@ export default class PartnerService {
       const response = await handleRequest(API_URL + PARTNERS_ALL_TENANT, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['partners-all'] } // Cache for 1 hour
+        next: { revalidate: 30, tags: ['login', 'partners-all'] }
       })
 
       return response

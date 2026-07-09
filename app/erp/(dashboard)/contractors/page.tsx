@@ -3,12 +3,27 @@ import BusinessLocationService from '@/services/api/locations/business_location.
 import LocationService from '@/services/api/locations/location.service'
 import PartnerTypesService from '@/services/api/settings/partner_types.service'
 import SkillService from '@/services/api/skills.service'
-import { BusinessLocation, Company, CountryWithStates, PartnerType, Skill } from '@/types'
+import PartnerService from '@/services/api/partners/partners.service'
+import {
+  BusinessLocation,
+  Company,
+  CountryWithStates,
+  PartnerType,
+  Skill,
+  DataTableApiResponse,
+  Partner
+} from '@/types'
 import Partners from '@/views/erp/partners/Partners'
 
 export const dynamic = 'force-dynamic'
 
-export default async function PartnersPage() {
+export default async function PartnersPage({
+  searchParams
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const resolvedSearchParams = await searchParams
+
   const [businessLocationsRes, partnerTypesRes, locationsRes, companiesRes, skillsRes] = await Promise.allSettled([
     BusinessLocationService.getAll(),
     PartnerTypesService.getAll(),
@@ -28,6 +43,16 @@ export default async function PartnersPage() {
   const companies: Company[] = companiesRes.status === 'fulfilled' ? companiesRes.value.data || [] : []
   const skills: Skill[] = skillsRes.status === 'fulfilled' ? skillsRes.value.data || [] : []
 
+  let responseData: DataTableApiResponse<Partner> | null = null
+
+  try {
+    const response = await PartnerService.index(resolvedSearchParams as Record<string, string>)
+
+    responseData = response?.data || null
+  } catch (error) {
+    console.error('Failed to fetch contractors:', error)
+  }
+
   return (
     <Partners
       businessLocations={businessLocations}
@@ -35,6 +60,7 @@ export default async function PartnersPage() {
       countriesWithStatesAndCities={countriesWithStatesAndCities}
       companies={companies}
       skills={skills}
+      initialData={responseData}
     />
   )
 }
