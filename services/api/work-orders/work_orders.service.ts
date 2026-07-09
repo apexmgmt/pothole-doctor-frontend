@@ -11,7 +11,6 @@ import {
 } from '@/constants/api'
 import { handleRequest } from '@/services/api/base.service'
 import { CompletionCertificatePayload, WorkOrderPayload, WorkOrderServicePayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
 
 export default class WorkOrderService {
   /**
@@ -28,7 +27,10 @@ export default class WorkOrderService {
       const response = await handleRequest(API_URL + WORK_ORDERS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['work_orders', 'login'] } // Cache for 60 seconds
+        next: {
+          revalidate: 30,
+          tags: ['login', 'work_orders', queryParams ? `work_orders?${queryParams}` : 'work_orders']
+        }
       })
 
       return response
@@ -68,12 +70,9 @@ export default class WorkOrderService {
       const response = await handleRequest(API_URL + WORK_ORDERS, {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['work-orders', 'work-orders-summary', 'invoices-summary']
       })
-
-      await revalidate('work-orders')
-      await revalidate('work-orders-summary')
-      await revalidate('invoices-summary')
 
       return response
     } catch (error) {
@@ -93,12 +92,9 @@ export default class WorkOrderService {
       const response = await handleRequest(API_URL + WORK_ORDERS_SERVICES(workOrderId), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['work-orders', 'work-orders-summary', 'invoices-summary', `work_orders/${workOrderId}`]
       })
-
-      await revalidate('work-orders')
-      await revalidate('work-orders-summary')
-      await revalidate('invoices-summary')
 
       return response
     } catch (error) {
@@ -117,7 +113,8 @@ export default class WorkOrderService {
     try {
       const response = await handleRequest(API_URL + WORK_ORDERS + workOrderId, {
         requiresAuth: true,
-        method: 'GET'
+        method: 'GET',
+        next: { revalidate: 30, tags: ['login', `work_orders/${workOrderId}`] }
       })
 
       return response
@@ -139,12 +136,9 @@ export default class WorkOrderService {
       const response = await handleRequest(API_URL + WORK_ORDERS + workOrderId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['work-orders', 'work-orders-summary', 'invoices-summary', `work_orders/${workOrderId}`]
       })
-
-      await revalidate('work-orders')
-      await revalidate('work-orders-summary')
-      await revalidate('invoices-summary')
 
       return response
     } catch (error) {
@@ -165,12 +159,9 @@ export default class WorkOrderService {
       const response = await handleRequest(API_URL + WORK_ORDERS_SERVICES(workOrderId), {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['work-orders', 'work-orders-summary', 'invoices-summary', `work_orders/${workOrderId}`]
       })
-
-      await revalidate('work-orders')
-      await revalidate('work-orders-summary')
-      await revalidate('invoices-summary')
 
       return response
     } catch (error) {
@@ -189,12 +180,9 @@ export default class WorkOrderService {
     try {
       const response = await handleRequest(API_URL + WORK_ORDERS + workOrderId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['work-orders', 'work-orders-summary', 'invoices-summary', `work_orders/${workOrderId}`]
       })
-
-      await revalidate('work-orders')
-      await revalidate('work-orders-summary')
-      await revalidate('invoices-summary')
 
       return response
     } catch (error) {
@@ -213,12 +201,9 @@ export default class WorkOrderService {
     try {
       const response = await handleRequest(API_URL + WORK_ORDERS_RESTORE(workOrderId), {
         requiresAuth: true,
-        method: 'PUT'
+        method: 'PUT',
+        revalidateTags: ['work-orders', 'work-orders-summary', 'invoices-summary', `work_orders/${workOrderId}`]
       })
-
-      await revalidate('work-orders')
-      await revalidate('work-orders-summary')
-      await revalidate('invoices-summary')
 
       return response
     } catch (error) {
@@ -236,7 +221,8 @@ export default class WorkOrderService {
     try {
       const response = await handleRequest(API_URL + WORK_ORDERS_ALL, {
         requiresAuth: true,
-        method: 'GET'
+        method: 'GET',
+        next: { revalidate: 30, tags: ['login', 'work_orders-all'] }
       })
 
       return response
@@ -277,7 +263,8 @@ export default class WorkOrderService {
       const response = await handleRequest(API_URL + COMPLETE_WORK_ORDER, {
         requiresAuth: false,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['work-orders', `work_orders/${payload.wo_id}`]
       })
 
       return response
@@ -294,7 +281,7 @@ export default class WorkOrderService {
       const response = await handleRequest(API_URL + WORK_ORDERS_SUMMARY, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['work-orders-summary', 'login'] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', 'work-orders-summary'] } // Cache for 30 seconds
       })
 
       return response
