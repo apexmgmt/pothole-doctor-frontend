@@ -475,7 +475,7 @@ const CreateEditViewNonInventoryProductModal = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mb-4'>
           <div
-            className={`grid grid-cols-1 items-start ${mode === 'create' ? 'lg:grid-cols-2' : 'lg:grid-cols-[3fr_3fr_2fr]'} gap-2`}
+            className={`grid grid-cols-1 items-start ${mode === 'create' || mode === 'duplicate' ? 'lg:grid-cols-2' : 'lg:grid-cols-[3fr_3fr_2fr]'} gap-2`}
           >
             {/* Basic Product Information */}
             <div className='sticky top-4 p-4 border border-border rounded-lg'>

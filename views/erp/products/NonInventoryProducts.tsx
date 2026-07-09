@@ -56,6 +56,7 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
+  const [skuValue, setSkuValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(false)
   const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState<boolean>(false)
@@ -105,6 +106,7 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
   // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    setSkuValue(filterOptions.sku || '')
     if (!hideTitle) dispatch(setPageTitle('Manage Non-Inventory Products'))
   }, [])
 
@@ -133,6 +135,33 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
   const onSearchChange = (value: string) => {
     setSearchValue(value)
     debouncedSearch(value)
+  }
+
+  const debouncedSkuSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.sku = val
+          } else {
+            delete newOptions.sku
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSkuSearchChange = (value: string) => {
+    setSkuValue(value)
+    debouncedSkuSearch(value)
   }
 
   const handleOpenCreateModal = () => {
@@ -563,23 +592,8 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
             name='sku-filter'
             label='SKU'
             placeholder='SKU...'
-            value={filterOptions.sku || ''}
-            onChange={value => {
-              setFilterOptions((prev: any) => {
-                const newOptions = { ...prev }
-
-                if (value && typeof value === 'string' && value.trim() !== '') {
-                  newOptions.sku = value
-                } else {
-                  delete newOptions.sku
-                }
-
-                // Optionally reset page on filter change
-                if (newOptions.page) delete newOptions.page
-
-                return newOptions
-              })
-            }}
+            value={skuValue}
+            onChange={value => onSkuSearchChange(value as string)}
           />
         </div>
         {hasActiveFilters() && (

@@ -3,7 +3,7 @@ import ProductCategoryService from '@/services/api/products/product_categories.s
 import ServiceTypeService from '@/services/api/settings/service_types.service'
 import UnitService from '@/services/api/settings/units.service'
 import VendorService from '@/services/api/vendors/vendors.service'
-import ProductService from '@/services/api/products/products.service'
+import NonInventoryProductService from '@/services/api/products/non-inventory-products.service'
 import { ProductCategory, ServiceType, Unit, Vendor, DataTableApiResponse, Product } from '@/types'
 import NonInventoryProducts from '@/views/erp/products/NonInventoryProducts'
 import { hasPermission } from '@/utils/role-permission'
@@ -34,7 +34,7 @@ export default async function NonInventoryProductsPage({
   let responseData: DataTableApiResponse<Product> | null = null
 
   try {
-    const response = await ProductService.index(resolvedSearchParams as Record<string, string>)
+    const response = await NonInventoryProductService.index(resolvedSearchParams as Record<string, string>)
 
     responseData = response?.data || null
   } catch (error) {
