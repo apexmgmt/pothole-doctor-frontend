@@ -14,7 +14,6 @@ import {
 } from '@/constants/api'
 import { handleRequest } from '@/services/api/base.service'
 import { InvoicePayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
 
 export default class InvoiceService {
   /**
@@ -31,7 +30,10 @@ export default class InvoiceService {
       const response = await handleRequest(API_URL + INVOICES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['invoices'] } // Cache for 60 seconds
+        next: {
+          revalidate: 60,
+          tags: ['login', 'invoices', queryParams ? `invoices?${queryParams}` : 'invoices']
+        }
       })
 
       return response
@@ -68,12 +70,9 @@ export default class InvoiceService {
       const response = await handleRequest(API_URL + INVOICES, {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['invoices', 'invoices-summary', 'work-orders-summary']
       })
-
-      await revalidate('invoices')
-      await revalidate('invoices-summary')
-      await revalidate('work-orders-summary')
 
       return response
     } catch (error) {
@@ -93,12 +92,9 @@ export default class InvoiceService {
       const response = await handleRequest(API_URL + INVOICES_SERVICES(invoiceId), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['invoices', 'invoices-summary', 'work-orders-summary', `invoices/${invoiceId}`]
       })
-
-      await revalidate('invoices')
-      await revalidate('invoices-summary')
-      await revalidate('work-orders-summary')
 
       return response
     } catch (error) {
@@ -117,7 +113,8 @@ export default class InvoiceService {
     try {
       const response = await handleRequest(API_URL + INVOICES + invoiceId, {
         requiresAuth: true,
-        method: 'GET'
+        method: 'GET',
+        next: { revalidate: 60, tags: ['login', `invoices/${invoiceId}`] }
       })
 
       return response
@@ -139,12 +136,9 @@ export default class InvoiceService {
       const response = await handleRequest(API_URL + INVOICES + invoiceId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['invoices', 'invoices-summary', 'work-orders-summary', `invoices/${invoiceId}`]
       })
-
-      await revalidate('invoices')
-      await revalidate('invoices-summary')
-      await revalidate('work-orders-summary')
 
       return response
     } catch (error) {
@@ -165,12 +159,9 @@ export default class InvoiceService {
       const response = await handleRequest(API_URL + INVOICES_SERVICES(invoiceId), {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['invoices', 'invoices-summary', 'work-orders-summary', `invoices/${invoiceId}`]
       })
-
-      await revalidate('invoices')
-      await revalidate('invoices-summary')
-      await revalidate('work-orders-summary')
 
       return response
     } catch (error) {
@@ -189,12 +180,9 @@ export default class InvoiceService {
     try {
       const response = await handleRequest(API_URL + INVOICES + invoiceId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['invoices', 'invoices-summary', 'work-orders-summary', `invoices/${invoiceId}`]
       })
-
-      await revalidate('invoices')
-      await revalidate('invoices-summary')
-      await revalidate('work-orders-summary')
 
       return response
     } catch (error) {
@@ -213,12 +201,9 @@ export default class InvoiceService {
     try {
       const response = await handleRequest(API_URL + INVOICES_RESTORE(invoiceId), {
         requiresAuth: true,
-        method: 'PUT'
+        method: 'PUT',
+        revalidateTags: ['invoices', 'invoices-summary', 'work-orders-summary', `invoices/${invoiceId}`]
       })
-
-      await revalidate('invoices')
-      await revalidate('invoices-summary')
-      await revalidate('work-orders-summary')
 
       return response
     } catch (error) {
@@ -272,7 +257,8 @@ export default class InvoiceService {
     try {
       const response = await handleRequest(API_URL + INVOICES_MARKED_SIGNED(invoiceId), {
         requiresAuth: true,
-        method: 'POST'
+        method: 'POST',
+        revalidateTags: ['invoices', `invoices/${invoiceId}`]
       })
 
       return response
@@ -335,7 +321,7 @@ export default class InvoiceService {
       const response = await handleRequest(API_URL + INVOICES_SUMMARY, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['invoices-summary', 'login'] } // Cache for 60 seconds
+        next: { revalidate: 60, tags: ['login', 'invoices-summary'] } // Cache for 60 seconds
       })
 
       return response

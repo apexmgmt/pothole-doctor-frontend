@@ -11,7 +11,6 @@ import {
   TASKS_EXPORT_TENANT
 } from '@/constants/api'
 import { TaskPayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
 
 export default class TaskService {
   /**Task DataTable API */
@@ -25,7 +24,10 @@ export default class TaskService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 30, tags: ['tasks', 'login'] } // Cache for 30 seconds
+          next: {
+            revalidate: 30,
+            tags: ['login', 'tasks', queryParams ? `tasks?${queryParams}` : 'tasks']
+          }
         }
       )
 
@@ -43,11 +45,9 @@ export default class TaskService {
       const response = await handleRequest(API_URL + (isTenantApi ? TASKS_TENANT : TASKS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['tasks', 'tasks-all']
       })
-
-      await revalidate('tasks')
-      await revalidate('tasks-all')
 
       return response
     } catch (error) {
@@ -63,7 +63,7 @@ export default class TaskService {
       const response = await handleRequest(API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + taskId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 30, tags: [`tasks/${taskId}`, 'login'] } // Cache for 30 seconds
+        next: { revalidate: 30, tags: ['login', `tasks/${taskId}`] } // Cache for 30 seconds
       })
 
       return response
@@ -80,12 +80,9 @@ export default class TaskService {
       const response = await handleRequest(API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + taskId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['tasks', `tasks/${taskId}`, 'tasks-all']
       })
-
-      await revalidate('tasks')
-      await revalidate(`tasks/${taskId}`)
-      await revalidate('tasks-all')
 
       return response
     } catch (error) {
@@ -109,12 +106,9 @@ export default class TaskService {
       const response = await handleRequest(API_URL + TASKS_STATUS_TENANT(taskId), {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify({ status: newStatus, order: newOrder })
+        body: JSON.stringify({ status: newStatus, order: newOrder }),
+        revalidateTags: ['tasks', `tasks/${taskId}`, 'tasks-all']
       })
-
-      await revalidate('tasks')
-      await revalidate(`tasks/${taskId}`)
-      await revalidate('tasks-all')
 
       return response
     } catch (error) {
@@ -135,11 +129,9 @@ export default class TaskService {
       const response = await handleRequest(API_URL + TASKS_BULK_ACTION_TENANT, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify({ ids, status })
+        body: JSON.stringify({ ids, status }),
+        revalidateTags: ['tasks', 'tasks-all']
       })
-
-      await revalidate('tasks')
-      await revalidate('tasks-all')
 
       return response
     } catch (error) {
@@ -170,12 +162,9 @@ export default class TaskService {
 
       const response = await handleRequest(API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + taskId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['tasks', `tasks/${taskId}`, 'tasks-all']
       })
-
-      await revalidate('tasks')
-      await revalidate(`tasks/${taskId}`)
-      await revalidate('tasks-all')
 
       return response
     } catch (error) {
@@ -193,7 +182,10 @@ export default class TaskService {
       const response = await handleRequest(url, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 30, tags: ['tasks-all', 'login'] } // Cache for 30 seconds
+        next: {
+          revalidate: 30,
+          tags: ['login', 'tasks-all', queryParams ? `tasks-all?${queryParams}` : 'tasks-all']
+        }
       })
 
       return response
