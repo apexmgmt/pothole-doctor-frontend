@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useForm } from 'react-hook-form'
 
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -17,10 +18,9 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import NoteTypeService from '@/services/api/settings/note_types.service'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import { hasPermission } from '@/utils/role-permission'
 import CustomFormField from '@/components/form/CustomFormField'
 import TableSearch from '@/components/erp/common/TableSearch'
 
@@ -37,21 +37,36 @@ const emptyNoteTypePayload: NoteTypeFormValues = {
 }
 
 type NoteTypeFieldErrors = Partial<Record<keyof NoteTypeFormValues, string>>
+interface NoteTypesProps {
+  initialData?: DataTableApiResponse<NoteType> | null
+  permissions?: {
+    canCreateType: boolean
+    canEditType: boolean
+    canDeleteType: boolean
+  }
+}
 
-const NoteTypes: React.FC = () => {
+const NoteTypes: React.FC<NoteTypesProps> = ({ initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<NoteType> | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<NoteType> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
   const [inlineMode, setInlineMode] = useState<'create' | 'edit' | null>(null)
   const [editingNoteTypeId, setEditingNoteTypeId] = useState<string | null>(null)
-  const [canCreateNoteType, setCanCreateNoteType] = useState<boolean>(false)
-  const [canEditNoteType, setCanEditNoteType] = useState<boolean>(false)
-  const [canDeleteNoteType, setCanDeleteNoteType] = useState<boolean>(false)
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+
+  const canCreateNoteType = permissions?.canCreateType ?? false
+  const canEditNoteType = permissions?.canEditType ?? false
+  const canDeleteNoteType = permissions?.canDeleteType ?? false
+
+  const filterOptions = useMemo(
+    () => ({
+      ...getInitialFilters(searchParams)
+    }),
+    [searchParams]
+  )
 
   const {
     register,
@@ -68,59 +83,60 @@ const NoteTypes: React.FC = () => {
   const isInlineEditing = inlineMode !== null
 
   useEffect(() => {
-    setSearchValue(filterOptions.search || '')
-
-    hasPermission('Create Note Type').then(result => setCanCreateNoteType(result))
-    hasPermission('Update Note Type').then(result => setCanEditNoteType(result))
-    hasPermission('Delete Note Type').then(result => setCanDeleteNoteType(result))
-  }, [])
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
+    setSearchValue(filterOptions.search || '')
+    dispatch(setPageTitle('Manage Note Types'))
+  }, [dispatch])
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+    const params = new URLSearchParams()
 
-        return newOptions
-      })
-    }, 500)
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
 
-    return () => clearTimeout(timer)
-  }, [searchValue])
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
-  const fetchData = async () => {
     setIsLoading(true)
-
-    try {
-      NoteTypeService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch note types')
-        })
-    } catch {
-      setIsLoading(false)
-      toast.error('Something went wrong while fetching the note types!')
-    }
+    router.push(newUrl, { scroll: false })
   }
 
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Note Types'))
-  }, [filterOptions])
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const getFieldErrorsFromApi = (error: any): NoteTypeFieldErrors => {
     const serverErrors = error?.errors
@@ -222,7 +238,7 @@ const NoteTypes: React.FC = () => {
         goToFirstPage()
 
         if (!createdNoteType) {
-          fetchData()
+          router.refresh()
         }
 
         toast.success(response?.message || 'Note type created successfully')
@@ -249,7 +265,7 @@ const NoteTypes: React.FC = () => {
             }
           })
         } else {
-          fetchData()
+          router.refresh()
         }
 
         toast.success(response?.message || 'Note type updated successfully')
@@ -276,7 +292,7 @@ const NoteTypes: React.FC = () => {
       await NoteTypeService.destroy(id)
         .then(() => {
           toast.success('Note type deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete note type')
@@ -468,7 +484,12 @@ const NoteTypes: React.FC = () => {
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
