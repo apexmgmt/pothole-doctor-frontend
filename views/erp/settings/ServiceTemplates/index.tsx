@@ -14,79 +14,97 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { Column, DataTableApiResponse, ServiceTemplate } from '@/types'
-import { getInitialFilters, updateURL } from '@/utils/utility'
-import { hasPermission } from '@/utils/role-permission'
+import { getInitialFilters } from '@/utils/utility'
 import TableSearch from '@/components/erp/common/TableSearch'
 import ServiceTemplateService from '@/services/api/settings/service_templates.service'
 import { formatDate } from '@/utils/date'
 
-const ServiceTemplates = () => {
+import debounce from '@/utils/debounce'
+
+interface ServiceTemplatesProps {
+  initialData?: DataTableApiResponse<any> | null
+  permissions?: {
+    canCreateTemplate: boolean
+    canEditTemplate: boolean
+    canDeleteTemplate: boolean
+  }
+}
+
+const ServiceTemplates: React.FC<ServiceTemplatesProps> = ({ initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<any> | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<any> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
 
-  const [filterOptions, setFilterOptions] = useState<any>(() => getInitialFilters(searchParams))
+  const canCreate = permissions?.canCreateTemplate ?? false
+  const canEdit = permissions?.canEditTemplate ?? false
+  const canDelete = permissions?.canDeleteTemplate ?? false
 
-  // Permissions
-  const [canCreate, setCanCreate] = useState<boolean>(false)
-  const [canEdit, setCanEdit] = useState<boolean>(false)
-  const [canDelete, setCanDelete] = useState<boolean>(false)
+  const filterOptions = useMemo(
+    () => ({
+      ...getInitialFilters(searchParams)
+    }),
+    [searchParams]
+  )
+
+  useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Create Service Template').then(result => setCanCreate(result))
-    hasPermission('Update Service Template').then(result => setCanEdit(result))
-    hasPermission('Delete Service Template').then(result => setCanDelete(result))
-  }, [])
+    dispatch(setPageTitle('Manage Service Templates'))
+  }, [dispatch])
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+    const params = new URLSearchParams()
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
 
-        return newOptions
-      })
-    }, 500)
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  const fetchData = async () => {
     setIsLoading(true)
-
-    try {
-      ServiceTemplateService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(() => {
-          setIsLoading(false)
-        })
-    } catch {
-      setIsLoading(false)
-    }
+    router.push(newUrl, { scroll: false })
   }
 
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Service Templates'))
-  }, [filterOptions])
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const handleOpenEditPage = (id: string) => {
     router.push(`/erp/settings/service-templates/${id}`)
@@ -97,7 +115,7 @@ const ServiceTemplates = () => {
       await ServiceTemplateService.destroy(id)
         .then(() => {
           toast.success('Service template deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete service template')
@@ -193,7 +211,7 @@ const ServiceTemplates = () => {
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
         <TableSearch
           value={searchValue}
-          onChange={setSearchValue}
+          onChange={onSearchChange}
           placeholder='Search...'
           className='lg:w-80 min-w-0'
         />

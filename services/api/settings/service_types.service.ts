@@ -3,7 +3,6 @@ import { getApiUrl, isTenant } from '@/utils/utility'
 import { handleRequest } from '@/services/api/base.service'
 import { API_URL, SERVICE_TYPES, SERVICE_TYPES_ALL } from '@/constants/api'
 import { ServiceTypePayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class ServiceTypeService {
   /**Service Types DataTable API */
@@ -18,7 +17,10 @@ export default class ServiceTypeService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['service-types'] } // Cache for 60 seconds
+          next: {
+            revalidate: 30,
+            tags: ['login', 'service-types', queryParams ? `service-types?${queryParams}` : 'service-types']
+          }
         }
       )
 
@@ -36,10 +38,9 @@ export default class ServiceTypeService {
       const response = await handleRequest(API_URL + (isTenantApi ? SERVICE_TYPES_TENANT : SERVICE_TYPES), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['service-types', 'service-types-all']
       })
-
-      await revalidate('service-types')
 
       return response
     } catch (error) {
@@ -57,7 +58,7 @@ export default class ServiceTypeService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`service-types/${serviceTypeId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `service-types/${serviceTypeId}`] }
         }
       )
 
@@ -77,13 +78,10 @@ export default class ServiceTypeService {
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['service-types', 'service-types-all', `service-types/${serviceTypeId}`]
         }
       )
-
-      await revalidate('service-types')
-      await revalidate(`service-types/${serviceTypeId}`)
-      await revalidate('service-types-all')
 
       return response
     } catch (error) {
@@ -100,13 +98,10 @@ export default class ServiceTypeService {
         API_URL + (isTenantApi ? SERVICE_TYPES_TENANT : SERVICE_TYPES) + serviceTypeId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['service-types', 'service-types-all', `service-types/${serviceTypeId}`]
         }
       )
-
-      await revalidate('service-types')
-      await revalidate(`service-types/${serviceTypeId}`)
-      await revalidate('service-types-all')
 
       return response
     } catch (error) {
@@ -123,13 +118,10 @@ export default class ServiceTypeService {
         API_URL + (isTenantApi ? SERVICE_TYPES_TENANT : SERVICE_TYPES) + serviceTypeId + '/restore',
         {
           requiresAuth: true,
-          method: 'POST'
+          method: 'POST',
+          revalidateTags: ['service-types', 'service-types-all', `service-types/${serviceTypeId}`]
         }
       )
-
-      await revalidate('service-types')
-      await revalidate(`service-types/${serviceTypeId}`)
-      await revalidate('service-types-all')
 
       return response
     } catch (error) {
@@ -145,7 +137,7 @@ export default class ServiceTypeService {
       const response = await handleRequest(API_URL + (isTenantApi ? SERVICE_TYPES_ALL_TENANT : SERVICE_TYPES_ALL), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['service-type-types'] } // Cache for 1 hour
+        next: { revalidate: 3600, tags: ['login', 'service-types-all'] }
       })
 
       return response

@@ -1,7 +1,6 @@
 import { API_URL, SERVICE_TEMPLATES, SERVICE_TEMPLATES_ALL, SERVICE_TEMPLATES_RESTORE } from '@/constants/api'
 import { handleRequest } from '@/services/api/base.service'
 import { ServiceTemplatePayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
 
 export default class ServiceTemplateService {
   /**
@@ -18,7 +17,10 @@ export default class ServiceTemplateService {
       const response = await handleRequest(API_URL + SERVICE_TEMPLATES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['service-templates', 'login'] } // Cache for 60 seconds
+        next: {
+          revalidate: 30,
+          tags: ['login', 'service-templates', queryParams ? `service-templates?${queryParams}` : 'service-templates']
+        }
       })
 
       return response
@@ -35,10 +37,9 @@ export default class ServiceTemplateService {
       const response = await handleRequest(API_URL + SERVICE_TEMPLATES, {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['service-templates', 'service-templates-all']
       })
-
-      await revalidate('service-templates')
 
       return response
     } catch (error) {
@@ -57,7 +58,8 @@ export default class ServiceTemplateService {
     try {
       const response = await handleRequest(API_URL + SERVICE_TEMPLATES + serviceTemplateId, {
         requiresAuth: true,
-        method: 'GET'
+        method: 'GET',
+        next: { revalidate: 30, tags: ['login', `service-templates/${serviceTemplateId}`] }
       })
 
       return response
@@ -79,10 +81,9 @@ export default class ServiceTemplateService {
       const response = await handleRequest(API_URL + SERVICE_TEMPLATES + serviceTemplateId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['service-templates', 'service-templates-all', `service-templates/${serviceTemplateId}`]
       })
-
-      await revalidate('service-templates')
 
       return response
     } catch (error) {
@@ -101,10 +102,9 @@ export default class ServiceTemplateService {
     try {
       const response = await handleRequest(API_URL + SERVICE_TEMPLATES + serviceTemplateId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['service-templates', 'service-templates-all', `service-templates/${serviceTemplateId}`]
       })
-
-      await revalidate('service-templates')
 
       return response
     } catch (error) {
@@ -123,10 +123,9 @@ export default class ServiceTemplateService {
     try {
       const response = await handleRequest(API_URL + SERVICE_TEMPLATES_RESTORE(serviceTemplateId), {
         requiresAuth: true,
-        method: 'POST'
+        method: 'POST',
+        revalidateTags: ['service-templates', 'service-templates-all', `service-templates/${serviceTemplateId}`]
       })
-
-      await revalidate('service-templates')
 
       return response
     } catch (error) {
@@ -144,7 +143,8 @@ export default class ServiceTemplateService {
     try {
       const response = await handleRequest(API_URL + SERVICE_TEMPLATES_ALL, {
         requiresAuth: true,
-        method: 'GET'
+        method: 'GET',
+        next: { revalidate: 3600, tags: ['login', 'service-templates-all'] }
       })
 
       return response
