@@ -14,36 +14,33 @@ import EditEmailTemplateDialog from './EditEmailTemplateDialog'
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { hasPermission } from '@/utils/role-permission'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
-export default function EmailTemplates({ templates: initialTemplates }: { templates: EmailTemplate[] }) {
+interface EmailTemplatesProps {
+  templates: EmailTemplate[]
+  permissions?: {
+    canManageMessageTemplates: boolean
+    canUpdateMessageTemplates: boolean
+    canViewMessageTemplates: boolean
+  }
+}
+
+export default function EmailTemplates({ templates: initialTemplates, permissions }: EmailTemplatesProps) {
   const [templates, setTemplates] = useState(initialTemplates)
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const dispatch = useAppDispatch()
 
-  // Message template permissions
-  const [canManageMessageTemplates, setCanManageMessageTemplates] = useState<boolean>(false)
-  const [canUpdateMessageTemplates, setCanUpdateMessageTemplates] = useState<boolean>(false)
-  const [canViewMessageTemplates, setCanViewMessageTemplates] = useState<boolean>(false)
+  const canManageMessageTemplates = permissions?.canManageMessageTemplates ?? false
+  const canUpdateMessageTemplates = permissions?.canUpdateMessageTemplates ?? false
+  const canViewMessageTemplates = permissions?.canViewMessageTemplates ?? false
+
   const router = useRouter()
 
   useEffect(() => {
     dispatch(setPageTitle('Email & SMS Templates'))
-
-    // Check permissions for message templates
-    hasPermission('Manage Message Template').then(result => {
-      setCanManageMessageTemplates(result)
-    })
-    hasPermission('Update Message Template').then(result => {
-      setCanUpdateMessageTemplates(result)
-    })
-    hasPermission('View Message Template').then(result => {
-      setCanViewMessageTemplates(result)
-    })
-  }, [])
+  }, [dispatch])
 
   // Sync state with props when initialTemplates changes
   useEffect(() => {

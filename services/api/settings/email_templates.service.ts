@@ -15,7 +15,7 @@ export default class EmailTemplateService {
         {
           requiresAuth: true,
           method: 'GET',
-          cache: 'no-store'
+          next: { revalidate: 30, tags: ['login', 'email-templates', group ? `email-templates?group=${group}` : 'email-templates'] }
         }
       )
 
@@ -33,7 +33,8 @@ export default class EmailTemplateService {
       const response = await handleRequest(API_URL + (isTenantApi ? EMAIL_TEMPLATES_TENANT : EMAIL_TEMPLATES) + id, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['email-templates']
       })
 
       return response
