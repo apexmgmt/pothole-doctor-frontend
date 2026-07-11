@@ -24,6 +24,7 @@ export default async function VendorsPage({
 
   try {
     const response = await VendorService.index(resolvedSearchParams as Record<string, string>)
+
     responseData = response?.data || null
   } catch (error) {
     console.error('Failed to fetch vendors:', error)

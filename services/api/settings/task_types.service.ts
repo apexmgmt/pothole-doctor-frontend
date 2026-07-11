@@ -2,7 +2,6 @@ import { getApiUrl, isTenant } from '@/utils/utility'
 import { handleRequest } from '@/services/api/base.service'
 import { API_URL, TASK_TYPES, TASK_TYPES_ALL, TASK_TYPES_ALL_TENANT, TASK_TYPES_TENANT } from '@/constants/api'
 import { TaskTypePayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
 
 export default class TaskTypeService {
   /**Task type DataTable API */
@@ -16,7 +15,10 @@ export default class TaskTypeService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['task-types'] } // Cache for 60 seconds
+          next: {
+            revalidate: 30,
+            tags: ['login', 'task-types', queryParams ? `task-types?${queryParams}` : 'task-types']
+          }
         }
       )
 
@@ -34,11 +36,9 @@ export default class TaskTypeService {
       const response = await handleRequest(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['task-types', 'task-types-all']
       })
-
-      await revalidate('task-types')
-      await revalidate('task-types-all')
 
       return response
     } catch (error) {
@@ -54,7 +54,7 @@ export default class TaskTypeService {
       const response = await handleRequest(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`task-types/${taskTypeId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', `task-types/${taskTypeId}`] }
       })
 
       return response
@@ -71,12 +71,9 @@ export default class TaskTypeService {
       const response = await handleRequest(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['task-types', 'task-types-all', `task-types/${taskTypeId}`]
       })
-
-      await revalidate('task-types')
-      await revalidate(`task-types/${taskTypeId}`)
-      await revalidate('task-types-all')
 
       return response
     } catch (error) {
@@ -91,12 +88,9 @@ export default class TaskTypeService {
 
       const response = await handleRequest(API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['task-types', 'task-types-all', `task-types/${taskTypeId}`]
       })
-
-      await revalidate('task-types')
-      await revalidate(`task-types/${taskTypeId}`)
-      await revalidate('task-types-all')
 
       return response
     } catch (error) {
@@ -113,13 +107,10 @@ export default class TaskTypeService {
         API_URL + (isTenantApi ? TASK_TYPES_TENANT : TASK_TYPES) + taskTypeId + '/restore',
         {
           requiresAuth: true,
-          method: 'POST'
+          method: 'POST',
+          revalidateTags: ['task-types', 'task-types-all', `task-types/${taskTypeId}`]
         }
       )
-
-      await revalidate('task-types')
-      await revalidate(`task-types/${taskTypeId}`)
-      await revalidate('task-types-all')
 
       return response
     } catch (error) {
@@ -135,7 +126,7 @@ export default class TaskTypeService {
       const response = await handleRequest(API_URL + (isTenantApi ? TASK_TYPES_ALL_TENANT : TASK_TYPES_ALL), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['task-types-all'] } // Cache for 60 seconds
+        next: { revalidate: 3600, tags: ['login', 'task-types-all'] }
       })
 
       return response
