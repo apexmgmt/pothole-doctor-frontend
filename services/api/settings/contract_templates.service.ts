@@ -1,7 +1,6 @@
 import { handleRequest } from '@/services/api/base.service'
 import { API_URL, CONTRACT_TEMPLATES, CONTRACT_TEMPLATES_ALL } from '@/constants/api'
 import { ContractTemplatePayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
 
 export default class ContractTemplateService {
   /**
@@ -17,7 +16,14 @@ export default class ContractTemplateService {
       const response = await handleRequest(API_URL + CONTRACT_TEMPLATES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['contract-templates'] } // Cache for 60 seconds
+        next: {
+          revalidate: 30,
+          tags: [
+            'login',
+            'contract-templates',
+            queryParams ? `contract-templates?${queryParams}` : 'contract-templates'
+          ]
+        }
       })
 
       return response
@@ -32,11 +38,9 @@ export default class ContractTemplateService {
       const response = await handleRequest(API_URL + CONTRACT_TEMPLATES, {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['contract-templates', 'contract-templates-all']
       })
-
-      await revalidate('contract-templates')
-      await revalidate('contract-templates-all')
 
       return response
     } catch (error) {
@@ -50,7 +54,7 @@ export default class ContractTemplateService {
       const response = await handleRequest(API_URL + CONTRACT_TEMPLATES + contractTemplateId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`contract-templates/${contractTemplateId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', `contract-templates/${contractTemplateId}`] }
       })
 
       return response
@@ -65,12 +69,9 @@ export default class ContractTemplateService {
       const response = await handleRequest(API_URL + CONTRACT_TEMPLATES + contractTemplateId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['contract-templates', 'contract-templates-all', `contract-templates/${contractTemplateId}`]
       })
-
-      await revalidate('contract-templates')
-      await revalidate(`contract-templates/${contractTemplateId}`)
-      await revalidate('contract-templates-all')
 
       return response
     } catch (error) {
@@ -83,12 +84,9 @@ export default class ContractTemplateService {
     try {
       const response = await handleRequest(API_URL + CONTRACT_TEMPLATES + contractTemplateId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['contract-templates', 'contract-templates-all', `contract-templates/${contractTemplateId}`]
       })
-
-      await revalidate('contract-templates')
-      await revalidate(`contract-templates/${contractTemplateId}`)
-      await revalidate('contract-templates-all')
 
       return response
     } catch (error) {
@@ -105,7 +103,7 @@ export default class ContractTemplateService {
       const response = await handleRequest(url, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['contract-templates-all'] } // Cache for 1 hour
+        next: { revalidate: 3600, tags: ['login', 'contract-templates-all'] }
       })
 
       return response
