@@ -35,7 +35,7 @@ const ProductInventorySection: React.FC<ProductInventorySectionProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedInventory, setSelectedInventory] = useState<PurchaseOrder | null>(null)
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<PurchaseOrder> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [filterOptions, setFilterOptions] = useState<any>({ product_id: product.id })
 

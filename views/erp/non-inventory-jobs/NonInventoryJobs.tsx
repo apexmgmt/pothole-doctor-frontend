@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Plus, Trash2 } from 'lucide-react'
 
@@ -22,7 +23,7 @@ import {
   Warehouse
 } from '@/types'
 import { formatDate } from '@/utils/date'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import MaterialJobService from '@/services/api/products/material-jobs.service'
 import AddNonInventoryJobActionModal from './AddNonInventoryJobActionModal'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
@@ -33,20 +34,40 @@ interface NonInventoryJobsProps {
   staffs: Staff[]
   warehouses: Warehouse[]
   businessLocations: BusinessLocation[]
+  initialData?: DataTableApiResponse<MaterialJob> | null
 }
 
-const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses, businessLocations }) => {
+const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses, businessLocations, initialData }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<MaterialJob> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
 
-  const [filterOptions, setFilterOptions] = useState<any>(() => ({
-    ...getInitialFilters(searchParams)
-  }))
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
+
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
 
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [openActionModal, setOpenActionModal] = useState(false)
@@ -56,60 +77,41 @@ const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses,
   const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
+  useEffect(() => {
     setSearchValue(filterOptions.search || '')
     dispatch(setPageTitle('Non-Inventory Jobs'))
   }, [])
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+          if (newOptions.page) {
+            delete newOptions.page
+          }
 
-        const prevKeys = Object.keys(prev)
-        const newKeys = Object.keys(newOptions)
-
-        if (prevKeys.length === newKeys.length && newKeys.every(k => prev[k] === newOptions[k])) {
-          return prev
-        }
-
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      MaterialJobService.index({ ...filterOptions, job_type: 'non_inventory' })
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
+          return newOptions
         })
-        .catch(() => {
-          setIsLoading(false)
-        })
-    } catch {
-      setIsLoading(false)
-    }
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
   }
-
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-  }, [filterOptions])
 
   const toggleRow = (row: MaterialJob) => {
     setExpandedRows(prev => {
@@ -438,7 +440,7 @@ const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses,
         <div className='flex items-center gap-2 lg:flex-0 flex-1'>
           <TableSearch
             value={searchValue}
-            onChange={setSearchValue}
+            onChange={onSearchChange}
             placeholder='Search...'
             className='lg:w-80 min-w-0'
           />
@@ -476,7 +478,7 @@ const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses,
         staffs={staffs}
         warehouses={warehouses}
         businessLocations={businessLocations}
-        onSuccess={fetchData}
+        onSuccess={() => router.refresh()}
       />
       <ConfirmDialog
         open={confirmDeleteOpen}
@@ -496,7 +498,7 @@ const NonInventoryJobs: React.FC<NonInventoryJobsProps> = ({ staffs, warehouses,
             toast.success('Action deleted')
             setConfirmDeleteOpen(false)
             setDeletingAction(null)
-            fetchData()
+            router.refresh()
           } catch {
             toast.error('Failed to delete action')
           } finally {

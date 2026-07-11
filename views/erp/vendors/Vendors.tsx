@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 
+import debounce from '@/utils/debounce'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { PlusIcon, User2Icon } from 'lucide-react'
@@ -22,86 +23,89 @@ import { DetailsIcon, UserIcon } from '@/public/icons'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CreateOrEditVendorModal from './CreateOrEditVendorModal'
 import VendorDetails from './VendorDetails'
-import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCities, paymentTerms }) => {
+const Vendors: React.FC<VendorsProps> = ({
+  taxTypes,
+  countriesWithStatesAndCities,
+  paymentTerms,
+  initialData,
+  permissions
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Vendor> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedVendorId, setSelectedVendorId] = useState<string | null>(null)
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [activeTab, setActiveTab] = useState<string>('vendors')
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateVendor, setCanCreateVendor] = useState<boolean>(false)
-  const [canEditVendor, setCanEditVendor] = useState<boolean>(false)
-  const [canDeleteVendor, setCanDeleteVendor] = useState<boolean>(false)
-  const [canViewVendor, setCanViewVendor] = useState<boolean>(false)
+  const filterOptions = useMemo(() => getInitialFilters(searchParams), [searchParams])
+  const canCreateVendor = permissions?.canCreateVendor ?? false
+  const canEditVendor = permissions?.canEditVendor ?? false
+  const canDeleteVendor = permissions?.canDeleteVendor ?? false
+  const canViewVendor = permissions?.canViewVendor ?? false
 
-  // Set initial search value from filterOptions and check permissions
+  useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Create Vendor').then(result => setCanCreateVendor(result))
-    hasPermission('Update Vendor').then(result => setCanEditVendor(result))
-    hasPermission('Delete Vendor').then(result => setCanDeleteVendor(result))
-    hasPermission('View Vendor').then(result => setCanViewVendor(result))
+    dispatch(setPageTitle('Manage Vendors'))
   }, [])
 
-  // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
+  // Debounced search setup
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+          if (newOptions.page) {
+            delete newOptions.page
+          }
 
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      VendorService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
+          return newOptions
         })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error('Error fetching contact types')
-        })
-    } catch (error) {
-      setIsLoading(false)
-      toast.error('Error fetching partners')
-    }
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
   }
 
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Vendors'))
-  }, [filterOptions])
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = getInitialFilters(searchParams)
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
 
   // Transform API data to match table format
   const vendorsData = apiResponse?.data
@@ -150,7 +154,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   }
 
   const handleSuccess = () => {
-    fetchData()
+    router.refresh()
     handleModalClose()
   }
 
@@ -228,7 +232,7 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
       await VendorService.destroy(id)
         .then(response => {
           toast.success('Vendor deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete partner')
@@ -249,7 +253,12 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear

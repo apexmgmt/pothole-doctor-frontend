@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import {
   API_URL,
   COMMISSION_BASES_ALL,
@@ -11,8 +11,6 @@ import {
   COMMISSIONS_TENANT
 } from '@/constants/api'
 import { CommissionPayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
-
 export default class CommissionService {
   /**Commission DataTable API */
   static index = async (filterOptions: object = {}) => {
@@ -20,22 +18,19 @@ export default class CommissionService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['commissions'] } // Cache for 60 seconds
+          next: {
+            revalidate: 30,
+            tags: ['login', 'commissions', queryParams ? `commissions?${queryParams}` : 'commissions']
+          }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch commissions')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -46,22 +41,14 @@ export default class CommissionService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['commissions', 'commissions-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to create commissions')
-      }
-
-      await revalidate('commissions')
-      await revalidate('commissions-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -72,19 +59,13 @@ export default class CommissionService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + commissionId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + commissionId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`commissions/${commissionId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', `commissions/${commissionId}`] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch commissions details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -95,23 +76,14 @@ export default class CommissionService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + commissionId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + commissionId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['commissions', 'commissions-all', `commissions/${commissionId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to update commissions')
-      }
-
-      await revalidate('commissions')
-      await revalidate(`commissions/${commissionId}`)
-      await revalidate('commissions-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -122,22 +94,13 @@ export default class CommissionService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + commissionId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + commissionId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['commissions', 'commissions-all', `commissions/${commissionId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete commissions')
-      }
-
-      await revalidate('commissions')
-      await revalidate(`commissions/${commissionId}`)
-      await revalidate('commissions-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -148,22 +111,16 @@ export default class CommissionService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? COMMISSION_FILTERS_ALL_TENANT : COMMISSION_FILTERS_ALL),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 3600, tags: ['commission-filters-all'] } // Cache for 1 hour
+          next: { revalidate: 30, tags: ['login', 'commission-filters-all'] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch commission filters')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -174,22 +131,16 @@ export default class CommissionService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? COMMISSION_BASES_ALL_TENANT : COMMISSION_BASES_ALL),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 3600, tags: ['commission-bases-all'] } // Cache for 1 hour
+          next: { revalidate: 3600, tags: ['login', 'commission-bases-all'] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch commission bases')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import {
   API_URL,
   PAYMENT_TERMS,
@@ -10,7 +10,6 @@ import {
   PAYMENT_TERMS_TYPES_TENANT
 } from '@/constants/api'
 import { PaymentTermPayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class PaymentTermsService {
   /**Payment Terms DataTable API */
@@ -19,22 +18,19 @@ export default class PaymentTermsService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['payment-terms'] } // Cache for 60 seconds
+          next: {
+            revalidate: 30,
+            tags: ['login', 'payment-terms', queryParams ? `payment-terms?${queryParams}` : 'payment-terms']
+          }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch payment terms')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -45,22 +41,14 @@ export default class PaymentTermsService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['payment-terms', 'payment-terms-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('payment-terms')
-      await revalidate('payment-terms-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -71,22 +59,16 @@ export default class PaymentTermsService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS) + paymentTermId,
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`payment-terms/${paymentTermId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `payment-terms/${paymentTermId}`] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch payment terms details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -97,26 +79,17 @@ export default class PaymentTermsService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS) + paymentTermId,
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['payment-terms', 'payment-terms-all', `payment-terms/${paymentTermId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('payment-terms')
-      await revalidate(`payment-terms/${paymentTermId}`)
-      await revalidate('payment-terms-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -127,25 +100,16 @@ export default class PaymentTermsService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS) + paymentTermId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['payment-terms', 'payment-terms-all', `payment-terms/${paymentTermId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete payment terms')
-      }
-
-      await revalidate('payment-terms-all')
-      await revalidate(`payment-terms/${paymentTermId}`)
-      await revalidate('payment-terms')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -156,25 +120,16 @@ export default class PaymentTermsService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PAYMENT_TERMS_TENANT : PAYMENT_TERMS) + paymentTermId + '/restore',
         {
           requiresAuth: true,
-          method: 'POST'
+          method: 'POST',
+          revalidateTags: ['payment-terms', 'payment-terms-all', `payment-terms/${paymentTermId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to restore payment terms')
-      }
-
-      await revalidate('payment-terms')
-      await revalidate(`payment-terms/${paymentTermId}`)
-      await revalidate('payment-terms-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -185,19 +140,13 @@ export default class PaymentTermsService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PAYMENT_TERMS_ALL_TENANT : PAYMENT_TERMS_ALL), {
+      const response = await handleRequest(API_URL + (isTenantApi ? PAYMENT_TERMS_ALL_TENANT : PAYMENT_TERMS_ALL), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['payment-terms-all'] } // Cache for 1 hour
+        next: { revalidate: 30, tags: ['login', 'payment-terms-all'] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch payment term list')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -208,22 +157,13 @@ export default class PaymentTermsService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
-        API_URL + (isTenantApi ? PAYMENT_TERMS_TYPES_TENANT : PAYMENT_TERMS_TYPES),
-        {
-          requiresAuth: true,
-          method: 'GET',
-          next: { revalidate: 3600, tags: ['payment-term-types'] } // Cache for 1 hour
-        }
-      )
+      const response = await handleRequest(API_URL + (isTenantApi ? PAYMENT_TERMS_TYPES_TENANT : PAYMENT_TERMS_TYPES), {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 30, tags: ['login', 'payment-term-types'] }
+      })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch payment term types')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

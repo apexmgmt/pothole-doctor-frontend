@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
+import debounce from '@/utils/debounce'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ImageIcon, PlusIcon } from 'lucide-react'
 import { toast } from 'sonner'
@@ -26,7 +27,6 @@ import {
   Staff
 } from '@/types'
 import { getInitialFilters, updateURL } from '@/utils/utility'
-import { hasPermission } from '@/utils/role-permission'
 import { DocumentIcon, UserIcon, ExcelIcon } from '@/public/icons'
 import InvoiceService from '@/services/api/invoices/invoices.service'
 
@@ -49,11 +49,8 @@ const Invoices: React.FC<{
   paymentTerms: PaymentTerm[]
   businessLocations: BusinessLocation[]
   invoicesSummary: Summary
-
-  // units: Unit[]
-  // productCategories: ProductCategory[]
-  // uomUnits: Unit[]
-  // vendors: Vendor[]
+  initialData?: DataTableApiResponse<Invoice> | null
+  permissions?: { canCreate: boolean; canView: boolean; canEdit: boolean; canDelete: boolean }
 }> = ({
   invoiceTypes,
   serviceTypes,
@@ -61,7 +58,9 @@ const Invoices: React.FC<{
   staffs,
   paymentTerms,
   businessLocations,
-  invoicesSummary
+  invoicesSummary,
+  initialData,
+  permissions
 
   // units,
   // productCategories,
@@ -72,17 +71,40 @@ const Invoices: React.FC<{
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Invoice> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
 
-  const [filterOptions, setFilterOptions] = useState<any>(() => {
+  const filterOptions = useMemo(() => {
     const f = getInitialFilters(searchParams)
 
     delete f['inv_id']
 
     return f
-  })
+  }, [searchParams])
+
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    const invId = searchParams.get('inv_id')
+
+    if (invId) params.set('inv_id', invId)
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
 
   const [activeTab, setActiveTab] = useState<string>('invoices')
   const [selectedInvoiceForTab, setSelectedInvoiceForTab] = useState<Invoice | null>(null)
@@ -112,61 +134,46 @@ const Invoices: React.FC<{
   const [notesListClientId, setNotesListClientId] = useState<string | null>(null)
 
   // Permissions
-  const [canCreateInvoice, setCanCreateInvoice] = useState<boolean>(false)
-  const [canEditInvoice, setCanEditInvoice] = useState<boolean>(false)
-  const [canDeleteInvoice, setCanDeleteInvoice] = useState<boolean>(false)
+  const canCreateInvoice = permissions?.canCreate ?? false
+  const canEditInvoice = permissions?.canEdit ?? false
+  const canDeleteInvoice = permissions?.canDelete ?? false
+
+  useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Create Invoice').then(result => setCanCreateInvoice(result))
-    hasPermission('Update Invoice').then(result => setCanEditInvoice(result))
-    hasPermission('Delete Invoice').then(result => setCanDeleteInvoice(result))
+    dispatch(setPageTitle('Manage Invoices'))
   }, [])
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+          if (newOptions.page) {
+            delete newOptions.page
+          }
 
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      InvoiceService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
+          return newOptions
         })
-        .catch(() => {
-          setIsLoading(false)
-        })
-    } catch {
-      setIsLoading(false)
-    }
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
   }
-
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Invoices'))
-  }, [filterOptions])
 
   const handleOpenCreateModal = () => {
     setInvoiceModalMode('create')
@@ -195,7 +202,7 @@ const Invoices: React.FC<{
       await InvoiceService.destroy(id)
         .then(() => {
           toast.success('Invoice deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete invoice')
@@ -211,7 +218,7 @@ const Invoices: React.FC<{
       const blob = await InvoiceService.exportInvoices(filterOptions)
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
-      
+
       a.href = url
       const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
 
@@ -376,7 +383,7 @@ const Invoices: React.FC<{
         </Button>
         <TableSearch
           value={searchValue}
-          onChange={setSearchValue}
+          onChange={onSearchChange}
           placeholder='Search...'
           className='lg:w-80 min-w-0'
         />
@@ -483,7 +490,7 @@ const Invoices: React.FC<{
         staffs={staffs}
         paymentTerms={paymentTerms}
         businessLocations={businessLocations}
-        onSuccess={fetchData}
+        onSuccess={() => router.refresh()}
         onCreateSuccess={handleCreateSuccess}
       />
 

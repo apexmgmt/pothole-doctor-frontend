@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, CLIENT_SMS, CLIENT_SMS_TENANT } from '@/constants/api'
 import { revalidate } from '@/services/app/cache.service'
 import { ClientSmsPayload } from '@/types'
@@ -11,18 +11,15 @@ export default class ClientSmsService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS) + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET'
-      })
+      const response = await handleRequest(
+        API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch client sms')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -33,19 +30,13 @@ export default class ClientSmsService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to send sms')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -56,18 +47,12 @@ export default class ClientSmsService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS) + clientSmsId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS) + clientSmsId, {
         requiresAuth: true,
         method: 'GET'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch lead sms details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -78,19 +63,13 @@ export default class ClientSmsService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS) + clientSmsId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS) + clientSmsId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to update client sms')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -101,18 +80,12 @@ export default class ClientSmsService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS) + clientSmsId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? CLIENT_SMS_TENANT : CLIENT_SMS) + clientSmsId, {
         requiresAuth: true,
         method: 'DELETE'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete client sms')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import Image from 'next/image'
 
@@ -16,7 +16,6 @@ import ProductGalleryService from '@/services/api/products/product-galleries.ser
 
 import { generateFileUrl } from '@/utils/utility'
 import { ProductGallery } from '@/types'
-import { hasPermission } from '@/utils/role-permission'
 
 interface ProductGallerySectionProps {
   productId: string
@@ -24,6 +23,12 @@ interface ProductGallerySectionProps {
   isLoading: boolean
   onUpdate: () => void
   disabled?: boolean
+  permissions?: {
+    canCreateGallery?: boolean
+    canViewGallery?: boolean
+    canEditGallery?: boolean
+    canDeleteGallery?: boolean
+  }
 }
 
 export function ProductGallerySection({
@@ -31,22 +36,16 @@ export function ProductGallerySection({
   galleries,
   isLoading,
   onUpdate,
-  disabled = false
+  disabled = false,
+  permissions: {
+    canCreateGallery = false,
+    canViewGallery = false,
+    canEditGallery = false,
+    canDeleteGallery = false
+  } = {}
 }: ProductGallerySectionProps) {
   const [uploadingImage, setUploadingImage] = useState<boolean>(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [canCreateGallery, setCanCreateGallery] = useState<boolean>(false)
-  const [canDeleteGallery, setCanDeleteGallery] = useState<boolean>(false)
-  const [canViewGallery, setCanViewGallery] = useState<boolean>(false)
-  const [canEditGallery, setCanEditGallery] = useState<boolean>(false)
-
-  // check the permissions
-  useEffect(() => {
-    hasPermission('Create Gallery').then(result => setCanCreateGallery(result))
-    hasPermission('Delete Gallery').then(result => setCanDeleteGallery(result))
-    hasPermission('View Gallery').then(result => setCanViewGallery(result))
-    hasPermission('Update Gallery').then(result => setCanEditGallery(result))
-  }, [])
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files

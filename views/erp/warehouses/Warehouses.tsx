@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { PlusIcon } from 'lucide-react'
@@ -16,22 +16,40 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import WarehouseService from '@/services/api/warehouses.service'
 import { Badge } from '@/components/ui/badge'
 import CreateOrEditWarehouseModal from './CreateOrEditWarehouseModal'
-import { hasPermission } from '@/utils/role-permission'
-import WarehousePurchaseOrders from './WarehousePurchaseOrders'
 import TableSearch from '@/components/erp/common/TableSearch'
+import WarehousePurchaseOrders from './WarehousePurchaseOrders'
 
-const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWithStateAndCities }) => {
+type Permissions = {
+  canCreateWarehouse: boolean
+  canViewWarehouse: boolean
+  canEditWarehouse: boolean
+  canDeleteWarehouse: boolean
+  canManagePurchaseOrder: boolean
+}
+
+const Warehouses: React.FC<WarehousesProps & { permissions?: Permissions }> = ({
+  businessLocations,
+  countriesWithStateAndCities,
+  initialData,
+  permissions: {
+    canCreateWarehouse = false,
+    canViewWarehouse = false,
+    canEditWarehouse = false,
+    canDeleteWarehouse = false,
+    canManagePurchaseOrder = false
+  } = {}
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Warehouse> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [activeTab, setActiveTab] = useState<'warehouses' | 'purchase_orders'>('warehouses')
   const [selectedWarehouseRow, setSelectedWarehouseRow] = useState<{ id: string; title: string } | null>(null)
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<string | null>(null)
@@ -39,70 +57,71 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateWarehouse, setCanCreateWarehouse] = useState<boolean>(false)
-  const [canEditWarehouse, setCanEditWarehouse] = useState<boolean>(false)
-  const [canDeleteWarehouse, setCanDeleteWarehouse] = useState<boolean>(false)
-  const [canManagePurchaseOrder, setCanManagePurchaseOrder] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions and check permissions
-  useEffect(() => {
-    setSearchValue(filterOptions.search || '')
-    hasPermission('Create Warehouse').then(result => setCanCreateWarehouse(result))
-    hasPermission('Update Warehouse').then(result => setCanEditWarehouse(result))
-    hasPermission('Delete Warehouse').then(result => setCanDeleteWarehouse(result))
-    hasPermission('Manage Purchase Order').then(result => setCanManagePurchaseOrder(result))
-  }, [])
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
 
-  // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+    const params = new URLSearchParams()
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
 
-        return newOptions
-      })
-    }, 500)
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  // Fetch data from API
-  const fetchData = async () => {
     setIsLoading(true)
-
-    try {
-      WarehouseService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch warehouses')
-        })
-    } catch (error) {
-      setIsLoading(false)
-      toast.error('Something went wrong while fetching the warehouses!')
-    }
+    router.push(newUrl, { scroll: false })
   }
 
+  // Set initial search value from filterOptions
   useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Warehouses'))
-  }, [filterOptions])
+    setSearchValue(filterOptions.search || '')
+  }, [])
+
+  useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
+  useEffect(() => {
+    dispatch(setPageTitle('Warehouses'))
+  }, [dispatch])
+
+  // Debounced search update
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   // Transform API data to match table format
   const warehousesData = apiResponse?.data
@@ -153,7 +172,7 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
   }
 
   const handleSuccess = () => {
-    fetchData()
+    router.refresh()
     handleModalClose()
   }
 
@@ -258,7 +277,7 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
       await WarehouseService.destroy(id)
         .then(response => {
           toast.success('Warehouse deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete warehouse')
@@ -279,7 +298,12 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear

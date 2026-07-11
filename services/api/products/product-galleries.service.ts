@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, PRODUCTS_GALLERIES, PRODUCTS_GALLERIES_TENANT } from '@/constants/api'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -8,7 +8,7 @@ export default class ProductGalleryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PRODUCTS_GALLERIES_TENANT : PRODUCTS_GALLERIES) + `?product_id=${productId}`,
         {
           requiresAuth: true,
@@ -17,13 +17,7 @@ export default class ProductGalleryService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch product galleries')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -33,21 +27,15 @@ export default class ProductGalleryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PRODUCTS_GALLERIES_TENANT : PRODUCTS_GALLERIES), {
+      const response = await handleRequest(API_URL + (isTenantApi ? PRODUCTS_GALLERIES_TENANT : PRODUCTS_GALLERIES), {
         requiresAuth: true,
         method: 'POST',
         body: payload
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to add product gallery')
-      }
-
       await revalidate('product-galleries')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -57,7 +45,7 @@ export default class ProductGalleryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PRODUCTS_GALLERIES_TENANT : PRODUCTS_GALLERIES) + galleryId,
         {
           requiresAuth: true,
@@ -65,15 +53,9 @@ export default class ProductGalleryService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete product gallery')
-      }
-
       await revalidate('product-galleries')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

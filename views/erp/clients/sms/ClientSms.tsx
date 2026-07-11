@@ -15,7 +15,7 @@ import ClientSmsService from '@/services/api/clients/client-sms.service'
 import TableSearch from '@/components/erp/common/TableSearch'
 
 const ClientSmsView = ({ clientId, client }: { clientId: string; client: Client | null }) => {
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<any> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)

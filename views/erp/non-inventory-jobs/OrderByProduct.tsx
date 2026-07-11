@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { ShoppingCart } from 'lucide-react'
 
@@ -12,83 +13,87 @@ import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import { Column, DataTableApiResponse, MaterialJob } from '@/types'
 import { formatDate } from '@/utils/date'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import MaterialJobService from '@/services/api/products/material-jobs.service'
 import UpdateMaterialJobModal from './UpdateMaterialJobModal'
 import TableSearch from '@/components/erp/common/TableSearch'
 import { toast } from 'sonner'
 import { ExcelIcon } from '@/public/icons'
 
-const OrderByProduct: React.FC = () => {
+interface OrderByProductProps {
+  initialData?: DataTableApiResponse<MaterialJob> | null
+}
+
+const OrderByProduct: React.FC<OrderByProductProps> = ({ initialData }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<any> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
   const [updateModalOpen, setUpdateModalOpen] = useState(false)
   const [selectedJob, setSelectedJob] = useState<MaterialJob | null>(null)
 
-  const [filterOptions, setFilterOptions] = useState<any>(() => ({
-    ...getInitialFilters(searchParams)
-  }))
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
+
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
+
+  useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
     dispatch(setPageTitle('Order By Product'))
   }, [])
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+          if (newOptions.page) {
+            delete newOptions.page
+          }
 
-        const prevKeys = Object.keys(prev)
-        const newKeys = Object.keys(newOptions)
-
-        if (prevKeys.length === newKeys.length && newKeys.every(k => prev[k] === newOptions[k])) {
-          return prev
-        }
-
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      MaterialJobService.index({ ...filterOptions, job_type: 'non_inventory' })
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
+          return newOptions
         })
-        .catch(() => {
-          setIsLoading(false)
-        })
-    } catch {
-      setIsLoading(false)
-    }
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
   }
-
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-  }, [filterOptions])
 
   const getStatusVariant = (
     status: string
@@ -258,7 +263,13 @@ const OrderByProduct: React.FC = () => {
   const handleExport = async () => {
     try {
       toast.info(`Exporting order by product jobs...`)
-      const blob = await MaterialJobService.exportMaterialJobs({ ...filterOptions, job_type: 'non_inventory', export_type: 'order_by_product' })
+
+      const blob = await MaterialJobService.exportMaterialJobs({
+        ...filterOptions,
+        job_type: 'non_inventory',
+        export_type: 'order_by_product'
+      })
+
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
 
@@ -285,7 +296,12 @@ const OrderByProduct: React.FC = () => {
           <span className='hidden min-[480px]:block'>Export</span>
         </Button>
         <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-          <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+          <TableSearch
+            value={searchValue}
+            onChange={onSearchChange}
+            placeholder='Search...'
+            className='lg:w-80 min-w-0'
+          />
           {hasActiveFilters() && (
             <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
               Clear
@@ -310,7 +326,7 @@ const OrderByProduct: React.FC = () => {
         open={updateModalOpen}
         onOpenChange={setUpdateModalOpen}
         materialJob={selectedJob}
-        onSuccess={fetchData}
+        onSuccess={() => router.refresh()}
       />
     </CommonLayout>
   )

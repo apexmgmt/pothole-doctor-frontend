@@ -1,9 +1,8 @@
 import { SERVICE_TYPES_ALL_TENANT, SERVICE_TYPES_TENANT } from '@/constants/api'
 import { getApiUrl, isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, SERVICE_TYPES, SERVICE_TYPES_ALL } from '@/constants/api'
 import { ServiceTypePayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class ServiceTypeService {
   /**Service Types DataTable API */
@@ -13,22 +12,19 @@ export default class ServiceTypeService {
 
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? SERVICE_TYPES_TENANT : SERVICE_TYPES) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['service-types'] } // Cache for 60 seconds
+          next: {
+            revalidate: 30,
+            tags: ['login', 'service-types', queryParams ? `service-types?${queryParams}` : 'service-types']
+          }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch service types')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -39,21 +35,14 @@ export default class ServiceTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? SERVICE_TYPES_TENANT : SERVICE_TYPES), {
+      const response = await handleRequest(API_URL + (isTenantApi ? SERVICE_TYPES_TENANT : SERVICE_TYPES), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['service-types', 'service-types-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('service-types')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -64,22 +53,16 @@ export default class ServiceTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? SERVICE_TYPES_TENANT : SERVICE_TYPES) + serviceTypeId,
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`service-types/${serviceTypeId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `service-types/${serviceTypeId}`] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch service types details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -90,26 +73,17 @@ export default class ServiceTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? SERVICE_TYPES_TENANT : SERVICE_TYPES) + serviceTypeId,
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['service-types', 'service-types-all', `service-types/${serviceTypeId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('service-types')
-      await revalidate(`service-types/${serviceTypeId}`)
-      await revalidate('service-types-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -120,25 +94,16 @@ export default class ServiceTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? SERVICE_TYPES_TENANT : SERVICE_TYPES) + serviceTypeId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['service-types', 'service-types-all', `service-types/${serviceTypeId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete service types')
-      }
-
-      await revalidate('service-types')
-      await revalidate(`service-types/${serviceTypeId}`)
-      await revalidate('service-types-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -149,25 +114,16 @@ export default class ServiceTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? SERVICE_TYPES_TENANT : SERVICE_TYPES) + serviceTypeId + '/restore',
         {
           requiresAuth: true,
-          method: 'POST'
+          method: 'POST',
+          revalidateTags: ['service-types', 'service-types-all', `service-types/${serviceTypeId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to restore service types')
-      }
-
-      await revalidate('service-types')
-      await revalidate(`service-types/${serviceTypeId}`)
-      await revalidate('service-types-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -178,19 +134,13 @@ export default class ServiceTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? SERVICE_TYPES_ALL_TENANT : SERVICE_TYPES_ALL), {
+      const response = await handleRequest(API_URL + (isTenantApi ? SERVICE_TYPES_ALL_TENANT : SERVICE_TYPES_ALL), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['service-type-types'] } // Cache for 1 hour
+        next: { revalidate: 3600, tags: ['login', 'service-types-all'] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch service type types')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

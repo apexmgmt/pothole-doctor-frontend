@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useForm } from 'react-hook-form'
 
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -16,10 +17,9 @@ import { Column, DataTableApiResponse, ProductCategory, ProductCategoryPayload }
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import ProductCategoryService from '@/services/api/products/product_categories.service'
-import { hasPermission } from '@/utils/role-permission'
 import CustomFormField from '@/components/form/CustomFormField'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import TableSearch from '@/components/erp/common/TableSearch'
@@ -36,20 +36,33 @@ const emptyCategoryPayload: CategoryFormValues = {
 
 type CategoryFieldErrors = Partial<Record<keyof CategoryFormValues, string>>
 
-const ProductCategories: React.FC = () => {
+interface ProductCategoriesProps {
+  initialData?: DataTableApiResponse<ProductCategory> | null
+  permissions?: {
+    canCreateCategory: boolean
+    canEditCategory: boolean
+    canDeleteCategory: boolean
+  }
+}
+
+const ProductCategories: React.FC<ProductCategoriesProps> = ({ initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<ProductCategory> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
   const [inlineMode, setInlineMode] = useState<'create' | 'edit' | null>(null)
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateCategory, setCanCreateCategory] = useState<boolean>(false)
-  const [canEditCategory, setCanEditCategory] = useState<boolean>(false)
-  const [canDeleteCategory, setCanDeleteCategory] = useState<boolean>(false)
+
+  const canCreateCategory = permissions?.canCreateCategory ?? false
+  const canEditCategory = permissions?.canEditCategory ?? false
+  const canDeleteCategory = permissions?.canDeleteCategory ?? false
+
+  const filterOptions = useMemo(() => ({
+    ...getInitialFilters(searchParams)
+  }), [searchParams])
 
   const {
     register,
@@ -64,63 +77,61 @@ const ProductCategories: React.FC = () => {
 
   const isInlineEditing = inlineMode !== null
 
-  // Set initial search value from filterOptions and check permissions
+  useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Create Category').then(result => setCanCreateCategory(result))
-    hasPermission('Update Category').then(result => setCanEditCategory(result))
-    hasPermission('Delete Category').then(result => setCanDeleteCategory(result))
-  }, [])
+    dispatch(setPageTitle('Manage Product Categories'))
+  }, [dispatch])
 
-  // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+    const params = new URLSearchParams()
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
 
-        return newOptions
-      })
-    }, 500)
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  // Fetch data from API
-  const fetchData = async () => {
     setIsLoading(true)
-
-    try {
-      ProductCategoryService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch product categories')
-        })
-    } catch (error) {
-      setIsLoading(false)
-      toast.error('Something went wrong while fetching product categories!')
-    }
+    router.push(newUrl, { scroll: false })
   }
 
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Product Categories'))
-  }, [filterOptions])
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const getFieldErrorsFromApi = (error: any): CategoryFieldErrors => {
     const serverErrors = error?.errors
@@ -219,7 +230,7 @@ const ProductCategories: React.FC = () => {
         goToFirstPage()
 
         if (!createdCategory) {
-          fetchData()
+          router.refresh()
         }
 
         toast.success(response?.message || 'Product category created successfully')
@@ -246,7 +257,7 @@ const ProductCategories: React.FC = () => {
             }
           })
         } else {
-          fetchData()
+          router.refresh()
         }
 
         toast.success(response?.message || 'Product category updated successfully')
@@ -407,7 +418,7 @@ const ProductCategories: React.FC = () => {
       await ProductCategoryService.destroy(id)
         .then(response => {
           toast.success('Product category deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete product category')
@@ -430,7 +441,7 @@ const ProductCategories: React.FC = () => {
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
         <TableSearch
           value={searchValue}
-          onChange={setSearchValue}
+          onChange={onSearchChange}
           placeholder='Search...'
           className='lg:w-80 min-w-0'
         />

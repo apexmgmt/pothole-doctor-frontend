@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -42,28 +43,55 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
   selectedRows,
   setSelectedRows,
   hideTitle = false,
-  hideActionButton = false
+  hideActionButton = false,
+  initialData,
+  permissions,
+  galleryPermissions
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Product> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
+  const [skuValue, setSkuValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(false)
   const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState<boolean>(false)
   const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState<boolean>(false)
   const [isBulkQrModalOpen, setIsBulkQrModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateProduct, setCanCreateProduct] = useState<boolean>(false)
-  const [canEditProduct, setCanEditProduct] = useState<boolean>(false)
-  const [canDeleteProduct, setCanDeleteProduct] = useState<boolean>(false)
-  const [canViewProduct, setCanViewProduct] = useState<boolean>(false)
+
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
+
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
+
+  const canCreateProduct = permissions?.canCreateProduct ?? false
+  const canEditProduct = permissions?.canEditProduct ?? false
+  const canDeleteProduct = permissions?.canDeleteProduct ?? false
+  const canViewProduct = permissions?.canViewProduct ?? false
 
   const [localSelectedRows, setLocalSelectedRows] = useState<Product[]>([])
   const [isBulkDeleting, setIsBulkDeleting] = useState(false)
@@ -72,60 +100,70 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
   const activeSetSelectedRows = isFromModal ? setSelectedRows : setLocalSelectedRows
 
   useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
+  // Set initial search value from filterOptions
+  useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Create Product').then(result => setCanCreateProduct(result))
-    hasPermission('Update Product').then(result => setCanEditProduct(result))
-    hasPermission('Delete Product').then(result => setCanDeleteProduct(result))
-    hasPermission('View Product').then(result => setCanViewProduct(result))
+    setSkuValue(filterOptions.sku || '')
+    if (!hideTitle) dispatch(setPageTitle('Manage Non-Inventory Products'))
   }, [])
 
-  // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+          if (newOptions.page) {
+            delete newOptions.page
+          }
 
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      NonInventoryProductService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
+          return newOptions
         })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch non-inventory products')
-        })
-    } catch (error) {
-      setIsLoading(false)
-      toast.error('Something went wrong while fetching non-inventory products!')
-    }
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
   }
 
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    if (!hideTitle) dispatch(setPageTitle('Manage Non-Inventory Products'))
-  }, [filterOptions])
+  const debouncedSkuSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.sku = val
+          } else {
+            delete newOptions.sku
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSkuSearchChange = (value: string) => {
+    setSkuValue(value)
+    debouncedSkuSearch(value)
+  }
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
@@ -183,7 +221,7 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
   }
 
   const handleSuccess = () => {
-    fetchData()
+    router.refresh()
     handleModalClose()
   }
 
@@ -260,7 +298,7 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
           if (currentPage > pageCount) {
             setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
           } else {
-            fetchData()
+            router.refresh()
           }
         })
         .catch(error => {
@@ -302,7 +340,7 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
       if (currentPage > pageCount) {
         setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
       } else {
-        fetchData()
+        router.refresh()
       }
     } catch (error: any) {
       toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete non-inventory products')
@@ -518,7 +556,7 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
             name='product-search'
             label='Search'
             value={searchValue}
-            onChange={setSearchValue}
+            onChange={onSearchChange}
             placeholder='Search...'
             className='w-full'
           />
@@ -555,23 +593,8 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
             name='sku-filter'
             label='SKU'
             placeholder='SKU...'
-            value={filterOptions.sku || ''}
-            onChange={value => {
-              setFilterOptions((prev: any) => {
-                const newOptions = { ...prev }
-
-                if (value && typeof value === 'string' && value.trim() !== '') {
-                  newOptions.sku = value
-                } else {
-                  delete newOptions.sku
-                }
-
-                // Optionally reset page on filter change
-                if (newOptions.page) delete newOptions.page
-
-                return newOptions
-              })
-            }}
+            value={skuValue}
+            onChange={value => onSkuSearchChange(value as string)}
           />
         </div>
         {hasActiveFilters() && (
@@ -701,6 +724,7 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
         uomUnits={uomUnits}
         serviceTypes={serviceTypes}
         vendors={vendors}
+        galleryPermissions={galleryPermissions}
       />
       <ConfirmDialog
         open={isBulkDeleteModalOpen}
@@ -716,7 +740,7 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
         open={isBulkEditModalOpen}
         onOpenChange={setIsBulkEditModalOpen}
         onSuccess={() => {
-          fetchData()
+          router.refresh()
           activeSetSelectedRows?.([])
         }}
         selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}
@@ -726,7 +750,7 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
         open={isBulkUpdateModalOpen}
         onOpenChange={setIsBulkUpdateModalOpen}
         onSuccess={() => {
-          fetchData()
+          router.refresh()
           activeSetSelectedRows?.([])
         }}
         selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}

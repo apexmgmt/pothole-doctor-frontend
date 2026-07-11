@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { API_URL, AUTH_REFRESH_TOKEN, AUTH_REFRESH_TOKEN_TENANT } from '@/constants/api'
-import { isTenant } from '@/utils/utility'
+import { isTenant, checkSubdomain } from '@/utils/utility'
+import { CookieKeys } from '@/constants/cookies'
 
 interface CacheEntry {
   data: any
@@ -80,7 +81,13 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { refresh_token } = body
-    const tenant = req.cookies.get('tenant')?.value
+    let tenant = req.cookies.get(CookieKeys.TENANT)?.value
+
+    if (!tenant) {
+      const { subdomain } = checkSubdomain(req)
+
+      tenant = subdomain
+    }
 
     if (!refresh_token) {
       return NextResponse.json({ message: 'Refresh token is required' }, { status: 400 })

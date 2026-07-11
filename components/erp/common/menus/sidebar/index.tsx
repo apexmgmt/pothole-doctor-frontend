@@ -361,7 +361,7 @@ const Sidebar: React.FC = () => {
           id: 'labor-costs',
           label: 'Labor Costs',
           icon: <UserLock className={iconSize} />,
-          href: '/erp/labor-costs',
+          href: '/erp/settings/labor-costs',
           hasSubItems: false,
           exactMatch: false,
           permissions: ['Manage Labor Cost']

@@ -31,6 +31,12 @@ interface CreateEditViewNonInventoryProductModalProps extends ProductsProps {
   productId?: string
   productDetails?: Product
   onSuccess?: () => void
+  galleryPermissions?: {
+    canCreateGallery?: boolean
+    canViewGallery?: boolean
+    canEditGallery?: boolean
+    canDeleteGallery?: boolean
+  }
 }
 
 interface FormValues {
@@ -128,10 +134,11 @@ const CreateEditViewNonInventoryProductModal = ({
   productId,
   productDetails,
   onSuccess,
-  productCategories,
-  uomUnits,
-  serviceTypes,
-  vendors
+  productCategories = [],
+  uomUnits = [],
+  serviceTypes = [],
+  vendors = [],
+  galleryPermissions
 }: CreateEditViewNonInventoryProductModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [galleries, setGalleries] = useState<ProductGallery[]>(productDetails?.galleries || [])
@@ -475,7 +482,7 @@ const CreateEditViewNonInventoryProductModal = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mb-4'>
           <div
-            className={`grid grid-cols-1 items-start ${mode === 'create' ? 'lg:grid-cols-2' : 'lg:grid-cols-[3fr_3fr_2fr]'} gap-2`}
+            className={`grid grid-cols-1 items-start ${mode === 'create' || mode === 'duplicate' ? 'lg:grid-cols-2' : 'lg:grid-cols-[3fr_3fr_2fr]'} gap-2`}
           >
             {/* Basic Product Information */}
             <div className='sticky top-4 p-4 border border-border rounded-lg'>
@@ -527,6 +534,7 @@ const CreateEditViewNonInventoryProductModal = ({
                     isLoading={isLoadingGalleries}
                     onUpdate={handleGalleryUpdate}
                     disabled={mode === 'view'}
+                    permissions={galleryPermissions}
                   />
                 </div>
               </div>

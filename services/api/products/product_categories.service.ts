@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import {
   API_URL,
   PRODUCT_CATEGORIES,
@@ -8,7 +8,6 @@ import {
   PRODUCT_CATEGORIES_TENANT
 } from '@/constants/api'
 import { ProductCategoryPayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class ProductCategoryService {
   /**Product Category DataTable API */
@@ -17,24 +16,25 @@ export default class ProductCategoryService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL +
           (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES) +
           (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['product-categories'] } // Cache for 60 seconds
+          next: {
+            revalidate: 30,
+            tags: [
+              'login',
+              'product-categories',
+              queryParams ? `product-categories?${queryParams}` : 'product-categories'
+            ]
+          }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch product categories')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -45,22 +45,14 @@ export default class ProductCategoryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES), {
+      const response = await handleRequest(API_URL + (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['product-categories', 'product-categories-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('product-categories')
-      await revalidate('product-categories-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -71,22 +63,16 @@ export default class ProductCategoryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES) + productCategoryId,
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`product-categories/${productCategoryId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `product-categories/${productCategoryId}`] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch product category details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -97,26 +83,17 @@ export default class ProductCategoryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES) + productCategoryId,
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['product-categories', 'product-categories-all', `product-categories/${productCategoryId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('product-categories')
-      await revalidate(`product-categories/${productCategoryId}`)
-      await revalidate('product-categories-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -127,25 +104,16 @@ export default class ProductCategoryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES) + productCategoryId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['product-categories', 'product-categories-all', `product-categories/${productCategoryId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete product category')
-      }
-
-      await revalidate('product-categories')
-      await revalidate(`product-categories/${productCategoryId}`)
-      await revalidate('product-categories-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -156,22 +124,16 @@ export default class ProductCategoryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PRODUCT_CATEGORIES_ALL_TENANT : PRODUCT_CATEGORIES_ALL),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 3600, tags: ['product-categories-all'] } // Cache for 1 hour
+          next: { revalidate: 3600, tags: ['login', 'product-categories-all'] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch product categories')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

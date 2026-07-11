@@ -1,6 +1,6 @@
 import { EMAIL_TEMPLATES_TENANT } from './../../../constants/api/email_templates_api'
 import { getApiUrl, isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, EMAIL_TEMPLATES } from '@/constants/api'
 import { EmailTemplatePayload } from '@/types'
 
@@ -10,22 +10,16 @@ export default class EmailTemplateService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? EMAIL_TEMPLATES_TENANT : EMAIL_TEMPLATES) + (group ? `?group=${group}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          cache: 'no-store'
+          next: { revalidate: 30, tags: ['login', 'email-templates', group ? `email-templates?group=${group}` : 'email-templates'] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch email templates')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -36,19 +30,14 @@ export default class EmailTemplateService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? EMAIL_TEMPLATES_TENANT : EMAIL_TEMPLATES) + id, {
+      const response = await handleRequest(API_URL + (isTenantApi ? EMAIL_TEMPLATES_TENANT : EMAIL_TEMPLATES) + id, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['email-templates']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to update email template')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

@@ -21,19 +21,20 @@ import StateService from '@/services/api/locations/state.service'
 import CreateOrEditStateModal from './CreateOrEditStateModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters } from '@/utils/utility'
-import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const States: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = ({
-  countriesWithStateAndCities = []
-}) => {
+const States: React.FC<{
+  countriesWithStateAndCities: CountryWithStates[]
+  initialData?: DataTableApiResponse<State> | null
+  permissions?: { canCreateState: boolean; canViewState: boolean; canEditState: boolean; canDeleteState: boolean }
+}> = ({ countriesWithStateAndCities = [], initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<State> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedStateId, setSelectedStateId] = useState<string | null>(null)
   const [selectedState, setSelectedState] = useState<State | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
@@ -41,18 +42,18 @@ const States: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = (
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateState, setCanCreateState] = useState<boolean>(false)
-  const [canEditState, setCanEditState] = useState<boolean>(false)
-  const [canDeleteState, setCanDeleteState] = useState<boolean>(false)
+  const canCreateState = permissions?.canCreateState ?? false
+  const canEditState = permissions?.canEditState ?? false
+  const canDeleteState = permissions?.canDeleteState ?? false
 
   // Set initial search value from filterOptions and check permissions
   useEffect(() => {
-    setSearchValue(filterOptions.search || '')
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
-    // Check permissions
-    hasPermission('Create State').then(result => setCanCreateState(result))
-    hasPermission('Update State').then(result => setCanEditState(result))
-    hasPermission('Delete State').then(result => setCanDeleteState(result))
+  useEffect(() => {
+    setSearchValue(filterOptions.search || '')
   }, [])
 
   // Debounced search update
@@ -95,28 +96,7 @@ const States: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = (
     router.push(newUrl, { scroll: false })
   }
 
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      StateService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          console.error('Error fetching states:', error)
-        })
-    } catch (error) {
-      setIsLoading(false)
-      console.error('Error fetching states:', error)
-    }
-  }
-
   useEffect(() => {
-    fetchData()
     updateURL(filterOptions)
     dispatch(setPageTitle('Manage States'))
   }, [filterOptions])
@@ -160,7 +140,7 @@ const States: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = (
   }
 
   const handleSuccess = () => {
-    fetchData()
+    router.refresh()
     handleModalClose()
   }
 
@@ -227,7 +207,7 @@ const States: React.FC<{ countriesWithStateAndCities: CountryWithStates[] }> = (
       await StateService.destroy(id)
         .then(response => {
           toast.success('State deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete state')

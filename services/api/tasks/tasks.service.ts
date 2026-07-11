@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import {
   TASKS_ALL,
   TASKS,
@@ -11,7 +11,6 @@ import {
   TASKS_EXPORT_TENANT
 } from '@/constants/api'
 import { TaskPayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
 
 export default class TaskService {
   /**Task DataTable API */
@@ -20,22 +19,19 @@ export default class TaskService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['tasks'] } // Cache for 60 seconds
+          next: {
+            revalidate: 30,
+            tags: ['login', 'tasks', queryParams ? `tasks?${queryParams}` : 'tasks']
+          }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch tasks')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -46,22 +42,14 @@ export default class TaskService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? TASKS_TENANT : TASKS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? TASKS_TENANT : TASKS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['tasks', 'tasks-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('tasks')
-      await revalidate('tasks-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -72,19 +60,13 @@ export default class TaskService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + taskId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + taskId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`tasks/${taskId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', `tasks/${taskId}`] } // Cache for 30 seconds
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch tasks details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -95,23 +77,14 @@ export default class TaskService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + taskId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + taskId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['tasks', `tasks/${taskId}`, 'tasks-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('tasks')
-      await revalidate(`tasks/${taskId}`)
-      await revalidate('tasks-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -130,23 +103,14 @@ export default class TaskService {
    */
   static updateStatus = async (taskId: string, newStatus: string, newOrder: number) => {
     try {
-      const response = await apiInterceptor(API_URL + TASKS_STATUS_TENANT(taskId), {
+      const response = await handleRequest(API_URL + TASKS_STATUS_TENANT(taskId), {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify({ status: newStatus, order: newOrder })
+        body: JSON.stringify({ status: newStatus, order: newOrder }),
+        revalidateTags: ['tasks', `tasks/${taskId}`, 'tasks-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to update task status')
-      }
-
-      await revalidate('tasks')
-      await revalidate(`tasks/${taskId}`)
-      await revalidate('tasks-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -162,22 +126,14 @@ export default class TaskService {
    */
   static bulkAction = async (ids: string[], status: string) => {
     try {
-      const response = await apiInterceptor(API_URL + TASKS_BULK_ACTION_TENANT, {
+      const response = await handleRequest(API_URL + TASKS_BULK_ACTION_TENANT, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify({ ids, status })
+        body: JSON.stringify({ ids, status }),
+        revalidateTags: ['tasks', 'tasks-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to update task status')
-      }
-
-      await revalidate('tasks')
-      await revalidate('tasks-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -188,16 +144,10 @@ export default class TaskService {
     try {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(API_URL + TASKS_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''), {
+      const response = await handleRequest(API_URL + TASKS_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET'
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to export tasks')
-      }
 
       return await response.blob()
     } catch (error) {
@@ -210,22 +160,13 @@ export default class TaskService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + taskId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? TASKS_TENANT : TASKS) + taskId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['tasks', `tasks/${taskId}`, 'tasks-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete tasks')
-      }
-
-      await revalidate('tasks')
-      await revalidate(`tasks/${taskId}`)
-      await revalidate('tasks-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -238,19 +179,16 @@ export default class TaskService {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
       const url = API_URL + (isTenantApi ? TASKS_ALL_TENANT : TASKS_ALL) + (queryParams ? `?${queryParams}` : '')
 
-      const response = await apiInterceptor(url, {
+      const response = await handleRequest(url, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['tasks-all'] } // Cache for 1 hour
+        next: {
+          revalidate: 30,
+          tags: ['login', 'tasks-all', queryParams ? `tasks-all?${queryParams}` : 'tasks-all']
+        }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch tasks')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

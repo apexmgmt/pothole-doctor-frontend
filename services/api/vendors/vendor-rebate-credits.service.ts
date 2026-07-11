@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, VENDOR_REBATE_CREDITS, VENDOR_REBATE_CREDITS_TENANT } from '@/constants/api'
 import { VendorRebateCreditPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
@@ -11,7 +11,7 @@ export default class VendorRebateCreditService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL +
           (isTenantApi ? VENDOR_REBATE_CREDITS_TENANT : VENDOR_REBATE_CREDITS) +
           (queryParams ? `?${queryParams}` : ''),
@@ -22,13 +22,7 @@ export default class VendorRebateCreditService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch vendor rebate credits')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -39,7 +33,7 @@ export default class VendorRebateCreditService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_REBATE_CREDITS_TENANT : VENDOR_REBATE_CREDITS),
         {
           requiresAuth: true,
@@ -48,15 +42,9 @@ export default class VendorRebateCreditService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('vendor-rebate-credits')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -67,7 +55,7 @@ export default class VendorRebateCreditService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_REBATE_CREDITS_TENANT : VENDOR_REBATE_CREDITS) + vendorRebateCreditId,
         {
           requiresAuth: true,
@@ -76,13 +64,7 @@ export default class VendorRebateCreditService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch rebate credit details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -93,7 +75,7 @@ export default class VendorRebateCreditService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_REBATE_CREDITS_TENANT : VENDOR_REBATE_CREDITS) + vendorRebateCreditId,
         {
           requiresAuth: true,
@@ -102,16 +84,10 @@ export default class VendorRebateCreditService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('vendor-rebate-credits')
       await revalidate(`vendor-rebate-credits/${vendorRebateCreditId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -122,7 +98,7 @@ export default class VendorRebateCreditService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_REBATE_CREDITS_TENANT : VENDOR_REBATE_CREDITS) + vendorRebateCreditId,
         {
           requiresAuth: true,
@@ -130,16 +106,10 @@ export default class VendorRebateCreditService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete rebate credit')
-      }
-
       await revalidate('vendor-rebate-credits')
       await revalidate(`vendor-rebate-credits/${vendorRebateCreditId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

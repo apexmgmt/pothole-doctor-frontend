@@ -21,7 +21,7 @@ import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
 const BusinessLocationWarehouses: React.FC<{ locationId: string }> = ({ locationId }) => {
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Warehouse> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>({})

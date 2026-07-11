@@ -5,7 +5,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User } from '@/types'
 import AuthService from '@/services/api/auth.service'
 import CookieService from '@/services/app/cookie.service'
-import { encryptData } from '@/utils/encryption'
+import { CookieKeys } from '@/constants/cookies'
 
 interface SidebarDataContextValue {
   user: User | null
@@ -43,7 +43,7 @@ export const SidebarDataProvider = ({ initialUser, initialPermissions, children 
 
     const refetch = async () => {
       try {
-        const accessToken = CookieService.get('access_token')
+        const accessToken = CookieService.get(CookieKeys.ACCESS_TOKEN)
 
         if (!accessToken) return
 
@@ -57,15 +57,13 @@ export const SidebarDataProvider = ({ initialUser, initialPermissions, children 
         setPermissions(data.permissions ?? [])
 
         // Re-write cookies so the next full-page navigation finds them.
-        await CookieService.store('user', encryptData(data.user))
-        await CookieService.store('roles', encryptData(data.roles || []))
+        const { setUserDataCookies } = await import('@/app/actions/auth')
 
-        const encryptedPermissions = encryptData(data.permissions || [])
-        const chunkSize = Math.ceil(encryptedPermissions.length / 3)
-
-        await CookieService.store('permissions_1', encryptedPermissions.slice(0, chunkSize))
-        await CookieService.store('permissions_2', encryptedPermissions.slice(chunkSize, chunkSize * 2))
-        await CookieService.store('permissions_3', encryptedPermissions.slice(chunkSize * 2))
+        await setUserDataCookies({
+          roles: data.roles || [],
+          permissions: data.permissions || [],
+          user: data.user
+        })
       } catch {
         // Silently ignore — the sidebar will simply show no items.
       }

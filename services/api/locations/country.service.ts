@@ -1,6 +1,6 @@
 import { CountryPayload } from '@/types'
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, COUNTRIES, COUNTRIES_TENANT } from '@/constants/api'
 import { revalidate } from '../../app/cache.service'
 
@@ -11,19 +11,16 @@ export default class CountryService {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? COUNTRIES_TENANT : COUNTRIES) + (queryParams ? `?${queryParams}` : ''), {
-        requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['countries'] } // Cache for 60 seconds
-      })
+      const response = await handleRequest(
+        API_URL + (isTenantApi ? COUNTRIES_TENANT : COUNTRIES) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET',
+          next: { revalidate: 60, tags: ['countries'] } // Cache for 60 seconds
+        }
+      )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch countries')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -34,22 +31,16 @@ export default class CountryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? COUNTRIES_TENANT : COUNTRIES), {
+      const response = await handleRequest(API_URL + (isTenantApi ? COUNTRIES_TENANT : COUNTRIES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to create country')
-      }
-
       await revalidate('countries')
       await revalidate('locations')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -59,19 +50,13 @@ export default class CountryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? COUNTRIES_TENANT : COUNTRIES) + countryId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? COUNTRIES_TENANT : COUNTRIES) + countryId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`countries/${countryId}`] } // Cache for 60 seconds
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch country details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -81,23 +66,17 @@ export default class CountryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? COUNTRIES_TENANT : COUNTRIES) + countryId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? COUNTRIES_TENANT : COUNTRIES) + countryId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to update country')
-      }
-
       await revalidate('countries')
       await revalidate(`countries/${countryId}`)
       await revalidate('locations')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -107,22 +86,16 @@ export default class CountryService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? COUNTRIES_TENANT : COUNTRIES) + countryId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? COUNTRIES_TENANT : COUNTRIES) + countryId, {
         requiresAuth: true,
         method: 'DELETE'
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete country')
-      }
 
       await revalidate('countries')
       await revalidate(`countries/${countryId}`)
       await revalidate('locations')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

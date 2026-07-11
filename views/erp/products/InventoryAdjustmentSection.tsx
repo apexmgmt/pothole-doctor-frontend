@@ -20,7 +20,7 @@ interface InventoryAdjustmentSectionProps {
 
 const InventoryAdjustmentSection: React.FC<InventoryAdjustmentSectionProps> = ({ inventory, product }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<any> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [filterOptions, setFilterOptions] = useState<any>({ purchase_order_id: inventory.id })
 

@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, ESTIMATE_NOTES, ESTIMATE_NOTES_TENANT } from '@/constants/api'
 import { revalidate } from '@/services/app/cache.service'
 import { EstimateNotePayload } from '@/types'
@@ -11,7 +11,7 @@ export default class EstimateNoteService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? ESTIMATE_NOTES_TENANT : ESTIMATE_NOTES) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -20,13 +20,7 @@ export default class EstimateNoteService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch estimate notes')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -37,21 +31,15 @@ export default class EstimateNoteService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATE_NOTES_TENANT : ESTIMATE_NOTES), {
+      const response = await handleRequest(API_URL + (isTenantApi ? ESTIMATE_NOTES_TENANT : ESTIMATE_NOTES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to create estimate notes')
-      }
-
       await revalidate('estimate-notes')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -62,7 +50,7 @@ export default class EstimateNoteService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? ESTIMATE_NOTES_TENANT : ESTIMATE_NOTES) + estimateNoteId,
         {
           requiresAuth: true,
@@ -71,13 +59,7 @@ export default class EstimateNoteService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch estimate note details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -88,7 +70,7 @@ export default class EstimateNoteService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? ESTIMATE_NOTES_TENANT : ESTIMATE_NOTES) + estimateNoteId,
         {
           requiresAuth: true,
@@ -97,16 +79,10 @@ export default class EstimateNoteService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to update estimate note')
-      }
-
       await revalidate('estimate-notes')
       await revalidate(`estimate-notes/${estimateNoteId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -117,7 +93,7 @@ export default class EstimateNoteService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? ESTIMATE_NOTES_TENANT : ESTIMATE_NOTES) + estimateNoteId,
         {
           requiresAuth: true,
@@ -125,16 +101,10 @@ export default class EstimateNoteService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete estimate note')
-      }
-
       await revalidate('estimate-notes')
       await revalidate(`estimate-notes/${estimateNoteId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

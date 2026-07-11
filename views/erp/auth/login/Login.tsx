@@ -6,12 +6,11 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import Field from '@/components/erp/common/Field'
 import CustomButton from '@/components/erp/common/CustomButton'
 import AuthService from '@/services/api/auth.service'
-import CookieService from '@/services/app/cookie.service'
-import { encryptData } from '@/utils/encryption'
+import { setAllAuthCookies, generateRedirectUrl } from '@/app/actions/auth'
 import { useAppDispatch } from '@/lib/hooks'
 import { setUserData } from '@/lib/features/auth/authSlice'
-import { appUrl } from '@/utils/utility'
 import Link from 'next/link'
+import { decryptRedirectUrl } from '@/utils/encryption'
 
 type LoginForm = {
   email: string
@@ -38,54 +37,41 @@ const Login: React.FC<{ isTenant: boolean }> = ({ isTenant }) => {
     try {
       setIsLoading(true)
       AuthService.login(data.email, data.password)
-        .then(response => {
+        .then(async response => {
           if (!isTenant && response?.data?.is_redirect_required && response?.data?.domain) {
-            // If not tenant and redirect is required, redirect to the specified domain (subdomain)
+            // ... (keep redirect logic)
             const authData = {
               access_token: response?.data.access_token,
               refresh_token: response?.data.refresh_token,
               token_type: response?.data.token_type,
               expires_in: response?.data.expires_in
-
-              // user: response?.data?.user,
-              // roles: response?.data?.roles || [],
-              // permissions: response?.data?.permissions || []
             }
 
-            const encryptedData = encryptData(authData)
-            const redirectUrl = `${appUrl(response.data.domain ?? '')}/erp/redirecting?data=${encodeURIComponent(encryptedData)}`
+            const redirectUrl = await generateRedirectUrl(authData, response.data.domain ?? '')
 
             window.location.href = redirectUrl
           } else {
-            // Save the token and refresh token
-            CookieService.storeSync('access_token', response?.data.access_token, {
-              expires: response?.data.expires_in,
-              path: '/'
-            })
-            CookieService.storeSync('refresh_token', response?.data.refresh_token, {
-              expires: Number(process.env.NEXT_PUBLIC_REFRESH_TOKEN_DURATION ?? 120),
-              path: '/'
-            })
-            CookieService.storeSync('token_type', response?.data.token_type, { path: '/' })
-            CookieService.storeSync('user', encryptData(response?.data?.user))
-            CookieService.storeSync('roles', encryptData(response?.data?.roles || []))
-
-            // Split permissions into chunks to avoid cookie size limit
-            const encryptedPermissions = encryptData(response?.data?.permissions || [])
-            const chunkSize = Math.ceil(encryptedPermissions.length / 3)
-
-            const chunk1 = encryptedPermissions.slice(0, chunkSize)
-            const chunk2 = encryptedPermissions.slice(chunkSize, chunkSize * 2)
-            const chunk3 = encryptedPermissions.slice(chunkSize * 2)
-
-            CookieService.storeSync('permissions_1', chunk1)
-            CookieService.storeSync('permissions_2', chunk2)
-            CookieService.storeSync('permissions_3', chunk3)
+            await setAllAuthCookies(
+              response?.data.access_token,
+              response?.data.refresh_token,
+              response?.data.token_type,
+              response?.data.expires_in,
+              response?.data?.roles || [],
+              response?.data?.permissions || [],
+              response?.data?.user
+            )
 
             dispatch(setUserData(response?.data?.user))
 
             // Redirect to the original route or default to /erp/
-            const redirect = searchParams.get('redirect') || '/erp/'
+            let redirect = '/erp/'
+            const redirectParam = searchParams.get('redirect')
+
+            if (redirectParam) {
+              const decryptedRedirect = await decryptRedirectUrl(redirectParam)
+
+              redirect = decryptedRedirect || redirectParam
+            }
 
             router.push(redirect)
           }

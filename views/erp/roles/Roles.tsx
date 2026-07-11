@@ -21,7 +21,6 @@ import RoleService from '@/services/api/role.service'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters } from '@/utils/utility'
-import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
 interface RoleData {
@@ -29,29 +28,32 @@ interface RoleData {
   name: string
 }
 
-const Roles: React.FC = () => {
+const Roles: React.FC<{
+  initialData?: DataTableApiResponse<any> | null
+  permissions?: { canCreateRole: boolean; canEditRole: boolean; canDeleteRole: boolean }
+}> = ({ initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [activeTab, setActiveTab] = useState<string>('roles')
-  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null)
-  const [selectedRole, setSelectedRole] = useState<object | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<any> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  // const [selectedRole, setSelectedRole] = useState<object | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateRole, setCanCreateRole] = useState<boolean>(false)
-  const [canEditRole, setCanEditRole] = useState<boolean>(false)
-  const [canDeleteRole, setCanDeleteRole] = useState<boolean>(false)
+  const canCreateRole = permissions?.canCreateRole ?? false
+  const canEditRole = permissions?.canEditRole ?? false
+  const canDeleteRole = permissions?.canDeleteRole ?? false
 
   // Set initial search value from filterOptions
   useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
+  useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Create Role').then(result => setCanCreateRole(result))
-    hasPermission('Update Role').then(result => setCanEditRole(result))
-    hasPermission('Delete Role').then(result => setCanDeleteRole(result))
   }, [])
 
   // Debounced search update
@@ -94,28 +96,7 @@ const Roles: React.FC = () => {
     router.push(newUrl, { scroll: false })
   }
 
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      RoleService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          console.error('Error fetching roles:', error)
-        })
-    } catch (error) {
-      setIsLoading(false)
-      console.error('Error fetching roles:', error)
-    }
-  }
-
   useEffect(() => {
-    fetchData()
     updateURL(filterOptions)
     dispatch(setPageTitle('Manage Roles'))
   }, [filterOptions])
@@ -173,30 +154,25 @@ const Roles: React.FC = () => {
   const handleClearFilters = () => {
     setFilterOptions({})
     setSearchValue('')
-    setIsFilterDrawerOpen(false)
   }
 
-  const handleRowSelect = (role: any) => {
-    setSelectedRoleId(role?.id || null)
-
-    RoleService.show(role?.id)
-      .then(response => {
-        setSelectedRole(response.data)
-      })
-      .catch(error => {
-        setSelectedRole(null)
-        console.error('Error fetching role details:', error)
-      })
-  }
+  // const handleRowSelect = (role: any) => {
+  //   RoleService.show(role?.id)
+  //     .then(response => {
+  //       setSelectedRole(response.data)
+  //     })
+  //     .catch(error => {
+  //       setSelectedRole(null)
+  //       console.error('Error fetching role details:', error)
+  //     })
+  // }
 
   const handleDeleteRole = async (id: string) => {
-    setSelectedRoleId(null)
-
     try {
       await RoleService.destroy(id)
         .then(response => {
           toast.success('Role deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete role')
@@ -259,7 +235,8 @@ const Roles: React.FC = () => {
         pagination={true}
         isLoading={isLoading}
         emptyMessage='No Roles found'
-        handleRowSelect={handleRowSelect}
+
+        // handleRowSelect={handleRowSelect}
       />
     </CommonLayout>
   )

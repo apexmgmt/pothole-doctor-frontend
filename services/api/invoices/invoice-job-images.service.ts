@@ -1,21 +1,15 @@
 import { API_URL, INVOICE_JOB_IMAGES } from '@/constants/api'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 
 export default class InvoiceJobImageService {
   static index = async (invoiceId: string, type: 'before' | 'after') => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICE_JOB_IMAGES + `?invoice_id=${invoiceId}&type=${type}`, {
+      const response = await handleRequest(API_URL + INVOICE_JOB_IMAGES + `?invoice_id=${invoiceId}&type=${type}`, {
         requiresAuth: true,
         method: 'GET'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch invoice job images')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -27,19 +21,13 @@ export default class InvoiceJobImageService {
    */
   static store = async (payload: FormData) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICE_JOB_IMAGES, {
+      const response = await handleRequest(API_URL + INVOICE_JOB_IMAGES, {
         requiresAuth: true,
         method: 'POST',
         body: payload
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -47,18 +35,12 @@ export default class InvoiceJobImageService {
 
   static delete = async (imageId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICE_JOB_IMAGES + imageId, {
+      const response = await handleRequest(API_URL + INVOICE_JOB_IMAGES + imageId, {
         requiresAuth: true,
         method: 'DELETE'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete invoice job image')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

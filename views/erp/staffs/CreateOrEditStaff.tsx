@@ -276,7 +276,7 @@ const CreateOrEditStaff: React.FC<CreateOrEditStaffProps> = ({
                   return (
                     <div
                       key={`${module}-${idx}`}
-                      className='grid grid-cols-[136px_minmax(0,_1fr)] items-center gap-5 hover:bg-accent/10 p-2.5 border-b last:border-none border-border'
+                      className='grid grid-cols-[136px_minmax(0,1fr)] items-center gap-5 hover:bg-accent/10 p-2.5 border-b last:border-none border-border'
                     >
                       <h3 className='text-sm font-medium text-light capitalize'>{moduleName}</h3>
                       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-3'>

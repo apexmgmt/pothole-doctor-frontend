@@ -217,6 +217,52 @@ export const getFileType = (fullPath: string) => {
 }
 
 /**
+ * Get tenant subdomain from app base url
+ * @returns Promise<string | null> returns null if no subdomain is found or not found tenant
+ */
+export async function getTenantSubdomain(): Promise<string | null> {
+  const isServer = typeof window === 'undefined'
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+
+  try {
+    const baseUrl = new URL(appBaseUrl)
+    const baseDomain = baseUrl.hostname
+    let currentHost = ''
+
+    if (isServer) {
+      const { headers } = await import('next/headers')
+      const headersList = await headers()
+
+      currentHost = headersList.get('host') || ''
+    } else {
+      currentHost = window.location.host
+    }
+
+    const currentHostWithoutPort = currentHost.split(':')[0]
+
+    if (currentHostWithoutPort === baseDomain) {
+      return null
+    }
+
+    // Subdomain logic
+    const domainParts = currentHostWithoutPort.split('.')
+
+    if (domainParts.length >= 2) {
+      const possibleBaseDomain = domainParts.slice(1).join('.')
+
+      if (possibleBaseDomain === baseDomain && domainParts[0] !== 'www') {
+        return domainParts[0]
+      }
+    }
+
+    // Fallback: If it's a custom domain we might return the whole host, but usually tenant is subdomain
+    return currentHostWithoutPort !== baseDomain ? currentHostWithoutPort : null
+  } catch (error) {
+    return null
+  }
+}
+
+/**
  * Check subdomain and domain information from request
  * @param req NextRequest
  * @returns Object with subdomain, domain, isSubdomain, and isApexDomain information

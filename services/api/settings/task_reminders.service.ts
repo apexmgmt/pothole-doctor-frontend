@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import {
   API_URL,
   TASK_REMINDER_CHANNELS,
@@ -16,19 +16,13 @@ export default class TaskReminderService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? TASK_REMINDERS_TENANT : TASK_REMINDERS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? TASK_REMINDERS_TENANT : TASK_REMINDERS), {
         requiresAuth: true,
         method: 'GET',
         cache: 'no-store'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch task reminders')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -38,19 +32,13 @@ export default class TaskReminderService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? TASK_REMINDERS_TENANT : TASK_REMINDERS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? TASK_REMINDERS_TENANT : TASK_REMINDERS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to create task reminder')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -60,7 +48,7 @@ export default class TaskReminderService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL +
           (isTenantApi ? TASK_REMINDER_CHANNELS_TENANT : TASK_REMINDER_CHANNELS) +
           (type ? `?type=${type}` : ''),
@@ -71,13 +59,7 @@ export default class TaskReminderService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch reminder channels')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -87,22 +69,13 @@ export default class TaskReminderService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
-        API_URL + (isTenantApi ? TASK_REMINDER_TIMES_TENANT : TASK_REMINDER_TIMES),
-        {
-          requiresAuth: true,
-          method: 'GET',
-          next: { revalidate: 3600, tags: ['reminder-times'] } // Cache for 3600 seconds
-        }
-      )
+      const response = await handleRequest(API_URL + (isTenantApi ? TASK_REMINDER_TIMES_TENANT : TASK_REMINDER_TIMES), {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 3600, tags: ['reminder-times'] } // Cache for 3600 seconds
+      })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch reminder times')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

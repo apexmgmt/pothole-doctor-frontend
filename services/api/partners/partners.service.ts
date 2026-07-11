@@ -1,8 +1,7 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, PARTNERS, PARTNERS_ALL_TENANT, PARTNERS_TENANT } from '@/constants/api'
 import { PartnerPayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class PartnerService {
   /**Partner DataTable API */
@@ -11,22 +10,16 @@ export default class PartnerService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['partners'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'partners', queryParams ? `partners?${queryParams}` : 'partners'] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch contractors')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -37,21 +30,14 @@ export default class PartnerService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['partners', 'partners-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('partners')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -62,19 +48,13 @@ export default class PartnerService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`partners/${partnerId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', `partners/${partnerId}`] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch contractor details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -85,23 +65,14 @@ export default class PartnerService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['partners', 'partners-all', `partners/${partnerId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('partners')
-      await revalidate(`partners/${partnerId}`)
-      await revalidate('partners-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -112,22 +83,13 @@ export default class PartnerService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['partners', 'partners-all', `partners/${partnerId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete contractors')
-      }
-
-      await revalidate('partners')
-      await revalidate(`partners/${partnerId}`)
-      await revalidate('partners-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -144,25 +106,16 @@ export default class PartnerService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PARTNERS_TENANT : PARTNERS) + partnerId + '/restore',
         {
           requiresAuth: true,
-          method: 'POST'
+          method: 'POST',
+          revalidateTags: ['partners', 'partners-all', `partners/${partnerId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to restore contractors')
-      }
-
-      await revalidate('partners')
-      await revalidate(`partners/${partnerId}`)
-      await revalidate('partners-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -174,19 +127,13 @@ export default class PartnerService {
    */
   static getAll = async () => {
     try {
-      const response = await apiInterceptor(API_URL + PARTNERS_ALL_TENANT, {
+      const response = await handleRequest(API_URL + PARTNERS_ALL_TENANT, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['partners-all'] } // Cache for 1 hour
+        next: { revalidate: 30, tags: ['login', 'partners-all'] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch contractors')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

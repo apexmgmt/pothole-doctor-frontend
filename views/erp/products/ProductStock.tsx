@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -30,17 +31,19 @@ const ProductStock: React.FC<ProductsProps> = ({
   vendors = [],
   serviceTypes = [],
   warehouses = [],
-  businessLocations = []
+  businessLocations = [],
+  initialData,
+  permissions
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Product> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
 
-  const [filterOptions, setFilterOptions] = useState<any>(() => {
+  const filterOptions = useMemo(() => {
     const filters = getInitialFilters(searchParams)
 
     // These are navigation params, not API filters.
@@ -48,7 +51,32 @@ const ProductStock: React.FC<ProductsProps> = ({
     delete filters.tab
 
     return filters
-  })
+  }, [searchParams])
+
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    const tab = searchParams.get('tab')
+    const inventoryProductId = searchParams.get('inventory_product_id')
+
+    if (tab) params.set('tab', tab)
+    if (inventoryProductId) params.set('inventory_product_id', inventoryProductId)
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [selectedInventory, setSelectedInventory] = useState<PurchaseOrder | null>(null)
@@ -56,30 +84,43 @@ const ProductStock: React.FC<ProductsProps> = ({
   const hasProcessedInitialNavigation = useRef(false)
 
   useEffect(() => {
+    if (activeTab === 'stock') {
+      setApiResponse(initialData || null)
+      setIsLoading(false)
+    }
+  }, [initialData, activeTab])
+
+  // Set initial search value from filterOptions
+  useEffect(() => {
     setSearchValue(filterOptions.search || '')
   }, [])
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+          if (newOptions.page) {
+            delete newOptions.page
+          }
 
-        return newOptions
-      })
-    }, 500)
+          return newOptions
+        })
+      }, 500),
+    []
+  )
 
-    return () => clearTimeout(timer)
-  }, [searchValue])
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   useEffect(() => {
     if (hasProcessedInitialNavigation.current) {
@@ -104,28 +145,9 @@ const ProductStock: React.FC<ProductsProps> = ({
     }
   }, [searchParams])
 
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    ProductService.index({ ...filterOptions, type: 'inventory' })
-      .then(response => {
-        setApiResponse(response.data)
-        setIsLoading(false)
-      })
-      .catch(error => {
-        setIsLoading(false)
-        toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch products')
-      })
-  }
-
   useEffect(() => {
-    if (activeTab === 'stock') {
-      fetchData()
-    }
-
-    updateURL(router, filterOptions)
     dispatch(setPageTitle('Inventory Product Stock'))
-  }, [filterOptions, activeTab])
+  }, [])
 
   const handleCategoryChange = (value: string) => {
     setFilterOptions((prev: any) => {
@@ -340,7 +362,7 @@ const ProductStock: React.FC<ProductsProps> = ({
       const blob = await ProductService.exportProducts(filterOptions, 'stock')
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
-      
+
       a.href = url
       const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
 
@@ -372,7 +394,7 @@ const ProductStock: React.FC<ProductsProps> = ({
             name='stock-search'
             label='Search'
             value={searchValue}
-            onChange={setSearchValue}
+            onChange={onSearchChange}
             placeholder='Search...'
           />
 
@@ -390,8 +412,6 @@ const ProductStock: React.FC<ProductsProps> = ({
             ]}
           />
         </div>
-
-        
 
         {hasActiveFilters() && (
           <Button

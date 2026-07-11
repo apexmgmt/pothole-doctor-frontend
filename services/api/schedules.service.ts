@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from './api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import {
   TASKS_ALL,
   TASKS,
@@ -16,27 +16,21 @@ import { revalidate } from '@/services/app/cache.service'
 export default class ScheduleService {
   /**
    * Summary of the index API
-   * 
-   * Schedules data with pagination and filter options. 
+   *
+   * Schedules data with pagination and filter options.
    * Pass filter to get the filtered results.
    */
   static index = async (filterOptions: object = {}) => {
     try {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(API_URL + SCHEDULES + (queryParams ? `?${queryParams}` : ''), {
+      const response = await handleRequest(API_URL + SCHEDULES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['schedules'] } // Cache for 60 seconds
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch schedules')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -49,16 +43,10 @@ export default class ScheduleService {
     try {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(API_URL + SCHEDULES + 'export' + (queryParams ? `?${queryParams}` : ''), {
+      const response = await handleRequest(API_URL + SCHEDULES + 'export' + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET'
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to export schedules')
-      }
 
       return await response.blob()
     } catch (error) {
@@ -69,22 +57,16 @@ export default class ScheduleService {
   /** Create Schedule API */
   static store = async (payload: SchedulePayload) => {
     try {
-      const response = await apiInterceptor(API_URL + SCHEDULES, {
+      const response = await handleRequest(API_URL + SCHEDULES, {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('schedules')
       await revalidate('schedules-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -93,19 +75,13 @@ export default class ScheduleService {
   /** Show Schedule API */
   static show = async (scheduleId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + SCHEDULES + scheduleId, {
+      const response = await handleRequest(API_URL + SCHEDULES + scheduleId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`schedules/${scheduleId}`] } // Cache for 60 seconds
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch schedule details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -114,23 +90,17 @@ export default class ScheduleService {
   /** Update Schedule API */
   static update = async (scheduleId: string, payload: SchedulePayload) => {
     try {
-      const response = await apiInterceptor(API_URL + SCHEDULES + scheduleId, {
+      const response = await handleRequest(API_URL + SCHEDULES + scheduleId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('schedules')
       await revalidate(`schedules/${scheduleId}`)
       await revalidate('schedules-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -139,22 +109,16 @@ export default class ScheduleService {
   /** Delete Schedule API */
   static destroy = async (scheduleId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + SCHEDULES + scheduleId, {
+      const response = await handleRequest(API_URL + SCHEDULES + scheduleId, {
         requiresAuth: true,
         method: 'DELETE'
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete schedules')
-      }
 
       await revalidate('schedules')
       await revalidate(`schedules/${scheduleId}`)
       await revalidate('schedules-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -166,22 +130,15 @@ export default class ScheduleService {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
       const url = API_URL + SCHEDULES_ALL + (queryParams ? `?${queryParams}` : '')
 
-      const response = await apiInterceptor(url, {
+      const response = await handleRequest(url, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['schedules-all'] } // Cache for 1 hour
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch schedules')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
   }
 }
-

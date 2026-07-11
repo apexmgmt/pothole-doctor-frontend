@@ -34,6 +34,7 @@ export interface WarehousePayload {
 export interface WarehousesProps {
   businessLocations: BusinessLocation[]
   countriesWithStateAndCities: CountryWithStates[]
+  initialData?: DataTableApiResponse<Warehouse> | null
 }
 
 export interface WarehouseFormValues {

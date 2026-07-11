@@ -7,6 +7,7 @@ import ContactTypeService from '@/services/api/settings/contact_types.service'
 import NoteTypeService from '@/services/api/settings/note_types.service'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
 import StaffService from '@/services/api/staff.service'
+import ClientService from '@/services/api/clients/clients.service'
 import {
   BusinessLocation,
   ClientSource,
@@ -16,13 +17,29 @@ import {
   InterestLevel,
   NoteType,
   ServiceType,
-  Staff
+  Staff,
+  DataTableApiResponse,
+  Client
 } from '@/types'
 import Clients from '@/views/erp/clients/Clients'
+import { hasPermission } from '@/utils/role-permission'
+
+const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Pothole Doctors'
+
+export const metadata = {
+  title: `Manage Leads | ${APP_NAME}`,
+  description: `Manage your ${APP_NAME} leads.`
+}
 
 export const dynamic = 'force-dynamic'
 
-export default async function LeadsPage() {
+export default async function LeadsPage({
+  searchParams
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const resolvedSearchParams = await searchParams
+
   const [
     interestLevelsRes,
     companiesRes,
@@ -43,6 +60,22 @@ export default async function LeadsPage() {
     NoteTypeService.index(),
     LocationService.index(),
     ContactTypeService.getAll()
+  ])
+
+  let responseData: DataTableApiResponse<Client> | null = null
+
+  try {
+    const response = await ClientService.index({ ...(resolvedSearchParams as Record<string, string>), type: 'lead' })
+
+    responseData = response?.data || null
+  } catch (error) {
+    console.error('Failed to fetch leads:', error)
+  }
+
+  const [canCreateClient, canEditClient, canDeleteClient] = await Promise.all([
+    hasPermission('Create Lead'),
+    hasPermission('Update Lead'),
+    hasPermission('Delete Lead')
   ])
 
   const interestLevels: InterestLevel[] =
@@ -66,6 +99,8 @@ export default async function LeadsPage() {
   return (
     <Clients
       type='lead'
+      initialData={responseData}
+      permissions={{ canCreateClient, canEditClient, canDeleteClient }}
       interestLevels={interestLevels}
       companies={companies}
       staffs={staffs}
