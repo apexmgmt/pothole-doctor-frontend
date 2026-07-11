@@ -175,7 +175,7 @@ const ContractTemplates: React.FC<ContractTemplatesProps> = ({ estimateTypes }) 
       header: 'Content',
       cell: (row: ContractTemplate) => (
         <div
-          className='line-clamp-2 text-xs! text-accent-foreground! max-w-xs [&_*]:!text-accent-foreground [&_*]:!bg-transparent [&_*]:!font-normal'
+          className='line-clamp-2 text-xs! text-accent-foreground! max-w-xs **:text-accent-foreground! **:bg-transparent! **:font-normal!'
           dangerouslySetInnerHTML={{ __html: row.template_message || '' }}
         />
       ),
