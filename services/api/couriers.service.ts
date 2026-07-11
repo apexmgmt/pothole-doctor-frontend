@@ -1,7 +1,7 @@
 import { handleRequest } from '@/services/api/base.service'
 import { API_URL, COURIERS, COURIERS_ALL } from '@/constants/api'
 import { CourierPayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
+
 
 export default class CourierService {
   /** Couriers DataTable API */
@@ -12,7 +12,7 @@ export default class CourierService {
       const response = await handleRequest(API_URL + COURIERS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['couriers'] }
+        next: { revalidate: 30, tags: ['login', 'couriers', queryParams ? `couriers?${queryParams}` : 'couriers'] }
       })
 
       return response
@@ -27,11 +27,9 @@ export default class CourierService {
       const response = await handleRequest(API_URL + COURIERS, {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['couriers', 'couriers-all']
       })
-
-      await revalidate('couriers')
-      await revalidate('couriers-all')
 
       return response
     } catch (error) {
@@ -45,7 +43,7 @@ export default class CourierService {
       const response = await handleRequest(API_URL + COURIERS + courierId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`couriers/${courierId}`] }
+        next: { revalidate: 30, tags: ['login', `couriers/${courierId}`] }
       })
 
       return response
@@ -60,12 +58,9 @@ export default class CourierService {
       const response = await handleRequest(API_URL + COURIERS + courierId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['couriers', 'couriers-all', `couriers/${courierId}`]
       })
-
-      await revalidate('couriers')
-      await revalidate('couriers-all')
-      await revalidate(`couriers/${courierId}`)
 
       return response
     } catch (error) {
@@ -78,12 +73,9 @@ export default class CourierService {
     try {
       const response = await handleRequest(API_URL + COURIERS + courierId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['couriers', 'couriers-all', `couriers/${courierId}`]
       })
-
-      await revalidate('couriers')
-      await revalidate('couriers-all')
-      await revalidate(`couriers/${courierId}`)
 
       return response
     } catch (error) {
@@ -96,7 +88,7 @@ export default class CourierService {
       const response = await handleRequest(API_URL + COURIERS_ALL, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['couriers-all'] }
+        next: { revalidate: 3600, tags: ['login', 'couriers-all'] }
       })
 
       return response
