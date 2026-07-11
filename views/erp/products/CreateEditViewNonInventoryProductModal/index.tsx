@@ -31,6 +31,12 @@ interface CreateEditViewNonInventoryProductModalProps extends ProductsProps {
   productId?: string
   productDetails?: Product
   onSuccess?: () => void
+  galleryPermissions?: {
+    canCreateGallery?: boolean
+    canViewGallery?: boolean
+    canEditGallery?: boolean
+    canDeleteGallery?: boolean
+  }
 }
 
 interface FormValues {
@@ -128,10 +134,11 @@ const CreateEditViewNonInventoryProductModal = ({
   productId,
   productDetails,
   onSuccess,
-  productCategories,
-  uomUnits,
-  serviceTypes,
-  vendors
+  productCategories = [],
+  uomUnits = [],
+  serviceTypes = [],
+  vendors = [],
+  galleryPermissions
 }: CreateEditViewNonInventoryProductModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [galleries, setGalleries] = useState<ProductGallery[]>(productDetails?.galleries || [])
@@ -527,6 +534,7 @@ const CreateEditViewNonInventoryProductModal = ({
                     isLoading={isLoadingGalleries}
                     onUpdate={handleGalleryUpdate}
                     disabled={mode === 'view'}
+                    permissions={galleryPermissions}
                   />
                 </div>
               </div>

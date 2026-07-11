@@ -45,7 +45,8 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
   hideTitle = false,
   hideActionButton = false,
   initialData,
-  permissions
+  permissions,
+  galleryPermissions
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -723,6 +724,7 @@ const NonInventoryProducts: React.FC<ProductsProps> = ({
         uomUnits={uomUnits}
         serviceTypes={serviceTypes}
         vendors={vendors}
+        galleryPermissions={galleryPermissions}
       />
       <ConfirmDialog
         open={isBulkDeleteModalOpen}

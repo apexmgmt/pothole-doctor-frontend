@@ -27,7 +27,6 @@ import {
   Staff
 } from '@/types'
 import { getInitialFilters, updateURL } from '@/utils/utility'
-import { hasPermission } from '@/utils/role-permission'
 import { DocumentIcon, UserIcon, ExcelIcon } from '@/public/icons'
 import InvoiceService from '@/services/api/invoices/invoices.service'
 

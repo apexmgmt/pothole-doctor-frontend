@@ -23,10 +23,15 @@ import { DetailsIcon, UserIcon } from '@/public/icons'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CreateOrEditVendorModal from './CreateOrEditVendorModal'
 import VendorDetails from './VendorDetails'
-import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCities, paymentTerms, initialData, permissions }) => {
+const Vendors: React.FC<VendorsProps> = ({
+  taxTypes,
+  countriesWithStatesAndCities,
+  paymentTerms,
+  initialData,
+  permissions
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -54,8 +59,6 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
     setSearchValue(filterOptions.search || '')
     dispatch(setPageTitle('Manage Vendors'))
   }, [])
-
-
 
   // Debounced search setup
   const debouncedSearch = useMemo(
@@ -250,7 +253,12 @@ const Vendors: React.FC<VendorsProps> = ({ taxTypes, countriesWithStatesAndCitie
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch value={searchValue} onChange={onSearchChange} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear

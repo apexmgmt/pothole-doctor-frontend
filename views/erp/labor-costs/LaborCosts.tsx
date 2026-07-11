@@ -21,10 +21,15 @@ import LaborCostService from '@/services/api/labor_costs.service'
 import CreateOrEditLaborCostModal from './CreateOrEditLaborCostModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { Checkbox } from '@/components/ui/checkbox'
-import { hasPermission } from '@/utils/role-permission'
 import { formatCurrency } from '@/utils/currency'
 import TableSearch from '@/components/erp/common/TableSearch'
 import CustomFormField from '@/components/form/CustomFormField'
+
+type Permissions = {
+  canCreate: boolean
+  canEdit: boolean
+  canDelete: boolean
+}
 
 const LaborCosts: React.FC<{
   serviceTypes: ServiceType[]
@@ -33,7 +38,20 @@ const LaborCosts: React.FC<{
   selectedRows?: LaborCost[]
   setSelectedRows?: React.Dispatch<React.SetStateAction<LaborCost[]>>
   initialData?: DataTableApiResponse<LaborCost> | null
-}> = ({ serviceTypes, units, isFromModal = false, selectedRows, setSelectedRows, initialData }) => {
+  permissions?: Permissions
+}> = ({
+  serviceTypes,
+  units,
+  isFromModal = false,
+  selectedRows,
+  setSelectedRows,
+  initialData,
+  permissions: {
+    canCreate: canCreateLaborCost = false,
+    canEdit: canEditLaborCost = false,
+    canDelete: canDeleteLaborCost = false
+  } = {}
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -68,18 +86,8 @@ const LaborCosts: React.FC<{
     router.push(newUrl, { scroll: false })
   }
 
-  const [canCreateLaborCost, setCanCreateLaborCost] = useState<boolean>(false)
-  const [canEditLaborCost, setCanEditLaborCost] = useState<boolean>(false)
-  const [canDeleteLaborCost, setCanDeleteLaborCost] = useState<boolean>(false)
-
-  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-
-    // Check permissions
-    hasPermission('Create Labor Cost').then(result => setCanCreateLaborCost(result))
-    hasPermission('Update Labor Cost').then(result => setCanEditLaborCost(result))
-    hasPermission('Delete Labor Cost').then(result => setCanDeleteLaborCost(result))
   }, [])
 
   useEffect(() => {
@@ -360,15 +368,17 @@ const LaborCosts: React.FC<{
         )}
       </div>
 
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90 mt-5 h-7'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        <span>Add Labor Cost</span>
-      </Button>
+      {canCreateLaborCost && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90 mt-5 h-7'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          <span>Add Labor Cost</span>
+        </Button>
+      )}
     </div>
   )
 

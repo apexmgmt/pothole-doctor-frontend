@@ -24,16 +24,28 @@ import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
 import PartnerDocuments from './documents/PartnerDocuments'
 import PartnerDetails from './PartnerDetails'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const Partners: React.FC<PartnersProps> = ({
+type Permissions = {
+  canCreatePartner: boolean
+  canViewPartner: boolean
+  canEditPartner: boolean
+  canDeletePartner: boolean
+}
+
+const Partners: React.FC<PartnersProps & { permissions?: Permissions }> = ({
   businessLocations,
   partnerTypes,
   countriesWithStatesAndCities,
   companies,
   skills,
-  initialData
+  initialData,
+  permissions: {
+    canCreatePartner = false,
+    canViewPartner = false,
+    canEditPartner = false,
+    canDeletePartner = false
+  } = {}
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -71,18 +83,9 @@ const Partners: React.FC<PartnersProps> = ({
     router.push(newUrl, { scroll: false })
   }
 
-  const [canCreatePartner, setCanCreatePartner] = useState<boolean>(false)
-  const [canViewPartner, setCanViewPartner] = useState<boolean>(false)
-  const [canEditPartner, setCanEditPartner] = useState<boolean>(false)
-  const [canDeletePartner, setCanDeletePartner] = useState<boolean>(false)
-
-  // Set initial search value from filterOptions and check permissions
+  // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Create Contractor').then(result => setCanCreatePartner(result))
-    hasPermission('View Contractor').then(result => setCanViewPartner(result))
-    hasPermission('Update Contractor').then(result => setCanEditPartner(result))
-    hasPermission('Delete Contractor').then(result => setCanDeletePartner(result))
   }, [])
 
   useEffect(() => {

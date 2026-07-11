@@ -38,7 +38,6 @@ import ClientService from '@/services/api/clients/clients.service'
 import { Badge } from '@/components/ui/badge'
 import CreateEditClientModal from './CreateEditClientModal'
 import ClientDetails from './ClientDetails'
-import { hasPermission } from '@/utils/role-permission'
 import ChangeLeadStageModal, { LeadStage } from '@/views/erp/clients/ChangeLeadStageModal'
 import TableSearch from '@/components/erp/common/TableSearch'
 

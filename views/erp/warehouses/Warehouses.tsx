@@ -21,11 +21,29 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import WarehouseService from '@/services/api/warehouses.service'
 import { Badge } from '@/components/ui/badge'
 import CreateOrEditWarehouseModal from './CreateOrEditWarehouseModal'
-import { hasPermission } from '@/utils/role-permission'
-import WarehousePurchaseOrders from './WarehousePurchaseOrders'
 import TableSearch from '@/components/erp/common/TableSearch'
+import WarehousePurchaseOrders from './WarehousePurchaseOrders'
 
-const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWithStateAndCities, initialData }) => {
+type Permissions = {
+  canCreateWarehouse: boolean
+  canViewWarehouse: boolean
+  canEditWarehouse: boolean
+  canDeleteWarehouse: boolean
+  canManagePurchaseOrder: boolean
+}
+
+const Warehouses: React.FC<WarehousesProps & { permissions?: Permissions }> = ({
+  businessLocations,
+  countriesWithStateAndCities,
+  initialData,
+  permissions: {
+    canCreateWarehouse = false,
+    canViewWarehouse = false,
+    canEditWarehouse = false,
+    canDeleteWarehouse = false,
+    canManagePurchaseOrder = false
+  } = {}
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -63,18 +81,9 @@ const Warehouses: React.FC<WarehousesProps> = ({ businessLocations, countriesWit
     router.push(newUrl, { scroll: false })
   }
 
-  const [canCreateWarehouse, setCanCreateWarehouse] = useState<boolean>(false)
-  const [canEditWarehouse, setCanEditWarehouse] = useState<boolean>(false)
-  const [canDeleteWarehouse, setCanDeleteWarehouse] = useState<boolean>(false)
-  const [canManagePurchaseOrder, setCanManagePurchaseOrder] = useState<boolean>(false)
-
-  // Set initial search value from filterOptions and check permissions
+  // Set initial search value from filterOptions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Create Warehouse').then(result => setCanCreateWarehouse(result))
-    hasPermission('Update Warehouse').then(result => setCanEditWarehouse(result))
-    hasPermission('Delete Warehouse').then(result => setCanDeleteWarehouse(result))
-    hasPermission('Manage Purchase Order').then(result => setCanManagePurchaseOrder(result))
   }, [])
 
   useEffect(() => {

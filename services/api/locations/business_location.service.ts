@@ -7,7 +7,6 @@ import {
   BUSINESS_LOCATIONS_ALL_TENANT,
   BUSINESS_LOCATIONS_TENANT
 } from '@/constants/api'
-import { revalidate } from '@/services/app/cache.service'
 import { BusinessLocationPayload } from '@/types'
 
 export default class BusinessLocationService {
@@ -24,7 +23,7 @@ export default class BusinessLocationService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['business-locations'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'business-locations', queryParams ? `business-locations?${queryParams}` : 'business-locations'] }
         }
       )
 
@@ -65,11 +64,9 @@ export default class BusinessLocationService {
       const response = await handleRequest(API_URL + (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS), {
         requiresAuth: true,
         method: 'POST',
-        body: payload
+        body: payload,
+        revalidateTags: ['business-locations', 'business-locations-all']
       })
-
-      await revalidate('business-locations')
-      await revalidate('business-locations-all')
 
       return response
     } catch (error) {
@@ -87,7 +84,7 @@ export default class BusinessLocationService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`business-locations/${businessLocationId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `business-locations/${businessLocationId}`] }
         }
       )
 
@@ -110,13 +107,10 @@ export default class BusinessLocationService {
         {
           requiresAuth: true,
           method: 'POST',
-          body: payload
+          body: payload,
+          revalidateTags: ['business-locations', 'business-locations-all', `business-locations/${businessLocationId}`]
         }
       )
-
-      await revalidate('business-locations')
-      await revalidate(`business-locations/${businessLocationId}`)
-      await revalidate('business-locations-all')
 
       return response
     } catch (error) {
@@ -133,13 +127,10 @@ export default class BusinessLocationService {
         API_URL + (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS) + businessLocationId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['business-locations', 'business-locations-all', `business-locations/${businessLocationId}`]
         }
       )
-
-      await revalidate('business-locations')
-      await revalidate(`business-locations/${businessLocationId}`)
-      await revalidate('business-locations-all')
 
       return response
     } catch (error) {
@@ -156,13 +147,10 @@ export default class BusinessLocationService {
         API_URL + (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS) + businessLocationId + '/restore',
         {
           requiresAuth: true,
-          method: 'POST'
+          method: 'POST',
+          revalidateTags: ['business-locations', 'business-locations-all', `business-locations/${businessLocationId}`]
         }
       )
-
-      await revalidate('business-locations')
-      await revalidate(`business-locations/${businessLocationId}`)
-      await revalidate('business-locations-all')
 
       return response
     } catch (error) {

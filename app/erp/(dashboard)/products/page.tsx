@@ -42,11 +42,15 @@ export default async function ProductsPage({
     console.error('Failed to fetch products:', error)
   }
 
-  const [canCreateProduct, canViewProduct, canEditProduct, canDeleteProduct] = await Promise.all([
+  const [canCreateProduct, canViewProduct, canEditProduct, canDeleteProduct, canCreateGallery, canViewGallery, canEditGallery, canDeleteGallery] = await Promise.all([
     hasPermission('Create Product'),
     hasPermission('View Product'),
     hasPermission('Update Product'),
-    hasPermission('Delete Product')
+    hasPermission('Delete Product'),
+    hasPermission('Create Gallery'),
+    hasPermission('View Gallery'),
+    hasPermission('Update Gallery'),
+    hasPermission('Delete Gallery')
   ])
 
   const productCategories: ProductCategory[] =
@@ -64,6 +68,7 @@ export default async function ProductsPage({
       serviceTypes={serviceTypes}
       initialData={responseData}
       permissions={{ canCreateProduct, canViewProduct, canEditProduct, canDeleteProduct }}
+      galleryPermissions={{ canCreateGallery, canViewGallery, canEditGallery, canDeleteGallery }}
     />
   )
 }

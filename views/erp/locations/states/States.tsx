@@ -21,7 +21,6 @@ import StateService from '@/services/api/locations/state.service'
 import CreateOrEditStateModal from './CreateOrEditStateModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters } from '@/utils/utility'
-import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
 const States: React.FC<{

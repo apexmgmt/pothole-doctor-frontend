@@ -3,6 +3,7 @@ import UnitService from '@/services/api/settings/units.service'
 import LaborCostService from '@/services/api/labor_costs.service'
 import { ServiceType, Unit, DataTableApiResponse, LaborCost } from '@/types'
 import LaborCosts from '@/views/erp/labor-costs/LaborCosts'
+import { hasPermission } from '@/utils/role-permission'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,5 +28,18 @@ export default async function LaborCostsPage({
     console.error('Failed to fetch labor costs:', error)
   }
 
-  return <LaborCosts serviceTypes={serviceTypes} units={units} initialData={responseData} />
+  const [canCreate, canEdit, canDelete] = await Promise.all([
+    hasPermission('Create Labor Cost'),
+    hasPermission('Update Labor Cost'),
+    hasPermission('Delete Labor Cost')
+  ])
+
+  return (
+    <LaborCosts
+      serviceTypes={serviceTypes}
+      units={units}
+      initialData={responseData}
+      permissions={{ canCreate, canEdit, canDelete }}
+    />
+  )
 }

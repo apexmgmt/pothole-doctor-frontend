@@ -14,6 +14,7 @@ import {
   Partner
 } from '@/types'
 import Partners from '@/views/erp/partners/Partners'
+import { hasPermission } from '@/utils/role-permission'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,6 +54,13 @@ export default async function PartnersPage({
     console.error('Failed to fetch contractors:', error)
   }
 
+  const [canCreatePartner, canViewPartner, canEditPartner, canDeletePartner] = await Promise.all([
+    hasPermission('Create Contractor'),
+    hasPermission('View Contractor'),
+    hasPermission('Update Contractor'),
+    hasPermission('Delete Contractor')
+  ])
+
   return (
     <Partners
       businessLocations={businessLocations}
@@ -61,6 +69,7 @@ export default async function PartnersPage({
       companies={companies}
       skills={skills}
       initialData={responseData}
+      permissions={{ canCreatePartner, canViewPartner, canEditPartner, canDeletePartner }}
     />
   )
 }

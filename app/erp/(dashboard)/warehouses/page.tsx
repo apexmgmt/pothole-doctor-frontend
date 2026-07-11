@@ -3,6 +3,7 @@ import LocationService from '@/services/api/locations/location.service'
 import WarehouseService from '@/services/api/warehouses.service'
 import { BusinessLocation, CountryWithStates, DataTableApiResponse, Warehouse } from '@/types'
 import Warehouses from '@/views/erp/warehouses/Warehouses'
+import { hasPermission } from '@/utils/role-permission'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,11 +35,20 @@ export default async function WarehousesPage({
     console.error('Failed to fetch warehouses:', error)
   }
 
+  const [canCreateWarehouse, canViewWarehouse, canEditWarehouse, canDeleteWarehouse, canManagePurchaseOrder] = await Promise.all([
+    hasPermission('Create Warehouse'),
+    hasPermission('View Warehouse'),
+    hasPermission('Update Warehouse'),
+    hasPermission('Delete Warehouse'),
+    hasPermission('Manage Purchase Order')
+  ])
+
   return (
     <Warehouses
       businessLocations={businessLocations}
       countriesWithStateAndCities={countriesWithStateAndCities}
       initialData={responseData}
+      permissions={{ canCreateWarehouse, canViewWarehouse, canEditWarehouse, canDeleteWarehouse, canManagePurchaseOrder }}
     />
   )
 }

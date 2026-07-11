@@ -10,8 +10,7 @@ export default class LocationService {
 
       const response = await handleRequest(API_URL + (isTenantApi ? LOCATIONS_ALL_TENANT : LOCATIONS_ALL), {
         requiresAuth: true,
-        method: 'GET',
-        next: { revalidate: 60, tags: ['locations'] } // Cache for 60 seconds
+        next: { revalidate: 3600, tags: ['login', 'locations'] }
       })
 
       return response

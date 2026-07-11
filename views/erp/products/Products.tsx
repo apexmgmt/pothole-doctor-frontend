@@ -25,7 +25,6 @@ import CreateEditViewProductModal from './CreateEditViewProductModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ExcelIcon } from '@/public/icons'
-import { hasPermission } from '@/utils/role-permission'
 import { formatCurrency } from '@/utils/currency'
 import TableSearch from '@/components/erp/common/TableSearch'
 import BulkEditProductModal from './BulkEditProductModal'
@@ -46,7 +45,8 @@ const Products: React.FC<ProductsProps> = ({
   hideTitle = false,
   hideActionButton = false,
   initialData,
-  permissions
+  permissions,
+  galleryPermissions
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -746,6 +746,7 @@ const Products: React.FC<ProductsProps> = ({
         uomUnits={uomUnits}
         serviceTypes={serviceTypes}
         vendors={vendors}
+        galleryPermissions={galleryPermissions}
       />
       <ConfirmDialog
         open={isBulkDeleteModalOpen}

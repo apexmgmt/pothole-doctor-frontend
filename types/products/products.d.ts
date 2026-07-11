@@ -136,6 +136,12 @@ export interface ProductsProps {
   hideActionButton?: boolean
   initialData?: DataTableApiResponse<Product> | null
   permissions?: { canCreateProduct?: boolean; canViewProduct?: boolean; canEditProduct?: boolean; canDeleteProduct?: boolean }
+  galleryPermissions?: {
+    canCreateGallery?: boolean
+    canViewGallery?: boolean
+    canEditGallery?: boolean
+    canDeleteGallery?: boolean
+  }
 }
 
 export interface ProductGallery {

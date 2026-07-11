@@ -21,7 +21,6 @@ import CreateOrEditCountryModal from './CreateOrEditCountryModal'
 
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters } from '@/utils/utility'
-import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
 const Countries: React.FC<{
