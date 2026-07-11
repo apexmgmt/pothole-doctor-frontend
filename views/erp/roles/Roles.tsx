@@ -21,7 +21,6 @@ import RoleService from '@/services/api/role.service'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters } from '@/utils/utility'
-import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
 interface RoleData {
