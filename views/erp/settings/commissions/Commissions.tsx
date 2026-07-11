@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -16,98 +17,105 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import CommissionService from '@/services/api/settings/commissions.service'
 import CreateOrEditCommissionModal from './CreateOrEditCommissionModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import { hasPermission } from '@/utils/role-permission'
+
 import { formatCurrency } from '@/utils/currency'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionFilters, commissionBases }) => {
+type Permissions = {
+  canCreate: boolean
+  canEdit: boolean
+  canDelete: boolean
+}
+
+const Commissions: React.FC<
+  CommissionsParams & { initialData?: DataTableApiResponse<Commission> | null; permissions: Permissions }
+> = ({
+  commissionTypes,
+  commissionFilters,
+  commissionBases,
+  initialData,
+  permissions: { canCreate: canCreateCommission, canEdit: canEditCommission, canDelete: canDeleteCommission }
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Commission> | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Commission> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedCommissionId, setSelectedCommissionId] = useState<string | null>(null)
   const [selectedCommission, setSelectedCommission] = useState<Commission | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-  const [canCreateCommission, setCanCreateCommission] = useState<boolean>(false)
-  const [canEditCommission, setCanEditCommission] = useState<boolean>(false)
-  const [canDeleteCommission, setCanDeleteCommission] = useState<boolean>(false)
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
+
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
 
   // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-
-    // Check permissions
-    hasPermission('Create Commission').then(result => {
-      setCanCreateCommission(result)
-    })
-
-    hasPermission('Update Commission').then(result => {
-      setCanEditCommission(result)
-    })
-
-    hasPermission('Delete Commission').then(result => {
-      setCanDeleteCommission(result)
-    })
   }, [])
 
-  // Debounced search update
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
-
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
-
-        if (newOptions.page) {
-          delete newOptions.page
-        }
-
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      CommissionService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          console.error('Error fetching commissions:', error)
-        })
-    } catch (error) {
-      setIsLoading(false)
-      console.error('Error fetching commissions:', error)
-    }
-  }
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
   useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
     dispatch(setPageTitle('Manage Commissions'))
-  }, [filterOptions])
+  }, [dispatch])
+
+  // Debounced search update
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
@@ -138,7 +146,7 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
   }
 
   const handleSuccess = () => {
-    fetchData()
+    router.refresh()
     handleModalClose()
   }
 
@@ -190,21 +198,14 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
           case 'between':
             return (
               <span>
-                {row.filter_percent ? `${row.min_amount}%` : formatCurrency(row.min_amount)} - {row.filter_percent ? `${row.max_amount}%` : formatCurrency(row.max_amount)}
-              </span>
-            )
-          case 'greater-than':
-            return (
-              <span>
-                {row.filter_percent ? `${row.min_amount}%` : formatCurrency(row.min_amount)}
-              </span>
-            )
-          case 'less-than':
-            return (
-              <span>
+                {row.filter_percent ? `${row.min_amount}%` : formatCurrency(row.min_amount)} -{' '}
                 {row.filter_percent ? `${row.max_amount}%` : formatCurrency(row.max_amount)}
               </span>
             )
+          case 'greater-than':
+            return <span>{row.filter_percent ? `${row.min_amount}%` : formatCurrency(row.min_amount)}</span>
+          case 'less-than':
+            return <span>{row.filter_percent ? `${row.max_amount}%` : formatCurrency(row.max_amount)}</span>
           case 'same-as-store':
             return <span>0</span>
           default:
@@ -216,11 +217,7 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
     {
       id: 'amount',
       header: 'Commission Value',
-      cell: (row: Commission) => (
-        <span>
-          {row.commission_percent ? `${row.amount}%` : formatCurrency(row.amount)}
-        </span>
-      ),
+      cell: (row: Commission) => <span>{row.commission_percent ? `${row.amount}%` : formatCurrency(row.amount)}</span>,
       sortable: true
     },
     {
@@ -270,7 +267,7 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
       await CommissionService.destroy(id)
         .then(response => {
           toast.success('Commission deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete commission')
@@ -291,7 +288,12 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
@@ -299,11 +301,7 @@ const Commissions: React.FC<CommissionsParams> = ({ commissionTypes, commissionF
         )}
       </div>
       {canCreateCommission && (
-        <Button className='h-7'
-          variant='default'
-          size='sm'
-          onClick={handleOpenCreateModal}
-        >
+        <Button className='h-7' variant='default' size='sm' onClick={handleOpenCreateModal}>
           <PlusIcon className='w-4 h-4' />
           <span className='hidden min-[480px]:block'>Add Commission</span>
         </Button>

@@ -11,8 +11,6 @@ import {
   COMMISSIONS_TENANT
 } from '@/constants/api'
 import { CommissionPayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
-
 export default class CommissionService {
   /**Commission DataTable API */
   static index = async (filterOptions: object = {}) => {
@@ -25,7 +23,10 @@ export default class CommissionService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['commissions'] } // Cache for 60 seconds
+          next: {
+            revalidate: 30,
+            tags: ['login', 'commissions', queryParams ? `commissions?${queryParams}` : 'commissions']
+          }
         }
       )
 
@@ -43,11 +44,9 @@ export default class CommissionService {
       const response = await handleRequest(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['commissions', 'commissions-all']
       })
-
-      await revalidate('commissions')
-      await revalidate('commissions-all')
 
       return response
     } catch (error) {
@@ -63,7 +62,7 @@ export default class CommissionService {
       const response = await handleRequest(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + commissionId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`commissions/${commissionId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', `commissions/${commissionId}`] }
       })
 
       return response
@@ -80,12 +79,9 @@ export default class CommissionService {
       const response = await handleRequest(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + commissionId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['commissions', 'commissions-all', `commissions/${commissionId}`]
       })
-
-      await revalidate('commissions')
-      await revalidate(`commissions/${commissionId}`)
-      await revalidate('commissions-all')
 
       return response
     } catch (error) {
@@ -100,12 +96,9 @@ export default class CommissionService {
 
       const response = await handleRequest(API_URL + (isTenantApi ? COMMISSIONS_TENANT : COMMISSIONS) + commissionId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['commissions', 'commissions-all', `commissions/${commissionId}`]
       })
-
-      await revalidate('commissions')
-      await revalidate(`commissions/${commissionId}`)
-      await revalidate('commissions-all')
 
       return response
     } catch (error) {
@@ -123,7 +116,7 @@ export default class CommissionService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 3600, tags: ['commission-filters-all'] } // Cache for 1 hour
+          next: { revalidate: 30, tags: ['login', 'commission-filters-all'] }
         }
       )
 
@@ -143,7 +136,7 @@ export default class CommissionService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 3600, tags: ['commission-bases-all'] } // Cache for 1 hour
+          next: { revalidate: 3600, tags: ['login', 'commission-bases-all'] }
         }
       )
 
