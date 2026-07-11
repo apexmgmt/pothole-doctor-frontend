@@ -8,7 +8,6 @@ import {
   PRODUCT_CATEGORIES_TENANT
 } from '@/constants/api'
 import { ProductCategoryPayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class ProductCategoryService {
   /**Product Category DataTable API */
@@ -24,7 +23,14 @@ export default class ProductCategoryService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['product-categories'] } // Cache for 60 seconds
+          next: {
+            revalidate: 30,
+            tags: [
+              'login',
+              'product-categories',
+              queryParams ? `product-categories?${queryParams}` : 'product-categories'
+            ]
+          }
         }
       )
 
@@ -42,11 +48,9 @@ export default class ProductCategoryService {
       const response = await handleRequest(API_URL + (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['product-categories', 'product-categories-all']
       })
-
-      await revalidate('product-categories')
-      await revalidate('product-categories-all')
 
       return response
     } catch (error) {
@@ -64,7 +68,7 @@ export default class ProductCategoryService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`product-categories/${productCategoryId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `product-categories/${productCategoryId}`] }
         }
       )
 
@@ -84,13 +88,10 @@ export default class ProductCategoryService {
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['product-categories', 'product-categories-all', `product-categories/${productCategoryId}`]
         }
       )
-
-      await revalidate('product-categories')
-      await revalidate(`product-categories/${productCategoryId}`)
-      await revalidate('product-categories-all')
 
       return response
     } catch (error) {
@@ -107,13 +108,10 @@ export default class ProductCategoryService {
         API_URL + (isTenantApi ? PRODUCT_CATEGORIES_TENANT : PRODUCT_CATEGORIES) + productCategoryId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['product-categories', 'product-categories-all', `product-categories/${productCategoryId}`]
         }
       )
-
-      await revalidate('product-categories')
-      await revalidate(`product-categories/${productCategoryId}`)
-      await revalidate('product-categories-all')
 
       return response
     } catch (error) {
@@ -131,7 +129,7 @@ export default class ProductCategoryService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 3600, tags: ['product-categories-all'] } // Cache for 1 hour
+          next: { revalidate: 3600, tags: ['login', 'product-categories-all'] }
         }
       )
 
