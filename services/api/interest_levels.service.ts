@@ -1,4 +1,4 @@
-import { getApiUrl, isTenant } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import { handleRequest } from '@/services/api/base.service'
 import {
   API_URL,
@@ -8,7 +8,7 @@ import {
   INTEREST_LEVELS_TENANT
 } from '@/constants/api'
 import { InterestLevelPayload } from '@/types'
-import { revalidate } from '../app/cache.service'
+
 
 export default class InterestLevelService {
   /**Interest levels DataTable API */
@@ -22,7 +22,7 @@ export default class InterestLevelService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['interest-levels'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'interest-levels', queryParams ? `interest-levels?${queryParams}` : 'interest-levels'] }
         }
       )
 
@@ -40,10 +40,9 @@ export default class InterestLevelService {
       const response = await handleRequest(API_URL + (isTenantApi ? INTEREST_LEVELS_TENANT : INTEREST_LEVELS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['interest-levels', 'interest-levels-all']
       })
-
-      await revalidate('interest-levels')
 
       return response
     } catch (error) {
@@ -61,7 +60,7 @@ export default class InterestLevelService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`interest-levels/${interestLevelId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `interest-levels/${interestLevelId}`] }
         }
       )
 
@@ -81,13 +80,10 @@ export default class InterestLevelService {
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['interest-levels', 'interest-levels-all', `interest-levels/${interestLevelId}`]
         }
       )
-
-      await revalidate('interest-levels')
-      await revalidate(`interest-levels/${interestLevelId}`)
-      await revalidate('interest-levels-all')
 
       return response
     } catch (error) {
@@ -104,13 +100,10 @@ export default class InterestLevelService {
         API_URL + (isTenantApi ? INTEREST_LEVELS_TENANT : INTEREST_LEVELS) + interestLevelId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['interest-levels', 'interest-levels-all', `interest-levels/${interestLevelId}`]
         }
       )
-
-      await revalidate('interest-levels')
-      await revalidate(`interest-levels/${interestLevelId}`)
-      await revalidate('interest-levels-all')
 
       return response
     } catch (error) {
@@ -126,7 +119,7 @@ export default class InterestLevelService {
       const response = await handleRequest(API_URL + (isTenantApi ? INTEREST_LEVELS_ALL_TENANT : INTEREST_LEVELS_ALL), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['interest-levels-all'] } // Cache for 1 hour
+        next: { revalidate: 3600, tags: ['login', 'interest-levels-all'] }
       })
 
       return response
