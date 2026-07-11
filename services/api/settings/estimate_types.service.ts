@@ -1,4 +1,4 @@
-import { getApiUrl, isTenant } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import { handleRequest } from '@/services/api/base.service'
 import {
   API_URL,
@@ -8,7 +8,7 @@ import {
   ESTIMATE_TYPES_TENANT
 } from '@/constants/api'
 import { EstimateTypePayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
+
 
 export default class EstimateTypeService {
   /**Estimate types DataTable API */
@@ -22,7 +22,7 @@ export default class EstimateTypeService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['estimate-types'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'estimate-types', queryParams ? `estimate-types?${queryParams}` : 'estimate-types'] }
         }
       )
 
@@ -40,10 +40,9 @@ export default class EstimateTypeService {
       const response = await handleRequest(API_URL + (isTenantApi ? ESTIMATE_TYPES_TENANT : ESTIMATE_TYPES), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['estimate-types', 'estimate-types-all']
       })
-
-      await revalidate('estimate-types')
 
       return response
     } catch (error) {
@@ -61,7 +60,7 @@ export default class EstimateTypeService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`estimate-types/${estimateTypeId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `estimate-types/${estimateTypeId}`] }
         }
       )
 
@@ -81,13 +80,10 @@ export default class EstimateTypeService {
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['estimate-types', 'estimate-types-all', `estimate-types/${estimateTypeId}`]
         }
       )
-
-      await revalidate('estimate-types')
-      await revalidate(`estimate-types/${estimateTypeId}`)
-      await revalidate('estimate-types-all')
 
       return response
     } catch (error) {
@@ -104,13 +100,10 @@ export default class EstimateTypeService {
         API_URL + (isTenantApi ? ESTIMATE_TYPES_TENANT : ESTIMATE_TYPES) + estimateTypeId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['estimate-types', 'estimate-types-all', `estimate-types/${estimateTypeId}`]
         }
       )
-
-      await revalidate('estimate-types-all')
-      await revalidate(`estimate-types/${estimateTypeId}`)
-      await revalidate('estimate-types')
 
       return response
     } catch (error) {
@@ -126,7 +119,7 @@ export default class EstimateTypeService {
       const response = await handleRequest(API_URL + (isTenantApi ? ESTIMATE_TYPES_ALL_TENANT : ESTIMATE_TYPES_ALL), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['estimate-types-all'] } // Cache for 1 hour
+        next: { revalidate: 30, tags: ['login', 'estimate-types-all'] }
       })
 
       return response

@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -20,86 +21,96 @@ import { getInitialFilters, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import EstimateTypeService from '@/services/api/settings/estimate_types.service'
 import CreateOrEditEstimateTypeModal from './CreateOrEditEstimateTypeModal'
-import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const EstimateTypes: React.FC = () => {
+interface EstimateTypesProps {
+  initialData?: DataTableApiResponse<EstimateType> | null
+  permissions?: {
+    canCreateType: boolean
+    canEditType: boolean
+    canDeleteType: boolean
+  }
+}
+
+const EstimateTypes: React.FC<EstimateTypesProps> = ({ initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<EstimateType> | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<EstimateType> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedEstimateTypeId, setSelectedEstimateTypeId] = useState<string | null>(null)
   const [selectedEstimateType, setSelectedEstimateType] = useState<EstimateType | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-  const [canCreateEstimateType, setCanCreateEstimateType] = useState<boolean>(false)
-  const [canEditEstimateType, setCanEditEstimateType] = useState<boolean>(false)
-  const [canDeleteEstimateType, setCanDeleteEstimateType] = useState<boolean>(false)
 
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+  const canCreateEstimateType = permissions?.canCreateType ?? false
+  const canEditEstimateType = permissions?.canEditType ?? false
+  const canDeleteEstimateType = permissions?.canDeleteType ?? false
 
-  // Set initial search value from filterOptions and check permissions
+  const filterOptions = useMemo(
+    () => ({
+      ...getInitialFilters(searchParams)
+    }),
+    [searchParams]
+  )
+
+  useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
+    dispatch(setPageTitle('Manage Estimate Types'))
+  }, [dispatch])
 
-    // Check permissions
-    hasPermission('Create Estimate Type').then(result => setCanCreateEstimateType(result))
-    hasPermission('Update Estimate Type').then(result => setCanEditEstimateType(result))
-    hasPermission('Delete Estimate Type').then(result => setCanDeleteEstimateType(result))
-  }, [])
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-  // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
+    const params = new URLSearchParams()
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  // Fetch data from API
-  const fetchData = async () => {
     setIsLoading(true)
-
-    try {
-      EstimateTypeService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          console.error('Error fetching estimate types:', error)
-        })
-    } catch (error) {
-      setIsLoading(false)
-      console.error('Error fetching estimate types:', error)
-    }
+    router.push(newUrl, { scroll: false })
   }
 
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Estimate Types'))
-  }, [filterOptions])
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
@@ -122,7 +133,7 @@ const EstimateTypes: React.FC = () => {
   }
 
   const handleSuccess = () => {
-    fetchData()
+    router.refresh()
     handleModalClose()
   }
 
@@ -194,7 +205,7 @@ const EstimateTypes: React.FC = () => {
       await EstimateTypeService.destroy(id)
         .then(response => {
           toast.success('Estimate type deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete estimate type')
@@ -215,7 +226,12 @@ const EstimateTypes: React.FC = () => {
   const customFilters = (
     <div className='flex items-center justify-between w-full'>
       <div className='flex items-center gap-2'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={setSearchValue}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear
