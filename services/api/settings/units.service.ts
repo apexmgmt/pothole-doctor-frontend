@@ -2,7 +2,6 @@ import { isTenant } from '@/utils/utility'
 import { handleRequest } from '@/services/api/base.service'
 import { API_URL, UNITS, UNITS_ALL, UNITS_ALL_TENANT, UNITS_TENANT } from '@/constants/api'
 import { UnitPayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class UnitService {
   /**Units DataTable API */
@@ -16,7 +15,7 @@ export default class UnitService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['units'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'units', queryParams ? `units?${queryParams}` : 'units'] }
         }
       )
 
@@ -34,13 +33,9 @@ export default class UnitService {
       const response = await handleRequest(API_URL + (isTenantApi ? UNITS_TENANT : UNITS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['units', 'units-all', 'units-all-uom', 'units-all-measure']
       })
-
-      await revalidate('units')
-      await revalidate('units-all')
-      await revalidate('units-all-uom')
-      await revalidate('units-all-measure')
 
       return response
     } catch (error) {
@@ -56,7 +51,7 @@ export default class UnitService {
       const response = await handleRequest(API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + unitId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`units/${unitId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', `units/${unitId}`] }
       })
 
       return response
@@ -73,14 +68,9 @@ export default class UnitService {
       const response = await handleRequest(API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + unitId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['units', 'units-all', 'units-all-uom', 'units-all-measure', `units/${unitId}`]
       })
-
-      await revalidate('units')
-      await revalidate(`units/${unitId}`)
-      await revalidate('units-all')
-      await revalidate('units-all-uom')
-      await revalidate('units-all-measure')
 
       return response
     } catch (error) {
@@ -95,14 +85,9 @@ export default class UnitService {
 
       const response = await handleRequest(API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + unitId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['units', 'units-all', 'units-all-uom', 'units-all-measure', `units/${unitId}`]
       })
-
-      await revalidate('units')
-      await revalidate(`units/${unitId}`)
-      await revalidate('units-all')
-      await revalidate('units-all-uom')
-      await revalidate('units-all-measure')
 
       return response
     } catch (error) {
@@ -120,7 +105,7 @@ export default class UnitService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 3600, tags: ['units-all' + (group ? `-${group}` : '')] } // Cache for 1 hour
+          next: { revalidate: 30, tags: ['login', 'units-all' + (group ? `-${group}` : '')] }
         }
       )
 

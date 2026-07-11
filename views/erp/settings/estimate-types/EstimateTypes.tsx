@@ -228,7 +228,7 @@ const EstimateTypes: React.FC<EstimateTypesProps> = ({ initialData, permissions 
       <div className='flex items-center gap-2'>
         <TableSearch
           value={searchValue}
-          onChange={setSearchValue}
+          onChange={onSearchChange}
           placeholder='Search...'
           className='lg:w-80 min-w-0'
         />

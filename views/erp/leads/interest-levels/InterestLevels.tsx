@@ -439,7 +439,7 @@ const InterestLevels: React.FC<InterestLevelsProps> = ({ initialData, permission
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
         <TableSearch
           value={searchValue}
-          onChange={setSearchValue}
+          onChange={onSearchChange}
           placeholder='Search...'
           className='lg:w-80 min-w-0'
         />
