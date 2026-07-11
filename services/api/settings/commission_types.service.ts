@@ -1,4 +1,4 @@
-import { getApiUrl, isTenant } from '@/utils/utility'
+import { isTenant } from '@/utils/utility'
 import { handleRequest } from '@/services/api/base.service'
 import {
   COMMISSION_TYPES_ALL,
@@ -8,7 +8,6 @@ import {
   COMMISSION_TYPES_ALL_TENANT
 } from '@/constants/api'
 import { CommissionTypePayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
 
 export default class CommissionTypeService {
   /**Commission Type DataTable API */
@@ -22,7 +21,10 @@ export default class CommissionTypeService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['commission-types'] } // Cache for 60 seconds
+          next: {
+            revalidate: 30,
+            tags: ['login', 'commission-types', queryParams ? `commission-types?${queryParams}` : 'commission-types']
+          }
         }
       )
 
@@ -40,11 +42,9 @@ export default class CommissionTypeService {
       const response = await handleRequest(API_URL + (isTenantApi ? COMMISSION_TYPES_TENANT : COMMISSION_TYPES), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['commission-types', 'commission-types-all']
       })
-
-      await revalidate('commission-types')
-      await revalidate('commission-types-all')
 
       return response
     } catch (error) {
@@ -62,7 +62,7 @@ export default class CommissionTypeService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`commission-types/${commissionTypeId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `commission-types/${commissionTypeId}`] }
         }
       )
 
@@ -82,13 +82,10 @@ export default class CommissionTypeService {
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['commission-types', 'commission-types-all', `commission-types/${commissionTypeId}`]
         }
       )
-
-      await revalidate('commission-types')
-      await revalidate(`commission-types/${commissionTypeId}`)
-      await revalidate('commission-types-all')
 
       return response
     } catch (error) {
@@ -105,13 +102,10 @@ export default class CommissionTypeService {
         API_URL + (isTenantApi ? COMMISSION_TYPES_TENANT : COMMISSION_TYPES) + commissionTypeId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['commission-types', 'commission-types-all', `commission-types/${commissionTypeId}`]
         }
       )
-
-      await revalidate('commission-types')
-      await revalidate(`commission-types/${commissionTypeId}`)
-      await revalidate('commission-types-all')
 
       return response
     } catch (error) {
@@ -129,7 +123,7 @@ export default class CommissionTypeService {
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 3600, tags: ['commission-types-all'] } // Cache for 1 hour
+          next: { revalidate: 3600, tags: ['login', 'commission-types-all'] }
         }
       )
 

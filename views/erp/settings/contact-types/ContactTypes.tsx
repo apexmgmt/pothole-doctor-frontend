@@ -20,10 +20,9 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters } from '@/utils/utility'
 import ContactTypeService from '@/services/api/settings/contact_types.service'
-import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import { hasPermission } from '@/utils/role-permission'
 import CustomFormField from '@/components/form/CustomFormField'
 import TableSearch from '@/components/erp/common/TableSearch'
+import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 
 const INLINE_CREATE_ID = '__inline_create__'
 
@@ -45,10 +44,21 @@ const emptyContactTypePayload: ContactTypeFormValues = {
 
 type ContactTypeFieldErrors = Partial<Record<keyof ContactTypeFormValues, string>>
 
+type Permissions = {
+  canCreate: boolean
+  canEdit: boolean
+  canDelete: boolean
+}
+
 const ContactTypes: React.FC<{
   paymentTerms: PaymentTerm[]
   initialData?: DataTableApiResponse<ContactType> | null
-}> = ({ paymentTerms, initialData }) => {
+  permissions: Permissions
+}> = ({
+  paymentTerms,
+  initialData,
+  permissions: { canCreate: canCreateContactType, canEdit: canEditContactType, canDelete: canDeleteContactType }
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -58,9 +68,6 @@ const ContactTypes: React.FC<{
   const [searchValue, setSearchValue] = useState<string>('')
   const [inlineMode, setInlineMode] = useState<'create' | 'edit' | null>(null)
   const [editingContactTypeId, setEditingContactTypeId] = useState<string | null>(null)
-  const [canCreateContactType, setCanCreateContactType] = useState<boolean>(false)
-  const [canEditContactType, setCanEditContactType] = useState<boolean>(false)
-  const [canDeleteContactType, setCanDeleteContactType] = useState<boolean>(false)
 
   const filterOptions = useMemo(() => {
     return getInitialFilters(searchParams)
@@ -101,10 +108,6 @@ const ContactTypes: React.FC<{
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-
-    hasPermission('Create Contact Type').then(result => setCanCreateContactType(result))
-    hasPermission('Update Contact Type').then(result => setCanEditContactType(result))
-    hasPermission('Delete Contact Type').then(result => setCanDeleteContactType(result))
   }, [])
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useForm } from 'react-hook-form'
 
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -17,10 +18,9 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import CommissionTypeService from '@/services/api/settings/commission_types.service'
-import { hasPermission } from '@/utils/role-permission'
 import CustomFormField from '@/components/form/CustomFormField'
 import TableSearch from '@/components/erp/common/TableSearch'
 
@@ -36,20 +36,47 @@ const emptyCommissionTypePayload: CommissionTypeFormValues = {
 
 type CommissionTypeFieldErrors = Partial<Record<keyof CommissionTypeFormValues, string>>
 
-const CommissionTypes: React.FC = () => {
+type Permissions = {
+  canCreate: boolean
+  canEdit: boolean
+  canDelete: boolean
+}
+
+const CommissionTypes: React.FC<{ initialData?: DataTableApiResponse<CommissionType> | null; permissions: Permissions }> = ({ initialData, permissions: { canCreate: canCreateCommissionType, canEdit: canEditCommissionType, canDelete: canDeleteCommissionType } }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<CommissionType> | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<CommissionType> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
   const [inlineMode, setInlineMode] = useState<'create' | 'edit' | null>(null)
   const [editingCommissionTypeId, setEditingCommissionTypeId] = useState<string | null>(null)
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateCommissionType, setCanCreateCommissionType] = useState<boolean>(false)
-  const [canEditCommissionType, setCanEditCommissionType] = useState<boolean>(false)
-  const [canDeleteCommissionType, setCanDeleteCommissionType] = useState<boolean>(false)
+
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
+
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
+
+  const isInlineEditing = inlineMode !== null
 
   const {
     register,
@@ -62,62 +89,46 @@ const CommissionTypes: React.FC = () => {
     defaultValues: emptyCommissionTypePayload
   })
 
-  const isInlineEditing = inlineMode !== null
-
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-
-    hasPermission('Create Commission').then(result => setCanCreateCommissionType(result))
-    hasPermission('Update Commission').then(result => setCanEditCommissionType(result))
-    hasPermission('Delete Commission').then(result => setCanDeleteCommissionType(result))
   }, [])
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
-
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
-
-        if (newOptions.page) {
-          delete newOptions.page
-        }
-
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      CommissionTypeService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch commission types')
-        })
-    } catch {
-      setIsLoading(false)
-      toast.error('Something went wrong while fetching the commission types!')
-    }
-  }
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
   useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Commission Types'))
-  }, [filterOptions])
+    dispatch(setPageTitle('Commission Types'))
+  }, [dispatch])
+
+  // Debounced search update
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const getFieldErrorsFromApi = (error: any): CommissionTypeFieldErrors => {
     const serverErrors = error?.errors
@@ -172,16 +183,6 @@ const CommissionTypes: React.FC = () => {
     clearErrors()
   }
 
-  const goToFirstPage = () => {
-    setFilterOptions((prev: any) => {
-      const next = { ...prev }
-
-      delete next.page
-
-      return next
-    })
-  }
-
   const handleInlineSubmit = async (values: CommissionTypeFormValues) => {
     clearErrors()
 
@@ -191,63 +192,18 @@ const CommissionTypes: React.FC = () => {
 
     try {
       if (inlineMode === 'create') {
-        const response = await CommissionTypeService.store(payload)
-        const createdCommissionType = response?.data as CommissionType | undefined
-
-        setApiResponse(prev => {
-          if (!prev || !createdCommissionType) {
-            return prev
-          }
-
-          const perPage = prev.per_page || 10
-          const updatedTotal = (prev.total || 0) + 1
-          const nextData = [createdCommissionType, ...(prev.data || [])].slice(0, perPage)
-
-          return {
-            ...prev,
-            data: nextData,
-            total: updatedTotal,
-            from: 1,
-            to: nextData.length,
-            current_page: 1,
-            last_page: Math.max(1, Math.ceil(updatedTotal / perPage))
-          }
-        })
-
-        goToFirstPage()
-
-        if (!createdCommissionType) {
-          fetchData()
-        }
-
-        toast.success(response?.message || 'Commission type created successfully')
+        await CommissionTypeService.store(payload)
+        toast.success('Commission type created successfully')
+        router.refresh()
         handleInlineCancel()
 
         return
       }
 
       if (inlineMode === 'edit' && editingCommissionTypeId) {
-        const response = await CommissionTypeService.update(editingCommissionTypeId, payload)
-        const updatedCommissionType = response?.data as CommissionType | undefined
-
-        if (updatedCommissionType) {
-          setApiResponse(prev => {
-            if (!prev) {
-              return prev
-            }
-
-            return {
-              ...prev,
-              data: (prev.data || []).map(item =>
-                (item as CommissionType).id === editingCommissionTypeId ? updatedCommissionType : item
-              )
-            }
-          })
-        } else {
-          fetchData()
-        }
-
-        toast.success(response?.message || 'Commission type updated successfully')
+        await CommissionTypeService.update(editingCommissionTypeId, payload)
+        toast.success('Commission type updated successfully')
+        router.refresh()
         handleInlineCancel()
       }
     } catch (error: any) {
@@ -271,7 +227,7 @@ const CommissionTypes: React.FC = () => {
       await CommissionTypeService.destroy(id)
         .then(() => {
           toast.success('Commission type deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete commission type')
@@ -423,7 +379,12 @@ const CommissionTypes: React.FC = () => {
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear

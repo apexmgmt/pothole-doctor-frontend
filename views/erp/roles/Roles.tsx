@@ -37,12 +37,10 @@ const Roles: React.FC<{
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [activeTab, setActiveTab] = useState<string>('roles')
-  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
   const [apiResponse, setApiResponse] = useState<DataTableApiResponse<any> | null>(initialData || null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null)
-  const [selectedRole, setSelectedRole] = useState<object | null>(null)
+
+  // const [selectedRole, setSelectedRole] = useState<object | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
   const canCreateRole = permissions?.canCreateRole ?? false
@@ -157,25 +155,20 @@ const Roles: React.FC<{
   const handleClearFilters = () => {
     setFilterOptions({})
     setSearchValue('')
-    setIsFilterDrawerOpen(false)
   }
 
-  const handleRowSelect = (role: any) => {
-    setSelectedRoleId(role?.id || null)
-
-    RoleService.show(role?.id)
-      .then(response => {
-        setSelectedRole(response.data)
-      })
-      .catch(error => {
-        setSelectedRole(null)
-        console.error('Error fetching role details:', error)
-      })
-  }
+  // const handleRowSelect = (role: any) => {
+  //   RoleService.show(role?.id)
+  //     .then(response => {
+  //       setSelectedRole(response.data)
+  //     })
+  //     .catch(error => {
+  //       setSelectedRole(null)
+  //       console.error('Error fetching role details:', error)
+  //     })
+  // }
 
   const handleDeleteRole = async (id: string) => {
-    setSelectedRoleId(null)
-
     try {
       await RoleService.destroy(id)
         .then(response => {
@@ -243,7 +236,8 @@ const Roles: React.FC<{
         pagination={true}
         isLoading={isLoading}
         emptyMessage='No Roles found'
-        handleRowSelect={handleRowSelect}
+
+        // handleRowSelect={handleRowSelect}
       />
     </CommonLayout>
   )

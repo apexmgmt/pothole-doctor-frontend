@@ -17,16 +17,26 @@ import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters } from '@/utils/utility'
-import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import CreateOrEditPaymentTermModal from './CreateOrEditPaymentTermModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
+import PaymentTermsService from '@/services/api/settings/payment_terms.service'
+
+type Permissions = {
+  canCreate: boolean
+  canEdit: boolean
+  canDelete: boolean
+}
 
 const PaymentTerms: React.FC<{
   paymentTermTypes: PaymentTermType[] | []
   initialData?: DataTableApiResponse<PaymentTerm> | null
-}> = ({ paymentTermTypes, initialData }) => {
+  permissions: Permissions
+}> = ({
+  paymentTermTypes,
+  initialData,
+  permissions: { canCreate: canCreatePaymentTerm, canEdit: canEditPaymentTerm, canDelete: canDeletePaymentTerm }
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -62,18 +72,8 @@ const PaymentTerms: React.FC<{
     router.push(newUrl, { scroll: false })
   }
 
-  const [canCreatePaymentTerm, setCanCreatePaymentTerm] = useState<boolean>(false)
-  const [canEditPaymentTerm, setCanEditPaymentTerm] = useState<boolean>(false)
-  const [canDeletePaymentTerm, setCanDeletePaymentTerm] = useState<boolean>(false)
-
-  // Set initial search value from filterOptions and check permissions
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-
-    // Check permissions
-    hasPermission('Create Payment Term').then(result => setCanCreatePaymentTerm(result))
-    hasPermission('Update Payment Term').then(result => setCanEditPaymentTerm(result))
-    hasPermission('Delete Payment Term').then(result => setCanDeletePaymentTerm(result))
   }, [])
 
   useEffect(() => {

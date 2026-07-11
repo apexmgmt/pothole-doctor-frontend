@@ -21,7 +21,6 @@ import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import { getInitialFilters } from '@/utils/utility'
 import PartnerTypesService from '@/services/api/settings/partner_types.service'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import { hasPermission } from '@/utils/role-permission'
 import CustomFormField from '@/components/form/CustomFormField'
 import TableSearch from '@/components/erp/common/TableSearch'
 
@@ -37,7 +36,16 @@ const emptyPartnerTypePayload: PartnerTypeFormValues = {
 
 type PartnerTypeFieldErrors = Partial<Record<keyof PartnerTypeFormValues, string>>
 
-const PartnerTypes: React.FC<{ initialData?: DataTableApiResponse<PartnerType> | null }> = ({ initialData }) => {
+type Permissions = {
+  canCreate: boolean
+  canEdit: boolean
+  canDelete: boolean
+}
+
+const PartnerTypes: React.FC<{ initialData?: DataTableApiResponse<PartnerType> | null; permissions: Permissions }> = ({
+  initialData,
+  permissions: { canCreate: canCreatePartnerType, canEdit: canEditPartnerType, canDelete: canDeletePartnerType }
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
@@ -47,9 +55,6 @@ const PartnerTypes: React.FC<{ initialData?: DataTableApiResponse<PartnerType> |
   const [searchValue, setSearchValue] = useState<string>('')
   const [inlineMode, setInlineMode] = useState<'create' | 'edit' | null>(null)
   const [editingPartnerTypeId, setEditingPartnerTypeId] = useState<string | null>(null)
-  const [canCreatePartnerType, setCanCreatePartnerType] = useState<boolean>(false)
-  const [canEditPartnerType, setCanEditPartnerType] = useState<boolean>(false)
-  const [canDeletePartnerType, setCanDeletePartnerType] = useState<boolean>(false)
 
   const filterOptions = useMemo(() => {
     return getInitialFilters(searchParams)
@@ -89,10 +94,6 @@ const PartnerTypes: React.FC<{ initialData?: DataTableApiResponse<PartnerType> |
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-
-    hasPermission('Create Contractor Type').then(result => setCanCreatePartnerType(result))
-    hasPermission('Update Contractor Type').then(result => setCanEditPartnerType(result))
-    hasPermission('Delete Contractor Type').then(result => setCanDeletePartnerType(result))
   }, [])
 
   useEffect(() => {

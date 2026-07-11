@@ -1,6 +1,7 @@
 import ContactTypeService from '@/services/api/settings/contact_types.service'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import { PaymentTerm, ContactType, DataTableApiResponse } from '@/types'
+import { hasPermission } from '@/utils/role-permission'
 import ContactTypes from '@/views/erp/settings/contact-types/ContactTypes'
 
 export const dynamic = 'force-dynamic'
@@ -31,5 +32,17 @@ export default async function ContactTypesPage({
     console.error('Failed to fetch contact types:', error)
   }
 
-  return <ContactTypes paymentTerms={payment_terms} initialData={responseData} />
+  const [canCreate, canEdit, canDelete] = await Promise.all([
+    hasPermission('Create Contact Type'),
+    hasPermission('Update Contact Type'),
+    hasPermission('Delete Contact Type')
+  ])
+
+  return (
+    <ContactTypes
+      paymentTerms={payment_terms}
+      initialData={responseData}
+      permissions={{ canCreate, canEdit, canDelete }}
+    />
+  )
 }

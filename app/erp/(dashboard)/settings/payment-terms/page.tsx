@@ -1,6 +1,7 @@
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import { PaymentTermType, DataTableApiResponse, PaymentTerm } from '@/types'
 import PaymentTerms from '@/views/erp/settings/payment-terms/PaymentTerms'
+import { hasPermission } from '@/utils/role-permission'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,5 +31,17 @@ export default async function PaymentTermsPage({
     console.error('Failed to fetch payment terms:', error)
   }
 
-  return <PaymentTerms paymentTermTypes={paymentTermTypes} initialData={responseData} />
+  const [canCreate, canEdit, canDelete] = await Promise.all([
+    hasPermission('Create Payment Term'),
+    hasPermission('Update Payment Term'),
+    hasPermission('Delete Payment Term')
+  ])
+
+  return (
+    <PaymentTerms
+      paymentTermTypes={paymentTermTypes}
+      initialData={responseData}
+      permissions={{ canCreate, canEdit, canDelete }}
+    />
+  )
 }
