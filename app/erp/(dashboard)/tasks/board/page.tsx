@@ -5,6 +5,7 @@ import StaffService from '@/services/api/staff.service'
 import TaskService from '@/services/api/tasks/tasks.service'
 import { Client, Staff, Task, TaskReminder, TaskReminderChannel, TaskType } from '@/types'
 import KanbanBoard from '@/views/erp/tasks/kanban/KanbanBoard'
+import { hasPermission } from '@/utils/role-permission'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,6 +40,13 @@ export default async function TaskKanbanPage({ searchParams }: PageProps) {
         }
       : undefined
 
+  // Get permissions
+  const [canCreateTask, canEditTask, canDeleteTask] = await Promise.all([
+    hasPermission('Create Task'),
+    hasPermission('Update Task'),
+    hasPermission('Delete Task')
+  ])
+
   // Fire the requests
   const [tasksRes, staffsRes, clientsRes, taskTypesRes, taskRemindersRes, taskReminderChannelsRes] =
     await Promise.allSettled([
@@ -67,6 +75,9 @@ export default async function TaskKanbanPage({ searchParams }: PageProps) {
       taskTypes={taskTypes}
       taskReminders={taskReminders}
       taskReminderChannels={taskReminderChannels}
+      canCreateTask={canCreateTask}
+      canEditTask={canEditTask}
+      canDeleteTask={canDeleteTask}
     />
   )
 }

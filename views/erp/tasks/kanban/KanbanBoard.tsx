@@ -24,7 +24,6 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { KanbanColumn as Column, KanbanTask } from './kanban'
 import KanbanColumn from './KanbanColumn'
 import { toast } from 'sonner'
-import { hasPermission } from '@/utils/role-permission'
 import KanbanFilter from './KanbanFilter'
 import TaskViewModal from '@/views/erp/tasks/TaskViewModal'
 import { useAppDispatch } from '@/lib/hooks'
@@ -68,7 +67,10 @@ export default function KanbanBoard({
   clients = [],
   taskTypes = [],
   taskReminders = [],
-  taskReminderChannels = []
+  taskReminderChannels = [],
+  canCreateTask = false,
+  canEditTask = false,
+  canDeleteTask = false
 }: {
   initialTasks?: Task[]
   staffs?: Staff[]
@@ -76,6 +78,9 @@ export default function KanbanBoard({
   taskTypes?: TaskType[]
   taskReminders?: TaskReminder[]
   taskReminderChannels?: TaskReminderChannel[]
+  canCreateTask?: boolean
+  canEditTask?: boolean
+  canDeleteTask?: boolean
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -95,9 +100,6 @@ export default function KanbanBoard({
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [selectedViewTaskId, setSelectedViewTaskId] = useState<string | null>(null)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
-  const [canCreateTask, setCanCreateTask] = useState<boolean>(false)
-  const [canEditTask, setCanEditTask] = useState<boolean>(false)
-  const [canDeleteTask, setCanDeleteTask] = useState<boolean>(false)
 
   // The "Interaction Lock" - Only allow fetches after the user touches the filter
   const hasUserChangedFilter = useRef(false)
@@ -252,13 +254,6 @@ export default function KanbanBoard({
     }
   }
 
-  // check permissions from cookies and set state accordingly
-  useEffect(() => {
-    // Check permissions
-    hasPermission('Create Task').then(result => setCanCreateTask(result))
-    hasPermission('Update Task').then(result => setCanEditTask(result))
-    hasPermission('Delete Task').then(result => setCanDeleteTask(result))
-  }, [])
 
   const handleAddTask = async (columnId: string, name = '') => {
     const taskName = name.trim()
