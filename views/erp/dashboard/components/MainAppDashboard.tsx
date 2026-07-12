@@ -10,6 +10,7 @@ import { Column } from '@/types'
 
 import { getChartValue, getDayLabel } from '../utils'
 import { EmptyState } from './shared'
+import Link from 'next/link'
 
 interface MainAppDashboardProps {
   data: Record<string, unknown> | null
@@ -149,19 +150,19 @@ export default function MainAppDashboard({ data, impersonateUser }: MainAppDashb
         </div>
       </div>
 
-      {/* Latest organisations */}
+      {/* Latest organizations */}
       <div className='rounded-2xl border border-border/30 bg-card overflow-hidden'>
         <div className='px-6 py-4 border-b border-border/20 flex items-center justify-between'>
           <h2 className='text-sm font-semibold text-card-foreground'>Latest Companies</h2>
           <div className='flex items-center gap-3'>
             <span className='text-xs text-muted-foreground'>{companiesData.length} records</span>
-            <a
+            <Link
               href='/erp/companies'
               className='text-xs text-primary hover:text-primary/80 font-medium transition-colors flex items-center gap-1'
             >
               View All
               <ArrowRight size={16} />
-            </a>
+            </Link>
           </div>
         </div>
         <div className='px-2'>
