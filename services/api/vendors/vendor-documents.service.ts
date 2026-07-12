@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, VENDOR_DOCUMENTS, VENDOR_DOCUMENTS_TENANT } from '@/constants/api'
 import { DocumentPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
@@ -11,7 +11,7 @@ export default class VendorDocumentService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_DOCUMENTS_TENANT : VENDOR_DOCUMENTS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -20,13 +20,7 @@ export default class VendorDocumentService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch vendor documents')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -37,21 +31,15 @@ export default class VendorDocumentService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? VENDOR_DOCUMENTS_TENANT : VENDOR_DOCUMENTS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? VENDOR_DOCUMENTS_TENANT : VENDOR_DOCUMENTS), {
         requiresAuth: true,
         method: 'POST',
         body: payload
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('vendor-documents')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -62,7 +50,7 @@ export default class VendorDocumentService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_DOCUMENTS_TENANT : VENDOR_DOCUMENTS) + vendorDocumentId,
         {
           requiresAuth: true,
@@ -71,13 +59,7 @@ export default class VendorDocumentService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch document details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -91,7 +73,7 @@ export default class VendorDocumentService {
       // Add the _method field to simulate PUT request
       payload.append('_method', 'PUT')
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_DOCUMENTS_TENANT : VENDOR_DOCUMENTS) + vendorDocumentId,
         {
           requiresAuth: true,
@@ -100,16 +82,10 @@ export default class VendorDocumentService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('vendor-documents')
       await revalidate(`vendor-documents/${vendorDocumentId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -120,7 +96,7 @@ export default class VendorDocumentService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_DOCUMENTS_TENANT : VENDOR_DOCUMENTS) + vendorDocumentId,
         {
           requiresAuth: true,
@@ -128,16 +104,10 @@ export default class VendorDocumentService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete document')
-      }
-
       await revalidate('vendor-documents')
       await revalidate(`vendor-documents/${vendorDocumentId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

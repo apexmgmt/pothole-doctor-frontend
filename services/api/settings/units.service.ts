@@ -1,8 +1,7 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, UNITS, UNITS_ALL, UNITS_ALL_TENANT, UNITS_TENANT } from '@/constants/api'
 import { UnitPayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class UnitService {
   /**Units DataTable API */
@@ -11,22 +10,16 @@ export default class UnitService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['units'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'units', queryParams ? `units?${queryParams}` : 'units'] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch units')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -37,24 +30,14 @@ export default class UnitService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? UNITS_TENANT : UNITS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? UNITS_TENANT : UNITS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['units', 'units-all', 'units-all-uom', 'units-all-measure']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('units')
-      await revalidate('units-all')
-      await revalidate('units-all-uom')
-      await revalidate('units-all-measure')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -65,19 +48,13 @@ export default class UnitService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + unitId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + unitId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`units/${unitId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', `units/${unitId}`] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch units details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -88,25 +65,14 @@ export default class UnitService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + unitId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + unitId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['units', 'units-all', 'units-all-uom', 'units-all-measure', `units/${unitId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('units')
-      await revalidate(`units/${unitId}`)
-      await revalidate('units-all')
-      await revalidate('units-all-uom')
-      await revalidate('units-all-measure')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -117,24 +83,13 @@ export default class UnitService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + unitId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? UNITS_TENANT : UNITS) + unitId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['units', 'units-all', 'units-all-uom', 'units-all-measure', `units/${unitId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete units')
-      }
-
-      await revalidate('units')
-      await revalidate(`units/${unitId}`)
-      await revalidate('units-all')
-      await revalidate('units-all-uom')
-      await revalidate('units-all-measure')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -145,22 +100,16 @@ export default class UnitService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? UNITS_ALL_TENANT : UNITS_ALL) + (group ? `?group=${group}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 3600, tags: ['units-all' + (group ? `-${group}` : '')] } // Cache for 1 hour
+          next: { revalidate: 30, tags: ['login', 'units-all' + (group ? `-${group}` : '')] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch units')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

@@ -24,7 +24,6 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { KanbanColumn as Column, KanbanTask } from './kanban'
 import KanbanColumn from './KanbanColumn'
 import { toast } from 'sonner'
-import { hasPermission } from '@/utils/role-permission'
 import KanbanFilter from './KanbanFilter'
 import TaskViewModal from '@/views/erp/tasks/TaskViewModal'
 import { useAppDispatch } from '@/lib/hooks'
@@ -68,7 +67,10 @@ export default function KanbanBoard({
   clients = [],
   taskTypes = [],
   taskReminders = [],
-  taskReminderChannels = []
+  taskReminderChannels = [],
+  canCreateTask = false,
+  canEditTask = false,
+  canDeleteTask = false
 }: {
   initialTasks?: Task[]
   staffs?: Staff[]
@@ -76,6 +78,9 @@ export default function KanbanBoard({
   taskTypes?: TaskType[]
   taskReminders?: TaskReminder[]
   taskReminderChannels?: TaskReminderChannel[]
+  canCreateTask?: boolean
+  canEditTask?: boolean
+  canDeleteTask?: boolean
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -95,13 +100,75 @@ export default function KanbanBoard({
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [selectedViewTaskId, setSelectedViewTaskId] = useState<string | null>(null)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
-  const [canCreateTask, setCanCreateTask] = useState<boolean>(false)
-  const [canEditTask, setCanEditTask] = useState<boolean>(false)
-  const [canDeleteTask, setCanDeleteTask] = useState<boolean>(false)
 
   // The "Interaction Lock" - Only allow fetches after the user touches the filter
   const hasUserChangedFilter = useRef(false)
   const lastDragOverKeyRef = useRef<string | null>(null)
+  const pendingSyncRef = useRef<{ task: KanbanTask; originalTask: Task } | null>(null)
+
+  // Flush pending API calls after state updates to avoid React warnings during render
+  useEffect(() => {
+    if (pendingSyncRef.current) {
+      const { task: finalMovedTask, originalTask } = pendingSyncRef.current
+
+      pendingSyncRef.current = null
+
+      TaskService.updateStatus(finalMovedTask.id, finalMovedTask.status, finalMovedTask.order).catch((error: any) => {
+        toast.error(typeof error?.message === 'string' ? error.message : 'Failed to update task status')
+
+        setTasks(prevTasks => {
+          const newTasks = [...prevTasks]
+          const taskIndex = newTasks.findIndex(t => t.id === finalMovedTask.id)
+
+          if (taskIndex === -1) return prevTasks
+
+          const taskToRollback = newTasks[taskIndex]
+          const currentColumnId = taskToRollback.columnId || 'backlog'
+          const originalColumnId = originalTask.status || 'backlog'
+
+          newTasks.splice(taskIndex, 1)
+
+          const rolledBackTask = {
+            ...taskToRollback,
+            status: originalColumnId,
+            columnId: originalColumnId,
+            order: originalTask.order ?? 0
+          }
+
+          const colTasks = newTasks.filter(t => t.columnId === originalColumnId)
+          const insertIdx = colTasks.findIndex(t => (t.order ?? 0) >= (originalTask.order ?? 0))
+
+          if (insertIdx === -1) {
+            newTasks.push(rolledBackTask)
+          } else {
+            const fullIdx = newTasks.findIndex(t => t.id === colTasks[insertIdx].id)
+
+            newTasks.splice(fullIdx !== -1 ? fullIdx : newTasks.length, 0, rolledBackTask)
+          }
+
+          const affectedColumns = new Set<string>([currentColumnId, originalColumnId])
+
+          for (const colId of affectedColumns) {
+            let order = 0
+
+            for (let index = 0; index < newTasks.length; index++) {
+              const currentTask = newTasks[index]
+
+              if (currentTask.columnId !== colId) continue
+
+              if (currentTask.order !== order || currentTask.status !== colId) {
+                newTasks[index] = { ...currentTask, order, status: colId }
+              }
+
+              order += 1
+            }
+          }
+
+          return newTasks
+        })
+      })
+    }
+  }, [tasks])
 
   /** Set the page title when the component mounts */
   useEffect(() => {
@@ -251,14 +318,6 @@ export default function KanbanBoard({
       toast.error(typeof error?.message === 'string' ? error.message : 'Failed to delete task')
     }
   }
-
-  // check permissions from cookies and set state accordingly
-  useEffect(() => {
-    // Check permissions
-    hasPermission('Create Task').then(result => setCanCreateTask(result))
-    hasPermission('Update Task').then(result => setCanEditTask(result))
-    hasPermission('Delete Task').then(result => setCanDeleteTask(result))
-  }, [])
 
   const handleAddTask = async (columnId: string, name = '') => {
     const taskName = name.trim()
@@ -593,12 +652,10 @@ export default function KanbanBoard({
 
       const finalMovedTask = newTasks.find(t => t.id === activeId)
 
-      // Call API ONLY if column or order has actually changed vs original state
+      // Queue API call for after render to avoid React warning
       if (finalMovedTask && originalTask) {
         if (originalTask.status !== finalMovedTask.status || originalTask.order !== finalMovedTask.order) {
-          TaskService.updateStatus(finalMovedTask.id, finalMovedTask.status, finalMovedTask.order).catch(() => {
-            // Handle rollback UI here if needed
-          })
+          pendingSyncRef.current = { task: finalMovedTask, originalTask }
         }
       }
 

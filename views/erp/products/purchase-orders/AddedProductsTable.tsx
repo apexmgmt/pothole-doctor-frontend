@@ -38,9 +38,11 @@ const AddedProductsTable = ({ addedProducts, onRemove, onFieldChange }: AddedPro
         </thead>
         <tbody>
           {addedProducts.map((ap, index) => {
+            const coverageUnit = ap.product?.coverage_unit?.name ?? ap.product?.coverage_uom?.name
+
             const totalCoverage =
-              ap.product.coverage_per_rate != null
-                ? Number((ap.quantity * ap.product.coverage_per_rate).toFixed(2))
+              ap.product?.coverage_per_rate != null
+                ? Number((ap.quantity * (ap.product.coverage_per_rate ?? 1)).toFixed(2))
                 : null
 
             const rowTotal = Number((ap.company_cost * ap.quantity).toFixed(2))
@@ -48,11 +50,11 @@ const AddedProductsTable = ({ addedProducts, onRemove, onFieldChange }: AddedPro
             return (
               <tr key={ap.product_id} className='border-b border-border last:border-0'>
                 <td className='px-3 py-2 text-muted-foreground'>{index + 1}</td>
-                <td className='px-3 py-2'>{ap.product.sku}</td>
-                <td className='px-3 py-2'>{ap.product.vendor_product_name || ap.product.private_product_name}</td>
-                <td className='px-3 py-2 text-muted-foreground'>{ap.product.description || '—'}</td>
-                <td className='px-3 py-2'>{ap.product.vendor_style || ap.product.private_style || '—'}</td>
-                <td className='px-3 py-2'>{ap.product.vendor_color || ap.product.private_color || '—'}</td>
+                <td className='px-3 py-2'>{ap.product?.sku}</td>
+                <td className='px-3 py-2'>{ap.product?.vendor_product_name || ap.product?.private_product_name}</td>
+                <td className='px-3 py-2 text-muted-foreground'>{ap.product?.description || '—'}</td>
+                <td className='px-3 py-2'>{ap.product?.vendor_style || ap.product?.private_style || '—'}</td>
+                <td className='px-3 py-2'>{ap.product?.vendor_color || ap.product?.private_color || '—'}</td>
                 <td className='px-3 py-2'>
                   <Input
                     type='number'
@@ -63,10 +65,12 @@ const AddedProductsTable = ({ addedProducts, onRemove, onFieldChange }: AddedPro
                     className='h-7 text-xs w-20'
                   />
                 </td>
-                <td className='px-3 py-2'>{ap.product.purchase_unit?.name ?? ap.product.purchase_uom?.name ?? '—'}</td>
+                <td className='px-3 py-2'>{ap.product?.purchase_unit?.name ?? ap.product?.purchase_uom?.name ?? '—'}</td>
                 <td className='px-3 py-2'>
-                  {totalCoverage != null
-                    ? `${totalCoverage} (${ap.product.coverage_unit?.name ?? ap.product.coverage_uom?.name ?? ''})`
+                  {totalCoverage !== null
+                    ? coverageUnit
+                      ? `${totalCoverage} (${coverageUnit})`
+                      : `${totalCoverage}`
                     : '—'}
                 </td>
                 <td className='px-3 py-2'>
@@ -81,7 +85,7 @@ const AddedProductsTable = ({ addedProducts, onRemove, onFieldChange }: AddedPro
                         className='h-7 text-xs w-24'
                       />
                       <span className='text-xs text-muted-foreground whitespace-nowrap'>
-                        {ap.product.purchase_unit?.name ?? ap.product.purchase_uom?.name ?? ''}
+                        {ap.product?.purchase_unit?.name ?? ap.product?.purchase_uom?.name ?? ''}
                       </span>
                     </div>
                     <div className='flex items-center gap-1'>
@@ -94,7 +98,7 @@ const AddedProductsTable = ({ addedProducts, onRemove, onFieldChange }: AddedPro
                         className='h-7 text-xs w-24'
                       />
                       <span className='text-xs text-muted-foreground whitespace-nowrap'>
-                        {ap.product.selling_unit?.name ?? ap.product.selling_uom?.name ?? ''}
+                        {ap.product?.selling_unit?.name ?? ap.product?.selling_uom?.name ?? ''}
                       </span>
                     </div>
                   </div>

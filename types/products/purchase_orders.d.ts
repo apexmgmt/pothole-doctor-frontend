@@ -28,6 +28,10 @@ export interface PurchaseOrder extends Model {
   comments: string
   purchase_products: PurchaseOrderProduct[]
   documents?: Document[]
+  total_cost: number
+  paid_amount: number
+  due_amount: number
+  payment_due: null | 'on_arrival' | 'paid'
 }
 
 export interface PurchaseOrderProduct extends Model {

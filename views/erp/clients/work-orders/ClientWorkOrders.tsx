@@ -20,7 +20,7 @@ import TableSearch from '@/components/erp/common/TableSearch'
 const ClientWorkOrders = ({ clientId }: { clientId: string }) => {
   const router = useRouter()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<WorkOrder> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [filterOptions, setFilterOptions] = useState<any>({ page: 1, per_page: 10, client_id: clientId })

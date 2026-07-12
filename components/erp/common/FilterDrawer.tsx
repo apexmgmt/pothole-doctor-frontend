@@ -163,6 +163,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
           {fields.map(field => (
             <div key={field.key} className={field.gridCols ? `grid grid-cols-${field.gridCols} gap-4` : 'space-y-2'}>
               {field.gridCols ? (
+
                 // Handle grid layout for fields like date range
                 field.fields?.map(subField => (
                   <div key={subField.key} className='space-y-2'>
@@ -173,6 +174,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
                   </div>
                 ))
               ) : (
+
                 // Single field
                 <>
                   <Label htmlFor={field.key} className='text-white text-sm font-medium'>

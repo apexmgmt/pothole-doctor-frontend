@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useForm } from 'react-hook-form'
 
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -17,10 +18,9 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import { hasPermission } from '@/utils/role-permission'
 import CustomFormField from '@/components/form/CustomFormField'
 import TableSearch from '@/components/erp/common/TableSearch'
 
@@ -41,21 +41,37 @@ const emptyServiceTypePayload: ServiceTypeFormValues = {
 }
 
 type ServiceTypeFieldErrors = Partial<Record<keyof ServiceTypeFormValues, string>>
+interface ServiceTypesProps {
+  initialData?: DataTableApiResponse<ServiceType> | null
+  permissions?: {
+    canCreateType: boolean
+    canEditType: boolean
+    canDeleteType: boolean
+    canRestoreType: boolean
+  }
+}
 
-const ServiceTypes: React.FC = () => {
+const ServiceTypes: React.FC<ServiceTypesProps> = ({ initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<ServiceType> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
   const [inlineMode, setInlineMode] = useState<'create' | 'edit' | null>(null)
   const [editingServiceTypeId, setEditingServiceTypeId] = useState<string | null>(null)
-  const [canCreateServiceType, setCanCreateServiceType] = useState<boolean>(false)
-  const [canEditServiceType, setCanEditServiceType] = useState<boolean>(false)
-  const [canDeleteServiceType, setCanDeleteServiceType] = useState<boolean>(false)
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+
+  const canCreateServiceType = permissions?.canCreateType ?? false
+  const canEditServiceType = permissions?.canEditType ?? false
+  const canDeleteServiceType = permissions?.canDeleteType ?? false
+
+  const filterOptions = useMemo(
+    () => ({
+      ...getInitialFilters(searchParams)
+    }),
+    [searchParams]
+  )
 
   const {
     register,
@@ -72,54 +88,60 @@ const ServiceTypes: React.FC = () => {
   const isInlineEditing = inlineMode !== null
 
   useEffect(() => {
-    setSearchValue(filterOptions.search || '')
-
-    hasPermission('Create Service Type').then(result => setCanCreateServiceType(result))
-    hasPermission('Update Service Type').then(result => setCanEditServiceType(result))
-    hasPermission('Delete Service Type').then(result => setCanDeleteServiceType(result))
-  }, [])
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
+    setSearchValue(filterOptions.search || '')
+    dispatch(setPageTitle('Manage Service Types'))
+  }, [dispatch])
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+    const params = new URLSearchParams()
 
-        return newOptions
-      })
-    }, 500)
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
 
-    return () => clearTimeout(timer)
-  }, [searchValue])
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
-  const fetchData = async () => {
     setIsLoading(true)
-
-    ServiceTypeService.index(filterOptions)
-      .then(response => {
-        setApiResponse(response.data)
-        setIsLoading(false)
-      })
-      .catch(error => {
-        setIsLoading(false)
-        toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch service types')
-      })
+    router.push(newUrl, { scroll: false })
   }
 
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Service Types'))
-  }, [filterOptions])
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const getFieldErrorsFromApi = (error: any): ServiceTypeFieldErrors => {
     const serverErrors = error?.errors
@@ -225,7 +247,7 @@ const ServiceTypes: React.FC = () => {
         goToFirstPage()
 
         if (!createdServiceType) {
-          fetchData()
+          router.refresh()
         }
 
         toast.success(response?.message || 'Service type created successfully')
@@ -252,7 +274,7 @@ const ServiceTypes: React.FC = () => {
             }
           })
         } else {
-          fetchData()
+          router.refresh()
         }
 
         toast.success(response?.message || 'Service type updated successfully')
@@ -279,7 +301,7 @@ const ServiceTypes: React.FC = () => {
       await ServiceTypeService.destroy(id)
         .then(() => {
           toast.success('Service type deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete service type')
@@ -504,7 +526,12 @@ const ServiceTypes: React.FC = () => {
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear

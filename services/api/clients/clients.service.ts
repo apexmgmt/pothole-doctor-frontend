@@ -1,7 +1,15 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
-import { revalidate } from '@/services/app/cache.service'
-import { API_URL, CLIENTS, CLIENTS_ALL, CLIENTS_ALL_TENANT, CLIENTS_LEAD_STAGE, CLIENTS_TENANT } from '@/constants/api'
+import { handleRequest } from '@/services/api/base.service'
+import {
+  API_URL,
+  CLIENTS,
+  CLIENTS_ALL,
+  CLIENTS_ALL_TENANT,
+  CLIENTS_LEAD_STAGE,
+  CLIENTS_TENANT,
+  CLIENTS_EXPORT,
+  CLIENTS_EXPORT_TENANT
+} from '@/constants/api'
 import { ClientPayload } from '@/types'
 
 export default class ClientService {
@@ -11,22 +19,44 @@ export default class ClientService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`clients${type ? `-${type}` : ''}`] }
+          next: {
+            revalidate: 30,
+            tags: [
+              'login',
+              'clients',
+              `clients${type ? `-${type}` : ''}`,
+              queryParams ? `clients${type ? `-${type}` : ''}?${queryParams}` : `clients${type ? `-${type}` : ''}`
+            ]
+          }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
 
-        throw new Error(errorData.message || 'Failed to fetch clients')
-      }
+  /** Export Clients API */
+  static exportClients = async (filterOptions: object = {}) => {
+    try {
+      const isTenantApi = await isTenant()
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      return await response.json()
+      const response = await handleRequest(
+        API_URL + (isTenantApi ? CLIENTS_EXPORT_TENANT : CLIENTS_EXPORT) + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      return await response.blob()
     } catch (error) {
       throw error
     }
@@ -37,29 +67,14 @@ export default class ClientService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['clients', 'clients-all', type ? `clients-${type}` : '', type ? `clients-all-${type}` : ''].filter(Boolean)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to create client')
-      }
-
-      // Revalidate generic tags
-      await revalidate('clients')
-      await revalidate('clients-all')
-
-      // Revalidate type-specific tags if type is provided
-      if (type) {
-        await revalidate(`clients-${type}`)
-        await revalidate(`clients-all-${type}`)
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -70,19 +85,13 @@ export default class ClientService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`clients/${clientId}`] }
+        next: { revalidate: 30, tags: ['login', `clients/${clientId}`] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch client details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -93,54 +102,32 @@ export default class ClientService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['clients', 'clients-all', `clients/${clientId}`, type ? `clients-${type}` : '', type ? `clients-all-${type}` : ''].filter(Boolean)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to update client')
-      }
-
-      // Revalidate generic tags
-      await revalidate('clients')
-      await revalidate('clients-all')
-      await revalidate(`clients/${clientId}`)
-
-      // Revalidate type-specific tags if type is provided
-      if (type) {
-        await revalidate(`clients-${type}`)
-        await revalidate(`clients-all-${type}`)
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
   }
 
   /** Update Client Lead Stage API */
-  static updateLeadStage = async (clientId: string, stage: 'prospect' | 'open' | 'working' | 'meeting-set' | 'opportunity' | 'closed-won' | 'closed-lost') => {
+  static updateLeadStage = async (
+    clientId: string,
+    stage: 'prospect' | 'open' | 'working' | 'meeting-set' | 'opportunity' | 'closed-won' | 'closed-lost'
+  ) => {
     try {
-      const response = await apiInterceptor(API_URL + CLIENTS_LEAD_STAGE(clientId, stage), {
+      const response = await handleRequest(API_URL + CLIENTS_LEAD_STAGE(clientId, stage), {
         requiresAuth: true,
-        method: 'PUT'
+        method: 'PUT',
+        revalidateTags: ['clients', `clients/${clientId}`, 'clients-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new errorData
-      }
-
-      await revalidate('clients')
-      await revalidate(`clients/${clientId}`)
-      await revalidate('clients-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -151,23 +138,13 @@ export default class ClientService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['clients', 'clients-all', `clients/${clientId}`, `clients${type ? `-${type}` : ''}`, `clients-all${type ? `-${type}` : ''}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete client')
-      }
-
-      await revalidate(`clients${type ? `-${type}` : ''}`)
-      await revalidate(`clients/${clientId}`)
-      await revalidate(`clients-all${type ? `-${type}` : ''}`)
-      await revalidate('clients-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -178,26 +155,13 @@ export default class ClientService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
-        API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId + '/restore',
-        {
-          requiresAuth: true,
-          method: 'POST'
-        }
-      )
+      const response = await handleRequest(API_URL + (isTenantApi ? CLIENTS_TENANT : CLIENTS) + clientId + '/restore', {
+        requiresAuth: true,
+        method: 'POST',
+        revalidateTags: ['clients', 'clients-all', `clients/${clientId}`, `clients${type ? `-${type}` : ''}`, `clients-all${type ? `-${type}` : ''}`]
+      })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to restore client')
-      }
-
-      await revalidate(`clients${type ? `-${type}` : ''}`)
-      await revalidate(`clients/${clientId}`)
-      await revalidate(`clients-all${type ? `-${type}` : ''}`)
-      await revalidate('clients-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -208,24 +172,16 @@ export default class ClientService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? CLIENTS_ALL_TENANT : CLIENTS_ALL) + (type ? `?type=${type}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
           cache: 'no-store'
-
-          // next: { revalidate: 3600, tags: [`clients-all${type ? `-${type}` : ''}`] } // Cache for 1 hour
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch clients')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

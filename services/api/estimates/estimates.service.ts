@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { ESTIMATES_ALL, ESTIMATES, API_URL, ESTIMATES_TENANT, ESTIMATES_ALL_TENANT } from '@/constants/api'
 import { EstimatePayload, TakeoffData } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
@@ -11,7 +11,7 @@ export default class EstimateService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -20,13 +20,7 @@ export default class EstimateService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch estimates')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -37,22 +31,16 @@ export default class EstimateService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES), {
+      const response = await handleRequest(API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to create estimates')
-      }
-
       await revalidate('estimates')
       await revalidate('estimates-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -63,19 +51,13 @@ export default class EstimateService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES) + estimateId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES) + estimateId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`estimates/${estimateId}`] } // Cache for 60 seconds
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch estimates details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -86,23 +68,17 @@ export default class EstimateService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES) + estimateId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES) + estimateId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('estimates')
       await revalidate(`estimates/${estimateId}`)
       await revalidate('estimates-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -113,22 +89,16 @@ export default class EstimateService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES) + estimateId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES) + estimateId, {
         requiresAuth: true,
         method: 'DELETE'
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete estimate')
-      }
 
       await revalidate('estimates')
       await revalidate(`estimates/${estimateId}`)
       await revalidate('estimates-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -138,7 +108,7 @@ export default class EstimateService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? ESTIMATES_TENANT : ESTIMATES) + `${estimateId}/take-off`,
         {
           requiresAuth: true,
@@ -147,17 +117,11 @@ export default class EstimateService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate(`estimates/${estimateId}`)
       await revalidate('estimates')
       await revalidate('estimates-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -168,19 +132,13 @@ export default class EstimateService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATES_ALL_TENANT : ESTIMATES_ALL), {
+      const response = await handleRequest(API_URL + (isTenantApi ? ESTIMATES_ALL_TENANT : ESTIMATES_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['estimates-all'] } // Cache for 1 hour
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch estimates')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

@@ -361,7 +361,7 @@ const Sidebar: React.FC = () => {
           id: 'labor-costs',
           label: 'Labor Costs',
           icon: <UserLock className={iconSize} />,
-          href: '/erp/labor-costs',
+          href: '/erp/settings/labor-costs',
           hasSubItems: false,
           exactMatch: false,
           permissions: ['Manage Labor Cost']
@@ -516,6 +516,15 @@ const Sidebar: React.FC = () => {
               hasSubItems: false,
               exactMatch: true,
               permissions: ['Manage Contract Template']
+            },
+            {
+              id: 'service-templates',
+              label: 'Service Templates',
+              href: '/erp/settings/service-templates',
+              icon: <LocateIcon className={iconSize} />,
+              hasSubItems: false,
+              exactMatch: true,
+              permissions: ['Manage Service Template']
             }
           ],
           exactMatch: true,
@@ -526,7 +535,8 @@ const Sidebar: React.FC = () => {
             'Manage Contact Type',
             'Manage Note Type',
             'Manage Task Type',
-            'Manage Contract Template'
+            'Manage Contract Template',
+            'Manage Service Template'
           ]
         },
 
@@ -572,7 +582,8 @@ const Sidebar: React.FC = () => {
         'Manage Role',
         'Manage Contractor',
         'Manage Labor Cost',
-        'Manage Contract Template'
+        'Manage Contract Template',
+        'Manage Service Template'
       ]
     }
   ]
@@ -590,7 +601,7 @@ const Sidebar: React.FC = () => {
       />
 
       <aside
-        className={`transition-all duration-300 h-screen ${isOpen ? 'max-xl:translate-x-0' : 'max-xl:-translate-x-full'} w-[240px] bg-bg-2 border-r border-border flex flex-col max-xl:absolute max-xl:top-0 max-xl:z-50 max-xl:h-full`}
+        className={`transition-all duration-300 h-screen ${isOpen ? 'max-xl:translate-x-0' : 'max-xl:-translate-x-full'} w-60 bg-bg-2 border-r border-border flex flex-col max-xl:absolute max-xl:top-0 max-xl:z-50 max-xl:h-full`}
       >
         {/* Header/Logo */}
         <Link href={'/erp'} className='px-4 py-3 border-b border-border'>

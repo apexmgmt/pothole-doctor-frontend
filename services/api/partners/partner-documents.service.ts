@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, PARTNER_DOCUMENTS, PARTNER_DOCUMENTS_TENANT } from '@/constants/api'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -10,7 +10,7 @@ export default class PartnerDocumentService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PARTNER_DOCUMENTS_TENANT : PARTNER_DOCUMENTS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -19,13 +19,7 @@ export default class PartnerDocumentService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch contractor documents')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -36,21 +30,15 @@ export default class PartnerDocumentService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PARTNER_DOCUMENTS_TENANT : PARTNER_DOCUMENTS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? PARTNER_DOCUMENTS_TENANT : PARTNER_DOCUMENTS), {
         requiresAuth: true,
         method: 'POST',
         body: payload
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('partner-documents')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -61,7 +49,7 @@ export default class PartnerDocumentService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PARTNER_DOCUMENTS_TENANT : PARTNER_DOCUMENTS) + partnerDocumentId,
         {
           requiresAuth: true,
@@ -70,13 +58,7 @@ export default class PartnerDocumentService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch document details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -90,7 +72,7 @@ export default class PartnerDocumentService {
       // Add the _method field to simulate PUT request
       payload.append('_method', 'PUT')
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PARTNER_DOCUMENTS_TENANT : PARTNER_DOCUMENTS) + partnerDocumentId,
         {
           requiresAuth: true,
@@ -99,16 +81,10 @@ export default class PartnerDocumentService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('partner-documents')
       await revalidate(`partner-documents/${partnerDocumentId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -119,7 +95,7 @@ export default class PartnerDocumentService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PARTNER_DOCUMENTS_TENANT : PARTNER_DOCUMENTS) + partnerDocumentId,
         {
           requiresAuth: true,
@@ -127,16 +103,10 @@ export default class PartnerDocumentService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete document')
-      }
-
       await revalidate('partner-documents')
       await revalidate(`partner-documents/${partnerDocumentId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

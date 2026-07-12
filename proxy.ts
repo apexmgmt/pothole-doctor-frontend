@@ -2,12 +2,83 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 import { isPublicRoute, isUnauthenticatedRoute } from './constants/routePermission'
-import AuthService from './services/api/auth.service'
+import { CookieKeys } from './constants/cookies'
 import { getPermissionsFromCookies, hasRoutePermission } from './utils/role-permission'
 import { checkSubdomain } from './utils/utility'
 import SubdomainService from './services/api/subdomain.service'
+import { encryptRedirectUrl } from './utils/encryption'
+import { API_URL, AUTH_REFRESH_TOKEN, AUTH_REFRESH_TOKEN_TENANT } from './constants/api'
+
+const getRedirectRoute = (): string => '/erp'
+
+interface CacheEntry {
+  data: any
+  timestamp: number
+}
+
+const globalForProxy = globalThis as unknown as {
+  authRefreshCache?: Map<string, CacheEntry>
+  authRefreshLock?: Map<string, Promise<any>>
+}
+
+const cache = globalForProxy.authRefreshCache || new Map<string, CacheEntry>()
+const lock = globalForProxy.authRefreshLock || new Map<string, Promise<any>>()
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForProxy.authRefreshCache = cache
+  globalForProxy.authRefreshLock = lock
+}
+
+const CACHE_DURATION = 60000
+
+// Copy cookies
+const copyCookies = (from: NextResponse, to: NextResponse) => {
+  from.cookies.getAll().forEach(cookie => {
+    to.cookies.set(cookie.name, cookie.value, {
+      httpOnly: cookie.httpOnly,
+      path: cookie.path
+    })
+  })
+}
+
+// Redirect user by permissions
+const redirectToUserRoute = (req: NextRequest, baseRes?: NextResponse) => {
+  const url = req.nextUrl.clone()
+
+  url.pathname = getRedirectRoute()
+  const redirectRes = NextResponse.redirect(url)
+
+  if (baseRes) {
+    copyCookies(baseRes, redirectRes)
+  }
+
+  return redirectRes
+}
+
+// Clear cookies
+const clearAuthCookies = (res: NextResponse) => {
+  ;[CookieKeys.ACCESS_TOKEN, CookieKeys.REFRESH_TOKEN, CookieKeys.TOKEN_TYPE].forEach(cookie =>
+    res.cookies.delete(cookie)
+  )
+}
+
+function isTokenExpired(token: string) {
+  try {
+    const payloadBase64 = token.split('.')[1]
+    const decodedJson = atob(payloadBase64)
+    const decoded = JSON.parse(decodedJson)
+    const exp = decoded.exp
+    const now = Date.now() / 1000
+
+    // Add 10 seconds of buffer
+    return exp < now + 10
+  } catch {
+    return true // if we can't parse it, treat it as expired
+  }
+}
 
 export async function proxy(req: NextRequest) {
+  const url = new URL(req.url)
   const { pathname } = req.nextUrl
 
   // Skip domain validation for error pages to prevent redirect loops
@@ -18,38 +89,39 @@ export async function proxy(req: NextRequest) {
   // Handle www redirect - strip www from any domain (except localhost)
   const hostname = req.headers.get('host') || req.nextUrl.hostname
 
-  // If hostname starts with 'www.', redirect to non-www version
   if (hostname.startsWith('www.') && !hostname.includes('localhost')) {
     const newUrl = req.nextUrl.clone()
-    const newHostname = hostname.replace(/^www\./, '')
 
-    // Update the URL with the new hostname (without www)
-    newUrl.host = newHostname
+    newUrl.host = hostname.replace(/^www\./, '')
 
-    return NextResponse.redirect(newUrl, 301) // 301 permanent redirect
+    return NextResponse.redirect(newUrl, 301)
   }
 
   // Check domain first and get domain info
   const domainInfo: any = checkSubdomain(req)
-
   let tenantId = ''
 
-  // if domain is subdomain and domain info has subdomin then need to verify the subdomain
+  // console.log('[PROXY]: Domain Info: ', domainInfo)
+
   if (domainInfo.isSubdomain && domainInfo.subdomain) {
-    // if it is a subdomain then need to verify its existence
     try {
       const res = await SubdomainService.verification(domainInfo.subdomain)
 
-      if (res.status !== 'success') {
+      // console.log('[PROXY]: Subdomain Verification Response: ', res)
+
+      // If handleRequest didn't throw an error, the subdomain is valid.
+      // Some APIs might return success: true instead of status: 'success'
+      if (res.status === 'error' || res.status === 'fail' || res.success === false) {
         const notFoundUrl = req.nextUrl.clone()
 
         notFoundUrl.pathname = '/invalid-subdomain'
 
         return NextResponse.redirect(notFoundUrl)
       } else {
-        tenantId = res?.data?.tenant_id || ''
+        tenantId = res?.data?.tenant_id || res?.tenant_id || ''
       }
     } catch (error) {
+      // console.log('[PROXY]: Subdomain Verification Error: ', error)
       const notFoundUrl = req.nextUrl.clone()
 
       notFoundUrl.pathname = '/invalid-subdomain'
@@ -58,118 +130,184 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  let accessToken = req.cookies.get('access_token')?.value
-  let refreshToken = req.cookies.get('refresh_token')?.value
-  const tokenType = req.cookies.get('token_type')?.value || 'Bearer'
+  const isErpRoute = url.pathname.startsWith('/erp')
+  const isUnauth = isUnauthenticatedRoute(url.pathname)
 
-  // If user tries to access unauthenticated routes and already has tokens, redirect to /erp
-  if (isUnauthenticatedRoute(pathname) && (accessToken || refreshToken)) {
-    const erpUrl = req.nextUrl.clone()
+  // Only /erp routes require auth (except public/unauth ones).
+  // Frontend routes (not starting with /erp) are always public.
+  const requiresAuth = isErpRoute && !isPublicRoute(url.pathname) && !isUnauth
 
-    erpUrl.pathname = '/erp'
+  let accessToken = req.cookies.get(CookieKeys.ACCESS_TOKEN)?.value
+  let refreshToken = req.cookies.get(CookieKeys.REFRESH_TOKEN)?.value
 
-    return NextResponse.redirect(erpUrl)
+  if (accessToken && isTokenExpired(accessToken)) {
+    // console.log('[PROXY]: Access Token found but is expired')
+    accessToken = undefined
   }
 
-  // if pathname is public or unauthenticated then no need to check further for tokens
-  if (isPublicRoute(pathname) || isUnauthenticatedRoute(pathname)) {
-    const response = NextResponse.next()
+  // If route requires login and user has no tokens
+  if (requiresAuth && !accessToken && !refreshToken) {
+    // console.log('[PROXY]: Route requires authentication but no tokens found')
+    const loginUrl = req.nextUrl.clone()
 
-    // Set tenant cookie if subdomain was verified
-    if (tenantId) {
-      response.cookies.set({
-        name: 'tenant',
-        value: tenantId,
-        httpOnly: false,
-        path: '/'
-      })
-    }
+    loginUrl.pathname = '/erp/login'
+    const encryptedRedirect = await encryptRedirectUrl(pathname)
 
-    return response
+    loginUrl.searchParams.set('redirect', encryptedRedirect || pathname)
+
+    return NextResponse.redirect(loginUrl)
   }
 
-  // if access token is available 
-  if (accessToken) {
-    // Check permission for the route
-    const permissions = await getPermissionsFromCookies(req)
+  /* Refresh token flow */
+  if (refreshToken && !accessToken) {
+    // console.log('[PROXY]: Refresh token flow')
 
-    if (!hasRoutePermission(pathname, permissions)) {
-      const forbiddenUrl = req.nextUrl.clone()
-
-      forbiddenUrl.pathname = '/erp' // or '/403' for a forbidden page
-
-      return NextResponse.redirect(forbiddenUrl)
-    }
-
-    const response = NextResponse.next()
-
-    // Set tenant cookie if subdomain was verified
-    if (tenantId) {
-      response.cookies.set({
-        name: 'tenant',
-        value: tenantId,
-        httpOnly: false,
-        path: '/'
-      })
-    }
-
-    return response
-  }
-
-  // if access token is not available but refresh token is available then try to refresh token
-  if (refreshToken) {
     try {
-      const json = await AuthService.refreshToken(refreshToken)
+      const apiUrl = API_URL
+      const isTenantApi = !!tenantId
 
-      const payload = json.data || json
-      const newAccess = payload.access_token
-      const newRefresh = payload.refresh_token
-      const expiresIn = payload.expires_in
+      // console.log('[PROXY]: Tenant ID: ', tenantId)
+      // console.log('[PROXY]: Is tenant API: ', isTenantApi)
 
-      if (!newAccess) {
-        throw new Error('No access token returned from refresh')
+      const refreshUrl = isTenantApi ? `${apiUrl}${AUTH_REFRESH_TOKEN_TENANT}` : `${apiUrl}${AUTH_REFRESH_TOKEN}`
+
+      // console.log('[PROXY]: Refresh URL: ', refreshUrl)
+      const now = Date.now()
+      let payload: any
+
+      const cached = cache.get(refreshToken)
+
+      // console.log('[PROXY]: Cached: ', cached)
+
+      if (cached && now - cached.timestamp < CACHE_DURATION) {
+        payload = cached.data
+
+        // console.log('[PROXY]: Using cached data')
+      } else {
+        // console.log('[PROXY]: No cached data found')
+        const existing = lock.get(refreshToken)
+
+        // console.log('[PROXY]: Existing: ', existing)
+
+        if (existing) {
+          // console.log('[PROXY]: Waiting for existing lock')
+          payload = await existing
+        } else {
+          // console.log('[PROXY]: No existing lock found, creating new lock')
+          const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+
+          if (tenantId) headers['tenant'] = tenantId
+
+          // console.log('[PROXY]: Headers: ', headers)
+          // console.log('[PROXY]: Refresh Token: ', refreshToken)
+
+          const promise = fetch(refreshUrl, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ refresh_token: refreshToken })
+          })
+            .then(async res => {
+              // console.log('[PROXY]: Refresh Response: ', res)
+              if (!res.ok) throw new Error('Refresh failed')
+              const json = await res.json()
+
+              // console.log('[PROXY]: Refresh Response JSON: ', json)
+
+              return json.data || json
+            })
+            .catch(error => {
+              // console.error('[PROXY]: Refresh fetch error: ', error?.message || error)
+              // console.error('[PROXY]: Refresh URL was: ', refreshUrl)
+              throw error
+            })
+
+          lock.set(refreshToken, promise)
+
+          try {
+            payload = await promise
+            cache.set(refreshToken, { data: payload, timestamp: Date.now() })
+
+            // Cleanup
+            for (const [key, entry] of cache.entries()) {
+              if (Date.now() - entry.timestamp > CACHE_DURATION) {
+                cache.delete(key)
+              }
+            }
+          } finally {
+            lock.delete(refreshToken)
+          }
+        }
       }
 
-      const nextRes = NextResponse.next()
+      const newAccess = payload?.access_token
+      const newRefresh = payload?.refresh_token
 
-      // set the tokens on cookies
-      nextRes.cookies.set({
-        name: 'access_token',
-        value: newAccess,
-        httpOnly: false,
+      if (!newAccess) throw new Error('No access token returned')
+
+      req.cookies.set(CookieKeys.ACCESS_TOKEN, newAccess)
+      if (newRefresh) req.cookies.set(CookieKeys.REFRESH_TOKEN, newRefresh)
+
+      const requestHeaders = new Headers(req.headers)
+
+      requestHeaders.set('cookie', req.cookies.toString())
+      if (tenantId) requestHeaders.set('tenant', tenantId)
+
+      let nextRes = NextResponse.next({
+        request: {
+          headers: requestHeaders
+        }
+      })
+
+      if (isUnauth) {
+        nextRes = redirectToUserRoute(req, nextRes)
+      }
+
+      nextRes.cookies.set(CookieKeys.ACCESS_TOKEN, newAccess, {
+        maxAge: payload?.expires_in || 600,
         path: '/',
-        maxAge: typeof expiresIn === 'number' ? expiresIn : undefined
+        httpOnly: false
       })
 
       if (newRefresh) {
-        nextRes.cookies.set({
-          name: 'refresh_token',
-          value: newRefresh,
-          httpOnly: false,
-          path: '/'
+        nextRes.cookies.set(CookieKeys.REFRESH_TOKEN, newRefresh, {
+          maxAge: Number(process.env.REFRESH_TOKEN_DURATION || 864000),
+          path: '/',
+          httpOnly: false
         })
       }
 
-      if (payload.token_type) {
-        nextRes.cookies.set({
-          name: 'token_type',
-          value: payload.token_type,
-          httpOnly: false,
-          path: '/'
-        })
+      if (payload?.token_type) {
+        nextRes.cookies.set(CookieKeys.TOKEN_TYPE, payload.token_type, { path: '/', httpOnly: false })
       }
 
-      // Set tenant cookie if subdomain was verified
       if (tenantId) {
-        nextRes.cookies.set({
-          name: 'tenant',
-          value: tenantId,
-          httpOnly: false,
-          path: '/'
-        })
+        nextRes.cookies.set(CookieKeys.TENANT, tenantId, { path: '/', httpOnly: false })
       }
 
-      // Check permission after token refresh
+      return nextRes
+    } catch (error: any) {
+      // console.error('[PROXY]: Refresh token flow FAILED: ', error?.message || error)
+      const loginUrl = req.nextUrl.clone()
+
+      loginUrl.pathname = '/erp/login'
+      const encryptedRedirect = await encryptRedirectUrl(pathname)
+
+      loginUrl.searchParams.set('redirect', encryptedRedirect || pathname)
+      const redirectRes = NextResponse.redirect(loginUrl)
+
+      clearAuthCookies(redirectRes)
+
+      return redirectRes
+    }
+  }
+
+  /* Access token flow */
+  if (accessToken) {
+    if (isUnauth) {
+      return redirectToUserRoute(req)
+    }
+
+    if (requiresAuth) {
       const permissions = await getPermissionsFromCookies(req)
 
       if (!hasRoutePermission(pathname, permissions)) {
@@ -179,35 +317,34 @@ export async function proxy(req: NextRequest) {
 
         return NextResponse.redirect(forbiddenUrl)
       }
-
-      return nextRes
-    } catch (error) {
-      const loginUrl = req.nextUrl.clone()
-
-      loginUrl.pathname = '/erp/login'
-      loginUrl.searchParams.set('redirect', pathname)
-
-      const redirectRes = NextResponse.redirect(loginUrl)
-
-      redirectRes.cookies.delete('access_token')
-      redirectRes.cookies.delete('refresh_token')
-      redirectRes.cookies.delete('token_type')
-      redirectRes.cookies.delete('permissions_1')
-      redirectRes.cookies.delete('permissions_2')
-      redirectRes.cookies.delete('permissions_3')
-      redirectRes.cookies.delete('permissions_4')
-      redirectRes.cookies.delete('roles')
-
-      return redirectRes
     }
+
+    const response = NextResponse.next()
+
+    if (tenantId) {
+      response.cookies.set({
+        name: CookieKeys.TENANT,
+        value: tenantId,
+        httpOnly: false,
+        path: '/'
+      })
+    }
+
+    return response
   }
 
-  const loginUrl = req.nextUrl.clone()
+  const finalResponse = NextResponse.next()
 
-  loginUrl.pathname = '/erp/login'
-  loginUrl.searchParams.set('redirect', pathname)
+  if (tenantId) {
+    finalResponse.cookies.set({
+      name: CookieKeys.TENANT,
+      value: tenantId,
+      httpOnly: false,
+      path: '/'
+    })
+  }
 
-  return NextResponse.redirect(loginUrl)
+  return finalResponse
 }
 
 export const config = {

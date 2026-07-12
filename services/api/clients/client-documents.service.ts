@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, CLIENT_DOCUMENTS, CLIENT_DOCUMENTS_TENANT } from '@/constants/api'
 import { revalidate } from '@/services/app/cache.service'
 
@@ -10,7 +10,7 @@ export default class ClientDocumentService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? CLIENT_DOCUMENTS_TENANT : CLIENT_DOCUMENTS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -18,13 +18,7 @@ export default class ClientDocumentService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch client documents')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -35,19 +29,13 @@ export default class ClientDocumentService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? CLIENT_DOCUMENTS_TENANT : CLIENT_DOCUMENTS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? CLIENT_DOCUMENTS_TENANT : CLIENT_DOCUMENTS), {
         requiresAuth: true,
         method: 'POST',
         body: payload
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -58,7 +46,7 @@ export default class ClientDocumentService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? CLIENT_DOCUMENTS_TENANT : CLIENT_DOCUMENTS) + clientDocumentId,
         {
           requiresAuth: true,
@@ -66,13 +54,7 @@ export default class ClientDocumentService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch document details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -86,7 +68,7 @@ export default class ClientDocumentService {
       // Add the _method field to simulate PUT request
       payload.append('_method', 'PUT')
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? CLIENT_DOCUMENTS_TENANT : CLIENT_DOCUMENTS) + clientDocumentId,
         {
           requiresAuth: true,
@@ -95,13 +77,7 @@ export default class ClientDocumentService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -112,7 +88,7 @@ export default class ClientDocumentService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? CLIENT_DOCUMENTS_TENANT : CLIENT_DOCUMENTS) + clientDocumentId,
         {
           requiresAuth: true,
@@ -120,13 +96,7 @@ export default class ClientDocumentService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete document')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

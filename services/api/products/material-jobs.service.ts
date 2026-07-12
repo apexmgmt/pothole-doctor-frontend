@@ -1,7 +1,6 @@
-import apiInterceptor from '../api.interceptor'
-import { API_URL, MATERIAL_JOBS, MATERIAL_JOBS_ACTIONS } from '@/constants/api'
+import { handleRequest } from '@/services/api/base.service'
+import { API_URL, MATERIAL_JOBS, MATERIAL_JOBS_ACTIONS, MATERIAL_JOBS_EXPORT_TENANT } from '@/constants/api'
 import { MaterialJobActionPayload, MaterialJobUpdatePayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class MaterialJobService {
   /** Material Jobs DataTable API */
@@ -9,19 +8,37 @@ export default class MaterialJobService {
     try {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(API_URL + MATERIAL_JOBS + (queryParams ? `?${queryParams}` : ''), {
+      const response = await handleRequest(API_URL + MATERIAL_JOBS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['material-jobs'] }
+        next: {
+          revalidate: 30,
+          tags: ['login', 'material-jobs', queryParams ? `material-jobs?${queryParams}` : 'material-jobs']
+        }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
 
-        throw new Error(errorData.message || 'Failed to fetch material jobs')
-      }
+  /**
+   * Export material jobs API
+   */
+  static exportMaterialJobs = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      return await response.json()
+      const response = await handleRequest(
+        API_URL + MATERIAL_JOBS_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      return await response.blob()
     } catch (error) {
       throw error
     }
@@ -30,19 +47,13 @@ export default class MaterialJobService {
   /** Show Material Job API */
   static show = async (materialJobId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + MATERIAL_JOBS + materialJobId, {
+      const response = await handleRequest(API_URL + MATERIAL_JOBS + materialJobId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`material-jobs/${materialJobId}`] }
+        next: { revalidate: 30, tags: ['login', `material-jobs/${materialJobId}`] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch material job details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -51,22 +62,14 @@ export default class MaterialJobService {
   /** Update Material Job API */
   static update = async (materialJobId: string, payload: MaterialJobUpdatePayload) => {
     try {
-      const response = await apiInterceptor(API_URL + MATERIAL_JOBS + materialJobId + '/non-inventory', {
+      const response = await handleRequest(API_URL + MATERIAL_JOBS + materialJobId + '/non-inventory', {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['material-jobs', `material-jobs/${materialJobId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('material-jobs')
-      await revalidate(`material-jobs/${materialJobId}`)
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -75,22 +78,14 @@ export default class MaterialJobService {
   /** Create Material Job Action API */
   static storeAction = async (materialJobId: string, payload: MaterialJobActionPayload) => {
     try {
-      const response = await apiInterceptor(API_URL + MATERIAL_JOBS_ACTIONS(materialJobId), {
+      const response = await handleRequest(API_URL + MATERIAL_JOBS_ACTIONS(materialJobId), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['material-jobs', `material-jobs/${materialJobId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('material-jobs')
-      await revalidate(`material-jobs/${materialJobId}`)
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -99,21 +94,13 @@ export default class MaterialJobService {
   /** Delete Material Job Action API (Latest First)*/
   static destroyAction = async (materialJobId: string, actionId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + MATERIAL_JOBS_ACTIONS(materialJobId) + `/${actionId}`, {
+      const response = await handleRequest(API_URL + MATERIAL_JOBS_ACTIONS(materialJobId) + `/${actionId}`, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['material-jobs', `material-jobs/${materialJobId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete material job action')
-      }
-
-      await revalidate('material-jobs')
-      await revalidate(`material-jobs/${materialJobId}`)
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

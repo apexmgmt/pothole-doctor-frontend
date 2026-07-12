@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import {
   API_URL,
   PARTNER_TYPES,
@@ -8,7 +8,6 @@ import {
   PARTNER_TYPES_TENANT
 } from '@/constants/api'
 import { PartnerTypePayload } from '@/types'
-import { revalidate } from '../../app/cache.service'
 
 export default class PartnerTypesService {
   /**Partner Types DataTable API */
@@ -17,22 +16,16 @@ export default class PartnerTypesService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PARTNER_TYPES_TENANT : PARTNER_TYPES) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['partner-types'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'partner-types', queryParams ? `partner-types?${queryParams}` : 'partner-types'] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch payment terms')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -43,22 +36,14 @@ export default class PartnerTypesService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PARTNER_TYPES_TENANT : PARTNER_TYPES), {
+      const response = await handleRequest(API_URL + (isTenantApi ? PARTNER_TYPES_TENANT : PARTNER_TYPES), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['partner-types', 'partner-types-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('partner-types')
-      await revalidate('partner-types-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -69,22 +54,16 @@ export default class PartnerTypesService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PARTNER_TYPES_TENANT : PARTNER_TYPES) + partnerTypeId,
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`partner-types/${partnerTypeId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `partner-types/${partnerTypeId}`] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch partner types details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -95,26 +74,17 @@ export default class PartnerTypesService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PARTNER_TYPES_TENANT : PARTNER_TYPES) + partnerTypeId,
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['partner-types', 'partner-types-all', `partner-types/${partnerTypeId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('partner-types')
-      await revalidate(`partner-types/${partnerTypeId}`)
-      await revalidate('partner-types-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -125,25 +95,16 @@ export default class PartnerTypesService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PARTNER_TYPES_TENANT : PARTNER_TYPES) + partnerTypeId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['partner-types', 'partner-types-all', `partner-types/${partnerTypeId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete partner types')
-      }
-
-      await revalidate('partner-types')
-      await revalidate(`partner-types/${partnerTypeId}`)
-      await revalidate('partner-types-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -154,19 +115,13 @@ export default class PartnerTypesService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PARTNER_TYPES_ALL_TENANT : PARTNER_TYPES_ALL), {
+      const response = await handleRequest(API_URL + (isTenantApi ? PARTNER_TYPES_ALL_TENANT : PARTNER_TYPES_ALL), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['partner-types-all'] } // Cache for 1 hour
+        next: { revalidate: 3600, tags: ['login', 'partner-types-all'] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch partner types')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

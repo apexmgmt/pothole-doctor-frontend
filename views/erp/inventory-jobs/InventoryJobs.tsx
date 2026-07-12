@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Plus, Trash2 } from 'lucide-react'
 
@@ -28,25 +29,33 @@ import AddInventoryJobActionModal from './AddInventoryJobActionModal'
 import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 import { formatCurrency } from '@/utils/currency'
 import TableSearch from '@/components/erp/common/TableSearch'
+import { ExcelIcon } from '@/public/icons'
 
 interface InventoryJobsProps {
   staffs: Staff[]
   warehouses: Warehouse[]
   businessLocations: BusinessLocation[]
+  initialData?: DataTableApiResponse<any> | null
+  permissions?: {
+    canCreateJob: boolean
+    canViewJob: boolean
+    canEditJob: boolean
+    canDeleteJob: boolean
+  }
 }
 
-const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, businessLocations }) => {
+const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, businessLocations, initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<any> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
 
-  const [filterOptions, setFilterOptions] = useState<any>(() => ({
+  const filterOptions = useMemo(() => ({
     ...getInitialFilters(searchParams)
-  }))
+  }), [searchParams])
 
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [openActionModal, setOpenActionModal] = useState(false)
@@ -55,61 +64,66 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
   const [deletingAction, setDeletingAction] = useState<{ jobId: string; actionId: string } | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
+  const canCreateJob = permissions?.canCreateJob ?? false
+  const canEditJob = permissions?.canEditJob ?? false
+  const canDeleteJob = permissions?.canDeleteJob ?? false
+  const canViewJob = permissions?.canViewJob ?? false
+
+  useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
     dispatch(setPageTitle('Inventory Jobs'))
-  }, [])
+  }, [dispatch])
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+    const params = new URLSearchParams()
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
 
-        const prevKeys = Object.keys(prev)
-        const newKeys = Object.keys(newOptions)
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
-        if (prevKeys.length === newKeys.length && newKeys.every(k => prev[k] === newOptions[k])) {
-          return prev
-        }
-
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  const fetchData = async () => {
     setIsLoading(true)
-
-    try {
-      MaterialJobService.index({ ...filterOptions, job_type: 'inventory' })
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(() => {
-          setIsLoading(false)
-        })
-    } catch {
-      setIsLoading(false)
-    }
+    router.push(newUrl, { scroll: false })
   }
 
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-  }, [filterOptions])
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const toggleRow = (row: MaterialJob) => {
     setExpandedRows(prev => {
@@ -391,11 +405,34 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
         </tbody>
       </table>
     )
+
   }
 
   const handleClearFilters = () => {
     setFilterOptions({ job_type: 'inventory' })
     setSearchValue('')
+  }
+
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting inventory jobs...`)
+      const blob = await MaterialJobService.exportMaterialJobs({ ...filterOptions, job_type: 'inventory' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `inventory-jobs-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success('Inventory jobs exported successfully')
+    } catch (error) {
+      toast.error('Failed to export inventory jobs')
+      console.error('Export error:', error)
+    }
   }
 
   const hasActiveFilters = () => {
@@ -407,14 +444,30 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
   }
 
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <div className='flex items-center gap-2'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
-        {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
-            Clear
-          </Button>
-        )}
+    <div className='flex items-center justify-between w-full gap-2.5'>
+      <div className='flex flex-row gap-2'>
+        <Button
+          variant='default'
+          size='sm'
+          className='h-7 bg-light text-bg hover:bg-light/90'
+          onClick={handleExport}
+        >
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
+        <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+          <TableSearch
+            value={searchValue}
+            onChange={onSearchChange}
+            placeholder='Search...'
+            className='lg:w-80 min-w-0'
+          />
+          {hasActiveFilters() && (
+            <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -443,7 +496,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
         staffs={staffs}
         warehouses={warehouses}
         businessLocations={businessLocations}
-        onSuccess={fetchData}
+        onSuccess={() => router.refresh()}
       />
       <ConfirmDialog
         open={confirmDeleteOpen}
@@ -463,7 +516,7 @@ const InventoryJobs: React.FC<InventoryJobsProps> = ({ staffs, warehouses, busin
             toast.success('Action deleted')
             setConfirmDeleteOpen(false)
             setDeletingAction(null)
-            fetchData()
+            router.refresh()
           } catch {
             toast.error('Failed to delete action')
           } finally {

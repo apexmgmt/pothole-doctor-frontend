@@ -1,5 +1,5 @@
 import { API_URL, SALESMAN_CHART_REPORT, SALESMAN_RANKING_REPORT } from '@/constants/api'
-import apiInterceptor from './api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 
 export default class ReportService {
   /**
@@ -22,18 +22,12 @@ export default class ReportService {
       if (params?.end_date) queryParams.append('end_date', params.end_date)
       if (params?.location_ids) params.location_ids.forEach(id => queryParams.append('location_ids[]', id))
 
-      const response = await apiInterceptor(API_URL + SALESMAN_CHART_REPORT + '?' + queryParams.toString(), {
+      const response = await handleRequest(API_URL + SALESMAN_CHART_REPORT + '?' + queryParams.toString(), {
         method: 'GET',
         requiresAuth: true
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -59,18 +53,12 @@ export default class ReportService {
       if (params?.end_date) queryParams.append('end_date', params.end_date)
       if (params?.location_ids) params.location_ids.forEach(id => queryParams.append('location_ids[]', id))
 
-      const response = await apiInterceptor(API_URL + SALESMAN_RANKING_REPORT + '?' + queryParams.toString(), {
+      const response = await handleRequest(API_URL + SALESMAN_RANKING_REPORT + '?' + queryParams.toString(), {
         method: 'GET',
         requiresAuth: true
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

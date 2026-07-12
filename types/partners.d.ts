@@ -1,11 +1,14 @@
 import { BusinessLocation, City, Company, CountryWithStates, PartnerType, Skill, State, User } from '.'
 
+import { DataTableApiResponse } from './index'
+
 export interface PartnersProps {
   businessLocations: BusinessLocation[]
   partnerTypes: PartnerType[]
   countriesWithStatesAndCities: CountryWithStates[]
   companies: Company[]
   skills: Skill[]
+  initialData?: DataTableApiResponse<Partner> | null
 }
 
 export interface CreateOrEditPartnerModalProps {

@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -18,7 +19,7 @@ import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
 import LocationService from '@/services/api/locations/location.service'
-import { DetailsIcon, LocationIcon, UserIcon } from '@/public/icons'
+import { DetailsIcon, LocationIcon, UserIcon, ExcelIcon } from '@/public/icons'
 import BusinessLocationDetails from './BusinessLocationDetails'
 import BusinessLocationClients from './BusinessLocationClients'
 import BusinessLocationEstimates from './BusinessLocationEstimates'
@@ -27,19 +28,30 @@ import BusinessLocationWarehouses from './BusinessLocationWarehouses'
 import BusinessLocationEmployees from './BusinessLocationEmployees'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { getInitialFilters } from '@/utils/utility'
-import { hasPermission } from '@/utils/role-permission'
 import CreateOrEditBusinessLocationModal from './CreateOrEditBusinessLocationModal'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const BusinessLocations: React.FC = () => {
+const BusinessLocations: React.FC<{
+  initialData?: DataTableApiResponse<BusinessLocation> | null
+  locations?: Location['countries']
+  permissions?: {
+    canCreateBusiness: boolean
+    canViewBusiness: boolean
+    canEditBusiness: boolean
+    canDeleteBusiness: boolean
+    canManageWarehouse: boolean
+    canManageStaff: boolean
+    canManageEstimate: boolean
+  }
+}> = ({ initialData, locations = [], permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
   const [activeTab, setActiveTab] = useState<string>('businesses')
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<BusinessLocation> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedBusinessLocationId, setSelectedBusinessLocationId] = useState<string | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
 
@@ -47,110 +59,81 @@ const BusinessLocations: React.FC = () => {
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [modalBusinessLocation, setModalBusinessLocation] = useState<BusinessLocation | null>(null)
   const [modalLoading, setModalLoading] = useState(false)
-  const [countriesWithStateAndCities, setCountriesWithStateAndCities] = useState<Location['countries']>([])
+  const [countriesWithStateAndCities, setCountriesWithStateAndCities] = useState<Location['countries']>(locations)
 
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateLocation, setCanCreateLocation] = useState<boolean>(false)
-  const [canEditLocation, setCanEditLocation] = useState<boolean>(false)
-  const [canDeleteLocation, setCanDeleteLocation] = useState<boolean>(false)
-  const [canViewLocation, setCanViewLocation] = useState<boolean>(false)
-  const [canManageWarehouse, setCanManageWarehouse] = useState<boolean>(false)
-  const [canManageStaff, setCanManageStaff] = useState<boolean>(false)
-  const [canManageEstimate, setCanManageEstimate] = useState<boolean>(false)
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
+
+  const canCreateLocation = permissions?.canCreateBusiness ?? false
+  const canEditLocation = permissions?.canEditBusiness ?? false
+  const canDeleteLocation = permissions?.canDeleteBusiness ?? false
+  const canViewLocation = permissions?.canViewBusiness ?? false
+  const canManageWarehouse = permissions?.canManageWarehouse ?? false
+  const canManageStaff = permissions?.canManageStaff ?? false
+  const canManageEstimate = permissions?.canManageEstimate ?? false
+
+  useEffect(() => {
+    setCountriesWithStateAndCities(locations)
+  }, [locations])
 
   // Set initial search value from filterOptions and check permissions
   useEffect(() => {
-    setSearchValue(filterOptions.search || '')
-
-    // Check permissions
-    hasPermission('Create Location').then(result => setCanCreateLocation(result))
-    hasPermission('Update Location').then(result => setCanEditLocation(result))
-    hasPermission('Delete Location').then(result => setCanDeleteLocation(result))
-    hasPermission('View Location').then(result => setCanViewLocation(result))
-    hasPermission('Manage Warehouse').then(result => setCanManageWarehouse(result))
-    hasPermission('Manage Staff').then(result => setCanManageStaff(result))
-    hasPermission('Manage Estimate').then(result => setCanManageEstimate(result))
-  }, [])
-
-  useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        const response = await LocationService.index()
-
-        setCountriesWithStateAndCities(response.data || [])
-      } catch (error) {
-        setCountriesWithStateAndCities([])
-      }
-    }
-
-    fetchLocations()
-  }, [])
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
   // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+          if (newOptions.page) {
+            delete newOptions.page
+          }
 
-        return newOptions
-      })
-    }, 500)
+          return newOptions
+        })
+      }, 500),
+    []
+  )
 
-    return () => clearTimeout(timer)
-  }, [searchValue])
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   // Update URL when filters change
-  const updateURL = (filters: any) => {
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
     const params = new URLSearchParams()
 
-    Object.keys(filters).forEach(key => {
-      if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
-        params.set(key, String(filters[key]))
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
       }
     })
 
     const queryString = params.toString()
     const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
+    setIsLoading(true)
     router.push(newUrl, { scroll: false })
   }
 
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      BusinessLocationService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          console.error('Error fetching business locations:', error)
-        })
-    } catch (error) {
-      setIsLoading(false)
-      console.error('Error fetching business locations:', error)
-    }
-  }
-
   useEffect(() => {
-    fetchData()
-    updateURL(filterOptions)
     dispatch(setPageTitle('Manage Business Locations'))
-  }, [filterOptions])
+  }, [dispatch])
 
   // Transform API data to match table format
   const businessLocationData = apiResponse?.data
@@ -203,7 +186,11 @@ const BusinessLocations: React.FC = () => {
     {
       id: 'street_address',
       header: 'Address',
-      cell: row => <span>{row.street_address}, {row.city}, {row.state}</span>,
+      cell: row => (
+        <span>
+          {row.street_address}, {row.city}, {row.state}
+        </span>
+      ),
       sortable: true
     },
     {
@@ -254,7 +241,7 @@ const BusinessLocations: React.FC = () => {
       await BusinessLocationService.destroy(id)
         .then(response => {
           toast.success('Business location deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete business location')
@@ -298,31 +285,61 @@ const BusinessLocations: React.FC = () => {
     return filterKeys.length > 0
   }
 
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting business locations...`)
+      const blob = await BusinessLocationService.exportBusinessLocations(filterOptions)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `business-locations-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success(`Business locations exported successfully`)
+    } catch (error: any) {
+      console.error('Export error:', error)
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   // Custom filters component
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
-      <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch
-          value={searchValue}
-          onChange={setSearchValue}
-          placeholder='Search...'
-          className='lg:w-80 min-w-0'
-        />
-        {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
-            Clear
-          </Button>
-        )}
+      <div className='flex flex-row gap-2 w-full'>
+        <Button variant='default' size='sm' className='h-7 bg-light text-bg hover:bg-light/90' onClick={handleExport}>
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
+        <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+          <TableSearch
+            value={searchValue}
+            onChange={onSearchChange}
+            placeholder='Search...'
+            className='w-full lg:w-80'
+          />
+          {hasActiveFilters() && (
+            <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90 h-7'
-        onClick={handleCreateLocation}
-      >
-        <PlusIcon className='w-4 h-4' />
-        <span className='hidden min-[480px]:block'>Add Business Location</span>
-      </Button>
+      {canCreateLocation && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90 h-7'
+          onClick={handleCreateLocation}
+        >
+          <PlusIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Add Business Location</span>
+        </Button>
+      )}
     </div>
   )
 
@@ -424,7 +441,7 @@ const BusinessLocations: React.FC = () => {
         )}
 
         {activeTab === 'details' && selectedBusinessLocationId && (
-          <BusinessLocationDetails businessLocationId={selectedBusinessLocationId} fetchData={fetchData} />
+          <BusinessLocationDetails businessLocationId={selectedBusinessLocationId} fetchData={() => router.refresh()} />
         )}
 
         {activeTab === 'employees' && selectedBusinessLocationId && (
@@ -467,7 +484,7 @@ const BusinessLocations: React.FC = () => {
         countriesWithStateAndCities={countriesWithStateAndCities}
         isFetching={modalLoading}
         onSuccess={() => {
-          fetchData()
+          router.refresh()
           setModalBusinessLocation(null)
           setIsModalOpen(false)
         }}

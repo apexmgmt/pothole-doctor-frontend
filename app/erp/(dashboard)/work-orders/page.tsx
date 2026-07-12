@@ -1,30 +1,33 @@
 import ClientService from '@/services/api/clients/clients.service'
 import BusinessLocationService from '@/services/api/locations/business_location.service'
-import ProductCategoryService from '@/services/api/products/product_categories.service'
 import EstimateTypeService from '@/services/api/settings/estimate_types.service'
 import PaymentTermsService from '@/services/api/settings/payment_terms.service'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
-import UnitService from '@/services/api/settings/units.service'
 import StaffService from '@/services/api/staff.service'
-import VendorService from '@/services/api/vendors/vendors.service'
 import WorkOrderService from '@/services/api/work-orders/work_orders.service'
 import {
   BusinessLocation,
   Client,
   EstimateType,
   PaymentTerm,
-  ProductCategory,
   ServiceType,
   Staff,
-  Unit,
-  Vendor,
-  WorkOrderSummary
+  WorkOrder,
+  WorkOrderSummary,
+  DataTableApiResponse
 } from '@/types'
 import WorkOrders from '@/views/erp/work-orders'
+import { hasPermission } from '@/utils/role-permission'
 
 export const dynamic = 'force-dynamic'
 
-export default async function WorkOrdersPage() {
+export default async function WorkOrdersPage({
+  searchParams
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const resolvedSearchParams = await searchParams
+
   const [
     workOrderTypesRes,
     serviceTypesRes,
@@ -41,6 +44,34 @@ export default async function WorkOrdersPage() {
     PaymentTermsService.getAllPaymentTerms(),
     BusinessLocationService.getAll(),
     WorkOrderService.getSummary()
+  ])
+
+  let responseData: DataTableApiResponse<WorkOrder> | null = null
+
+  try {
+    const response = await WorkOrderService.index(resolvedSearchParams as Record<string, string>)
+
+    responseData = response?.data || null
+  } catch (error) {
+    console.error('Failed to fetch work orders:', error)
+  }
+
+  const [
+    canManageEstimate,
+    canManageProposal,
+    canEditProposal,
+    canManageInvoice,
+    canEditInvoice,
+    canEditWorkOrder,
+    canDeleteWorkOrder
+  ] = await Promise.all([
+    hasPermission('Manage Estimate'),
+    hasPermission('Manage Proposal'),
+    hasPermission('Update Proposal'),
+    hasPermission('Manage Invoice'),
+    hasPermission('Update Invoice'),
+    hasPermission('Update Work Order'),
+    hasPermission('Delete Work Order')
   ])
 
   const workOrderTypes: EstimateType[] =
@@ -80,6 +111,16 @@ export default async function WorkOrdersPage() {
       paymentTerms={paymentTerms}
       businessLocations={businessLocations}
       workOrderSummary={workOrderSummary}
+      initialData={responseData}
+      permissions={{
+        canManageEstimate,
+        canManageProposal,
+        canEditProposal,
+        canManageInvoice,
+        canEditInvoice,
+        canEditWorkOrder,
+        canDeleteWorkOrder
+      }}
     />
   )
 }

@@ -11,17 +11,7 @@ export default async function RedirectingPage({ searchParams }: PageProps) {
   const encryptedData = params.data
 
   if (!encryptedData) {
-    // redirect to login page /erp/login
     redirect('/erp/login')
-
-    return (
-      <div className='flex items-center justify-center min-h-screen'>
-        <div className='text-center'>
-          <h1 className='text-2xl font-semibold text-red-500 mb-4'>Error</h1>
-          <p className='text-gray-600 mb-4'>No authentication data received</p>
-        </div>
-      </div>
-    )
   }
 
   return (

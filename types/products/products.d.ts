@@ -1,4 +1,5 @@
 import { Model, ProductCategory, ServiceType, Unit, Vendor } from '..'
+import { DataTableApiResponse } from '../table'
 
 export interface Product extends Model {
   category_id: string
@@ -133,6 +134,14 @@ export interface ProductsProps {
   selected_vendor_id?: string | null
   hideTitle?: boolean
   hideActionButton?: boolean
+  initialData?: DataTableApiResponse<Product> | null
+  permissions?: { canCreateProduct?: boolean; canViewProduct?: boolean; canEditProduct?: boolean; canDeleteProduct?: boolean }
+  galleryPermissions?: {
+    canCreateGallery?: boolean
+    canViewGallery?: boolean
+    canEditGallery?: boolean
+    canDeleteGallery?: boolean
+  }
 }
 
 export interface ProductGallery {
@@ -142,4 +151,28 @@ export interface ProductGallery {
   product_id: string
   created_at: string
   updated_at: string
+}
+
+export interface ProductBulkEditPayload {
+  id: string
+  product_cost?: number
+  margin?: number
+  status?: number | boolean
+}
+
+export interface ProductBulkUpdatePayload {
+  ids: string[]
+  changes: {
+    product_cost?: number
+    margin?: number
+    coverage_per_rate?: number
+    is_freight_percentage?: boolean
+    freight_amount?: number
+    status?: boolean
+    is_update_all_product_for_vendor?: boolean
+    is_update_all_product_for_category?: boolean
+    round_up_quantity?: boolean
+  }
+  vendor_id?: string | null
+  category_id?: string | null
 }

@@ -1,12 +1,13 @@
-import CryptoJS from 'crypto-js'
+'use server'
+import CryptoJS from 'crypto-js';
 
-const SECRET_KEY: string | undefined = process.env.NEXT_PUBLIC_ENCRYPTION_KEY
+const SECRET_KEY: string | undefined = process.env.ENCRYPTION_KEY;
 
 if (!SECRET_KEY) {
-  throw new Error('NEXT_PUBLIC_ENCRYPTION_KEY is not defined in environment variables.')
+  throw new Error('ENCRYPTION_KEY is not defined in environment variables.');
 }
 
-const NODE_ENV: string = process.env.NODE_ENV || 'production'
+const NODE_ENV: string = process.env.NODE_ENV || 'production';
 
 /**
  * Encrypts data using AES encryption.
@@ -15,25 +16,25 @@ const NODE_ENV: string = process.env.NODE_ENV || 'production'
  * @param data - The data to encrypt (object, array, or string).
  * @returns The encrypted string or original data in development.
  */
-export const encryptData = (data: any): string | any => {
+export const encryptData = async (data: any): Promise<string | any> => {
   try {
     if (NODE_ENV === 'development') {
-      return JSON.stringify(data)
+      return JSON.stringify(data);
     } else if (NODE_ENV === 'production') {
-      const jsonData = JSON.stringify(data)
+      const jsonData = JSON.stringify(data);
 
-      return CryptoJS.AES.encrypt(jsonData, SECRET_KEY).toString()
+      return CryptoJS.AES.encrypt(jsonData, SECRET_KEY).toString();
     } else {
-      console.warn('NODE_ENV is not set correctly. Defaulting to JSON.stringify.')
+      console.warn('NODE_ENV is not set correctly. Defaulting to JSON.stringify.');
 
-      return JSON.stringify(data)
+      return JSON.stringify(data);
     }
   } catch (error) {
-    console.error('Encryption error:', error)
+    console.error('Encryption error:', error);
 
-    return null
+    return null;
   }
-}
+};
 
 /**
  * Decrypts AES-encrypted data.
@@ -42,133 +43,133 @@ export const encryptData = (data: any): string | any => {
  * @param value - The encrypted string or object.
  * @returns The decrypted data or original value if decryption fails.
  */
-export const decryptData = (value: any): any => {
+export const decryptData = async (value: any): Promise<any> => {
   try {
     if (!value) {
-      return null
+      return null;
     }
 
     if (NODE_ENV === 'development') {
-      if (typeof value === 'object' && value !== null) return value
+      if (typeof value === 'object' && value !== null) return value;
 
       if (typeof value === 'string') {
         try {
-          return JSON.parse(value)
+          return JSON.parse(value);
         } catch {
-          return value
+          return value;
         }
       }
 
-      return value
+      return value;
     } else if (NODE_ENV === 'production') {
       if (typeof value === 'object' && value !== null) {
-        return value
+        return value;
       }
 
       if (typeof value !== 'string') {
-        return value
+        return value;
       }
 
       try {
-        const parsed = JSON.parse(value)
+        const parsed = JSON.parse(value);
 
-        return parsed
+        return parsed;
       } catch {
         // Not valid JSON, continue with decryption
       }
 
       try {
-        const decryptedBytes = CryptoJS.AES.decrypt(value, SECRET_KEY)
+        const decryptedBytes = CryptoJS.AES.decrypt(value, SECRET_KEY);
 
         if (!decryptedBytes || !decryptedBytes.words || decryptedBytes.words.length === 0) {
-          return value
+          return value;
         }
 
-        let decrypted: string
+        let decrypted: string;
 
         try {
-          decrypted = decryptedBytes.toString(CryptoJS.enc.Utf8)
+          decrypted = decryptedBytes.toString(CryptoJS.enc.Utf8);
         } catch {
-          return value
+          return value;
         }
 
         if (!decrypted || decrypted.trim() === '') {
-          return value
+          return value;
         }
 
         try {
-          const parsed = JSON.parse(decrypted)
+          const parsed = JSON.parse(decrypted);
 
-          return parsed
+          return parsed;
         } catch {
-          return decrypted
+          return decrypted;
         }
       } catch {
-        return value
+        return value;
       }
     } else {
-      return value
+      return value;
     }
   } catch {
-    return value
+    return value;
   }
-}
+};
 
 /**
  * Safely decrypts user data, returning null if decryption fails.
  * @param encryptedData - The encrypted user data.
  * @returns The decrypted user data or null.
  */
-export const decryptUserData = (encryptedData: unknown): unknown | null => {
+export const decryptUserData = async (encryptedData: unknown): Promise<unknown | null> => {
   try {
-    const decrypted = decryptData(encryptedData)
+    const decrypted = await decryptData(encryptedData);
 
     if (!decrypted) {
-      return null
+      return null;
     }
 
-    return decrypted
+    return decrypted;
   } catch {
-    return encryptedData
+    return encryptedData;
   }
-}
+};
 
 /**
  * Encrypts a URL for safe redirection.
  * @param url - The URL to encrypt.
  * @returns The encrypted and URL-safe string.
  */
-export const encryptRedirectUrl = (url: string): string | null => {
+export const encryptRedirectUrl = async (url: string): Promise<string | null> => {
   try {
-    const encrypted = CryptoJS.AES.encrypt(url, SECRET_KEY).toString()
+    const encrypted = CryptoJS.AES.encrypt(url, SECRET_KEY).toString();
 
-    return encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+    return encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   } catch (error) {
-    console.error('URL Encryption error:', error)
+    console.error('URL Encryption error:', error);
 
-    return null
+    return null;
   }
-}
+};
 
 /**
  * Decrypts a URL that was encrypted for redirection.
  * @param encryptedUrl - The encrypted URL string.
  * @returns The decrypted URL or null if decryption fails.
  */
-export const decryptRedirectUrl = (encryptedUrl: string): string | null => {
+export const decryptRedirectUrl = async (encryptedUrl: string): Promise<string | null> => {
   try {
-    let restored = encryptedUrl.replace(/-/g, '+').replace(/_/g, '/')
+    let restored = encryptedUrl.replace(/-/g, '+').replace(/_/g, '/');
 
     while (restored.length % 4) {
-      restored += '='
+      restored += '=';
     }
 
-    const decrypted = CryptoJS.AES.decrypt(restored, SECRET_KEY).toString(CryptoJS.enc.Utf8)
+    const decrypted = CryptoJS.AES.decrypt(restored, SECRET_KEY).toString(CryptoJS.enc.Utf8);
 
-    return decrypted
+    return decrypted;
   } catch (error) {
-    console.error('URL Decryption error:', error)
+    console.error('URL Decryption error:', error);
 
-    return null
+    return null;
   }
-}
+};

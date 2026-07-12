@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { PlusIcon } from 'lucide-react'
@@ -16,16 +16,20 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import LaborCostService from '@/services/api/labor_costs.service'
 import CreateOrEditLaborCostModal from './CreateOrEditLaborCostModal'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { hasPermission } from '@/utils/role-permission'
 import { formatCurrency } from '@/utils/currency'
 import TableSearch from '@/components/erp/common/TableSearch'
 import CustomFormField from '@/components/form/CustomFormField'
+
+type Permissions = {
+  canCreate: boolean
+  canEdit: boolean
+  canDelete: boolean
+}
 
 const LaborCosts: React.FC<{
   serviceTypes: ServiceType[]
@@ -33,84 +37,95 @@ const LaborCosts: React.FC<{
   isFromModal?: boolean
   selectedRows?: LaborCost[]
   setSelectedRows?: React.Dispatch<React.SetStateAction<LaborCost[]>>
-}> = ({ serviceTypes, units, isFromModal = false, selectedRows, setSelectedRows }) => {
+  initialData?: DataTableApiResponse<LaborCost> | null
+  permissions?: Permissions
+}> = ({
+  serviceTypes,
+  units,
+  isFromModal = false,
+  selectedRows,
+  setSelectedRows,
+  initialData,
+  permissions: {
+    canCreate: canCreateLaborCost = false,
+    canEdit: canEditLaborCost = false,
+    canDelete: canDeleteLaborCost = false
+  } = {}
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<LaborCost> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedLaborCostId, setSelectedLaborCostId] = useState<string | null>(null)
   const [selectedLaborCost, setSelectedLaborCost] = useState<LaborCost | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateLaborCost, setCanCreateLaborCost] = useState<boolean>(false)
-  const [canEditLaborCost, setCanEditLaborCost] = useState<boolean>(false)
-  const [canDeleteLaborCost, setCanDeleteLaborCost] = useState<boolean>(false)
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
 
-  // Set initial search value from filterOptions and check permissions
-  useEffect(() => {
-    setSearchValue(filterOptions.search || '')
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-    // Check permissions
-    hasPermission('Create Labor Cost').then(result => setCanCreateLaborCost(result))
-    hasPermission('Update Labor Cost').then(result => setCanEditLaborCost(result))
-    hasPermission('Delete Labor Cost').then(result => setCanDeleteLaborCost(result))
-  }, [])
+    const params = new URLSearchParams()
 
-  // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
-
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  // Fetch data from API
-  const fetchData = async () => {
     setIsLoading(true)
-
-    try {
-      LaborCostService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch labor costs')
-        })
-    } catch (error) {
-      setIsLoading(false)
-      toast.error('Something went wrong while fetching the labor costs!')
-    }
+    router.push(newUrl, { scroll: false })
   }
 
   useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
+    setSearchValue(filterOptions.search || '')
+  }, [])
 
-    // set the page title only if the view from page
-    if (!isFromModal) dispatch(setPageTitle('Manage Labor Costs'))
-  }, [filterOptions])
+  useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
+  useEffect(() => {
+    dispatch(setPageTitle('Labor Costs'))
+  }, [dispatch])
+
+  // Debounced search update
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
@@ -141,7 +156,7 @@ const LaborCosts: React.FC<{
   }
 
   const handleSuccess = () => {
-    fetchData()
+    router.refresh()
     handleModalClose()
   }
 
@@ -295,7 +310,7 @@ const LaborCosts: React.FC<{
       await LaborCostService.destroy(id)
         .then(response => {
           toast.success('Labor cost deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete labor cost')
@@ -322,7 +337,7 @@ const LaborCosts: React.FC<{
             name='product-search'
             label='Search'
             value={searchValue}
-            onChange={setSearchValue}
+            onChange={onSearchChange}
             placeholder='Search...'
           />
 
@@ -353,15 +368,17 @@ const LaborCosts: React.FC<{
         )}
       </div>
 
-      <Button
-        variant='default'
-        size='sm'
-        className='bg-light text-bg hover:bg-light/90 mt-5 h-7'
-        onClick={handleOpenCreateModal}
-      >
-        <PlusIcon className='w-4 h-4' />
-        <span>Add Labor Cost</span>
-      </Button>
+      {canCreateLaborCost && (
+        <Button
+          variant='default'
+          size='sm'
+          className='bg-light text-bg hover:bg-light/90 mt-5 h-7'
+          onClick={handleOpenCreateModal}
+        >
+          <PlusIcon className='w-4 h-4' />
+          <span>Add Labor Cost</span>
+        </Button>
+      )}
     </div>
   )
 

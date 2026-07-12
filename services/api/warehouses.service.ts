@@ -1,8 +1,7 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from './api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, WAREHOUSES, WAREHOUSES_ALL, WAREHOUSES_ALL_TENANT, WAREHOUSES_TENANT } from '@/constants/api'
 import { WarehousePayload } from '@/types'
-import { revalidate } from '../app/cache.service'
 
 export default class WarehouseService {
   /**Warehouse DataTable API */
@@ -11,22 +10,16 @@ export default class WarehouseService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? WAREHOUSES_TENANT : WAREHOUSES) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['warehouses'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'warehouses', queryParams ? `warehouses?${queryParams}` : 'warehouses'] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch warehouses')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -37,21 +30,14 @@ export default class WarehouseService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? WAREHOUSES_TENANT : WAREHOUSES), {
+      const response = await handleRequest(API_URL + (isTenantApi ? WAREHOUSES_TENANT : WAREHOUSES), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['warehouses', 'warehouses-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('warehouses')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -62,19 +48,13 @@ export default class WarehouseService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? WAREHOUSES_TENANT : WAREHOUSES) + warehouseId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? WAREHOUSES_TENANT : WAREHOUSES) + warehouseId, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: [`warehouses/${warehouseId}`] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', `warehouses/${warehouseId}`] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch warehouse details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -85,23 +65,14 @@ export default class WarehouseService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? WAREHOUSES_TENANT : WAREHOUSES) + warehouseId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? WAREHOUSES_TENANT : WAREHOUSES) + warehouseId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['warehouses', 'warehouses-all', `warehouses/${warehouseId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('warehouses')
-      await revalidate(`warehouses/${warehouseId}`)
-      await revalidate('warehouses-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -112,50 +83,32 @@ export default class WarehouseService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? WAREHOUSES_TENANT : WAREHOUSES) + warehouseId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? WAREHOUSES_TENANT : WAREHOUSES) + warehouseId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['warehouses', 'warehouses-all', `warehouses/${warehouseId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete warehouse')
-      }
-
-      await revalidate('warehouses')
-      await revalidate(`warehouses/${warehouseId}`)
-      await revalidate('warehouses-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
   }
 
   /**
-   * Get All Warehouses API - This endpoint is used to fetch all warehouses without pagination, primarily for dropdowns and selection lists. It is cached for 5 minutes to optimize performance while ensuring reasonably fresh data. 
+   * Get All Warehouses API - This endpoint is used to fetch all warehouses without pagination, primarily for dropdowns and selection lists. It is cached for 5 minutes to optimize performance while ensuring reasonably fresh data.
    */
   static getAll = async () => {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
-        API_URL + (isTenantApi ? WAREHOUSES_ALL_TENANT : WAREHOUSES_ALL),
-        {
-          requiresAuth: true,
-          method: 'GET',
-          next: { revalidate: 300, tags: ['warehouses-all'] } // Cache for 5 minutes
-        }
-      )
+      const response = await handleRequest(API_URL + (isTenantApi ? WAREHOUSES_ALL_TENANT : WAREHOUSES_ALL), {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 30, tags: ['login', 'warehouses-all'] }
+      })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch all warehouses')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

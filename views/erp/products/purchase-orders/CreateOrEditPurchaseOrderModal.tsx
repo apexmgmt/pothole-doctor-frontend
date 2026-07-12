@@ -7,10 +7,10 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
+import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
+import { Form } from '@/components/ui/form'
 import ProductService from '@/services/api/products/products.service'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import PurchaseOrderService from '@/services/api/products/purchase_orders.service'
 import { BusinessLocation, Courier, Product, ProductCategory, ServiceType, Vendor, Warehouse } from '@/types'
 import { PurchaseOrder, PurchaseOrderPayload, PurchaseProductPayload } from '@/types/products/purchase_orders'
@@ -54,6 +54,10 @@ const CreateOrEditPurchaseOrderModal = ({
   const [selectedVendorId, setSelectedVendorId] = useState<string>('')
   const [addedProducts, setAddedProducts] = useState<AddedProduct[]>([])
   const [selectedProductRows, setSelectedProductRows] = useState<Product[]>([])
+
+  const [deletedProductsConfirmOpen, setDeletedProductsConfirmOpen] = useState(false)
+  const [deletedProductIds, setDeletedProductIds] = useState<string[]>([])
+  const [pendingSubmitValues, setPendingSubmitValues] = useState<FormValues | null>(null)
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -248,9 +252,40 @@ const CreateOrEditPurchaseOrderModal = ({
       return
     }
 
+    const deletedProducts = addedProducts.filter(p => p.product?.deleted_at != null)
+
+    if (deletedProducts.length > 0) {
+      setDeletedProductIds(deletedProducts.map(p => p.product_id))
+      setPendingSubmitValues(values)
+      setDeletedProductsConfirmOpen(true)
+
+      return
+    }
+
+    await executeSubmit(values, addedProducts)
+  }
+
+  const handleConfirmRemoveDeleted = async () => {
+    const remainingProducts = addedProducts.filter(p => !deletedProductIds.includes(p.product_id))
+
+    setAddedProducts(remainingProducts)
+    setDeletedProductsConfirmOpen(false)
+
+    if (remainingProducts.length === 0) {
+      toast.error('Cannot submit without any products.')
+
+      return
+    }
+
+    if (pendingSubmitValues) {
+      await executeSubmit(pendingSubmitValues, remainingProducts)
+    }
+  }
+
+  const executeSubmit = async (values: FormValues, productsToSubmit: AddedProduct[]) => {
     setIsLoading(true)
 
-    const products: PurchaseProductPayload[] = addedProducts.map(p => ({
+    const products: PurchaseProductPayload[] = productsToSubmit.map(p => ({
       product_id: p.product_id,
       vendor_id: p.vendor_id,
       company_cost: p.company_cost,
@@ -302,81 +337,104 @@ const CreateOrEditPurchaseOrderModal = ({
   }
 
   return (
-    <CommonDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={mode === 'create' ? 'Add New Purchase Order' : 'Edit Purchase Order'}
-      description=''
-      maxWidth='7xl'
-      isLoading={isLoading}
-      loadingMessage={mode === 'create' ? 'Creating purchase order...' : 'Updating purchase order...'}
-      disableClose={isLoading}
-      actions={
-        <div className='flex items-center justify-end w-full'>
-          {/* <Button type='button' variant='outline' size='sm' onClick={() => {}} disabled={isLoading}>
+    <>
+      <CommonDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        title={mode === 'create' ? 'Add New Purchase Order' : 'Edit Purchase Order'}
+        description=''
+        maxWidth='7xl'
+        isLoading={isLoading}
+        loadingMessage={mode === 'create' ? 'Creating purchase order...' : 'Updating purchase order...'}
+        disableClose={isLoading}
+        actions={
+          <div className='flex items-center justify-end w-full'>
+            {/* <Button type='button' variant='outline' size='sm' onClick={() => {}} disabled={isLoading}>
             Print Purchase Order
           </Button> */}
-          <div className='flex gap-3'>
-            <Button type='button' variant='outline' size='sm' onClick={() => onOpenChange(false)} disabled={isLoading}>
-              Cancel
-            </Button>
-            <Button type='submit' size='sm' form='purchase-order-form' disabled={isSubmitting}>
-              {isSubmitting ? (mode === 'create' ? 'Creating...' : 'Saving...') : mode === 'create' ? 'Save' : 'Update'}
-            </Button>
+            <div className='flex gap-3'>
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                onClick={() => onOpenChange(false)}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button type='submit' size='sm' form='purchase-order-form' disabled={isSubmitting}>
+                {isSubmitting
+                  ? mode === 'create'
+                    ? 'Creating...'
+                    : 'Saving...'
+                  : mode === 'create'
+                    ? 'Save'
+                    : 'Update'}
+              </Button>
+            </div>
           </div>
-        </div>
-      }
-    >
-      <Form {...form}>
-        <form id='purchase-order-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <CustomFormField
-            name='vendor_id'
-            type='select'
-            label='Vendor'
-            placeholder='Select Vendor'
-            control={form.control}
-            selectOptions={vendors?.map(vendor => ({
-              value: vendor.id,
-              label: `${vendor.first_name ?? ''} ${vendor.last_name ?? ''}`
-            }))}
-            onChange={v => handleVendorChange(v as string)}
-            fieldClassName='flex-row justify-start max-w-100'
-            labelClassName='w-max!'
-          />
+        }
+      >
+        <Form {...form}>
+          <form id='purchase-order-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+            <CustomFormField
+              name='vendor_id'
+              type='select'
+              label='Vendor'
+              placeholder='Select Vendor'
+              control={form.control}
+              selectOptions={vendors?.map(vendor => ({
+                value: vendor.id,
+                label: `${vendor.first_name ?? ''} ${vendor.last_name ?? ''}`
+              }))}
+              onChange={v => handleVendorChange(v as string)}
+              fieldClassName='flex-row justify-start max-w-100'
+              labelClassName='w-max!'
+            />
 
-          <ProductsSection
-            selectedVendorId={selectedVendorId}
-            selectedProductRows={selectedProductRows}
-            setSelectedProductRows={setSelectedProductRows}
-            vendors={vendors}
-            productCategories={productCategories}
-            serviceTypes={serviceTypes}
-            onAddSelected={handleAddSelectedProducts}
-          />
+            <ProductsSection
+              selectedVendorId={selectedVendorId}
+              selectedProductRows={selectedProductRows}
+              setSelectedProductRows={setSelectedProductRows}
+              vendors={vendors}
+              productCategories={productCategories}
+              serviceTypes={serviceTypes}
+              onAddSelected={handleAddSelectedProducts}
+            />
 
-          <OrderDetailsForm
-            form={form}
-            mode={mode}
-            couriers={couriers}
-            warehouses={warehouses}
-            businessLocations={businessLocations}
-          />
+            <OrderDetailsForm
+              form={form}
+              mode={mode}
+              couriers={couriers}
+              warehouses={warehouses}
+              businessLocations={businessLocations}
+            />
 
-          <AddedProductsTable
-            addedProducts={addedProducts}
-            onRemove={handleRemoveProduct}
-            onFieldChange={handleProductFieldChange}
-          />
+            <AddedProductsTable
+              addedProducts={addedProducts}
+              onRemove={handleRemoveProduct}
+              onFieldChange={handleProductFieldChange}
+            />
 
-          <TotalsSection
-            form={form}
-            totalProductCost={totalProductCost}
-            shippingCost={shippingCost}
-            finalCost={finalCost}
-          />
-        </form>
-      </Form>
-    </CommonDialog>
+            <TotalsSection
+              form={form}
+              totalProductCost={totalProductCost}
+              shippingCost={shippingCost}
+              finalCost={finalCost}
+            />
+          </form>
+        </Form>
+      </CommonDialog>
+
+      <ConfirmDialog
+        open={deletedProductsConfirmOpen}
+        onOpenChange={setDeletedProductsConfirmOpen}
+        title='Deleted Products Found'
+        message={`You have ${deletedProductIds.length} deleted product(s) in this purchase order. You must remove them before submitting. Do you want to remove them now and proceed?`}
+        confirmButtonTitle='Remove & Proceed'
+        onConfirm={handleConfirmRemoveDeleted}
+      />
+    </>
   )
 }
 

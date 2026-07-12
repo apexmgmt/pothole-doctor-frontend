@@ -4,35 +4,29 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import AuthService from '@/services/api/auth.service'
-import DashboardService from '@/services/api/dashboard.service'
-import { encryptData } from '@/utils/encryption'
-import { appUrl, isTenant } from '@/utils/utility'
+import { appUrl } from '@/utils/utility'
+import { generateRedirectUrl } from '@/app/actions/auth'
 
 import MainAppDashboard from './components/MainAppDashboard'
 import TenantDashboardView from './components/TenantDashboardView'
-import { LoadingSkeleton } from './components/shared'
+import { useAppDispatch } from '@/lib/hooks'
+import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 
-const DashboardIndex = () => {
-  const [tenantMode, setTenantMode] = useState<boolean | null>(null)
-  const [data, setData] = useState<Record<string, unknown> | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+const DashboardIndex = ({
+  initialData,
+  initialTenantMode,
+  error
+}: {
+  initialData: Record<string, unknown> | null
+  initialTenantMode: boolean
+  error: string | null
+}) => {
+  const [tenantMode] = useState<boolean>(initialTenantMode)
+  const [data] = useState<Record<string, unknown> | null>(initialData)
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
-    // Determine tenant context and fetch dashboard data in parallel
-    isTenant().then(t => setTenantMode(t))
-
-    DashboardService.get()
-      .then(res => setData(res?.data ?? res))
-      .catch(err => {
-        const msg = String(err?.message ?? '')
-
-        // Auth errors are handled globally by the interceptor (redirect to login)
-        if (!msg.toLowerCase().includes('authentication')) {
-          setError(msg || 'Failed to load dashboard')
-        }
-      })
-      .finally(() => setLoading(false))
+    dispatch(setPageTitle('Dashboard'))
   }, [])
 
   const impersonateUser = useCallback(async (userId: string) => {
@@ -49,9 +43,8 @@ const DashboardIndex = () => {
         permissions: response?.data?.permissions ?? []
       }
 
-      const encryptedData = encryptData(authData)
       const baseUrl = appUrl(response.data.domain ?? '')
-      const redirectUrl = `${baseUrl}/erp/redirecting?data=${encodeURIComponent(encryptedData)}`
+      const redirectUrl = await generateRedirectUrl(authData, response.data.domain ?? '')
 
       const newWindow = window.open(redirectUrl, '_blank')
 
@@ -62,8 +55,6 @@ const DashboardIndex = () => {
       toast.error((err as { message?: string })?.message ?? 'Failed to impersonate user')
     }
   }, [])
-
-  if (loading || tenantMode === null) return <LoadingSkeleton />
 
   if (error) {
     return (

@@ -9,7 +9,22 @@ interface UseServiceTypeLinesParams {
   hideMargin: boolean
 }
 
+/**
+ * Custom hook to manage the state and calculations of proposal service lines.
+ * It provides utilities for adding, removing, updating, and recalculating line items
+ * (e.g., products, labor, comments, deductions) within a proposal estimate.
+ *
+ * @param params - Configuration parameters containing the current lines, change handler, tax rate, and margin visibility.
+ * @returns An object containing utility functions to manage the service lines.
+ */
 export const useServiceTypeLines = ({ lines, onLinesChange, taxRate, hideMargin }: UseServiceTypeLinesParams) => {
+  /**
+   * Recalculates the financial fields of a single line item based on its current quantity and unit cost.
+   * This updates the unit price (applying discounts), total cost, total price, tax amount, and freight charge.
+   *
+   * @param line - The proposal service item payload to recalculate.
+   * @returns A new proposal service item payload with updated calculated fields.
+   */
   const recalculateLine = (line: ProposalServiceItemPayload): ProposalServiceItemPayload => {
     const unit_price = getDiscountedUnitPrice(line)
     const total_cost = line.unit_cost * line.qty
@@ -27,19 +42,53 @@ export const useServiceTypeLines = ({ lines, onLinesChange, taxRate, hideMargin 
     return { ...line, unit_price, total_cost, total_price, tax_amount, tax: tax_amount, freight_charge }
   }
 
+  /**
+   * Clamps the quantity of a product line item to ensure it meets the product's minimum quantity
+   * and coverage requirements.
+   *
+   * Rules applied:
+   * 1. The final quantity cannot be less than the product's minimum quantity (if specified).
+   * 2. The final quantity must be a multiple of the product's coverage rate (always rounded up to the nearest multiple).
+   * 3. If the product requires rounding up to an integer and the coverage has no fractional value, the final quantity is rounded up.
+   *
+   * @param qty - The initial requested quantity.
+   * @param line - The proposal service item payload containing product rules.
+   * @returns The adjusted quantity adhering to the product's rules.
+   */
   const clampProductQty = (qty: number, line: ProposalServiceItemPayload): number => {
     if (!line.product_id || !line.product) return qty
 
-    const minQty = Number(line.product.coverage_per_rate ?? line.product.minimum_qty ?? 0)
+    const coverage = Number(line.product.coverage_per_rate || 0)
+    const minQty = Number(line.product.minimum_qty || 0)
     const roundUp = !!line.product.round_up_quantity
     let adjusted = qty
 
-    if (roundUp) adjusted = Math.ceil(adjusted)
-    if (minQty > 0) adjusted = Math.ceil(adjusted / minQty) * minQty
+    if (minQty > 0 && adjusted < minQty) {
+      adjusted = minQty
+    }
+
+    if (coverage > 0) {
+      adjusted = Math.ceil(adjusted / coverage) * coverage
+
+      if (minQty > 0 && adjusted < minQty) {
+        adjusted = Math.ceil(minQty / coverage) * coverage
+      }
+    }
+
+    if (roundUp && Number.isInteger(coverage)) {
+      adjusted = Math.ceil(adjusted)
+    }
 
     return adjusted
   }
 
+  /**
+   * Updates multiple fields on a specific line item identified by its index.
+   * Automatically recalculates the financial fields for the line unless it is a 'deduction'.
+   *
+   * @param idx - The index of the line item to update.
+   * @param fields - A partial object containing the fields to update.
+   */
   const updateLineFields = (idx: number, fields: Partial<ProposalServiceItemPayload>) => {
     const updated = lines.map((line, i) => {
       if (i !== idx) return line
@@ -52,6 +101,14 @@ export const useServiceTypeLines = ({ lines, onLinesChange, taxRate, hideMargin 
     onLinesChange(updated)
   }
 
+  /**
+   * Updates a single specific field on a line item identified by its index.
+   * Automatically recalculates the financial fields for the line unless it is a 'deduction'.
+   *
+   * @param idx - The index of the line item to update.
+   * @param field - The key of the field to update.
+   * @param value - The new value for the field.
+   */
   const updateLine = (idx: number, field: keyof ProposalServiceItemPayload, value: any) => {
     const updated = lines.map((line, i) => {
       if (i !== idx) return line
@@ -64,10 +121,21 @@ export const useServiceTypeLines = ({ lines, onLinesChange, taxRate, hideMargin 
     onLinesChange(updated)
   }
 
+  /**
+   * Removes a specific line item from the list based on its index.
+   *
+   * @param idx - The index of the line item to remove.
+   */
   const removeLine = (idx: number) => {
     onLinesChange(lines.filter((_, i) => i !== idx))
   }
 
+  /**
+   * Adds a new, empty line item of the specified type to the end of the list.
+   * Sets appropriate default values depending on the type (e.g., product, labor, comment, deduction).
+   *
+   * @param type - The type of line item to add.
+   */
   const addLine = (type: ProposalServiceItemPayload['type']) => {
     let newLine: ProposalServiceItemPayload = {
       name: '',
@@ -95,6 +163,12 @@ export const useServiceTypeLines = ({ lines, onLinesChange, taxRate, hideMargin 
     onLinesChange([...lines, newLine])
   }
 
+  /**
+   * Appends newly selected labor cost items to the list of service lines.
+   * Initializes the line items with the labor cost details and triggers a recalculation for each.
+   *
+   * @param laborCosts - An array of labor cost items to add.
+   */
   const onLaborCostSelect = (laborCosts: LaborCost[]) => {
     const newLines: ProposalServiceItemPayload[] = laborCosts.map(lc =>
       recalculateLine({
@@ -123,6 +197,13 @@ export const useServiceTypeLines = ({ lines, onLinesChange, taxRate, hideMargin 
     onLinesChange([...lines, ...newLines])
   }
 
+  /**
+   * Appends newly selected products to the list of service lines.
+   * Initializes the line items with the product details, default quantities based on coverage/minimums,
+   * freight rules, and triggers a recalculation for each.
+   *
+   * @param products - An array of products to add.
+   */
   const onProductSelect = (products: Product[]) => {
     const newLines: ProposalServiceItemPayload[] = products.map(product =>
       recalculateLine({

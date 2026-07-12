@@ -40,7 +40,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PHONE_REGEX = /^\+?[0-9\s\-()]{7,20}$/
 
 const VendorSalesmen = ({ vendorId }: { vendorId: string }) => {
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<any> | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchValue, setSearchValue] = useState<string>('')
   const [inlineMode, setInlineMode] = useState<'create' | 'edit' | null>(null)
@@ -193,7 +193,7 @@ const VendorSalesmen = ({ vendorId }: { vendorId: string }) => {
         const response = await VendorSalesmanService.store(payload)
         const createdSalesman = response?.data as VendorSalesman | undefined
 
-        setApiResponse(prev => {
+        setApiResponse((prev: any) => {
           if (!prev || !createdSalesman) {
             return prev
           }
@@ -230,14 +230,14 @@ const VendorSalesmen = ({ vendorId }: { vendorId: string }) => {
         const updatedSalesman = response?.data as VendorSalesman | undefined
 
         if (updatedSalesman) {
-          setApiResponse(prev => {
+          setApiResponse((prev: any) => {
             if (!prev) {
               return prev
             }
 
             return {
               ...prev,
-              data: (prev.data || []).map(item =>
+              data: (prev.data || []).map((item: any) =>
                 (item as VendorSalesman).id === editingSalesmanId ? updatedSalesman : item
               )
             }

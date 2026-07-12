@@ -20,6 +20,9 @@ export const CLIENTS_TENANT: string = '/v1/tenant/clients/'
 export const CLIENTS_ALL: string = '/v1/get-clients'
 export const CLIENTS_ALL_TENANT: string = '/v1/tenant/get-clients/'
 
+export const CLIENTS_EXPORT: string = '/v1/export-clients'
+export const CLIENTS_EXPORT_TENANT: string = '/v1/tenant/export-clients'
+
 /**
  * Update lead stage api endpoint
  * @method PUT

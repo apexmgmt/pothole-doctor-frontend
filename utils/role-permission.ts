@@ -1,5 +1,6 @@
 import CookieService from '@/services/app/cookie.service'
 import { decryptData } from './encryption'
+import { CookieKeys } from '@/constants/cookies'
 import { getAuthUser } from './auth'
 import { NextRequest } from 'next/server'
 import { getRequiredPermissionByPath } from '@/constants/routePermission'
@@ -12,16 +13,16 @@ import { getRequiredPermissionByPath } from '@/constants/routePermission'
 export const getPermissions = async (): Promise<string[]> => {
   try {
     // Get all permission chunks
-    const chunk1 = (await CookieService.get('permissions_1')) || ''
-    const chunk2 = (await CookieService.get('permissions_2')) || ''
-    const chunk3 = (await CookieService.get('permissions_3')) || ''
+    const p1 = (await CookieService.get(CookieKeys.PERMISSIONS_1)) || ''
+    const p2 = (await CookieService.get(CookieKeys.PERMISSIONS_2)) || ''
+    const p3 = (await CookieService.get(CookieKeys.PERMISSIONS_3)) || ''
 
     // Reassemble the encrypted permissions
-    const encryptedPermissions = chunk1 + chunk2 + chunk3
+    const encryptedPermissions = p1 + p2 + p3
 
     if (!encryptedPermissions) return []
 
-    const decryptedPermissions = decryptData(encryptedPermissions)
+    const decryptedPermissions = await decryptData(encryptedPermissions)
     let userPermissions: string[] = []
 
     if (process.env.NODE_ENV === 'development') {
@@ -46,12 +47,12 @@ export const getPermissions = async (): Promise<string[]> => {
  * @returns string[]
  */
 export const getRoles = async (): Promise<string[]> => {
-  const encryptedRoles = await CookieService.get('roles')
+  const encryptedRoles = await CookieService.get(CookieKeys.ROLES)
 
   if (!encryptedRoles) return []
 
   try {
-    const decryptedRoles = decryptData(encryptedRoles)
+    const decryptedRoles = await decryptData(encryptedRoles)
     let userRoles: string[] = []
 
     if (process.env.NODE_ENV === 'development') {
@@ -111,9 +112,9 @@ export const isGuardType = async (guardType: string): Promise<boolean> => {
 export async function getPermissionsFromCookies(req: NextRequest): Promise<string[]> {
   try {
     // Get all permission chunks
-    const chunk1 = req.cookies.get('permissions_1')?.value || ''
-    const chunk2 = req.cookies.get('permissions_2')?.value || ''
-    const chunk3 = req.cookies.get('permissions_3')?.value || ''
+    const chunk1 = req.cookies.get(CookieKeys.PERMISSIONS_1)?.value || ''
+    const chunk2 = req.cookies.get(CookieKeys.PERMISSIONS_2)?.value || ''
+    const chunk3 = req.cookies.get(CookieKeys.PERMISSIONS_3)?.value || ''
 
     // Reassemble the encrypted permissions
     const encryptedPermissions = chunk1 + chunk2 + chunk3
@@ -124,7 +125,7 @@ export async function getPermissionsFromCookies(req: NextRequest): Promise<strin
       return []
     }
 
-    const decryptedPermissions = decryptData(encryptedPermissions)
+    const decryptedPermissions = await decryptData(encryptedPermissions)
     let userPermissions: string[] = []
 
     if (process.env.NODE_ENV === 'development') {

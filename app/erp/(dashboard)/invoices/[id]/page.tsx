@@ -10,6 +10,7 @@ import UnitService from '@/services/api/settings/units.service'
 import StaffService from '@/services/api/staff.service'
 import VendorService from '@/services/api/vendors/vendors.service'
 import InvoiceService from '@/services/api/invoices/invoices.service'
+import ServiceTemplateService from '@/services/api/settings/service_templates.service'
 import {
   BusinessLocation,
   Client,
@@ -20,7 +21,8 @@ import {
   ServiceType,
   Staff,
   Unit,
-  Vendor
+  Vendor,
+  ServiceTemplate
 } from '@/types'
 import AddInvoiceServicesView from '@/views/erp/invoices/AddInvoiceServicesView'
 
@@ -40,7 +42,8 @@ const InvoiceServicesPage = async ({ params }: { params: Promise<{ id: string }>
     unitsRes,
     productCategoriesRes,
     uomUnitsRes,
-    vendorsRes
+    vendorsRes,
+    serviceTemplatesRes
   ] = await Promise.allSettled([
     InvoiceService.show(id),
     EstimateTypeService.getAll(),
@@ -52,7 +55,8 @@ const InvoiceServicesPage = async ({ params }: { params: Promise<{ id: string }>
     UnitService.getAll(),
     ProductCategoryService.getAll(),
     UnitService.getAll('uom'),
-    VendorService.getAll()
+    VendorService.getAll(),
+    ServiceTemplateService.getAll()
   ])
 
   if (invoiceRes.status === 'rejected') {
@@ -82,6 +86,9 @@ const InvoiceServicesPage = async ({ params }: { params: Promise<{ id: string }>
 
   const uomUnits: Unit[] = uomUnitsRes.status === 'fulfilled' ? uomUnitsRes.value.data || [] : []
   const vendors: Vendor[] = vendorsRes.status === 'fulfilled' ? vendorsRes.value.data || [] : []
+  
+  const serviceTemplates: ServiceTemplate[] =
+    serviceTemplatesRes.status === 'fulfilled' ? serviceTemplatesRes.value.data || [] : []
 
   return (
     <AddInvoiceServicesView
@@ -91,6 +98,7 @@ const InvoiceServicesPage = async ({ params }: { params: Promise<{ id: string }>
       productCategories={productCategories}
       uomUnits={uomUnits}
       vendors={vendors}
+      serviceTemplates={serviceTemplates}
       invoiceTypes={invoiceTypes}
       clients={clients}
       staffs={staffs}

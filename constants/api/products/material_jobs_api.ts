@@ -7,9 +7,16 @@
 export const MATERIAL_JOBS: string = '/v1/tenant/material-jobs/'
 
 /**
+ * This contains the API endpoint to export material jobs.
+ * @method GET - Export data: GET /export
+ */
+export const MATERIAL_JOBS_EXPORT_TENANT: string = '/v1/tenant/material-jobs/export/'
+
+/**
  * Material jobs actions api endpoint
  * @method - GET - for data table api endpoint
  * @method - POST - for action creation
  * @method - DELETE - for action deletion (latest first)
  */
-export const MATERIAL_JOBS_ACTIONS = (materialJobId: string): string => `/v1/tenant/material-jobs/${materialJobId}/actions`
+export const MATERIAL_JOBS_ACTIONS = (materialJobId: string): string =>
+  `/v1/tenant/material-jobs/${materialJobId}/actions`

@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { PlusIcon } from 'lucide-react'
@@ -16,7 +16,7 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import { formatDateTime } from '@/utils/date'
 import PartnerService from '@/services/api/partners/partners.service'
 import CreateOrEditPartnerModal from './CreateOrEditPartnerModal'
@@ -24,92 +24,106 @@ import { DetailsIcon, DocumentIcon, UserIcon } from '@/public/icons'
 import PartnerDocuments from './documents/PartnerDocuments'
 import PartnerDetails from './PartnerDetails'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import { hasPermission } from '@/utils/role-permission'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const Partners: React.FC<PartnersProps> = ({
+type Permissions = {
+  canCreatePartner: boolean
+  canViewPartner: boolean
+  canEditPartner: boolean
+  canDeletePartner: boolean
+}
+
+const Partners: React.FC<PartnersProps & { permissions?: Permissions }> = ({
   businessLocations,
   partnerTypes,
   countriesWithStatesAndCities,
   companies,
-  skills
+  skills,
+  initialData,
+  permissions: {
+    canCreatePartner = false,
+    canViewPartner = false,
+    canEditPartner = false,
+    canDeletePartner = false
+  } = {}
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Partner> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null)
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [activeTab, setActiveTab] = useState<string>('partners')
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreatePartner, setCanCreatePartner] = useState<boolean>(false)
-  const [canViewPartner, setCanViewPartner] = useState<boolean>(false)
-  const [canEditPartner, setCanEditPartner] = useState<boolean>(false)
-  const [canDeletePartner, setCanDeletePartner] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions and check permissions
-  useEffect(() => {
-    setSearchValue(filterOptions.search || '')
-    hasPermission('Create Contractor').then(result => setCanCreatePartner(result))
-    hasPermission('View Contractor').then(result => setCanViewPartner(result))
-    hasPermission('Update Contractor').then(result => setCanEditPartner(result))
-    hasPermission('Delete Contractor').then(result => setCanDeletePartner(result))
-  }, [])
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
 
-  // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+    const params = new URLSearchParams()
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
 
-        return newOptions
-      })
-    }, 500)
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  // Fetch data from API
-  const fetchData = async () => {
     setIsLoading(true)
-
-    try {
-      PartnerService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error('Error fetching contractors')
-        })
-    } catch (error) {
-      setIsLoading(false)
-      toast.error('Error fetching contractors')
-    }
+    router.push(newUrl, { scroll: false })
   }
 
+  // Set initial search value from filterOptions
   useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Contractors'))
-  }, [filterOptions])
+    setSearchValue(filterOptions.search || '')
+  }, [])
+
+  useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
+  useEffect(() => {
+    dispatch(setPageTitle('Contractors'))
+  }, [dispatch])
+
+  // Debounced search update
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   // Transform API data to match table format
   const partnersData = apiResponse?.data
@@ -165,7 +179,7 @@ const Partners: React.FC<PartnersProps> = ({
   }
 
   const handleSuccess = () => {
-    fetchData()
+    router.refresh()
     handleModalClose()
   }
 
@@ -273,7 +287,7 @@ const Partners: React.FC<PartnersProps> = ({
       await PartnerService.destroy(id)
         .then(response => {
           toast.success('Partner deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete partner')

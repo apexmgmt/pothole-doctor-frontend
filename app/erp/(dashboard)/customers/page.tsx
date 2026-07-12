@@ -7,6 +7,7 @@ import ContactTypeService from '@/services/api/settings/contact_types.service'
 import NoteTypeService from '@/services/api/settings/note_types.service'
 import ServiceTypeService from '@/services/api/settings/service_types.service'
 import StaffService from '@/services/api/staff.service'
+import ClientService from '@/services/api/clients/clients.service'
 import {
   BusinessLocation,
   ClientSource,
@@ -16,13 +17,29 @@ import {
   InterestLevel,
   NoteType,
   ServiceType,
-  Staff
+  Staff,
+  DataTableApiResponse,
+  Client
 } from '@/types'
 import Clients from '@/views/erp/clients/Clients'
+import { hasPermission } from '@/utils/role-permission'
+
+const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Pothole Doctors'
+
+export const metadata = {
+  title: `Manage Customers | ${APP_NAME}`,
+  description: `Manage your ${APP_NAME} customers.`
+}
 
 export const dynamic = 'force-dynamic'
 
-export default async function CustomersPage() {
+export default async function CustomersPage({
+  searchParams
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const resolvedSearchParams = await searchParams
+
   const [
     interestLevelsRes,
     companiesRes,
@@ -43,6 +60,25 @@ export default async function CustomersPage() {
     NoteTypeService.getAll(),
     LocationService.index(),
     ContactTypeService.getAll()
+  ])
+
+  let responseData: DataTableApiResponse<Client> | null = null
+
+  try {
+    const response = await ClientService.index({
+      ...(resolvedSearchParams as Record<string, string>),
+      type: 'customer'
+    })
+
+    responseData = response?.data || null
+  } catch (error) {
+    console.error('Failed to fetch customers:', error)
+  }
+
+  const [canCreateClient, canEditClient, canDeleteClient] = await Promise.all([
+    hasPermission('Create Customer'),
+    hasPermission('Update Customer'),
+    hasPermission('Delete Customer')
   ])
 
   const interestLevels: InterestLevel[] =
@@ -66,6 +102,8 @@ export default async function CustomersPage() {
   return (
     <Clients
       type='customer'
+      initialData={responseData}
+      permissions={{ canCreateClient, canEditClient, canDeleteClient }}
       interestLevels={interestLevels}
       companies={companies}
       staffs={staffs}

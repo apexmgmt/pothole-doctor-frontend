@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 
 export type Column = {
   id: string
-  header: string
+  header: string | ReactNode
   cell: (row: any, rowIndex?: number) => ReactNode
   sortable?: boolean
   enableSorting?: boolean
@@ -10,8 +10,8 @@ export type Column = {
   size?: number | string // width in pixels or percentage (e.g., 100, '20%', 'auto')
 }
 
-export interface DataTableApiResponse {
-  data: any[]
+export interface DataTableApiResponse<T> {
+  data: T[]
   per_page: number
   total: number
   from: number

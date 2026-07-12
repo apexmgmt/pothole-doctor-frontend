@@ -6,11 +6,11 @@ import {
   WORK_ORDERS_ALL,
   WORK_ORDERS_RESTORE,
   WORK_ORDERS_SERVICES,
-  WORK_ORDERS_SUMMARY
+  WORK_ORDERS_SUMMARY,
+  WORK_ORDERS_EXPORT_TENANT
 } from '@/constants/api'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { CompletionCertificatePayload, WorkOrderPayload, WorkOrderServicePayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
 
 export default class WorkOrderService {
   /**
@@ -24,19 +24,39 @@ export default class WorkOrderService {
     try {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(API_URL + WORK_ORDERS + (queryParams ? `?${queryParams}` : ''), {
+      const response = await handleRequest(API_URL + WORK_ORDERS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['work_orders', 'login'] } // Cache for 60 seconds
+        next: {
+          revalidate: 30,
+          tags: ['login', 'work_orders', queryParams ? `work_orders?${queryParams}` : 'work_orders']
+        }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
 
-        throw new Error(errorData.message || 'Failed to fetch invoices')
-      }
+  /**
+   * Export work orders API
+   *
+   * @param filterOptions An object containing key-value pairs for filtering the work orders.
+   */
+  static exportWorkOrders = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      return await response.json()
+      const response = await handleRequest(
+        API_URL + WORK_ORDERS_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      return await response.blob()
     } catch (error) {
       throw error
     }
@@ -47,23 +67,14 @@ export default class WorkOrderService {
    */
   static store = async (payload: WorkOrderPayload) => {
     try {
-      const response = await apiInterceptor(API_URL + WORK_ORDERS, {
+      const response = await handleRequest(API_URL + WORK_ORDERS, {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['work-orders', 'work-orders-summary', 'invoices-summary']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('work-orders')
-      await revalidate('work-orders-summary')
-      await revalidate('invoices-summary')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -78,23 +89,14 @@ export default class WorkOrderService {
    */
   static storeServices = async (workOrderId: string, payload: WorkOrderServicePayload) => {
     try {
-      const response = await apiInterceptor(API_URL + WORK_ORDERS_SERVICES(workOrderId), {
+      const response = await handleRequest(API_URL + WORK_ORDERS_SERVICES(workOrderId), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['work-orders', 'work-orders-summary', 'invoices-summary', `work_orders/${workOrderId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('work-orders')
-      await revalidate('work-orders-summary')
-      await revalidate('invoices-summary')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -109,18 +111,13 @@ export default class WorkOrderService {
    */
   static show = async (workOrderId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + WORK_ORDERS + workOrderId, {
+      const response = await handleRequest(API_URL + WORK_ORDERS + workOrderId, {
         requiresAuth: true,
-        method: 'GET'
+        method: 'GET',
+        next: { revalidate: 30, tags: ['login', `work_orders/${workOrderId}`] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch work order')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -136,23 +133,14 @@ export default class WorkOrderService {
    */
   static update = async (workOrderId: string, payload: WorkOrderPayload) => {
     try {
-      const response = await apiInterceptor(API_URL + WORK_ORDERS + workOrderId, {
+      const response = await handleRequest(API_URL + WORK_ORDERS + workOrderId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['work-orders', 'work-orders-summary', 'invoices-summary', `work_orders/${workOrderId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('work-orders')
-      await revalidate('work-orders-summary')
-      await revalidate('invoices-summary')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -168,23 +156,14 @@ export default class WorkOrderService {
    */
   static updateServices = async (workOrderId: string, payload: WorkOrderServicePayload) => {
     try {
-      const response = await apiInterceptor(API_URL + WORK_ORDERS_SERVICES(workOrderId), {
+      const response = await handleRequest(API_URL + WORK_ORDERS_SERVICES(workOrderId), {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['work-orders', 'work-orders-summary', 'invoices-summary', `work_orders/${workOrderId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('work-orders')
-      await revalidate('work-orders-summary')
-      await revalidate('invoices-summary')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -199,22 +178,13 @@ export default class WorkOrderService {
    */
   static destroy = async (workOrderId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + WORK_ORDERS + workOrderId, {
+      const response = await handleRequest(API_URL + WORK_ORDERS + workOrderId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['work-orders', 'work-orders-summary', 'invoices-summary', `work_orders/${workOrderId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete work order')
-      }
-
-      await revalidate('work-orders')
-      await revalidate('work-orders-summary')
-      await revalidate('invoices-summary')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -229,22 +199,13 @@ export default class WorkOrderService {
    */
   static restore = async (workOrderId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + WORK_ORDERS_RESTORE(workOrderId), {
+      const response = await handleRequest(API_URL + WORK_ORDERS_RESTORE(workOrderId), {
         requiresAuth: true,
-        method: 'PUT'
+        method: 'PUT',
+        revalidateTags: ['work-orders', 'work-orders-summary', 'invoices-summary', `work_orders/${workOrderId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to restore work order')
-      }
-
-      await revalidate('work-orders')
-      await revalidate('work-orders-summary')
-      await revalidate('invoices-summary')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -258,18 +219,13 @@ export default class WorkOrderService {
    */
   static getAll = async () => {
     try {
-      const response = await apiInterceptor(API_URL + WORK_ORDERS_ALL, {
+      const response = await handleRequest(API_URL + WORK_ORDERS_ALL, {
         requiresAuth: true,
-        method: 'GET'
+        method: 'GET',
+        next: { revalidate: 30, tags: ['login', 'work_orders-all'] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch work orders')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -285,18 +241,12 @@ export default class WorkOrderService {
    */
   static viewWorkOrder = async (wo_id: string, sg_id: string, st_id: string) => {
     try {
-      const response = await apiInterceptor(API_URL + VIEW_WORK_ORDER(wo_id, sg_id, st_id), {
+      const response = await handleRequest(API_URL + VIEW_WORK_ORDER(wo_id, sg_id, st_id), {
         requiresAuth: false,
         method: 'GET'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to view work order')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -310,19 +260,14 @@ export default class WorkOrderService {
    */
   static completeWorkOrder = async (payload: CompletionCertificatePayload) => {
     try {
-      const response = await apiInterceptor(API_URL + COMPLETE_WORK_ORDER, {
+      const response = await handleRequest(API_URL + COMPLETE_WORK_ORDER, {
         requiresAuth: false,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['work-orders', `work_orders/${payload.wo_id}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to submit completion certificate')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -333,19 +278,13 @@ export default class WorkOrderService {
    */
   static getSummary = async () => {
     try {
-      const response = await apiInterceptor(API_URL + WORK_ORDERS_SUMMARY, {
+      const response = await handleRequest(API_URL + WORK_ORDERS_SUMMARY, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['work-orders-summary', 'login'] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', 'work-orders-summary'] } // Cache for 30 seconds
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch work orders summary')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

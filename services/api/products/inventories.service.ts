@@ -1,6 +1,13 @@
-import { API_URL, INVENTORIES, INVENTORY_ADJUST, INVENTORY_ADJUSTMENTS } from '@/constants/api'
+import {
+  API_URL,
+  INVENTORIES,
+  INVENTORY_ADJUST,
+  INVENTORY_ADJUSTMENTS,
+  INVENTORIES_EXPORT_TENANT,
+  INVENTORY_ADJUSTMENTS_EXPORT_TENANT
+} from '@/constants/api'
 import { InventoryAdjustPayload, InventoryPayload } from '@/types'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { revalidate } from '../../app/cache.service'
 
 export default class InventoryService {
@@ -12,19 +19,32 @@ export default class InventoryService {
     try {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(API_URL + INVENTORIES + (queryParams ? `?${queryParams}` : ''), {
+      const response = await handleRequest(API_URL + INVENTORIES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['inventories'] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
 
-        throw new Error(errorData.message || 'Failed to fetch inventories')
-      }
+  /** Export Inventories API */
+  static exportInventories = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      return await response.json()
+      const response = await handleRequest(
+        API_URL + INVENTORIES_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      return await response.blob()
     } catch (error) {
       throw error
     }
@@ -33,21 +53,15 @@ export default class InventoryService {
   /** Create Inventory API */
   static store = async (payload: InventoryPayload) => {
     try {
-      const response = await apiInterceptor(API_URL + INVENTORIES, {
+      const response = await handleRequest(API_URL + INVENTORIES, {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('inventories')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -56,19 +70,13 @@ export default class InventoryService {
   /** Show Inventory API */
   static show = async (inventoryId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + INVENTORIES + inventoryId, {
+      const response = await handleRequest(API_URL + INVENTORIES + inventoryId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`inventories/${inventoryId}`] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch inventory details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -77,22 +85,16 @@ export default class InventoryService {
   /** Update Inventory API */
   static update = async (inventoryId: string, payload: InventoryPayload) => {
     try {
-      const response = await apiInterceptor(API_URL + INVENTORIES + inventoryId, {
+      const response = await handleRequest(API_URL + INVENTORIES + inventoryId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('inventories')
       await revalidate(`inventories/${inventoryId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -101,21 +103,15 @@ export default class InventoryService {
   /** Delete Inventory API */
   static destroy = async (inventoryId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + INVENTORIES + inventoryId, {
+      const response = await handleRequest(API_URL + INVENTORIES + inventoryId, {
         requiresAuth: true,
         method: 'DELETE'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete inventory')
-      }
-
       await revalidate('inventories')
       await revalidate(`inventories/${inventoryId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -124,22 +120,16 @@ export default class InventoryService {
   /** Adjust Inventory API */
   static adjust = async (inventoryId: string, payload: InventoryAdjustPayload) => {
     try {
-      const response = await apiInterceptor(API_URL + INVENTORY_ADJUST(inventoryId), {
+      const response = await handleRequest(API_URL + INVENTORY_ADJUST(inventoryId), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('inventories')
       await revalidate(`inventories/${inventoryId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -153,19 +143,32 @@ export default class InventoryService {
     try {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(API_URL + INVENTORY_ADJUSTMENTS + (queryParams ? `?${queryParams}` : ''), {
+      const response = await handleRequest(API_URL + INVENTORY_ADJUSTMENTS + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: ['inventory-adjustments'] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
 
-        throw new Error(errorData.message || 'Failed to fetch inventory adjustments')
-      }
+  /** Export Inventory Adjustments API */
+  static exportInventoryAdjustments = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      return await response.json()
+      const response = await handleRequest(
+        API_URL + INVENTORY_ADJUSTMENTS_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      return await response.blob()
     } catch (error) {
       throw error
     }
@@ -179,19 +182,13 @@ export default class InventoryService {
    */
   static getAdjustmentDetails = async (adjustmentId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + INVENTORY_ADJUSTMENTS + adjustmentId, {
+      const response = await handleRequest(API_URL + INVENTORY_ADJUSTMENTS + adjustmentId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`inventory-adjustments/${adjustmentId}`] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch inventory adjustment details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -199,22 +196,16 @@ export default class InventoryService {
 
   static createAdjustmentForInventory = async (purchaseOrderId: string, payload: InventoryAdjustPayload) => {
     try {
-      const response = await apiInterceptor(API_URL + INVENTORY_ADJUSTMENTS + purchaseOrderId, {
+      const response = await handleRequest(API_URL + INVENTORY_ADJUSTMENTS + purchaseOrderId, {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('inventory-adjustments')
       await revalidate(`purchase-orders/${purchaseOrderId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

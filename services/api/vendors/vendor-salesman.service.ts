@@ -1,5 +1,5 @@
 import { getApiUrl, isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { API_URL, VENDOR_SALESMAN, VENDOR_SALESMAN_TENANT } from '@/constants/api'
 import { VendorSalesmanPayload } from '@/types'
 import { revalidate } from '@/services/app/cache.service'
@@ -11,7 +11,7 @@ export default class VendorSalesmanService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_SALESMAN_TENANT : VENDOR_SALESMAN) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -20,13 +20,7 @@ export default class VendorSalesmanService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch vendor salesman')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -37,21 +31,15 @@ export default class VendorSalesmanService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? VENDOR_SALESMAN_TENANT : VENDOR_SALESMAN), {
+      const response = await handleRequest(API_URL + (isTenantApi ? VENDOR_SALESMAN_TENANT : VENDOR_SALESMAN), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new errorData
-      }
-
       await revalidate('vendor-salesman')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -62,7 +50,7 @@ export default class VendorSalesmanService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_SALESMAN_TENANT : VENDOR_SALESMAN) + vendorSalesmanId,
         {
           requiresAuth: true,
@@ -71,13 +59,7 @@ export default class VendorSalesmanService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch vendor salesman details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -88,7 +70,7 @@ export default class VendorSalesmanService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_SALESMAN_TENANT : VENDOR_SALESMAN) + vendorSalesmanId,
         {
           requiresAuth: true,
@@ -97,16 +79,10 @@ export default class VendorSalesmanService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('vendor-salesman')
       await revalidate(`vendor-salesman/${vendorSalesmanId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -117,7 +93,7 @@ export default class VendorSalesmanService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? VENDOR_SALESMAN_TENANT : VENDOR_SALESMAN) + vendorSalesmanId,
         {
           requiresAuth: true,
@@ -125,16 +101,10 @@ export default class VendorSalesmanService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete vendor salesman')
-      }
-
       await revalidate('vendor-salesman')
       await revalidate(`vendor-salesman/${vendorSalesmanId}`)
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

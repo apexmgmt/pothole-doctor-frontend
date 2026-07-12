@@ -9,11 +9,11 @@ import {
   INVOICES_SERVICES,
   INVOICES_SUMMARY,
   SEND_INVOICE_EMAIL,
-  VIEW_INVOICE
+  VIEW_INVOICE,
+  INVOICES_EXPORT_TENANT
 } from '@/constants/api'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import { InvoicePayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
 
 export default class InvoiceService {
   /**
@@ -27,19 +27,36 @@ export default class InvoiceService {
     try {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(API_URL + INVOICES + (queryParams ? `?${queryParams}` : ''), {
+      const response = await handleRequest(API_URL + INVOICES + (queryParams ? `?${queryParams}` : ''), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['invoices'] } // Cache for 60 seconds
+        next: {
+          revalidate: 60,
+          tags: ['login', 'invoices', queryParams ? `invoices?${queryParams}` : 'invoices']
+        }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
 
-        throw new Error(errorData.message || 'Failed to fetch invoices')
-      }
+  /**
+   * Export invoices API
+   *
+   * @param filterOptions An object containing key-value pairs for filtering the invoices.
+   */
+  static exportInvoices = async (filterOptions: object = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      return await response.json()
+      const response = await handleRequest(API_URL + INVOICES_EXPORT_TENANT + (queryParams ? `?${queryParams}` : ''), {
+        requiresAuth: true,
+        method: 'GET'
+      })
+
+      return await response.blob()
     } catch (error) {
       throw error
     }
@@ -50,23 +67,14 @@ export default class InvoiceService {
    */
   static store = async (payload: InvoicePayload) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICES, {
+      const response = await handleRequest(API_URL + INVOICES, {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['invoices', 'invoices-summary', 'work-orders-summary']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('invoices')
-      await revalidate('invoices-summary')
-      await revalidate('work-orders-summary')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -81,23 +89,14 @@ export default class InvoiceService {
    */
   static storeServices = async (invoiceId: string, payload: InvoiceServicePayload) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICES_SERVICES(invoiceId), {
+      const response = await handleRequest(API_URL + INVOICES_SERVICES(invoiceId), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['invoices', 'invoices-summary', 'work-orders-summary', `invoices/${invoiceId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('invoices')
-      await revalidate('invoices-summary')
-      await revalidate('work-orders-summary')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -112,18 +111,13 @@ export default class InvoiceService {
    */
   static show = async (invoiceId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICES + invoiceId, {
+      const response = await handleRequest(API_URL + INVOICES + invoiceId, {
         requiresAuth: true,
-        method: 'GET'
+        method: 'GET',
+        next: { revalidate: 60, tags: ['login', `invoices/${invoiceId}`] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch invoice')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -139,23 +133,14 @@ export default class InvoiceService {
    */
   static update = async (invoiceId: string, payload: InvoicePayload) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICES + invoiceId, {
+      const response = await handleRequest(API_URL + INVOICES + invoiceId, {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['invoices', 'invoices-summary', 'work-orders-summary', `invoices/${invoiceId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('invoices')
-      await revalidate('invoices-summary')
-      await revalidate('work-orders-summary')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -171,23 +156,14 @@ export default class InvoiceService {
    */
   static updateServices = async (invoiceId: string, payload: InvoiceServicePayload) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICES_SERVICES(invoiceId), {
+      const response = await handleRequest(API_URL + INVOICES_SERVICES(invoiceId), {
         requiresAuth: true,
         method: 'PUT',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['invoices', 'invoices-summary', 'work-orders-summary', `invoices/${invoiceId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('invoices')
-      await revalidate('invoices-summary')
-      await revalidate('work-orders-summary')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -202,22 +178,13 @@ export default class InvoiceService {
    */
   static destroy = async (invoiceId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICES + invoiceId, {
+      const response = await handleRequest(API_URL + INVOICES + invoiceId, {
         requiresAuth: true,
-        method: 'DELETE'
+        method: 'DELETE',
+        revalidateTags: ['invoices', 'invoices-summary', 'work-orders-summary', `invoices/${invoiceId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete invoice')
-      }
-
-      await revalidate('invoices')
-      await revalidate('invoices-summary')
-      await revalidate('work-orders-summary')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -232,22 +199,13 @@ export default class InvoiceService {
    */
   static restore = async (invoiceId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICES_RESTORE(invoiceId), {
+      const response = await handleRequest(API_URL + INVOICES_RESTORE(invoiceId), {
         requiresAuth: true,
-        method: 'PUT'
+        method: 'PUT',
+        revalidateTags: ['invoices', 'invoices-summary', 'work-orders-summary', `invoices/${invoiceId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to restore invoice')
-      }
-
-      await revalidate('invoices')
-      await revalidate('invoices-summary')
-      await revalidate('work-orders-summary')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -263,18 +221,12 @@ export default class InvoiceService {
    */
   static viewInvoice = async (invoiceHashId: string, clientHashId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + VIEW_INVOICE(invoiceHashId, clientHashId), {
+      const response = await handleRequest(API_URL + VIEW_INVOICE(invoiceHashId, clientHashId), {
         requiresAuth: false,
         method: 'GET'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to view invoice')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -282,19 +234,13 @@ export default class InvoiceService {
 
   static approveInvoice = async (invoice_id: string, payload: FormData) => {
     try {
-      const response = await apiInterceptor(API_URL + APPROVE_INVOICE, {
+      const response = await handleRequest(API_URL + APPROVE_INVOICE, {
         requiresAuth: false,
         method: 'POST',
         body: payload
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to approve invoice')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -309,18 +255,13 @@ export default class InvoiceService {
    */
   static markSigned = async (invoiceId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICES_MARKED_SIGNED(invoiceId), {
+      const response = await handleRequest(API_URL + INVOICES_MARKED_SIGNED(invoiceId), {
         requiresAuth: true,
-        method: 'POST'
+        method: 'POST',
+        revalidateTags: ['invoices', `invoices/${invoiceId}`]
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to mark invoice as signed')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -335,19 +276,14 @@ export default class InvoiceService {
    */
   static sendEmail = async (invoiceId: string, subject?: string, message?: string) => {
     try {
-      const response = await apiInterceptor(API_URL + SEND_INVOICE_EMAIL(invoiceId), {
+      const response = await handleRequest(API_URL + SEND_INVOICE_EMAIL(invoiceId), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify({ subject, message })
+        body: JSON.stringify({ subject, message }),
+        revalidateTags: ['invoices', `invoices/${invoiceId}`, 'invoices-histories', 'invoices-histories-summary']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to send invoice email')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -364,21 +300,23 @@ export default class InvoiceService {
     try {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + INVOICE_HISTORIES(invoiceId) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
-          method: 'GET'
+          method: 'GET',
+          next: {
+            revalidate: 30,
+            tags: [
+              'login',
+              `invoices-histories/${invoiceId}`,
+              queryParams ? `invoices-histories/${invoiceId}?${queryParams}` : `invoices-histories/${invoiceId}`
+            ]
+          }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch invoice history')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -389,19 +327,13 @@ export default class InvoiceService {
    */
   static getSummary = async () => {
     try {
-      const response = await apiInterceptor(API_URL + INVOICES_SUMMARY, {
+      const response = await handleRequest(API_URL + INVOICES_SUMMARY, {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 60, tags: ['invoices-summary', 'login'] } // Cache for 60 seconds
+        next: { revalidate: 30, tags: ['login', 'invoices-summary'] } // Cache for 60 seconds
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch invoices summary')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useForm } from 'react-hook-form'
 
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -17,10 +18,9 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import TaskTypeService from '@/services/api/settings/task_types.service'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import { hasPermission } from '@/utils/role-permission'
 import CustomFormField from '@/components/form/CustomFormField'
 import TableSearch from '@/components/erp/common/TableSearch'
 
@@ -37,21 +37,37 @@ const emptyTaskTypePayload: TaskTypeFormValues = {
 }
 
 type TaskTypeFieldErrors = Partial<Record<keyof TaskTypeFormValues, string>>
+interface TaskTypesProps {
+  initialData?: DataTableApiResponse<TaskType> | null
+  permissions?: {
+    canCreateType: boolean
+    canEditType: boolean
+    canDeleteType: boolean
+    canRestoreType: boolean
+  }
+}
 
-const TaskTypes: React.FC = () => {
+const TaskTypes: React.FC<TaskTypesProps> = ({ initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<TaskType> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
   const [inlineMode, setInlineMode] = useState<'create' | 'edit' | null>(null)
   const [editingTaskTypeId, setEditingTaskTypeId] = useState<string | null>(null)
-  const [canCreate, setCanCreate] = useState<boolean>(false)
-  const [canUpdate, setCanUpdate] = useState<boolean>(false)
-  const [canDelete, setCanDelete] = useState<boolean>(false)
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+
+  const canCreate = permissions?.canCreateType ?? false
+  const canUpdate = permissions?.canEditType ?? false
+  const canDelete = permissions?.canDeleteType ?? false
+
+  const filterOptions = useMemo(
+    () => ({
+      ...getInitialFilters(searchParams)
+    }),
+    [searchParams]
+  )
 
   const {
     register,
@@ -68,59 +84,60 @@ const TaskTypes: React.FC = () => {
   const isInlineEditing = inlineMode !== null
 
   useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
+  useEffect(() => {
     setSearchValue(filterOptions.search || '')
     dispatch(setPageTitle('Manage Task Types'))
+  }, [dispatch])
 
-    hasPermission('Create Task Type').then(result => setCanCreate(result))
-    hasPermission('Update Task Type').then(result => setCanUpdate(result))
-    hasPermission('Delete Task Type').then(result => setCanDelete(result))
-  }, [])
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
+    const params = new URLSearchParams()
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  const fetchData = async () => {
     setIsLoading(true)
-
-    try {
-      TaskTypeService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch task types')
-        })
-    } catch {
-      setIsLoading(false)
-      toast.error('Something went wrong while fetching the task types!')
-    }
+    router.push(newUrl, { scroll: false })
   }
 
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-  }, [filterOptions])
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const getFieldErrorsFromApi = (error: any): TaskTypeFieldErrors => {
     const serverErrors = error?.errors
@@ -222,7 +239,7 @@ const TaskTypes: React.FC = () => {
         goToFirstPage()
 
         if (!createdTaskType) {
-          fetchData()
+          router.refresh()
         }
 
         toast.success(response?.message || 'Task type created successfully')
@@ -249,7 +266,7 @@ const TaskTypes: React.FC = () => {
             }
           })
         } else {
-          fetchData()
+          router.refresh()
         }
 
         toast.success(response?.message || 'Task type updated successfully')
@@ -276,7 +293,7 @@ const TaskTypes: React.FC = () => {
       await TaskTypeService.destroy(id)
         .then(() => {
           toast.success('Task type deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete task type')
@@ -466,7 +483,12 @@ const TaskTypes: React.FC = () => {
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear

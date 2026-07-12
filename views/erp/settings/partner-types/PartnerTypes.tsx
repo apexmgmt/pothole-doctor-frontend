@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 import { useForm } from 'react-hook-form'
 
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -17,10 +18,9 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
-import { getInitialFilters, updateURL } from '@/utils/utility'
+import { getInitialFilters } from '@/utils/utility'
 import PartnerTypesService from '@/services/api/settings/partner_types.service'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import { hasPermission } from '@/utils/role-permission'
 import CustomFormField from '@/components/form/CustomFormField'
 import TableSearch from '@/components/erp/common/TableSearch'
 
@@ -36,20 +36,48 @@ const emptyPartnerTypePayload: PartnerTypeFormValues = {
 
 type PartnerTypeFieldErrors = Partial<Record<keyof PartnerTypeFormValues, string>>
 
-const PartnerTypes: React.FC = () => {
+type Permissions = {
+  canCreate: boolean
+  canEdit: boolean
+  canDelete: boolean
+}
+
+const PartnerTypes: React.FC<{ initialData?: DataTableApiResponse<PartnerType> | null; permissions: Permissions }> = ({
+  initialData,
+  permissions: { canCreate: canCreatePartnerType, canEdit: canEditPartnerType, canDelete: canDeletePartnerType }
+}) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<PartnerType> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
   const [inlineMode, setInlineMode] = useState<'create' | 'edit' | null>(null)
   const [editingPartnerTypeId, setEditingPartnerTypeId] = useState<string | null>(null)
-  const [canCreatePartnerType, setCanCreatePartnerType] = useState<boolean>(false)
-  const [canEditPartnerType, setCanEditPartnerType] = useState<boolean>(false)
-  const [canDeletePartnerType, setCanDeletePartnerType] = useState<boolean>(false)
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
+
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
+
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
+
+    const params = new URLSearchParams()
+
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
+  }
 
   const {
     register,
@@ -66,58 +94,43 @@ const PartnerTypes: React.FC = () => {
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-
-    hasPermission('Create Contractor Type').then(result => setCanCreatePartnerType(result))
-    hasPermission('Update Contractor Type').then(result => setCanEditPartnerType(result))
-    hasPermission('Delete Contractor Type').then(result => setCanDeletePartnerType(result))
   }, [])
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
-
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
-
-        if (newOptions.page) {
-          delete newOptions.page
-        }
-
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      PartnerTypesService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch contractor types')
-        })
-    } catch {
-      setIsLoading(false)
-      toast.error('Something went wrong while fetching the contractor types!')
-    }
-  }
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
   useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Contractor Types'))
-  }, [filterOptions])
+    dispatch(setPageTitle('Contractor Types'))
+  }, [dispatch])
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const getFieldErrorsFromApi = (error: any): PartnerTypeFieldErrors => {
     const serverErrors = error?.errors
@@ -172,16 +185,6 @@ const PartnerTypes: React.FC = () => {
     clearErrors()
   }
 
-  const goToFirstPage = () => {
-    setFilterOptions((prev: any) => {
-      const next = { ...prev }
-
-      delete next.page
-
-      return next
-    })
-  }
-
   const handleInlineSubmit = async (values: PartnerTypeFormValues) => {
     clearErrors()
 
@@ -191,63 +194,18 @@ const PartnerTypes: React.FC = () => {
 
     try {
       if (inlineMode === 'create') {
-        const response = await PartnerTypesService.store(payload)
-        const createdPartnerType = response?.data as PartnerType | undefined
-
-        setApiResponse(prev => {
-          if (!prev || !createdPartnerType) {
-            return prev
-          }
-
-          const perPage = prev.per_page || 10
-          const updatedTotal = (prev.total || 0) + 1
-          const nextData = [createdPartnerType, ...(prev.data || [])].slice(0, perPage)
-
-          return {
-            ...prev,
-            data: nextData,
-            total: updatedTotal,
-            from: 1,
-            to: nextData.length,
-            current_page: 1,
-            last_page: Math.max(1, Math.ceil(updatedTotal / perPage))
-          }
-        })
-
-        goToFirstPage()
-
-        if (!createdPartnerType) {
-          fetchData()
-        }
-
-        toast.success(response?.message || 'Contractor type created successfully')
+        await PartnerTypesService.store(payload)
+        toast.success('Contractor type created successfully')
+        router.refresh()
         handleInlineCancel()
 
         return
       }
 
       if (inlineMode === 'edit' && editingPartnerTypeId) {
-        const response = await PartnerTypesService.update(editingPartnerTypeId, payload)
-        const updatedPartnerType = response?.data as PartnerType | undefined
-
-        if (updatedPartnerType) {
-          setApiResponse(prev => {
-            if (!prev) {
-              return prev
-            }
-
-            return {
-              ...prev,
-              data: (prev.data || []).map(item =>
-                (item as PartnerType).id === editingPartnerTypeId ? updatedPartnerType : item
-              )
-            }
-          })
-        } else {
-          fetchData()
-        }
-
-        toast.success(response?.message || 'Contractor type updated successfully')
+        await PartnerTypesService.update(editingPartnerTypeId, payload)
+        toast.success('Contractor type updated successfully')
+        router.refresh()
         handleInlineCancel()
       }
     } catch (error: any) {
@@ -271,7 +229,7 @@ const PartnerTypes: React.FC = () => {
       await PartnerTypesService.destroy(id)
         .then(() => {
           toast.success('Contractor type deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete contractor type')
@@ -422,7 +380,12 @@ const PartnerTypes: React.FC = () => {
   const customFilters = (
     <div className='flex items-center justify-between w-full gap-2.5'>
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
+        <TableSearch
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder='Search...'
+          className='lg:w-80 min-w-0'
+        />
         {hasActiveFilters() && (
           <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
             Clear

@@ -1,5 +1,5 @@
-import { getApiUrl, isTenant } from '@/utils/utility'
-import apiInterceptor from './api.interceptor'
+import { isTenant } from '@/utils/utility'
+import { handleRequest } from '@/services/api/base.service'
 import {
   API_URL,
   INTEREST_LEVELS,
@@ -8,7 +8,7 @@ import {
   INTEREST_LEVELS_TENANT
 } from '@/constants/api'
 import { InterestLevelPayload } from '@/types'
-import { revalidate } from '../app/cache.service'
+
 
 export default class InterestLevelService {
   /**Interest levels DataTable API */
@@ -17,22 +17,16 @@ export default class InterestLevelService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? INTEREST_LEVELS_TENANT : INTEREST_LEVELS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['interest-levels'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'interest-levels', queryParams ? `interest-levels?${queryParams}` : 'interest-levels'] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch interest levels')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -43,21 +37,14 @@ export default class InterestLevelService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? INTEREST_LEVELS_TENANT : INTEREST_LEVELS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? INTEREST_LEVELS_TENANT : INTEREST_LEVELS), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['interest-levels', 'interest-levels-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('interest-levels')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -68,22 +55,16 @@ export default class InterestLevelService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? INTEREST_LEVELS_TENANT : INTEREST_LEVELS) + interestLevelId,
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`interest-levels/${interestLevelId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `interest-levels/${interestLevelId}`] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch interest level details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -94,26 +75,17 @@ export default class InterestLevelService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? INTEREST_LEVELS_TENANT : INTEREST_LEVELS) + interestLevelId,
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['interest-levels', 'interest-levels-all', `interest-levels/${interestLevelId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('interest-levels')
-      await revalidate(`interest-levels/${interestLevelId}`)
-      await revalidate('interest-levels-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -124,25 +96,16 @@ export default class InterestLevelService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? INTEREST_LEVELS_TENANT : INTEREST_LEVELS) + interestLevelId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['interest-levels', 'interest-levels-all', `interest-levels/${interestLevelId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete interest level')
-      }
-
-      await revalidate('interest-levels')
-      await revalidate(`interest-levels/${interestLevelId}`)
-      await revalidate('interest-levels-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -153,22 +116,13 @@ export default class InterestLevelService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
-        API_URL + (isTenantApi ? INTEREST_LEVELS_ALL_TENANT : INTEREST_LEVELS_ALL),
-        {
-          requiresAuth: true,
-          method: 'GET',
-          next: { revalidate: 3600, tags: ['interest-levels-all'] } // Cache for 1 hour
-        }
-      )
+      const response = await handleRequest(API_URL + (isTenantApi ? INTEREST_LEVELS_ALL_TENANT : INTEREST_LEVELS_ALL), {
+        requiresAuth: true,
+        method: 'GET',
+        next: { revalidate: 3600, tags: ['login', 'interest-levels-all'] }
+      })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch all interest levels')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

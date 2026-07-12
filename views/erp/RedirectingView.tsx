@@ -2,9 +2,6 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { decryptData } from '@/utils/encryption'
-import CookieService from '@/services/app/cookie.service'
-import { encryptData } from '@/utils/encryption'
 import { useAppDispatch } from '@/lib/hooks'
 import { setUserData } from '@/lib/features/auth/authSlice'
 
@@ -27,37 +24,19 @@ const RedirectingView: React.FC<RedirectingViewProps> = ({ encryptedData }) => {
           return
         }
 
-        // Decrypt the data
-        const authData = decryptData(decodeURIComponent(encryptedData))
+        // Process the redirect data (decrypt and store cookies in a single server action)
+        const { processRedirectData } = await import('@/app/actions/auth')
+        const result = await processRedirectData(encryptedData)
 
-        if (!authData || !authData.access_token) {
-          setError('Failed to decrypt authentication data')
+        if (!result.success || !result.user) {
+          setError(result.error || 'Failed to process authentication data')
           setTimeout(() => router.push('/erp/login'), 2000)
 
           return
         }
 
-        // Store the decrypted data in cookies
-        CookieService.storeSync('access_token', authData.access_token, { expires: authData.expires_in })
-        CookieService.storeSync('refresh_token', authData.refresh_token)
-        CookieService.storeSync('token_type', authData.token_type)
-        CookieService.storeSync('user', encryptData(authData.user))
-        CookieService.storeSync('roles', encryptData(authData.roles || []))
-
-        // Split permissions into chunks
-        const encryptedPermissions = encryptData(authData.permissions || [])
-        const chunkSize = Math.ceil(encryptedPermissions.length / 3)
-
-        const chunk1 = encryptedPermissions.slice(0, chunkSize)
-        const chunk2 = encryptedPermissions.slice(chunkSize, chunkSize * 2)
-        const chunk3 = encryptedPermissions.slice(chunkSize * 2)
-
-        CookieService.storeSync('permissions_1', chunk1)
-        CookieService.storeSync('permissions_2', chunk2)
-        CookieService.storeSync('permissions_3', chunk3)
-
         // Dispatch user data to Redux store
-        dispatch(setUserData(authData.user))
+        dispatch(setUserData(result.user))
 
         // Redirect to ERP dashboard
         router.push('/erp/')

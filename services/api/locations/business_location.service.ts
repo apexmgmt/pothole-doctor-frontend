@@ -1,5 +1,5 @@
 import { getApiUrl, isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import {
   API_URL,
   BUSINESS_LOCATIONS,
@@ -7,7 +7,6 @@ import {
   BUSINESS_LOCATIONS_ALL_TENANT,
   BUSINESS_LOCATIONS_TENANT
 } from '@/constants/api'
-import { revalidate } from '@/services/app/cache.service'
 import { BusinessLocationPayload } from '@/types'
 
 export default class BusinessLocationService {
@@ -17,24 +16,41 @@ export default class BusinessLocationService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL +
           (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS) +
           (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['business-locations'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'business-locations', queryParams ? `business-locations?${queryParams}` : 'business-locations'] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
 
-        throw new Error(errorData.message || 'Failed to fetch business locations')
-      }
+  /**Export Business Locations API */
+  static exportBusinessLocations = async (filterOptions: object = {}) => {
+    try {
+      const isTenantApi = await isTenant()
+      const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      return await response.json()
+      const response = await handleRequest(
+        API_URL +
+          (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS) +
+          'export' +
+          (queryParams ? `?${queryParams}` : ''),
+        {
+          requiresAuth: true,
+          method: 'GET'
+        }
+      )
+
+      return await response.blob()
     } catch (error) {
       throw error
     }
@@ -45,22 +61,14 @@ export default class BusinessLocationService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS), {
         requiresAuth: true,
         method: 'POST',
-        body: payload
+        body: payload,
+        revalidateTags: ['business-locations', 'business-locations-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('business-locations')
-      await revalidate('business-locations-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -71,22 +79,16 @@ export default class BusinessLocationService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS) + businessLocationId,
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`business-locations/${businessLocationId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `business-locations/${businessLocationId}`] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch business location details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -100,26 +102,17 @@ export default class BusinessLocationService {
       // append _method=PUT to payload for method spoofing
       payload.append('_method', 'PUT')
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS) + businessLocationId,
         {
           requiresAuth: true,
           method: 'POST',
-          body: payload
+          body: payload,
+          revalidateTags: ['business-locations', 'business-locations-all', `business-locations/${businessLocationId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
-      await revalidate('business-locations')
-      await revalidate(`business-locations/${businessLocationId}`)
-      await revalidate('business-locations-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -130,25 +123,16 @@ export default class BusinessLocationService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS) + businessLocationId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['business-locations', 'business-locations-all', `business-locations/${businessLocationId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete business location')
-      }
-
-      await revalidate('business-locations')
-      await revalidate(`business-locations/${businessLocationId}`)
-      await revalidate('business-locations-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -159,25 +143,16 @@ export default class BusinessLocationService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? BUSINESS_LOCATIONS_TENANT : BUSINESS_LOCATIONS) + businessLocationId + '/restore',
         {
           requiresAuth: true,
-          method: 'POST'
+          method: 'POST',
+          revalidateTags: ['business-locations', 'business-locations-all', `business-locations/${businessLocationId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to restore business location')
-      }
-
-      await revalidate('business-locations')
-      await revalidate(`business-locations/${businessLocationId}`)
-      await revalidate('business-locations-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -188,7 +163,7 @@ export default class BusinessLocationService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? BUSINESS_LOCATIONS_ALL_TENANT : BUSINESS_LOCATIONS_ALL),
         {
           requiresAuth: true,
@@ -197,13 +172,7 @@ export default class BusinessLocationService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch all business locations')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

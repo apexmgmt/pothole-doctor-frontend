@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 
 import { toast } from 'sonner'
 
@@ -14,82 +15,101 @@ import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
-import { getInitialFilters, updateURL } from '@/utils/utility'
-import { hasPermission } from '@/utils/role-permission'
+import { getInitialFilters } from '@/utils/utility'
 import { Description } from '@/components/ui/description'
 import ScheduleService from '@/services/api/schedules.service'
 import { formatDate } from '@/utils/date'
 import { Schedule } from '@/types/schedules'
 import { Column, Partner, WorkOrder } from '@/types'
 import TableSearch from '@/components/erp/common/TableSearch'
+import ScheduleFormDialog from './ScheduleFormDialog'
+import { ExcelIcon } from '@/public/icons'
 
-const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = ({
+const Schedules: React.FC<{
+  workOrders?: WorkOrder[]
+  partners?: Partner[]
+  initialData?: any
+  permissions?: {
+    canCreate: boolean
+    canView: boolean
+    canEdit: boolean
+    canDelete: boolean
+  }
+}> = ({
   workOrders = [],
-  partners = []
+  partners = [],
+  initialData,
+  permissions
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<any>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState<string>('')
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreate, setCanCreate] = useState(false)
-  const [canEdit, setCanEdit] = useState(false)
-  const [canDelete, setCanDelete] = useState(false)
+  const filterOptions = useMemo(() => getInitialFilters(searchParams), [searchParams])
+  const canCreate = permissions?.canCreate ?? false
+  const canEdit = permissions?.canEdit ?? false
+  const canDelete = permissions?.canDelete ?? false
+
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null)
+
+  useEffect(() => {
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
 
   useEffect(() => {
     setSearchValue(filterOptions.search || '')
-    hasPermission('Create Schedule').then(setCanCreate)
-    hasPermission('Update Schedule').then(setCanEdit)
-    hasPermission('Delete Schedule').then(setCanDelete)
+    dispatch(setPageTitle('Manage Schedules'))
   }, [])
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        const newOptions = { ...prev }
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = getInitialFilters(searchParams)
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+    const params = new URLSearchParams()
 
-        if (newOptions.page) delete newOptions.page
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
 
-        return newOptions
-      })
-    }, 500)
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  const fetchData = async () => {
     setIsLoading(true)
-
-    try {
-      ScheduleService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error(error.message || 'Failed to fetch schedules')
-        })
-    } catch (error: any) {
-      setIsLoading(false)
-      toast.error(error.message || 'Failed to fetch schedules')
-    }
+    router.push(newUrl, { scroll: false })
   }
 
-  useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
-    dispatch(setPageTitle('Manage Schedules'))
-  }, [filterOptions])
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) delete newOptions.page
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const handleClearFilters = () => {
     setFilterOptions({})
@@ -101,7 +121,7 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
       await ScheduleService.destroy(id)
         .then(() => {
           toast.success('Schedule deleted successfully')
-          fetchData()
+          router.refresh()
         })
         .catch(error => {
           toast.error(error.message || 'Failed to delete schedule')
@@ -115,6 +135,28 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
     const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
 
     return filterKeys.length > 0
+  }
+
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting schedules...`)
+      const blob = await ScheduleService.exportSchedules(filterOptions)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `schedules-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success(`Schedules exported successfully`)
+    } catch (error: any) {
+      console.error('Export error:', error)
+      toast.error(error.message || 'Failed to export data')
+    }
   }
 
   // Columns definition
@@ -247,7 +289,19 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
           {(canEdit || canDelete) && (
             <ThreeDotButton
               buttons={[
-                ...(canEdit ? [<EditButton tooltip='Edit Schedule' onClick={() => {}} variant='text' />] : []),
+                ...(canEdit
+                  ? [
+                      <EditButton
+                        tooltip='Edit Schedule'
+                        onClick={() => {
+                          setModalMode('edit')
+                          setSelectedSchedule(row)
+                          setIsModalOpen(true)
+                        }}
+                        variant='text'
+                      />
+                    ]
+                  : []),
                 ...(canDelete
                   ? [
                       <DeleteButton
@@ -269,14 +323,25 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
   ]
 
   const customFilters = (
-    <div className='flex items-center justify-between w-full'>
-      <div className='flex items-center gap-2'>
-        <TableSearch value={searchValue} onChange={setSearchValue} placeholder='Search...' className='lg:w-80 min-w-0' />
-        {hasActiveFilters() && (
-          <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
-            Clear
-          </Button>
-        )}
+    <div className='flex items-center justify-between w-full gap-2.5'>
+      <div className='flex flex-row gap-2'>
+        <Button variant='default' size='sm' className='h-7 bg-light text-bg hover:bg-light/90' onClick={handleExport}>
+          <ExcelIcon className='w-4 h-4' />
+          <span className='hidden min-[480px]:block'>Export</span>
+        </Button>
+        <div className='flex items-center gap-2 lg:flex-0 flex-1'>
+          <TableSearch
+            value={searchValue}
+            onChange={onSearchChange}
+            placeholder='Search...'
+            className='lg:w-80 min-w-0'
+          />
+          {hasActiveFilters() && (
+            <Button variant='outline' size='sm' onClick={handleClearFilters} className='text-gray hover:text-light h-7'>
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -300,6 +365,19 @@ const Schedules: React.FC<{ workOrders?: WorkOrder[]; partners?: Partner[] }> = 
         pagination={true}
         isLoading={isLoading}
         emptyMessage='No schedule found'
+      />
+
+      <ScheduleFormDialog
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        mode={modalMode}
+        schedule={selectedSchedule}
+        partners={partners}
+        workOrders={workOrders}
+        onSuccess={() => {
+          setIsModalOpen(false)
+          router.refresh()
+        }}
       />
     </CommonLayout>
   )

@@ -1,5 +1,5 @@
 import { isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { handleRequest } from '@/services/api/base.service'
 import {
   PROPOSALS_ALL,
   PROPOSALS,
@@ -24,7 +24,7 @@ export default class ProposalService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -33,13 +33,7 @@ export default class ProposalService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch proposals')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -50,22 +44,16 @@ export default class ProposalService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS), {
+      const response = await handleRequest(API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('proposals')
       await revalidate('proposals-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -76,19 +64,13 @@ export default class ProposalService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS) + proposalId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS) + proposalId, {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 60, tags: [`proposals/${proposalId}`] } // Cache for 60 seconds
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch proposals details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -99,23 +81,17 @@ export default class ProposalService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS) + proposalId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS) + proposalId, {
         requiresAuth: true,
         method: 'PUT',
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw errorData
-      }
-
       await revalidate('proposals')
       await revalidate(`proposals/${proposalId}`)
       await revalidate('proposals-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -126,22 +102,16 @@ export default class ProposalService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS) + proposalId, {
+      const response = await handleRequest(API_URL + (isTenantApi ? PROPOSALS_TENANT : PROPOSALS) + proposalId, {
         requiresAuth: true,
         method: 'DELETE'
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete proposal')
-      }
 
       await revalidate('proposals')
       await revalidate(`proposals/${proposalId}`)
       await revalidate('proposals-all')
 
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -152,19 +122,13 @@ export default class ProposalService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? PROPOSALS_ALL_TENANT : PROPOSALS_ALL), {
+      const response = await handleRequest(API_URL + (isTenantApi ? PROPOSALS_ALL_TENANT : PROPOSALS_ALL), {
         requiresAuth: true,
         method: 'GET',
         next: { revalidate: 3600, tags: ['proposals-all'] } // Cache for 1 hour
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch proposals')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -179,19 +143,13 @@ export default class ProposalService {
    */
   static sendEmail = async (proposalId: string, subject?: string, message?: string) => {
     try {
-      const response = await apiInterceptor(API_URL + SEND_PROPOSAL_EMAIL(proposalId), {
+      const response = await handleRequest(API_URL + SEND_PROPOSAL_EMAIL(proposalId), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify({ subject, message })
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to send proposal email')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -206,18 +164,12 @@ export default class ProposalService {
    */
   static viewProposal = async (proposalHashId: string, clientHashId: string, iscus?: 1 | 0) => {
     try {
-      const response = await apiInterceptor(API_URL + VIEW_PROPOSAL(proposalHashId, clientHashId, iscus), {
+      const response = await handleRequest(API_URL + VIEW_PROPOSAL(proposalHashId, clientHashId, iscus), {
         requiresAuth: false,
         method: 'GET'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to view proposal')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -232,19 +184,13 @@ export default class ProposalService {
    */
   static reviewProposal = async (proposalHashId: string, clientHashId: string, review: string) => {
     try {
-      const response = await apiInterceptor(API_URL + REVIEW_PROPOSAL, {
+      const response = await handleRequest(API_URL + REVIEW_PROPOSAL, {
         requiresAuth: false,
         method: 'POST',
         body: JSON.stringify({ pid: proposalHashId, qcid: clientHashId, review })
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to review proposal')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -252,19 +198,13 @@ export default class ProposalService {
 
   static approveProposal = async (proposalHashId: string, clientHashId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + APPROVE_PROPOSAL, {
+      const response = await handleRequest(API_URL + APPROVE_PROPOSAL, {
         requiresAuth: false,
         method: 'POST',
         body: JSON.stringify({ pid: proposalHashId, qcid: clientHashId })
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to approve proposal')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -281,7 +221,7 @@ export default class ProposalService {
     try {
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + PROPOSAL_HISTORY(proposalId) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
@@ -289,13 +229,7 @@ export default class ProposalService {
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch proposal history')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -305,22 +239,18 @@ export default class ProposalService {
    * Mark proposal as void or dead API to allow tenants to mark a proposal as void (canceled) or dead (lost) with a reason for better tracking and analytics
    * @param proposalId - The ID of the proposal to be marked as void or dead
    * @param status - The status to mark the proposal as, either 'void' or 'dead'
-   * @param reason - The reason for marking the proposal as void or dead, which can help the business understand why proposals are not successful and improve their sales process 
+   * @param reason - The reason for marking the proposal as void or dead, which can help the business understand why proposals are not successful and improve their sales process
    * @returns json response
    */
   static markAsVoidOrDead = async (proposalId: string, status: 'void' | 'dead', reason: string) => {
     try {
-      const response = await apiInterceptor(API_URL + MARK_PROPOSAL_AS_VOID_OR_DEAD(proposalId), {
+      const response = await handleRequest(API_URL + MARK_PROPOSAL_AS_VOID_OR_DEAD(proposalId), {
         requiresAuth: true,
         method: 'POST',
         body: JSON.stringify({ status, reason })
       })
 
-      if (!response.ok) {
-        throw await response.json()
-      } 
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -333,16 +263,12 @@ export default class ProposalService {
    */
   static reopen = async (proposalId: string) => {
     try {
-      const response = await apiInterceptor(API_URL + REOPEN_PROPOSAL(proposalId), {
+      const response = await handleRequest(API_URL + REOPEN_PROPOSAL(proposalId), {
         requiresAuth: true,
         method: 'POST'
       })
 
-      if (!response.ok) {
-        throw await response.json()
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

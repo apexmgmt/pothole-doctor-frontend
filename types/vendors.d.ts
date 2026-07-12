@@ -1,9 +1,16 @@
-import { City, CountryWithStates, State, PaymentTerm, TaxType } from '.'
+import { City, CountryWithStates, State, PaymentTerm, TaxType, DataTableApiResponse } from '.'
 
 export interface VendorsProps {
   taxTypes: TaxType[]
   countriesWithStatesAndCities: CountryWithStates[]
   paymentTerms: PaymentTerm[]
+  initialData?: DataTableApiResponse<Vendor> | null
+  permissions?: {
+    canCreateVendor: boolean
+    canViewVendor: boolean
+    canEditVendor: boolean
+    canDeleteVendor: boolean
+  }
 }
 
 export interface Vendor {

@@ -1,5 +1,5 @@
-import { getApiUrl, isTenant } from '@/utils/utility'
-import apiInterceptor from '../api.interceptor'
+import { isTenant } from '@/utils/utility'
+import { handleRequest } from '@/services/api/base.service'
 import {
   API_URL,
   ESTIMATE_TYPES,
@@ -8,7 +8,7 @@ import {
   ESTIMATE_TYPES_TENANT
 } from '@/constants/api'
 import { EstimateTypePayload } from '@/types'
-import { revalidate } from '@/services/app/cache.service'
+
 
 export default class EstimateTypeService {
   /**Estimate types DataTable API */
@@ -17,22 +17,16 @@ export default class EstimateTypeService {
       const isTenantApi = await isTenant()
       const queryParams = new URLSearchParams(filterOptions as Record<string, string>).toString()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? ESTIMATE_TYPES_TENANT : ESTIMATE_TYPES) + (queryParams ? `?${queryParams}` : ''),
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: ['estimate-types'] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', 'estimate-types', queryParams ? `estimate-types?${queryParams}` : 'estimate-types'] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch estimate types')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -43,21 +37,14 @@ export default class EstimateTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATE_TYPES_TENANT : ESTIMATE_TYPES), {
+      const response = await handleRequest(API_URL + (isTenantApi ? ESTIMATE_TYPES_TENANT : ESTIMATE_TYPES), {
         requiresAuth: true,
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        revalidateTags: ['estimate-types', 'estimate-types-all']
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to create estimate types')
-      }
-
-      await revalidate('estimate-types')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -68,22 +55,16 @@ export default class EstimateTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? ESTIMATE_TYPES_TENANT : ESTIMATE_TYPES) + estimateTypeId,
         {
           requiresAuth: true,
           method: 'GET',
-          next: { revalidate: 60, tags: [`estimate-types/${estimateTypeId}`] } // Cache for 60 seconds
+          next: { revalidate: 30, tags: ['login', `estimate-types/${estimateTypeId}`] }
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch estimate types details')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -94,26 +75,17 @@ export default class EstimateTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? ESTIMATE_TYPES_TENANT : ESTIMATE_TYPES) + estimateTypeId,
         {
           requiresAuth: true,
           method: 'PUT',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          revalidateTags: ['estimate-types', 'estimate-types-all', `estimate-types/${estimateTypeId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to update estimate types')
-      }
-
-      await revalidate('estimate-types')
-      await revalidate(`estimate-types/${estimateTypeId}`)
-      await revalidate('estimate-types-all')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -124,25 +96,16 @@ export default class EstimateTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(
+      const response = await handleRequest(
         API_URL + (isTenantApi ? ESTIMATE_TYPES_TENANT : ESTIMATE_TYPES) + estimateTypeId,
         {
           requiresAuth: true,
-          method: 'DELETE'
+          method: 'DELETE',
+          revalidateTags: ['estimate-types', 'estimate-types-all', `estimate-types/${estimateTypeId}`]
         }
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to delete estimate types')
-      }
-
-      await revalidate('estimate-types-all')
-      await revalidate(`estimate-types/${estimateTypeId}`)
-      await revalidate('estimate-types')
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }
@@ -153,19 +116,13 @@ export default class EstimateTypeService {
     try {
       const isTenantApi = await isTenant()
 
-      const response = await apiInterceptor(API_URL + (isTenantApi ? ESTIMATE_TYPES_ALL_TENANT : ESTIMATE_TYPES_ALL), {
+      const response = await handleRequest(API_URL + (isTenantApi ? ESTIMATE_TYPES_ALL_TENANT : ESTIMATE_TYPES_ALL), {
         requiresAuth: true,
         method: 'GET',
-        next: { revalidate: 3600, tags: ['estimate-types-all'] } // Cache for 1 hour
+        next: { revalidate: 30, tags: ['login', 'estimate-types-all'] }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-
-        throw new Error(errorData.message || 'Failed to fetch estimate types list')
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       throw error
     }

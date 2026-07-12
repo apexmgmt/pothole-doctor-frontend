@@ -51,23 +51,27 @@ const NewPassIndex: React.FC = () => {
       return
     }
 
-    try {
-      const decodedData = decodeURIComponent(encryptedData)
-      const parsed = decryptData(decodedData) as ResetRoutePayload
+    const processData = async () => {
+      try {
+        const decodedData = decodeURIComponent(encryptedData)
+        const parsed = (await decryptData(decodedData)) as ResetRoutePayload
 
-      if (!parsed?.email || !parsed?.reset_token || parsed?.type !== 'reset-password') {
+        if (!parsed?.email || !parsed?.reset_token || parsed?.type !== 'reset-password') {
+          toast.error('Invalid password reset request')
+          router.replace('/erp/forgot-password')
+
+          return
+        }
+
+        setEmail(parsed.email)
+        setResetToken(parsed.reset_token)
+      } catch {
         toast.error('Invalid password reset request')
         router.replace('/erp/forgot-password')
-
-        return
       }
-
-      setEmail(parsed.email)
-      setResetToken(parsed.reset_token)
-    } catch {
-      toast.error('Invalid password reset request')
-      router.replace('/erp/forgot-password')
     }
+
+    processData()
   }, [searchParams, router])
 
   const onSubmit: SubmitHandler<ResetPasswordForm> = async values => {

@@ -11,6 +11,7 @@ import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 
 import CommonDialog from '@/components/erp/common/dialogs/CommonDialog'
+import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 import ProductService from '@/services/api/products/products.service'
 import ProductGalleryService from '@/services/api/products/product-galleries.service'
 import { Separator } from '@/components/ui/separator'
@@ -25,12 +26,18 @@ import { InputType, SelectOption } from '@/components/form/fields/types'
 import CustomFormField from '@/components/form/CustomFormField'
 
 interface CreateEditViewProductModalProps extends ProductsProps {
-  mode?: 'create' | 'edit' | 'view'
+  mode?: 'create' | 'edit' | 'view' | 'duplicate'
   open: boolean
   onOpenChange: (open: boolean) => void
   productId?: string
   productDetails?: Product
   onSuccess?: () => void
+  galleryPermissions?: {
+    canCreateGallery?: boolean
+    canViewGallery?: boolean
+    canEditGallery?: boolean
+    canDeleteGallery?: boolean
+  }
 }
 
 interface FormValues {
@@ -89,14 +96,19 @@ const CreateEditViewProductModal = ({
   productId,
   productDetails,
   onSuccess,
-  productCategories,
-  uomUnits,
-  serviceTypes,
-  vendors
+  productCategories = [],
+  uomUnits = [],
+  serviceTypes = [],
+  vendors = [],
+  galleryPermissions
 }: CreateEditViewProductModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [galleries, setGalleries] = useState<ProductGallery[]>(productDetails?.galleries || [])
   const [isLoadingGalleries, setIsLoadingGalleries] = useState<boolean>(false)
+
+  const [exactMatches, setExactMatches] = useState<Product[]>([])
+  const [isDuplicateConfirmOpen, setIsDuplicateConfirmOpen] = useState<boolean>(false)
+  const [pendingFormValues, setPendingFormValues] = useState<FormValues | null>(null)
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -155,6 +167,12 @@ const CreateEditViewProductModal = ({
   const coveragePerUnitId = watch('coverage_per_unit_id')
   const isFreightPercentage = watch('is_freight_percentage')
 
+  const watchedVendorId = watch('vendor_id')
+  const watchedSku = watch('sku')
+  const watchedVendorProductName = watch('vendor_product_name')
+  const watchedVendorStyle = watch('vendor_style')
+  const watchedVendorColor = watch('vendor_color')
+
   const purchaseUnit = uomUnits.find(unit => unit.id.toString() === purchaseUomId) ?? null
   const coverageUnit = uomUnits.find(unit => unit.id.toString() === coveragePerUnitId) ?? null
 
@@ -195,11 +213,12 @@ const CreateEditViewProductModal = ({
   useEffect(() => {
     if (!open) {
       reset()
+      setExactMatches([])
 
       return
     }
 
-    if (open && productDetails && (mode === 'edit' || mode === 'view') && productId) {
+    if (open && productDetails && (mode === 'edit' || mode === 'view' || mode === 'duplicate') && productId) {
       reset({
         name: productDetails.name ?? '',
         vendor_id: productDetails.vendor_id?.toString() ?? '',
@@ -283,6 +302,47 @@ const CreateEditViewProductModal = ({
     }
   }, [open, productDetails, mode, productId, form])
 
+  useEffect(() => {
+    if (!open || mode === 'view' || mode === 'edit') {
+      setExactMatches([])
+
+      return
+    }
+
+    const checkDuplicate = async () => {
+      const query = watchedSku || watchedVendorProductName
+
+      if (!query || !watchedVendorId) {
+        setExactMatches([])
+
+        return
+      }
+
+      try {
+        const response = await ProductService.index({ search: query })
+        const products = (response.data?.data as Product[]) || []
+
+        const matches = products.filter(p => {
+          return (
+            p.vendor_id?.toString() === watchedVendorId &&
+            (p.sku || '') === (watchedSku || '') &&
+            (p.vendor_product_name || '') === (watchedVendorProductName || '') &&
+            (p.vendor_style || '') === (watchedVendorStyle || '') &&
+            (p.vendor_color || '') === (watchedVendorColor || '')
+          )
+        })
+
+        setExactMatches(matches)
+      } catch (e) {
+        // ignore errors
+      }
+    }
+
+    const timer = setTimeout(checkDuplicate, 500)
+
+    return () => clearTimeout(timer)
+  }, [open, mode, watchedVendorId, watchedSku, watchedVendorProductName, watchedVendorStyle, watchedVendorColor])
+
   const handleApiError = (error: any, fallbackMessage: string) => {
     if (error?.errors && typeof error.errors === 'object') {
       const formValues = getValues()
@@ -307,6 +367,17 @@ const CreateEditViewProductModal = ({
   }
 
   const onSubmit = async (values: FormValues) => {
+    if ((mode === 'create' || mode === 'duplicate') && exactMatches.length > 0 && !isDuplicateConfirmOpen) {
+      setPendingFormValues(values)
+      setIsDuplicateConfirmOpen(true)
+
+      return
+    }
+
+    await performSubmit(values)
+  }
+
+  const performSubmit = async (values: FormValues) => {
     setIsLoading(true)
 
     const payload: ProductPayload = {
@@ -349,7 +420,7 @@ const CreateEditViewProductModal = ({
     }
 
     try {
-      if (mode === 'create') {
+      if (mode === 'create' || mode === 'duplicate') {
         await ProductService.store(payload)
         toast.success('Product created successfully')
         reset()
@@ -362,7 +433,7 @@ const CreateEditViewProductModal = ({
         onSuccess?.()
       }
     } catch (error: any) {
-      handleApiError(error, mode === 'create' ? 'Failed to create product' : 'Failed to update product')
+      handleApiError(error, mode === 'edit' ? 'Failed to update product' : 'Failed to create product')
     } finally {
       setIsLoading(false)
     }
@@ -377,6 +448,8 @@ const CreateEditViewProductModal = ({
     switch (mode) {
       case 'create':
         return 'Create New Product'
+      case 'duplicate':
+        return 'Duplicate Product'
       case 'edit':
         return 'Edit Product'
       case 'view':
@@ -390,6 +463,8 @@ const CreateEditViewProductModal = ({
     switch (mode) {
       case 'create':
         return 'Add a new product to the system'
+      case 'duplicate':
+        return 'Duplicate an existing product'
       case 'edit':
         return 'Update product information'
       case 'view':
@@ -429,7 +504,11 @@ const CreateEditViewProductModal = ({
     <CommonDialog
       isLoading={isLoading}
       loadingMessage={
-        mode === 'create' ? 'Creating product...' : mode === 'edit' ? 'Updating product...' : 'Loading product...'
+        mode === 'create' || mode === 'duplicate'
+          ? 'Creating product...'
+          : mode === 'edit'
+            ? 'Updating product...'
+            : 'Loading product...'
       }
       open={open}
       onOpenChange={onOpenChange}
@@ -451,7 +530,7 @@ const CreateEditViewProductModal = ({
               Cancel
             </Button>
             <Button type='submit' size='sm' onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className='flex-1'>
-              {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
+              {isSubmitting ? 'Saving...' : mode === 'create' || mode === 'duplicate' ? 'Create' : 'Update'}
             </Button>
           </div>
         ) : (
@@ -464,7 +543,7 @@ const CreateEditViewProductModal = ({
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-4 mb-4'>
           <div
-            className={`grid grid-cols-1 items-start ${mode === 'create' ? 'lg:grid-cols-2' : 'lg:grid-cols-[3fr_3fr_2fr]'} gap-2`}
+            className={`grid grid-cols-1 items-start ${mode === 'create' || mode === 'duplicate' ? 'lg:grid-cols-2' : 'lg:grid-cols-[3fr_3fr_2fr]'} gap-2`}
           >
             {/* Basic Product Information */}
             <div className='sticky top-4 p-4 border border-border rounded-lg'>
@@ -508,7 +587,7 @@ const CreateEditViewProductModal = ({
             </div>
 
             {/* Gallery Section - Only show in edit/view mode */}
-            {mode !== 'create' && productId && (
+            {mode !== 'create' && mode !== 'duplicate' && productId && (
               <div className='sticky top-4 space-y-4'>
                 <QrCodeSection qrCodePath={productDetails?.qr_code} />
                 <BarCodeSection barCodePath={productDetails?.bar_code} />
@@ -521,6 +600,7 @@ const CreateEditViewProductModal = ({
                     isLoading={isLoadingGalleries}
                     onUpdate={handleGalleryUpdate}
                     disabled={mode === 'view'}
+                    permissions={galleryPermissions}
                   />
                 </div>
               </div>
@@ -528,6 +608,48 @@ const CreateEditViewProductModal = ({
           </div>
         </form>
       </Form>
+      <ConfirmDialog
+        open={isDuplicateConfirmOpen}
+        onOpenChange={setIsDuplicateConfirmOpen}
+        className='max-w-3xl!'
+        title='Add Product?'
+        message={
+          <div className='flex flex-col gap-4'>
+            <p>The product with similar details is already available. Are you sure you want to add the product?</p>
+            <div className='border rounded-md overflow-hidden'>
+              <table className='w-full text-sm text-left'>
+                <thead className='bg-muted/50'>
+                  <tr>
+                    <th className='px-4 py-2 font-medium'>SKU</th>
+                    <th className='px-4 py-2 font-medium'>Product Name</th>
+                    <th className='px-4 py-2 font-medium'>Style</th>
+                    <th className='px-4 py-2 font-medium'>Color</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {exactMatches.map((match, i) => (
+                    <tr key={match.id || i} className='border-t'>
+                      <td className='px-4 py-2'>{match.sku || 'N/A'}</td>
+                      <td className='px-4 py-2'>{match.vendor_product_name || match.private_product_name || 'N/A'}</td>
+                      <td className='px-4 py-2'>{match.vendor_style || match.private_style || 'N/A'}</td>
+                      <td className='px-4 py-2'>{match.vendor_color || match.private_color || 'N/A'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+        confirmButtonTitle='Duplicate'
+        cancelButtonTitle='Cancel'
+        onConfirm={() => {
+          setIsDuplicateConfirmOpen(false)
+
+          if (pendingFormValues) {
+            performSubmit(pendingFormValues)
+          }
+        }}
+      />
     </CommonDialog>
   )
 }

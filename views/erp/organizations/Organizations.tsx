@@ -1,16 +1,15 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-
-import Link from 'next/link'
 
 import { PlusIcon } from 'lucide-react'
 
 import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
-import { DetailsIcon, FilterIcon, UserIcon } from '@/public/icons'
+import { DetailsIcon, UserIcon } from '@/public/icons'
 import OrganizationService from '@/services/api/organizations.service'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, Organization } from '@/types'
@@ -20,18 +19,28 @@ import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
-import { hasPermission } from '@/utils/role-permission'
 import AuthService from '@/services/api/auth.service'
-import { encryptData } from '@/utils/encryption'
+import { generateRedirectUrl } from '@/app/actions/auth'
 import { appUrl } from '@/utils/utility'
 import { toast } from 'sonner'
 import CreateOrEditOrganizationModal from '@/views/erp/organizations/CreateOrEditOrganizationModal'
 import TableSearch from '@/components/erp/common/TableSearch'
 
-const Organizations: React.FC = () => {
+interface OrganizationsProps {
+  initialData: DataTableApiResponse<Organization> | null
+  permissions: {
+    canCreateCompany: boolean
+    canViewCompany: boolean
+    canEditCompany: boolean
+  }
+}
+
+const Organizations: React.FC<OrganizationsProps> = ({ initialData, permissions }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
+
+  const { canCreateCompany, canViewCompany, canEditCompany } = permissions
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
@@ -40,14 +49,11 @@ const Organizations: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<string>('companies')
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Organization> | null>(initialData)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [statusLoading, setStatusLoading] = useState<{ [key: string]: boolean }>({})
-  const [canCreateCompany, setCanCreateCompany] = useState<boolean>(false)
-  const [canViewCompany, setCanViewCompany] = useState<boolean>(false)
-  const [canEditCompany, setCanEditCompany] = useState<boolean>(false)
 
   // Initialize filterOptions from URL params
   const getInitialFilters = () => {
@@ -65,83 +71,67 @@ const Organizations: React.FC = () => {
     return filters
   }
 
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters())
+  // Replace filterOptions state with a mock setFilterOptions that updates URL directly
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = getInitialFilters()
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-  // Set initial search value from filterOptions and check permissions
-  useEffect(() => {
-    setSearchValue(filterOptions.search || '')
-
-    // check permissions
-    hasPermission('Create Company').then(result => setCanCreateCompany(result))
-    hasPermission('View Company').then(result => setCanViewCompany(result))
-    hasPermission('Update Company').then(result => setCanEditCompany(result))
-  }, [])
-
-  // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
-
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
-
-        if (newOptions.page) {
-          delete newOptions.page
-        }
-
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  // Update URL when filters change
-  const updateURL = (filters: any) => {
     const params = new URLSearchParams()
 
-    Object.keys(filters).forEach(key => {
-      if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
-        params.set(key, String(filters[key]))
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
       }
     })
 
     const queryString = params.toString()
     const newUrl = queryString ? `?${queryString}` : window.location.pathname
 
+    setIsLoading(true)
     router.push(newUrl, { scroll: false })
   }
 
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      OrganizationService.index(filterOptions)
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          console.error('Error fetching companies:', error)
-        })
-    } catch (error) {
-      setIsLoading(false)
-      console.error('Error fetching companies:', error)
-    }
-  }
-
+  // Sync state when server data changes (e.g. from navigation)
   useEffect(() => {
-    fetchData()
-    updateURL(filterOptions)
+    setApiResponse(initialData)
+    setIsLoading(false)
+  }, [initialData])
+
+  // Set initial search value from URL and title
+  useEffect(() => {
+    const filters = getInitialFilters()
+
+    setSearchValue(filters.search || '')
     dispatch(setPageTitle('Manage Companies'))
-  }, [filterOptions])
+  }, [])
+
+  // Debounced search setup
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
 
   const impersonateUser = async (userId: string) => {
     try {
@@ -151,21 +141,18 @@ const Organizations: React.FC = () => {
             access_token: response?.data.access_token,
             refresh_token: response?.data.refresh_token,
             token_type: response?.data.token_type,
-            expires_in: response?.data.expires_in,
-            user: response?.data?.user,
-            roles: response?.data?.roles || [],
-            permissions: response?.data?.permissions || []
+            expires_in: response?.data.expires_in
           }
 
-          const encryptedData = encryptData(authData)
           const baseUrl = appUrl(response.data.domain ?? '')
-          const redirectUrl = `${baseUrl}/erp/redirecting?data=${encodeURIComponent(encryptedData)}`
 
-          const newWindow = window.open(redirectUrl, '_blank')
+          generateRedirectUrl(authData, response.data.domain ?? '').then(redirectUrl => {
+            const newWindow = window.open(redirectUrl, '_blank')
 
-          if (!newWindow) {
-            toast.error('Pop-up blocked. Please allow pop-ups for this site.')
-          }
+            if (!newWindow) {
+              toast.error('Pop-up blocked. Please allow pop-ups for this site.')
+            }
+          })
         })
         .catch(error => {
           toast.error(error?.message || 'Failed to impersonate user')
@@ -267,9 +254,9 @@ const Organizations: React.FC = () => {
   ]
 
   const handleClearFilters = () => {
-    setFilterOptions({})
     setSearchValue('')
     setIsFilterDrawerOpen(false)
+    setFilterOptions({})
   }
 
   const handleRowSelect = (company: any) => {
@@ -286,14 +273,14 @@ const Organizations: React.FC = () => {
         ...prev,
         data: prev.data.map(company =>
           company.id === updatedCompany.id
-            ? {
+            ? ({
                 ...company,
                 ...updatedCompany,
                 userable: {
                   ...company.userable,
                   ...updatedCompany.userable
                 }
-              }
+              } as Organization)
             : company
         )
       }
@@ -302,7 +289,7 @@ const Organizations: React.FC = () => {
 
   // Check if filters are active (excluding pagination)
   const hasActiveFilters = () => {
-    const filterKeys = Object.keys(filterOptions).filter(key => key !== 'page' && key !== 'per_page')
+    const filterKeys = Object.keys(getInitialFilters()).filter(key => key !== 'page' && key !== 'per_page')
 
     return filterKeys.length > 0
   }
@@ -313,7 +300,7 @@ const Organizations: React.FC = () => {
       <div className='flex items-center gap-2 lg:flex-0 flex-1'>
         <TableSearch
           value={searchValue}
-          onChange={setSearchValue}
+          onChange={onSearchChange}
           placeholder='Search...'
           className='lg:w-80 min-w-0'
         />
@@ -435,7 +422,7 @@ const Organizations: React.FC = () => {
         mode={modalMode}
         companyId={editCompanyId}
         companyDetails={editCompanyDetails}
-        onSuccess={fetchData}
+        onSuccess={() => router.refresh()}
       />
     </CommonLayout>
   )

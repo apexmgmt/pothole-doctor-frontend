@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import debounce from '@/utils/debounce'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -12,22 +13,25 @@ import CommonLayout from '@/components/erp/dashboard/crm/CommonLayout'
 import CommonTable from '@/components/erp/common/table'
 import { Button } from '@/components/ui/button'
 import { Column, DataTableApiResponse, Product, ProductsProps } from '@/types'
-import { InputGroup, InputGroupInput } from '@/components/ui/input-group'
 import EditButton from '@/components/erp/common/buttons/EditButton'
 import { useAppDispatch } from '@/lib/hooks'
 import { setPageTitle } from '@/lib/features/pageTitle/pageTitleSlice'
 import DeleteButton from '@/components/erp/common/buttons/DeleteButton'
+import DuplicateButton from '@/components/erp/common/buttons/DuplicateButton'
 import { getInitialFilters, mathRoundFixed, updateURL } from '@/utils/utility'
 import ThreeDotButton from '@/components/erp/common/buttons/ThreeDotButton'
 import ProductService from '@/services/api/products/products.service'
 import CreateEditViewProductModal from './CreateEditViewProductModal'
 import ViewButton from '@/components/erp/common/buttons/ViewButton'
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { hasPermission } from '@/utils/role-permission'
+import { ExcelIcon } from '@/public/icons'
 import { formatCurrency } from '@/utils/currency'
 import TableSearch from '@/components/erp/common/TableSearch'
+import BulkEditProductModal from './BulkEditProductModal'
+import BulkUpdateProductModal from './BulkUpdateProductModal'
+import BulkQrPrintModal from './BulkQrPrintModal'
 import CustomFormField from '@/components/form/CustomFormField'
+import ConfirmDialog from '@/components/erp/common/dialogs/ConfirmDialog'
 
 const Products: React.FC<ProductsProps> = ({
   productCategories,
@@ -39,85 +43,133 @@ const Products: React.FC<ProductsProps> = ({
   setSelectedRows,
   selected_vendor_id = null,
   hideTitle = false,
-  hideActionButton = false
+  hideActionButton = false,
+  initialData,
+  permissions,
+  galleryPermissions
 }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
 
-  const [apiResponse, setApiResponse] = useState<DataTableApiResponse | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [apiResponse, setApiResponse] = useState<DataTableApiResponse<Product> | null>(initialData || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
+  const [skuValue, setSkuValue] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
-  const [filterOptions, setFilterOptions] = useState<any>(getInitialFilters(searchParams))
-  const [canCreateProduct, setCanCreateProduct] = useState<boolean>(false)
-  const [canEditProduct, setCanEditProduct] = useState<boolean>(false)
-  const [canDeleteProduct, setCanDeleteProduct] = useState<boolean>(false)
-  const [canViewProduct, setCanViewProduct] = useState<boolean>(false)
 
-  // Set initial search value from filterOptions and check permissions
-  useEffect(() => {
-    setSearchValue(filterOptions.search || '')
-    hasPermission('Create Product').then(result => setCanCreateProduct(result))
-    hasPermission('Update Product').then(result => setCanEditProduct(result))
-    hasPermission('Delete Product').then(result => setCanDeleteProduct(result))
-    hasPermission('View Product').then(result => setCanViewProduct(result))
-  }, [])
+  const filterOptions = useMemo(() => {
+    return getInitialFilters(searchParams)
+  }, [searchParams])
 
-  // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilterOptions((prev: any) => {
-        // Remove search if empty, otherwise set it
-        const newOptions = { ...prev }
+  const setFilterOptions = (updater: any) => {
+    const currentFilters = filterOptions
+    const nextFilters = typeof updater === 'function' ? updater(currentFilters) : updater
 
-        if (searchValue && searchValue.trim() !== '') {
-          newOptions.search = searchValue
-        } else {
-          delete newOptions.search
-        }
+    const params = new URLSearchParams()
 
-        if (newOptions.page) {
-          delete newOptions.page
-        }
+    Object.keys(nextFilters).forEach(key => {
+      if (nextFilters[key] !== null && nextFilters[key] !== undefined && nextFilters[key] !== '') {
+        params.set(key, String(nextFilters[key]))
+      }
+    })
 
-        return newOptions
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchValue])
-
-  // Fetch data from API
-  const fetchData = async () => {
-    setIsLoading(true)
-
-    try {
-      ProductService.index({ ...filterOptions, ...(selected_vendor_id ? { vendor_id: selected_vendor_id } : {}) })
-        .then(response => {
-          setApiResponse(response.data)
-          setIsLoading(false)
-        })
-        .catch(error => {
-          setIsLoading(false)
-          toast.error(typeof error.message === 'string' ? error.message : 'Failed to fetch products')
-        })
-    } catch (error) {
-      setIsLoading(false)
-      toast.error('Something went wrong while fetching products!')
+    if (selected_vendor_id) {
+      params.set('vendor_id', String(selected_vendor_id))
     }
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : window.location.pathname
+
+    setIsLoading(true)
+    router.push(newUrl, { scroll: false })
   }
 
+  const canCreateProduct = permissions?.canCreateProduct ?? false
+  const canEditProduct = permissions?.canEditProduct ?? false
+  const canDeleteProduct = permissions?.canDeleteProduct ?? false
+  const canViewProduct = permissions?.canViewProduct ?? false
+
+  const [localSelectedRows, setLocalSelectedRows] = useState<Product[]>([])
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(false)
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState<boolean>(false)
+  const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState<boolean>(false)
+  const [isBulkQrModalOpen, setIsBulkQrModalOpen] = useState<boolean>(false)
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+
+  const activeSelectedRows = isFromModal ? selectedRows : localSelectedRows
+  const activeSetSelectedRows = isFromModal ? setSelectedRows : setLocalSelectedRows
+
   useEffect(() => {
-    fetchData()
-    updateURL(router, filterOptions)
+    setApiResponse(initialData || null)
+    setIsLoading(false)
+  }, [initialData])
+
+  // Set initial search value from filterOptions
+  useEffect(() => {
+    setSearchValue(filterOptions.search || '')
+    setSkuValue(filterOptions.sku || '')
 
     // show the page title only if not from modal
     if (!isFromModal) dispatch(setPageTitle('Manage Products'))
-  }, [filterOptions, selected_vendor_id])
+  }, [])
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.search = val
+          } else {
+            delete newOptions.search
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSearchChange = (value: string) => {
+    setSearchValue(value)
+    debouncedSearch(value)
+  }
+
+  const debouncedSkuSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setFilterOptions((prev: any) => {
+          const newOptions = { ...prev }
+
+          if (val && val.trim() !== '') {
+            newOptions.sku = val
+          } else {
+            delete newOptions.sku
+          }
+
+          if (newOptions.page) {
+            delete newOptions.page
+          }
+
+          return newOptions
+        })
+      }, 500),
+    []
+  )
+
+  const onSkuSearchChange = (value: string) => {
+    setSkuValue(value)
+    debouncedSkuSearch(value)
+  }
 
   const handleOpenCreateModal = () => {
     setModalMode('create')
@@ -155,6 +207,20 @@ const Products: React.FC<ProductsProps> = ({
     }
   }
 
+  const handleOpenDuplicateModal = async (id: string) => {
+    setModalMode('duplicate' as any)
+    setSelectedProductId(id)
+
+    try {
+      const response = await ProductService.show(id)
+
+      setSelectedProduct(response.data)
+      setIsModalOpen(true)
+    } catch (error) {
+      toast.error('Failed to fetch product details')
+    }
+  }
+
   const handleModalClose = () => {
     setIsModalOpen(false)
     setSelectedProductId(null)
@@ -162,10 +228,32 @@ const Products: React.FC<ProductsProps> = ({
   }
 
   const handleSuccess = () => {
-    fetchData()
+    router.refresh()
     handleModalClose()
   }
 
+  /**
+   * Handles the change of vendor filter
+   * @param value The value of the vendor filter
+   */
+  const handleVendorChange = (value: string) => {
+    setFilterOptions((prev: any) => {
+      const newOptions = { ...prev }
+
+      if (value === 'all') {
+        delete newOptions.vendor_id
+      } else {
+        newOptions.vendor_id = value
+      }
+
+      return newOptions
+    })
+  }
+
+  /**
+   * Handles the change of category filter
+   * @param value The value of the category filter
+   */
   const handleCategoryChange = (value: string) => {
     setFilterOptions((prev: any) => {
       const newOptions = { ...prev }
@@ -180,36 +268,61 @@ const Products: React.FC<ProductsProps> = ({
     })
   }
 
-  // Column definitions for CommonTable
+  /**
+   * Column definitions for CommonTable
+   */
   const columns: Column[] = [
-    ...((isFromModal
-      ? [
-          {
-            id: 'select',
-            header: '',
-            cell: (row: Product) => (
-              <Checkbox
-                checked={selectedRows?.some((r: Product) => r.id === row.id)}
-                onCheckedChange={checked => {
-                  setSelectedRows?.((prev: Product[]) => {
-                    if (checked) {
-                      // Add if not already present
-                      if (!prev.some(r => r.id === row.id)) return [...prev, row]
-
-                      return prev
-                    } else {
-                      // Remove
-                      return prev.filter(r => r.id !== row.id)
-                    }
-                  })
-                }}
-              />
-            ),
-            sortable: false,
-            size: 16
+    {
+      id: 'select',
+      header: (
+        <Checkbox
+          className='border-accent-foreground/60!'
+          checked={
+            !!apiResponse?.data?.length &&
+            (apiResponse.data as Product[]).every(row => activeSelectedRows?.some(r => r.id === row.id))
           }
-        ]
-      : [
+          onCheckedChange={checked => {
+            if (checked) {
+              const newSelected = [...(activeSelectedRows || [])]
+              const currentData = (apiResponse?.data || []) as Product[]
+
+              currentData.forEach(row => {
+                if (!newSelected.some(r => r.id === row.id)) {
+                  newSelected.push(row)
+                }
+              })
+              activeSetSelectedRows?.(newSelected)
+            } else {
+              const currentIds = ((apiResponse?.data as Product[]) || []).map(r => r.id)
+
+              activeSetSelectedRows?.((activeSelectedRows || []).filter(r => !currentIds.includes(r.id)))
+            }
+          }}
+        />
+      ),
+      cell: (row: Product) => (
+        <Checkbox
+          checked={activeSelectedRows?.some((r: Product) => r.id === row.id)}
+          onCheckedChange={checked => {
+            activeSetSelectedRows?.((prev: any) => {
+              const prevArray = prev || []
+
+              if (checked) {
+                if (!prevArray.some((r: Product) => r.id === row.id)) return [...prevArray, row]
+
+                return prevArray
+              } else {
+                return prevArray.filter((r: Product) => r.id !== row.id)
+              }
+            })
+          }}
+        />
+      ),
+      sortable: false,
+      size: 16
+    },
+    ...(!isFromModal
+      ? [
           {
             id: 'index',
             header: '#',
@@ -221,8 +334,9 @@ const Products: React.FC<ProductsProps> = ({
             },
             sortable: false,
             size: 16
-          }
-        ]) as Column[]),
+          } as Column
+        ]
+      : []),
 
     {
       id: 'vendor',
@@ -310,6 +424,15 @@ const Products: React.FC<ProductsProps> = ({
                             />
                           ]
                         : []),
+                      ...(canCreateProduct
+                        ? [
+                            <DuplicateButton
+                              tooltip='Duplicate Product'
+                              onClick={() => handleOpenDuplicateModal(row.id)}
+                              variant='text'
+                            />
+                          ]
+                        : []),
                       ...(canEditProduct
                         ? [
                             <EditButton
@@ -335,6 +458,7 @@ const Products: React.FC<ProductsProps> = ({
                             `/erp/products/stock?tab=inventory&inventory_product_id=${encodeURIComponent(row.id)}`
                           )
                         }
+                        className='w-full'
                       >
                         Show Inventory
                       </Button>
@@ -356,12 +480,74 @@ const Products: React.FC<ProductsProps> = ({
     setSearchValue('')
   }
 
+  const handleBulkDelete = async () => {
+    if (!activeSelectedRows || activeSelectedRows.length === 0) return
+    setIsBulkDeleting(true)
+
+    try {
+      await ProductService.bulkDelete({ ids: activeSelectedRows.map(r => r.id) })
+      toast.success('Products deleted successfully')
+
+      const total = apiResponse?.total || 0
+      const perPage = apiResponse?.per_page || 10
+      const currentPage = filterOptions.page ? Number(filterOptions.page) : 1
+      const restItemCount = total - activeSelectedRows.length
+      const pageCount = Math.max(1, Math.ceil(restItemCount / perPage))
+
+      activeSetSelectedRows?.([])
+      setIsBulkDeleteModalOpen(false)
+
+      if (currentPage > pageCount) {
+        setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
+      } else {
+        router.refresh()
+      }
+    } catch (error: any) {
+      toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete products')
+    } finally {
+      setIsBulkDeleting(false)
+    }
+  }
+
+  const handleExport = async () => {
+    try {
+      toast.info(`Exporting products...`)
+      const blob = await ProductService.exportProducts(filterOptions)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+
+      a.href = url
+      const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0]
+
+      a.download = `products-export-${dateStr}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(`Products exported successfully`)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export data')
+    }
+  }
+
   const handleDeleteProduct = async (id: string) => {
     try {
       await ProductService.destroy(id)
         .then(response => {
           toast.success('Product deleted successfully')
-          fetchData()
+          activeSetSelectedRows?.((prev: any) => (prev || []).filter((r: any) => r.id !== id))
+
+          const total = apiResponse?.total || 0
+          const perPage = apiResponse?.per_page || 10
+          const currentPage = filterOptions.page ? Number(filterOptions.page) : 1
+          const restItemCount = total - 1
+          const pageCount = Math.max(1, Math.ceil(restItemCount / perPage))
+
+          if (currentPage > pageCount) {
+            setFilterOptions((prev: any) => ({ ...prev, page: pageCount }))
+          } else {
+            router.refresh()
+          }
         })
         .catch(error => {
           toast.error(typeof error.message === 'string' ? error.message : 'Failed to delete product')
@@ -380,17 +566,30 @@ const Products: React.FC<ProductsProps> = ({
 
   // Custom filters component
   const customFilters = (
-    <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between w-full gap-2.5'>
-      <div className='flex-1 flex flex-col lg:flex-row lg:items-center gap-2'>
+    <div className='flex flex-col lg:flex-row lg:items-start lg:justify-between w-full gap-2.5'>
+      <div className='flex-1 flex flex-col lg:flex-row lg:items-start gap-2'>
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-2 w-full lg:max-w-240'>
           {/* Global search filter */}
           <TableSearch
             name='product-search'
             label='Search'
             value={searchValue}
-            onChange={setSearchValue}
+            onChange={onSearchChange}
             placeholder='Search...'
             className='w-full'
+          />
+          {/* Vendor filter */}
+          <CustomFormField
+            type='select'
+            name='vendor-filter'
+            label='Vendor'
+            placeholder='All'
+            value={filterOptions.vendor_id || 'all'}
+            onChange={v => handleVendorChange(v as string)}
+            selectOptions={[
+              { label: 'All', value: 'all' },
+              ...(vendors || []).map(v => ({ label: `${v.first_name} ${v.last_name ?? ''}`, value: v.id }))
+            ]}
           />
 
           {/* Category filter */}
@@ -413,23 +612,8 @@ const Products: React.FC<ProductsProps> = ({
             name='sku-filter'
             label='SKU'
             placeholder='SKU...'
-            value={filterOptions.sku || ''}
-            onChange={value => {
-              setFilterOptions((prev: any) => {
-                const newOptions = { ...prev }
-
-                if (value && typeof value === 'string' && value.trim() !== '') {
-                  newOptions.sku = value
-                } else {
-                  delete newOptions.sku
-                }
-
-                // Optionally reset page on filter change
-                if (newOptions.page) delete newOptions.page
-
-                return newOptions
-              })
-            }}
+            value={skuValue}
+            onChange={value => onSkuSearchChange(value as string)}
           />
         </div>
 
@@ -438,23 +622,71 @@ const Products: React.FC<ProductsProps> = ({
             variant='outline'
             size='sm'
             onClick={handleClearFilters}
-            className='text-gray hover:text-light mt-5 h-7'
+            className='text-gray hover:text-light lg:mt-5.75 h-7'
           >
             Clear
           </Button>
         )}
       </div>
-      {canCreateProduct && !hideActionButton && (
-        <Button
-          variant='default'
-          size='sm'
-          className='bg-light text-bg hover:bg-light/90 mt-5 h-7'
-          onClick={handleOpenCreateModal}
-        >
-          <PlusIcon className='w-4 h-4' />
-          <span>Add Product</span>
-        </Button>
-      )}
+      <div className='flex items-start flex-wrap gap-2 lg:mt-5.75'>
+        {!isFromModal && (
+          <Button
+            variant='default'
+            size='sm'
+            className='h-7 bg-light text-bg hover:bg-light/90 gap-1.5'
+            onClick={handleExport}
+          >
+            <ExcelIcon className='w-4 h-4' />
+            <span className='hidden min-[480px]:block'>Export</span>
+          </Button>
+        )}
+        {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
+          <Button
+            variant='outline'
+            size='sm'
+            className='h-7 bg-[#2A2A2A] hover:bg-[#333333]'
+            onClick={() => setIsBulkEditModalOpen(true)}
+          >
+            Bulk Edit
+          </Button>
+        )}
+        {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
+          <Button
+            variant='outline'
+            size='sm'
+            className='h-7 bg-[#2A2A2A] hover:bg-[#333333]'
+            onClick={() => setIsBulkUpdateModalOpen(true)}
+          >
+            Bulk Update
+          </Button>
+        )}
+        {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canEditProduct && (
+          <Button
+            variant='outline'
+            size='sm'
+            className='h-7 bg-[#2A2A2A] hover:bg-[#333333]'
+            onClick={() => setIsBulkQrModalOpen(true)}
+          >
+            Bulk QR
+          </Button>
+        )}
+        {!isFromModal && activeSelectedRows && activeSelectedRows.length > 0 && canDeleteProduct && (
+          <Button variant='destructive' size='sm' className='h-7' onClick={() => setIsBulkDeleteModalOpen(true)}>
+            Bulk Delete
+          </Button>
+        )}
+        {canCreateProduct && !hideActionButton && (
+          <Button
+            variant='default'
+            size='sm'
+            className='bg-light text-bg hover:bg-light/90 h-7'
+            onClick={handleOpenCreateModal}
+          >
+            <PlusIcon className='w-4 h-4' />
+            <span>Add Product</span>
+          </Button>
+        )}
+      </div>
     </div>
   )
 
@@ -514,6 +746,45 @@ const Products: React.FC<ProductsProps> = ({
         uomUnits={uomUnits}
         serviceTypes={serviceTypes}
         vendors={vendors}
+        galleryPermissions={galleryPermissions}
+      />
+      <ConfirmDialog
+        open={isBulkDeleteModalOpen}
+        onOpenChange={setIsBulkDeleteModalOpen}
+        title='Confirm Bulk Delete'
+        message={`Are you sure you want to delete ${activeSelectedRows?.length || 0} products? This action cannot be undone.`}
+        confirmButtonTitle='Delete'
+        confirmButtonProps={{ variant: 'destructive' }}
+        onConfirm={handleBulkDelete}
+        loading={isBulkDeleting}
+      />
+      <BulkEditProductModal
+        open={isBulkEditModalOpen}
+        onOpenChange={setIsBulkEditModalOpen}
+        onSuccess={() => {
+          router.refresh()
+          activeSetSelectedRows?.([])
+        }}
+        selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}
+        type='inventory'
+      />
+      <BulkUpdateProductModal
+        open={isBulkUpdateModalOpen}
+        onOpenChange={setIsBulkUpdateModalOpen}
+        onSuccess={() => {
+          router.refresh()
+          activeSetSelectedRows?.([])
+        }}
+        selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}
+        type='inventory'
+        vendorId={filterOptions.vendor_id && filterOptions.vendor_id !== 'all' ? filterOptions.vendor_id : null}
+        categoryId={filterOptions.category_id && filterOptions.category_id !== 'all' ? filterOptions.category_id : null}
+      />
+      <BulkQrPrintModal
+        open={isBulkQrModalOpen}
+        onOpenChange={setIsBulkQrModalOpen}
+        selectedIds={activeSelectedRows ? activeSelectedRows.map(r => r.id) : []}
+        type='inventory'
       />
     </>
   )
