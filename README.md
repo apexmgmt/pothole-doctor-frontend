@@ -2,7 +2,6 @@
 # Pothole Doctor Frontend
 
 > A modern, full-featured starter kit for building robust web applications with Next.js, TypeScript, Redux Toolkit, Tailwind CSS, and more.
-
 ## Features
 
 - **Next.js 16** with App Router and TypeScript
