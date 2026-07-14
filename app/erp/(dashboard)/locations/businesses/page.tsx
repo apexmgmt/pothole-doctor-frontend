@@ -40,10 +40,10 @@ const BusinessLocationsPage = async ({
     canManageStaff,
     canManageEstimate
   ] = await Promise.all([
-    hasPermission('Create Business'),
-    hasPermission('View Business'),
-    hasPermission('Update Business'),
-    hasPermission('Delete Business'),
+    hasPermission('Create Location'),
+    hasPermission('View Location'),
+    hasPermission('Update Location'),
+    hasPermission('Delete Location'),
     hasPermission('Manage Warehouse'),
     hasPermission('Manage Staff'),
     hasPermission('Manage Estimate')
